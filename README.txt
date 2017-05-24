@@ -17,4 +17,5 @@ https://jaykhimani.blogspot.com/2016/10/deploying-angular-2-app-with-angular.htm
 
 = References
 
-https://angular.io/docs/js/latest/quickstart.html
+TypeScript: https://angular.io/docs/ts/latest/tutorial/
+Javascript (small example): https://angular.io/docs/js/latest/quickstart.html
