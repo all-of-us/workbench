@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'my-app',
+  selector: 'aou-app',
   styleUrls: [ './app.component.css' ],
   template: `
     <h1>{{title}}</h1>
