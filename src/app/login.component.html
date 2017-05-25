@@ -1,0 +1,22 @@
+<h2>Log In</h2>
+<div *ngIf="user; else loggedout">
+  <span>
+    Logged in as {{user.name}} with permission level
+    {{user.permission}}.
+  </span>
+  <button (click)="logOut()">Log Out</button>
+</div>
+<ng-template #loggedout><span>Not logged in.</span></ng-template>
+<div>
+  <span>
+    <label>Log in as a new user:</label>
+    <input [(ngModel)]="login.name" placeholder="name"/>
+    <label>Permission Level:</label>
+    <select [(ngModel)]="login.permission"> <!-- TODO Auto-generate name/value options. -->
+      <option value="1">Public</option>
+      <option value="2">Registered</option>
+      <option value="3">Controlled</option>
+    </select>
+  </span>
+  <button (click)="logIn()">Log In</button>
+</div>

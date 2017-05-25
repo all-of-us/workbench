@@ -1,15 +1,17 @@
-import { NgModule }             from '@angular/core';
-import { RouterModule, Routes } from '@angular/router'
+import { NgModule }                  from '@angular/core';
+import { RouterModule, Routes }      from '@angular/router'
 
-import { DashboardComponent }   from './dashboard.component'
-import { HeroDetailComponent }  from './hero-detail.component'
-import { HeroesComponent }      from './heroes.component'
+import { LoginComponent }            from './login.component'
+import { SelectRepositoryComponent } from './select-repository.component'
+import { CohortBuilderComponent }    from './cohort-builder.component'
 
+// Based on the URL, the RouterModule attaches one of these UI Components to the
+// <router-outlet> element in the main AppComponent's template.
 const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'heroes', component: HeroesComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'detail/:id', component: HeroDetailComponent }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'repository', component: SelectRepositoryComponent },
+  { path: 'cohort/:id', component: CohortBuilderComponent }
 ];
 
 @NgModule({

@@ -21,6 +21,16 @@ From the project root:
 
   npm start
 
+= Source Code
+
+All the interesting code is under src/app/.
+
+*.component.ts are UI components, controlling various widgets; they have associated *.component.html and/or *.component.css for their templated DOM and style. Angular scopes CSS to its associated component.
+
+*.service.ts provide data. In a real app, these would probably wrap REST APIs.
+
+*.module.ts set up glue to stick the app together: routing of URLs to different views, installation of the various components/services for use in other places.
+
 = Deploy
 
 https://jaykhimani.blogspot.com/2016/10/deploying-angular-2-app-with-angular.html
