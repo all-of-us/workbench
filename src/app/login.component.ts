@@ -1,3 +1,5 @@
+// View for logging in and switching user / permission levels.
+
 import { Component, OnInit } from '@angular/core';
 import { Router }            from '@angular/router';
 

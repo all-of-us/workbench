@@ -1,3 +1,8 @@
+// A stub for user/login management, which simply trusts any login attempt
+// and stores the current logged-in user in memory.
+//
+// A default user is logged in by default.
+
 import { Injectable } from '@angular/core';
 
 import { User } from './user';

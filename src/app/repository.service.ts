@@ -1,3 +1,6 @@
+// Data interface for getting details about available CDRs. This communicates
+// via Angular's builtin Http module with a (fake) REST API.
+
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 

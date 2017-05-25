@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+// View which wraps the third-party, plain javascript cohort browser widget.
+
+import { Component, OnInit }      from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 
 import 'rxjs/add/operator/switchMap';
 
-import { User } from './user';
-import { Repository } from './repository';
-import { RepositoryService } from './repository.service';
+import { User }                   from './user';
+import { Repository }             from './repository';
+import { RepositoryService }      from './repository.service';
 
-import { vaadin } from './vaadin'
+import { vaadin }                 from './vaadin'
 
 const vaadinRootElementId = 'cohort-builder-widget';
 const vaadinConfig =

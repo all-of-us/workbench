@@ -1,3 +1,9 @@
+// View for picking a repository.
+//
+// The template handles login/permission (by showing/hiding/disabling UI
+// elements). In a real server, these would of course need to be enforced
+// server-side.
+
 import { Component, OnInit } from '@angular/core';
 import { Router }            from '@angular/router';
 
