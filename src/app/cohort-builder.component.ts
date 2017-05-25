@@ -9,8 +9,6 @@ import { User }                   from './user';
 import { Repository }             from './repository';
 import { RepositoryService }      from './repository.service';
 
-import { vaadin }                 from './vaadin'
-
 const vaadinRootElementId = 'cohort-builder-widget';
 const vaadinConfig =
   {
@@ -20,24 +18,21 @@ const vaadinConfig =
     'comErrMsg': {
       'caption': 'Communication problem',
       'message': 'Take note of any unsaved data, and <u>click here</u> or press ESC to continue.',
-      'url': null
     },
     'authErrMsg': {
       'caption': 'Authentication problem',
       'message': 'Take note of any unsaved data, and <u>click here</u> or press ESC to continue.',
-      'url': null
     },
     'sessExpMsg': {
       'caption': 'Session Expired',
       'message': 'Take note of any unsaved data, and <u>click here</u> or press ESC to continue.',
-      'url': null
     },
-    'vaadinDir': 'http://35.185.116.214/pmi-cb/VAADIN/',
+    'vaadinDir': 'https://35.185.116.214/pmi-cb/VAADIN/',
     'debug': false,
     'standalone': true,
     'heartbeatInterval': 300,
-    'serviceUrl': 'http://35.185.116.214/pmi-cb/vaadinServlet/',
-    'browserDetailsUrl': 'http://35.185.116.214/pmi-cb/'
+    'serviceUrl': 'https://35.185.116.214/pmi-cb/vaadinServlet/',
+    'browserDetailsUrl': 'https://35.185.116.214/pmi-cb/'
   };
 
 @Component({
