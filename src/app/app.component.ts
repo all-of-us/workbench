@@ -1,11 +1,11 @@
 // UI Component framing the overall app (title and nav).
 // Content is in other Components.
 
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'aou-app',
-  styleUrls: [ './app.component.css' ],
+  styleUrls: ['./app.component.css'],
   template: `
     <h1>{{title}}</h1>
     <nav>

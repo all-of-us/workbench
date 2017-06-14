@@ -1,22 +1,21 @@
 // Import all the pieces of the app centrally.
 
-import { BrowserModule }             from '@angular/platform-browser';
-import { FormsModule }               from '@angular/forms';
-import { NgModule }                  from '@angular/core';
-import { HttpModule }                from '@angular/http';
-
-import { AppRoutingModule }          from './app-routing.module'
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {HttpModule} from '@angular/http';
+import {BrowserModule} from '@angular/platform-browser';
 
 // Imports for loading & configuring the in-memory web api
-import { InMemoryWebApiModule }      from 'angular-in-memory-web-api';
-import { InMemoryDataService }       from './in-memory-data.service';
+import {InMemoryWebApiModule} from 'angular-in-memory-web-api';
 
-import { AppComponent }              from './app.component';
-import { CohortBuilderComponent }    from './cohort-builder.component'
-import { LoginComponent }            from './login.component'
-import { RepositoryService }         from './repository.service'
-import { SelectRepositoryComponent } from './select-repository.component'
-import { UserService }               from './user.service'
+import {AppRoutingModule} from './app-routing.module'
+import {AppComponent} from './app.component';
+import {CohortBuilderComponent} from './cohort-builder.component'
+import {InMemoryDataService} from './in-memory-data.service';
+import {LoginComponent} from './login.component'
+import {RepositoryService} from './repository.service'
+import {SelectRepositoryComponent} from './select-repository.component'
+import {UserService} from './user.service'
 
 @NgModule({
   imports:      [
@@ -32,9 +31,9 @@ import { UserService }               from './user.service'
     SelectRepositoryComponent,
     CohortBuilderComponent
   ],
-  providers: [ UserService, RepositoryService ],
+  providers: [UserService, RepositoryService],
 
   // This specifies the top-level component, to load first.
-  bootstrap: [ AppComponent ]
+  bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

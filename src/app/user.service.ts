@@ -3,10 +3,10 @@
 //
 // A default user is logged in by default.
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import { User } from './user';
-import { PermissionLevel } from './permission-level';
+import {PermissionLevel} from './permission-level';
+import {User} from './user';
 
 @Injectable()
 export class UserService {
