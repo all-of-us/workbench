@@ -2,7 +2,7 @@
 <div *ngIf="user; else loggedout">
   <span>
     Logged in as {{user.name}} with permission level
-    {{user.permission}}.
+    {{permissionNames[user.permission]}}.
   </span>
   <button (click)="logOut()">Log Out</button>
 </div>
@@ -13,9 +13,9 @@
     <input [(ngModel)]="login.name" placeholder="name"/>
     <label>Permission Level:</label>
     <select [(ngModel)]="login.permission"> <!-- TODO Auto-generate name/value options. -->
-      <option value="1">Public</option>
-      <option value="2">Registered</option>
-      <option value="3">Controlled</option>
+      <option *ngFor="let value of permissionValues" value="{{value}}">
+        {{permissionNames[value]}}
+      </option>
     </select>
   </span>
   <button (click)="logIn()">Log In</button>

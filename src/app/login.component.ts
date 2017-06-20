@@ -1,6 +1,7 @@
 // View for logging in and switching user / permission levels.
 
 import {Component, OnInit} from '@angular/core';
+import {PermissionLevel} from './permission-level'
 import {Router} from '@angular/router';
 
 import {User} from './user'
@@ -15,6 +16,9 @@ export class LoginComponent implements OnInit {
 
   user: User;  // currently logged in, may be undefined
   login: User = new User();  // form data
+  permissionValues = Object.keys(PermissionLevel).map(k => PermissionLevel[k])
+      .filter(v => typeof v === "number") as number[];
+  permissionNames = PermissionLevel;
 
   ngOnInit(): void {
     this.userService.getLoggedInUser()

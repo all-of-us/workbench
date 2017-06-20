@@ -2,12 +2,13 @@
 
 import 'rxjs/add/operator/switchMap';
 
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 
 import {Repository} from './repository';
 import {RepositoryService} from './repository.service';
 import {User} from './user';
+import {VAADIN_CLIENT} from './vaadin-client';
 
 const vaadinRootElementId = 'cohort-builder-widget';
 const vaadinConfig = {
@@ -43,7 +44,8 @@ export class CohortBuilderComponent implements OnInit {
 
   constructor(
       private route: ActivatedRoute,
-      private repositoryService: RepositoryService
+      private repositoryService: RepositoryService,
+      @Inject(VAADIN_CLIENT) private vaadinInst: any
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +54,11 @@ export class CohortBuilderComponent implements OnInit {
             (params: Params) => this.repositoryService.get(+params['id']))
         .subscribe(repository => {
           this.repository = repository;
-          vaadin.initApplication(vaadinRootElementId, vaadinConfig);
+          if (this.vaadinInst) {
+            this.vaadinInst.initApplication(vaadinRootElementId, vaadinConfig);
+          } else {
+            console.error('Vaadin failed to load.');
+          }
         });
   }
 }
