@@ -8,15 +8,15 @@ import {BrowserModule} from '@angular/platform-browser';
 // Imports for loading & configuring the in-memory web api
 import {InMemoryWebApiModule} from 'angular-in-memory-web-api';
 
-import {AppRoutingModule} from './app-routing.module'
-import {AppComponent} from './app.component';
-import {CohortBuilderComponent} from './cohort-builder.component'
-import {InMemoryDataService} from './in-memory-data.service';
-import {LoginComponent} from './login.component'
-import {RepositoryService} from './repository.service'
-import {SelectRepositoryComponent} from './select-repository.component'
-import {UserService} from './user.service'
-import {VAADIN_CLIENT} from './vaadin-client';
+import {AppRoutingModule} from 'app/app-routing.module'
+import {AppComponent} from 'app/views/app/component';
+import {CohortBuilderComponent} from 'app/views/cohort-builder/component'
+import {InMemoryDataService} from 'app/services/in-memory-data.service';
+import {LoginComponent} from 'app/views/login/component'
+import {RepositoryService} from 'app/services/repository.service'
+import {SelectRepositoryComponent} from 'app/views/select-repository/component'
+import {UserService} from 'app/services/user.service'
+import {VAADIN_CLIENT} from 'app/vaadin-client';
 
 @NgModule({
   imports:      [

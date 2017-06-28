@@ -4,9 +4,9 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router'
 
-import {CohortBuilderComponent} from './cohort-builder.component'
-import {LoginComponent} from './login.component'
-import {SelectRepositoryComponent} from './select-repository.component'
+import {CohortBuilderComponent} from 'app/views/cohort-builder/component'
+import {LoginComponent} from 'app/views/login/component'
+import {SelectRepositoryComponent} from 'app/views/select-repository/component'
 
 const routes: Routes = [
   {path: '', redirectTo: '/login', pathMatch: 'full'},

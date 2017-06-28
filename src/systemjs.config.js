@@ -10,7 +10,9 @@ System.config({
   },
   // map tells the System loader where to look for things
   map: {
-    // our app is within the app folder
+    // Our app is within the app folder. This allows serving 'app/foo.ts'.
+    // This is paired with "baseUrl":"." in tsconfig, which allows the compiler
+    // to resolve 'app/foo.ts' paths.
     'app': 'app',
 
     // angular bundles

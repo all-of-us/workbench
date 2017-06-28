@@ -1,13 +1,13 @@
 // View for logging in and switching user / permission levels.
 
 import {Component, OnInit} from '@angular/core';
-import {PermissionLevel} from './permission-level'
 import {Router} from '@angular/router';
 
-import {User} from './user'
-import {UserService} from './user.service'
+import {PermissionLevel} from 'app/models/permission-level'
+import {User} from 'app/models/user'
+import {UserService} from 'app/services/user.service'
 
-@Component({templateUrl: './login.component.html'})
+@Component({templateUrl: './component.html'})
 export class LoginComponent implements OnInit {
   constructor(
       private userService: UserService,

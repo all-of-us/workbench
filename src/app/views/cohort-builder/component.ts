@@ -5,10 +5,10 @@ import 'rxjs/add/operator/switchMap';
 import {Component, Inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 
-import {Repository} from './repository';
-import {RepositoryService} from './repository.service';
-import {User} from './user';
-import {VAADIN_CLIENT} from './vaadin-client';
+import {Repository} from 'app/models/repository';
+import {RepositoryService} from 'app/services/repository.service';
+import {User} from 'app/models/user';
+import {VAADIN_CLIENT} from 'app/vaadin-client';
 
 const vaadinRootElementId = 'cohort-builder-widget';
 const vaadinConfig = {
@@ -35,7 +35,7 @@ const vaadinConfig = {
   'browserDetailsUrl': 'https://35.185.116.214/pmi-cb/'
 };
 
-@Component({templateUrl: './cohort-builder.component.html'})
+@Component({templateUrl: './component.html'})
 export class CohortBuilderComponent implements OnInit {
   vaadinJsUrl =
       'https://35.185.116.214/pmi-cb/VAADIN/vaadinBootstrap.js?v=7.7.5';

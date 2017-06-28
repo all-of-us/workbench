@@ -3,7 +3,7 @@
 
 import {InMemoryDbService} from 'angular-in-memory-web-api';
 
-import {PermissionLevel} from './permission-level'
+import {PermissionLevel} from 'app/models/permission-level'
 
 export class InMemoryDataService implements InMemoryDbService {
   createDb() {

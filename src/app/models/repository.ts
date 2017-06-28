@@ -1,6 +1,6 @@
 // A Curated Data Repository which a user might browse to build a cohort.
 
-import {PermissionLevel} from './permission-level';
+import {PermissionLevel} from 'app/models/permission-level';
 
 export class Repository {
   id: number;

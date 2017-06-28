@@ -6,7 +6,7 @@ import 'rxjs/add/operator/toPromise';
 import {Injectable} from '@angular/core';
 import {Headers, Http} from '@angular/http';
 
-import {Repository} from './repository';
+import {Repository} from 'app/models/repository';
 
 @Injectable()
 export class RepositoryService {

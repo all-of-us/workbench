@@ -5,8 +5,8 @@
 
 import {Injectable} from '@angular/core';
 
-import {PermissionLevel} from './permission-level';
-import {User} from './user';
+import {PermissionLevel} from 'app/models/permission-level';
+import {User} from 'app/models/user';
 
 @Injectable()
 export class UserService {
