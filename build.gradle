@@ -1,0 +1,53 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'                               // standard Web Archive plugin
+apply plugin: 'com.google.cloud.tools.appengine'  // App Engine tasks
+
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+  }
+}
+
+repositories {   // repositories for Jar's you access in your code
+  maven {
+    url 'https://maven-central.storage.googleapis.com'             // Google's mirror of Maven Central
+  }
+  jcenter()
+  mavenCentral()
+}
+
+
+dependencies {
+  providedCompile group: 'javax.servlet', name: 'servlet-api', version:'2.5'
+  compile 'com.google.appengine:appengine:+'
+  compile("org.springframework.boot:spring-boot-starter-web") {
+      exclude module: "spring-boot-starter-tomcat"
+  }
+  compile 'org.springframework.boot:spring-boot-legacy:+'
+  testCompile("junit:junit")
+}
+
+appengine {  // App Engine tasks configuration
+  run {      // local (dev_appserver) configuration (standard environments only)
+    port = 8080                 // default
+  }
+
+  deploy {   // deploy configuration
+    stopPreviousVersion = true  // default - stop the current version
+    promote = true              // default - & make this the current version
+  }
+}
+
+group = 'org.pmiops.allofus.workbench'
+version = '0.1.0'          // Version in generated output
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
