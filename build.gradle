@@ -12,7 +12,7 @@ buildscript {    // Configuration for building
   }
   dependencies {
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
-    classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
   }
 }
 
@@ -28,7 +28,7 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   providedCompile group: 'javax.servlet', name: 'servlet-api', version:'2.5'
   compile 'com.google.appengine:appengine:+'
-  compile("org.springframework.boot:spring-boot-starter-web") {
+  compile('org.springframework.boot:spring-boot-starter-web') {
       exclude module: "spring-boot-starter-tomcat"
   }
   compile 'org.springframework.boot:spring-boot-legacy:+'
