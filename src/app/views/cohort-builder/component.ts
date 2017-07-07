@@ -7,7 +7,6 @@ import {ActivatedRoute, Params} from '@angular/router';
 
 import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
-import {User} from 'app/models/user';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 
 const vaadinRootElementId = 'cohort-builder-widget';
