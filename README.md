@@ -2,7 +2,7 @@
 
 ## Getting the code
 
-* Run "git clone https://https://github.com/all-of-us/workbench"
+* Run "git clone https://github.com/all-of-us/workbench"
 
 To make changes, do:
 
@@ -20,10 +20,6 @@ After responding to changes, merge in GitHub.
 
 ## Setup
 
-* Download Gradle 4.0 from https://services.gradle.org/distributions/gradle-4.0-bin.zip
-
-* Unzip it and add bin/gradle to the path.
-
 * Run tools/setup_env.sh.
 
 ## Running dev appserver
@@ -31,7 +27,7 @@ After responding to changes, merge in GitHub.
 To run AppEngine with workbench, run:
 
 ```Shell
-gradle appengineRun
+./gradlew appengineRun
 ```
 
 When the console displays "Dev App Server is now running", you can hit your local server at http://localhost:8080/.
