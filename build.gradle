@@ -1,7 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
 apply plugin: 'war'                               // standard Web Archive plugin
 apply plugin: 'com.google.cloud.tools.appengine'  // App Engine tasks
 
@@ -12,7 +11,6 @@ buildscript {    // Configuration for building
   }
   dependencies {
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
-    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
   }
 }
 
@@ -28,10 +26,10 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   providedCompile group: 'javax.servlet', name: 'servlet-api', version:'2.5'
   compile 'com.google.appengine:appengine:+'
-  compile('org.springframework.boot:spring-boot-starter-web') {
-      exclude module: "spring-boot-starter-tomcat"
-  }
-  compile 'org.springframework.boot:spring-boot-legacy:+'
+  compile 'org.springframework:spring-webmvc:+'
+  compile 'com.fasterxml.jackson.core:jackson-annotations:+'
+  compile 'com.fasterxml.jackson.core:jackson-core:+'
+  compile 'com.fasterxml.jackson.core:jackson-databind:+'
   testCompile("junit:junit")
 }
 
@@ -49,5 +47,5 @@ appengine {  // App Engine tasks configuration
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7

@@ -1,5 +1,7 @@
 package org.pmiops.workbench;
 
+import static org.pmiops.workbench.api.Constants.V1_API_PREFIX;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.pmiops.workbench.model.Cohort;
 
 @RestController
-@RequestMapping("/workspaces/{workspaceId}/cohorts")
+@RequestMapping(V1_API_PREFIX + "/workspaces/{workspaceId}/cohorts")
 public class CohortController {
 
   @GetMapping
