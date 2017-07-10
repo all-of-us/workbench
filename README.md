@@ -20,6 +20,9 @@ After responding to changes, merge in GitHub.
 
 ## Setup
 
+* Install JDK 7 on your machine from [http://docs.oracle.com/javase/7/docs/webnotes/install/].
+* Set your JAVA_HOME environment variable to point at the installation directory.
+* Install Google Cloud SDK on your device from [https://cloud.google.com/sdk/downloads].
 * Run tools/setup_env.sh.
 
 ## Running dev appserver
