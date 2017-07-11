@@ -36,3 +36,6 @@ RUN apt-get -qqy update && apt-get install -qqy \
 ADD . /app
 WORKDIR /app
 RUN ./gradlew
+
+ENTRYPOINT ["/app/gradlew"]
+CMD ["appengineRun"]
