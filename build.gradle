@@ -36,6 +36,7 @@ dependencies {
 appengine {  // App Engine tasks configuration
   run {      // local (dev_appserver) configuration (standard environments only)
     port = 8080                 // default
+    host = "0.0.0.0"
   }
 
   deploy {   // deploy configuration
