@@ -1,6 +1,9 @@
 FROM java:openjdk-7-jdk
 
 RUN apt-get update
+
+# From https://hub.docker.com/r/google/cloud-sdk/~/dockerfile/
+# (Need Java and gcloud, so need to install one of these ourselves.)
 ENV CLOUD_SDK_VERSION 161.0.0
 RUN apt-get -qqy update && apt-get install -qqy \
         curl \
