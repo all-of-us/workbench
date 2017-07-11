@@ -15,4 +15,11 @@
     <property name="defaultContentType" value="application/xml" />
   </bean>
   <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+  <mvc:cors>
+    <!-- In production, we may want to restrict to our domain. For now, allow everything. -->
+    <mvc:mapping path="/**"
+        allowed-origins="*"
+        allowed-headers="Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Authorization, X-Requested-With, requestId, Correlation-Id"
+        allowed-methods="GET, HEAD, POST, PUT, DELETE, PATCH, TRACE, OPTIONS"/>
+  </mvc:cors>
 </beans>
