@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class Controller {
   @RequestMapping("/")
   public String index() {
-    return "HELLO WORLD";
+    return "HELLO API";
   }
 }
