@@ -33,7 +33,8 @@ To run AppEngine with workbench, run:
 ./gradlew appengineRun
 ```
 
-When the console displays "Dev App Server is now running", you can hit your local server at http://localhost:8080/api/v1/workspaces/123/cohorts .
+When the console displays "Dev App Server is now running", you can hit your local frontend resources
+ under http://localhost:8080/ and your local API server under http://localhost:8081/api/.
 
 
 ## Running in Docker
