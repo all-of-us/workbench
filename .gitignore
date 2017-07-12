@@ -2,3 +2,5 @@
 *~
 /build/*
 /.gradle/*
+/ui/build/*
+/api/build/*

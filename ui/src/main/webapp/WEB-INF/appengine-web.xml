@@ -1,6 +1,9 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-  <application>all-of-us-workbench-test</application>
+  <service>default</service>
   <version>0.1.0</version>
-  <public-root>/src/main/webapp/static</public-root>
+  <static-files>
+    <include path="/**"/>
+    <exclude path="/WEB-INF/**"/>
+  </static-files>
   <threadsafe>true</threadsafe>
 </appengine-web-app>
