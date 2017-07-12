@@ -33,7 +33,8 @@ To run AppEngine with workbench, run:
 ./gradlew appengineRun
 ```
 
-When the console displays "Dev App Server is now running", you can hit your local server at http://localhost:8080/api/v1/workspaces/123/cohorts .
+When the console displays "Dev App Server is now running", you can hit your local frontend resources
+ under http://localhost:8080/ and your local API server under http://localhost:8081/api/.
 
 
 ## Running in Docker
@@ -42,3 +43,21 @@ When the console displays "Dev App Server is now running", you can hit your loca
 docker build -t workbench .
 docker run -p 8080:8080 -v $(pwd):/app --rm -it workbench
 ```
+
+## Deploying
+
+To deploy your local code to a given AppEngine project, run:
+
+```
+./deploy.sh --project PROJECT --account ACCOUNT@pmi-ops.org
+```
+
+Example:
+
+```
+./deploy.sh --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org
+```
+
+You will be prompted to confirm the deployment. When it finishes, you will be able to access the
+UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot.com.
+
