@@ -15,11 +15,15 @@ Install project deps:
 
  npm install
 
+Direct your editor to write swap files outside the source tree, so Webpack
+does not reload when they're updated.
+https://github.com/angular/angular-cli/issues/4593[Example for vim].
+
 == Every Time
 
 From the project root:
 
- npm start
+ ng serve
 
 = Source Code
 
@@ -33,9 +37,14 @@ All the interesting code is under `src/app/`.
 
 = Deploy
 
+Build static source files, created under `dist/`:
+
+ ng build --prod
+
+Deploy to AppEngine:
+
 https://jaykhimani.blogspot.com/2016/10/deploying-angular-2-app-with-angular.html
 
 = References
 
 Tutorial w/ TypeScript: https://angular.io/docs/ts/latest/tutorial/
-Javascript (small example): https://angular.io/docs/js/latest/quickstart.html

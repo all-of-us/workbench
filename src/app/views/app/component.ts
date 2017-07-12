@@ -4,7 +4,7 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: 'aou-app',
+  selector: 'app-aou',
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })

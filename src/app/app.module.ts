@@ -18,6 +18,16 @@ import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 
+export function getVaadin(): VaadinNs {
+  // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
+  // and referencing it directly results in an error.
+  if (typeof vaadin === 'undefined') {
+    return undefined;
+  } else {
+    return vaadin;
+  }
+}
+
 @NgModule({
   imports:      [
     AppRoutingModule,
@@ -35,9 +45,7 @@ import {VAADIN_CLIENT} from 'app/vaadin-client';
   providers: [
     UserService,
     RepositoryService,
-    // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
-    // and referencing it directly results in an error.
-    {provide: VAADIN_CLIENT, useValue: typeof vaadin === 'undefined' ? undefined : vaadin}
+    {provide: VAADIN_CLIENT, useFactory: getVaadin}
   ],
 
   // This specifies the top-level component, to load first.

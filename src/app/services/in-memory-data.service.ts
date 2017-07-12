@@ -7,7 +7,7 @@ import {PermissionLevel} from 'app/models/permission-level';
 
 export class InMemoryDataService implements InMemoryDbService {
   createDb() {
-    let repository = [
+    const repository = [
       {id: 11, permission: PermissionLevel.Public, name: 'Aggregates 2017 Q1'},
       {id: 12, permission: PermissionLevel.Public, name: 'Aggregates 2017 Q2'},
       {id: 13, permission: PermissionLevel.Registered, name: 'CDR 2017 Q1 v1'},
