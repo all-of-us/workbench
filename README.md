@@ -1,4 +1,4 @@
-# workbench
+# Workbench
 
 ## Getting the code
 
@@ -12,30 +12,59 @@ To make changes, do:
 * (make changes and git add / commit them)
 * git push -u origin USERNAME/BRANCH_NAME
 
-And make a pull request in your browser at 
+And make a pull request in your browser at
 https://github.com/all-of-us/workbench based on your upload.
 
 After responding to changes, merge in GitHub.
 
-
 ## Setup
+
+### API
 
 * Install JDK 7 on your machine from http://docs.oracle.com/javase/7/docs/webnotes/install/.
 * Set your JAVA_HOME environment variable to point at the installation directory.
 * Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
 * Run tools/setup_env.sh.
 
-## Running dev appserver
+### UI
 
-To run AppEngine with workbench, run:
+Install Node.js and npm. (For Google workstation setup, see go/nodejs.)
+
+Install the Angular command-line tool:
+
+```Shell
+sudo npm install -g @angular/cli
+```
+
+Install project dependencies. This includes `shared-git-hooks`, which installs
+wrappers into `.git/hooks` to use the contents of the `hooks` directory.
+
+```Shell
+npm install
+```
+
+Direct your editor to write swap files outside the source tree, so Webpack
+does not reload when they're updated.
+[Example for vim](https://github.com/angular/angular-cli/issues/4593).
+
+## Running the Dev Servers
+
+### API: dev AppEngine appserver
 
 ```Shell
 ./gradlew appengineRun
 ```
 
-When the console displays "Dev App Server is now running", you can hit your local frontend resources
- under http://localhost:8080/ and your local API server under http://localhost:8081/api/.
+When the console displays "Dev App Server is now running", you can hit your
+local API server under http://localhost:8081/api/.
 
+### UI
+
+From the `ui/` subdirectory:
+
+```Shell
+ng serve
+```
 
 ## Running in Docker
 
