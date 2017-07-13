@@ -2,6 +2,7 @@
 *~
 /build/*
 /.gradle/*
+/api/.gradle/*
 /api/build/*
 *.swp
 npm-debug.log

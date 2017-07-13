@@ -1,15 +1,16 @@
 package org.pmiops.workbench.interceptors;
 
+import com.google.api.client.http.HttpResponseException;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.pmiops.workbench.auth.TokenVerifier;
+import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -18,13 +19,15 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
 
+  private static final String PMI_OPS_SUFFIX = "@pmi-ops.org";
+
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
 
-  private final TokenVerifier tokenVerifier;
+  private final UserInfoService userInfoService;
 
   @Autowired
-  public AuthInterceptor(TokenVerifier tokenVerifier) {
-    this.tokenVerifier = tokenVerifier;
+  public AuthInterceptor(UserInfoService userInfoService) {
+    this.userInfoService = userInfoService;
   }
 
   @Override
@@ -37,24 +40,33 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+      log.warning("No bearer token found in request");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
 
     String token = authorizationHeader.substring("Bearer".length()).trim();
-    log.log(Level.INFO, "token: {0}", tokenVerifier.verifyBearerToken(token));
+    Userinfoplus userInfo;
+    try {
+      userInfo = userInfoService.getUserInfo(token);
+    } catch (HttpResponseException e) {
+      log.log(Level.WARNING,
+          "{0} response getting user info for bearer token {1}: {2}",
+          new Object[] { e.getStatusCode(), token, e.getStatusMessage() });
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return false;
+    }
+    if (!userInfo.getEmail().endsWith(PMI_OPS_SUFFIX)) {
+      log.log(Level.WARNING,"User {0} is not from pmi-ops.org", userInfo.getEmail());
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return false;
+    }
+
+    // TODO: check Google group membership to ensure user is in registered user group
+
+    // TODO: setup this in the context, get rid of log statement
+    log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
+
     return true;
-  }
-
-  @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-      ModelAndView modelAndView) throws Exception {
-
-  }
-
-  @Override
-  public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-      Object handler, Exception ex) throws Exception {
-
   }
 }

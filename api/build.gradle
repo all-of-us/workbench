@@ -9,6 +9,9 @@ buildscript {    // Configuration for building
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
     mavenCentral()
   }
+  dependencies {
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
+  }
 }
 
 repositories {   // repositories for Jar's you access in your code

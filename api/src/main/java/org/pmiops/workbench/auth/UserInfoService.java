@@ -10,18 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TokenVerifier {
+public class UserInfoService {
 
   private final HttpTransport httpTransport;
   private final JsonFactory jsonFactory;
 
   @Autowired
-  TokenVerifier(HttpTransport httpTransport, JsonFactory jsonFactory) {
+  UserInfoService(HttpTransport httpTransport, JsonFactory jsonFactory) {
     this.httpTransport = httpTransport;
     this.jsonFactory = jsonFactory;
   }
 
-  public Userinfoplus verifyBearerToken(String token) throws IOException {
+  public Userinfoplus getUserInfo(String token) throws IOException {
     GoogleCredential credential = new GoogleCredential().setAccessToken(token);
     Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential).build();
     return oauth2.userinfo().get().execute();
