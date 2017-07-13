@@ -1,3 +1,4 @@
 #!/bin/bash -e
 # Checks to run before pushing to a remote git repo for review/merging.
-$(cd ui && ng lint)
+cd ui
+ng lint
