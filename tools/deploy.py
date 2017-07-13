@@ -35,7 +35,9 @@ def deploy(args):
 
   if _TargetChoices.UI in targets:
     logging.info('Building UI using %r', paths.get_ng())
-    subprocess.check_call([paths.get_ng(), 'build'], cwd=paths.get_ui_dir())
+    subprocess.check_call(
+        [paths.get_ng(), 'build', '--environment=test'],
+        cwd=paths.get_ui_dir())
     logging.info('Deploying UI')
     subprocess.check_call(
         [
