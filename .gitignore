@@ -2,5 +2,10 @@
 *~
 /build/*
 /.gradle/*
-/ui/build/*
 /api/build/*
+*.swp
+npm-debug.log
+node_modules
+/ui/dist/**
+/ui/**/*.map
+/ui/**/*.js

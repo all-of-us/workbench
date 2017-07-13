@@ -47,7 +47,6 @@ echo "${BOLD}Deploying API...${NONE}"
 ./gradlew :api:appengineDeploy
 
 echo "${BOLD}Deploying UI...${NONE}"
-./gradlew :ui:appengineDeploy
-
-
-
+cd ui
+ng build  # Change this to `ng build --environment=prod` to minify.
+gcloud app deploy

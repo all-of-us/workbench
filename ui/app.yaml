@@ -1,0 +1,18 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /
+  static_files: dist/index.html
+  upload: dist/index.html
+  secure: always
+- url: /(.*)
+  static_files: dist/\1
+  upload: dist/(.*)
+  secure: always
+
+# If a file (relative path under ui/) matches this regex, do not upload it.
+# Skip everything not starting with "dist".
+skip_files:
+- ^(?!dist).*$
