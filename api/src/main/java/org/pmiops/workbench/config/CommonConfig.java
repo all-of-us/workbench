@@ -7,9 +7,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Created by danrodney on 7/13/17.
- */
 @Configuration
 public class CommonConfig {
 

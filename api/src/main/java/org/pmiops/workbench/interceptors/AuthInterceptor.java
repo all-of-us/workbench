@@ -18,9 +18,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
-
-  private static final String PMI_OPS_SUFFIX = "@pmi-ops.org";
-
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
 
   private final UserInfoService userInfoService;
@@ -33,10 +30,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    if (request.getMethod() == HttpMethod.OPTIONS.name()) {
-      // OPTIONS methods don't have to be authenticated.
-      return true;
-    }
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -56,12 +49,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
-    if (!userInfo.getEmail().endsWith(PMI_OPS_SUFFIX)) {
-      log.log(Level.WARNING,"User {0} is not from pmi-ops.org", userInfo.getEmail());
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
-      return false;
-    }
-
     // TODO: get token info and check that as well
     
     // TODO: check Google group membership to ensure user is in registered user group
