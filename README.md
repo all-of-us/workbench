@@ -39,6 +39,8 @@ does not reload when they're updated.
 
 ### API: dev AppEngine appserver
 
+From the `api/` directory:
+
 ```Shell
 ./gradlew appengineRun
 ```
