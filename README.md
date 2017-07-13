@@ -28,7 +28,8 @@ After responding to changes, merge in GitHub.
 
 ### UI
 
-Install Node.js and npm. (For Google workstation setup, see go/nodejs.)
+Install [Node.js](https://nodejs.org/en/download/) and npm (typically included
+with Node.js). (For Google workstation setup, see go/nodejs.)
 
 Install the Angular command-line tool:
 
