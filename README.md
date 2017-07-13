@@ -23,30 +23,17 @@ After responding to changes, merge in GitHub.
 
 * Install JDK 7 on your machine from http://docs.oracle.com/javase/7/docs/webnotes/install/.
 * Set your JAVA_HOME environment variable to point at the installation directory.
-* Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
-* Run tools/setup_env.sh.
 
 ### UI
-
-Install [Node.js](https://nodejs.org/en/download/) and npm (typically included
-with Node.js). (For Google workstation setup, see go/nodejs.)
-
-Install the Angular command-line tool:
-
-```Shell
-sudo npm install -g @angular/cli
-```
-
-Install project dependencies. This includes `shared-git-hooks`, which installs
-wrappers into `.git/hooks` to use the contents of the `hooks` directory.
-
-```Shell
-npm install
-```
 
 Direct your editor to write swap files outside the source tree, so Webpack
 does not reload when they're updated.
 [Example for vim](https://github.com/angular/angular-cli/issues/4593).
+
+### General
+
+* Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
+* Run tools/setup_env.sh.
 
 ## Running the Dev Servers
 
