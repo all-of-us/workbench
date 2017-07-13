@@ -62,6 +62,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
 
+    // TODO: get token info and check that as well
+    
     // TODO: check Google group membership to ensure user is in registered user group
 
     // TODO: setup this in the context, get rid of log statement
