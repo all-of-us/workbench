@@ -5,13 +5,10 @@ import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 
-// Imports for loading & configuring the in-memory web api
-import {InMemoryWebApiModule} from 'angular-in-memory-web-api';
-
+import {AllOfUsService} from 'app/services/all-of-us.service';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
-import {InMemoryDataService} from 'app/services/in-memory-data.service';
 import {LoginComponent} from 'app/views/login/component';
 import {RepositoryService} from 'app/services/repository.service';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
@@ -33,8 +30,7 @@ export function getVaadin(): VaadinNs {
     AppRoutingModule,
     BrowserModule,
     FormsModule,
-    HttpModule,
-    InMemoryWebApiModule.forRoot(InMemoryDataService)
+    HttpModule
   ],
   declarations: [
     AppComponent,
@@ -43,6 +39,7 @@ export function getVaadin(): VaadinNs {
     CohortBuilderComponent
   ],
   providers: [
+    AllOfUsService,
     UserService,
     RepositoryService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin}

@@ -56,11 +56,15 @@ local API server under http://localhost:8081/api/.
 From the `ui/` subdirectory:
 
 ```Shell
-ng serve
+ng serve [--environment=test]
 ```
 
 After webpack finishes the build, you can view your local UI server at
 http://localhost:4200/.
+
+By default, this connects to a local API server. Use `--environment=$ENV` to
+use an alternate `src/environments/environment.$ENV.ts` file and connect to a
+different API server.
 
 ## Running in Docker
 
