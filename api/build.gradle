@@ -27,6 +27,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'com.google.apis:google-api-services-oauth2:+'
   testCompile("junit:junit")
 }
 
@@ -45,5 +46,5 @@ appengine {  // App Engine tasks configuration
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
