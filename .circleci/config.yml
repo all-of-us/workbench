@@ -20,6 +20,7 @@ jobs:
           command: gradle dependencies
       - save_cache:
           paths:
+            - ~/.gradle
             - ~/.m2
           key: api-deps-{{ checksum "~/workbench/api/build.gradle" }}
       - run:
