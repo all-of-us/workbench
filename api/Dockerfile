@@ -1,4 +1,4 @@
-FROM java:openjdk-8-jdk
+FROM java:8
 
 RUN apt-get update
 
@@ -37,5 +37,4 @@ ADD . /app
 WORKDIR /app
 RUN ./gradlew
 
-ENTRYPOINT ["/app/gradlew"]
-CMD ["appengineRun"]
+CMD ["/app/gradlew", "appengineRun"]
