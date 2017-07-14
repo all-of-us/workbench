@@ -33,6 +33,7 @@ does not reload when they're updated.
 ### General
 
 * Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
+* If not selected initially, add the AppEngine component with `gcloud components install app-engine-java`.
 * Run tools/setup_env.sh.
 
 ## Running the Dev Servers
