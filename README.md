@@ -26,14 +26,17 @@ After responding to changes, merge in GitHub.
 
 ### UI
 
-Direct your editor to write swap files outside the source tree, so Webpack
+* Direct your editor to write swap files outside the source tree, so Webpack
 does not reload when they're updated.
 [Example for vim](https://github.com/angular/angular-cli/issues/4593).
+* Install npm. (For Google workstations, see go/nodejs.)
 
 ### General
 
 * Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
-* Run tools/setup_env.sh.
+* If not selected initially, add the AppEngine component with `gcloud components install app-engine-java`.
+* Run tools/setup_env.sh. (This installs angular-cli globally. You may also get it from `ui/node_modules` after
+running `npm install`.)
 
 ## Running the Dev Servers
 
@@ -55,6 +58,9 @@ From the `ui/` subdirectory:
 ```Shell
 ng serve
 ```
+
+After webpack finishes the build, you can view your local UI server at
+http://localhost:4200/.
 
 ## Running in Docker
 
