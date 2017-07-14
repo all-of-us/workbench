@@ -1,5 +1,6 @@
 package org.pmiops.workbench.interceptors;
 
+import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.logging.Level;
@@ -30,6 +31,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+    // OPTIONS methods requests don't need authorization.
+    if (request.getMethod().equals(HttpMethods.OPTIONS)) {
+      return true;
+    }
+
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {

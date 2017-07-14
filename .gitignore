@@ -4,6 +4,7 @@
 /.gradle/*
 /api/.gradle/*
 /api/build/*
+/api/.idea/*
 *.swp
 npm-debug.log
 node_modules
