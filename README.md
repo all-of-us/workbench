@@ -59,6 +59,9 @@ From the `ui/` subdirectory:
 ng serve
 ```
 
+After webpack finishes the build, you can view your local UI server at
+http://localhost:4200/.
+
 ## Running in Docker
 
 ```
