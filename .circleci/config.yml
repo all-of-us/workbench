@@ -13,8 +13,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - api-deps-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-deps-
+          - api-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-dependencies-
       - run:
           working_directory: ~/workbench/api
           command: gradle dependencies
@@ -22,7 +22,7 @@ jobs:
           paths:
             - ~/.gradle
             - ~/.m2
-          key: api-deps-{{ checksum "~/workbench/api/build.gradle" }}
+          key: api-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
       - run:
           working_directory: ~/workbench/api
           command: gradle test
