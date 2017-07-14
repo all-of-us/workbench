@@ -49,6 +49,9 @@ appengine {  // App Engine tasks configuration
   deploy {   // deploy configuration
     stopPreviousVersion = true  // default - stop the current version
     promote = true              // default - & make this the current version
+    // TODO(danrodney)
+    //account = System.properties("account")
+    //project = System.properties("project")
   }
 }
 

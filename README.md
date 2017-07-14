@@ -81,13 +81,13 @@ docker run -p 4200:4200 -v --rm -it workbench-ui
 To deploy your local code to a given AppEngine project, run:
 
 ```
-./deploy.sh --project PROJECT --account ACCOUNT@pmi-ops.org
+./deploy.py --project PROJECT --account ACCOUNT@pmi-ops.org
 ```
 
 Example:
 
 ```
-./deploy.sh --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org
+./deploy.py -p all-of-us-workbench-test -a dan.rodney@pmi-ops.org
 ```
 
 You will be prompted to confirm the deployment. When it finishes, you will be able to access the

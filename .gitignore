@@ -11,3 +11,4 @@ node_modules
 /ui/dist/**
 /ui/**/*.map
 /ui/**/*.js
+*.pyc
