@@ -1,0 +1,33 @@
+<h2>AoU Research Portal Workspace</h2>
+<div *ngIf="user else loggedout">
+  <p style="color:black;">Default workspace for July, 2017 demo</p>
+  <div id="cdrVersionArea" class="AreaBlock">
+    <h3>CDR Version</h3>
+    <div class="Indented">
+      <p>CDR version info goes here.</p>
+    </div>
+  </div>
+  <div id="cohortArea" class="AreaBlock">
+    <h3>Cohorts</h3>
+    <a href="javascript:;">Add a Cohort</a>
+    <div class="Indented">
+      <table id="cohortTable" ng-controller="CohortListController">
+        <tr class="TableHeader">
+          <th>Name</th>
+          <th>Description</th>
+          <th>URL</th>
+          <th>Created Date</th>
+          <th>Notebook</th>
+        </tr>
+        <tr *ngFor="let cohort of cohortList">
+          <td><a href="javascript:;">{{cohort.name}}</a></td>
+          <td>{{cohort.description}}</td>
+          <td>{{cohort.url}}</td>
+          <td>{{cohort.date.toString()}}</td>
+          <td><a href="javascript:;">{{cohort.notebook}}</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+<ng-template #loggedout>Log in to view workspace.</ng-template>
