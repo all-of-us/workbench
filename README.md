@@ -59,8 +59,15 @@ ng serve
 ## Running in Docker
 
 ```
-docker build -t workbench .
-docker run -p 8080:8080 -v $(pwd):/app --rm -it workbench
+cd api
+docker build -t workbench-api .
+docker run -p 8081:8081 -v --rm -it workbench-api
+```
+
+```
+cd ui
+docker build -t workbench-ui .
+docker run -p 4200:4200 -v --rm -it workbench-ui
 ```
 
 ## Deploying

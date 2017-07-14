@@ -35,6 +35,6 @@ RUN apt-get -qqy update && apt-get install -qqy \
 
 ADD . /app
 WORKDIR /app
-RUN ./gradlew
+RUN ./gradlew build
 
 CMD ["/app/gradlew", "appengineRun"]
