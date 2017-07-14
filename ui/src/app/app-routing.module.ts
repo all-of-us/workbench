@@ -9,10 +9,10 @@ import {LoginComponent} from 'app/views/login/component';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 const routes: Routes = [
-  {path: '', redirectTo: '/login', pathMatch: 'full'},
-  {path: 'login', component: LoginComponent},
-  {path: 'repository', component: SelectRepositoryComponent},
-  {path: 'cohort/:id', component: CohortBuilderComponent}
+  {path: '', redirectTo: '/login', pathMatch: 'full', data: {title: 'Redirecting...'}},
+  {path: 'login', component: LoginComponent, data: {title: 'Log In'}},
+  {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
+  {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}}
 ];
 
 @NgModule({
