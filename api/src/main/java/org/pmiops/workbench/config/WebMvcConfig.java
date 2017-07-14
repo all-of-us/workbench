@@ -26,7 +26,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public ServletRegistrationBean dispatcherRegistration(DispatcherServlet dispatcherServlet) {
     ServletRegistrationBean registration = new ServletRegistrationBean(
         dispatcherServlet);
-    registration.addUrlMappings("/api/*");
+    registration.addUrlMappings("/api/v1/*");
     return registration;
   }
 

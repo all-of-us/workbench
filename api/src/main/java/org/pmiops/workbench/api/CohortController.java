@@ -1,24 +1,28 @@
-package org.pmiops.workbench;
+package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.api.Constants.V1_API_PREFIX;
-
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.pmiops.workbench.model.Cohort;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V1_API_PREFIX + "/workspaces/{workspaceId}/cohorts")
-public class CohortController {
+public class CohortController implements CohortsApi {
 
-  @GetMapping
-  public List<Cohort> listCohorts(@PathVariable Long workspaceId) {
-    List<Cohort> cohorts = new ArrayList<>();
-    cohorts.add(new Cohort("id1", "name1", "criteria1", "type1"));
-    cohorts.add(new Cohort("id2", "name2", "criteria2", "type2"));
-    return cohorts;
+  @Override
+  public ResponseEntity<List<Cohort>> getCohortsInWorkspace(String workspaceId) {
+    Cohort cohort1 = new Cohort();
+    cohort1.setId("id1");
+    cohort1.setName("name1");
+    cohort1.setCriteria("criteria1");
+    cohort1.setType("type1");
+
+    Cohort cohort2 = new Cohort();
+    cohort2.setId("id2");
+    cohort2.setName("name2");
+    cohort2.setCriteria("criteria2");
+    cohort2.setType("type2");
+
+    return ResponseEntity.ok(ImmutableList.of(cohort1, cohort2));
   }
 }
