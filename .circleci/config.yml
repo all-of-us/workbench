@@ -11,8 +11,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - api-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-dependencies-
+          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-cache-
       - run:
           working_directory: ~/workbench/api
           command: gradle test
@@ -20,4 +20,5 @@ jobs:
           paths:
             - ~/.gradle
             - ~/.m2
-          key: api-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
+            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
+          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
