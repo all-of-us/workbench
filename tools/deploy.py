@@ -14,8 +14,6 @@ import gcloud_auth
 
 
 def deploy(args):
-  gcloud_auth.do_auth(args)
-
   targets = (
       _TargetChoices.ALL_TARGETS if args.target == _TargetChoices.ALL
       else (args.target,))
@@ -24,7 +22,14 @@ def deploy(args):
   if _TargetChoices.API in targets:
     logging.info('Deploying API')
     subprocess.check_call(
-        ['./gradlew', ':appengineDeploy'], cwd=paths.get_api_dir())
+        [
+            './gradlew',
+            ':appengineDeploy',
+            # TODO(danrodney)
+            #'-Pproject=%s' % args.project,
+            #'-Paccount=%s' % args.account,
+        ],
+        cwd=paths.get_api_dir())
   else:
     logging.info('Skipping deploy of API.')
 
@@ -32,7 +37,17 @@ def deploy(args):
     logging.info('Building UI using %r', paths.get_ng())
     subprocess.check_call([paths.get_ng(), 'build'], cwd=paths.get_ui_dir())
     logging.info('Deploying UI')
-    subprocess.check_call(['gcloud', 'app', 'deploy'], cwd=paths.get_ui_dir())
+    subprocess.check_call(
+        [
+          'gcloud',
+          'app',
+          'deploy',
+          '--project',
+          args.project,
+          '--account',
+          args.account,
+        ],
+        cwd=paths.get_ui_dir())
   else:
     logging.info('Skipping deploy of UI.')
 
@@ -54,5 +69,8 @@ if __name__ == '__main__':
       '-t', '--target',
       default=_TargetChoices.ALL, choices=_TargetChoices.ALL_TARGET_CHOICES,
       help='Which part of the Workbench to deploy.')
-  args = gcloud_auth.add_parse_and_check_args(parser)
+  # Set auth/project here for general usage, but also pass them explicitly
+  # to commands that support it as a safeguard against other gcloud commands
+  # altering the configured values (which would cause a race condition).
+  args = gcloud_auth.add_parse_and_do_auth(parser)
   deploy(args)

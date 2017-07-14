@@ -4,7 +4,7 @@ import logging
 import subprocess
 
 
-def add_parse_and_check_args(parser):
+def add_parse_and_do_auth(parser):
   """Takes in a parser, does all the auth stuff, and returns parsed args.
 
   This function composes the rest of the functions in this module, for the
