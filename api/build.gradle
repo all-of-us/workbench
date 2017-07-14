@@ -25,6 +25,7 @@ dependencies {
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
   }
+  compile 'org.springframework.security:spring-security-web:+'
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'

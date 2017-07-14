@@ -2,6 +2,9 @@
 *~
 /build/*
 /.gradle/*
+/api/api.iml
+/api/api.ipr
+/api/api.iws
 /api/.gradle/*
 /api/build/*
 /api/.idea/*
