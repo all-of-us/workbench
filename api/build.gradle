@@ -1,37 +1,43 @@
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+  }
+  dependencies {
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
+  }
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
-
-buildscript {    // Configuration for building
-  repositories {
-    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
-  }
-}
+apply plugin: 'org.springframework.boot'
 
 repositories {   // repositories for Jar's you access in your code
-  maven {
-    url 'https://maven-central.storage.googleapis.com'             // Google's mirror of Maven Central
-  }
   jcenter()
-  mavenCentral()
 }
-
 
 dependencies {
   providedCompile group: 'javax.servlet', name: 'servlet-api', version:'2.5'
   compile 'com.google.appengine:appengine:+'
-  compile 'org.springframework:spring-webmvc:+'
+  compile('org.springframework.boot:spring-boot-starter-web:+') {
+    exclude module: 'spring-boot-starter-tomcat'
+  }
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
   compile 'com.google.apis:google-api-services-oauth2:+'
-  testCompile("junit:junit")
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.mockito:mockito-core:1.+'
+  testCompile 'com.google.truth:truth:+'
+}
+
+test {
+  testLogging {
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+  }
 }
 
 appengine {  // App Engine tasks configuration

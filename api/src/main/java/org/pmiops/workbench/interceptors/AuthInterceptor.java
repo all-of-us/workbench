@@ -1,5 +1,6 @@
 package org.pmiops.workbench.interceptors;
 
+import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.util.logging.Level;
@@ -9,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -30,6 +30,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+    // OPTIONS methods requests don't need authorization.
+    if (request.getMethod().equals(HttpMethods.OPTIONS)) {
+      return true;
+    }
+
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
