@@ -2,7 +2,7 @@
 
 ## Getting the code
 
-* Run "git clone https://github.com/all-of-us/workbench"
+* Run `git clone https://github.com/all-of-us/workbench`
 
 To make changes, do:
 
@@ -21,7 +21,7 @@ After responding to changes, merge in GitHub.
 
 ### API
 
-* Install JDK 7 on your machine from http://docs.oracle.com/javase/7/docs/webnotes/install/.
+* Install JDK 8 on your machine from http://www.oracle.com/technetwork/java/javase/downloads/index.html.
 * Set your JAVA_HOME environment variable to point at the installation directory.
 
 ### UI
