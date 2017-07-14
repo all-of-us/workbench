@@ -1,5 +1,7 @@
 # Workbench
 
+[![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workbench)
+
 ## Getting the code
 
 * Run `git clone https://github.com/all-of-us/workbench`
