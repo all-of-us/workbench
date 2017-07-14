@@ -2,8 +2,6 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workbench)
 
-You can use a simple image URL like this to see the status of your project’s default branch: https://circleci.com/gh/:owner/:repo.png?circle-token=9cd8d79a126cdcffb0c18239b62fa7068b491942
-
 ## Getting the code
 
 * Run `git clone https://github.com/all-of-us/workbench`
