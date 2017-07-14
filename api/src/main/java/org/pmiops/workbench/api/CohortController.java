@@ -2,16 +2,13 @@ package org.pmiops.workbench;
 
 import static org.pmiops.workbench.api.Constants.V1_API_PREFIX;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.GetMapping;
-
+import java.util.List;
 import org.pmiops.workbench.model.Cohort;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(V1_API_PREFIX + "/workspaces/{workspaceId}/cohorts")
