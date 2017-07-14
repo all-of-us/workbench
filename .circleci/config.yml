@@ -13,15 +13,15 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
-          - v1-dependencies-
+          - api-deps-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-deps-
       - run:
           working_directory: ~/workbench/api
           command: gradle dependencies
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
+          key: api-deps-{{ checksum "~/workbench/api/build.gradle" }}
       - run:
           working_directory: ~/workbench/api
           command: gradle test
