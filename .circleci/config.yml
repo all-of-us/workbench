@@ -15,12 +15,9 @@ jobs:
           - api-dependencies-
       - run:
           working_directory: ~/workbench/api
-          command: gradle dependencies
+          command: gradle test
       - save_cache:
           paths:
             - ~/.gradle
             - ~/.m2
           key: api-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
-      - run:
-          working_directory: ~/workbench/api
-          command: gradle test
