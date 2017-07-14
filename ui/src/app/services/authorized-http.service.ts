@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Http, Headers, RequestOptionsArgs, Request, Response, ConnectionBackend, RequestOptions} from '@angular/http';
+import {Http, Headers, Request, Response, ConnectionBackend, RequestOptions} from '@angular/http';
+import {RequestOptionsArgs} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
 // Subclass of Http which adds bearer token auth to all requests.
@@ -25,7 +26,7 @@ export class AuthorizedHttp extends Http {
       // Requests coming from Http.get() will have a Request object. To support a string URL in
       // place of a request, add the headers on the RequestOptionsArgs instead (as in the original
       // SO example).
-      throw new NotImplementedException('AuthorizedHttp.request(url: string) unimplemented.');
+      throw new Error('AuthorizedHttp.request(url: string) unimplemented.');
     }
     this._setAuthHeader(request);
     return super.request(request, options);
