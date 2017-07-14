@@ -1,0 +1,48 @@
+
+.AreaBlock{
+  margin-top: 20px;
+  margin-left: 4%;
+}
+
+.Indented{
+  margin-left:2%;
+}
+
+.TableHeader{
+  border-bottom: 3px;
+  border-bottom-color: lightgray;
+  border-bottom-style: solid;
+  width: 100%;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  display: flex;
+}
+h3{
+  display: inline-block;
+  margin: 0.5em 0 0.5em 0;
+}
+
+a{
+  display:inline-block;
+  color: #5DADE0;
+}
+
+a:hover {
+  color:#262262;
+}
+
+table{
+  width: 100%;
+  text-align: left;
+  table-layout: fixed;
+}
+
+th{
+  width:19%;
+  display: flex;
+}
+td{
+  width:19%;
+  display: inline-block;
+  padding-top: 1em;
+}

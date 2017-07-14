@@ -17,6 +17,7 @@ import {RepositoryService} from 'app/services/repository.service';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
+import {WorkspaceComponent} from 'app/views/workspace/component'
 
 export function getVaadin(): VaadinNs {
   // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
@@ -40,7 +41,8 @@ export function getVaadin(): VaadinNs {
     AppComponent,
     LoginComponent,
     SelectRepositoryComponent,
-    CohortBuilderComponent
+    CohortBuilderComponent,
+    WorkspaceComponent
   ],
   providers: [
     UserService,

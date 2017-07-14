@@ -6,12 +6,14 @@ import {RouterModule, Routes} from '@angular/router';
 
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {LoginComponent} from 'app/views/login/component';
+import {WorkspaceComponent} from 'app/views/workspace/component';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 const routes: Routes = [
   {path: '', redirectTo: '/login', pathMatch: 'full'},
   {path: 'login', component: LoginComponent},
   {path: 'repository', component: SelectRepositoryComponent},
+  {path: 'workspace', component: WorkspaceComponent},
   {path: 'cohort/:id', component: CohortBuilderComponent}
 ];
 
