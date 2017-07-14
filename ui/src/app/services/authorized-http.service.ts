@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Http, Headers, RequestOptionsArgs, Request, Response, ConnectionBackend, RequestOptions}
-    from '@angular/http';
+import {Http, Headers, RequestOptionsArgs, Request, Response, ConnectionBackend, RequestOptions} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
 // Subclass of Http which adds bearer token auth to all requests.
