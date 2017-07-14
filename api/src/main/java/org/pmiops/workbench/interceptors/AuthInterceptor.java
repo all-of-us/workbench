@@ -3,6 +3,7 @@ package org.pmiops.workbench.interceptors;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -36,9 +37,20 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    if (authorizationHeader == null) {
+      Enumeration<String> headerNames = request.getHeaderNames();
+      String foundHeaders = "";
+      while (headerNames.hasMoreElements()) {
+        foundHeaders += " " + headerNames.nextElement();
+      }
+      log.warning("No " + HttpHeaders.AUTHORIZATION + " header found in request, found: "
+          + foundHeaders + ".");
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return false;
+    }
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      log.warning("No bearer token found in request");
+    if (!authorizationHeader.startsWith("Bearer ")) {
+      log.warning("No bearer token found in authorization header: " + authorizationHeader);
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
