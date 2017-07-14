@@ -11,6 +11,9 @@ jobs:
 
     steps:
       - checkout
+      - run:
+          working_directory: ~/workbench/api
+          command: echo "in $(pwd)"
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "~/workbench/api/build.gradle" }}
