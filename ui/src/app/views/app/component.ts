@@ -1,11 +1,13 @@
 // UI Component framing the overall app (title and nav).
 // Content is in other Components.
 
-import {Component, OnInit} from '@angular/core';
+import {environment} from 'environments/environment';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Router, NavigationEnd, ActivatedRoute} from '@angular/router';
+import {SignInService} from 'app/services/sign-in.service';
 import {Title} from '@angular/platform-browser';
 
-import {environment} from 'environments/environment';
+declare const gapi: any;
 
 @Component({
   selector: 'app-aou',
@@ -14,11 +16,14 @@ import {environment} from 'environments/environment';
 })
 export class AppComponent implements OnInit {
   private baseTitle: string;
+  isSignedIn: Promise<boolean>;
 
   constructor(
+      private cdRef: ChangeDetectorRef,
       private titleService: Title,
       private activatedRoute: ActivatedRoute,
-      private router: Router
+      private router: Router,
+      private signInService: SignInService,
   ) {}
 
   ngOnInit(): void {
@@ -44,5 +49,22 @@ export class AppComponent implements OnInit {
         }
       }
     });
+
+    this.signInService.listenForUserDidChange(function(user) {
+      this.isSignedIn = Promise.resolve(user.isSignedIn());
+      this.isSignedIn.then((x) => console.log(x));
+      this.cdRef.detectChanges();
+    }.bind(this));
+    this.signInService.isSignedIn()
+      .then((isSignedIn) => this.isSignedIn = Promise.resolve(isSignedIn));
+  }
+
+
+  signIn(e: Event): void {
+    gapi.auth2.getAuthInstance().signIn();
+  }
+
+  signOut(e: Event): void {
+    gapi.auth2.getAuthInstance().signOut();
   }
 }

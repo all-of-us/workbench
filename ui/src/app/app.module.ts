@@ -12,6 +12,8 @@ import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {LoginComponent} from 'app/views/login/component';
 import {RepositoryService} from 'app/services/repository.service';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
+import {SignInComponent} from 'app/views/sign-in/component'
+import {SignInService} from 'app/services/sign-in.service';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 
@@ -36,12 +38,14 @@ export function getVaadin(): VaadinNs {
     AppComponent,
     LoginComponent,
     SelectRepositoryComponent,
-    CohortBuilderComponent
+    CohortBuilderComponent,
+    SignInComponent
   ],
   providers: [
     AllOfUsService,
     UserService,
     RepositoryService,
+    SignInService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin}
   ],
 
