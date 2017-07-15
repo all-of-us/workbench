@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_api:
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/workbench
@@ -22,3 +22,30 @@ jobs:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+  build_ui:
+    docker:
+        - image: circleci/node:latest-browsers
+    working_directory: ~/workbench
+    environment: []
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+          - ui-cache-
+      - run:
+          working_directory: ~/workbench/ui
+          command: npm install
+      - save_cache:
+          paths:
+            - ~/workbench/ui/node_modules
+          key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+      - run:
+          working_directory: ~/workbench/ui
+          command: npm run test -- --no-watch
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build_api
+      - build_ui

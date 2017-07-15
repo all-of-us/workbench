@@ -1,6 +1,6 @@
 {
   "name": "aou-ui-angular",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "BSD",
   "scripts": {
     "ng": "ng",
@@ -22,7 +22,7 @@
     "@angular/router": "^4.0.0",
     "core-js": "^2.4.1",
     "rxjs": "^5.1.0",
-    "zone.js": "^0.8.4"
+    "zone.js": "^0.8.12"
   },
   "devDependencies": {
     "@angular/cli": "1.2.0",
@@ -40,6 +40,7 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-webdriver-launcher": "^1.0.5",
     "protractor": "~5.1.2",
     "shared-git-hooks": "^1.2.1",
     "ts-node": "~3.0.4",
