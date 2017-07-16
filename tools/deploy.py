@@ -17,7 +17,8 @@ def deploy(args):
   targets = (
       _TargetChoices.ALL_TARGETS if args.target == _TargetChoices.ALL
       else (args.target,))
-  get_confirmation('Deploy to %r (%s)?' % (args.project, ', '.join(targets)))
+  if not args.skip_confirmation:
+    get_confirmation('Deploy to %r (%s)?' % (args.project, ', '.join(targets)))
 
   if _TargetChoices.API in targets:
     logging.info('Deploying API')
@@ -71,6 +72,10 @@ if __name__ == '__main__':
       '-t', '--target',
       default=_TargetChoices.ALL, choices=_TargetChoices.ALL_TARGET_CHOICES,
       help='Which part of the Workbench to deploy.')
+  parser.add_argument(
+      '-s', '--skip-confirmation',
+      action='store_true',
+      help='Skip confirmation (for automated deploys)')
   # Set auth/project here for general usage, but also pass them explicitly
   # to commands that support it as a safeguard against other gcloud commands
   # altering the configured values (which would cause a race condition).
