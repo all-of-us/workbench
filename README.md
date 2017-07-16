@@ -56,11 +56,23 @@ local API server under http://localhost:8081/api/.
 From the `ui/` subdirectory:
 
 ```Shell
-ng serve
+npm run start
 ```
 
 After webpack finishes the build, you can view your local UI server at
 http://localhost:4200/.
+
+#### You can regenerate classes from swagger with
+
+```Shell
+npm run codegen
+```
+
+#### You can build the UI with
+
+```Shell
+npm run build
+```
 
 ## Running in Docker
 
