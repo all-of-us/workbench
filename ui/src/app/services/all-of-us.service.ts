@@ -3,14 +3,14 @@
 
 import 'rxjs/add/operator/toPromise';
 
-import {Http} from '@angular/http';
 import {Injectable} from '@angular/core';
 
 import {environment} from 'environments/environment';
+import {AuthorizedHttp} from 'app/services/authorized-http.service';
 
 @Injectable()
 export class AllOfUsService {
-  constructor(private http: Http) {}
+  constructor(private http: AuthorizedHttp) {}
 
   // Gets a "hello world" value from the server (a test endpoint).
   getHelloWorld(): Promise<String> {

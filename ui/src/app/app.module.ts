@@ -2,10 +2,11 @@
 
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {HttpModule} from '@angular/http';
+import {HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {AllOfUsService} from 'app/services/all-of-us.service';
+import {AuthorizedHttp} from 'app/services/authorized-http.service';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
@@ -25,6 +26,11 @@ export function getVaadin(): VaadinNs {
   }
 }
 
+export function getAuthorizedHttp(
+    xhrBackend: XHRBackend, requestOptions: RequestOptions): AuthorizedHttp {
+  return new AuthorizedHttp(xhrBackend, requestOptions);
+}
+
 @NgModule({
   imports:      [
     AppRoutingModule,
@@ -40,6 +46,7 @@ export function getVaadin(): VaadinNs {
   ],
   providers: [
     AllOfUsService,
+    {provide: AuthorizedHttp, useFactory: getAuthorizedHttp, deps: [XHRBackend, RequestOptions]},
     UserService,
     RepositoryService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin}
