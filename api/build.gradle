@@ -36,7 +36,7 @@ buildscript {    // Configuration for building
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
-    classpath 'io.swagger:swagger-codegen:2.2.2'
+    classpath 'io.swagger:swagger-codegen:+'
   }
 }
 
@@ -81,6 +81,7 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
   }
   compile 'org.springframework.security:spring-security-web:+'
+  compile 'io.swagger:swagger-codegen:+'
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
