@@ -1,0 +1,101 @@
+# A subset of the FireCloud API spec that we use to generate Java client libraries. The
+# original API spec can be found here:
+# https://github.com/broadinstitute/firecloud-orchestration/blob/develop/src/main/resources/swagger/api-docs.yaml
+
+swagger: '2.0'
+
+info:
+  title: FireCloud
+  description: |
+    Genome analysis execution service.
+  version: "0.1"
+  license:
+    name: BSD
+    url: http://opensource.org/licenses/BSD-3-Clause
+  termsOfService: https://github.com/broadinstitute/firecloud-orchestration
+
+host: "api.firecloud.org"
+schemes:
+  - "https"
+basePath: /
+
+produces:
+  - application/json
+
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+      - https://www.googleapis.com/auth/devstorage.full_control
+
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+      https://www.googleapis.com/auth/devstorage.full_control: GCS storage
+      https://www.googleapis.com/auth/cloud-billing: GCS billing
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+  /me:
+    get:
+      tags:
+        - Profile
+      operationId: me
+      summary: Returns registration and activation status for the current user
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Me'
+        401:
+          description: Unauthorized. User is not allowed in FireCloud or has not signed in.
+        403:
+          description: Forbidden. User is registered in FireCloud, but not activated.
+        404:
+          description: Not Found. User is authenticated to Google but not a FireCloud member.
+        500:
+          description: Internal Server Error determining user status.
+        503:
+          description: Service Unavailable. Could not reach underlying services to determine user status.
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  Enabled:
+    type: object
+    properties:
+      google:
+        type: boolean
+        description: User enabled via Google?
+      ldap:
+        type: boolean
+        description: User enabled in LDAP?
+      allUsersGroup:
+        type: boolean
+        description: User is a member of the "All Users" group?
+  Me:
+    type: object
+    properties:
+      userInfo:
+        $ref: '#/definitions/UserInfo'
+      enabled:
+        $ref: '#/definitions/Enabled'
+  UserInfo:
+    type: object
+    properties:
+      userSubjectId:
+        type: string
+        description: Subject ID (from Google)
+      userEmail:
+        type: string
+        description: User's email
