@@ -1,37 +1,34 @@
-// Data interface for getting details about available CDRs. This communicates
-// via Angular's builtin Http module with a (fake) REST API.
-
-import 'rxjs/add/operator/toPromise';
+// Data interface for getting details about available CDRs. This fake service
+// uses hardcoded data for demo purposes.
 
 import {Injectable} from '@angular/core';
-import {Http} from '@angular/http';
 
+import {PermissionLevel} from 'app/models/permission-level';
 import {Repository} from 'app/models/repository';
 
 @Injectable()
 export class RepositoryService {
-  private apiUrl = 'api/repository';  // URL to (fake in-memory) web API
-
-  constructor(private http: Http) {}
+  REPOSITORY: Repository[] = [
+    {id: 11, permission: PermissionLevel.Public, name: 'Aggregates 2017 Q1'},
+    {id: 12, permission: PermissionLevel.Public, name: 'Aggregates 2017 Q2'},
+    {id: 13, permission: PermissionLevel.Registered, name: 'CDR 2017 Q1 v1'},
+    {id: 14, permission: PermissionLevel.Registered, name: 'CDR 2017 Q1 v2'},
+    {id: 15, permission: PermissionLevel.Registered, name: 'CDR 2017 Q1 v3'},
+    {id: 16, permission: PermissionLevel.Registered, name: 'CDR 2017 Q2 v1'},
+    {id: 19, permission: PermissionLevel.Controlled, name: 'Raw 2017 Q1'},
+    {id: 20, permission: PermissionLevel.Controlled, name: 'Raw 2017 Q2'}
+  ];
 
   list(): Promise<Repository[]> {
-    return this.http
-        .get(this.apiUrl)
-        .toPromise()
-        .then(response => response.json().data as Repository[])
-        .catch(this.handleError);
+    return Promise.resolve(this.REPOSITORY);
   }
 
   get(id: number): Promise<Repository> {
-    return this.http
-        .get(`${this.apiUrl}/${id}`)
-        .toPromise()
-        .then(response => response.json().data as Repository)
-        .catch(this.handleError);
-  }
-
-  private handleError(error: any): Promise<any> {
-    console.error('An error occurred', error);  // for demo purposes only
-    return Promise.reject(error.message || error);
+    for (const repo of this.REPOSITORY) {
+      if (repo.id === id) {
+        return Promise.resolve(repo);
+      }
+    }
+    return Promise.reject(`No Repository with ID ${id}.`);
   }
 }
