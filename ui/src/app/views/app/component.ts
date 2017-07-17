@@ -53,11 +53,6 @@ export class AppComponent implements OnInit {
       }
     });
     this.user = this.signInService.user;
-
-    this.user.subscribe(u => {
-      console.log('USER', u);
-      this.cohortsService.getCohortsInWorkspace('123').subscribe(r => console.log);
-    });
   }
 
   signIn(e: Event): void {
