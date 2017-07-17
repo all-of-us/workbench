@@ -1,10 +1,42 @@
+import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+
+def swaggerTemplateDir = 'src/main/resources'
+def swaggerSourceFile = 'src/main/resources/workbench.yaml'
+def swaggerTargetFolder = 'src/generated/java'
+
+task generateApi {
+  inputs.file("$projectDir/$swaggerSourceFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$swaggerTemplateDir")
+    config.setLang('spring')
+    config.setAdditionalProperties([
+            'interfaceOnly' : 'true',
+            'apiPackage'    : 'org.pmiops.workbench.api',
+            'modelPackage'  : 'org.pmiops.workbench.model',
+            'sourceFolder'  : swaggerTargetFolder,
+            'useTags'       : 'true'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
+configurations {
+  generatedCompile
+}
+
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
   }
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE'
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'    // latest App Engine Gradle tasks
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
+    classpath 'io.swagger:swagger-codegen:+'
   }
 }
 
@@ -14,6 +46,29 @@ apply plugin: 'idea'
 apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
+
+sourceSets {
+  generated {
+    compileClasspath = configurations.generatedCompile
+  }
+  main {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+  test {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+}
+
+ideaModule.dependsOn generateApi
+compileGeneratedJava.dependsOn generateApi
+classes.dependsOn generatedClasses
+compileJava.dependsOn compileGeneratedJava
+
+clean.doFirst {
+  delete("${projectDir}/$swaggerTargetFolder")
+}
 
 repositories {   // repositories for Jar's you access in your code
   jcenter()
@@ -25,6 +80,8 @@ dependencies {
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
   }
+  compile 'org.springframework.security:spring-security-web:+'
+  compile 'io.swagger:swagger-codegen:+'
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
@@ -32,6 +89,11 @@ dependencies {
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
   testCompile 'com.google.truth:truth:+'
+
+  // For Swagger generation
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile 'io.springfox:springfox-swagger2:2.5.0'
+  generatedCompile 'io.springfox:springfox-swagger-ui:2.5.0'
 }
 
 test {

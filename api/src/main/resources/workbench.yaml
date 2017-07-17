@@ -1,0 +1,55 @@
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Workbench API"
+  description: "The API for the AllOfUs workbench."
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "MIT"
+host: "api.pmi-ops.org"
+basePath: "/api/v1"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+paths:
+  /workspaces/{workspaceId}/cohorts:
+    get:
+      tags:
+        - cohorts
+      description: "Returns all cohorts in a workspace"
+      operationId: "getCohortsInWorkspace"
+      parameters:
+       - in: path
+         name: workspaceId
+         type: string
+         required: true
+         description: ID of the workspace to retrieve cohorts from.
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "A list of cohorts."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Cohort"
+definitions:
+  Cohort:
+    type: "object"
+    required:
+      - "id"
+      - "name"
+      - "criteria"
+      - "type"
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      criteria:
+        type: string
+      type:
+        type: string
