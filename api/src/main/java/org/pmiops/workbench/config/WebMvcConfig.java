@@ -1,13 +1,18 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.client.http.HttpMethods;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -28,6 +33,18 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         dispatcherServlet);
     registration.addUrlMappings("/api/v1/*");
     return registration;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public UserAuthentication userAuthentication() {
+    return (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public Userinfoplus userInfo(UserAuthentication userAuthentication) {
+    return userAuthentication.getPrincipal();
   }
 
   @Override

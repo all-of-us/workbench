@@ -1,7 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
 /**
- * Interface for accessing FireCloud APIs.
+ * Encapsulate Firecloud API interaction details and provide a simple/mockable interface
+ * for internal use.
  */
 public interface FireCloudService {
 
