@@ -27,9 +27,7 @@ a{
   color: #5DADE0;
 }
 
-a:hover {
-  color:#262262;
-}
+a:hover {color:#262262;}
 
 table{
   width: 100%;

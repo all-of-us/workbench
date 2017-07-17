@@ -63,35 +63,4 @@ export class WorkspaceComponent implements OnInit {
   goToNotebook(id: number): void {
 
   }
-
-
 }
-
-
-// WorkspaceComponent.controller('CohortController', function CohortController($scope){
-//   $scope.cohorts = [
-//     {
-//       name: 'Cohort 1',
-//       description: 'Male, 40-50, Various ethnic groups, MA',
-//       url: 'URL to the cohort',
-//       date: Date("July 1, 2017"),
-//       notebook: 'Notebook name'
-//     }
-//   ]
-// })
-
-/*
-WANT TO DO THIS ON PAGE LOAD, NOT INIT
-for(let c of cohortList){
-  console.log("Adding Cohort");
-  console.log(document.getElementById("cohortTable"));
-  document.getElementById("cohortTable").innerHTML +=
-    "<tr>"
-    "<td><a href='/'>" + c.name + "</a></td>" +
-    "<td>" + c.description + "</td>" +
-    "<td>" + c.url + "</td>" +
-    "<td>" + c.date.toString() + "</td>" +
-    "<td><a href='/'>" + c.notebook + "</a></td>" +
-    "</tr>";
-}
-*/
