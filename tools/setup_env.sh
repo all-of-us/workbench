@@ -6,3 +6,6 @@ echo Installing the Angular command-line tool, to serve/build the UI.
 sudo npm install -g @angular/cli
 echo Installing UI project dependencies.
 npm install
+
+cd ../tools
+./download_swagger_cli.sh

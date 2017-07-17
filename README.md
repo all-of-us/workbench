@@ -58,7 +58,7 @@ local API server under http://localhost:8081/api/.
 From the `ui/` subdirectory:
 
 ```Shell
-ng serve [--environment=test]
+npm run start [-- --environment test]
 ```
 
 After webpack finishes the build, you can view your local UI server at
@@ -67,6 +67,18 @@ http://localhost:4200/.
 By default, this connects to a local API server. Use `--environment=$ENV` to
 use an alternate `src/environments/environment.$ENV.ts` file and connect to a
 different API server.
+
+#### You can regenerate classes from swagger with
+
+```Shell
+npm run codegen
+```
+
+#### You can build the UI with
+
+```Shell
+npm run build
+```
 
 ## Running in Docker
 

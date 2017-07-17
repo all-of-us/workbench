@@ -9,6 +9,13 @@ info:
   license:
     name: "MIT"
 host: "api.pmi-ops.org"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    type: oauth2
+    flow: accessCode
 basePath: "/api/v1"
 schemes:
   - "https"
@@ -36,6 +43,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Cohort"
+      # Establish the fact that this endpoint is protected: this annotation
+      # ensures that client libraries know to send bearer tokens when calling
+      security:
+        - aou_oauth: []
 definitions:
   Cohort:
     type: "object"
