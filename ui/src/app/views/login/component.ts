@@ -3,7 +3,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {AllOfUsService} from 'app/services/all-of-us.service';
 import {PermissionLevel} from 'app/models/permission-level';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
@@ -16,13 +15,8 @@ export class LoginComponent implements OnInit {
       .filter(v => typeof v === 'number') as number[];
   permissionNames = PermissionLevel;
 
-  // A demo value fetched from the backend, to illustrate login status
-  // as fetched from Firecloud via the AllOfUsService.
-  firecloudStatus: String = '';
-
   constructor(
       private userService: UserService,
-      private aouService: AllOfUsService,
       private router: Router
   ) {}
 
@@ -34,9 +28,6 @@ export class LoginComponent implements OnInit {
             this.login = user;
           }
         });
-    this.aouService.getHelloWorld()
-        .then(statusText => this.firecloudStatus = statusText)
-        .catch(error => { console.log(error); this.firecloudStatus = 'Error loading'; });
   }
 
   logIn(): void {
