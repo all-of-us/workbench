@@ -3,13 +3,18 @@ package org.pmiops.workbench.interceptors;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -58,6 +63,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     
     // TODO: check Google group membership to ensure user is in registered user group
 
+    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(userInfo, token));
+    
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 

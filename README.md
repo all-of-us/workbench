@@ -1,5 +1,7 @@
 # Workbench
 
+[![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
+
 ## Getting the code
 
 * Run `git clone https://github.com/all-of-us/workbench`
@@ -56,11 +58,15 @@ local API server under http://localhost:8081/api/.
 From the `ui/` subdirectory:
 
 ```Shell
-ng serve
+ng serve [--environment=test]
 ```
 
 After webpack finishes the build, you can view your local UI server at
 http://localhost:4200/.
+
+By default, this connects to a local API server. Use `--environment=$ENV` to
+use an alternate `src/environments/environment.$ENV.ts` file and connect to a
+different API server.
 
 ## Running in Docker
 
@@ -81,13 +87,13 @@ docker run -p 4200:4200 -v --rm -it workbench-ui
 To deploy your local code to a given AppEngine project, run:
 
 ```
-./deploy.sh --project PROJECT --account ACCOUNT@pmi-ops.org
+./deploy.py --project PROJECT --account ACCOUNT@pmi-ops.org
 ```
 
 Example:
 
 ```
-./deploy.sh --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org
+./deploy.py -p all-of-us-workbench-test -a dan.rodney@pmi-ops.org
 ```
 
 You will be prompted to confirm the deployment. When it finishes, you will be able to access the

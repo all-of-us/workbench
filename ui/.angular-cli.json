@@ -8,7 +8,7 @@
       "root": "src",
       "outDir": "dist",
       "assets": [
-        "images",
+        "assets",
         "favicon.ico"
       ],
       "index": "index.html",
@@ -25,6 +25,7 @@
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",
+        "test": "environments/environment.test.ts",
         "prod": "environments/environment.prod.ts"
       }
     }

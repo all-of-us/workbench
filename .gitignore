@@ -2,7 +2,13 @@
 *~
 /build/*
 /.gradle/*
+/api/api.iml
+/api/api.ipr
+/api/api.iws
 /api/.gradle/*
+/api/out/*
+/api/.swagger-codegen/*
+/api/src/generated
 /api/build/*
 /api/.idea/*
 *.swp
@@ -11,3 +17,4 @@ node_modules
 /ui/dist/**
 /ui/**/*.map
 /ui/**/*.js
+*.pyc
