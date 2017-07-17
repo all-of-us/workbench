@@ -6,14 +6,16 @@ import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
 
-class cohort {
+class Cohort {
   id: string;
   name: string;
   description: string;
   url: string;
   date: Date;
   notebook: string;
-  constructor(id:string, name:string, description:string,url:string,date:Date,notebook:string){
+  constructor(id: string, name: string,
+              description: string, url: string, date: Date,
+              notebook: string) {
     this.id = id;
     this.name = name;
     this.description = description;
@@ -22,19 +24,14 @@ class cohort {
     this.notebook = notebook;
   }
 }
-let cohort1 = new cohort("cohort1", "Cohort 1", "Male, 40-50, Various ethnic groups, MA", "URL to the cohort", new Date("July 1, 2017"), "Notebook name");
-let cohort2 = new cohort("cohort2", "Cohort 2", "Male, 10-50, Various ethnic groups, MA", "URL to the cohort", new Date("July 1, 2017"), "Notebook name");
-let cohortList = [cohort1, cohort2];
 
-
-class someComponent {
-  public cohortList:Array<cohort>;
-
-  constructor(){
-    this.cohortList.concat(cohort1);
-    this.cohortList.concat(cohort2);
-  }
-}
+const cohort1 = new Cohort('cohort1', 'Cohort 1',
+                          'Male, 40-50, Various ethnic groups, MA', 'URL to the cohort',
+                          new Date('July 1, 2017'), 'Notebook name');
+const cohort2 = new Cohort('cohort2', 'Cohort 2',
+                          'Male, 10-50, Various ethnic groups, MA', 'URL to the cohort',
+                          new Date('July 1, 2017'), 'Notebook name');
+const cohortList = [cohort1, cohort2];
 
 
 @Component({
