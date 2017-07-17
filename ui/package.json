@@ -4,11 +4,13 @@
   "license": "BSD",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
+    "start": "npm run codegen && ng serve",
+    "build": "npm run codegen && ng build",
+    "test": "npm run codegen && ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "clean": "rm -rf src/generated",
+    "codegen": "npm run clean && java -jar ../tools/swagger-codegen-cli.jar generate --lang typescript-angular  --input-spec ../api/src/main/resources/workbench.yaml  --output src/generated --additional-properties ngVersion=2"
   },
   "private": true,
   "dependencies": {
