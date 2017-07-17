@@ -17,3 +17,5 @@ node_modules
 /ui/dist/**
 /ui/**/*.map
 /ui/**/*.js
+tools/*.jar
+/ui/src/generated/*

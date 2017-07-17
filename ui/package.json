@@ -5,10 +5,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run codegen && ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "codegen": "java -jar ../tools/swagger-codegen-cli.jar generate --lang typescript-angular  --input-spec ../api/src/main/resources/workbench.yaml  --output src/generated --additional-properties ngVersion=2"
   },
   "private": true,
   "dependencies": {
