@@ -12,12 +12,12 @@
   Angular's builtin Router module will attach specific views here
   based on clicking routerLink elements (above) or router.navigate calls.
 -->
-<div *ngIf="isSignedIn | async">
+<div *ngIf="(user | async).isSignedIn">
   <router-outlet></router-outlet>
 </div>
-<div *ngIf="!(isSignedIn | async)">
+<div *ngIf="!(user | async).isSignedIn">
   <button (click)="signIn()">Sign In</button>
 </div>
-<div *ngIf="isSignedIn | async">
+<div *ngIf="(user | async).isSignedIn">
   <button (click)="signOut()">Sign Out</button>
 </div>

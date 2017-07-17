@@ -4,8 +4,9 @@
 import {environment} from 'environments/environment';
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {Router, NavigationEnd, ActivatedRoute} from '@angular/router';
-import {SignInService} from 'app/services/sign-in.service';
+import {SignInService, SignInDetails} from 'app/services/sign-in.service';
 import {Title} from '@angular/platform-browser';
+import {Observable} from 'rxjs/Observable';
 
 declare const gapi: any;
 
@@ -16,10 +17,9 @@ declare const gapi: any;
 })
 export class AppComponent implements OnInit {
   private baseTitle: string;
-  isSignedIn: Promise<boolean>;
+  user: Observable<SignInDetails>;
 
   constructor(
-      private cdRef: ChangeDetectorRef,
       private titleService: Title,
       private activatedRoute: ActivatedRoute,
       private router: Router,
@@ -49,22 +49,18 @@ export class AppComponent implements OnInit {
         }
       }
     });
+    this.user = this.signInService.user;
 
-    this.signInService.listenForUserDidChange(function(user) {
-      this.isSignedIn = Promise.resolve(user.isSignedIn());
-      this.isSignedIn.then((x) => console.log(x));
-      this.cdRef.detectChanges();
-    }.bind(this));
-    this.signInService.isSignedIn()
-      .then((isSignedIn) => this.isSignedIn = Promise.resolve(isSignedIn));
+    this.user.subscribe(u => {
+      console.log('USER', u);
+    })
   }
 
-
   signIn(e: Event): void {
-    gapi.auth2.getAuthInstance().signIn();
+    this.signInService.signIn();
   }
 
   signOut(e: Event): void {
-    gapi.auth2.getAuthInstance().signOut();
+    this.signInService.signOut();
   }
 }
