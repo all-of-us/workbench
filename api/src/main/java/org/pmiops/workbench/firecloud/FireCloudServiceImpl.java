@@ -1,6 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.springframework.security.core.Authentication;
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FireCloudServiceImpl implements FireCloudService {
-
+  
   @Override
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -19,8 +18,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     profileApi.setApiClient(apiClient);
 
     Me me = profileApi.me();
-    // Users can only use FireCloud if all three flags are enabled.
-    return me.getEnabled() != null && isTrue(me.getEnabled().getAllUsersGroup())
+    // Users can only use FireCloud if the Google and LDAP flags are enabled.
+    return me.getEnabled() != null
         && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
   }
 
