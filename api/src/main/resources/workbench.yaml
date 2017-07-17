@@ -36,6 +36,12 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Cohort"
+      security:
+        - aou_oauth: []
+securityDefinitions:
+  aou_oauth:
+    type: oauth2
+    flow: accessCode
 definitions:
   Cohort:
     type: "object"
