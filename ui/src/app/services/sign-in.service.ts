@@ -1,6 +1,7 @@
 import 'rxjs/Rx';
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {User} from 'app/models/user';
 
 declare const gapi: any;
@@ -59,20 +60,20 @@ export class SignInService {
   }
 
   private makeUserSubject(): Observable<SignInDetails> {
-     return new Observable<SignInDetails>((subscriber) => {
-      this.auth2.then(auth2 => {
-          gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
-            const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
-            const details = this.extractSignInDetails(currentUser);
+    const ret = new BehaviorSubject({isSignedIn: false});
+    this.auth2.then(auth2 => {
+        gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
+          const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
+          const details = this.extractSignInDetails(currentUser);
 
-            // Without this, Angular views won't "notice" the externally-triggered
-            // event, though the Angular models will update... so the change
-            // won't propagate to UI automatically. Calling `zone.run`
-            // ensures Angular notices as soon as the change occurs.
-            this.zone.run(() => subscriber.next(details));
-          });
-      });
-    }).share().startWith({isSignedIn: false});
+          // Without this, Angular views won't "notice" the externally-triggered
+          // event, though the Angular models will update... so the change
+          // won't propagate to UI automatically. Calling `zone.run`
+          // ensures Angular notices as soon as the change occurs.
+          this.zone.run(() => ret.next(details));
+        });
+    });
+    return ret;
   }
 
   private extractSignInDetails(currentUser: any): SignInDetails {
