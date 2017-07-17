@@ -9,18 +9,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class FireCloudServiceImpl implements FireCloudService {
 
-  private final Provider<ApiClient> apiClientProvider;
+  private final Provider<ProfileApi> profileApiProvider;
 
   @Autowired
-  public FireCloudServiceImpl(Provider<ApiClient> apiClientProvider) {
-    this.apiClientProvider = apiClientProvider;
+  public FireCloudServiceImpl(Provider<ProfileApi> profileApiProvider) {
+    this.profileApiProvider = profileApiProvider;
   }
 
   @Override
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
-    ProfileApi profileApi = new ProfileApi();
-    profileApi.setApiClient(apiClientProvider.get());
-
+    ProfileApi profileApi = profileApiProvider.get();
     Me me = profileApi.me();
     // Users can only use FireCloud if the Google and LDAP flags are enabled.
     return me.getEnabled() != null
