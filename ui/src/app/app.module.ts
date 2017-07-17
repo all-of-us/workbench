@@ -27,6 +27,13 @@ export function getVaadin(): VaadinNs {
   }
 }
 
+export function getConfiguration(signInService: SignInService): Configuration {
+    return new Configuration({
+      basePath: environment.allOfUsApiUrl,
+      accessToken: () => signInService.currentAccessToken
+    });
+}
+
 @NgModule({
   imports:      [
     AppRoutingModule,
@@ -48,12 +55,8 @@ export function getVaadin(): VaadinNs {
     {
       provide: Configuration,
       deps: [SignInService],
-      useFactory: (signInService: SignInService) => {
-      return new Configuration({
-        basePath: environment.allOfUsApiUrl,
-        accessToken: () => signInService.currentAccessToken
-      })
-    }},
+      useFactory: getConfiguration
+    },
     CohortsService
   ],
 

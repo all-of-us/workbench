@@ -7,12 +7,12 @@ import {User} from 'app/models/user';
 declare const gapi: any;
 
 interface BasicProfile {
-  id: string,
-  name: string,
-  givenName: string,
-  familyName: string,
-  imageUrl: string,
-  email: string
+  id: string;
+  name: string;
+  givenName: string;
+  familyName: string;
+  imageUrl: string;
+  email: string;
 }
 
 export interface SignInDetails {
@@ -42,8 +42,8 @@ export class SignInService {
         this.currentAccessToken = null;
         return;
       }
-      this.currentAccessToken = newUserDetails.authResponse['access_token']
-    })
+      this.currentAccessToken = newUserDetails.authResponse['access_token'];
+    });
   }
 
   public signIn(): void {
@@ -60,7 +60,7 @@ export class SignInService {
       gapi.load('auth2', function(){
         gapi.auth2.init({
             client_id: '887440561153-pb9gmue2cbbs2gbn9nkr35g0ifpvb8g5.apps.googleusercontent.com',
-            //hosted_domain: 'pmi-ops.org',
+            // hosted_domain: 'pmi-ops.org',
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
@@ -89,7 +89,7 @@ export class SignInService {
     if (!currentUser.isSignedIn()) {
       return {
         isSignedIn: false
-      }
+      };
     }
 
     const basicProfile = currentUser.getBasicProfile();
@@ -107,7 +107,7 @@ export class SignInService {
         email: basicProfile.getEmail()
       },
       authResponse: currentUser.getAuthResponse()
-    }
+    };
   }
 
 }
