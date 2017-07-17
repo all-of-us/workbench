@@ -1,21 +1,30 @@
 
-.AreaBlock{
+.area-block{
   margin-top: 20px;
   margin-left: 4%;
 }
 
-.Indented{
+.indented{
   margin-left:2%;
 }
 
-.TableHeader{
-  border-bottom: 3px;
+.table-header {
+  border-bottom: 2px;
   border-bottom-color: lightgray;
   border-bottom-style: solid;
-  width: 100%;
   padding-top: 1em;
   padding-bottom: 1em;
   display: flex;
+}
+.table-header > div {
+  flex: 1 1 0;
+}
+.table-row {
+  display: flex;
+  padding: 0.5em 0;
+}
+.table-row > div {
+  flex: 1 1 0;
 }
 h3{
   display: inline-block;
@@ -32,15 +41,12 @@ a:hover {color:#262262;}
 table{
   width: 100%;
   text-align: left;
-  table-layout: fixed;
 }
 
 th{
   width:19%;
-  display: flex;
 }
 td{
   width:19%;
-  display: inline-block;
   padding-top: 1em;
 }

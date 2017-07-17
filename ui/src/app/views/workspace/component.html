@@ -1,32 +1,32 @@
 <h2>AoU Research Portal Workspace</h2>
 <div *ngIf="user else loggedout">
-  <p style="color:black;">Default workspace for July, 2017 demo</p>
-  <div id="cdrVersionArea" class="AreaBlock">
+  <p style="color: #333;">Default workspace for July, 2017 demo</p>
+  <div class="area-block">
     <h3>CDR Version</h3>
-    <div class="Indented">
+    <div class="indented">
       <p>CDR version info goes here.</p>
     </div>
   </div>
-  <div id="cohortArea" class="AreaBlock">
+  <div class="area-block">
     <h3>Cohorts</h3>
     <a href="javascript:;">Add a Cohort</a>
-    <div class="Indented">
-      <table id="cohortTable" ng-controller="CohortListController">
-        <tr class="TableHeader">
-          <th>Name</th>
-          <th>Description</th>
-          <th>URL</th>
-          <th>Created Date</th>
-          <th>Notebook</th>
-        </tr>
-        <tr *ngFor="let cohort of cohortList">
-          <td><a href="javascript:;">{{cohort.name}}</a></td>
-          <td>{{cohort.description}}</td>
-          <td>{{cohort.url}}</td>
-          <td>{{cohort.date.toString()}}</td>
-          <td><a href="javascript:;">{{cohort.notebook}}</a></td>
-        </tr>
-      </table>
+    <div class="indented">
+      <div>
+        <div class="table-header">
+          <div>Name</div>
+          <div style="flex: 2 2 0;">Description</div>
+          <div>URL</div>
+          <div>Created Date</div>
+          <div>Notebook</div>
+        </div>
+        <div *ngFor="let cohort of cohortList" class="table-row">
+          <div><a href="javascript:;">{{cohort.name}}</a></div>
+          <div style="flex: 2 2 0;">{{cohort.description}}</div>
+          <div>{{cohort.url}}</div>
+          <div>{{cohort.date.toLocaleDateString()}}</div>
+          <div><a href="javascript:;">{{cohort.notebook}}</a></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
