@@ -4,8 +4,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +18,6 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
-
     ProfileApi profileApi = new ProfileApi();
     profileApi.setApiClient(apiClientProvider.get());
 
