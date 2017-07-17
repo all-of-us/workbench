@@ -1,29 +1,33 @@
 <h2>AoU Research Portal Workspace</h2>
 <div *ngIf="user else loggedout">
-  <p style="color: #333;">Default workspace for July, 2017 demo</p>
+  <p class="description-text">Default workspace for July, 2017 demo</p>
   <div class="area-block">
     <h3>CDR Version</h3>
     <div class="indented">
+      <!-- TODO: Add CDR Version Info - blrubenstein -->
       <p>CDR version info goes here.</p>
     </div>
   </div>
   <div class="area-block">
     <h3>Cohorts</h3>
+    <!-- TODO: Add Cohort Link - blrubenstein -->
     <a href="javascript:;">Add a Cohort</a>
     <div class="indented">
       <div>
         <div class="table-header">
           <div>Name</div>
-          <div style="flex: 2 2 0;">Description</div>
+          <div class="wider-table">Description</div>
           <div>URL</div>
           <div>Created Date</div>
           <div>Notebook</div>
         </div>
         <div *ngFor="let cohort of cohortList" class="table-row">
+          <!-- TODO: Edit Cohort Link - blrubenstein -->
           <div><a href="javascript:;">{{cohort.name}}</a></div>
-          <div style="flex: 2 2 0;">{{cohort.description}}</div>
+          <div class="wider-table">{{cohort.description}}</div>
           <div>{{cohort.url}}</div>
           <div>{{cohort.date.toLocaleDateString()}}</div>
+          <!-- TODO: Open notebook link - blrubenstein -->
           <div><a href="javascript:;">{{cohort.notebook}}</a></div>
         </div>
       </div>

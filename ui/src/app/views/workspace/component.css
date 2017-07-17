@@ -1,10 +1,14 @@
 
-.area-block{
+.area-block {
   margin-top: 20px;
   margin-left: 4%;
 }
 
-.indented{
+.description-text {
+  color: #333;
+}
+
+.indented {
   margin-left:2%;
 }
 
@@ -26,27 +30,30 @@
 .table-row > div {
   flex: 1 1 0;
 }
-h3{
+/* TODO: Change style format for below once SCSS is in */
+.table-row > div.wider-table {
+  flex: 2 2 0;
+}
+
+.table-header > div.wider-table {
+  flex: 2 2 0;
+}
+
+h3 {
   display: inline-block;
   margin: 0.5em 0 0.5em 0;
 }
 
-a{
+a {
   display:inline-block;
   color: #5DADE0;
 }
 
-a:hover {color:#262262;}
+a:hover {
+  color:#262262;
+}
 
-table{
+table {
   width: 100%;
   text-align: left;
-}
-
-th{
-  width:19%;
-}
-td{
-  width:19%;
-  padding-top: 1em;
 }
