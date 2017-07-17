@@ -4,7 +4,7 @@
   <img class="portal-logo" src="assets/images/portal-logo.svg" alt="Researcher Portal"
     style="margin-left: 0.5rem; width: 13rem;">
 </div>
-<nav style="margin-top: 1rem;">
+<nav *ngIf="isSignedIn | async" style="margin-top: 1rem;">
   <a routerLink="/login" routerLinkActive="active">Switch User</a>
   <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
 </nav>
@@ -12,4 +12,12 @@
   Angular's builtin Router module will attach specific views here
   based on clicking routerLink elements (above) or router.navigate calls.
 -->
-<router-outlet></router-outlet>
+<div *ngIf="isSignedIn | async">
+  <router-outlet></router-outlet>
+</div>
+<div *ngIf="!(isSignedIn | async)">
+  <button (click)="signIn()">Sign In</button>
+</div>
+<div *ngIf="isSignedIn | async">
+  <button (click)="signOut()">Sign Out</button>
+</div>
