@@ -5,7 +5,6 @@ import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 
-import {AllOfUsService} from 'app/services/all-of-us.service';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
@@ -15,6 +14,8 @@ import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
+import {CohortsService, Configuration, ConfigurationParameters} from 'generated';
+import {environment} from 'environments/environment';
 
 export function getVaadin(): VaadinNs {
   // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
@@ -40,11 +41,20 @@ export function getVaadin(): VaadinNs {
     CohortBuilderComponent,
   ],
   providers: [
-    AllOfUsService,
     UserService,
     RepositoryService,
     SignInService,
-    {provide: VAADIN_CLIENT, useFactory: getVaadin}
+    {provide: VAADIN_CLIENT, useFactory: getVaadin},
+    {
+      provide: Configuration,
+      deps: [SignInService],
+      useFactory: (signInService: SignInService) => {
+      return new Configuration({
+        basePath: environment.allOfUsApiUrl,
+        accessToken: () => signInService.currentAccessToken
+      })
+    }},
+    CohortsService
   ],
 
   // This specifies the top-level component, to load first.

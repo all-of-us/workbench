@@ -21,7 +21,7 @@ export interface SignInDetails {
   hostedDomain?: string;
   grantedScopes?: Array<string>;
   basicProfile?: BasicProfile;
-  authRespones?: object;
+  authResponse?: object;
 }
 
 @Injectable()
@@ -31,11 +31,19 @@ export class SignInService {
   public auth2: Promise<any>;
   // Expose "current user details" as an Observable
   public user: Observable<SignInDetails>;
+  public currentAccessToken: string = null;
 
   constructor(private zone: NgZone) {
     this.zone = zone;
     this.auth2 = this.makeAuth2();
     this.user = this.makeUserSubject();
+    this.user.subscribe(newUserDetails => {
+      if (!newUserDetails.isSignedIn) {
+        this.currentAccessToken = null;
+        return;
+      }
+      this.currentAccessToken = newUserDetails.authResponse['access_token']
+    })
   }
 
   public signIn(): void {
@@ -52,7 +60,8 @@ export class SignInService {
       gapi.load('auth2', function(){
         gapi.auth2.init({
             client_id: '887440561153-pb9gmue2cbbs2gbn9nkr35g0ifpvb8g5.apps.googleusercontent.com',
-            hosted_domain: 'pmi-ops.org'
+            //hosted_domain: 'pmi-ops.org',
+            scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
       });
@@ -97,7 +106,7 @@ export class SignInService {
         imageUrl: basicProfile.getImageUrl(),
         email: basicProfile.getEmail()
       },
-      authRespones: currentUser.getAuthResponse()
+      authResponse: currentUser.getAuthResponse()
     }
   }
 
