@@ -21,6 +21,10 @@ schemes:
   - "https"
 produces:
   - "application/json"
+ # Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
 paths:
   /me:
     get:
@@ -58,10 +62,6 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Cohort"
-      # Establish the fact that this endpoint is protected: this annotation
-      # ensures that client libraries know to send bearer tokens when calling
-      security:
-        - aou_oauth: []
 definitions:
   DataAccessLevel:
     type: string
