@@ -13,7 +13,7 @@ const routes: Routes = [
   {path: '', redirectTo: '/login', pathMatch: 'full', data: {title: 'Redirecting...'}},
   {path: 'login', component: LoginComponent, data: {title: 'Log In'}},
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
-  {path: 'workspace', component: WorkspaceComponent, data: {title: 'View Workspace'}},
+  {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
   {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}}
 ];
 

@@ -7,7 +7,7 @@
 <nav *ngIf="(user | async).isSignedIn" style="margin-top: 1rem;">
   <a routerLink="/login" routerLinkActive="active">Switch User</a>
   <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
-  <a routerLink="/workspace" routerLinkActive="active">My Workspace</a>
+  <a routerLink="/workspace/namespace/workspace-id" routerLinkActive="active">My Workspace</a>
 </nav>
 <!--
   Angular's builtin Router module will attach specific views here

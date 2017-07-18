@@ -16,6 +16,7 @@ import {UserService} from 'app/services/user.service';
 export class WorkspaceComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;
+  currentUrl : string;
   // TODO: Pull cohortList from external source
   cohortList = [];
   constructor(
@@ -32,6 +33,7 @@ export class WorkspaceComponent implements OnInit {
           cohortsReceived => {
             this.cohortList = cohortsReceived;
           });
+    this.currentUrl = this.router.url;
   }
   // TODO: edit/add cohort link - blrubenstein
   goToCohort(id: number): void {
