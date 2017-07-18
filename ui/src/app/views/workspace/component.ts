@@ -30,9 +30,9 @@ export class WorkspaceComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
-    this.cohortsService.getCohortsInWorkspace("123", "123").subscribe(
+    this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
           cohortsReceived => {
-            for(let cohortIn of cohortsReceived){
+            for (const cohortIn of cohortsReceived){
               cohortList.push(cohortIn);
             }
           });
