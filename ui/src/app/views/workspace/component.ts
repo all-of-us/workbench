@@ -8,8 +8,6 @@ import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
 
 
-const cohortList = [];
-
 
 @Component({
   styleUrls: ['./component.css'],
@@ -19,7 +17,7 @@ export class WorkspaceComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;
   // TODO: Pull cohortList from external source
-  cohortList = cohortList;
+  cohortList = [];
   constructor(
       private router: Router,
       private userService: UserService,
@@ -32,9 +30,7 @@ export class WorkspaceComponent implements OnInit {
         .then(user => this.user = user);
     this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
           cohortsReceived => {
-            for (const cohortIn of cohortsReceived){
-              cohortList.push(cohortIn);
-            }
+            this.cohortList = cohortsReceived;
           });
   }
   // TODO: edit/add cohort link - blrubenstein
