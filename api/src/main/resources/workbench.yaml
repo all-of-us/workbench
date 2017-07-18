@@ -21,33 +21,52 @@ schemes:
   - "https"
 produces:
   - "application/json"
+ # Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
 paths:
-  /workspaces/{workspaceId}/cohorts:
+  /me:
+    get:
+      tags:
+        - profile
+      description: Returns the user's profile information
+      operationId: "getMe"
+      responses:
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     get:
       tags:
         - cohorts
-      description: "Returns all cohorts in a workspace"
+      description: Returns all cohorts in a workspace
       operationId: "getCohortsInWorkspace"
       parameters:
+       - in: path
+         name: workspaceNamespace
+         type: string
+         required: true
+         description: namespace containing the workspace to retrieve cohorts from
        - in: path
          name: workspaceId
          type: string
          required: true
          description: ID of the workspace to retrieve cohorts from.
-      produces:
-        - "application/json"
       responses:
         "200":
-          description: "A list of cohorts."
+          description: A list of cohorts.
           schema:
             type: "array"
             items:
               $ref: "#/definitions/Cohort"
-      # Establish the fact that this endpoint is protected: this annotation
-      # ensures that client libraries know to send bearer tokens when calling
-      security:
-        - aou_oauth: []
 definitions:
+  DataAccessLevel:
+    type: string
+    description: levels of access to data in the curated data repository
+    enum: &DATA_ACCESS_LEVEL [registered, protected]
   Cohort:
     type: "object"
     required:
@@ -63,4 +82,40 @@ definitions:
       criteria:
         type: string
       type:
+        type: string
+      description:
+        type: string
+      creator:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      lastModifiedTime:
+        type: string
+        format: date-time
+  Profile:
+    type: "object"
+    required:
+      - "email"
+      - "enabledInFireCloud"
+      - "dataAccessLevel"
+    properties:
+      email:
+        description: email address of the user
+        type: string
+      enabledInFireCloud:
+        description: true if the user is enabled in FireCloud, false if they are not
+        type: boolean
+      dataAccessLevel:
+        description: what level of data access the user has
+        type: string
+        enum: *DATA_ACCESS_LEVEL
+      fullName:
+        description: the user's full name
+        type: string
+      givenName:
+        description: the user's given name (e.g. Alice)
+        type: string
+      familyName:
+        description: the user's family  name (e.g. Jones)
         type: string

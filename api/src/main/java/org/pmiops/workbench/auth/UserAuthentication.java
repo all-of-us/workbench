@@ -27,7 +27,7 @@ public class UserAuthentication implements Authentication {
   }
 
   @Override
-  public Object getCredentials() {
+  public String getCredentials() {
     return bearerToken;
   }
 
@@ -37,7 +37,7 @@ public class UserAuthentication implements Authentication {
   }
 
   @Override
-  public Object getPrincipal() {
+  public Userinfoplus getPrincipal() {
     return userInfo;
   }
 
