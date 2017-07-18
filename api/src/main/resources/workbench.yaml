@@ -21,6 +21,10 @@ schemes:
   - "https"
 produces:
   - "application/json"
+ # Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
 paths:
   /me:
     get:
@@ -34,13 +38,18 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /workspaces/{workspaceId}/cohorts:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     get:
       tags:
         - cohorts
       description: Returns all cohorts in a workspace
       operationId: "getCohortsInWorkspace"
       parameters:
+       - in: path
+         name: workspaceNamespace
+         type: string
+         required: true
+         description: namespace containing the workspace to retrieve cohorts from
        - in: path
          name: workspaceId
          type: string
@@ -53,10 +62,6 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Cohort"
-      # Establish the fact that this endpoint is protected: this annotation
-      # ensures that client libraries know to send bearer tokens when calling
-      security:
-        - aou_oauth: []
 definitions:
   DataAccessLevel:
     type: string
@@ -78,6 +83,16 @@ definitions:
         type: string
       type:
         type: string
+      description:
+        type: string
+      creator:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      lastModifiedTime:
+        type: string
+        format: date-time
   Profile:
     type: "object"
     required:

@@ -13,6 +13,8 @@
 /api/out/*
 /api/src/generated
 /build/*
+/ui/ui.iml
+/ui/.idea/*
 /ui/**/*.js
 /ui/**/*.map
 /ui/dist/**
