@@ -59,7 +59,7 @@ export class SignInService {
     return new Promise(function(resolve){
       gapi.load('auth2', function(){
         gapi.auth2.init({
-            client_id: '887440561153-pb9gmue2cbbs2gbn9nkr35g0ifpvb8g5.apps.googleusercontent.com',
+            client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
             // hosted_domain: 'pmi-ops.org',
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
