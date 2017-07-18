@@ -34,13 +34,18 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /workspaces/{workspaceId}/cohorts:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     get:
       tags:
         - cohorts
       description: Returns all cohorts in a workspace
       operationId: "getCohortsInWorkspace"
       parameters:
+       - in: path
+         name: workspaceNamespace
+         type: string
+         required: true
+         description: namespace containing the workspace to retrieve cohorts from
        - in: path
          name: workspaceId
          type: string

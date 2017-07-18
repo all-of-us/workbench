@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortController implements CohortsApi {
 
   @Override
-  public ResponseEntity<List<Cohort>> getCohortsInWorkspace(String workspaceId) {
+  public ResponseEntity<List<Cohort>> getCohortsInWorkspace(String workspaceNamespace,
+      String workspaceId) {
     Cohort cohort1 = new Cohort();
     cohort1.setId("id1");
     cohort1.setName("name1");
