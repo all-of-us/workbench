@@ -83,6 +83,16 @@ definitions:
         type: string
       type:
         type: string
+      description:
+        type: string
+      creator:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      lastModifiedTime:
+        type: string
+        format: date-time
   Profile:
     type: "object"
     required:
