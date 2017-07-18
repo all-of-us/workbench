@@ -16,7 +16,7 @@ import {UserService} from 'app/services/user.service';
 export class WorkspaceComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;
-  currentUrl : string;
+  currentUrl: string;
   // TODO: Pull cohortList from external source
   cohortList = [];
   constructor(
