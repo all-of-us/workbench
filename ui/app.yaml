@@ -1,15 +1,16 @@
 runtime: python27
 api_version: 1
 threadsafe: true
+default_expiration: "2m"
 
 handlers:
-- url: /
-  static_files: dist/index.html
-  upload: dist/index.html
-  secure: always
-- url: /(.*)
+- url: /(.*\.(css|eot|gz|html|ico|js|map|png|svg|ttf|woff|woff2))
   static_files: dist/\1
   upload: dist/(.*)
+  secure: always
+- url: /.*
+  static_files: dist/index.html
+  upload: dist/index.html
   secure: always
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
