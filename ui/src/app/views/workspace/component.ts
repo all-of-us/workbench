@@ -35,12 +35,4 @@ export class WorkspaceComponent implements OnInit {
           });
     this.currentUrl = this.router.url;
   }
-  // TODO: edit/add cohort link - blrubenstein
-  goToCohort(id: number): void {
-    this.router.navigate(['/cohort', id]);
-  }
-  // TODO: open notebook link - blrubenstein
-  goToNotebook(id: number): void {
-
-  }
 }
