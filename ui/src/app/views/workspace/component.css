@@ -16,17 +16,23 @@
   border-bottom: 2px;
   border-bottom-color: lightgray;
   border-bottom-style: solid;
-  padding-top: 1em;
-  padding-bottom: 1em;
+  padding: 1em 0;
   display: flex;
 }
+
 .table-header > div {
   flex: 1 1 0;
 }
+
+.table-header > div.wider-table {
+  flex: 2 2 0;
+}
+
 .table-row {
   display: flex;
   padding: 0.5em 0;
 }
+
 .table-row > div {
   flex: 1 1 0;
 }
@@ -35,25 +41,16 @@
   flex: 2 2 0;
 }
 
-.table-header > div.wider-table {
-  flex: 2 2 0;
-}
 
 h3 {
   display: inline-block;
-  margin: 0.5em 0 0.5em 0;
+  margin: 0.5em 0;
 }
 
 a {
-  display: inline-block;
   color: #5DADE0;
 }
 
 a:hover {
-  color:#262262;
-}
-
-table {
-  width: 100%;
-  text-align: left;
+  color: #262262;
 }
