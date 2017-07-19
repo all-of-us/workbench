@@ -1,0 +1,13 @@
+<h2>Set Cohort Info</h2>
+<div *ngIf="user; else loggedout">
+<form action="/workspace/namespace/workspaceId" method="post">
+  <div>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="cohort-name">
+  </div>
+  <div>
+    <label for="description">Description:</label>
+    <textarea id="description" name="cohort-description"></textarea>
+  </div>
+</form>
+</div>
