@@ -7,8 +7,8 @@ import {RouterModule, Routes} from '@angular/router';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {LoginComponent} from 'app/views/login/component';
-import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 
 const routes: Routes = [

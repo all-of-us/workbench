@@ -20,7 +20,7 @@ export class WorkspaceComponent implements OnInit {
   user: User;
   currentUrl: string;
   // TODO: Pull cohortList from external source
-  cohortList: Cohort[] = [];
+  cohortList = [];
   constructor(
       private router: Router,
       private userService: UserService,

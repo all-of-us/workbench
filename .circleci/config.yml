@@ -28,7 +28,7 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy.sh api
             fi
-  build_and_test_ui:
+  build_and_test_and_deploy_ui:
     docker:
       - image: circleci/openjdk:8-jdk-browsers
     working_directory: ~/workbench
@@ -61,10 +61,16 @@ jobs:
           command: |
             export PATH=~/node/bin:$PATH
             npm test  -- --no-watch
+      - deploy:
+          name: Deploy to gcloud test project
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./ci/deploy.sh ui
+            fi
 
 workflows:
   version: 2
-  build_and_test:
+  build_and_test_and_deploy:
     jobs:
       - build_and_test_and_deploy_api
-      - build_and_test_ui
+      - build_and_test_and_deploy_ui
