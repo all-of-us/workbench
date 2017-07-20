@@ -1,6 +1,6 @@
 # To build and deploy:
-# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-0.0.1 .
-# $ docker push allofustest/workbench:buildimage-0.0.1
+# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-0.0.3 .
+# $ docker push allofustest/workbench:buildimage-0.0.3
 
 FROM circleci/openjdk:8-jdk-browsers
 
