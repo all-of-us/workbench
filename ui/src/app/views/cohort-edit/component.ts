@@ -31,9 +31,14 @@ export class CohortEditComponent implements OnInit {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
     this.cohortId = this.route.snapshot.url[4].path;
+    this.CohortEditService.list().then(cohorts=>{console.log(cohorts)});
     this.CohortEditService.get(this.cohortId).then(cohort => {
       this.cohortName = cohort.name;
       this.cohortDescription = cohort.description;
+    }).catch(error => {
+      alert("All of Us Researcher Workbench does not currently support editing cohorts from the API.");
+      this.CohortEditService.list().then(cohorts=>{console.log(cohorts)});
+      this.router.navigate(['../..'], {relativeTo: this.route});
     });
   }
 
