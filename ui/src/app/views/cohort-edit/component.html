@@ -1,16 +1,16 @@
 <h2>Set Cohort Info</h2>
 <div *ngIf="user; else loggedout">
-<form action="/workspace/namespace/workspaceId" method="post">
+<div class="form-area">
   <div>
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="cohort-name">
+    <label >Cohort Name:</label>
+    <input type="text" id="name" class="input" name="cohort-name" [(ngModel)]="cohortName">
   </div>
   <div>
-    <label for="description">Description:</label>
-    <textarea id="description" name="cohort-description"></textarea>
+    <label>Description:</label>
+    <textarea id="description" class="input" name="cohort-description" [(ngModel)]="cohortDescription"></textarea>
   </div>
   <div class="button">
-    <button type="submit">Save Cohort</button>
+    <button (click)="testClick()">Save Cohort</button>
   </div>
-</form>
+</div>
 </div>

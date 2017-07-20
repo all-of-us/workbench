@@ -2,12 +2,21 @@ textarea {
   resize: none;
 }
 
-
-form {
-  width: 20em;
-  padding: 1em;
+label {
+  display: block;
+  padding: 1em 0;
+  color: #333;
 }
 
-form > div {
-  margin: 1em 0;
+textarea {
+  height: 10em;
+}
+
+.input {
+  width: 100%;
+}
+
+.form-area {
+  width: 40em;
+  padding: 1em;
 }

@@ -3,31 +3,37 @@ import {Router} from '@angular/router';
 
 
 import {CohortsService} from 'generated';
-import {Repository} from 'app/models/repository';
-import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
+import {CohortEditService} from 'app/services/cohort-edit.service'
 
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
 export class CohortEditComponent implements OnInit {
-  repositories: Repository[] = [];
   user: User;
 
   cohortId: number;
-  cohortDescription: string;
+  cohortName: string;
+  cohortDescription: string = "Hello Cohort description";
   constructor(
       private router: Router,
       private userService: UserService,
-      private repositoryService: RepositoryService,
-      private cohortsService: CohortsService
+      private cohortsService: CohortsService,
+      private CohortEditService: CohortEditService
   ) {}
 
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
+  }
+
+  testClick(): void {
+    console.log(this.cohortName);
+    console.log(this.cohortDescription);
+    this.CohortEditService.add(this.cohortName, this.cohortDescription).then(
+      cohorts => console.log(cohorts));
   }
 
 }
