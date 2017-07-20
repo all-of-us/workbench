@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: circleci/openjdk:8-jdk-browsers
+      - image: allofustest/workbench:buildimage-0.0.3
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -30,18 +30,15 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: circleci/openjdk:8-jdk-browsers
+      - image: allofustest/workbench:buildimage-0.0.3
     working_directory: ~/workbench
     environment: []
     steps:
       - checkout
       - run:
           working_directory: ~/
-          name: Set up nodejs and swagger CLI
+          name: Set up swagger CLI
           command: |
-            wget https://nodejs.org/dist/v6.11.1/node-v6.11.1-linux-x64.tar.xz -O node.tar.xz
-            tar -xJf node.tar.xz
-            mv node-v6.11.1-linux-x64 node
             cd workbench/tools && ./download_swagger_cli.sh
       - restore_cache:
           keys:
@@ -50,7 +47,6 @@ jobs:
       - run:
           working_directory: ~/workbench/ui
           command: |
-            export PATH=~/node/bin:$PATH
             npm install
       - save_cache:
           paths:
@@ -59,12 +55,10 @@ jobs:
       - run:
           working_directory: ~/workbench/ui
           command: |
-            export PATH=~/node/bin:$PATH
             npm test  -- --no-watch
       - deploy:
           name: Deploy to gcloud test project
           command: |
-            export PATH=~/node/bin:$PATH
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy.sh ui
             fi
