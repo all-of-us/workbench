@@ -1,7 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
+import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
+import {CohortEditService} from 'app/services/cohort-edit.service';
 import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
@@ -18,12 +20,13 @@ export class WorkspaceComponent implements OnInit {
   user: User;
   currentUrl: string;
   // TODO: Pull cohortList from external source
-  cohortList = [];
+  cohortList: Cohort[] = [];
   constructor(
       private router: Router,
       private userService: UserService,
       private repositoryService: RepositoryService,
-      private cohortsService: CohortsService
+      private cohortsService: CohortsService,
+      private CohortEditService: CohortEditService
   ) {}
 
   ngOnInit(): void {
@@ -32,6 +35,9 @@ export class WorkspaceComponent implements OnInit {
     this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
           cohortsReceived => {
             this.cohortList = cohortsReceived;
+            this.CohortEditService.list().then(
+              cohorts => console.log(cohorts)
+            )
           });
     this.currentUrl = this.router.url;
   }
