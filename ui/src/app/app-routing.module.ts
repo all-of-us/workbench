@@ -5,7 +5,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
-import {CohortEditComponent} from 'app/views/cohort-edit/component'
+import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {LoginComponent} from 'app/views/login/component';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -17,7 +17,9 @@ const routes: Routes = [
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
   {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
   {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}},
-  {path: 'workspace/:ns/:wsid/cohort/:cid', component: CohortEditComponent, data: {title: 'Edit Cohort'}}
+  {path: 'workspace/:ns/:wsid/cohort/:cid',
+          component: CohortEditComponent,
+          data: {title: 'Edit Cohort'}}
 ];
 
 @NgModule({

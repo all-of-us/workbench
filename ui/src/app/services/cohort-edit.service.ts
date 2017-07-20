@@ -1,7 +1,7 @@
 // Data service used to pass information from the edit cohort page
 // to the workspace page.
 
-//TODO (blrubenstein): Remove this service once edits to cohorts
+// TODO (blrubenstein): Remove this service once edits to cohorts
 // are done server side.
 
 import {Injectable} from '@angular/core';
@@ -18,15 +18,15 @@ export class CohortEditService {
 
   get(id: string): Promise<Cohort> {
     for (const coho of this.COHORT) {
-      if (coho.id == id) {
+      if (coho.id === id) {
         return Promise.resolve(coho);
       }
     }
     return Promise.reject(`No Cohort with ID ${id}.`);
   }
 
-  add(): string{
-    let coho: Cohort = {id: "", name: "", criteria: "", type: ""};
+  add(): string {
+    const coho: Cohort = {id: '', name: '', criteria: '', type: ''};
     coho.id = this.COHORT.length.toString();
     coho.creationTime = new Date();
     this.COHORT.push(coho);
@@ -37,11 +37,11 @@ export class CohortEditService {
 
   edit(id: string, name: string, description: string): Promise<Cohort[]> {
     for (const coho of this.COHORT) {
-      if (coho.id == id) {
+      if (coho.id === id) {
         coho.name = name;
         coho.description = description;
         coho.lastModifiedTime = new Date();
-        return this.list()
+        return this.list();
       }
     }
     return Promise.reject(`No Cohort with ID ${id}.`);
