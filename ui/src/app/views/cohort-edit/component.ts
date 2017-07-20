@@ -14,7 +14,7 @@ import {CohortEditService} from 'app/services/cohort-edit.service'
 export class CohortEditComponent implements OnInit {
   user: User;
 
-  cohortId: number;
+  cohortId: string;
   cohortName: string;
   cohortDescription: string = "Hello Cohort description";
 
@@ -30,11 +30,15 @@ export class CohortEditComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
-    this.currentUrl = this.router.url;
+    this.cohortId = this.route.snapshot.url[4].path;
+    this.CohortEditService.get(this.cohortId).then(cohort => {
+      this.cohortName = cohort.name;
+      this.cohortDescription = cohort.description;
+    });
   }
 
   testClick(): void {
-    this.CohortEditService.add(this.cohortName, this.cohortDescription).then(
+    this.CohortEditService.edit(this.cohortId, this.cohortName, this.cohortDescription).then(
       cohorts => this.router.navigate(['../..'], {relativeTo: this.route}));
   }
 
