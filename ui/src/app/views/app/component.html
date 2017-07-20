@@ -1,26 +1,41 @@
-<div style="display: flex; justify-content: space-between;">
+<ng-template *ngIf="(user | async).isSignedIn; then signedIn else notSignedIn"></ng-template>
+<ng-template #logoImages>
+  <img class="main-logo" src="assets/images/all-of-us-logo.svg" alt="All of Us"
+    style="height: 100%;">
+  <img class="portal-logo" src="assets/images/portal-logo.svg" alt="Researcher Portal"
+    style="margin-left: 0.5rem; height: 100%;">
+</ng-template>
+<ng-template #notSignedIn>
+  <div class="sign-in-container">
+    <div class="sign-in-inner-container">
+      <div style="height: 2rem; margin: 0.5rem 2rem;">
+        <ng-template *ngIf="true; then logoImages"></ng-template>
+      </div>
+      <div style="margin: 1.5rem 0; display: flex; justify-content: space-around;">
+        <button (click)="signIn()">Sign In</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #signedIn>
+  <div style="display: flex; justify-content: space-between;">
+    <div style="height: 3rem;">
+      <ng-template *ngIf="true; then logoImages"></ng-template>
+    </div>
+    <div>
+      <button (click)="signOut()">Sign Out</button>
+    </div>
+  </div>
+  <nav style="margin-top: 1rem;">
+    <a routerLink="/login" routerLinkActive="active">Switch User</a>
+    <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
+    <a routerLink="/workspace/namespace/workspace-id" routerLinkActive="active">My Workspace</a>
+  </nav>
   <div>
-    <img class="main-logo" src="assets/images/all-of-us-logo.svg" alt="All of Us"
-      style="width: 18rem;">
-    <img class="portal-logo" src="assets/images/portal-logo.svg" alt="Researcher Portal"
-      style="margin-left: 0.5rem; width: 13rem;">
+    <!--
+      Angular's builtin Router module will attach specific views here
+      based on clicking routerLink elements (above) or router.navigate calls.
+    -->
+    <router-outlet></router-outlet>
   </div>
-  <div *ngIf="(user | async).isSignedIn">
-    <button (click)="signOut()">Sign Out</button>
-  </div>
-</div>
-<nav *ngIf="(user | async).isSignedIn" style="margin-top: 1rem;">
-  <a routerLink="/login" routerLinkActive="active">Switch User</a>
-  <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
-  <a routerLink="/workspace/namespace/workspace-id" routerLinkActive="active">My Workspace</a>
-</nav>
-<!--
-  Angular's builtin Router module will attach specific views here
-  based on clicking routerLink elements (above) or router.navigate calls.
--->
-<div *ngIf="(user | async).isSignedIn">
-  <router-outlet></router-outlet>
-</div>
-<div *ngIf="!(user | async).isSignedIn">
-  <button (click)="signIn()">Sign In</button>
-</div>
+</ng-template>
