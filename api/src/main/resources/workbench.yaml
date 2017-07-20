@@ -16,7 +16,6 @@ securityDefinitions:
   aou_oauth:
     type: oauth2
     flow: accessCode
-basePath: "/api/v1"
 schemes:
   - "https"
 produces:
@@ -26,7 +25,7 @@ produces:
 security:
   - aou_oauth: []
 paths:
-  /me:
+  /api/v1/me:
     get:
       tags:
         - profile
@@ -38,7 +37,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     get:
       tags:
         - cohorts
