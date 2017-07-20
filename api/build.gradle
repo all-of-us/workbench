@@ -118,6 +118,7 @@ dependencies {
   compile 'com.google.code.gson:gson:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
+  compile 'io.swagger:swagger-annotations:+'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
