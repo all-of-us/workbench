@@ -36,7 +36,11 @@ export class WorkspaceComponent implements OnInit {
           cohortsReceived => {
             this.cohortList = cohortsReceived;
             this.CohortEditService.list().then(
-              cohorts => console.log(cohorts)
+              cohorts => {
+                for(let coho of cohorts){
+                  this.cohortList.push(coho);
+                }
+              }
             )
           });
     this.currentUrl = this.router.url;

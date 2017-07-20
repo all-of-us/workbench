@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 
 
 import {CohortsService} from 'generated';
@@ -17,8 +17,11 @@ export class CohortEditComponent implements OnInit {
   cohortId: number;
   cohortName: string;
   cohortDescription: string = "Hello Cohort description";
+
+  currentUrl: string;
   constructor(
       private router: Router,
+      private route: ActivatedRoute,
       private userService: UserService,
       private cohortsService: CohortsService,
       private CohortEditService: CohortEditService
@@ -27,13 +30,12 @@ export class CohortEditComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
+    this.currentUrl = this.router.url;
   }
 
   testClick(): void {
-    console.log(this.cohortName);
-    console.log(this.cohortDescription);
     this.CohortEditService.add(this.cohortName, this.cohortDescription).then(
-      cohorts => console.log(cohorts));
+      cohorts => this.router.navigate(['../..'], {relativeTo: this.route}));
   }
 
 }
