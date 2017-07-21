@@ -26,7 +26,7 @@ export class CohortBuilderPlaceholderComponent implements OnInit {
   }
 
   continue(): void {
-    if(this.adding){
+    if (this.adding) {
       this.router.navigate(['../create'], {relativeTo : this.route});
     } else {
       this.router.navigate(['../edit'], {relativeTo : this.route});

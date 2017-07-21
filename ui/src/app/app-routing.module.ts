@@ -5,7 +5,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
-import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component'
+import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {LoginComponent} from 'app/views/login/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
