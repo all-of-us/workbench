@@ -32,25 +32,26 @@ export class WorkspaceComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
-    this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
+    this.CohortEditService.list().then(
+      cohorts => {
+        this.cohortList = cohorts;
+        this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
           cohortsReceived => {
-            this.cohortList = cohortsReceived;
-            this.CohortEditService.list().then(
-              cohorts => {
-                for (const coho of cohorts) {
-                  this.cohortList.push(coho);
-                }
-              }
-            );
-          });
+            for (const coho of cohortsReceived) {
+              this.cohortList.push(coho);
+            }
+          }
+        )
+      }
+    );
     this.currentUrl = this.router.url;
   }
 
   addCohort(): void {
-    this.router.navigate([this.currentUrl + '/cohorts/create']);
+    this.router.navigate([this.currentUrl + '/cohorts/build']);
   }
 
   goToCohortEdit(id: string): void {
-    this.router.navigate([this.currentUrl + '/cohorts/' + id + '/edit']);
+    this.router.navigate([this.currentUrl + '/cohorts/' + id + '/build']);
   }
 }
