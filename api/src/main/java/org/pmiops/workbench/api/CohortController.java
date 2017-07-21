@@ -35,33 +35,8 @@ public class CohortController implements CohortsApi {
   }
 
   @Override
-  public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
+  public ResponseEntity<List<Cohort>> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
     return null;
   }
-
-  @Override
-  public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
-      Cohort cohort) {
-
-  }
-
-  @Override
-  public ResponseEntity<Cohort> getCohort(String workspaceNamespace, String workspaceId,
-      String cohortId) {
-
-  }
-
-  @Override
-  public ResponseEntity<Cohort> updateCohort(String workspaceNamespace, String workspaceId,
-      String cohortId, Cohort cohort) {
-
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteCohort(String workspaceNamespace, String workspaceId,
-      String cohortId) {
-
-  }
-
 }

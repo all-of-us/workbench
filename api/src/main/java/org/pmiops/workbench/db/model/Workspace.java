@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -15,7 +16,8 @@ import org.joda.time.DateTime;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
-@Table(name = "workspace")
+@Table(name = "workspace",
+  indexes = {  @Index(name = "idx_workspace_fc_name", columnList = "firecloudName")})
 public class Workspace {
 
   private long workspaceId;
