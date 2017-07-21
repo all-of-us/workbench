@@ -30,6 +30,7 @@ export function getVaadin(): VaadinNs {
   }
 }
 
+// "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
     return new Configuration({
       basePath: environment.allOfUsApiUrl,

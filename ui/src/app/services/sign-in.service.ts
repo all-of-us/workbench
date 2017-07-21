@@ -55,9 +55,8 @@ export class SignInService {
   }
 
   private makeAuth2(): Promise<any> {
-    const zone = this.zone;
-    return new Promise(function(resolve){
-      gapi.load('auth2', function(){
+    return new Promise((resolve) => {
+      gapi.load('auth2', () => {
         gapi.auth2.init({
             client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
             // hosted_domain: 'pmi-ops.org',
