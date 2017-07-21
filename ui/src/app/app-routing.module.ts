@@ -12,7 +12,8 @@ import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 
 const routes: Routes = [
-  {path: '', redirectTo: '/login', pathMatch: 'full', data: {title: 'Redirecting...'}},
+  {path: '', redirectTo: '/workspace/namespace/workspace-id', pathMatch: 'full',
+   data: {title: 'Redirecting...'}},
   {path: 'login', component: LoginComponent, data: {title: 'Log In'}},
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
   {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
