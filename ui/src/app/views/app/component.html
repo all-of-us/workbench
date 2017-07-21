@@ -18,7 +18,7 @@
   </div>
 </ng-template>
 <ng-template #signedIn>
-  <div style="display: flex; justify-content: space-between;">
+  <div class="page-container">
     <div style="height: 3rem;">
       <ng-template *ngIf="true; then logoImages"></ng-template>
     </div>
@@ -26,7 +26,7 @@
       <button (click)="signOut()">Sign Out</button>
     </div>
   </div>
-  <nav style="margin-top: 1rem;">
+  <nav style="margin-top: 1.5rem;">
     <a routerLink="/login" routerLinkActive="active">Switch User</a>
     <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
     <a routerLink="/workspace/namespace/workspace-id" routerLinkActive="active">My Workspace</a>
