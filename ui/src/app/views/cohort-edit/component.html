@@ -1,0 +1,25 @@
+<h2>Set Cohort Info</h2>
+<div *ngIf="user; else loggedout">
+<div class="form-area">
+  <div>
+    <label >Cohort Name:</label>
+    <input type="text" id="name" class="input" name="cohort-name" [(ngModel)]="cohort.name">
+  </div>
+  <div>
+    <label>Description:</label>
+    <textarea id="description" class="input" name="cohort-description" [(ngModel)]="cohort.description"></textarea>
+  </div>
+  <div class="button">
+    <div *ngIf="adding; else saveButton">
+      <button (click)="addCohort()">Add Cohort</button>
+      <button (click)="cancelAdd()">Cancel</button>
+    </div>
+    <ng-template #saveButton>
+      <div>
+        <button (click)="saveCohort()">Save Cohort</button>
+        <button (click)="cancelSave()">Cancel</button>
+      </div>
+    </ng-template>
+  </div>
+</div>
+</div>

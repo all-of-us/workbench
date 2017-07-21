@@ -11,7 +11,7 @@
   <div class="area-block">
     <h3>Cohorts</h3>
     <!-- TODO: Add Cohort Link - blrubenstein -->
-    <a href="javascript:;">Add a Cohort</a>
+    <a (click)="addCohort()">Add a Cohort</a>
     <div class="indented">
       <div>
         <div class="table-header">
@@ -22,7 +22,7 @@
         </div>
         <div *ngFor="let cohort of cohortList" class="table-row">
           <!-- TODO: Edit Cohort Link - blrubenstein -->
-          <div><a href="javascript:;">{{cohort.name}}</a></div>
+          <div><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></div>
           <div class="wider-table">{{cohort.description}}</div>
           <div>{{this.currentUrl}}/cohort/{{cohort.id}}</div>
           <div>{{cohort.creationTime}}</div>

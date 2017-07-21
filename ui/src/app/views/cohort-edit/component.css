@@ -1,0 +1,22 @@
+textarea {
+  resize: none;
+}
+
+label {
+  display: block;
+  padding: 1em 0;
+  color: #333;
+}
+
+textarea {
+  height: 10em;
+}
+
+.input {
+  width: 100%;
+}
+
+.form-area {
+  width: 40em;
+  padding: 1em;
+}
