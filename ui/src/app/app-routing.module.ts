@@ -17,9 +17,12 @@ const routes: Routes = [
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
   {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
   {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}},
-  {path: 'workspace/:ns/:wsid/cohort/:cid',
+  {path: 'workspace/:ns/:wsid/cohort/:cid/edit',
           component: CohortEditComponent,
-          data: {title: 'Edit Cohort'}}
+          data: {title: 'Edit Cohort'}},
+  {path: 'workspace/:ns/:wsid/cohort/create',
+          component: CohortEditComponent,
+          data: {title: 'Create Cohort'}}
 ];
 
 @NgModule({

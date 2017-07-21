@@ -25,22 +25,19 @@ export class CohortEditService {
     return Promise.reject(`No Cohort with ID ${id}.`);
   }
 
-  add(): string {
-    const coho: Cohort = {id: '', name: '', criteria: '', type: ''};
-    coho.id = this.COHORT.length.toString();
-    coho.creationTime = new Date();
-    this.COHORT.push(coho);
-    return coho.id;
+  add(newCohort: Cohort): Promise<Cohort[]> {
+    newCohort.id = this.COHORT.length.toString();
+    newCohort.creationTime = new Date();
+    this.COHORT.push(newCohort);
+    return this.list();
   }
 
 
 
-  edit(id: string, name: string, description: string): Promise<Cohort[]> {
-    for (const coho of this.COHORT) {
+  edit(id: string, newCohort: Cohort): Promise<Cohort[]> {
+    for (let coho of this.COHORT) {
       if (coho.id === id) {
-        coho.name = name;
-        coho.description = description;
-        coho.lastModifiedTime = new Date();
+        coho = newCohort;
         return this.list();
       }
     }
