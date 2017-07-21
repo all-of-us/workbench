@@ -12,6 +12,7 @@
 /api/build/*
 /api/db/.gradle
 /api/out/*
+/api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/generated
 /build/*
 /ui/ui.iml
@@ -24,3 +25,4 @@
 node_modules
 npm-debug.log
 tools/*.jar
+tools/cloud_sql_proxy
