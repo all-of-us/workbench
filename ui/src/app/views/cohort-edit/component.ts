@@ -13,7 +13,7 @@ import {CohortEditService} from 'app/services/cohort-edit.service';
 })
 export class CohortEditComponent implements OnInit {
   user: User;
-  cohort: Cohort = {id: "", name: "", description: "", criteria: "", type: ""};
+  cohort: Cohort = {id: '', name: '', description: '', criteria: '', type: ''};
   cohortId: string;
   adding = false;
   constructor(
@@ -29,7 +29,7 @@ export class CohortEditComponent implements OnInit {
         .then(user => this.user = user);
     console.log(this.route.snapshot.url[5]);
     this.cohortId = this.route.snapshot.url[4].path;
-    if(this.route.snapshot.url[5] === undefined){
+    if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     } else {
       this.CohortEditService.get(this.cohortId).then(cohort => {
