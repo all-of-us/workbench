@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.joda.time.DateTime;
@@ -24,6 +26,7 @@ public class Workspace {
   private User creator;
   private DateTime creationTime;
   private DateTime lastModifiedTime;
+  private Set<Cohort> cohorts;
 
   @Id
   @GeneratedValue
@@ -99,5 +102,14 @@ public class Workspace {
 
   public void setLastModifiedTime(DateTime lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @OneToMany(mappedBy = "workspace_id")
+  public Set<Cohort> getCohorts() {
+    return cohorts;
+  }
+
+  public void setCohorts(Set<Cohort> cohorts) {
+    this.cohorts = cohorts;
   }
 }
