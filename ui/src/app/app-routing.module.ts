@@ -17,10 +17,10 @@ const routes: Routes = [
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
   {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
   {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}},
-  {path: 'workspace/:ns/:wsid/cohort/:cid/edit',
+  {path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
           component: CohortEditComponent,
           data: {title: 'Edit Cohort'}},
-  {path: 'workspace/:ns/:wsid/cohort/create',
+  {path: 'workspace/:ns/:wsid/cohorts/create',
           component: CohortEditComponent,
           data: {title: 'Create Cohort'}}
 ];

@@ -27,7 +27,6 @@ export class CohortEditComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
-    console.log(this.route.snapshot.url[5]);
     this.cohortId = this.route.snapshot.url[4].path;
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
