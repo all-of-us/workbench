@@ -1,3 +1,20 @@
+.sign-in-container {
+  background-image: url('/assets/images/group.jpg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 95vh;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.sign-in-inner-container {
+  margin-top: 30vh;
+  background-color: #fcfcfc;
+  border-radius: 4px;
+}
+
 h2 {
   font-size: 2em;
   margin-top: 0;
