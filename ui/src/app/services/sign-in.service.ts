@@ -6,6 +6,8 @@ import {User} from 'app/models/user';
 
 declare const gapi: any;
 
+const SIGNED_IN_USER = 'signedInUser';
+
 interface BasicProfile {
   id: string;
   name: string;
@@ -38,6 +40,7 @@ export class SignInService {
     this.auth2 = this.makeAuth2();
     this.user = this.makeUserSubject();
     this.user.subscribe(newUserDetails => {
+      window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
       if (!newUserDetails.isSignedIn) {
         this.currentAccessToken = null;
         return;
@@ -68,7 +71,11 @@ export class SignInService {
   }
 
   private makeUserSubject(): Observable<SignInDetails> {
-    const ret = new BehaviorSubject({isSignedIn: false});
+    const initialDetailsString = window.sessionStorage.getItem(SIGNED_IN_USER);
+    const initialDetails: SignInDetails = initialDetailsString ?
+      JSON.parse(initialDetailsString) : {isSignedIn: false};
+    const ret = new BehaviorSubject(initialDetails);
+
     this.auth2.then(auth2 => {
         gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
           const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
