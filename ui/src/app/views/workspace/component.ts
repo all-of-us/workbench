@@ -49,10 +49,10 @@ export class WorkspaceComponent implements OnInit {
   }
 
   addCohort(): void {
-    this.router.navigate([this.currentUrl + '/cohorts/create']);
+    this.router.navigate([this.currentUrl + '/cohorts/build']);
   }
 
   goToCohortEdit(id: string): void {
-    this.router.navigate([this.currentUrl + '/cohorts/' + id + '/edit']);
+    this.router.navigate([this.currentUrl + '/cohorts/' + id + '/build']);
   }
 }

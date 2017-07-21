@@ -8,6 +8,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
+import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {CohortEditService} from 'app/services/cohort-edit.service';
 import {LoginComponent} from 'app/views/login/component';
@@ -50,6 +51,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     LoginComponent,
     SelectRepositoryComponent,
     CohortBuilderComponent,
+    CohortBuilderPlaceholderComponent,
     CohortEditComponent,
     WorkspaceComponent
   ],
