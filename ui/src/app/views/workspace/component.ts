@@ -41,7 +41,7 @@ export class WorkspaceComponent implements OnInit {
               this.cohortList.push(coho);
             }
           }
-        )
+        );
       }
     );
     this.currentUrl = this.router.url;
