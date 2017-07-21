@@ -32,9 +32,10 @@ export class WorkspaceComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
+    this.cohortList = [];
     this.CohortEditService.list().then(
       cohorts => {
-        this.cohortList = cohorts;
+        this.cohortList = cohorts.slice();
         this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
           cohortsReceived => {
             for (const coho of cohortsReceived) {
