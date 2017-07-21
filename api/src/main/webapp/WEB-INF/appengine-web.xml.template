@@ -1,0 +1,12 @@
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <service>api</service>
+  <runtime>java8</runtime>
+  <threadsafe>true</threadsafe>
+  <env-variables>
+    <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
+    <env-var name="spring.datasource.url" value="jdbc:mysql://${DB_SERVER}/${DB_NAME}"/>
+    <env-var name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
+    <env-var name="spring.datasource.password" value="${WORKBENCH_PASSWORD}"/>
+    <!-- TODO: figure out if we need to set JPA dialect here -->
+  </env-variables>
+</appengine-web-app>

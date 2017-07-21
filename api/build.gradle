@@ -49,6 +49,11 @@ task generateFireCloudClient {
   }
 }
 
+task generate_local_appengine_web_xml(type: Exec) {
+  executable "bash"
+  args "-c", "./generate_local_appengine_web_xml.sh"
+}
+
 configurations {
   generatedCompile
 }
@@ -91,6 +96,7 @@ ideaModule.dependsOn generateFireCloudClient
 compileGeneratedJava.dependsOn generateFireCloudClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
+compileJava.dependsOn generate_local_appengine_web_xml
 
 clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
@@ -148,6 +154,7 @@ appengine {  // App Engine tasks configuration
   run {      // local (dev_appserver) configuration (standard environments only)
     port = 8081                 // default
     host = "0.0.0.0"
+
   }
 
   deploy {   // deploy configuration
