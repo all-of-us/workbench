@@ -9,3 +9,4 @@ npm install
 
 cd ../tools
 ./download_swagger_cli.sh
+./download_cloud_sql_proxy.sh
