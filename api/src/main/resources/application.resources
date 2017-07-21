@@ -1,0 +1,3 @@
+spring.datasource.url=jdbc:mysql://localhost:3306/workbench
+spring.datasource.username=workbench
+spring.datasource.password=workbench!pwd

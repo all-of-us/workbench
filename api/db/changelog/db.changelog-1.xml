@@ -6,6 +6,24 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="danrodney" id="changelog-1">
 
+    <createTable tableName="user">
+      <column name="user_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="email" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="data_access_level" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createIndex
+        indexName="idx_user_email"
+        tableName="user"
+        unique="true">
+      <column name="email"/>
+    </createIndex>
+
     <createTable tableName="cdr_version">
       <column name="cdr_version_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
@@ -18,7 +36,7 @@
         <constraints nullable="false"/>
       </column>
       <!-- Increases by one for each release of the CDR -->
-      <column name="release_number" type="tinyint">
+      <column name="release_number" type="smallint">
         <constraints nullable="false"/>
       </column>
       <column name="bigquery_project" type="varchar(80)">
@@ -53,7 +71,7 @@
       <column name="cdr_version_id" type="bigint">
         <constraints nullable="true"/>
       </column>
-      <column name="creator" type="varchar(1024)">
+      <column name="creator_id" type="bigint">
         <constraints nullable="true"/>
       </column>
       <column name="creation_time" type="datetime">
@@ -69,6 +87,12 @@
         unique="true">
       <column name="firecloud_name"/>
     </createIndex>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+        baseTableName="workspace"
+        constraintName="fk_workspace_creator_id"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
     <addForeignKeyConstraint baseColumnNames="cdr_version_id"
         baseTableName="workspace"
         constraintName="fk_workspace_cdr_version"
@@ -98,7 +122,7 @@
       <column name="criteria" type="blob">
         <constraints nullable="false"/>
       </column>
-      <column name="creator" type="varchar(1024)">
+      <column name="creator_id" type="bigint">
         <constraints nullable="true"/>
       </column>
       <column name="creation_time" type="datetime">
@@ -115,6 +139,12 @@
       <column name="workspace_id"/>
       <column name="external_id"/>
     </createIndex>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+        baseTableName="cohort"
+        constraintName="fk_cohort_creator_id"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
     <addForeignKeyConstraint baseColumnNames="workspace_id"
         baseTableName="cohort"
         constraintName="fk_cohort_workspace_id"

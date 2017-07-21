@@ -10,6 +10,7 @@
 /api/api.ipr
 /api/api.iws
 /api/build/*
+/api/db/.gradle
 /api/out/*
 /api/src/generated
 /build/*
