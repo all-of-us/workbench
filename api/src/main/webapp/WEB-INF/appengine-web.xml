@@ -2,4 +2,11 @@
   <service>api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
+  <env-variables>
+    <env-var name="spring.datasource.driver-class-name" value="com.mysql.jdbc.Driver"/>
+    <env-var name="spring.datasource.url" value="jdbc:mysql://localhost:3306/workbench"/>
+    <env-var name="spring.datasource.username" value="workbench"/>
+    <env-var name="spring.datasource.password" value="workbench!pwd"/>
+    <!-- TODO: figure out if we need to set JPA dialect here -->
+  </env-variables>
 </appengine-web-app>
