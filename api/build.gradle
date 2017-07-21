@@ -96,7 +96,8 @@ ideaModule.dependsOn generateFireCloudClient
 compileGeneratedJava.dependsOn generateFireCloudClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
-compileJava.dependsOn generate_local_appengine_web_xml
+
+war.dependsOn generate_local_appengine_web_xml
 
 clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
