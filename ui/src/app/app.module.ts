@@ -14,6 +14,7 @@ import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
+import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsService, Configuration, ConfigurationParameters} from 'generated';
 import {environment} from 'environments/environment';
 
@@ -27,6 +28,7 @@ export function getVaadin(): VaadinNs {
   }
 }
 
+// "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
     return new Configuration({
       basePath: environment.allOfUsApiUrl,
@@ -46,6 +48,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     LoginComponent,
     SelectRepositoryComponent,
     CohortBuilderComponent,
+    WorkspaceComponent
   ],
   providers: [
     UserService,

@@ -1,0 +1,5 @@
+WORKBENCH_DB_USER=workbench
+LIQUIBASE_DB_USER=liquibase
+ROOT_DB_USER=root
+DB_USER="${WORKBENCH_DB_USER}"
+DB_NAME=workbench
