@@ -36,7 +36,7 @@ export class WorkspaceComponent implements OnInit {
     this.CohortEditService.list().then(
       cohorts => {
         this.cohortList = cohorts.slice();
-        this.cohortsService.getCohortsInWorkspace('123', '123').subscribe(
+        this.cohortsService.getCohortsInWorkspace('123', '123').retry(2).subscribe(
           cohortsReceived => {
             for (const coho of cohortsReceived) {
               this.cohortList.push(coho);
