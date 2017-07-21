@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.liquibase:liquibase-gradle-plugin:1.2.4'
+        classpath 'mysql:mysql-connector-java:5.1.37'
+    }
+}
+apply plugin: 'org.liquibase.gradle'
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'changelog/db.changelog-master.xml'
+            url 'jdbc:mysql://localhost:3306/workbench'
+            username 'liquibase'
+            password 'workbench!pwd'
+        }
+    }
+}
