@@ -8,7 +8,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")

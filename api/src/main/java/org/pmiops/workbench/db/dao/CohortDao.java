@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface CohortDao extends CrudRepository<Cohort, Long> {
 
-  Cohort findByWorkspaceIdAndExternalId()
+  Cohort findByWorkspaceIdAndExternalId(long workspaceId, String externalId);
 }
