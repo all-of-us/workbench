@@ -20,6 +20,7 @@ public class Cohort {
   private String description;
   private String externalId;
   private Workspace workspace;
+  private long workspaceId;
   private String criteria;
   private User creator;
   private DateTime creationTime;
@@ -73,14 +74,13 @@ public class Cohort {
     this.externalId = externalId;
   }
 
-  @ManyToOne
-  @JoinColumn(name = "workspace_id")
-  public Workspace getWorkspace() {
-    return workspace;
+  @Column(name = "workspace_id")
+  public long getWorkspaceId() {
+    return workspaceId;
   }
 
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
+  public void setWorkspaceId(long workspaceId) {
+    this.workspaceId = workspaceId;
   }
 
   @Column(name = "criteria")

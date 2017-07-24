@@ -114,4 +114,8 @@ public class Workspace {
   public void setCohorts(Set<Cohort> cohorts) {
     this.cohorts = cohorts;
   }
+
+  public static String toFirecloudName(String workspaceNamespace, String workspaceId) {
+    return workspaceNamespace + "/" + workspaceId;
+  }
 }
