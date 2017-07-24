@@ -1,16 +1,19 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import org.joda.time.DateTime;
 
 @Entity
-@Table(name = "cdr_version")
+@Table(name = "cohort",
+    indexes = {  @Index(name = "idx_cohort_workspace_id_external_id",
+        columnList = "workspace_id,external_id", unique = true)})
 public class Cohort {
 
   private long cohortId;
@@ -22,9 +25,8 @@ public class Cohort {
   private long workspaceId;
   private String criteria;
   private User creator;
-  private DateTime creationTime;
-  private DateTime lastModifiedTime;
-
+  private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
 
   @Id
   @GeneratedValue
@@ -92,7 +94,7 @@ public class Cohort {
   }
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "creator_id")
   public User getCreator() {
     return creator;
   }
@@ -102,20 +104,20 @@ public class Cohort {
   }
 
   @Column(name = "creation_time")
-  public DateTime getCreationTime() {
+  public Timestamp getCreationTime() {
     return creationTime;
   }
 
-  public void setCreationTime(DateTime creationTime) {
+  public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
 
   @Column(name = "last_modified_time")
-  public DateTime getLastModifiedTime() {
+  public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(DateTime lastModifiedTime) {
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
 }

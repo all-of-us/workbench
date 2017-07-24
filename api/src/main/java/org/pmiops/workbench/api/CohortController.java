@@ -1,8 +1,10 @@
 package org.pmiops.workbench.api;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
+import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.joda.time.DateTime;
@@ -14,24 +16,27 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CohortController implements CohortsApi {
+public class CohortController implements CohortsApiDelegate {
+
+  private static final Logger log = Logger.getLogger(CohortController.class.getName());
 
   private static final Function<org.pmiops.workbench.db.model.Cohort, Cohort> TO_CLIENT_COHORT =
       new Function<org.pmiops.workbench.db.model.Cohort, Cohort>() {
         @Override
         public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
           Cohort result = new Cohort();
-          result.setLastModifiedTime(cohort.getLastModifiedTime());
+          result.setLastModifiedTime(new DateTime(cohort.getLastModifiedTime(), DateTimeZone.UTC));
           if (cohort.getCreator() != null) {
             result.setCreator(cohort.getCreator().getEmail());
           }
           result.setCriteria(cohort.getCriteria());
-          result.setCreationTime(cohort.getCreationTime());
+          result.setCreationTime(new DateTime(cohort.getCreationTime(), DateTimeZone.UTC));
           result.setDescription(cohort.getDescription());
           result.setId(cohort.getExternalId());
           result.setName(cohort.getName());
@@ -71,11 +76,11 @@ public class CohortController implements CohortsApi {
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
-    Workspace workspace = getWorkspace(workspaceNamespace, workspaceId);
-    DateTime now = new DateTime(clock.instant(), DateTimeZone.UTC);
+    Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
     dbCohort.setCreator(userProvider.get());
-    dbCohort.setWorkspace(workspace);
+    dbCohort.setWorkspaceId(workspace.getWorkspaceId());
     dbCohort.setCreationTime(now);
     dbCohort.setLastModifiedTime(now);
     dbCohort = cohortDao.save(dbCohort);
@@ -85,37 +90,85 @@ public class CohortController implements CohortsApi {
   @Override
   public ResponseEntity<Void> deleteCohort(String workspaceNamespace, String workspaceId,
       String cohortId) {
-    return null;
+    org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
+        cohortId);
+    cohortDao.delete(dbCohort);
+    return ResponseEntity.ok(null);
   }
 
   @Override
   public ResponseEntity<Cohort> getCohort(String workspaceNamespace, String workspaceId,
       String cohortId) {
-    return null;
+    org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
+        cohortId);
+    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    Workspace workspace = getWorkspace(workspaceNamespace, workspaceId);
+    Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
-    response.setItems(workspace.getCohorts().stream().map(TO_CLIENT_COHORT)
-        .collect(Collectors.toList()));
+    Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
+    if (cohorts != null) {
+      response.setItems(cohorts.stream().map(TO_CLIENT_COHORT).collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(response);
   }
 
   @Override
   public ResponseEntity<Cohort> updateCohort(String workspaceNamespace, String workspaceId,
       String cohortId, Cohort cohort) {
-    return null;
+    org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
+        cohortId);
+    if (cohort.getType() != null) {
+      dbCohort.setType(cohort.getType());
+    }
+    if (cohort.getName() != null) {
+      dbCohort.setName(cohort.getName());
+    }
+    if (cohort.getDescription() != null) {
+      dbCohort.setDescription(cohort.getDescription());
+    }
+    if (cohort.getCriteria() != null) {
+      dbCohort.setCriteria(cohort.getCriteria());
+    }
+    // TODO: add version, check it here
+    dbCohort = cohortDao.save(dbCohort);
+    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
-  private Workspace getWorkspace(String workspaceNamespace, String workspaceId) {
+  private Workspace getDbWorkspace(String workspaceNamespace, String workspaceId) {
     String firecloudName = Workspace.toFirecloudName(workspaceNamespace, workspaceId);
     Workspace workspace = workspaceDao.findByFirecloudName(firecloudName);
     if (workspace == null) {
-      throw new NotFoundException("No workspace with name {0}".format(firecloudName));
+      // Create a workspace if it doesn't already exist.
+      // TODO: get rid of this after creating workspace API
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      workspace = new Workspace();
+      workspace.setCreationTime(now);
+      workspace.setCreator(userProvider.get());
+      workspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
+      workspace.setLastModifiedTime(now);
+      workspace.setFirecloudName(firecloudName);
+      workspace.setName(workspaceId);
+
+      workspaceDao.save(workspace);
+
+      //throw new NotFoundException("No workspace with name {0}".format(firecloudName));
     }
     return workspace;
+  }
+
+  private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,
+      String workspaceId, String cohortId) {
+    Workspace workspace = getDbWorkspace(workspaceName, workspaceId);
+    org.pmiops.workbench.db.model.Cohort cohort =
+        cohortDao.findByWorkspaceIdAndExternalId(workspace.getWorkspaceId(), cohortId);
+    if (cohort == null) {
+      throw new NotFoundException("No cohort with name {0} in workspace {0}".format(cohortId,
+          workspace.getFirecloudName()));
+    }
+    return cohort;
   }
 }

@@ -1,7 +1,7 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import java.util.Set;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,13 +11,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.hibernate.annotations.OnDelete;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "workspace",
-  indexes = {  @Index(name = "idx_workspace_fc_name", columnList = "firecloudName")})
+  indexes = {  @Index(name = "idx_workspace_fc_name", columnList = "firecloud_name",
+      unique = true)})
 public class Workspace {
 
   private long workspaceId;
@@ -26,8 +25,8 @@ public class Workspace {
   private DataAccessLevel dataAccessLevel;
   private CdrVersion cdrVersion;
   private User creator;
-  private DateTime creationTime;
-  private DateTime lastModifiedTime;
+  private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
   private Set<Cohort> cohorts;
 
   @Id
@@ -89,24 +88,24 @@ public class Workspace {
   }
 
   @Column(name = "creation_time")
-  public DateTime getCreationTime() {
+  public Timestamp getCreationTime() {
     return creationTime;
   }
 
-  public void setCreationTime(DateTime creationTime) {
+  public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
 
   @Column(name = "last_modified_time")
-  public DateTime getLastModifiedTime() {
+  public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
 
-  public void setLastModifiedTime(DateTime lastModifiedTime) {
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @OneToMany(mappedBy = "workspace_id")
+  @OneToMany(mappedBy = "workspaceId")
   public Set<Cohort> getCohorts() {
     return cohorts;
   }
