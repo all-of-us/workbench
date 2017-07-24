@@ -3,12 +3,10 @@ import {Router} from '@angular/router';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {CohortEditService} from 'app/services/cohort-edit.service';
 import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
-
 
 
 @Component({
@@ -16,35 +14,33 @@ import {UserService} from 'app/services/user.service';
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit {
+  public static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
+  public static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
+  public static DEFAULT_WORKSPACE_ID = '1';
+
   repositories: Repository[] = [];
-  user: User;
+  user: User;  // to detect if logged in
   currentUrl: string;
-  // TODO: Pull cohortList from external source
   cohortList = [];
   constructor(
       private router: Router,
       private userService: UserService,
       private repositoryService: RepositoryService,
-      private cohortsService: CohortsService,
-      private CohortEditService: CohortEditService
+      private cohortsService: CohortsService
   ) {}
 
   ngOnInit(): void {
-    this.userService.getLoggedInUser()
-        .then(user => this.user = user);
-    this.cohortList = [];
-    this.CohortEditService.list().then(
-      cohorts => {
-        this.cohortList = cohorts.slice();
-        this.cohortsService.getCohortsInWorkspace('123', '123').retry(2).subscribe(
-          cohortsReceived => {
-            for (const coho of cohortsReceived.items) {
-              this.cohortList.push(coho);
-            }
-          }
-        );
-      }
-    );
+    this.userService.getLoggedInUser().then(user => this.user = user);
+    this.cohortsService
+        .getCohortsInWorkspace(
+            WorkspaceComponent.DEFAULT_WORKSPACE_NAME, WorkspaceComponent.DEFAULT_WORKSPACE_ID)
+        .retry(2)
+        .subscribe(
+            cohortsReceived => {
+              for (const coho of cohortsReceived.items) {
+                this.cohortList.push(coho);
+              }
+            });
     this.currentUrl = this.router.url;
   }
 
