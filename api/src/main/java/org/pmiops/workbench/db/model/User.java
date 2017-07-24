@@ -4,11 +4,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user",
+    indexes = {  @Index(name = "idx_user_email", columnList = "email", unique = true)})
 public class User {
 
   private long userId;

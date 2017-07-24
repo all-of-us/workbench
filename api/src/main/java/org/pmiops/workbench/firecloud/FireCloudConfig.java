@@ -11,7 +11,7 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient getFireCloudApiClient(UserAuthentication userAuthentication) {
+  public ApiClient fireCloudApiClient(UserAuthentication userAuthentication) {
     ApiClient apiClient = new ApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
@@ -19,7 +19,7 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ProfileApi getProfileApi(ApiClient apiClient) {
+  public ProfileApi profileApi(ApiClient apiClient) {
     ProfileApi api = new ProfileApi();
     api.setApiClient(apiClient);
     return api;
