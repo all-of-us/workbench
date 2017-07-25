@@ -33,7 +33,7 @@ export class WorkspaceComponent implements OnInit {
     this.userService.getLoggedInUser().then(user => this.user = user);
     this.cohortsService
         .getCohortsInWorkspace(
-            WorkspaceComponent.DEFAULT_WORKSPACE_NAME, WorkspaceComponent.DEFAULT_WORKSPACE_ID)
+            WorkspaceComponent.DEFAULT_WORKSPACE_NS, WorkspaceComponent.DEFAULT_WORKSPACE_ID)
         .retry(2)
         .subscribe(
             cohortsReceived => {
