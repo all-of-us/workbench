@@ -24,7 +24,12 @@ produces:
 # ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
+##########################################################################################
+## PATHS
+##########################################################################################
 paths:
+   # User methods ########################################################################
+
   /api/v1/me:
     get:
       tags:
@@ -37,35 +42,158 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  # Cohorts ##############################################################################
+
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     get:
       tags:
         - cohorts
-      description: Returns all cohorts in a workspace
+      description: Returns all cohort definitions in a workspace
       operationId: "getCohortsInWorkspace"
       parameters:
        - in: path
          name: workspaceNamespace
          type: string
          required: true
-         description: namespace containing the workspace to retrieve cohorts from
+         description: namespace containing the workspace to retrieve cohort definitions from
        - in: path
          name: workspaceId
          type: string
          required: true
-         description: ID of the workspace to retrieve cohorts from.
+         description: ID of the workspace to retrieve cohort definitions from.
       responses:
         "200":
-          description: A list of cohorts.
+          description: A list of cohort definitions.
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Cohort"
+            $ref: "#/definitions/CohortListResponse"
+    post:
+      tags:
+        - cohorts
+      description: Creates a cohort definition in a workspace.
+      operationId: "createCohort"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace containing the workspace to create a cohort definition in
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace to create a cohort definition in
+        - in: body
+          name: cohort
+          description: cohort definition
+          schema:
+            $ref: "#/definitions/Cohort"
+      responses:
+        "200":
+          description: The cohort definition that was created.
+          schema:
+            $ref: "#/definitions/Cohort"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+    get:
+      tags:
+        - cohorts
+      description: Returns the cohort definition with the specified ID
+      operationId: "getCohort"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+        - in: path
+          name: cohortId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+      responses:
+        "200":
+          description: A cohort definition
+          schema:
+            $ref: "#/definitions/Cohort"
+    patch:
+      tags:
+        - cohorts
+      description: >
+        Modifies the cohort definition with the specified ID; fields that are omitted
+        will not be modified
+      operationId: "updateCohort"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+        - in: path
+          name: cohortId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+        - in: body
+          name: cohort
+          description: cohort definition
+          schema:
+            $ref: "#/definitions/Cohort"
+      responses:
+        "200":
+          description: The updated cohort definition
+          schema:
+            $ref: "#/definitions/Cohort"
+    delete:
+      tags:
+        - cohorts
+      description: Deletes the cohort definition with the specified ID
+      operationId: "deleteCohort"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+        - in: path
+          name: cohortId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
 definitions:
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [registered, protected]
+
+  CohortListResponse:
+    type: "object"
+    required:
+     - "items"
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/Cohort"
+
   Cohort:
     type: "object"
     required:
@@ -92,6 +220,7 @@ definitions:
       lastModifiedTime:
         type: string
         format: date-time
+
   Profile:
     type: "object"
     required:

@@ -32,6 +32,7 @@ settings.gradle
 git_push.sh
 gradle.properties
 src/main/AndroidManifest.xml
+src/main/resources/application.properties
 src/test/**
 gradlew
 gradlew.bat

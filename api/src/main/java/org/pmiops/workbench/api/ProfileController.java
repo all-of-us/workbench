@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ProfileController implements ProfileApi {
+public class ProfileController implements ProfileApiDelegate {
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 

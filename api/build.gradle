@@ -15,11 +15,13 @@ task generateApi {
     config.setTemplateDir("$swaggerTemplateDir")
     config.setLang('spring')
     config.setAdditionalProperties([
-            'interfaceOnly' : 'true',
-            'apiPackage'    : 'org.pmiops.workbench.api',
-            'modelPackage'  : 'org.pmiops.workbench.model',
-            'sourceFolder'  : swaggerTargetFolder,
-            'useTags'       : 'true'
+            'apiPackage'     : 'org.pmiops.workbench.api',
+            'modelPackage'   : 'org.pmiops.workbench.model',
+            'sourceFolder'   : swaggerTargetFolder,
+            'useTags'        : 'true',
+            // Generates delegate interfaces; used to make method annotations work without
+            // having to copy them to our implementations.
+            'delegatePattern': 'true'
     ])
     new DefaultGenerator().opts(config.toClientOptInput()).generate()
   }
@@ -156,8 +158,11 @@ appengine {  // App Engine tasks configuration
   run {      // local (dev_appserver) configuration (standard environments only)
     port = 8081                 // default
     host = "0.0.0.0"
-
+    // Allows you to attach a debugger on port 8001 when running locally.
+    jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
   }
+
+
 
   deploy {   // deploy configuration
     stopPreviousVersion = true  // default - stop the current version
