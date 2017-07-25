@@ -1,8 +1,12 @@
 <h2>Set Cohort Info</h2>
 <div class="form-area">
   <div>
-    <label >Cohort Name:</label>
-    <input type="text" id="name" class="input" name="cohort-name" [(ngModel)]="cohort.name" autofocus>
+    <label>Cohort Name:</label>
+    <input type="text" id="name" class="input" name="cohort-name" autofocus
+        [(ngModel)]="cohort.name" (ngModelChange)="autoGenerateId()">
+    <label>Cohort ID:</label>
+    <input type="text" id="id" class="input" name="cohort-id"
+        [(ngModel)]="cohort.id" disabled>
   </div>
   <div>
     <label>Description:</label>

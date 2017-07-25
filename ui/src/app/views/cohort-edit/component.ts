@@ -34,6 +34,10 @@ export class CohortEditComponent implements OnInit {
     }
   }
 
+  autoGenerateId(): void {
+    this.cohort.id = this.cohort.name.replace(/[\W]/g, '_');
+  }
+
   saveCohort(): void {
     this.cohortsService
         .updateCohort(
