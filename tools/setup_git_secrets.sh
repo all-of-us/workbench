@@ -9,4 +9,6 @@ mv hooks/commit-msg .
 mv hooks/pre-commit .
 mv hooks/prepare-commit-msg .
 rm -rf hooks
+git secrets --add 'private_key_id'
+git secrets --add --allowed --literal "'private_key_id'"
 cd ../tools
