@@ -111,3 +111,38 @@ Example:
 You will be prompted to confirm the deployment. When it finishes, you will be able to access the
 UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot.com.
 
+## git-secrets
+
+### Setup
+
+Download the git-secrets tool.
+Place the tool somewhere in your path, using either:
+* make install
+* brew install git-secrets
+
+From the `tools/` directory:
+```Shell
+./setup_git_secrets
+```
+
+### Resetting
+
+To clear git-secrets if something is removed from the shell file, go to the config
+file and remove everything under the secrets item, inclusive.
+
+### Running
+
+git-secrets by default runs every time you make a commit. But if you
+want to manually scan:
+#### The Repository
+```Shell
+git secrets --scan
+```
+#### A File(s)
+```Shell
+git secrets --scan /path/to/file (/other/path/to/file *)
+```
+#### A Directory (recursively)
+```Shell
+git secrets --scan -r /path/to/directory
+```
