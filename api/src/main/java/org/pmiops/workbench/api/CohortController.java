@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
@@ -37,7 +38,7 @@ public class CohortController implements CohortsApiDelegate {
               .creationTime(new DateTime(cohort.getCreationTime(), DateTimeZone.UTC))
               .criteria(cohort.getCriteria())
               .description(cohort.getDescription())
-              .id(cohort.getExternalId())
+              .id(String.valueOf(cohort.getCohortId()))
               .name(cohort.getName())
               .type(cohort.getType());
           if (cohort.getCreator() != null) {
@@ -54,7 +55,6 @@ public class CohortController implements CohortsApiDelegate {
           org.pmiops.workbench.db.model.Cohort result = new org.pmiops.workbench.db.model.Cohort();
           result.setCriteria(cohort.getCriteria());
           result.setDescription(cohort.getDescription());
-          result.setExternalId(cohort.getId());
           result.setName(cohort.getName());
           result.setType(cohort.getType());
           return result;
@@ -168,12 +168,21 @@ public class CohortController implements CohortsApiDelegate {
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,
       String workspaceId, String cohortId) {
     Workspace workspace = getDbWorkspace(workspaceName, workspaceId);
+
     org.pmiops.workbench.db.model.Cohort cohort =
-        cohortDao.findByWorkspaceIdAndExternalId(workspace.getWorkspaceId(), cohortId);
+        cohortDao.findOne(convertCohortId(cohortId));
     if (cohort == null) {
       throw new NotFoundException("No cohort with name {0} in workspace {0}".format(cohortId,
           workspace.getFirecloudName()));
     }
     return cohort;
+  }
+
+  private static long convertCohortId(String cohortId) {
+    try {
+      return Long.parseLong(cohortId);
+    } catch (NumberFormatException e) {
+      throw new BadRequestException("Invalid cohort ID: {0}".format(cohortId));
+    }
   }
 }

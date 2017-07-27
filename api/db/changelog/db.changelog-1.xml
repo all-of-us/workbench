@@ -116,9 +116,6 @@
       <column name="description" type="clob">
         <constraints nullable="false"/>
       </column>
-      <column name="external_id" type="varchar(80)">
-        <constraints nullable="false"/>
-      </column>
       <column name="criteria" type="blob">
         <constraints nullable="false"/>
       </column>
@@ -132,13 +129,6 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <createIndex
-        indexName="idx_cohort_workspace_id_external_id"
-        tableName="cohort"
-        unique="true">
-      <column name="workspace_id"/>
-      <column name="external_id"/>
-    </createIndex>
     <addForeignKeyConstraint baseColumnNames="creator_id"
         baseTableName="cohort"
         constraintName="fk_cohort_creator_id"
