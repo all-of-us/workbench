@@ -197,7 +197,6 @@ definitions:
   Cohort:
     type: "object"
     required:
-      - "id"
       - "name"
       - "criteria"
       - "type"
