@@ -5,15 +5,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "cohort",
-    indexes = {  @Index(name = "idx_cohort_workspace_id_external_id",
-        columnList = "workspace_id,external_id", unique = true)})
+@Table(name = "cohort")
 public class Cohort {
 
   private long cohortId;
@@ -64,15 +61,6 @@ public class Cohort {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  @Column(name = "external_id")
-  public String getExternalId() {
-    return externalId;
-  }
-
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
   }
 
   @Column(name = "workspace_id")

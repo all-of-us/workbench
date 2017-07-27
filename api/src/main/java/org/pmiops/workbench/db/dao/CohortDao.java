@@ -4,6 +4,4 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.springframework.data.repository.CrudRepository;
 
 public interface CohortDao extends CrudRepository<Cohort, Long> {
-
-  Cohort findByWorkspaceIdAndExternalId(long workspaceId, String externalId);
 }
