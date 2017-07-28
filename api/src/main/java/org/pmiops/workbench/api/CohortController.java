@@ -119,12 +119,10 @@ public class CohortController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    log.info("Listing cohorts in workspace \"" + workspaceNamespace + "/" + workspaceId + "\".");
     Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
-      log.info("Found " + cohorts.size() + " cohorts.");
       response.setItems(cohorts.stream().map(TO_CLIENT_COHORT).collect(Collectors.toList()));
     }
     return ResponseEntity.ok(response);
