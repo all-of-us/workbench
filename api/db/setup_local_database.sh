@@ -13,10 +13,9 @@ CREATE_DB_FILE=/tmp/create_db.sql
 
 ROOT_USERNAME=
 ROOT_PASSWORD=root
-ROOT_PASSWORD_ARGS="-p${ROOT_PASSWORD}"
 while true; do
   case "$1" in
-    --nopassword) ROOT_PASSWORD=; ROOT_PASSWORD_ARGS=; shift 1;;
+    --nopassword) ROOT_PASSWORD=; shift 1;;
     --db_user) ROOT_DB_USER=$2; shift 2;;
     --db_name) DB_NAME=$2; shift 2;;
     -- ) shift; break ;;
@@ -27,7 +26,6 @@ done
 if [ "${MYSQL_ROOT_PASSWORD}" ]
 then
   ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD}"
-  ROOT_PASSWORD_ARGS='-p"${ROOT_PASSWORD}"'
 else
   echo "Using a default root mysql password. Set MYSQL_ROOT_PASSWORD to override."
 fi
@@ -41,7 +39,7 @@ trap finish EXIT
 cat drop_db.sql create_db.sql | envsubst > $CREATE_DB_FILE
 
 echo "Creating empty database..."
-mysql -u "$ROOT_DB_USER" $ROOT_PASSWORD_ARGS < ${CREATE_DB_FILE}
+mysql -u "$ROOT_DB_USER" -p${ROOT_PASSWORD} < ${CREATE_DB_FILE}
 if [ $? != '0' ]
 then
   echo "Error creating database. Exiting."
