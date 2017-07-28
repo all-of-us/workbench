@@ -7,7 +7,12 @@
 # If you have an environment variable named "MYSQL_ROOT_PASSWORD" it will be
 # used as the password to connect to the database; by default, the password
 # "root" will be used.
-#
+
+if [ ! -f setup_local_vars.sh ]
+then
+  echo Script must be run from local db/ directory.
+  exit 1
+fi
 
 CREATE_DB_FILE=/tmp/create_db.sql
 
