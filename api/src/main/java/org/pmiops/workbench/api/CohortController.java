@@ -88,14 +88,13 @@ public class CohortController implements CohortsApiDelegate {
     dbCohort.setLastModifiedTime(now);
     try {
       // TODO Make this a pre-check within a transaction?
-      // That would need a new lookup-by-external-ID method.
       dbCohort = cohortDao.save(dbCohort);
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
       throw new BadRequestException(
-          "Cohort \"/%s/%s/%s\" already exists.",
-          workspaceNamespace, workspaceId, dbCohort.getExternalId());
+          "Cohort \"/%s/%s/%s\" already exists.".format(
+              workspaceNamespace, workspaceId, dbCohort.getCohortId()));
     }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
