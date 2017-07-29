@@ -20,7 +20,7 @@ export class WorkspaceComponent implements OnInit {
   user: User;
   currentUrl: string;
   // TODO: Pull cohortList from external source
-  cohortList = [];
+  cohortList: Cohort[] = [];
   constructor(
       private router: Router,
       private userService: UserService,
@@ -33,14 +33,20 @@ export class WorkspaceComponent implements OnInit {
     this.userService.getLoggedInUser()
         .then(user => this.user = user);
     this.cohortList = [];
+    document.body.style.cursor = 'wait';
     this.CohortEditService.list().then(
       cohorts => {
         this.cohortList = cohorts.slice();
         this.cohortsService.getCohortsInWorkspace('123', '123').retry(2).subscribe(
           cohortsReceived => {
+            document.body.style.cursor = 'auto';
             for (const coho of cohortsReceived.items) {
               this.cohortList.push(coho);
             }
+          },
+          error => {
+            document.body.style.cursor = 'auto';
+            console.log('Failed to fetch cohorts data.');
           }
         );
       }
