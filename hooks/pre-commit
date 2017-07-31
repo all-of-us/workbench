@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
+../tools/setup_git_secrets.sh
 git secrets --pre_commit_hook -- "$@"
