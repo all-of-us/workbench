@@ -19,6 +19,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -85,7 +86,16 @@ public class CohortController implements CohortsApiDelegate {
     dbCohort.setWorkspaceId(workspace.getWorkspaceId());
     dbCohort.setCreationTime(now);
     dbCohort.setLastModifiedTime(now);
-    dbCohort = cohortDao.save(dbCohort);
+    try {
+      // TODO Make this a pre-check within a transaction?
+      dbCohort = cohortDao.save(dbCohort);
+    } catch (DataIntegrityViolationException e) {
+      // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
+      // client by Spring (the client gets a default reason string).
+      throw new BadRequestException(
+          "Cohort \"/%s/%s/%s\" already exists.".format(
+              workspaceNamespace, workspaceId, dbCohort.getCohortId()));
+    }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
