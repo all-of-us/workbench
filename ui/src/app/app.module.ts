@@ -10,7 +10,6 @@ import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
-import {CohortEditService} from 'app/services/cohort-edit.service';
 import {LoginComponent} from 'app/views/login/component';
 import {RepositoryService} from 'app/services/repository.service';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
@@ -59,7 +58,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     UserService,
     RepositoryService,
     SignInService,
-    CohortEditService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin},
     {
       provide: Configuration,

@@ -3,52 +3,71 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {User} from 'app/models/user';
-import {UserService} from 'app/services/user.service';
-import {CohortEditService} from 'app/services/cohort-edit.service';
+import {WorkspaceComponent} from 'app/views/workspace/component';
 
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
 export class CohortEditComponent implements OnInit {
-  user: User;
   cohort: Cohort = {id: '', name: '', description: '', criteria: '', type: ''};
   cohortId: string;
   adding = false;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
-      private userService: UserService,
       private cohortsService: CohortsService,
-      private CohortEditService: CohortEditService
   ) {}
 
   ngOnInit(): void {
-    this.userService.getLoggedInUser()
-        .then(user => this.user = user);
     this.cohortId = this.route.snapshot.url[4].path;
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     } else {
-      this.CohortEditService.get(this.cohortId).then(cohort => {
-        this.cohort = cohort;
-      }).catch(error => {
-        alert('All of Us Researcher Workbench does not currently \
-support editing cohorts from the API.');
-        this.router.navigate(['../../..'], {relativeTo : this.route});
-      });
+      this.cohortsService
+          .getCohort(
+              WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+              WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+              this.cohortId)
+          .retry(2)
+          .subscribe(this.handleCohortFetched);
     }
   }
 
+  /**
+   * Copy in only the client-used fields of the Cohort.
+   * TODO: Remove this and copy the Cohort wholesale once deserialization of all fields
+   * works server-side. (Currently creationTime deserialization causes errors.)
+   */
+  handleCohortFetched = (cohort: Cohort) => {
+    console.log(cohort);
+    console.log(this.cohort);
+    this.cohort.id = cohort.id;
+    this.cohort.name = cohort.name;
+    this.cohort.description = cohort.description;
+    this.cohort.criteria = cohort.criteria;
+    this.cohort.type = cohort.type;
+  }
+
   saveCohort(): void {
-    this.CohortEditService.edit(this.cohort.id, this.cohort).then(
-      cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
+    this.cohortsService
+        .updateCohort(
+            WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+            WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+            this.cohort.id,
+            this.cohort)
+        .retry(2)
+        .subscribe(cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
   }
 
   addCohort(): void {
-    this.CohortEditService.add(this.cohort).then(
-      cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+    this.cohortsService
+        .createCohort(
+            WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+            WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+            this.cohort)
+        .retry(2)
+        .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
   }
 
   cancelAdd(): void {

@@ -3,7 +3,6 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
-import {CohortEditService} from 'app/services/cohort-edit.service';
 
 @Component({
   styleUrls: ['./component.css'],
