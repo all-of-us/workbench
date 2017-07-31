@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
+../tools/setup_git_secrets.sh
 git secrets --prepare_commit_msg_hook -- "$@"
