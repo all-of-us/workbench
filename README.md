@@ -120,20 +120,14 @@ Place the tool somewhere in your path, using either:
 * make install
 * brew install git-secrets
 
-From the `tools/` directory:
-```Shell
-./setup_git_secrets
-```
-
-### Resetting
-
-To clear git-secrets if something is removed from the shell file, go to the config
-file and remove everything under the secrets item, inclusive.
-
 ### Running
 
 git-secrets by default runs every time you make a commit. But if you
 want to manually scan:
+First go to the tools directory and run
+```Shell
+./setup_git_secrets
+```
 #### The Repository
 ```Shell
 git secrets --scan
