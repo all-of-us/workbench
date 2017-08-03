@@ -7,7 +7,9 @@
   </div>
   <div>
     <label>Description:</label>
-    <textarea id="description" class="input" name="cohort-description" [(ngModel)]="cohort.description"></textarea>
+    <textarea id="description" class="input" name="cohort-description"
+        [(ngModel)]="cohort.description">
+    </textarea>
   </div>
   <div class="button">
     <div *ngIf="adding; else saveButton">
