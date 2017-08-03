@@ -177,7 +177,6 @@ describe('CohortEditComponent', () => {
   it('displays blank input fields when creating a new cohort', async(() => {
     const fixture = TestBed.createComponent(CohortEditComponent);
     fixture.detectChanges();
-    const app = fixture.debugElement.componentInstance;
     const nameField = fixture.debugElement.query(By.css('#name'));
     const descriptionField = fixture.debugElement.query(By.css('#description'));
     fixture.detectChanges();
@@ -196,7 +195,6 @@ describe('CohortEditComponent', () => {
     route.url.push(new UrlSegment('edit', {}));
 
     updateAndTick(fixture);
-    const app = fixture.debugElement.componentInstance;
     const nameField = fixture.debugElement.query(By.css('#name'));
     const descriptionField = fixture.debugElement.query(By.css('#description'));
 
@@ -242,7 +240,6 @@ describe('CohortEditComponent', () => {
     route.url[4].path = '1';
     route.url.push(new UrlSegment('edit', {}));
     updateAndTick(fixture);
-    const app = fixture.debugElement.componentInstance;
     const nameField = fixture.debugElement.query(By.css('#name'));
     const descriptionField = fixture.debugElement.query(By.css('#description'));
     updateAndTick(fixture);
