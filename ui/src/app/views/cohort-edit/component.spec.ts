@@ -1,4 +1,5 @@
-import {TestBed, async, fakeAsync, tick} from '@angular/core/testing';
+import {Component, DebugElement} from '@angular/core';
+import {TestBed, async, fakeAsync, tick, ComponentFixture} from '@angular/core/testing';
 import {Title, By} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
@@ -10,17 +11,38 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {Cohort, CohortListResponse} from 'generated';
 import {CohortsService} from 'generated';
-import { Observable } from 'rxjs/Observable';
+import {Observable} from 'rxjs/Observable';
 
+// TODO: Replace with Swagger-generated model
 class Workspace {
   id: string;
   namespace: string;
   cohorts: Cohort[];
 }
 
-function simulateInput(fixture: any, element: any, text: string) {
-  element.value = text;
-  element.dispatchEvent(new Event('input'));
+class Context {
+  fixture: ComponentFixture<CohortEditComponent>;
+  route: UrlSegment[];
+  cohortsService: CohortsService;
+  nameField: DebugElement;
+  descriptionField: DebugElement;
+  addButton: DebugElement;
+  saveButton: DebugElement;
+
+  constructor(testBed: typeof TestBed) {
+    this.fixture = testBed.createComponent(CohortEditComponent);
+    this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
+    this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
+    this.nameField = this.fixture.debugElement.query(By.css('#name'));
+    this.descriptionField = this.fixture.debugElement.query(By.css('#description'));
+  }
+}
+
+function simulateInput(fixture: ComponentFixture<Component>,
+  element: DebugElement,
+  text: string) {
+  element.nativeNode.value = text;
+  element.nativeNode.dispatchEvent(new Event('input'));
   updateAndTick(fixture);
 }
 
@@ -70,9 +92,9 @@ class CohortsServiceStub {
           }));
           observer.complete();
         }
-        observer.error(new Error('Error fetching a cohort. No cohort with \
-          id: ' + cId + ' exists in workspace ' + wsNamespace + ', ' + wsId +
-          ' in cohort service stub.'));
+        observer.error(new Error(`Error fetching. No cohort with \
+          id: ${cId} exists in workspace ${wsNamespace}, ${wsId} \
+          in cohort service stub.`));
       }, 0);
     });
     return observable;
@@ -97,9 +119,8 @@ class CohortsServiceStub {
           }
           observer.complete();
         }
-        observer.error(new Error('Error updating a cohort. No cohort with id: '
-          + cId + ' exists in workspace ' + wsNamespace + ', ' + wsId +
-          ' in cohort service stub.'));
+        observer.error(new Error(`Error updating. No cohort with id: ${cId} \
+          exists in workspace ${wsNamespace}, ${wsId} in cohort service stub`));
       }, 0);
     });
     return observable;
@@ -113,16 +134,16 @@ class CohortsServiceStub {
         if (workspaceMatch !== null) {
           observer.next(workspaceMatch.cohorts.find(function(cohort: Cohort) {
             if (cohort.id === newCohort.id) {
-              observer.error(new Error('Error creating a cohort. Cohort with \
-                id: ' + cohort.id + ' already exists.'));
+              observer.error(new Error(`Error creating. Cohort with \
+                id: ${cohort.id} already exists.`));
               return true;
             }
           }));
           workspaceMatch.cohorts.push(newCohort);
           observer.complete();
         }
-        observer.error(new Error('Error creating a cohort. No workspace '
-          + wsNamespace + ', ' + wsId + ' in cohort service stub.'));
+        observer.error(new Error(`Error creating. No workspace ${wsNamespace} \
+          , ${wsId} in cohort service stub.`));
       }, 0);
     });
     return observable;
@@ -137,7 +158,7 @@ class CohortsServiceStub {
           observer.next({items: workspaceMatch.cohorts});
           observer.complete();
         }
-        observer.error('No workspace ' + wsNamespace + ', ' + wsId + ' found.');
+        observer.error(`No workspace ${wsNamespace}, ${wsId} found.`);
       }, 0);
     });
     return observable;
@@ -175,93 +196,63 @@ describe('CohortEditComponent', () => {
 
 
   it('displays blank input fields when creating a new cohort', async(() => {
-    const fixture = TestBed.createComponent(CohortEditComponent);
-    fixture.detectChanges();
-    const nameField = fixture.debugElement.query(By.css('#name'));
-    const descriptionField = fixture.debugElement.query(By.css('#description'));
-    fixture.detectChanges();
+    const context = new Context(TestBed);
+    context.fixture.detectChanges();
     setTimeout(function(){
-      expect(nameField.nativeNode.value).toMatch('');
-      expect(descriptionField.nativeNode.value).toMatch('');
+      expect(context.nameField.nativeNode.value).toMatch('');
+      expect(context.descriptionField.nativeNode.value).toMatch('');
     }, 0);
   }));
 
 
   it('fetches and displays an existing cohort in the edit pane',
   fakeAsync(() => {
-    const fixture = TestBed.createComponent(CohortEditComponent);
-    const route = fixture.debugElement.injector.get(ActivatedRoute).snapshot;
-    route.url[4].path = '1';
-    route.url.push(new UrlSegment('edit', {}));
-
-    updateAndTick(fixture);
-    const nameField = fixture.debugElement.query(By.css('#name'));
-    const descriptionField = fixture.debugElement.query(By.css('#description'));
-
-    updateAndTick(fixture);
-
-    expect(nameField.nativeElement.value).toMatch('sample name');
-    expect(descriptionField.nativeElement.value).toMatch('sample description');
+    const context = new Context(TestBed);
+    context.route[4].path = '1';
+    context.route.push(new UrlSegment('edit', {}));
+    updateAndTick(context.fixture);
+    updateAndTick(context.fixture);
+    expect(context.nameField.nativeElement.value).toMatch('sample name');
+    expect(context.descriptionField.nativeElement.value).toMatch('sample description');
   }));
 
   it('adds a new cohort with given name and description', fakeAsync(() => {
-    const fixture = TestBed.createComponent(CohortEditComponent);
-    const nameField = fixture.debugElement.query(By.css('#name'));
-    const descriptionField = fixture.debugElement.query(By.css('#description'));
-    const route = fixture.debugElement.injector.get(ActivatedRoute).snapshot;
-    route.url[4].path = 'create';
-    updateAndTick(fixture);
-    const buttons = fixture.debugElement.queryAll(By.css('button'));
-    const addButton = buttons.find(button => {
-      if (button.nativeElement.innerText === 'Add Cohort') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    simulateInput(fixture, nameField.nativeNode, 'New Cohort');
-    simulateInput(fixture, descriptionField.nativeNode, 'New Description');
+    const context = new Context(TestBed);
+    context.route[4].path = 'create';
+    updateAndTick(context.fixture);
+    simulateInput(context.fixture, context.nameField, 'New Cohort');
+    simulateInput(context.fixture, context.descriptionField, 'New Description');
+    const addButton = context.fixture.debugElement.query(By.css('#add'));
     addButton.triggerEventHandler('click', null);
-    updateAndTick(fixture);
-    fixture.debugElement.injector.get(CohortsService).getCohortsInWorkspace(
+    updateAndTick(context.fixture);
+    context.cohortsService.getCohortsInWorkspace(
     WorkspaceComponent.DEFAULT_WORKSPACE_NS,
     WorkspaceComponent.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
       expect(cohorts.items.length).toBe(2);
       expect(cohorts.items[1].name).toBe('New Cohort');
       expect(cohorts.items[1].description).toBe('New Description');
     });
-    updateAndTick(fixture);
+    updateAndTick(context.fixture);
   }));
 
   it('edits an existing cohort with given name and description',
   fakeAsync(() => {
-    const fixture = TestBed.createComponent(CohortEditComponent);
-    const route = fixture.debugElement.injector.get(ActivatedRoute).snapshot;
-    route.url[4].path = '1';
-    route.url.push(new UrlSegment('edit', {}));
-    updateAndTick(fixture);
-    const nameField = fixture.debugElement.query(By.css('#name'));
-    const descriptionField = fixture.debugElement.query(By.css('#description'));
-    updateAndTick(fixture);
-    const buttons = fixture.debugElement.queryAll(By.css('button'));
-    const addButton = buttons.find(button => {
-      if (button.nativeElement.innerText === 'Save Cohort') {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    simulateInput(fixture, nameField.nativeNode, 'Edited Cohort');
-    simulateInput(fixture, descriptionField.nativeNode, 'Edited Description');
-    addButton.triggerEventHandler('click', null);
-    updateAndTick(fixture);
-    fixture.debugElement.injector.get(CohortsService).getCohortsInWorkspace(
+    const context = new Context(TestBed);
+    context.route[4].path = '1';
+    context.route.push(new UrlSegment('edit', {}));
+    updateAndTick(context.fixture);
+    const saveButton = context.fixture.debugElement.query(By.css('#save'));
+    simulateInput(context.fixture, context.nameField, 'Edited Cohort');
+    simulateInput(context.fixture, context.descriptionField, 'Edited Description');
+    saveButton.triggerEventHandler('click', null);
+    updateAndTick(context.fixture);
+    context.cohortsService.getCohortsInWorkspace(
     WorkspaceComponent.DEFAULT_WORKSPACE_NS,
     WorkspaceComponent.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
       expect(cohorts.items.length).toBe(1);
       expect(cohorts.items[0].name).toBe('Edited Cohort');
       expect(cohorts.items[0].description).toBe('Edited Description');
     });
-    updateAndTick(fixture);
+    updateAndTick(context.fixture);
   }));
 });
