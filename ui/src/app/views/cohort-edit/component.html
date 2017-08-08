@@ -7,16 +7,18 @@
   </div>
   <div>
     <label>Description:</label>
-    <textarea id="description" class="input" name="cohort-description" [(ngModel)]="cohort.description"></textarea>
+    <textarea id="description" class="input" name="cohort-description"
+        [(ngModel)]="cohort.description">
+    </textarea>
   </div>
   <div class="button">
     <div *ngIf="adding; else saveButton">
-      <button (click)="addCohort()">Add Cohort</button>
+      <button id="add" (click)="addCohort()">Add Cohort</button>
       <button (click)="cancelAdd()">Cancel</button>
     </div>
     <ng-template #saveButton>
       <div>
-        <button (click)="saveCohort()">Save Cohort</button>
+        <button id="save" (click)="saveCohort()">Save Cohort</button>
         <button (click)="cancelSave()">Cancel</button>
       </div>
     </ng-template>

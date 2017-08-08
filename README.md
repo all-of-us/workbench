@@ -119,6 +119,10 @@ Download the git-secrets tool.
 Place the tool somewhere in your path, using either:
 * make install
 * brew install git-secrets
+Run the command from the tools directory:
+```Shell
+./setup_git_secrets
+```
 
 ### Running
 
