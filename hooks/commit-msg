@@ -1,7 +1,2 @@
 #!/usr/bin/env bash
-CURRENT_DIRECTORY="$(pwd)"
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd ${DIR}/../tools
-./setup_git_secrets.sh
-git secrets --git-dir ../.git --work-tree ../ --commit_msg_hook -- "$@"
-cd "${CURRENT_DIRECTORY}"
+git secrets --commit_msg_hook -- "$@"
