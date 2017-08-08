@@ -7,8 +7,8 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {updateAndTick, simulateInput} from 'test-files/test-helpers';
-import {CohortsServiceStub} from 'test-files/stubs/cohort-service-stub';
+import {updateAndTick, simulateInput} from 'testing/test-helpers';
+import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
 
 
