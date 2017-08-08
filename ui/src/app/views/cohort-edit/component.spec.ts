@@ -27,8 +27,6 @@ class Context {
   cohortsService: CohortsService;
   nameField: DebugElement;
   descriptionField: DebugElement;
-  addButton: DebugElement;
-  saveButton: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(CohortEditComponent);
@@ -39,9 +37,10 @@ class Context {
   }
 }
 
-function simulateInput(fixture: ComponentFixture<Component>,
-  element: DebugElement,
-  text: string) {
+function simulateInput(
+    fixture: ComponentFixture<Component>,
+    element: DebugElement,
+    text: string) {
   element.nativeNode.value = text;
   element.nativeNode.dispatchEvent(new Event('input'));
   updateAndTick(fixture);
@@ -69,9 +68,10 @@ class CohortsServiceStub {
   }
   public workspaces: Workspace[];
 
-  private getMatchingWorkspaceOrSendError(wsNamespace: string,
-    wsId: string,
-    observer: Observer<{}>): Workspace {
+  private getMatchingWorkspaceOrSendError(
+      wsNamespace: string,
+      wsId: string,
+      observer: Observer<{}>): Workspace {
     const workspaceFound = this.workspaces.find(function(workspace: Workspace) {
       if (workspace.namespace === wsNamespace && workspace.id === wsId) {
         return true;
@@ -80,15 +80,16 @@ class CohortsServiceStub {
       }
     });
     if (workspaceFound === undefined) {
-      observer.error(`Error Searching. No workspace ${wsNamespace}, ${wsId} found \
-in cohort service stub`);
+      observer.error(`Error Searching. No workspace ${wsNamespace}, ${wsId} found `
+                    + 'in cohort service stub.');
     }
     return workspaceFound;
   }
 
-  public getCohort(wsNamespace: string,
-                   wsId: string,
-                   cId: string): Observable<Cohort> {
+  public getCohort(
+      wsNamespace: string,
+      wsId: string,
+      cId: string): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
@@ -105,10 +106,11 @@ in cohort service stub`);
     return observable;
   }
 
-  public updateCohort(wsNamespace: string,
-                      wsId: string,
-                      cId: string,
-                      newCohort: Cohort): Observable<Cohort> {
+  public updateCohort(
+      wsNamespace: string,
+      wsId: string,
+      cId: string,
+      newCohort: Cohort): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
@@ -123,8 +125,9 @@ in cohort service stub`);
             workspaceMatch.cohorts[index] = newCohort;
             observer.complete();
           } else {
-            observer.error(new Error(`Error updating. No cohort with id: ${cId} \
-              exists in workspace ${wsNamespace}, ${wsId} in cohort service stub`));
+            observer.error(new Error(`Error updating. No cohort with id: ${cId} `
+                                    + `exists in workspace ${wsNamespace}, ${wsId} `
+                                    + `in cohort service stub`));
           }
         }
       }, 0);
@@ -132,16 +135,18 @@ in cohort service stub`);
     return observable;
   }
 
-  public createCohort(wsNamespace: string,
-                      wsId: string, newCohort: Cohort): Observable<Cohort> {
+  public createCohort(
+      wsNamespace: string,
+      wsId: string,
+      newCohort: Cohort): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
         if (workspaceMatch !== undefined) {
           observer.next(workspaceMatch.cohorts.find(function(cohort: Cohort) {
             if (cohort.id === newCohort.id) {
-              observer.error(new Error(`Error creating. Cohort with \
-id: ${cohort.id} already exists.`));
+              observer.error(new Error(`Error creating. Cohort with `
+                                      + `id: ${cohort.id} already exists.`));
               return true;
             }
           }));
@@ -153,8 +158,9 @@ id: ${cohort.id} already exists.`));
     return observable;
   }
 
-  public getCohortsInWorkspace(wsNamespace: string,
-                               wsId: string): Observable<CohortListResponse> {
+  public getCohortsInWorkspace(
+      wsNamespace: string,
+      wsId: string): Observable<CohortListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
@@ -202,10 +208,8 @@ describe('CohortEditComponent', () => {
   it('displays blank input fields when creating a new cohort', async(() => {
     const context = new Context(TestBed);
     context.fixture.detectChanges();
-    setTimeout(function(){
-      expect(context.nameField.nativeNode.value).toMatch('');
-      expect(context.descriptionField.nativeNode.value).toMatch('');
-    }, 0);
+    expect(context.nameField.nativeNode.value).toMatch('');
+    expect(context.descriptionField.nativeNode.value).toMatch('');
   }));
 
 
