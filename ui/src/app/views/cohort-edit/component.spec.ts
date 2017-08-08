@@ -7,8 +7,13 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+<<<<<<< HEAD
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+=======
+import {updateAndTick, simulateInput} from 'test-files/test-helpers';
+import {CohortsServiceStub} from 'test-files/stubs/cohort-service-stub';
+>>>>>>> 89527a5940036d67d4f870c2d884c9e5dbb9d3d9
 import {CohortsService} from 'generated';
 
 
