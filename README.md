@@ -116,9 +116,28 @@ UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot
 ### Setup
 
 Download the git-secrets tool.
-Place the tool somewhere in your path, using either:
-* make install
-* brew install git-secrets
+If you have not yet run the setup environment script, run:
+```Shell
+./setup_env
+```
+Otherwise, if the command fails or you have run it before,
+follow the instructions below.
+If you are on Mac, run:
+```Shell
+brew install git-secrets
+```
+If you are on Linux, run:
+```Shell
+git clone https://github.com/awslabs/git-secrets.git
+cd git-secrets
+make install
+cd ..
+rm -rf git-secrets
+```
+Run the command from the tools directory:
+```Shell
+./setup_git_secrets
+```
 
 ### Running
 
@@ -126,7 +145,7 @@ git-secrets by default runs every time you make a commit. But if you
 want to manually scan:
 First go to the tools directory and run
 ```Shell
-./setup_git_secrets
+./setup_git_secrets.sh
 ```
 #### The Repository
 ```Shell
