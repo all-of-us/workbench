@@ -1,6 +1,7 @@
 import {Component, DebugElement} from '@angular/core';
 import {TestBed, async, fakeAsync, ComponentFixture} from '@angular/core/testing';
 import {Title, By} from '@angular/platform-browser';
+import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
@@ -14,6 +15,7 @@ class Context {
   cohortsService: CohortsService;
   userService: UserService;
   repositoryService: RepositoryService;
+  route: UrlSegment[];
   cohortsTableRows: DebugElement[];
   notebookTableRows: DebugElement[];
   cdrText: DebugElement;
@@ -25,6 +27,7 @@ class Context {
     this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
     this.userService = this.fixture.debugElement.injector.get(UserService);
     this.repositoryService = this.fixture.debugElement.injector.get(RepositoryService);
+    this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
     this.readPageData();
@@ -39,6 +42,15 @@ class Context {
   }
 }
 
+const activatedRouteStub  = {
+  snapshot: {
+    url: [
+      {path: 'workspace'},
+      {path: WorkspaceComponent.DEFAULT_WORKSPACE_NS},
+      {path: WorkspaceComponent.DEFAULT_WORKSPACE_ID}
+    ]
+  }
+};
 
 describe('WorkspaceComponent', () => {
 
@@ -53,7 +65,8 @@ describe('WorkspaceComponent', () => {
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: UserService, useValue: new UserService() },
-        { provide: RepositoryService, useValue: new RepositoryService() }
+        { provide: RepositoryService, useValue: new RepositoryService() },
+        { provide: ActivatedRoute, useValue: activatedRouteStub }
       ] }).compileComponents();
   }));
 
@@ -81,5 +94,16 @@ describe('WorkspaceComponent', () => {
       expect(context.loggedOutMessage.nativeElement.innerText)
         .toMatch('Log in to view workspace.');
     });
+  }));
+  it('errors if it tries to access a non-existant workspace', fakeAsync(() => {
+    const context = new Context(TestBed);
+    context.route[1].path = 'fakeNamespace';
+    context.route[2].path = '5';
+    updateAndTick(context.fixture);
+
+    expect(function(){
+      context.fixture.componentRef.instance.ngOnInit();
+      updateAndTick(context.fixture);
+    }).toThrow();
   }));
 });
