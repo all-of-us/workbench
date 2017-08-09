@@ -116,23 +116,9 @@ UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot
 ### Setup
 
 Download the git-secrets tool.
-If you have not yet run the setup environment script, run:
+Run:
 ```Shell
-./setup_env.sh
-```
-Otherwise, if the command fails or you have run it before,
-follow the instructions below.
-If you are on Mac, run:
-```Shell
-brew install git-secrets
-```
-If you are on Linux, run:
-```Shell
-git clone https://github.com/awslabs/git-secrets.git
-cd git-secrets
-make install
-cd ..
-rm -rf git-secrets
+tools/setup_env.sh
 ```
 
 ### Running
