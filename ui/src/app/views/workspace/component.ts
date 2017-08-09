@@ -21,7 +21,7 @@ export class WorkspaceComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
   currentUrl: string;
-  cohortList = [];
+  cohortList: Cohort[] = [];
   constructor(
       private router: Router,
       private userService: UserService,
