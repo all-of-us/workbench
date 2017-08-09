@@ -1,2 +1,14 @@
 #!/usr/bin/env bash
+{
+  git config --remove-section secrets 2>/dev/null
+} || {
+  :
+}
+git secrets --add 'private_key'
+git secrets --add 'auth_key'
+git secrets --add 'private_key_id'
+git secrets --add --allowed --literal "git secrets --add 'private_key'"
+git secrets --add --allowed --literal "git secrets --add 'private_key_id'"
+git secrets --add --allowed --literal "git secrets --add 'auth_key'"
+
 git secrets --commit_msg_hook -- "$@"
