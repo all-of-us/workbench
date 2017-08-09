@@ -6,7 +6,8 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <!-- Use a liquibase user with permissions to change the schema -->
   <preConditions>
-    <runningAs username="liquibase"/>
+    <!-- TODO(dmohs): Change this back to liquibase! -->
+    <runningAs username="workbench"/>
   </preConditions>
   <include file="changelog/db.changelog-1.xml"/>
 </databaseChangeLog>
