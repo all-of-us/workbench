@@ -116,11 +116,19 @@ UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot
 ### Setup
 
 Download the git-secrets tool.
-Run:
+If you are on a mac, run:
 ```Shell
-tools/setup_env.sh
+  brew install git-secrets
 ```
-
+If you are on Linux, run:
+```Shell
+rm -rf git-secrets
+git clone https://github.com/awslabs/git-secrets.git
+cd git-secrets
+sudo make install && sudo chmod o+rx /usr/local/bin/git-secrets
+cd ..
+rm -rf git-secrets
+```
 ### Running
 
 git-secrets by default runs every time you make a commit. But if you
