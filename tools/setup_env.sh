@@ -7,6 +7,7 @@ sudo npm install -g @angular/cli
 echo Installing UI project dependencies.
 npm install
 
+
 cd ../tools
 ./download_swagger_cli.sh
 ./download_cloud_sql_proxy.sh
