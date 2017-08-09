@@ -118,7 +118,7 @@ UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot
 Download the git-secrets tool.
 If you have not yet run the setup environment script, run:
 ```Shell
-./setup_env
+./setup_env.sh
 ```
 Otherwise, if the command fails or you have run it before,
 follow the instructions below.
