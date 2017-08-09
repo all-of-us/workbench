@@ -28,7 +28,7 @@ export class WorkspaceComponent implements OnInit {
       private repositoryService: RepositoryService,
       private cohortsService: CohortsService
   ) {}
-
+  // TODO: Replace arguments to getCohortsInWorkspace to read from URL.
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);
     this.cohortsService
