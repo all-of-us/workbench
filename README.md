@@ -134,19 +134,11 @@ make install
 cd ..
 rm -rf git-secrets
 ```
-Run the command from the tools directory:
-```Shell
-./setup_git_secrets
-```
 
 ### Running
 
 git-secrets by default runs every time you make a commit. But if you
 want to manually scan:
-First go to the tools directory and run
-```Shell
-./setup_git_secrets.sh
-```
 #### The Repository
 ```Shell
 git secrets --scan
