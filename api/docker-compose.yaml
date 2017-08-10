@@ -1,7 +1,7 @@
 version: "3"
 services:
   db:
-    image: "mysql:5.7"
+    image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_USER=workbench
@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
     volumes:
-      - gradle-cache:/root/.gradle
+      - gradle-cache-api:/root/.gradle
       - .:/w:cached
     command: ./gradlew --no-daemon appengineRun
     environment:
@@ -35,9 +35,11 @@ services:
     depends_on:
       - api
     volumes:
-      - gradle-cache:/root/.gradle
+      - gradle-cache-migration:/root/.gradle
       - .:/w:cached
-    command: wait-for api:8081 -t 120 -- ../gradlew update
+    # On first run, this has to wait a long time since the entire build process, including
+    # downloading jars, has to complete. Hence 180 seconds.
+    command: wait-for api:8081 -t 180 -- ../gradlew update
     environment:
       - DB_SERVER=db
       - DB_CONNECTION_STRING=jdbc:mysql://db/workbench
@@ -47,4 +49,5 @@ services:
       - WORKBENCH_PASSWORD=workbench!pwd
 volumes:
   db:
-  gradle-cache:
+  gradle-cache-api:
+  gradle-cache-migration:
