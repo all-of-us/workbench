@@ -23,8 +23,8 @@ class CohortEditPage {
     this.fixture = testBed.createComponent(CohortEditComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
-    this.nameField = this.fixture.debugElement.query(By.css('#name'));
-    this.descriptionField = this.fixture.debugElement.query(By.css('#description'));
+    this.nameField = this.fixture.debugElement.query(By.css('.name'));
+    this.descriptionField = this.fixture.debugElement.query(By.css('.description'));
   }
 }
 
@@ -84,7 +84,7 @@ describe('CohortEditComponent', () => {
     updateAndTick(cohortEditPage.fixture);
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'New Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'New Description');
-    const addButton = cohortEditPage.fixture.debugElement.query(By.css('#add'));
+    const addButton = cohortEditPage.fixture.debugElement.query(By.css('.add-button'));
     addButton.triggerEventHandler('click', null);
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
@@ -102,7 +102,7 @@ describe('CohortEditComponent', () => {
     cohortEditPage.route[4].path = '1';
     cohortEditPage.route.push(new UrlSegment('edit', {}));
     updateAndTick(cohortEditPage.fixture);
-    const saveButton = cohortEditPage.fixture.debugElement.query(By.css('#save'));
+    const saveButton = cohortEditPage.fixture.debugElement.query(By.css('.save-button'));
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'Edited Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'Edited Description');
     saveButton.triggerEventHandler('click', null);
