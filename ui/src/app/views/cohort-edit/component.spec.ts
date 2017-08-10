@@ -1,5 +1,5 @@
 import {Component, DebugElement} from '@angular/core';
-import {TestBed, async, fakeAsync, ComponentFixture} from '@angular/core/testing';
+import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
 import {Title, By} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
@@ -41,8 +41,8 @@ const activatedRouteStub  = {
 };
 
 describe('CohortEditComponent', () => {
-
-  beforeEach(async(() => {
+  let context: Context;
+  beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -54,13 +54,15 @@ describe('CohortEditComponent', () => {
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
-      ] }).compileComponents();
+      ] }).compileComponents().then(() => {
+        context = new Context(TestBed);
+      });
+      tick();
   }));
 
 
 
   it('displays blank input fields when creating a new cohort', async(() => {
-    const context = new Context(TestBed);
     context.fixture.detectChanges();
     expect(context.nameField.nativeNode.value).toMatch('');
     expect(context.descriptionField.nativeNode.value).toMatch('');
@@ -69,7 +71,6 @@ describe('CohortEditComponent', () => {
 
   it('fetches and displays an existing cohort in the edit pane',
   fakeAsync(() => {
-    const context = new Context(TestBed);
     context.route[4].path = '1';
     context.route.push(new UrlSegment('edit', {}));
     updateAndTick(context.fixture);
@@ -79,7 +80,6 @@ describe('CohortEditComponent', () => {
   }));
 
   it('adds a new cohort with given name and description', fakeAsync(() => {
-    const context = new Context(TestBed);
     context.route[4].path = 'create';
     updateAndTick(context.fixture);
     simulateInput(context.fixture, context.nameField, 'New Cohort');
@@ -99,7 +99,6 @@ describe('CohortEditComponent', () => {
 
   it('edits an existing cohort with given name and description',
   fakeAsync(() => {
-    const context = new Context(TestBed);
     context.route[4].path = '1';
     context.route.push(new UrlSegment('edit', {}));
     updateAndTick(context.fixture);
