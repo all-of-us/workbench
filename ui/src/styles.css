@@ -20,6 +20,15 @@ a {
   cursor: pointer;
   cursor: hand;
 }
+
+input[type=text] {
+  border: 1px solid #9a9a9a;
+}
+
+input[type=text]:focus {
+  border: 1px solid #0094d2;
+}
+
 button {
   font-family: Arial;
   background-color: #eee;

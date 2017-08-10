@@ -13,13 +13,13 @@
   </div>
   <div class="button">
     <div *ngIf="adding; else saveButton">
-      <button id="add" (click)="addCohort()">Add Cohort</button>
-      <button (click)="cancelAdd()">Cancel</button>
+      <button id="add" (click)="addCohort()" class="btn">Add Cohort</button>
+      <button (click)="cancelAdd()" class="btn">Cancel</button>
     </div>
     <ng-template #saveButton>
       <div>
-        <button id="save" (click)="saveCohort()">Save Cohort</button>
-        <button (click)="cancelSave()">Cancel</button>
+        <button id="save" (click)="saveCohort()" class="btn">Save Cohort</button>
+        <button (click)="cancelSave()" class="btn">Cancel</button>
       </div>
     </ng-template>
   </div>
