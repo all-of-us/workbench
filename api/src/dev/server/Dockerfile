@@ -39,5 +39,7 @@ RUN gcloud components install app-engine-java
 RUN apk --no-cache add gettext
 
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
-  > /usr/local/bin/cloud_sql_proxy
-RUN chmod +x /usr/local/bin/cloud_sql_proxy
+  > /usr/local/bin/cloud_sql_proxy && chmod +x /usr/local/bin/cloud_sql_proxy
+
+RUN curl https://raw.githubusercontent.com/Eficode/wait-for/master/wait-for \
+  > /usr/local/bin/wait-for && chmod +x /usr/local/bin/wait-for

@@ -1,0 +1,50 @@
+version: "3"
+services:
+  db:
+    image: "mysql:5.7"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=workbench
+      - MYSQL_PASSWORD=workbench!pwd
+      - MYSQL_DATABASE=workbench
+    volumes:
+      - db:/var/lib/mysql
+  api:
+    build:
+      context: ./src/dev/server
+    working_dir: /w
+    depends_on:
+      - db
+    volumes:
+      - gradle-cache:/root/.gradle
+      - .:/w:cached
+    command: ./gradlew --no-daemon appengineRun
+    environment:
+      - DB_SERVER=db
+      - DB_CONNECTION_STRING=jdbc:mysql://db/workbench
+      - DB_LIQUIBASE_USER=workbench
+      - DB_LIQUIBASE_PASSWORD=workbench!pwd
+      - WORKBENCH_DB_USER=workbench
+      - WORKBENCH_PASSWORD=workbench!pwd
+    ports:
+      - 8081:8081
+  db-migration:
+    build:
+      context: ./src/dev/server
+    working_dir: /w/db
+    depends_on:
+      - api
+    volumes:
+      - gradle-cache:/root/.gradle
+      - .:/w:cached
+    command: wait-for api:8081 -t 120 -- ../gradlew update
+    environment:
+      - DB_SERVER=db
+      - DB_CONNECTION_STRING=jdbc:mysql://db/workbench
+      - DB_LIQUIBASE_USER=workbench
+      - DB_LIQUIBASE_PASSWORD=workbench!pwd
+      - WORKBENCH_DB_USER=workbench
+      - WORKBENCH_PASSWORD=workbench!pwd
+volumes:
+  db:
+  gradle-cache:
