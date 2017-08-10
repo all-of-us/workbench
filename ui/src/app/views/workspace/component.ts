@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
@@ -20,20 +20,19 @@ export class WorkspaceComponent implements OnInit {
 
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
-  currentUrl: string;
-  cohortList = [];
+  cohortList: Cohort[] = [];
   constructor(
       private router: Router,
+      private route: ActivatedRoute,
       private userService: UserService,
       private repositoryService: RepositoryService,
       private cohortsService: CohortsService
   ) {}
-
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);
     this.cohortsService
         .getCohortsInWorkspace(
-            WorkspaceComponent.DEFAULT_WORKSPACE_NS, WorkspaceComponent.DEFAULT_WORKSPACE_ID)
+            this.route.snapshot.url[1].path, this.route.snapshot.url[2].path)
         .retry(2)
         .subscribe(
             cohortsReceived => {
@@ -41,14 +40,14 @@ export class WorkspaceComponent implements OnInit {
                 this.cohortList.push(coho);
               }
             });
-    this.currentUrl = this.router.url;
+
   }
 
   addCohort(): void {
-    this.router.navigate([this.currentUrl + '/cohorts/build']);
+    this.router.navigate(['cohorts/build'], {relativeTo : this.route});
   }
 
   goToCohortEdit(id: string): void {
-    this.router.navigate([this.currentUrl + '/cohorts/' + id + '/build']);
+    this.router.navigate(['cohorts/' + id + '/build'], {relativeTo : this.route});
   }
 }

@@ -5,7 +5,7 @@
     <h3>CDR Version</h3>
     <div class="indented">
       <!-- TODO: Add CDR Version Info - blrubenstein -->
-      <p>CDR version info goes here.</p>
+      <p class="cdr-text">CDR version info goes here.</p>
     </div>
   </div>
   <div class="area-block">
@@ -20,7 +20,7 @@
           <div>URL</div>
           <div>Created Date</div>
         </div>
-        <div *ngFor="let cohort of cohortList" class="table-row">
+        <div *ngFor="let cohort of cohortList" class="table-row cohort-table-row">
           <!-- TODO: Edit Cohort Link - blrubenstein -->
           <div><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></div>
           <div class="wider-table">{{cohort.description}}</div>
@@ -44,12 +44,12 @@
           <div class="wider-table">Description</div>
           <div class="wider-table">URL</div>
         </div>
-        <div class="table-row">
+        <div class="table-row notebook-table-row">
           <div>Notebook 1</div>
           <div class="wider-table">This is the user defined description for notebook 1</div>
           <div class="wider-table">/cohort/notebook1</div>
         </div>
-        <div class="table-row">
+        <div class="table-row notebook-table-row">
           <div>Notebook 2</div>
           <div class="wider-table">This is the user defined description for notebook 2</div>
           <div class="wider-table">/cohort/notebook2</div>
@@ -58,4 +58,4 @@
     </div>
   </div>
 </div>
-<ng-template #loggedout>Log in to view workspace.</ng-template>
+<ng-template #loggedout><p class="logged-out-message">Log in to view workspace.</p></ng-template>
