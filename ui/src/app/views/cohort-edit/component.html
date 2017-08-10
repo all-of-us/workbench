@@ -2,24 +2,24 @@
 <div class="form-area">
   <div>
     <label>Cohort Name:</label>
-    <input type="text" id="name" class="input" name="cohort-name" autofocus
+    <input type="text" class="input name" name="cohort-name" autofocus
         [(ngModel)]="cohort.name">
   </div>
   <div>
     <label>Description:</label>
-    <textarea id="description" class="input" name="cohort-description"
+    <textarea class="input description" name="cohort-description"
         [(ngModel)]="cohort.description">
     </textarea>
   </div>
   <div class="button">
     <div *ngIf="adding; else saveButton">
-      <button id="add" (click)="addCohort()" class="btn">Add Cohort</button>
-      <button (click)="cancelAdd()" class="btn">Cancel</button>
+      <button class="btn add-button" (click)="addCohort()">Add Cohort</button>
+      <button class="btn" (click)="cancelAdd()">Cancel</button>
     </div>
     <ng-template #saveButton>
       <div>
-        <button id="save" (click)="saveCohort()" class="btn">Save Cohort</button>
-        <button (click)="cancelSave()" class="btn">Cancel</button>
+        <button class="btn save-button" (click)="saveCohort()">Save Cohort</button>
+        <button class="btn" (click)="cancelSave()">Cancel</button>
       </div>
     </ng-template>
   </div>

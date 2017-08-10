@@ -40,9 +40,15 @@ class WorkspacePage {
     this.workspaceId = this.route[2].path;
     this.cohortsTableRows = this.fixture.debugElement.queryAll(By.css('.cohort-table-row'));
     this.notebookTableRows = this.fixture.debugElement.queryAll(By.css('.notebook-table-row'));
+<<<<<<< HEAD
     this.cdrText = this.fixture.debugElement.query(By.css('#cdr-text'));
     this.workspaceDescription = this.fixture.debugElement.query(By.css('.description-text'));
     this.loggedOutMessage = this.fixture.debugElement.query(By.css('#logged-out-message'));
+=======
+    this.cdrText = this.fixture.debugElement.query(By.css('.cdr-text'));
+    this.workspaceDescription = this.fixture.debugElement.query(By.css('.description-text'));
+    this.loggedOutMessage = this.fixture.debugElement.query(By.css('.logged-out-message'));
+>>>>>>> master
   }
 }
 
