@@ -10,7 +10,7 @@ import {CohortsService} from 'generated';
 import {UserService} from 'app/services/user.service';
 import {RepositoryService} from 'app/services/repository.service';
 
-class Context {
+class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
   cohortsService: CohortsService;
   userService: UserService;
@@ -57,7 +57,7 @@ const activatedRouteStub  = {
 };
 
 describe('WorkspaceComponent', () => {
-  let context: Context;
+  let workspacePage: WorkspacePage;
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
@@ -73,7 +73,7 @@ describe('WorkspaceComponent', () => {
         { provide: RepositoryService, useValue: new RepositoryService() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ] }).compileComponents().then(() => {
-        context = new Context(TestBed);
+        workspacePage = new WorkspacePage(TestBed);
       });
       tick();
   }));
@@ -81,40 +81,40 @@ describe('WorkspaceComponent', () => {
 
   it('displays correct information in default workspace', fakeAsync(() => {
     let expectedCohorts: number;
-    context.cohortsService.getCohortsInWorkspace(
-        context.workspaceNamespace,
-        context.workspaceId)
+    workspacePage.cohortsService.getCohortsInWorkspace(
+        workspacePage.workspaceNamespace,
+        workspacePage.workspaceId)
       .subscribe(cohorts => {
       expectedCohorts = cohorts.items.length;
     });
     tick();
-    expect(context.cohortsTableRows.length).toEqual(expectedCohorts);
-    expect(context.notebookTableRows.length).toEqual(2);
-    expect(context.cdrText.nativeElement.innerText)
+    expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
+    expect(workspacePage.notebookTableRows.length).toEqual(2);
+    expect(workspacePage.cdrText.nativeElement.innerText)
       .toMatch('CDR version info goes here.');
-    expect(context.workspaceDescription.nativeElement.innerText)
+    expect(workspacePage.workspaceDescription.nativeElement.innerText)
       .toMatch('Default workspace for July, 2017 demo');
   }));
 
   it('displays login prompt when logged out', fakeAsync(() => {
-    context.userService.logOut();
-    context.userService.getLoggedInUser().then((user) => {
-      updateAndTick(context.fixture);
-      updateAndTick(context.fixture);
-      context.fixture.componentRef.instance.ngOnInit();
-      context.readPageData();
-      expect(context.loggedOutMessage.nativeElement.innerText)
+    workspacePage.userService.logOut();
+    workspacePage.userService.getLoggedInUser().then((user) => {
+      updateAndTick(workspacePage.fixture);
+      updateAndTick(workspacePage.fixture);
+      workspacePage.fixture.componentRef.instance.ngOnInit();
+      workspacePage.readPageData();
+      expect(workspacePage.loggedOutMessage.nativeElement.innerText)
         .toMatch('Log in to view workspace.');
     });
   }));
   it('errors if it tries to access a non-existant workspace', fakeAsync(() => {
-    context.route[1].path = 'fakeNamespace';
-    context.route[2].path = '5';
-    updateAndTick(context.fixture);
+    workspacePage.route[1].path = 'fakeNamespace';
+    workspacePage.route[2].path = '5';
+    workspacePage.readPageData();
 
     expect(function(){
-      context.fixture.componentRef.instance.ngOnInit();
-      updateAndTick(context.fixture);
+      workspacePage.fixture.componentRef.instance.ngOnInit();
+      updateAndTick(workspacePage.fixture);
     }).toThrow();
   }));
 });
