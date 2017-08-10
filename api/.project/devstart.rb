@@ -32,7 +32,7 @@ def startdb()
       -v gradle-cache:/root/.gradle
       --network #{env.namespace}
       -w /w/db
-      -v #{ENV["PWD"]}:/w
+      -v #{ENV["PWD"]}:/w:cached
       #{env.namespace}-devserver
       ../gradlew --no-daemon update
   }
@@ -61,7 +61,7 @@ def serve()
       -v gradle-cache:/root/.gradle
       --network #{env.namespace}
       -w /w
-      -v #{ENV["PWD"]}:/w
+      -v #{ENV["PWD"]}:/w:cached
       -p 8081:8081
       #{cname}
       ./gradlew --no-daemon appengineRun
