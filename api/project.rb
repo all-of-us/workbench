@@ -1,31 +1,33 @@
 #!/usr/bin/env ruby
 
-unless Dir.exists? ".project/common"
-  unless system(*%W{mkdir -p .project})
-    STDERR.puts "mkdir failed."
-    exit 1
-  end
-  unless system(*%W{git clone https://github.com/dmohs/project-management.git .project/common})
-    STDERR.puts "git clone failed."
+# `git clone` includes submodule folders but nothing else.
+unless File.exists? "libproject/utils/README.md"
+  unless system(*%W{git submodule update libproject/utils})
+    STDERR.puts "`git submodule update` failed."
     exit 1
   end
 end
 
-require_relative ".project/common/common"
-Dir.foreach(".project") do |item|
-  unless item =~ /^\.\.?$/ || item == "common"
-    require_relative ".project/#{item}"
-  end
-end
+require_relative "libproject/utils/common"
 
-c = Common.new
+#
+# Custom script files
+#
+
+require_relative "libproject/devstart.rb"
+
+#
+# End custom script files
+#
+
+common = Common.new
 
 if ARGV.length == 0 or ARGV[0] == "--help"
-  c.print_usage
+  common.print_usage
   exit 0
 end
 
 command = ARGV.first
 args = ARGV.drop(1)
 
-c.handle_or_die(command, *args)
+common.handle_or_die(command, *args)
