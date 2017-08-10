@@ -2,7 +2,7 @@
 
 # `git clone` includes submodule folders but nothing else.
 unless File.exists? "libproject/utils/README.md"
-  unless system(*%W{git submodule update libproject/utils})
+  unless system(*%W{git submodule update --init libproject/utils})
     STDERR.puts "`git submodule update` failed."
     exit 1
   end
