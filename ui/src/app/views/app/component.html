@@ -12,7 +12,7 @@
         <ng-template *ngIf="true; then logoImages"></ng-template>
       </div>
       <div style="margin: 1.5rem 0; display: flex; justify-content: space-around;">
-        <button (click)="signIn()" class="btn">Sign In</button>
+        <button (click)="signIn()" class="btn btn-primary">Sign In</button>
       </div>
     </div>
   </div>
@@ -26,11 +26,17 @@
       <button (click)="signOut()" class="btn">Sign Out</button>
     </div>
   </div>
-  <nav style="margin-top: 1.5rem;">
-    <a routerLink="/" routerLinkActive="active">My Workspace</a>
-    <a routerLink="/login" routerLinkActive="active">Switch User</a>
-    <a routerLink="/repository" routerLinkActive="active">Select CDR</a>
-  </nav>
+  <ul class="nav nav-bar" role="tablist">
+    <li role="presentation" class="nav-item">
+      <button class="btn btn-link nav-link" routerLink="/"type="button">My Workspace</button>
+    </li>
+    <li role="presentation" class="nav-item">
+      <button class="btn btn-link nav-link" routerLink="/login" type="button">Switch User</button>
+    </li>
+    <li role="presentation" class="nav-item">
+      <button class="btn btn-link nav-link" routerLink="/repository" type="button">Select CDR</button>
+    </li>
+  </ul>
   <div>
     <!--
       Angular's builtin Router module will attach specific views here

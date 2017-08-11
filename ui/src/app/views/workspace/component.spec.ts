@@ -3,12 +3,20 @@ import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/t
 import {Title, By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
+import {FormsModule} from '@angular/forms';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
 import {UserService} from 'app/services/user.service';
 import {RepositoryService} from 'app/services/repository.service';
+import {Datagrid,
+  DatagridCell,
+  DatagridColumn,
+  DatagridRow,
+  DatagridPlaceholder} from 'clarity-angular/data/datagrid';
+import {Checkbox} from 'clarity-angular/forms/checkbox';
+import {ClarityModule} from 'clarity-angular';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -40,15 +48,9 @@ class WorkspacePage {
     this.workspaceId = this.route[2].path;
     this.cohortsTableRows = this.fixture.debugElement.queryAll(By.css('.cohort-table-row'));
     this.notebookTableRows = this.fixture.debugElement.queryAll(By.css('.notebook-table-row'));
-<<<<<<< HEAD
-    this.cdrText = this.fixture.debugElement.query(By.css('#cdr-text'));
-    this.workspaceDescription = this.fixture.debugElement.query(By.css('.description-text'));
-    this.loggedOutMessage = this.fixture.debugElement.query(By.css('#logged-out-message'));
-=======
     this.cdrText = this.fixture.debugElement.query(By.css('.cdr-text'));
     this.workspaceDescription = this.fixture.debugElement.query(By.css('.description-text'));
     this.loggedOutMessage = this.fixture.debugElement.query(By.css('.logged-out-message'));
->>>>>>> master
   }
 }
 
@@ -68,10 +70,17 @@ describe('WorkspaceComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterTestingModule,
+        ClarityModule.forRoot()
       ],
       declarations: [
-        WorkspaceComponent
+        WorkspaceComponent,
+        // Datagrid,
+        // DatagridColumn,
+        // DatagridRow,
+        // DatagridCell,
+        // DatagridPlaceholder,
+        // Checkbox
       ],
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
