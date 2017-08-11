@@ -14,9 +14,8 @@ liquibase {
         main {
             changeLogFile 'changelog/db.changelog-master.xml'
             url 'jdbc:mysql://db/workbench'
-            // TODO(dmohs): Change this back to liquibase!
-            username 'workbench'
-            password 'workbench!pwd'
+            username 'liquibase'
+            password 'lb-notasecret'
         }
     }
 }
