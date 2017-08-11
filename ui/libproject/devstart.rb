@@ -56,13 +56,26 @@ def dev_up(*args)
   unless Dir.exist?("node_modules")
     install_dependencies
   end
-  unless Dir.exist?("src/generated")
-    swagger_regen
-  end
+
+  swagger_regen
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
   common.run_inline_swallowing_interrupt %W{docker-compose up}
   at_exit { common.run_inline %W{docker-compose down} }
+end
+
+def start_tests()
+  common = Common.new
+  common.docker.requires_docker
+
+  swagger_regen
+
+  common.status "Starting tests. Open\n"
+  common.status "    http://localhost:9876/debug.html\n"
+  common.status "in a browser to view/re-run."
+  common.run_inline %W{
+    docker run --rm -it -w /w -v #{ENV["PWD"]}:/w -p 9876:9876 node npm test
+  }
 end
 
 def clean_git_hooks()
@@ -73,6 +86,12 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
   :fn => Proc.new { |*args| dev_up(*args) }
+})
+
+Common.register_command({
+  :invocation => "test",
+  :description => "Runs the test server and opens a browser to run the tests.",
+  :fn => Proc.new { |*args| start_tests(*args) }
 })
 
 Common.register_command({
