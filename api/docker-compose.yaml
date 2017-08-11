@@ -2,11 +2,8 @@ version: "3"
 services:
   db:
     image: mysql:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=workbench
-      - MYSQL_PASSWORD=workbench!pwd
-      - MYSQL_DATABASE=workbench
+    env_file:
+      - db/vars.env
     volumes:
       - db:/var/lib/mysql
   api:
@@ -19,13 +16,8 @@ services:
       - gradle-cache-api:/root/.gradle
       - .:/w:cached
     command: ./gradlew --no-daemon appengineRun
-    environment:
-      - DB_SERVER=db
-      - DB_CONNECTION_STRING=jdbc:mysql://db/workbench
-      - DB_LIQUIBASE_USER=workbench
-      - DB_LIQUIBASE_PASSWORD=workbench!pwd
-      - WORKBENCH_DB_USER=workbench
-      - WORKBENCH_PASSWORD=workbench!pwd
+    env_file:
+      - db/vars.env
     ports:
       - 8081:8081
   db-migration:
@@ -37,16 +29,9 @@ services:
     volumes:
       - gradle-cache-migration:/root/.gradle
       - .:/w:cached
-    # On first run, this has to wait a long time since the entire build process, including
-    # downloading jars, has to complete. Hence 180 seconds.
-    command: wait-for api:8081 -t 180 -- ../gradlew update
-    environment:
-      - DB_SERVER=db
-      - DB_CONNECTION_STRING=jdbc:mysql://db/workbench
-      - DB_LIQUIBASE_USER=workbench
-      - DB_LIQUIBASE_PASSWORD=workbench!pwd
-      - WORKBENCH_DB_USER=workbench
-      - WORKBENCH_PASSWORD=workbench!pwd
+    command: wait-for db:3306 -- ./run-migrations.sh
+    env_file:
+      - db/vars.env
 volumes:
   db:
   gradle-cache-api:
