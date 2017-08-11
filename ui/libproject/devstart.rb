@@ -21,7 +21,7 @@ def swagger_regen()
       -w /w -v #{parent}:/w:cached
       openjdk:jre-alpine
       java -jar tools/swagger-codegen-cli.jar generate
-        --lang typescript-angular  --input-spec api/src/main/resources/workbench.yaml
+        --lang typescript-angular --input-spec api/src/main/resources/workbench.yaml
         --output ui/src/generated --additional-properties ngVersion=2
   }
 end
