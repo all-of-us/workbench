@@ -4,7 +4,7 @@
   "license": "BSD",
   "scripts": {
     "ng": "ng",
-    "start": "npm run codegen && ng serve",
+    "start": "ng serve",
     "build": "npm run codegen && ng build",
     "test": "npm run codegen && ng test",
     "lint": "ng lint",

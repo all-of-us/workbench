@@ -1,0 +1,10 @@
+version: "3"
+services:
+  ui:
+    image: node
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+    command: npm start -- --host=0.0.0.0 ${ENV_FLAG}
+    ports:
+      - 4200:4200
