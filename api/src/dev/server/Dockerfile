@@ -42,5 +42,5 @@ RUN apk --no-cache add mysql-client
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
   > /usr/local/bin/cloud_sql_proxy && chmod +x /usr/local/bin/cloud_sql_proxy
 
-RUN curl https://raw.githubusercontent.com/Eficode/wait-for/master/wait-for \
+RUN curl https://raw.githubusercontent.com/mrako/wait-for/d9699cb9fe8a4622f05c4ee32adf2fd93239d005/wait-for \
   > /usr/local/bin/wait-for && chmod +x /usr/local/bin/wait-for
