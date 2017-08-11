@@ -5,6 +5,7 @@
 /.gradle/*
 /api/.gradle/*
 /api/.idea/*
+/api/.project/common/
 /api/.swagger-codegen/*
 /api/api.iml
 /api/api.ipr

@@ -1,5 +1,8 @@
-#!/bin/bash -e
+#!/bin/bash
+set -xeuo pipefail
+IFS=$'\n\t'
+
 cd db
-source setup_local_vars.sh
+source vars.env
 cd ..
 ./generate_appengine_web_xml.sh
