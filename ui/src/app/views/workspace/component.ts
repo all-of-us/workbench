@@ -8,12 +8,12 @@ import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
-//TODO: use a real swagger generated class for this.
+// TODO: use a real swagger generated class for this.
 class Notebook {
   constructor(public name: string, public description: string, public url: string) {}
 }
 /*
-* Search filters used by the cohort and notebook tables to
+* Search filters used by the cohort and notebook data tables to
 * determine which of the cohorts loaded into client side memory
 * are displayed.
 */
@@ -54,7 +54,7 @@ export class WorkspaceComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
   cohortList: Cohort[] = [];
-  //TODO: Replace with real data/notebooks
+  // TODO: Replace with real data/notebooks
   notebookList = [new Notebook('Notebook 1',
                     'This is the user defined description for notebook 1',
                     '/cohort/notebook1'),

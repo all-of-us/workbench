@@ -10,12 +10,6 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
 import {UserService} from 'app/services/user.service';
 import {RepositoryService} from 'app/services/repository.service';
-import {Datagrid,
-  DatagridCell,
-  DatagridColumn,
-  DatagridRow,
-  DatagridPlaceholder} from 'clarity-angular/data/datagrid';
-import {Checkbox} from 'clarity-angular/forms/checkbox';
 import {ClarityModule} from 'clarity-angular';
 
 class WorkspacePage {

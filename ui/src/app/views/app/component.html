@@ -26,17 +26,17 @@
       <button (click)="signOut()" class="btn">Sign Out</button>
     </div>
   </div>
-  <ul class="nav nav-bar" role="tablist">
-    <li role="presentation" class="nav-item">
-      <button class="btn btn-link nav-link" routerLink="/"type="button">My Workspace</button>
-    </li>
-    <li role="presentation" class="nav-item">
-      <button class="btn btn-link nav-link" routerLink="/login" type="button">Switch User</button>
-    </li>
-    <li role="presentation" class="nav-item">
-      <button class="btn btn-link nav-link" routerLink="/repository" type="button">Select CDR</button>
-    </li>
-  </ul>
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink routerLink="/" routerLinkActive="active">My Workspace</button>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink routerLink="/login">Switch User</button>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink routerLink="/repository" routerLinkActive="active">Select CDR</button>
+    </clr-tab>
+  </clr-tabs>
   <div>
     <!--
       Angular's builtin Router module will attach specific views here
