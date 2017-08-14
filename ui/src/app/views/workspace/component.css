@@ -1,6 +1,6 @@
 
 .area-block {
-  margin-top: 20px;
+  margin-top: 0.25rem;
   margin-left: 4%;
 }
 
@@ -12,45 +12,15 @@
   margin-left:2%;
 }
 
+.table-header-descriptor {
+  margin-top: 0;
+  padding-right: 0.5rem;
+}
+
 .table-header {
-  border-bottom: 2px;
-  border-bottom-color: lightgray;
-  border-bottom-style: solid;
-  padding: 1em 0;
-  display: flex;
+  margin: 1.5rem 0 0.25rem 0;
 }
-
-.table-header > div {
-  flex: 1 1 0;
-}
-
-.table-header > div.wider-table {
-  flex: 2 2 0;
-}
-
-.table-row {
-  display: flex;
-  padding: 0.5em 0;
-}
-
-.table-row > div {
-  flex: 1 1 0;
-}
-/* TODO: Change style format for below once SCSS is in */
-.table-row > div.wider-table {
-  flex: 2 2 0;
-}
-
 
 h3 {
   display: inline-block;
-  margin: 0.5em 0;
-}
-
-a {
-  color: #5DADE0;
-}
-
-a:hover {
-  color: #262262;
 }

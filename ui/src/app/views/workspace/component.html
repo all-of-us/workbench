@@ -9,52 +9,58 @@
     </div>
   </div>
   <div class="area-block">
-    <h3>Cohorts</h3>
-    <!-- TODO: Add Cohort Link - blrubenstein -->
-    <a (click)="addCohort()">Add a Cohort</a>
+    <div class="table-header">
+      <h3 class="table-header-descriptor">Cohorts</h3>
+      <button class="btn btn-link" (click)="addCohort()">Add a Cohort</button>
+    </div>
     <div class="indented">
-      <div>
-        <div class="table-header">
-          <div>Name</div>
-          <div class="wider-table">Description</div>
-          <div>URL</div>
-          <div>Created Date</div>
-        </div>
-        <div *ngFor="let cohort of cohortList" class="table-row cohort-table-row">
-          <!-- TODO: Edit Cohort Link - blrubenstein -->
-          <div><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></div>
-          <div class="wider-table">{{cohort.description}}</div>
-          <div>{{this.currentUrl}}/cohort/{{cohort.id}}</div>
-          <div>{{cohort.creationTime}}</div>
-        </div>
-      </div>
+      <clr-datagrid>
+        <clr-dg-column>
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>URL</clr-dg-column>
+        <clr-dg-column>Created Date</clr-dg-column>
+        <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
+          <clr-dg-cell><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></clr-dg-cell>
+          <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
+          <clr-dg-cell>{{this.currentUrl}}/cohort/{{cohort.id}}</clr-dg-cell>
+          <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
     </div>
   </div>
   <!-- TODO: Add a notebook server launch button and table -->
   <!-- For M0, can do something like spin up and bring you -->
   <!-- to a local notebook server that is running. -->
   <div class="area-block">
-    <h3>Notebooks</h3>
-    <!-- TODO: Add Cohort Link - blrubenstein -->
-    <a href="javascript:;">Launch Notebook Server</a>
+    <div class="table-header">
+      <h3 class="table-header-descriptor">Notebooks</h3>
+      <button class="btn btn-link">Launch Notebook Server</button>
+    </div>
     <div class="indented">
-      <div>
-        <div class="table-header">
-          <div>Name</div>
-          <div class="wider-table">Description</div>
-          <div class="wider-table">URL</div>
-        </div>
-        <div class="table-row notebook-table-row">
-          <div>Notebook 1</div>
-          <div class="wider-table">This is the user defined description for notebook 1</div>
-          <div class="wider-table">/cohort/notebook1</div>
-        </div>
-        <div class="table-row notebook-table-row">
-          <div>Notebook 2</div>
-          <div class="wider-table">This is the user defined description for notebook 2</div>
-          <div class="wider-table">/cohort/notebook2</div>
-        </div>
-      </div>
+      <clr-datagrid>
+        <clr-dg-column>
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>URL</clr-dg-column>
+        <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
+          <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
+          <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
+          <clr-dg-cell>{{notebook.url}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
     </div>
   </div>
 </div>

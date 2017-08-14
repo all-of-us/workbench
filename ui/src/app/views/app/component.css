@@ -19,33 +19,16 @@
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid #ccc;
-  margin: -1rem -2rem;
+  margin: 0rem -2rem;
   padding: 1rem 2rem 0.5rem 2rem;
 }
 
-h2 {
-  font-size: 2em;
-  margin-top: 0;
-  padding-top: 0;
+.nav-bar {
+  margin: 0rem -2rem;
+  padding: 0rem 2rem;
+  width: 103%;
 }
 
-/* Navigation link styles */
-nav a {
-  padding: 5px 10px;
-  text-decoration: none;
-  margin-right: 10px;
-  margin-top: 10px;
-  display: inline-block;
-  background-color: #eee;
-  border-radius: 4px;
-}
-nav a:visited, a:link {
-  color: #607D8B;
-}
-nav a:hover {
-  color: #039be5;
-  background-color: #CFD8DC;
-}
-nav a.active {
-  color: #039be5;
+.nav-link:hover {
+  transition: box-shadow 0.05s ease-in;
 }

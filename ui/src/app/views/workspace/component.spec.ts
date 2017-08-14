@@ -3,12 +3,14 @@ import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/t
 import {Title, By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
+import {FormsModule} from '@angular/forms';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
 import {UserService} from 'app/services/user.service';
 import {RepositoryService} from 'app/services/repository.service';
+import {ClarityModule} from 'clarity-angular';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -62,7 +64,8 @@ describe('WorkspaceComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterTestingModule,
+        ClarityModule.forRoot()
       ],
       declarations: [
         WorkspaceComponent

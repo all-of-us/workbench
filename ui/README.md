@@ -14,3 +14,6 @@ and style. Angular scopes CSS to its associated component.
 `*.module.ts` set up glue to stick the app together: routing of URLs to
 different views, installation of the various components/services for use in
 other places.
+
+To debug Project Clarity, the widget framework, go here for examples:
+https://github.com/vmware/clarity/tree/master/src/app
