@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -30,7 +30,7 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment: []
     steps:
@@ -38,10 +38,6 @@ jobs:
       - run:
           working_directory: ~/
           name: Set up swagger CLI
-          # This would be preferred, but would need to install ruby in the CircleCI docker image:
-          # cd workbench/ui && ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
-          command: |
-            cd workbench/ui && wget https://storage.googleapis.com/swagger-codegen-cli/swagger-codegen-cli-2.3.0-20170814.101630-90.jar -O libproject/swagger-codegen-cli.jar
           command: |
             cd workbench/ui && ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
       - restore_cache:
