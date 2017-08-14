@@ -53,7 +53,7 @@ task generateFireCloudClient {
 
 task generate_local_appengine_web_xml(type: Exec) {
   executable "bash"
-  args "-c", "./generate_local_appengine_web_xml.sh"
+  args "libproject/generate_appengine_web_xml.sh"
 }
 
 configurations {
