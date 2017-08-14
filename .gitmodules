@@ -1,3 +1,6 @@
 [submodule "api/libproject/utils"]
 	path = api/libproject/utils
 	url = https://github.com/dmohs/project-management.git
+[submodule "ui/libproject/utils"]
+	path = ui/libproject/utils
+	url = https://github.com/dmohs/project-management.git

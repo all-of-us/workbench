@@ -1,0 +1,20 @@
+version: "3"
+services:
+  ui:
+    build:
+      context: ./src/dev/server
+    working_dir: /w/ui
+    volumes:
+      - ..:/w:cached
+    command: npm start -- --host=0.0.0.0 ${ENV_FLAG}
+    ports:
+      - 4200:4200
+  tests:
+    build:
+      context: ./src/dev/server
+    working_dir: /w/ui
+    volumes:
+      - ..:/w:cached
+    command: npm test
+    ports:
+      - 9876:9876
