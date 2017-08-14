@@ -7,8 +7,10 @@ Usage:
 
 import logging
 import subprocess
+import switch-env
 
 from main_util import configure_logging, get_parser, get_confirmation
+from shutil import copyfile
 import paths
 import gcloud_auth
 
@@ -35,9 +37,13 @@ def deploy(args):
     logging.info('Skipping deploy of API.')
 
   if _TargetChoices.UI in targets:
+    environmentPath = '../ui/src/environments/'
+    copyfile(environmentPath + 'environment.ts', environmentPath + 'environment.stash.ts')
+    environmentSwap('test');
+
     logging.info('Building UI using %r', paths.get_ng())
     subprocess.check_call(
-        [paths.get_ng(), 'build', '--environment=test'],
+        [paths.get_ng(), 'build'],
         cwd=paths.get_ui_dir())
     logging.info('Deploying UI')
     subprocess.check_call(
@@ -51,6 +57,7 @@ def deploy(args):
           args.account,
         ],
         cwd=paths.get_ui_dir())
+    environmentSwap('revert')
   else:
     logging.info('Skipping deploy of UI.')
 
