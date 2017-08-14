@@ -35,11 +35,6 @@ jobs:
     environment: []
     steps:
       - checkout
-      - run:
-          working_directory: ~/
-          name: Set up swagger CLI
-          command: |
-            cd workbench/tools && ./download_swagger_cli.sh
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
