@@ -5,25 +5,14 @@ def install_dependencies()
   common = Common.new
   common.docker.requires_docker
 
-  parent = Dir.chdir("..") { Dir.pwd }
-
-  common.run_inline %W{docker run --rm -w /w/ui -v #{parent}:/w:cached node npm install}
+  common.run_inline %W{docker-compose run --rm ui npm install}
 end
 
 def swagger_regen()
   common = Common.new
   common.docker.requires_docker
 
-  parent = Dir.chdir("..") { Dir.pwd }
-
-  common.run_inline %W{
-    docker run --rm
-      -w /w -v #{parent}:/w:cached
-      openjdk:jre-alpine
-      java -jar tools/swagger-codegen-cli.jar generate
-        --lang typescript-angular --input-spec api/src/main/resources/workbench.yaml
-        --output ui/src/generated --additional-properties ngVersion=2
-  }
+  common.run_inline %W{docker-compose run --rm ui npm run codegen}
 end
 
 class DevUpOptions
@@ -31,7 +20,7 @@ class DevUpOptions
   attr_accessor :env
 
   def initialize
-    self.env = "local"
+    self.env = "test"
   end
 
   def parse args
@@ -57,25 +46,15 @@ def dev_up(*args)
     install_dependencies
   end
 
-  swagger_regen
-
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
-  common.run_inline_swallowing_interrupt %W{docker-compose up}
+  common.run_inline %W{docker-compose up -d}
   at_exit { common.run_inline %W{docker-compose down} }
-end
 
-def start_tests()
-  common = Common.new
-  common.docker.requires_docker
-
-  swagger_regen
-
-  common.status "Starting tests. Open\n"
+  common.status "Tests started. Open\n"
   common.status "    http://localhost:9876/debug.html\n"
-  common.status "in a browser to view/re-run."
-  common.run_inline %W{
-    docker run --rm -it -w /w -v #{ENV["PWD"]}:/w -p 9876:9876 node npm test
-  }
+  common.status "in a browser to view/run tests."
+
+  common.run_inline_swallowing_interrupt %W{docker-compose up ui}
 end
 
 def clean_git_hooks()
@@ -86,12 +65,6 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
   :fn => Proc.new { |*args| dev_up(*args) }
-})
-
-Common.register_command({
-  :invocation => "test",
-  :description => "Runs the test server and opens a browser to run the tests.",
-  :fn => Proc.new { |*args| start_tests(*args) }
 })
 
 Common.register_command({

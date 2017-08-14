@@ -3,6 +3,16 @@
 
 module.exports = function (config) {
   config.set({
+    customLaunchers: {
+      'webdriver': {
+        base: 'WebDriver',
+        browserName: 'chrome',
+        config: {
+          hostname: 'localhost',
+          port: 4444
+        },
+      }
+    },
     basePath: '',
     frameworks: ['jasmine', '@angular/cli'],
     plugins: [
@@ -29,6 +39,7 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
+    browsers: ['Chrome'],
     singleRun: false
   });
 };
