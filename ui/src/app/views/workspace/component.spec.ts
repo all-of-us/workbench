@@ -74,13 +74,7 @@ describe('WorkspaceComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        WorkspaceComponent,
-        // Datagrid,
-        // DatagridColumn,
-        // DatagridRow,
-        // DatagridCell,
-        // DatagridPlaceholder,
-        // Checkbox
+        WorkspaceComponent
       ],
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
