@@ -1,5 +1,8 @@
+require "open-uri"
 require "optparse"
 require_relative "utils/common"
+
+SWAGGER_CODEGEN_CLI_JAR = "libproject/swagger-codegen-cli.jar"
 
 def install_dependencies()
   common = Common.new
@@ -8,9 +11,27 @@ def install_dependencies()
   common.run_inline %W{docker-compose run --rm ui npm install}
 end
 
+def download(url, path)
+  File.open(path, "wb") do |f|
+    IO.copy_stream(open(url), f)
+  end
+end
+
+def download_swagger_codegen_cli()
+  common = Common.new
+  jar_url = "https://storage.googleapis.com" +
+    "/swagger-codegen-cli/swagger-codegen-cli-2.3.0-20170814.101630-90.jar"
+  common.status "#{jar_url} > #{SWAGGER_CODEGEN_CLI_JAR}..."
+  download(jar_url, SWAGGER_CODEGEN_CLI_JAR)
+end
+
 def swagger_regen()
   common = Common.new
   common.docker.requires_docker
+
+  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
+    download_swagger_codegen_cli
+  end
 
   common.run_inline %W{docker-compose run --rm ui npm run codegen}
 end

@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -30,16 +30,21 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment: []
     steps:
       - checkout
       - run:
-          working_directory: ~/
-          name: Set up swagger CLI
+          working_directory: ~/workbench/ui
+          name: Fetch submodules
           command: |
-            cd workbench/tools && ./download_swagger_cli.sh
+            git submodule update --init libproject/utils
+      - run:
+          working_directory: ~/workbench/ui
+          name: Download Swagger CLI
+          command: |
+            ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}

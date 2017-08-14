@@ -22,6 +22,7 @@
 /ui/**/*.js
 /ui/**/*.map
 /ui/dist/**
+/ui/libproject/swagger-codegen-cli.jar
 /ui/src/generated/*
 node_modules
 npm-debug.log
