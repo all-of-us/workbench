@@ -1,0 +1,38 @@
+version: "3"
+services:
+  db:
+    image: mysql:5.7
+    env_file:
+      - db/vars.env
+    volumes:
+      - db:/var/lib/mysql
+  api:
+    build:
+      context: ./src/dev/server
+    working_dir: /w
+    depends_on:
+      - db
+    volumes:
+      - gradle-cache-api:/root/.gradle
+      - .:/w:cached
+    command: ./gradlew --no-daemon appengineRun
+    env_file:
+      - db/vars.env
+    ports:
+      - 8081:8081
+  db-migration:
+    build:
+      context: ./src/dev/server
+    working_dir: /w/db
+    depends_on:
+      - api
+    volumes:
+      - gradle-cache-migration:/root/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./run-migrations.sh
+    env_file:
+      - db/vars.env
+volumes:
+  db:
+  gradle-cache-api:
+  gradle-cache-migration:

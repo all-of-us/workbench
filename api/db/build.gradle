@@ -13,9 +13,9 @@ liquibase {
     activities {
         main {
             changeLogFile 'changelog/db.changelog-master.xml'
-            url 'jdbc:mysql://localhost:3306/workbench'
+            url 'jdbc:mysql://db/workbench'
             username 'liquibase'
-            password 'workbench!pwd'
+            password 'lb-notasecret'
         }
     }
 }
