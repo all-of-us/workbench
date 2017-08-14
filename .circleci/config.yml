@@ -36,10 +36,15 @@ jobs:
     steps:
       - checkout
       - run:
-          working_directory: ~/
-          name: Set up swagger CLI
+          working_directory: ~/workbench/ui
+          name: Fetch submodules
           command: |
-            cd workbench/ui && ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
+            git submodule update --init libproject/utils
+      - run:
+          working_directory: ~/workbench/ui
+          name: Download Swagger CLI
+          command: |
+            ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
