@@ -18,6 +18,7 @@
 /build/*
 /ui/ui.iml
 /ui/.idea/*
+/ui/package-lock.json
 /ui/**/*.js
 /ui/**/*.map
 /ui/dist/**
