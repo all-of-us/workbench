@@ -21,7 +21,9 @@ After responding to changes, merge in GitHub.
 
 ## Setup
 
-Docker must be installed to build and run code.
+Docker must be installed to build and run code (For Google workstations, see
+go/installdocker.). Ruby is required to run our development scripts, which
+document common operations and provide a convenient way to perform them.
 
 ### UI
 
@@ -35,17 +37,22 @@ does not reload when they're updated.
 
 From the `api/` directory:
 ```Shell
-./project.rb dev_up
+./project.rb dev-up
 ```
 
 When the console displays "Dev App Server is now running", you can hit your
 local API server under http://localhost:8081/api/.
 
+Other available operations may be discovered by running:
+```Shell
+./project.rb
+```
+
 ### UI
 
 From the `ui/` directory:
 ```Shell
-./project.rb dev_up
+./project.rb dev-up
 ```
 
 After webpack finishes the build, you can view your local UI server at
@@ -54,6 +61,11 @@ http://localhost:4200/. You can view the tests at http://localhost:9876/debug.ht
 By default, this connects to a test API server. Use `--environment=$ENV` to
 use an alternate `src/environments/environment.$ENV.ts` file and connect to a
 different API server.
+
+Other available operations may be discovered by running:
+```Shell
+./project.rb
+```
 
 #### You can regenerate classes from swagger with
 
