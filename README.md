@@ -21,77 +21,57 @@ After responding to changes, merge in GitHub.
 
 ## Setup
 
-### API
-
-* Install JDK 8 on your machine from http://www.oracle.com/technetwork/java/javase/downloads/index.html.
-* Set your JAVA_HOME environment variable to point at the installation directory.
+Docker must be installed to build and run code (For Google workstations, see
+go/installdocker.). Ruby is required to run our development scripts, which
+document common operations and provide a convenient way to perform them.
 
 ### UI
 
 * Direct your editor to write swap files outside the source tree, so Webpack
 does not reload when they're updated.
 [Example for vim](https://github.com/angular/angular-cli/issues/4593).
-* Install npm. (For Google workstations, see go/nodejs.)
-
-### General
-
-* Install Google Cloud SDK on your device from https://cloud.google.com/sdk/downloads.
-* If not selected initially, add the AppEngine component with `gcloud components install app-engine-java`.
-* Run tools/setup_env.sh. (This installs angular-cli globally. You may also get it from `ui/node_modules` after
-running `npm install`.)
 
 ## Running the Dev Servers
 
 ### API: dev AppEngine appserver
 
 From the `api/` directory:
-
 ```Shell
-./gradlew appengineRun
+./project.rb dev-up
 ```
 
 When the console displays "Dev App Server is now running", you can hit your
 local API server under http://localhost:8081/api/.
 
+Other available operations may be discovered by running:
+```Shell
+./project.rb
+```
+
 ### UI
 
-From the `ui/` subdirectory:
-
+From the `ui/` directory:
 ```Shell
-npm run start [-- --environment test]
+./project.rb dev-up
 ```
 
 After webpack finishes the build, you can view your local UI server at
-http://localhost:4200/.
+http://localhost:4200/. You can view the tests at http://localhost:9876/debug.html.
 
-By default, this connects to a local API server. Use `--environment=$ENV` to
+By default, this connects to our test API server. Use `--environment=$ENV` to
 use an alternate `src/environments/environment.$ENV.ts` file and connect to a
-different API server.
+different API server. To connect to your own API server running at
+`localhost:8081`, pass `--environment=local`.
+
+Other available operations may be discovered by running:
+```Shell
+./project.rb
+```
 
 #### You can regenerate classes from swagger with
 
 ```Shell
-npm run codegen
-```
-
-#### You can build the UI with
-
-```Shell
-npm run build
-```
-
-## Running in Docker
-
-```
-cd api
-docker build -t workbench-api .
-docker run -p 8081:8081 -v --rm -it workbench-api
-```
-
-```
-cd ui
-docker build -t workbench-ui .
-docker run -p 4200:4200 -v --rm -it workbench-ui
+./project.rb swagger-regen
 ```
 
 ## Deploying
