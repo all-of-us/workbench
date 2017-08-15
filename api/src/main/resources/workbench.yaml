@@ -42,6 +42,98 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  # Workspaces ###########################################################################
+
+  /api/v1/workspaces:
+    get:
+      tags:
+        - workspaces
+      description: Returns all workspaces that a user has access to
+      operationId: "getWorkspaces"
+      responses:
+        "200":
+          description: A list of workspace definitions.
+          schema:
+            $ref: "#/definitions/WorkspaceListResponse"
+    post:
+      tags:
+        - workspaces
+      description: Creates a workspace
+      operationId: "createWorkspace"
+      parameters:
+        - in: body
+          name: workspace
+          description: workspace definition
+          schema:
+            $ref: "#/definitons/Workspace"
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}:
+    get:
+      tags:
+        - workspaces
+      description: Returns the workspace definition with the specified ID and namespace
+      operationId: "getWorkspace"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+      responses:
+        "200":
+          description: A workspace definition
+          schema:
+            $ref: "#/definitions/Workspace"
+    patch:
+      tags:
+        - workspaces
+      description: >
+        Modifies the workspace definition with the specified ID and namespace;
+        fields that are omitted will not be modified
+      operationId: "updateWorkspace"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+        - in: body
+          name: workspace
+          description: workspace definition
+          schema:
+            $ref: "#/definitions/Workspace"
+      responses:
+        "200":
+          description: The updated workspace definition
+          schema:
+            $ref: "#/definitions/Workspace"
+    delete:
+      tags:
+        - workspaces
+      description: Deletes the workspace definition with the specified ID and namespace
+      operationId: "deleteWorkspace"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: namespace of the workspace containing the cohort definition
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: ID of the workspace containing the cohort definition
+
+
   # Cohorts ##############################################################################
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -183,6 +275,43 @@ definitions:
     type: string
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [registered, protected]
+
+  WorkspaceListResponse:
+    type: "object"
+    required:
+     - "items"
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/Workspace"
+
+  Workspace:
+    type: "object"
+    required:
+     - "name"
+     - "cohorts"
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      description:
+        type: string
+      creator:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      lastModifiedTime:
+        type: string
+        format: date-time
+      cohorts:
+        type: "array"
+        items:
+          $ref: "#/definitions/Cohort"
 
   CohortListResponse:
     type: "object"
