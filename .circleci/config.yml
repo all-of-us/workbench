@@ -49,7 +49,7 @@ jobs:
           working_directory: ~/workbench/ui
           name: Download Swagger CLI
           command: |
-            ruby -r ./libproject/devstart.rb -e download_swagger_codegen_cli
+            ruby -r ./libproject/download-swagger-codegen-cli.rb -e download_swagger_codegen_cli
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
