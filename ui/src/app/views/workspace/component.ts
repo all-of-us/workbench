@@ -1,5 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {DOCUMENT} from '@angular/platform-browser'
 import {StringFilter} from 'clarity-angular';
 
 import {Cohort} from 'generated';
@@ -66,7 +67,8 @@ export class WorkspaceComponent implements OnInit {
       private route: ActivatedRoute,
       private userService: UserService,
       private repositoryService: RepositoryService,
-      private cohortsService: CohortsService
+      private cohortsService: CohortsService,
+      @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);

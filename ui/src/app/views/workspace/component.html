@@ -29,7 +29,7 @@
         <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
           <clr-dg-cell><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></clr-dg-cell>
           <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.currentUrl}}/cohort/{{cohort.id}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
           <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
@@ -58,7 +58,7 @@
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-          <clr-dg-cell>{{notebook.url}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>

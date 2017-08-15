@@ -22,7 +22,7 @@
         <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
           <clr-dg-cell><a (click)="goToWorkspace(workspace.namespace, workspace.id)">{{workspace.name}}</a></clr-dg-cell>
           <clr-dg-cell>{{workspace.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.currentUrl}}/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
           <clr-dg-cell>{{workspace.creationTime}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>

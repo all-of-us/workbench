@@ -1,6 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {DOCUMENT} from '@angular/platform-browser'
 import {StringFilter} from 'clarity-angular';
+
+import {WorkspaceComponent} from 'app/views/workspace/component'
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -37,14 +40,15 @@ export class HomePageComponent implements OnInit {
   user: User;  // to detect if logged in
   // TODO: Replace with real data/workspaces.
   // TODO: Implement API side workspace detection.
-  workspaceList: Workspace[] = [];
-
+  workspace: Workspace = {name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME, namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS, id: WorkspaceComponent.DEFAULT_WORKSPACE_ID, cohorts: []};
+  workspaceList: Workspace[] = [this.workspace];
   constructor(
       private router: Router,
       private route: ActivatedRoute,
       private userService: UserService,
       private repositoryService: RepositoryService,
-      private workspacesService: WorkspacesService
+      private workspacesService: WorkspacesService,
+      @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);
@@ -59,6 +63,6 @@ export class HomePageComponent implements OnInit {
   }
 
   goToWorkspace(namespace: string, id: string): void {
-    this.router.navigate(['workspaces/' + namespace + '/' + id], {relativeTo : this.route});
+    this.router.navigate(['workspace/' + namespace + '/' + id], {relativeTo : this.route});
   }
 }
