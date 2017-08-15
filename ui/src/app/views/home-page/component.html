@@ -1,0 +1,32 @@
+<h2>AoU Research Portal</h2>
+<div *ngIf="user else loggedout">
+  <div class="area-block">
+    <div class="table-header">
+      <!-- TODO: Add workspace link and functionality -->
+      <h3 class="table-header-descriptor">Workspaces</h3>
+      <button class="btn btn-link" (click)="addWorkspace()">Add a Workspace</button>
+    </div>
+    <div class="indented">
+      <clr-datagrid>
+        <clr-dg-column>
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="workspaceDescriptionFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>URL</clr-dg-column>
+        <clr-dg-column>Created Date</clr-dg-column>
+        <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
+          <clr-dg-cell><a (click)="goToWorkspace(workspace.namespace, workspace.id)">{{workspace.name}}</a></clr-dg-cell>
+          <clr-dg-cell>{{workspace.description}}</clr-dg-cell>
+          <clr-dg-cell>{{this.currentUrl}}/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
+          <clr-dg-cell>{{workspace.creationTime}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </div>
+  </div>
+</div>
+<ng-template #loggedout><p class="logged-out-message">Log in to view workspace.</p></ng-template>
