@@ -2,13 +2,18 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
     steps:
       - checkout
+      - run:
+          working_directory: ~/workbench/api
+          name: Fetch submodules
+          command: |
+            git submodule update --init
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -30,16 +35,21 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.4
+      - image: allofustest/workbench:buildimage-0.0.5
     working_directory: ~/workbench
     environment: []
     steps:
       - checkout
       - run:
-          working_directory: ~/
-          name: Set up swagger CLI
+          working_directory: ~/workbench/ui
+          name: Fetch submodules
           command: |
-            cd workbench/tools && ./download_swagger_cli.sh
+            git submodule update --init
+      - run:
+          working_directory: ~/workbench/ui
+          name: Download Swagger CLI
+          command: |
+            ruby -r ./libproject/download-swagger-codegen-cli.rb -e download_swagger_codegen_cli
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
