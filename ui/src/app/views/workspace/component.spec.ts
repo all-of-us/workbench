@@ -114,10 +114,8 @@ describe('WorkspaceComponent', () => {
     workspacePage.route[1].path = 'fakeNamespace';
     workspacePage.route[2].path = '5';
     workspacePage.readPageData();
-
-    expect(function(){
-      workspacePage.fixture.componentRef.instance.ngOnInit();
-      updateAndTick(workspacePage.fixture);
-    }).toThrow();
+    workspacePage.fixture.componentRef.instance.ngOnInit();
+    updateAndTick(workspacePage.fixture);
+    expect(workspacePage.fixture.debugElement.context.cohortsError).toBe(true);
   }));
 });

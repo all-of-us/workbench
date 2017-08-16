@@ -84,7 +84,6 @@ export class WorkspaceComponent implements OnInit {
               this.cohortsLoading = false;
             },
             error => {
-              console.log(error);
               this.cohortsLoading = false;
               this.cohortsError = true;
             });
