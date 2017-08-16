@@ -290,7 +290,6 @@ definitions:
     type: "object"
     required:
      - "name"
-     - "cohorts"
     properties:
       id:
         type: string
@@ -300,18 +299,19 @@ definitions:
         type: string
       description:
         type: string
+      cdrVersionId:
+        type: string
       creator:
         type: string
+      dataAccessLevel:
+        type: string
+        enum: *DATA_ACCESS_LEVEL
       creationTime:
         type: string
         format: date-time
       lastModifiedTime:
         type: string
         format: date-time
-      cohorts:
-        type: "array"
-        items:
-          $ref: "#/definitions/Cohort"
 
   CohortListResponse:
     type: "object"
