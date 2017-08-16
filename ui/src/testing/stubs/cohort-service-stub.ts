@@ -1,23 +1,21 @@
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {Cohort, CohortListResponse} from 'generated';
+import {Cohort, CohortListResponse, Workspace} from 'generated';
 
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
 
 
-// TODO: Replace with Swagger-generated model
-class Workspace {
-  id: string;
-  namespace: string;
-  cohorts: Cohort[];
-}
+
 
 export class CohortsServiceStub {
   constructor() {
-    const stubWorkspace = new Workspace();
-    stubWorkspace.id = WorkspaceComponent.DEFAULT_WORKSPACE_ID;
-    stubWorkspace.namespace = WorkspaceComponent.DEFAULT_WORKSPACE_NS;
+    const stubWorkspace: Workspace = {
+      name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
+      cohorts: [],
+      id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS
+    };
 
     const exampleCohort: Cohort = {id: '',
       name: '', description: '', criteria: '', type: ''};
