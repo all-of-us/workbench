@@ -145,6 +145,8 @@ public class CohortController implements CohortsApiDelegate {
     if (cohort.getCriteria() != null) {
       dbCohort.setCriteria(cohort.getCriteria());
     }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbCohort.setLastModifiedTime(now);
     // TODO: add version, check it here
     dbCohort = cohortDao.save(dbCohort);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));

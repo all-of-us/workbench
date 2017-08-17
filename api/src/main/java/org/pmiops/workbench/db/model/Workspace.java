@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -19,8 +20,28 @@ import org.pmiops.workbench.model.DataAccessLevel;
       unique = true)})
 public class Workspace {
 
+  public static class FirecloudWorkspaceId {
+    private final String namespace;
+    private final String workspaceId;
+
+    public FirecloudWorkspaceId(String namespace, String workspaceId) {
+      this.namespace = namespace;
+      this.workspaceId = workspaceId;
+    }
+
+    public String getNamespace() {
+      return namespace;
+    }
+
+    public String getWorkspaceId() {
+      return workspaceId;
+    }
+
+  }
+
   private long workspaceId;
   private String name;
+  private String description;
   private String firecloudName;
   private DataAccessLevel dataAccessLevel;
   private CdrVersion cdrVersion;
@@ -47,6 +68,15 @@ public class Workspace {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  @Column(name = "description")
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @Column(name = "firecloud_name")
@@ -112,6 +142,14 @@ public class Workspace {
 
   public void setCohorts(Set<Cohort> cohorts) {
     this.cohorts = cohorts;
+  }
+
+  @Transient
+  public FirecloudWorkspaceId getFirecloudWorkspaceId() {
+    int slashIndex = firecloudName.indexOf('/');
+    String namespace = firecloudName.substring(0, slashIndex);
+    String workspaceId = firecloudName.substring(slashIndex + 1);
+    return new FirecloudWorkspaceId(namespace, workspaceId);
   }
 
   public static String toFirecloudName(String workspaceNamespace, String workspaceId) {
