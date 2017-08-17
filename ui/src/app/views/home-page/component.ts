@@ -21,7 +21,9 @@ class WorkspaceNameFilter implements StringFilter<Workspace> {
     return workspace.name.toLowerCase().indexOf(search) >= 0;
   }
 }
-class WorkspaceDescriptionFilter implements StringFilter<Workspace> {
+
+// TODO: Change to research purpose?
+class WorkspaceResearchPurposeFilter implements StringFilter<Workspace> {
   accepts(workspace: Workspace, search: string): boolean {
     return workspace.description.toLowerCase().indexOf(search) >= 0;
   }
@@ -34,7 +36,7 @@ class WorkspaceDescriptionFilter implements StringFilter<Workspace> {
 })
 export class HomePageComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();
-  private workspaceDescriptionFilter = new WorkspaceDescriptionFilter();
+  private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
 
   repositories: Repository[] = [];
   user: User;  // to detect if logged in

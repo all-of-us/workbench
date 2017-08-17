@@ -12,18 +12,19 @@
           Name
           <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column>
-          Description
-          <clr-dg-string-filter [clrDgStringFilter]="workspaceDescriptionFilter"></clr-dg-string-filter>
-        </clr-dg-column>
         <clr-dg-column>URL</clr-dg-column>
-        <clr-dg-column>Created Date</clr-dg-column>
+        <clr-dg-column>Last Modified</clr-dg-column>
+        <clr-dg-column>
+          Research Purpose
+          <clr-dg-string-filter [clrDgStringFilter]="workspaceResearchPurposeFilter"></clr-dg-string-filter>
+        </clr-dg-column>
         <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
           <clr-dg-cell><a (click)="goToWorkspace(workspace.namespace, workspace.id)">{{workspace.name}}</a></clr-dg-cell>
-          <clr-dg-cell>{{workspace.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.document.location.href}}{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
-          <clr-dg-cell>{{workspace.creationTime}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}workspace/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
+          <clr-dg-cell>{{workspace.lastModifiedTime}}</clr-dg-cell>
+          <!-- TODO: Research purpose -->
+          <clr-dg-cell>TBD Research purpose</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>
