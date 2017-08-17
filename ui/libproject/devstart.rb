@@ -1,4 +1,5 @@
 require "optparse"
+require_relative "download-swagger-codegen-cli"
 require_relative "utils/common"
 
 def install_dependencies()
@@ -11,6 +12,10 @@ end
 def swagger_regen()
   common = Common.new
   common.docker.requires_docker
+
+  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
+    download_swagger_codegen_cli
+  end
 
   common.run_inline %W{docker-compose run --rm ui npm run codegen}
 end
@@ -44,6 +49,10 @@ def dev_up(*args)
 
   unless Dir.exist?("node_modules")
     install_dependencies
+  end
+
+  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
+    download_swagger_codegen_cli
   end
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"

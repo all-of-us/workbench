@@ -51,7 +51,8 @@ export class WorkspaceComponent implements OnInit {
   private cohortDescriptionFilter = new CohortDescriptionFilter();
   private notebookNameFilter = new NotebookNameFilter();
   private notebookDescriptionFilter = new NotebookDescriptionFilter();
-
+  cohortsLoading = true;
+  notebooksLoading = false;
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
   cohortList: Cohort[] = [];
@@ -81,6 +82,7 @@ export class WorkspaceComponent implements OnInit {
               for (const coho of cohortsReceived.items) {
                 this.cohortList.push(coho);
               }
+              this.cohortsLoading = false;
             });
 
   }
