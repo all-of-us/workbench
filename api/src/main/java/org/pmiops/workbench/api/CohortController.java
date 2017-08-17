@@ -2,7 +2,7 @@ package org.pmiops.workbench.api;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -121,7 +121,7 @@ public class CohortController implements CohortsApiDelegate {
       String workspaceId) {
     Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
-    Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
+    List<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
       response.setItems(cohorts.stream().map(TO_CLIENT_COHORT).collect(Collectors.toList()));
     }

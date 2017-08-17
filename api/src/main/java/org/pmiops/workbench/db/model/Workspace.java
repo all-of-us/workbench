@@ -1,7 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -48,7 +49,7 @@ public class Workspace {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<Cohort> cohorts;
+  private List<Cohort> cohorts;
 
   @Id
   @GeneratedValue
@@ -136,11 +137,12 @@ public class Workspace {
   }
 
   @OneToMany(mappedBy = "workspaceId")
-  public Set<Cohort> getCohorts() {
+  @OrderBy("name ASC")
+  public List<Cohort> getCohorts() {
     return cohorts;
   }
 
-  public void setCohorts(Set<Cohort> cohorts) {
+  public void setCohorts(List<Cohort> cohorts) {
     this.cohorts = cohorts;
   }
 
