@@ -40,7 +40,7 @@ export class HomePageComponent implements OnInit {
   user: User;  // to detect if logged in
   // TODO: Replace with real data/workspaces.
   // TODO: Implement API side workspace detection.
-  workspace: Workspace = {name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME, namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS, id: WorkspaceComponent.DEFAULT_WORKSPACE_ID, cohorts: []};
+  workspace: Workspace = {name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME, namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS, id: WorkspaceComponent.DEFAULT_WORKSPACE_ID};
   workspaceList: Workspace[] = [this.workspace];
   constructor(
       private router: Router,

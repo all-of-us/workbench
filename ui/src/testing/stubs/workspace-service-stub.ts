@@ -11,7 +11,6 @@ export class WorkspacesServiceStub {
   constructor() {
     const stubWorkspace: Workspace = {
       name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
-      cohorts: [],
       id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
       namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS
     };
