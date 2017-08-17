@@ -66,6 +66,11 @@ paths:
           description: workspace definition
           schema:
             $ref: "#/definitons/Workspace"
+      responses:
+        "200":
+          description: The workspace that was created.
+          schema:
+            $ref: "#/definitions/Workspace"
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}:
     get:
       tags:
