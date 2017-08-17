@@ -114,6 +114,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     dbWorkspace.setCreator(userProvider.get());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
+    // TODO: handle research purpose
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
@@ -160,6 +161,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     if (workspace.getName() != null) {
       dbWorkspace.setName(workspace.getName());
     }
+    // TODO: handle research purpose
     setCdrVersionId(workspace, dbWorkspace);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbWorkspace.setLastModifiedTime(now);
