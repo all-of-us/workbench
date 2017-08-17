@@ -20,7 +20,7 @@ export class WorkspacesServiceStub {
   }
   public workspaces: Workspace[];
 
-  public createWorkspace(newWorkspace: Workspace): Observable<Workspace>{
+  public createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         observer.next(this.workspaces.find(function(workspace: Workspace) {
@@ -37,7 +37,7 @@ export class WorkspacesServiceStub {
     return observable;
   }
 
-  public deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<{}>{
+  public deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<{}> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const deletionIndex = this.workspaces.findIndex(function(workspace: Workspace) {
@@ -45,7 +45,7 @@ export class WorkspacesServiceStub {
             return true;
           }
         });
-        if(deletionIndex == -1){
+        if (deletionIndex === -1) {
           observer.error(new Error(`Error deleting. Workspace with `
                                   + `id: ${workspaceId} does not exist.`));
         }
@@ -56,7 +56,7 @@ export class WorkspacesServiceStub {
     return observable;
   }
 
-  public getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<Workspace>{
+  public getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<Workspace> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         observer.next(this.workspaces.find(function(workspace: Workspace) {
@@ -70,17 +70,19 @@ export class WorkspacesServiceStub {
     return observable;
   }
 
-  public getWorkspaces(): Observable<WorkspaceListResponse>{
+  public getWorkspaces(): Observable<WorkspaceListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         observer.next({items: this.workspaces});
         observer.complete();
-      }, 0)
+      }, 0);
     });
     return observable;
   }
 
-  public updateWorkspace(workspaceNamespace: string, workspaceId: string, newWorkspace: Workspace): Observable<Workspace>{
+  public updateWorkspace(workspaceNamespace: string,
+      workspaceId: string,
+      newWorkspace: Workspace): Observable<Workspace> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
@@ -88,7 +90,7 @@ export class WorkspacesServiceStub {
             return true;
           }
         });
-        if(updateIndex == -1){
+        if (updateIndex === -1) {
           observer.error(new Error(`Error updating. Workspace with `
                                   + `id: ${workspaceId} does not exist.`));
         }

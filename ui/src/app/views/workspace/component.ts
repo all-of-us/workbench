@@ -1,6 +1,6 @@
 import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
-import {DOCUMENT} from '@angular/platform-browser'
+import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter} from 'clarity-angular';
 
 import {Cohort} from 'generated';

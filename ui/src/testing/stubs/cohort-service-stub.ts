@@ -24,7 +24,7 @@ class CohortStub implements Cohort {
 
   workspaceId: string;
 
-  constructor(cohort: Cohort, wsId: string){
+  constructor(cohort: Cohort, wsId: string) {
     this.creationTime = cohort.creationTime;
     this.creator = cohort.creator;
     this.criteria = cohort.criteria;
@@ -52,7 +52,7 @@ export class CohortsServiceStub {
     exampleCohort.id = '1';
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';
-    this.cohorts = [exampleCohort]
+    this.cohorts = [exampleCohort];
     this.workspaces = [stubWorkspace];
   }
   public workspaces: Workspace[];
@@ -64,7 +64,7 @@ export class CohortsServiceStub {
     const observable = new Observable(observer => {
       setTimeout(() => {
         observer.next(this.cohorts.find(function(cohort: CohortStub) {
-          if (cohort.id === cId && cohort.workspaceId == wsId) {
+          if (cohort.id === cId && cohort.workspaceId === wsId) {
             return true;
           }
         }));
@@ -126,14 +126,14 @@ export class CohortsServiceStub {
       wsId: string): Observable<CohortListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        let cohortsInWorkspace: Cohort[] = []
+        const cohortsInWorkspace: Cohort[] = [];
         this.cohorts.forEach(cohort => {
-          if(cohort.workspaceId == wsId){
+          if (cohort.workspaceId === wsId) {
             cohortsInWorkspace.push(cohort);
           }
-        })
-        if(cohortsInWorkspace.length == 0){
-          observer.error("No cohorts in workspace.");
+        });
+        if (cohortsInWorkspace.length === 0) {
+          observer.error('No cohorts in workspace.');
         } else {
           observer.next({items: cohortsInWorkspace});
           observer.complete();
