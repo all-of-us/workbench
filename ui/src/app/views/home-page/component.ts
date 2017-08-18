@@ -3,7 +3,7 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter} from 'clarity-angular';
 
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceComponent, resetDateObject} from 'app/views/workspace/component';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -62,6 +62,10 @@ export class HomePageComponent implements OnInit {
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;
+              this.workspaceList.forEach(workspace => {
+                workspace.lastModifiedTime = resetDateObject(workspace.lastModifiedTime);
+                workspace.creationTime = resetDateObject(workspace.creationTime);
+              });
             });
 
   }

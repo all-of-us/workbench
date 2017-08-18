@@ -39,6 +39,14 @@ class NotebookDescriptionFilter implements StringFilter<Notebook> {
   }
 }
 
+interface DateObject {
+  millis?: string;
+}
+export function resetDateObject(date: Date): Date {
+  const obj = date as DateObject
+  return new Date(obj.millis)
+}
+
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
@@ -81,6 +89,8 @@ export class WorkspaceComponent implements OnInit {
         .subscribe(
             cohortsReceived => {
               for (const coho of cohortsReceived.items) {
+                coho.creationTime = resetDateObject(coho.creationTime)
+                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime)
                 this.cohortList.push(coho);
               }
               this.cohortsLoading = false;
