@@ -51,6 +51,7 @@ export class WorkspaceComponent implements OnInit {
   private notebookNameFilter = new NotebookNameFilter();
   private notebookDescriptionFilter = new NotebookDescriptionFilter();
   cohortsLoading = true;
+  cohortsError = false;
   notebooksLoading = false;
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
@@ -81,6 +82,10 @@ export class WorkspaceComponent implements OnInit {
                 this.cohortList.push(coho);
               }
               this.cohortsLoading = false;
+            },
+            error => {
+              this.cohortsLoading = false;
+              this.cohortsError = true;
             });
 
   }
