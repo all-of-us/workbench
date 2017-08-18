@@ -3,7 +3,8 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter} from 'clarity-angular';
 
-import {WorkspaceComponent, resetDateObject} from 'app/views/workspace/component';
+import {WorkspaceComponent} from 'app/views/workspace/component';
+import {resetDateObject} from 'helper-functions';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -67,10 +68,5 @@ export class HomePageComponent implements OnInit {
                 workspace.creationTime = resetDateObject(workspace.creationTime);
               });
             });
-
-  }
-
-  goToWorkspace(namespace: string, id: string): void {
-    this.router.navigate(['workspace/' + namespace + '/' + id], {relativeTo : this.route});
   }
 }

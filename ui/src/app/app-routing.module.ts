@@ -14,10 +14,12 @@ import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 
 const routes: Routes = [
-  {path: '', component: HomePageComponent, data: {title: 'All of Us Researcher Workbench'}},
+  {path: '', component: HomePageComponent, data: {title: 'View Workspaces'}},
   {path: 'login', component: LoginComponent, data: {title: 'Log In'}},
   {path: 'repository', component: SelectRepositoryComponent, data: {title: 'Select Repository'}},
-  {path: 'workspace/:ns/:wsid', component: WorkspaceComponent, data: {title: 'View Workspace'}},
+  {path: 'workspace/:ns/:wsid',
+          component: WorkspaceComponent,
+          data: {title: 'View Workspace Details'}},
   {path: 'cohort/:id', component: CohortBuilderComponent, data: {title: 'Build Cohort'}},
   {path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
           component: CohortEditComponent,

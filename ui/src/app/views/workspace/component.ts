@@ -5,6 +5,7 @@ import {StringFilter} from 'clarity-angular';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
+import {resetDateObject} from 'helper-functions';
 import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
@@ -39,13 +40,6 @@ class NotebookDescriptionFilter implements StringFilter<Notebook> {
   }
 }
 
-interface DateObject {
-  millis?: string;
-}
-export function resetDateObject(date: Date): Date {
-  const obj = date as DateObject
-  return new Date(obj.millis)
-}
 
 @Component({
   styleUrls: ['./component.css'],
@@ -89,8 +83,8 @@ export class WorkspaceComponent implements OnInit {
         .subscribe(
             cohortsReceived => {
               for (const coho of cohortsReceived.items) {
-                coho.creationTime = resetDateObject(coho.creationTime)
-                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime)
+                coho.creationTime = resetDateObject(coho.creationTime);
+                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime);
                 this.cohortList.push(coho);
               }
               this.cohortsLoading = false;
@@ -104,9 +98,5 @@ export class WorkspaceComponent implements OnInit {
 
   addCohort(): void {
     this.router.navigate(['cohorts/build'], {relativeTo : this.route});
-  }
-
-  goToCohortEdit(id: string): void {
-    this.router.navigate(['cohorts/' + id + '/build'], {relativeTo : this.route});
   }
 }

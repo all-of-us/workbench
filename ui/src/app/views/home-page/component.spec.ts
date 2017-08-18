@@ -65,9 +65,7 @@ describe('HomePageComponent', () => {
     let expectedWorkspaces: number;
     homePage.workspacesService.getWorkspaces()
       .subscribe(workspaces => {
-        console.log(workspaces);
-        console.log(workspaces.items);
-      expectedWorkspaces = workspaces.items.length;
+        expectedWorkspaces = workspaces.items.length;
     });
     tick();
     expect(homePage.workspaceTableRows.length).toEqual(expectedWorkspaces);
