@@ -52,6 +52,8 @@ export class CohortsServiceStub {
     exampleCohort.id = '1';
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';
+    exampleCohort.creationTime = new Date();
+    exampleCohort.lastModifiedTime = new Date();
     this.cohorts = [exampleCohort];
     this.workspaces = [stubWorkspace];
   }

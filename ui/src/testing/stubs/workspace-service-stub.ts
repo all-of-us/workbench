@@ -12,7 +12,9 @@ export class WorkspacesServiceStub {
     const stubWorkspace: Workspace = {
       name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS
+      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+      creationTime: new Date(),
+      lastModifiedTime: new Date()
     };
 
 
