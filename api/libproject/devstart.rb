@@ -23,22 +23,22 @@ end
 def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
   service_account ="#{project}@appspot.gserviceaccount.com"
-  common.run_inline %W(gcloud iam service-accounts keys create #{creds_file}
+  common.run_inline %W(gcloud iam service-accounts keys create #{creds_file.path}
     --iam-account=#{service_account} --project=#{project} --account=#{account})
 end
 
 def delete_service_accounts_creds(project, account, creds_file)
-  tmp_private_key = `grep private_key_id #{creds_file} | cut -d\\\" -f4`.strip()
+  tmp_private_key = `grep private_key_id #{creds_file.path} | cut -d\\\" -f4`.strip()
   service_account ="#{project}@appspot.gserviceaccount.com"
   common = Common.new
   common.run_inline %W(gcloud iam service-accounts keys delete #{tmp_private_key} -q
      --iam-account=#{service_account} --project=#{project} --account=#{account})
-  File.delete(creds_file)
+  creds_file.unlink
 end
 
 def activate_service_account(creds_file)
   common = Common.new
-  common.run_inline %W(gcloud auth activate-service-account --key-file #{creds_file})
+  common.run_inline %W(gcloud auth activate-service-account --key-file #{creds_file.path})
 end
 
 def copy_file_to_gcs(source_path, bucket, filename)
@@ -84,8 +84,7 @@ def create_db_creds(args)
     end
 
     instance_name = "#{project}:us-central1:workbenchmaindb"
-    creds_filename = "#{project}-vars.env"
-    creds_file = Tempfile.new(creds_filename)
+    creds_file = Tempfile.new("#{project}-vars.env")
     if creds_file
       begin
         creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
@@ -100,13 +99,13 @@ def create_db_creds(args)
         creds_file.close
 
         # Get service account credentials
-        service_account_creds_filename = "/tmp/#{project}-creds.json"
-        get_service_account_creds_file(project, account, service_account_creds_filename)
-        activate_service_account(service_account_creds_filename)
+        service_account_creds_file = Tempfile.new("#{project}-creds.json")
+        get_service_account_creds_file(project, account, service_account_creds_file)
+        activate_service_account(service_account_creds_file)
         begin
           copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
         ensure
-          delete_service_accounts_creds(project, account, service_account_creds_filename)
+          delete_service_accounts_creds(project, account, service_account_creds_file)
         end
       ensure
         creds_file.unlink
