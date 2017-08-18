@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
-import {StringFilter} from 'clarity-angular';
+import {StringFilter, Comparator} from 'clarity-angular';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
@@ -37,6 +37,31 @@ class NotebookDescriptionFilter implements StringFilter<Notebook> {
     return notebook.description.toLowerCase().indexOf(search) >= 0;
   }
 }
+/*
+* Sort comparators used by the cohort and notebook data tables to
+* determine the order that the cohorts loaded into client side memory
+* are displayed.
+*/
+class CohortNameComparator implements Comparator<Cohort> {
+  compare(a: Cohort, b: Cohort) {
+    return a.name.localeCompare(b.name);
+  }
+}
+class CohortDescriptionComparator implements Comparator<Cohort> {
+  compare(a: Cohort, b: Cohort) {
+    return a.description.localeCompare(b.description);
+  }
+}
+class NotebookNameComparator implements Comparator<Notebook> {
+  compare(a: Notebook, b: Notebook) {
+    return a.name.localeCompare(b.name);
+  }
+}
+class NotebookDescriptionComparator implements Comparator<Notebook> {
+  compare(a: Notebook, b: Notebook) {
+    return a.description.localeCompare(b.description);
+  }
+}
 
 @Component({
   styleUrls: ['./component.css'],
@@ -50,6 +75,10 @@ export class WorkspaceComponent implements OnInit {
   private cohortDescriptionFilter = new CohortDescriptionFilter();
   private notebookNameFilter = new NotebookNameFilter();
   private notebookDescriptionFilter = new NotebookDescriptionFilter();
+  private cohortNameComparator = new CohortNameComparator();
+  private cohortDescriptionComparator = new CohortDescriptionComparator();
+  private notebookNameComparator = new NotebookNameComparator();
+  private notebookDescriptionComparator = new NotebookDescriptionComparator();
   cohortsLoading = true;
   cohortsError = false;
   notebooksLoading = false;
