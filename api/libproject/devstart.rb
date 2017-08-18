@@ -27,6 +27,15 @@ def get_service_account_creds_file(project, account, creds_file)
     --iam-account=#{service_account} --project=#{project} --account=#{account})
 end
 
+def delete_service_accounts_creds(project, account, creds_file)
+  tmp_private_key = `grep private_key_id #{creds_file} | cut -d\\\" -f4`.strip()
+  service_account ="#{project}@appspot.gserviceaccount.com"
+  common = Common.new
+  common.run_inline %W(gcloud iam service-accounts keys delete #{tmp_private_key} -q
+     --iam-account=#{service_account} --project=#{project} --account=#{account})
+  File.delete(creds_file)
+end
+
 def activate_service_account(creds_file)
   common = Common.new
   common.run_inline %W(gcloud auth activate-service-account --key-file #{creds_file})
@@ -45,7 +54,7 @@ def create_db_creds(args)
     opts.on("--project [PROJECT]", "Project to create credentials for") do |project|
       options["project"] = project
     end
-    opts.on("--account [PROJECT]",
+    opts.on("--account [ACCOUNT]",
       "Account to use when creating credentials (your.name@pmi-ops.org)") do |account|
           options["account"] = account
     end
@@ -97,7 +106,7 @@ def create_db_creds(args)
         begin
           copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
         ensure
-          File.delete(service_account_creds_filename)
+          delete_service_accounts_creds(project, account, service_account_creds_filename)
         end
       ensure
         creds_file.unlink
