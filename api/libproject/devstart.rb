@@ -1,5 +1,7 @@
 require_relative "utils/common"
 require "io/console"
+require "optparse"
+require "tempfile"
 
 def dev_up(args)
   common = Common.new
@@ -18,14 +20,16 @@ def rebuild_image(args)
   common.run_inline %W{docker-compose build}
 end
 
-def auth_login(account)
+def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
-  common.run_inline %W{gcloud auth login #{account}}
+  service_account ="#{project}@appspot.gserviceaccount.com"
+  common.run_inline %W(gcloud iam service-accounts keys create #{creds_file}
+    --iam-account=#{service_account} --project=#{project} --account=#{account})
 end
 
-def set_project(project)
+def activate_service_account(creds_file)
   common = Common.new
-  common.run_inline %W{gcloud config set project #{project}}
+  common.run_inline %W(gcloud auth activate-service-account --key-file #{creds_file})
 end
 
 def copy_file_to_gcs(source_path, bucket, filename)
@@ -34,11 +38,24 @@ def copy_file_to_gcs(source_path, bucket, filename)
 end
 
 def create_db_creds(args)
+  options = {}
+  OptionParser.new do |opts|
+    opts.banner = "Usage: project.rb create-db-creds [options]"
+
+    opts.on("--project [PROJECT]", "Project to create credentials for") do |project|
+      options["project"] = project
+    end
+    opts.on("--account [PROJECT]",
+      "Account to use when creating credentials (your.name@pmi-ops.org)") do |account|
+          options["account"] = account
+    end
+  end.parse!(args)
+
   usage = "Usage: --project <project> --account <account>"
   common = Common.new()
-  if args.has_key?("project") && args.has_key?("account")
-    project = args["project"]
-    account = args["account"]
+  if options.has_key?("project") && options.has_key?("account")
+    project = options["project"]
+    account = options["account"]
     if project == nil || account == nil
       raise(usage)
     end
@@ -57,11 +74,9 @@ def create_db_creds(args)
       raise("Workbench password entries didn't match.")
     end
 
-    auth_login(account)
-    set_project(project)
     instance_name = "#{project}:us-central1:workbenchmaindb"
-    creds_filename = "/tmp/vars.env"
-    creds_file = File.new(creds_filename, "w")
+    creds_filename = "#{project}-vars.env"
+    creds_file = Tempfile.new(creds_filename)
     if creds_file
       begin
         creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
@@ -74,9 +89,18 @@ def create_db_creds(args)
         creds_file.puts "WORKBENCH_DB_USER=workbench"
         creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
         creds_file.close
-        copy_file_to_gcs(creds_filename, "#{project}-credentials", "vars.env")
+
+        # Get service account credentials
+        service_account_creds_filename = "/tmp/#{project}-creds.json"
+        get_service_account_creds_file(project, account, service_account_creds_filename)
+        activate_service_account(service_account_creds_filename)
+        begin
+          copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
+        ensure
+          File.delete(service_account_creds_filename)
+        end
       ensure
-        File.delete(creds_file)
+        creds_file.unlink
       end
     else
       raise("Error creating file.")

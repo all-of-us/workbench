@@ -29,6 +29,4 @@ end
 
 command = ARGV.first
 
-args = Hash[ ARGV.drop(1).flat_map{|s| s.scan(/--?([^=\s]+)(?:=(\S+))?/) } ]
-
-common.handle_or_die(command, args)
+common.handle_or_die(command, ARGV.drop(1))
