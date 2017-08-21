@@ -1,68 +1,76 @@
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {Cohort, CohortListResponse} from 'generated';
+import {Cohort, CohortListResponse, Workspace} from 'generated';
 
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
 
+class CohortStub implements Cohort {
+  id?: string;
 
-// TODO: Replace with Swagger-generated model
-class Workspace {
-  id: string;
-  namespace: string;
-  cohorts: Cohort[];
+  name: string;
+
+  criteria: string;
+
+  type: string;
+
+  description?: string;
+
+  creator?: string;
+
+  creationTime?: Date;
+
+  lastModifiedTime?: Date;
+
+  workspaceId: string;
+
+  constructor(cohort: Cohort, wsId: string) {
+    this.creationTime = cohort.creationTime;
+    this.creator = cohort.creator;
+    this.criteria = cohort.criteria;
+    this.description = cohort.description;
+    this.id = cohort.id;
+    this.lastModifiedTime = cohort.lastModifiedTime;
+    this.name = cohort.name;
+    this.type = cohort.type;
+    this.workspaceId = wsId;
+  }
 }
+
 
 export class CohortsServiceStub {
   constructor() {
-    const stubWorkspace = new Workspace();
-    stubWorkspace.id = WorkspaceComponent.DEFAULT_WORKSPACE_ID;
-    stubWorkspace.namespace = WorkspaceComponent.DEFAULT_WORKSPACE_NS;
+    const stubWorkspace: Workspace = {
+      name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
+      id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS
+    };
 
-    const exampleCohort: Cohort = {id: '',
-      name: '', description: '', criteria: '', type: ''};
+    const exampleCohort: CohortStub = {id: '',
+      name: '', description: '', criteria: '', type: '',
+      workspaceId: WorkspaceComponent.DEFAULT_WORKSPACE_ID};
     exampleCohort.id = '1';
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';
-
-    stubWorkspace.cohorts = [exampleCohort];
+    exampleCohort.creationTime = new Date();
+    exampleCohort.lastModifiedTime = new Date();
+    this.cohorts = [exampleCohort];
     this.workspaces = [stubWorkspace];
   }
   public workspaces: Workspace[];
-
-  private getMatchingWorkspaceOrSendError(
-      wsNamespace: string,
-      wsId: string,
-      observer: Observer<{}>): Workspace {
-    const workspaceFound = this.workspaces.find(function(workspace: Workspace) {
-      if (workspace.namespace === wsNamespace && workspace.id === wsId) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    if (workspaceFound === undefined) {
-      observer.error(`Error Searching. No workspace ${wsNamespace}, ${wsId} found `
-                    + 'in cohort service stub.');
-    }
-    return workspaceFound;
-  }
-
+  public cohorts: CohortStub[];
   public getCohort(
       wsNamespace: string,
       wsId: string,
       cId: string): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
-        if (workspaceMatch !== undefined) {
-          observer.next(workspaceMatch.cohorts.find(function(cohort: Cohort) {
-            if (cohort.id === cId) {
-              return true;
-            }
-          }));
-          observer.complete();
-        }
+        observer.next(this.cohorts.find(function(cohort: CohortStub) {
+          if (cohort.id === cId && cohort.workspaceId === wsId) {
+            return true;
+          }
+        }));
+        observer.complete();
       }, 0);
     });
     return observable;
@@ -75,22 +83,20 @@ export class CohortsServiceStub {
       newCohort: Cohort): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
-        if (workspaceMatch !== undefined) {
-          const index = workspaceMatch.cohorts.findIndex(function(cohort: Cohort) {
-            if (cohort.id === cId) {
-              return true;
-            }
-            return false;
-          });
-          if (index !== -1) {
-            workspaceMatch.cohorts[index] = newCohort;
-            observer.complete();
-          } else {
-            observer.error(new Error(`Error updating. No cohort with id: ${cId} `
-                                    + `exists in workspace ${wsNamespace}, ${wsId} `
-                                    + `in cohort service stub`));
+
+        const index = this.cohorts.findIndex(function(cohort: CohortStub) {
+          if (cohort.id === cId && cohort.workspaceId) {
+            return true;
           }
+          return false;
+        });
+        if (index !== -1) {
+          this.cohorts[index] = new CohortStub(newCohort, wsId);
+          observer.complete();
+        } else {
+          observer.error(new Error(`Error updating. No cohort with id: ${cId} `
+                                  + `exists in workspace ${wsNamespace}, ${wsId} `
+                                  + `in cohort service stub`));
         }
       }, 0);
     });
@@ -103,18 +109,15 @@ export class CohortsServiceStub {
       newCohort: Cohort): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
-        if (workspaceMatch !== undefined) {
-          observer.next(workspaceMatch.cohorts.find(function(cohort: Cohort) {
-            if (cohort.id === newCohort.id) {
-              observer.error(new Error(`Error creating. Cohort with `
-                                      + `id: ${cohort.id} already exists.`));
-              return true;
-            }
-          }));
-          workspaceMatch.cohorts.push(newCohort);
-          observer.complete();
-        }
+        observer.next(this.cohorts.find(function(cohort: Cohort) {
+          if (cohort.id === newCohort.id) {
+            observer.error(new Error(`Error creating. Cohort with `
+                                    + `id: ${cohort.id} already exists.`));
+            return true;
+          }
+        }));
+        this.cohorts.push(new CohortStub(newCohort, wsId));
+        observer.complete();
       }, 0);
     });
     return observable;
@@ -125,9 +128,16 @@ export class CohortsServiceStub {
       wsId: string): Observable<CohortListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        const workspaceMatch = this.getMatchingWorkspaceOrSendError(wsNamespace, wsId, observer);
-        if (workspaceMatch !== undefined) {
-          observer.next({items: workspaceMatch.cohorts});
+        const cohortsInWorkspace: Cohort[] = [];
+        this.cohorts.forEach(cohort => {
+          if (cohort.workspaceId === wsId) {
+            cohortsInWorkspace.push(cohort);
+          }
+        });
+        if (cohortsInWorkspace.length === 0) {
+          observer.error('No cohorts in workspace.');
+        } else {
+          observer.next({items: cohortsInWorkspace});
           observer.complete();
         }
       }, 0);

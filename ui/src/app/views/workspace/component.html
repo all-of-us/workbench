@@ -11,7 +11,7 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Cohorts</h3>
-      <button class="btn btn-link" (click)="addCohort()">Add a Cohort</button>
+      <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
@@ -27,9 +27,9 @@
         <clr-dg-column>Created Date</clr-dg-column>
         <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-          <clr-dg-cell><a (click)="goToCohortEdit(cohort.id)">{{cohort.name}}</a></clr-dg-cell>
+          <clr-dg-cell><a routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
           <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.currentUrl}}/cohort/{{cohort.id}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
           <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
@@ -48,7 +48,7 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Notebooks</h3>
-      <button class="btn btn-link">Launch Notebook Server</button>
+      <button class="btn">Launch Notebook Server</button>
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="notebooksLoading">
@@ -65,7 +65,7 @@
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-          <clr-dg-cell>{{notebook.url}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>
