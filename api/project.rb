@@ -28,6 +28,5 @@ if ARGV.length == 0 or ARGV[0] == "--help"
 end
 
 command = ARGV.first
-args = ARGV.drop(1)
 
-common.handle_or_die(command, *args)
+common.handle_or_die(command, ARGV.drop(1))
