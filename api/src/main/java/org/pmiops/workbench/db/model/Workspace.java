@@ -23,16 +23,16 @@ import org.pmiops.workbench.model.DataAccessLevel;
 public class Workspace {
 
   public static class FirecloudWorkspaceId {
-    private final String projectName;
+    private final String workspaceNamespace;
     private final String workspaceName;
 
-    public FirecloudWorkspaceId(String projectName, String workspaceName) {
-      this.projectName = projectName;
+    public FirecloudWorkspaceId(String workspaceNamespace, String workspaceName) {
+      this.workspaceNamespace = workspaceNamespace;
       this.workspaceName = workspaceName;
     }
 
-    public String getProjectName() {
-      return projectName;
+    public String getWorkspaceNamespace() {
+      return workspaceNamespace;
     }
 
     public String getWorkspaceName() {
@@ -41,7 +41,7 @@ public class Workspace {
 
     @Override
     public int hashCode() {
-      return Objects.hash(projectName, workspaceName);
+      return Objects.hash(workspaceNamespace, workspaceName);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class Workspace {
         return false;
       }
       FirecloudWorkspaceId that = (FirecloudWorkspaceId) obj;
-      return this.workspaceName.equals(that.workspaceName)
+      return this.workspaceNamespace.equals(that.workspaceNamespace)
           && this.workspaceName.equals(that.workspaceName);
     }
   }
@@ -58,7 +58,7 @@ public class Workspace {
   private long workspaceId;
   private String name;
   private String description;
-  private String projectName;
+  private String workspaceNamespace;
   private String firecloudName;
   private DataAccessLevel dataAccessLevel;
   private CdrVersion cdrVersion;
@@ -96,13 +96,13 @@ public class Workspace {
     this.description = description;
   }
 
-  @Column(name = "project_name")
-  public String getProjectName() {
-    return projectName;
+  @Column(name = "workspace_namespace")
+  public String getWorkspaceNamespace() {
+    return workspaceNamespace;
   }
 
-  public void setProjectName(String projectName) {
-    this.projectName = projectName;
+  public void setWorkspaceNamespace(String workspaceNamespace) {
+    this.workspaceNamespace = workspaceNamespace;
   }
 
 
@@ -174,6 +174,6 @@ public class Workspace {
 
   @Transient
   public FirecloudWorkspaceId getFirecloudWorkspaceId() {
-    return new FirecloudWorkspaceId(projectName, firecloudName);
+    return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 }

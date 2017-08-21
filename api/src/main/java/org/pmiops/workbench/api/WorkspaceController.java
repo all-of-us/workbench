@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class WorkspaceController implements WorkspacesApiDelegate {
 
-  private static final String PROJECT_NAMESPACE_PREFIX = "allofus-";
+  private static final String WORKSPACE_NAMESPACE_PREFIX = "allofus-";
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
 
@@ -46,7 +46,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
                   workspace.getDataAccessLevel().toString()))
               .name(workspace.getName())
               .id(workspaceId.getWorkspaceName())
-              .namespace(workspaceId.getProjectName())
+              .namespace(workspaceId.getWorkspaceNamespace())
               .description(workspace.getDescription());
           if (workspace.getCreator() != null) {
             result.setCreator(workspace.getCreator().getEmail());
@@ -114,24 +114,24 @@ public class WorkspaceController implements WorkspacesApiDelegate {
   }
 
   private FirecloudWorkspaceId generateFirecloudWorkspaceId(String name) {
-    // Find a unique project name based off of the provided name.
+    // Find a unique workspace namespace based off of the provided name.
     String strippedName = name.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
       strippedName = generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
     }
-    String projectName = PROJECT_NAMESPACE_PREFIX + strippedName;
+    String workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName;
     int suffixNumber = 1;
     List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        workspaceDao.findByProjectName(projectName);
-    // Keep looking until we find an unused project name.
+        workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
+    // Keep looking until we find an unused workspace namespace.
     while (!workspaces.isEmpty()) {
       suffixNumber++;
-      projectName = PROJECT_NAMESPACE_PREFIX + strippedName + "-" + suffixNumber;
-      workspaces = workspaceDao.findByProjectName(projectName);
-      // TODO: add Firecloud project lookup here, too
+      workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName + "-" + suffixNumber;
+      workspaces = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
+      // TODO: add Firecloud workspace namespace lookup here, too
     }
-    return new FirecloudWorkspaceId(projectName, strippedName);
+    return new FirecloudWorkspaceId(workspaceNamespace, strippedName);
   }
 
   @Override
@@ -145,7 +145,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setProjectName(workspaceId.getProjectName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
     // TODO: handle research purpose
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -202,9 +202,9 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
-  private org.pmiops.workbench.db.model.Workspace getDbWorkspace(String projectName,
+  private org.pmiops.workbench.db.model.Workspace getDbWorkspace(String workspaceNamespace,
       String firecloudName) {
-    return workspaceDao.findByProjectNameAndFirecloudName(projectName, firecloudName);
+    return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(workspaceNamespace, firecloudName);
   }
 
   private org.pmiops.workbench.db.model.Workspace getDbWorkspaceCheckExists(

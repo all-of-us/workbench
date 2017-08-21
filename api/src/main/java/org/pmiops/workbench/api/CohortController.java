@@ -157,7 +157,7 @@ public class CohortController implements CohortsApiDelegate {
    * (In future it will throw NotFoundException if the workspace wasn't created previously.)
    */
   private Workspace getDbWorkspace(String workspaceNamespace, String workspaceId) {
-    Workspace workspace = workspaceDao.findByProjectNameAndFirecloudName(workspaceNamespace,
+    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudName(workspaceNamespace,
         workspaceId);
     if (workspace == null) {
       // TODO: get rid of this after creating workspace API
@@ -167,7 +167,7 @@ public class CohortController implements CohortsApiDelegate {
       workspace.setCreator(userProvider.get());
       workspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
       workspace.setLastModifiedTime(now);
-      workspace.setProjectName(workspaceNamespace);
+      workspace.setWorkspaceNamespace(workspaceNamespace);
       workspace.setFirecloudName(workspaceId);
       workspace.setName(workspaceId);
 

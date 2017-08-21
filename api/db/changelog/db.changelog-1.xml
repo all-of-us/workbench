@@ -60,7 +60,7 @@
       <column name="name" type="varchar(80)">
         <constraints nullable="false"/>
       </column>
-      <column name="project_name" type="varchar(255)">
+      <column name="workspace_namespace" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
       <column name="firecloud_name" type="varchar(255)">
@@ -87,15 +87,15 @@
       </column>
     </createTable>
     <createIndex
-        indexName="idx_workspace_project_name"
+        indexName="idx_workspace_workspace_namespace"
         tableName="workspace">
-      <column name="project_name"/>
+      <column name="workspace_namespace"/>
     </createIndex>
     <createIndex
         indexName="idx_workspace_firecloud_name"
         tableName="workspace"
         unique="true">
-      <column name="project_name"/>
+      <column name="workspace_namespace"/>
       <column name="firecloud_name"/>
     </createIndex>
     <addForeignKeyConstraint baseColumnNames="creator_id"
