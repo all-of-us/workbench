@@ -2,6 +2,7 @@ require_relative "utils/common"
 require "io/console"
 require "optparse"
 require "tempfile"
+require "os"
 
 def dev_up(args)
   common = Common.new
@@ -61,10 +62,22 @@ def copy_file_to_gcs(source_path, bucket, filename)
   common.run_inline %W{gsutil cp #{source_path} gs://#{bucket}/#{filename}}
 end
 
-def create_db_creds(args)
+def run_cloud_sql_proxy(project, creds_file)
+  common = Common.new
+  if !File.file?("cloud_sql_proxy")
+    op_sys = OS.mac? ? "darwin" : "linux"
+    common.run_inline %W(wget https://dl.google.com/cloudsql/cloud_sql_proxy.#{op_sys}.amd64 -O
+      cloud_sql_proxy)
+    common.run_inline %W(chmod +x cloud_sql_proxy)
+  end
+  common.run_inline %W(../tools/cloud_sql_proxy
+      -instances #{project}:us-central1:workbenchmaindb=tcp:3307
+      -credential_file=#{creds_file.path})
+
+def get_project_and_account(args, command)
   options = {}
   OptionParser.new do |opts|
-    opts.banner = "Usage: project.rb create-db-creds [options]"
+    opts.banner = "Usage: project.rb #{command} [options]"
 
     opts.on("--project [PROJECT]", "Project to create credentials for") do |project|
       options["project"] = project
@@ -83,53 +96,72 @@ def create_db_creds(args)
     if project == nil || account == nil
       raise(usage)
     end
-    puts "Enter the root DB user password:"
-    root_password = STDIN.noecho(&:gets)
-    puts "Enter the root DB user password again:"
-    root_password_2 = STDIN.noecho(&:gets)
-    if root_password != root_password_2
-      raise("Root password entries didn't match.")
-    end
-    puts "Enter the workbench DB user password:"
-    workbench_password = STDIN.noecho(&:gets)
-    puts "Enter the workbench DB user password again:"
-    workbench_password_2 = STDIN.noecho(&:gets)
-    if workbench_password != workbench_password_2
-      raise("Workbench password entries didn't match.")
-    end
-
-    instance_name = "#{project}:us-central1:workbenchmaindb"
-    creds_file = Tempfile.new("#{project}-vars.env")
-    if creds_file
-      begin
-        creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
-        creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
-        creds_file.puts "DB_HOST=127.0.0.1"
-        creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
-        creds_file.puts "LIQUIBASE_DB_USER=liquibase"
-        creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
-        creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
-        creds_file.puts "WORKBENCH_DB_USER=workbench"
-        creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-        creds_file.close
-
-        # Get service account credentials
-        service_account_creds_file = Tempfile.new("#{project}-creds.json")
-        get_service_account_creds_file(project, account, service_account_creds_file)
-        activate_service_account(service_account_creds_file)
-        begin
-          copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
-        ensure
-          delete_service_accounts_creds(project, account, service_account_creds_file)
-        end
-      ensure
-        creds_file.unlink
-      end
-    else
-      raise("Error creating file.")
-    end
   else
     raise(usage)
+  return options
+end
+
+def reset_db(args, command)
+  options = get_project_and_account(args, "reset-db")
+  project = options["project"]
+  account = options["account"]
+  service_account_creds_file = Tempfile.new("#{project}-creds.json")
+  get_service_account_creds_file(project, account, service_account_creds_file)
+  begin
+    run_cloud_sql_proxy(project, service_account_creds_file)
+  ensure
+    delete_service_accounts_creds(project, account, service_account_creds_file)
+  end
+end
+
+def create_db_creds(args)
+  options = get_project_and_account(args, "create-db-creds")
+  project = options["project"]
+  account = options["account"]
+  puts "Enter the root DB user password:"
+  root_password = STDIN.noecho(&:gets)
+  puts "Enter the root DB user password again:"
+  root_password_2 = STDIN.noecho(&:gets)
+  if root_password != root_password_2
+    raise("Root password entries didn't match.")
+  end
+  puts "Enter the workbench DB user password:"
+  workbench_password = STDIN.noecho(&:gets)
+  puts "Enter the workbench DB user password again:"
+  workbench_password_2 = STDIN.noecho(&:gets)
+  if workbench_password != workbench_password_2
+    raise("Workbench password entries didn't match.")
+  end
+
+  instance_name = "#{project}:us-central1:workbenchmaindb"
+  creds_file = Tempfile.new("#{project}-vars.env")
+  if creds_file
+    begin
+      creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
+      creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
+      creds_file.puts "DB_HOST=127.0.0.1"
+      creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
+      creds_file.puts "LIQUIBASE_DB_USER=liquibase"
+      creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
+      creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
+      creds_file.puts "WORKBENCH_DB_USER=workbench"
+      creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      creds_file.close
+
+      # Get service account credentials
+      service_account_creds_file = Tempfile.new("#{project}-creds.json")
+      get_service_account_creds_file(project, account, service_account_creds_file)
+      begin
+        activate_service_account(service_account_creds_file)
+        copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
+      ensure
+        delete_service_accounts_creds(project, account, service_account_creds_file)
+      end
+    ensure
+      creds_file.unlink
+    end
+  else
+    raise("Error creating file.")
   end
 end
 

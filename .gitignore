@@ -23,6 +23,7 @@
 /ui/dist/**
 /ui/libproject/swagger-codegen-cli.jar
 /ui/src/generated/*
+cloud_sql_proxy
 node_modules
 npm-debug.log
 tools/*.jar
