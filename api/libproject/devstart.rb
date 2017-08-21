@@ -13,14 +13,14 @@ def dev_up(args)
   common.run_inline_swallowing_interrupt %W{docker-compose logs -f api}
 end
 
-def connect_to_db()
+def connect_to_db(args)
   common = Common.new
   common.docker.requires_docker
 
   common.run_inline %W{docker-compose exec db mysql --database=workbench}
 end
 
-def rebuild_image()
+def rebuild_image(args)
   common = Common.new
   common.docker.requires_docker
 
@@ -134,7 +134,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => Proc.new { |*args| connect_to_db(*args) }
+  :fn => Proc.new { |args| connect_to_db(args) }
 })
 
 Common.register_command({
