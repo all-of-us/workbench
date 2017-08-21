@@ -10,6 +10,7 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {LoginComponent} from 'app/views/login/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 
 
@@ -32,7 +33,10 @@ const routes: Routes = [
           data: {title: 'Build Cohort Criteria'}},
   {path: 'workspace/:ns/:wsid/cohorts/:cid/build',
           component: CohortBuilderPlaceholderComponent,
-          data: {title: 'Edit Cohort Criteria'}}
+          data: {title: 'Edit Cohort Criteria'}},
+  {path: 'workspace/build',
+          component: WorkspaceEditComponent,
+          data: {title: 'Create Workspace'}}
 ];
 
 @NgModule({

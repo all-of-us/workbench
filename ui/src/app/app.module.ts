@@ -20,6 +20,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters} from 'generated';
 import {environment} from 'environments/environment';
 
@@ -58,7 +59,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortBuilderPlaceholderComponent,
     CohortEditComponent,
     HomePageComponent,
-    WorkspaceComponent
+    WorkspaceComponent,
+    WorkspaceEditComponent
   ],
   providers: [
     UserService,
