@@ -1,9 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter} from 'clarity-angular';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
+import {resetDateObject} from 'helper-functions';
 import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
@@ -38,6 +40,7 @@ class NotebookDescriptionFilter implements StringFilter<Notebook> {
   }
 }
 
+
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
@@ -68,7 +71,8 @@ export class WorkspaceComponent implements OnInit {
       private route: ActivatedRoute,
       private userService: UserService,
       private repositoryService: RepositoryService,
-      private cohortsService: CohortsService
+      private cohortsService: CohortsService,
+      @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);
@@ -79,6 +83,8 @@ export class WorkspaceComponent implements OnInit {
         .subscribe(
             cohortsReceived => {
               for (const coho of cohortsReceived.items) {
+                coho.creationTime = resetDateObject(coho.creationTime);
+                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime);
                 this.cohortList.push(coho);
               }
               this.cohortsLoading = false;
@@ -88,13 +94,5 @@ export class WorkspaceComponent implements OnInit {
               this.cohortsError = true;
             });
 
-  }
-
-  addCohort(): void {
-    this.router.navigate(['cohorts/build'], {relativeTo : this.route});
-  }
-
-  goToCohortEdit(id: string): void {
-    this.router.navigate(['cohorts/' + id + '/build'], {relativeTo : this.route});
   }
 }
