@@ -15,11 +15,11 @@
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
           Description
           <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
         </clr-dg-column>
@@ -52,11 +52,11 @@
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
           Description
           <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
         </clr-dg-column>
