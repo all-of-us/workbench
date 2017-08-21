@@ -60,7 +60,9 @@
       <column name="name" type="varchar(80)">
         <constraints nullable="false"/>
       </column>
-      <!-- The namespace and name of the workspace in Firecloud, e.g. myproject/workspace_name -->
+      <column name="workspace_namespace" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
       <column name="firecloud_name" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
@@ -85,9 +87,15 @@
       </column>
     </createTable>
     <createIndex
+        indexName="idx_workspace_workspace_namespace"
+        tableName="workspace">
+      <column name="workspace_namespace"/>
+    </createIndex>
+    <createIndex
         indexName="idx_workspace_firecloud_name"
         tableName="workspace"
         unique="true">
+      <column name="workspace_namespace"/>
       <column name="firecloud_name"/>
     </createIndex>
     <addForeignKeyConstraint baseColumnNames="creator_id"

@@ -135,7 +135,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => Proc.new { |*args| connect_to_db(*args) }
+  :fn => Proc.new { |args| connect_to_db(args) }
 })
 
 Common.register_command({
