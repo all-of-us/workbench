@@ -75,6 +75,7 @@ export class WorkspaceComponent implements OnInit {
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
+    console.log(document.location);
     this.userService.getLoggedInUser().then(user => this.user = user);
     this.cohortsService
         .getCohortsInWorkspace(
@@ -94,9 +95,5 @@ export class WorkspaceComponent implements OnInit {
               this.cohortsError = true;
             });
 
-  }
-
-  addCohort(): void {
-    this.router.navigate(['cohorts/build'], {relativeTo : this.route});
   }
 }
