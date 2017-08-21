@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.repository.CrudRepository;
 
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
-  Workspace findByFirecloudName(String firecloudName);
+  List<Workspace> findByProjectName(String projectName);
+  Workspace findByProjectNameAndFirecloudName(String projectName, String firecloudName);
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
 }

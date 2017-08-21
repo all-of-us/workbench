@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,27 +23,42 @@ import org.pmiops.workbench.model.DataAccessLevel;
 public class Workspace {
 
   public static class FirecloudWorkspaceId {
-    private final String namespace;
-    private final String workspaceId;
+    private final String projectName;
+    private final String workspaceName;
 
-    public FirecloudWorkspaceId(String namespace, String workspaceId) {
-      this.namespace = namespace;
-      this.workspaceId = workspaceId;
+    public FirecloudWorkspaceId(String projectName, String workspaceName) {
+      this.projectName = projectName;
+      this.workspaceName = workspaceName;
     }
 
-    public String getNamespace() {
-      return namespace;
+    public String getProjectName() {
+      return projectName;
     }
 
-    public String getWorkspaceId() {
-      return workspaceId;
+    public String getWorkspaceName() {
+      return workspaceName;
     }
 
+    @Override
+    public int hashCode() {
+      return Objects.hash(projectName, workspaceName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof FirecloudWorkspaceId)) {
+        return false;
+      }
+      FirecloudWorkspaceId that = (FirecloudWorkspaceId) obj;
+      return this.workspaceName.equals(that.workspaceName)
+          && this.workspaceName.equals(that.workspaceName);
+    }
   }
 
   private long workspaceId;
   private String name;
   private String description;
+  private String projectName;
   private String firecloudName;
   private DataAccessLevel dataAccessLevel;
   private CdrVersion cdrVersion;
@@ -79,6 +95,16 @@ public class Workspace {
   public void setDescription(String description) {
     this.description = description;
   }
+
+  @Column(name = "project_name")
+  public String getProjectName() {
+    return projectName;
+  }
+
+  public void setProjectName(String projectName) {
+    this.projectName = projectName;
+  }
+
 
   @Column(name = "firecloud_name")
   public String getFirecloudName() {
@@ -148,13 +174,6 @@ public class Workspace {
 
   @Transient
   public FirecloudWorkspaceId getFirecloudWorkspaceId() {
-    int slashIndex = firecloudName.indexOf('/');
-    String namespace = firecloudName.substring(0, slashIndex);
-    String workspaceId = firecloudName.substring(slashIndex + 1);
-    return new FirecloudWorkspaceId(namespace, workspaceId);
-  }
-
-  public static String toFirecloudName(String workspaceNamespace, String workspaceId) {
-    return workspaceNamespace + "/" + workspaceId;
+    return new FirecloudWorkspaceId(projectName, firecloudName);
   }
 }
