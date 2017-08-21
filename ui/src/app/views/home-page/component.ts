@@ -69,8 +69,4 @@ export class HomePageComponent implements OnInit {
               });
             });
   }
-
-  addWorkspace(): void {
-    this.router.navigate(['workspace/build'], {relativeTo : this.route});
-  }
 }

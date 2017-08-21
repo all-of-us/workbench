@@ -11,15 +11,15 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Cohorts</h3>
-      <button class="btn btn-link" (click)="addCohort()">Add a Cohort</button>
+      <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
           Description
           <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
         </clr-dg-column>
@@ -27,7 +27,7 @@
         <clr-dg-column>Created Date</clr-dg-column>
         <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-          <clr-dg-cell><a href="{{this.document.location.href}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
+          <clr-dg-cell><a routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
           <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
           <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
           <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
@@ -48,15 +48,15 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Notebooks</h3>
-      <button class="btn btn-link">Launch Notebook Server</button>
+      <button class="btn">Launch Notebook Server</button>
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
           Description
           <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
         </clr-dg-column>

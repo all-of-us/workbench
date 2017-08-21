@@ -70,6 +70,13 @@ def clean_git_hooks()
   common.run_inline %W{find ../.git/hooks -type l -delete}
 end
 
+def rebuild_image()
+  common = Common.new
+  common.docker.requires_docker
+
+  common.run_inline %W{docker-compose build}
+end
+
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
@@ -86,6 +93,12 @@ Common.register_command({
   :invocation => "swagger-regen",
   :description => "Regenerates API client libraries from Swagger definitions.",
   :fn => Proc.new { |*args| swagger_regen(*args) }
+})
+
+Common.register_command({
+  :invocation => "rebuild-image",
+  :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
+  :fn => Proc.new { |*args| rebuild_image(*args) }
 })
 
 Common.register_command({
