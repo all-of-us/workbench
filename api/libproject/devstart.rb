@@ -3,6 +3,38 @@ require "io/console"
 require "optparse"
 require "tempfile"
 
+class ProjectAndAccountOptions
+  attr_accessor :project
+  attr_accessor :account
+  attr_accessor :command
+  attr_accessor :parser
+
+  def initialize(command)
+    self.command = command
+    self.parser = OptionParser.new do |parser|
+      parser.banner = "Usage: ./project.rb #{self.command} [options]"
+      parser.on("--project [PROJECT]",
+          "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+        self.project = project
+      end
+      parser.on("--account [ACCOUNT]",
+           "Account to use when creating credentials (your.name@pmi-ops.org)") do |account|
+        self.account = account
+      end
+    end
+  end
+
+  def parse args
+    self.parser.parse args
+    if self.project == nil || self.account == nil
+      puts self.parser.help
+      raise("Invalid arguments")
+    end
+    self
+  end
+end
+
+
 def dev_up(args)
   common = Common.new
   common.docker.requires_docker
@@ -143,38 +175,10 @@ def do_drop_db(project)
   end
 end
 
-def get_project_and_account(args, command)
-  options = {}
-  OptionParser.new do |opts|
-    opts.banner = "Usage: project.rb #{command} [options]"
-
-    opts.on("--project [PROJECT]", "Project to create credentials for") do |project|
-      options["project"] = project
-    end
-    opts.on("--account [ACCOUNT]",
-      "Account to use when creating credentials (your.name@pmi-ops.org)") do |account|
-          options["account"] = account
-    end
-  end.parse!(args)
-
-  usage = "Usage: --project <project> --account <account>"
-  common = Common.new()
-  if options.has_key?("project") && options.has_key?("account")
-    project = options["project"]
-    account = options["account"]
-    if project == nil || account == nil
-      raise(usage)
-    end
-  else
-    raise(usage)
-  end
-  return options
-end
-
 def drop_cloud_db(args)
-  options = get_project_and_account(args, "drop-cloud-db")
-  project = options["project"]
-  account = options["account"]
+  options = ProjectAndAccountOptions.new("drop-cloud-db").parse(args)
+  project = options.project
+  account = options.account
   service_account_creds_file = Tempfile.new("#{project}-creds.json")
   get_service_account_creds_file(project, account, service_account_creds_file)
   begin
@@ -190,9 +194,9 @@ def drop_cloud_db(args)
 end
 
 def connect_to_cloud_db(args)
-  options = get_project_and_account(args, "connect-to-cloud-db")
-  project = options["project"]
-  account = options["account"]
+  options = ProjectAndAccountOptions.new("connect-to-cloud-db").parse(args)
+  project = options.project
+  account = options.account
   service_account_creds_file = Tempfile.new("#{project}-creds.json")
   get_service_account_creds_file(project, account, service_account_creds_file)
   begin
@@ -210,9 +214,9 @@ def connect_to_cloud_db(args)
 end
 
 def run_cloud_migrations(args)
-  options = get_project_and_account(args, "run-cloud-migrations")
-  project = options["project"]
-  account = options["account"]
+  options = ProjectAndAccountOptions.new("run-cloud-migrations").parse(args)
+  project = options.project
+  account = options.account
   service_account_creds_file = Tempfile.new("#{project}-creds.json")
   get_service_account_creds_file(project, account, service_account_creds_file)
   begin
@@ -229,9 +233,9 @@ def run_cloud_migrations(args)
 end
 
 def create_db_creds(args)
-  options = get_project_and_account(args, "create-db-creds")
-  project = options["project"]
-  account = options["account"]
+  options = ProjectAndAccountOptions.new("create-db-creds").parse(args)
+  project = options.project
+  account = options.account
   puts "Enter the root DB user password:"
   root_password = STDIN.noecho(&:gets)
   puts "Enter the root DB user password again:"
