@@ -7,7 +7,7 @@
     </div>
     <div class="indented">
       <clr-datagrid>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
         </clr-dg-column>

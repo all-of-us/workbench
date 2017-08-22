@@ -1,7 +1,7 @@
 import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
-import {StringFilter} from 'clarity-angular';
+import {StringFilter, Comparator} from 'clarity-angular';
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {resetDateObject} from 'helper-functions';
@@ -23,6 +23,12 @@ class WorkspaceNameFilter implements StringFilter<Workspace> {
   }
 }
 
+class WorkspaceNameComparator implements Comparator<Workspace> {
+  compare(a: Workspace, b: Workspace) {
+    return a.name.localeCompare(b.name);
+  }
+}
+
 // TODO: Change to research purpose?
 class WorkspaceResearchPurposeFilter implements StringFilter<Workspace> {
   accepts(workspace: Workspace, search: string): boolean {
@@ -38,7 +44,7 @@ class WorkspaceResearchPurposeFilter implements StringFilter<Workspace> {
 export class HomePageComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
-
+  private workspaceNameComparator = new WorkspaceNameComparator();
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
   // TODO: Replace with real data/workspaces.
