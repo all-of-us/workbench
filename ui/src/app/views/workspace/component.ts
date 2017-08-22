@@ -140,7 +140,6 @@ export class WorkspaceComponent implements OnInit {
           workspaceReceived => {
             this.workspace = workspaceReceived;
             this.workspaceLoading = false;
-            console.log(this);
           },
           error => {
             this.workspaceLoading = false;
