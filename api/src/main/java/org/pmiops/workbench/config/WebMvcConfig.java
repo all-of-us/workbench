@@ -6,6 +6,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +43,17 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public User user(Userinfoplus userInfo, UserDao userDao) {
-    return userDao.findUserByEmail(userInfo.getEmail());
+    User user = userDao.findUserByEmail(userInfo.getEmail());
+    // If the user record doesn't exist, automatically create one.
+    if (user == null) {
+      user = new User();
+      // TODO: do group membership check to determine the appropriate data access level here
+      // (and figure out if we actually want to cache this)
+      user.setDataAccessLevel(DataAccessLevel.REGISTERED);
+      user.setEmail(userInfo.getEmail());
+      userDao.save(user);
+    }
+    return user;
   }
 
   @Override
