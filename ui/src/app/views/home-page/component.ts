@@ -48,6 +48,7 @@ export class HomePageComponent implements OnInit {
   repositories: Repository[] = [];
   user: User;  // to detect if logged in
   workspaceList: Workspace[] = [];
+  workspacesLoading = false;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -57,6 +58,7 @@ export class HomePageComponent implements OnInit {
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
+    this.workspacesLoading = true;
     this.userService.getLoggedInUser().then(user => this.user = user);
     this.workspacesService
         .getWorkspaces()
@@ -68,6 +70,11 @@ export class HomePageComponent implements OnInit {
                 workspace.lastModifiedTime = resetDateObject(workspace.lastModifiedTime);
                 workspace.creationTime = resetDateObject(workspace.creationTime);
               });
+              this.workspacesLoading = false;
+            },
+            error => {
+              // TODO: Add Error Message.
+              this.workspacesLoading = false;
             });
   }
 }

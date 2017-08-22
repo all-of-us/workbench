@@ -6,7 +6,7 @@
       <a class="btn btn-link" routerLink="/workspace/build">Add a Workspace</a>
     </div>
     <div class="indented">
-      <clr-datagrid>
+      <clr-datagrid [clrDgLoading]="workspacesLoading">
         <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
