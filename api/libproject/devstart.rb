@@ -7,10 +7,10 @@ def dev_up(args)
   common = Common.new
   common.docker.requires_docker
 
-  common.run_inline %W{docker-compose up -d}
   at_exit { common.run_inline %W{docker-compose down} }
-
-  common.run_inline_swallowing_interrupt %W{docker-compose logs -f api}
+  common.run_inline %W{docker-compose up -d db}
+  common.run_inline %W{docker-compose run db-migration}
+  common.run_inline_swallowing_interrupt %W{docker-compose up api}
 end
 
 def connect_to_db(args)
@@ -19,6 +19,13 @@ def connect_to_db(args)
 
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
+end
+
+def docker_clean(args)
+  common = Common.new
+  common.docker.requires_docker
+
+  common.run_inline %W{docker-compose down --volumes}
 end
 
 def rebuild_image(args)
@@ -136,6 +143,14 @@ Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
   :fn => Proc.new { |args| connect_to_db(args) }
+})
+
+Common.register_command({
+  :invocation => "docker-clean",
+  :description => \
+    "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
+    "start from scratch (e.g., the database will be re-created).",
+  :fn => Proc.new { |args| docker_clean(args) }
 })
 
 Common.register_command({

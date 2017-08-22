@@ -24,8 +24,6 @@ services:
     build:
       context: ./src/dev/server
     working_dir: /w/db
-    depends_on:
-      - api
     volumes:
       - gradle-cache-migration:/root/.gradle
       - .:/w:cached
