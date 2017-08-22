@@ -14,7 +14,7 @@ trap finish EXIT
 cat create_db.sql | envsubst > $CREATE_DB_FILE
 
 echo "Creating database if it does not exist..."
-mysql -h ${DB_HOST} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
+mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Upgrading database..."
 ../gradlew --no-daemon update
