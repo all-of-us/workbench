@@ -15,6 +15,7 @@ export class CohortEditComponent implements OnInit {
   adding = false;
   workspaceNamespace: string;
   workspaceId: string;
+  buttonClicked = false;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -54,24 +55,30 @@ export class CohortEditComponent implements OnInit {
   }
 
   saveCohort(): void {
-    this.cohortsService
-        .updateCohort(
-            this.workspaceNamespace,
-            this.workspaceId,
-            this.cohort.id,
-            this.cohort)
-        .retry(2)
-        .subscribe(cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
+    if (!this.buttonClicked) {
+      this.buttonClicked = true;
+      this.cohortsService
+          .updateCohort(
+              this.workspaceNamespace,
+              this.workspaceId,
+              this.cohort.id,
+              this.cohort)
+          .retry(2)
+          .subscribe(cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
+    }
   }
 
   addCohort(): void {
-    this.cohortsService
-        .createCohort(
-            this.workspaceNamespace,
-            this.workspaceId,
-            this.cohort)
-        .retry(2)
-        .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+    if (!this.buttonClicked) {
+      this.buttonClicked = true;
+      this.cohortsService
+          .createCohort(
+              this.workspaceNamespace,
+              this.workspaceId,
+              this.cohort)
+          .retry(2)
+          .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+    }
   }
 
   cancelAdd(): void {
@@ -81,6 +88,4 @@ export class CohortEditComponent implements OnInit {
   cancelSave(): void {
     this.router.navigate(['../../..'], {relativeTo : this.route});
   }
-
-
 }

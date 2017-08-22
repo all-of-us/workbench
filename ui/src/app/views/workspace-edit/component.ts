@@ -13,6 +13,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspace: Workspace;
   workspaceId: string;
   adding = false;
+  buttonClicked = false;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -27,10 +28,13 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    this.workspacesService
-        .createWorkspace(
-            this.workspace)
-        .retry(2)
-        .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+    if (!this.buttonClicked) {
+      this.buttonClicked = true;
+      this.workspacesService
+          .createWorkspace(
+              this.workspace)
+          .retry(2)
+          .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+    }
   }
 }
