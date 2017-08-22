@@ -3,11 +3,11 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Workspaces</h3>
-      <button class="btn btn-link" (click)="addWorkspace()">Add a Workspace</button>
+      <a class="btn btn-link" routerLink="/workspace/build">Add a Workspace</a>
     </div>
     <div class="indented">
-      <clr-datagrid>
-        <clr-dg-column>
+      <clr-datagrid [clrDgLoading]="workspacesLoading">
+        <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
         </clr-dg-column>

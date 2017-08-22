@@ -1,0 +1,18 @@
+<h2>Create a new Workspace</h2>
+<div class="form-area">
+  <div>
+    <label>Name:</label>
+    <input type="text" class="input name" name="workspace-name" autofocus
+        [(ngModel)]="workspace.name">
+  </div>
+  <div>
+    <label>Description:</label>
+    <textarea class="input description" name="workspace-description"
+        [(ngModel)]="workspace.description">
+    </textarea>
+  </div>
+  <div class="button">
+    <button class="btn add-button btn-primary" (click)="addWorkspace()">Create Workspace</button>
+    <button class="btn" routerLink="/../..">Cancel</button>
+  </div>
+</div>
