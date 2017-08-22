@@ -200,7 +200,7 @@ def connect_to_cloud_db(args)
     pid = run_cloud_sql_proxy(project, service_account_creds_file)
     begin
       system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
-                    "--port 3307")
+                    "--port 3307 --database #{ENV["DB_NAME"]}")
     ensure
       Process.kill("HUP", pid)
     end
