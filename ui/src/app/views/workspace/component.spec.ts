@@ -7,7 +7,7 @@ import {FormsModule} from '@angular/forms';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub'
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {CohortsService} from 'generated';
 import {WorkspacesService} from 'generated';
 import {UserService} from 'app/services/user.service';

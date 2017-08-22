@@ -13,8 +13,8 @@ export class WorkspacesServiceStub {
       name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
       namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-      description: "Stub workspace",
-      cdrVersionId: "Fake CDR Version",
+      description: 'Stub workspace',
+      cdrVersionId: 'Fake CDR Version',
       creationTime: new Date(),
       lastModifiedTime: new Date()
     };
