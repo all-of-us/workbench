@@ -10,6 +10,7 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
+import {ClarityModule} from 'clarity-angular';
 
 
 class CohortEditPage {
@@ -46,7 +47,8 @@ describe('CohortEditComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        FormsModule
+        FormsModule,
+        ClarityModule.forRoot()
       ],
       declarations: [
         CohortEditComponent
