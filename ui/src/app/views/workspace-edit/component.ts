@@ -33,8 +33,4 @@ export class WorkspaceEditComponent implements OnInit {
         .retry(2)
         .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
   }
-
-  cancelAdd(): void {
-    this.router.navigate(['../..'], {relativeTo : this.route});
-  }
 }
