@@ -5,7 +5,10 @@ import {Workspace, WorkspaceListResponse} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
 
-
+export class WorkspaceStubVariables {
+  static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
+  static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
+}
 
 export class WorkspacesServiceStub {
   constructor() {
@@ -13,8 +16,8 @@ export class WorkspacesServiceStub {
       name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
       namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-      description: 'Stub workspace',
-      cdrVersionId: 'Fake CDR Version',
+      description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
+      cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       creationTime: new Date(),
       lastModifiedTime: new Date()
     };

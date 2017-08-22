@@ -7,7 +7,7 @@ import {FormsModule} from '@angular/forms';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {CohortsService} from 'generated';
 import {WorkspacesService} from 'generated';
 import {UserService} from 'app/services/user.service';
@@ -117,9 +117,9 @@ describe('WorkspaceComponent', () => {
     updateAndTick(workspacePage.fixture);
     updateAndTick(workspacePage.fixture);
     expect(workspacePage.cdrText.nativeElement.innerText)
-      .toMatch('Fake CDR Version');
+      .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
     expect(workspacePage.workspaceDescription.nativeElement.innerText)
-      .toMatch('Stub workspace');
+      .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
   }));
 
   it('errors if it tries to access a non-existant workspace', fakeAsync(() => {
