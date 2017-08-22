@@ -13,6 +13,8 @@ export class CohortEditComponent implements OnInit {
   cohort: Cohort = {id: '', name: '', description: '', criteria: '', type: ''};
   cohortId: string;
   adding = false;
+  workspaceNamespace: string;
+  workspaceId: string;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -21,6 +23,8 @@ export class CohortEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.cohortId = this.route.snapshot.url[4].path;
+    this.workspaceId = this.route.snapshot.url[2].path;
+    this.workspaceNamespace = this.route.snapshot.url[1].path;
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     } else {
@@ -52,8 +56,8 @@ export class CohortEditComponent implements OnInit {
   saveCohort(): void {
     this.cohortsService
         .updateCohort(
-            WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-            WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+            this.workspaceNamespace,
+            this.workspaceId,
             this.cohort.id,
             this.cohort)
         .retry(2)
@@ -63,8 +67,8 @@ export class CohortEditComponent implements OnInit {
   addCohort(): void {
     this.cohortsService
         .createCohort(
-            WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-            WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+            this.workspaceNamespace,
+            this.workspaceId,
             this.cohort)
         .retry(2)
         .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));

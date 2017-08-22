@@ -27,7 +27,6 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    console.log(this.workspace);
     this.workspacesService
         .createWorkspace(
             this.workspace)
