@@ -66,7 +66,6 @@ class NotebookDescriptionComparator implements Comparator<Notebook> {
 }
 
 
-
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',

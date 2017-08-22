@@ -21,6 +21,12 @@ a {
   cursor: hand;
 }
 
+textarea {
+  height: 10em;
+  resize: none;
+  padding: 0.2rem 0.4rem;
+}
+
 input[type=text] {
   border: 1px solid #9a9a9a;
 }
