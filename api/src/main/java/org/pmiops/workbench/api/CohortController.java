@@ -17,7 +17,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -160,20 +159,8 @@ public class CohortController implements CohortsApiDelegate {
     Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudName(workspaceNamespace,
         workspaceId);
     if (workspace == null) {
-      // TODO: get rid of this after creating workspace API
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      workspace = new Workspace();
-      workspace.setCreationTime(now);
-      workspace.setCreator(userProvider.get());
-      workspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
-      workspace.setLastModifiedTime(now);
-      workspace.setWorkspaceNamespace(workspaceNamespace);
-      workspace.setFirecloudName(workspaceId);
-      workspace.setName(workspaceId);
-
-      workspaceDao.save(workspace);
-
-      //throw new NotFoundException("No workspace with name {0}".format(firecloudName));
+      throw new NotFoundException("No workspace with name {0}/{1}"
+          .format(workspaceNamespace, workspaceId));
     }
     return workspace;
   }
