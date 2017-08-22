@@ -53,6 +53,12 @@ button:disabled {
   cursor: auto;
 }
 
+.loading-text {
+  padding-left: 0.5rem;
+  color: #888;
+}
+
+
 /* everywhere else */
 * {
   font-family: Arial, Helvetica, sans-serif;

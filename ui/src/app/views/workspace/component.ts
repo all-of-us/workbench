@@ -10,6 +10,8 @@ import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
+import {Workspace} from 'generated';
+import {WorkspacesService} from 'generated';
 // TODO: use a real swagger generated class for this.
 class Notebook {
   constructor(public name: string, public description: string, public url: string) {}
@@ -82,6 +84,10 @@ export class WorkspaceComponent implements OnInit {
   private cohortDescriptionComparator = new CohortDescriptionComparator();
   private notebookNameComparator = new NotebookNameComparator();
   private notebookDescriptionComparator = new NotebookDescriptionComparator();
+  workspace: Workspace;
+  wsId: string;
+  wsNamespace: string;
+  workspaceLoading = true;
   cohortsLoading = true;
   cohortsError = false;
   notebooksLoading = false;
@@ -101,13 +107,17 @@ export class WorkspaceComponent implements OnInit {
       private userService: UserService,
       private repositoryService: RepositoryService,
       private cohortsService: CohortsService,
+      private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.userService.getLoggedInUser().then(user => this.user = user);
+    this.workspaceLoading = true;
+    this.wsNamespace = this.route.snapshot.url[1].path;
+    this.wsId = this.route.snapshot.url[2].path;
     this.cohortsService
         .getCohortsInWorkspace(
-            this.route.snapshot.url[1].path, this.route.snapshot.url[2].path)
+            this.wsNamespace, this.wsId)
         .retry(2)
         .subscribe(
             cohortsReceived => {
@@ -122,6 +132,17 @@ export class WorkspaceComponent implements OnInit {
               this.cohortsLoading = false;
               this.cohortsError = true;
             });
-
+    this.workspacesService
+      .getWorkspace(
+        this.wsNamespace, this.wsId)
+        .retry(2)
+        .subscribe(
+          workspaceReceived => {
+            this.workspace = workspaceReceived;
+            this.workspaceLoading = false;
+          },
+          error => {
+            this.workspaceLoading = false;
+          });
   }
 }
