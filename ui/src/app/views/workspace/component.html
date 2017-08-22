@@ -1,11 +1,21 @@
-<h2>AoU Research Portal Workspace</h2>
 <div *ngIf="user else loggedout">
-  <p class="description-text">Default workspace for July, 2017 demo</p>
+  <h2 *ngIf="!workspaceLoading; else workspacePageLoading">{{workspace.name}}</h2>
+  <ng-template #workspacePageLoading>
+    <div class="loading-area">
+      <span class="spinner spinner-md" style="padding-top: 1rem"></span>
+      <span class="loading-text">Loading...</span>
+    </div>
+  </ng-template>
+  <div *ngIf="!workspaceLoading;" class="description-text">
+    {{workspace.description}}
+  </div>
   <div class="area-block">
     <h3>CDR Version</h3>
     <div class="indented">
       <!-- TODO: Add CDR Version Info - blrubenstein -->
-      <p class="cdr-text">CDR version info goes here.</p>
+      <p *ngIf="!workspaceLoading;" class="cdr-text">
+        {{workspace.cdrVersionId}}
+      </p>
     </div>
   </div>
   <div class="area-block">

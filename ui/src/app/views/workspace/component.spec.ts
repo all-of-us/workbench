@@ -7,7 +7,9 @@ import {FormsModule} from '@angular/forms';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {CohortsService} from 'generated';
+import {WorkspacesService} from 'generated';
 import {UserService} from 'app/services/user.service';
 import {RepositoryService} from 'app/services/repository.service';
 import {ClarityModule} from 'clarity-angular';
@@ -17,6 +19,7 @@ class WorkspacePage {
   cohortsService: CohortsService;
   userService: UserService;
   repositoryService: RepositoryService;
+  workspacesService: WorkspacesService;
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
@@ -32,6 +35,7 @@ class WorkspacePage {
     this.userService = this.fixture.debugElement.injector.get(UserService);
     this.repositoryService = this.fixture.debugElement.injector.get(RepositoryService);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
+    this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.readPageData();
   }
 
@@ -72,6 +76,7 @@ describe('WorkspaceComponent', () => {
       ],
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: UserService, useValue: new UserService() },
         { provide: RepositoryService, useValue: new RepositoryService() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
@@ -93,10 +98,6 @@ describe('WorkspaceComponent', () => {
     tick();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
     expect(workspacePage.notebookTableRows.length).toEqual(2);
-    expect(workspacePage.cdrText.nativeElement.innerText)
-      .toMatch('CDR version info goes here.');
-    expect(workspacePage.workspaceDescription.nativeElement.innerText)
-      .toMatch('Default workspace for July, 2017 demo');
   }));
 
   it('displays login prompt when logged out', fakeAsync(() => {
@@ -110,6 +111,17 @@ describe('WorkspaceComponent', () => {
         .toMatch('Log in to view workspace.');
     });
   }));
+
+  it('fetches the correct workspace', fakeAsync(() => {
+    workspacePage.fixture.componentRef.instance.ngOnInit();
+    updateAndTick(workspacePage.fixture);
+    updateAndTick(workspacePage.fixture);
+    expect(workspacePage.cdrText.nativeElement.innerText)
+      .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+    expect(workspacePage.workspaceDescription.nativeElement.innerText)
+      .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
+  }));
+
   it('errors if it tries to access a non-existant workspace', fakeAsync(() => {
     workspacePage.route[1].path = 'fakeNamespace';
     workspacePage.route[2].path = '5';
@@ -118,4 +130,6 @@ describe('WorkspaceComponent', () => {
     updateAndTick(workspacePage.fixture);
     expect(workspacePage.fixture.debugElement.context.cohortsError).toBe(true);
   }));
+
+
 });
