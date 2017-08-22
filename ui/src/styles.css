@@ -58,6 +58,9 @@ button:disabled {
   color: #888;
 }
 
+.loading-area {
+  padding-top: 0.5rem;
+}
 
 /* everywhere else */
 * {
