@@ -7,6 +7,7 @@ class ProjectAndAccountOptions
   attr_accessor :project
   attr_accessor :account
   attr_accessor :command
+  attr_accessor :creds_file
   attr_accessor :parser
 
   def initialize(command)
@@ -18,15 +19,20 @@ class ProjectAndAccountOptions
         self.project = project
       end
       parser.on("--account [ACCOUNT]",
-           "Account to use when creating credentials (your.name@pmi-ops.org)") do |account|
+           "Account to use when creating credentials (your.name@pmi-ops.org); "\
+           "use this or --creds_file") do |account|
         self.account = account
+      end
+      parser.on("--creds_file [CREDS_FILE]",
+           "Path to a file containing credentials; use this or --account.") do |creds_file|
+        self.creds_file = creds_file
       end
     end
   end
 
   def parse args
     self.parser.parse args
-    if self.project == nil || self.account == nil
+    if self.project == nil || !((self.account == nil) ^ (self.creds_file == nil))
       puts self.parser.help
       raise("Invalid arguments")
     end
@@ -85,7 +91,7 @@ end
 
 def activate_service_account(creds_file)
   common = Common.new
-  common.run_inline %W{gcloud auth activate-service-account --key-file #{creds_file.path}}
+  common.run_inline %W{gcloud auth activate-service-account --key-file #{creds_file}}
 end
 
 def copy_file_to_gcs(source_path, bucket, filename)
@@ -99,11 +105,11 @@ def get_file_from_gcs(bucket, filename, target_path)
 end
 
 def read_db_vars(project)
-  creds_file = Tempfile.new("#{project}-vars.env")
+  db_creds_file = Tempfile.new("#{project}-vars.env")
   begin
-    get_file_from_gcs("#{project}-credentials", "vars.env", creds_file.path)
-    creds_file.open
-    creds_file.each_line do |line|
+    get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
+    db_creds_file.open
+    db_creds_file.each_line do |line|
       line = line.strip()
       if !line.empty?
         parts = line.split("=")
@@ -111,7 +117,7 @@ def read_db_vars(project)
       end
     end
   ensure
-    creds_file.unlink
+    db_creds_file.unlink
   end
 end
 
@@ -129,7 +135,7 @@ def run_cloud_sql_proxy(project, creds_file)
   puts "Running Cloud SQL Proxy..."
   pid = spawn(*%W{./cloud_sql_proxy
       -instances #{project}:us-central1:workbenchmaindb=tcp:3307
-      -credential_file=#{creds_file.path} &})
+      -credential_file=#{creds_file} &})
   common.run_inline %W{sleep 3}
   return pid
 end
@@ -175,67 +181,57 @@ def do_drop_db(project)
   end
 end
 
-def drop_cloud_db(args)
+def run_with_creds(args, proc)
   options = ProjectAndAccountOptions.new("drop-cloud-db").parse(args)
   project = options.project
   account = options.account
-  service_account_creds_file = Tempfile.new("#{project}-creds.json")
-  get_service_account_creds_file(project, account, service_account_creds_file)
-  begin
-    pid = run_cloud_sql_proxy(project, service_account_creds_file)
+  creds_file = options.creds_file
+  if creds_file == nil
+    service_account_creds_file = Tempfile.new("#{project}-creds.json")
+    get_service_account_creds_file(project, account, service_account_creds_file)
     begin
-      do_drop_db(project)
+      proc.call(project, account, service_account_creds_file.path)
+    ensure
+      delete_service_accounts_creds(project, account, service_account_creds_file)
+    end
+  else
+    proc.call(project, account, creds_file)
+  end
+end
+
+def run_with_cloud_sql_proxy(args, proc)
+  run_with_creds(args, Proc.new { |project, account, creds_file|
+    pid = run_cloud_sql_proxy(project, creds_file)
+    begin
+      proc.call(project, account, creds_file)
     ensure
       Process.kill("HUP", pid)
     end
-  ensure
-    delete_service_accounts_creds(project, account, service_account_creds_file)
-  end
+  })
+end
+
+def drop_cloud_db(args)
+  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
+    do_drop_db(project)
+  })
 end
 
 def connect_to_cloud_db(args)
-  options = ProjectAndAccountOptions.new("connect-to-cloud-db").parse(args)
-  project = options.project
-  account = options.account
-  service_account_creds_file = Tempfile.new("#{project}-creds.json")
-  get_service_account_creds_file(project, account, service_account_creds_file)
-  begin
+  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
     read_db_vars(project)
-    pid = run_cloud_sql_proxy(project, service_account_creds_file)
-    begin
-      system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
-                    "--port 3307 --database #{ENV["DB_NAME"]}")
-    ensure
-      Process.kill("HUP", pid)
-    end
-  ensure
-    delete_service_accounts_creds(project, account, service_account_creds_file)
-  end
+    system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
+           "--port 3307 --database #{ENV["DB_NAME"]}")
+  })
 end
 
 def run_cloud_migrations(args)
-  options = ProjectAndAccountOptions.new("run-cloud-migrations").parse(args)
-  project = options.project
-  account = options.account
-  service_account_creds_file = Tempfile.new("#{project}-creds.json")
-  get_service_account_creds_file(project, account, service_account_creds_file)
-  begin
-    pid = run_cloud_sql_proxy(project, service_account_creds_file)
-    begin
-      puts "Running migrations..."
-      do_run_migrations(project)
-    ensure
-      Process.kill("HUP", pid)
-    end
-  ensure
-    delete_service_accounts_creds(project, account, service_account_creds_file)
-  end
+  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
+    puts "Running migrations..."
+    do_run_migrations(project)
+  })
 end
 
-def create_db_creds(args)
-  options = ProjectAndAccountOptions.new("create-db-creds").parse(args)
-  project = options.project
-  account = options.account
+def do_create_db_creds(project, account, creds_file)
   puts "Enter the root DB user password:"
   root_password = STDIN.noecho(&:gets)
   puts "Enter the root DB user password again:"
@@ -252,36 +248,35 @@ def create_db_creds(args)
   end
 
   instance_name = "#{project}:us-central1:workbenchmaindb"
-  creds_file = Tempfile.new("#{project}-vars.env")
-  if creds_file
+  db_creds_file = Tempfile.new("#{project}-vars.env")
+  if db_creds_file
     begin
-      creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
-      creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
-      creds_file.puts "DB_HOST=127.0.0.1"
-      creds_file.puts "DB_NAME=workbench"
-      creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
-      creds_file.puts "LIQUIBASE_DB_USER=liquibase"
-      creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
-      creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
-      creds_file.puts "WORKBENCH_DB_USER=workbench"
-      creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      creds_file.close
+      db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
+      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
+      db_creds_file.puts "DB_HOST=127.0.0.1"
+      db_creds_file.puts "DB_NAME=workbench"
+      db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
+      db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
+      db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
+      db_creds_file.puts "WORKBENCH_DB_USER=workbench"
+      db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.close
 
-      # Get service account credentials
-      service_account_creds_file = Tempfile.new("#{project}-creds.json")
-      get_service_account_creds_file(project, account, service_account_creds_file)
-      begin
-        activate_service_account(service_account_creds_file)
-        copy_file_to_gcs(creds_file.path, "#{project}-credentials", "vars.env")
-      ensure
-        delete_service_accounts_creds(project, account, service_account_creds_file)
-      end
+      activate_service_account(creds_file)
+      copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
     ensure
-      creds_file.unlink
+      db_creds_file.unlink
     end
   else
     raise("Error creating file.")
   end
+end
+
+def create_db_creds(args)
+  run_with_creds(args, Proc.new { |project, account, creds_file|
+    do_create_db_creds(project, account, creds_file)
+  })
 end
 
 Common.register_command({
