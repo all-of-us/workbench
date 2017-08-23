@@ -1,84 +1,81 @@
-<div *ngIf="user else loggedout">
-  <h2 *ngIf="!workspaceLoading; else workspacePageLoading">{{workspace.name}}</h2>
-  <ng-template #workspacePageLoading>
-    <div class="loading-area">
-      <span class="spinner spinner-md" style="padding-top: 1rem"></span>
-      <span class="loading-text">Loading...</span>
-    </div>
-  </ng-template>
-  <div *ngIf="!workspaceLoading;" class="description-text">
-    {{workspace.description}}
+<h2 *ngIf="!workspaceLoading; else workspacePageLoading">{{workspace.name}}</h2>
+<ng-template #workspacePageLoading>
+  <div class="loading-area">
+    <span class="spinner spinner-md" style="padding-top: 1rem"></span>
+    <span class="loading-text">Loading...</span>
   </div>
-  <div class="area-block">
-    <h3>CDR Version</h3>
-    <div class="indented">
-      <!-- TODO: Add CDR Version Info - blrubenstein -->
-      <p *ngIf="!workspaceLoading;" class="cdr-text">
-        {{workspace.cdrVersionId}}
-      </p>
-    </div>
-  </div>
-  <div class="area-block">
-    <div class="table-header">
-      <h3 class="table-header-descriptor">Cohorts</h3>
-      <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
-    </div>
-    <div class="indented">
-      <clr-datagrid [clrDgLoading]="cohortsLoading">
-        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
-          Name
-          <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
-          Description
-          <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>URL</clr-dg-column>
-        <clr-dg-column>Created Date</clr-dg-column>
-        <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
-        <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-          <clr-dg-cell><a routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
-          <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
-          <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
-    </div>
-  </div>
-  <clr-modal [(clrModalOpen)]="cohortsError">
-    <h3 class="modal-title">Error:</h3>
-    <div class="modal-body">Could not fetch cohorts from workspace.</div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
-    </div>
-  </clr-modal>
-  <!-- TODO: Add a notebook server launch button and table -->
-  <!-- For M0, can do something like spin up and bring you -->
-  <!-- to a local notebook server that is running. -->
-  <div class="area-block">
-    <div class="table-header">
-      <h3 class="table-header-descriptor">Notebooks</h3>
-      <button class="btn">Launch Notebook Server</button>
-    </div>
-    <div class="indented">
-      <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
-          Name
-          <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
-          Description
-          <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>URL</clr-dg-column>
-        <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
-        <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
-          <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
-          <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
-    </div>
+</ng-template>
+<div *ngIf="!workspaceLoading;" class="description-text">
+  {{workspace.description}}
+</div>
+<div class="area-block">
+  <h3>CDR Version</h3>
+  <div class="indented">
+    <!-- TODO: Add CDR Version Info - blrubenstein -->
+    <p *ngIf="!workspaceLoading;" class="cdr-text">
+      {{workspace.cdrVersionId}}
+    </p>
   </div>
 </div>
-<ng-template #loggedout><p class="logged-out-message">Log in to view workspace.</p></ng-template>
+<div class="area-block">
+  <div class="table-header">
+    <h3 class="table-header-descriptor">Cohorts</h3>
+    <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
+  </div>
+  <div class="indented">
+    <clr-datagrid [clrDgLoading]="cohortsLoading">
+      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
+        Name
+        <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
+        Description
+        <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
+      </clr-dg-column>
+      <clr-dg-column>URL</clr-dg-column>
+      <clr-dg-column>Created Date</clr-dg-column>
+      <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
+      <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
+        <clr-dg-cell><a routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
+        <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
+        <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
+        <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
+      </clr-dg-row>
+    </clr-datagrid>
+  </div>
+</div>
+<clr-modal [(clrModalOpen)]="cohortsError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not fetch cohorts from workspace.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
+  </div>
+</clr-modal>
+<!-- TODO: Add a notebook server launch button and table -->
+<!-- For M0, can do something like spin up and bring you -->
+<!-- to a local notebook server that is running. -->
+<div class="area-block">
+  <div class="table-header">
+    <h3 class="table-header-descriptor">Notebooks</h3>
+    <button class="btn">Launch Notebook Server</button>
+  </div>
+  <div class="indented">
+    <clr-datagrid [clrDgLoading]="notebooksLoading">
+      <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
+        Name
+        <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
+        Description
+        <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
+      </clr-dg-column>
+      <clr-dg-column>URL</clr-dg-column>
+      <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
+      <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
+        <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
+        <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
+        <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
+      </clr-dg-row>
+    </clr-datagrid>
+  </div>
+</div>

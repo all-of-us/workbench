@@ -8,7 +8,6 @@ import {resetDateObject} from 'helper-functions';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
-import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
@@ -45,7 +44,6 @@ export class HomePageComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
-  repositories: Repository[] = [];
   user: User;  // to detect if logged in
   workspaceList: Workspace[] = [];
   workspacesLoading = false;

@@ -6,7 +6,6 @@ import {DOCUMENT} from '@angular/platform-browser';
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
 import {resetDateObject} from 'helper-functions';
-import {Repository} from 'app/models/repository';
 import {RepositoryService} from 'app/services/repository.service';
 import {User} from 'app/models/user';
 import {UserService} from 'app/services/user.service';
@@ -91,7 +90,6 @@ export class WorkspaceComponent implements OnInit {
   cohortsLoading = true;
   cohortsError = false;
   notebooksLoading = false;
-  repositories: Repository[] = [];
   user: User;  // to detect if logged in
   cohortList: Cohort[] = [];
   // TODO: Replace with real data/notebooks
