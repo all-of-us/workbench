@@ -9,8 +9,7 @@ import {ClarityModule} from 'clarity-angular';
 
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
-import {CohortBuilderComponent} from
-    'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
+import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {LoginComponent} from 'app/views/login/component';
