@@ -1,0 +1,110 @@
+
+<div class="row">
+  <div class="col-xs-12">
+      <!--<span *ngIf="nodes.length > 0; then nodesLoaded else requestingNodes"></span>-->
+      <!--<ng-template #requestingNodes>-->
+        <!--<span class="spinner spinner-sm">-->
+            <!--Loading...-->
+        <!--</span>-->
+      <!--</ng-template>-->
+      <!--<ng-template #nodesLoaded>-->
+        <!--<tree-root #tree [focused]="true" [nodes]="nodes" [options]="options" (event)="event($event)">-->
+
+          <!--<ng-template #treeNodeTemplate let-node>-->
+            <!--<div class="row">-->
+              <!--<div class="col-xs-8" (click)="toggleTree(node)">-->
+                <!--<span *ngIf="node.data.code; then showCode else noCode"></span>-->
+                <!--<ng-template #showCode><small class="font-weight-bold">{{ node.data.code }}</small>-<small class="text-muted">{{ node.data.name }}</small></ng-template>-->
+                <!--<ng-template #noCode><small class="font-weight-bold">{{ node.data.name }}</small></ng-template>-->
+              <!--</div>-->
+              <!--<div class="col-xs-3 text-right">-->
+                <!--<span *ngIf="node.data.count === 0; then noCount else count"></span>-->
+                <!--<ng-template #count><small class="font-weight-bold">~{{ node.data.count }}&nbsp;&nbsp;</small></ng-template>-->
+                <!--<ng-template #noCount><small class="font-weight-bold invisible">~{{ node.data.count }}&nbsp;&nbsp;</small></ng-template>-->
+              <!--</div>-->
+              <!--<div class="col-xs-1 text-right">-->
+                <!--<span *ngIf="node.data.selectable; then selectable else notSelectable"></span>-->
+                <!--<ng-template #notSelectable><button type="button" class="btn btn-link btn-sm invisible"><clr-icon shape="plus-circle"></clr-icon></button></ng-template>-->
+                <!--<ng-template #selectable><button type="button" class="btn btn-link btn-sm" (click)="selectCriteria (node)"><clr-icon shape="plus-circle"></clr-icon></button></ng-template>-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</ng-template>-->
+          <!--<ng-template #loadingTemplate let-node>-->
+            <!--<span class="spinner spinner-sm">-->
+                <!--Loading...-->
+            <!--</span>-->
+          <!--</ng-template>-->
+
+        <!--</tree-root>-->
+      <!--</ng-template>-->
+
+    <clr-tree-node>
+      David Wallace (CFO)
+      <ng-template [clrIfExpanded]="true">
+        <clr-tree-node>
+          Michael Scott (Regional Manager)
+
+          <ng-template [clrIfExpanded]="true">
+            <clr-tree-node>Dwight K. Schrute (Assistant to the Regional Manager)</clr-tree-node>
+
+            <clr-tree-node>
+              Jim Halpert (Head of Sales)
+              <ng-template clrIfExpanded>
+                <clr-tree-node>Andy Bernard</clr-tree-node>
+                <clr-tree-node>Stanley Hudson</clr-tree-node>
+                <clr-tree-node>Phyllis Vance</clr-tree-node>
+                <clr-tree-node>Todd Packer</clr-tree-node>
+              </ng-template>
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Angela Martin (Head of Accounting)
+              <ng-template clrIfExpanded>
+                <clr-tree-node>Kevin Malone</clr-tree-node>
+                <clr-tree-node>Oscar Martinez</clr-tree-node>
+              </ng-template>
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Kelly Kapoor (Head of Customer Service)
+              <ng-template clrIfExpanded>
+                <clr-tree-node>Ryan Howard (Temp)</clr-tree-node>
+              </ng-template>
+            </clr-tree-node>
+
+            <clr-tree-node>
+              <div class="row">
+                <div class="col-xs-8">
+                  Creed Bratton (Quality Assurance)
+                </div>
+                <div class="col-xs-4 text-right">
+                  Creed Bratton (Quality Assurance)
+                </div>
+              </div>
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Meredith Palmer (Supplier Relations)
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Toby Flenderson (Human Resources)
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Pam Beesly (Reception)
+            </clr-tree-node>
+
+            <clr-tree-node>
+              Darryl Philbin (Warehouse)
+            </clr-tree-node>
+          </ng-template>
+        </clr-tree-node>
+      </ng-template>
+    </clr-tree-node>
+
+  </div>
+  <!--<div class="col-xs-6">-->
+    <!--clicked nodes here-->
+  <!--</div>-->
+</div>

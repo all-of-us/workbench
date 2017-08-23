@@ -1,0 +1,121 @@
+<div id="scrollable-criteria-group" class="criteria-group-height scrolling-criteria-group">
+  <div *ngFor="let criteria of criteriaList; let i = index">
+    <div class="row">
+      <span *ngIf="criteria.group; then group else notGroup"></span>
+      <ng-template #group>
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger" (click)="removeCriteria(criteria)"span>
+            &times;
+          </span>
+          <span *ngIf="i > 0">
+            <small class="font-weight-bold">OR</small>
+          </span>
+          <small class="text-muted">Contains group</small>
+          <small class="font-weight-bold">{{criteria.code}}-{{criteria.name}}</small>
+          <span *ngIf="criteria.values.length > 0; then showCodes else hideCodes"></span>
+          <ng-template #showCodes>
+            <small class="text-muted">[{{criteria.code}}...]</small>
+          </ng-template>
+          <ng-template #hideCodes>
+            <span class="spinner">
+              <div class="bounce1"></div>
+              <div class="bounce2"></div>
+              <div class="bounce3"></div>
+            </span>
+          </ng-template>
+        </div>
+      </ng-template>
+      <ng-template #notGroup>
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger" (click)="removeCriteria(criteria)">
+            &times;
+          </span>
+          <span *ngIf="i > 0">
+            <small class="font-weight-bold">OR</small>
+          </span>
+          <small class="text-muted">Contains</small>
+          <span *ngIf="criteria.type === 'DEMO_GEN'"><small class="font-weight-bold">Gender-{{criteria.name}}</small></span>
+          <span *ngIf="criteria.type === 'DEMO_RACE'"><small class="font-weight-bold">Race/Ethnicity-{{criteria.name}}</small></span>
+          <span *ngIf="criteria.type !== 'DEMO_GEN' && criteria.type !== 'DEMO_RACE' "><small class="font-weight-bold">{{criteria.code}}-{{criteria.name}}</small></span>
+          <span *ngIf="criteria.values.length > 0; then showCodes else hideCodes"></span>
+          <ng-template #showCodes>
+            <small class="text-muted">[{{criteria.code}}]</small>
+          </ng-template>
+          <ng-template #hideCodes>
+            <span class="spinner">
+              <div class="bounce1"></div>
+              <div class="bounce2"></div>
+              <div class="bounce3"></div>
+            </span>
+          </ng-template>
+        </div>
+      </ng-template>
+      <div class="col-1 text-right"><small class="font-weight-bold">{{criteria.count}}</small></div>
+    </div>
+  </div>
+</div>
+  <div *ngIf="criteriaList.length > 0" class="modifiers-height">
+    <hr/>
+    <div class="row">
+      <div class="col-12"></div>
+    </div>
+    <form>
+      <div class="form-group form-inline">
+        <label class="mr-sm-2 font-weight-bold" for="ageAtEvent">Age at event:</label>
+        <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="ageAtEvent" [(ngModel)]="ageAtEvent.operator" name="ageAtEvent" #operator="ngModel">
+          <option *ngFor="let ageAtEvent of ageAtEventSelectList" [value]="ageAtEvent">{{ageAtEvent}}</option>
+        </select>
+        <span *ngIf="ageAtEvent.operator === 'GTE >=' || ageAtEvent.operator === 'LTE <='">
+          <input type="text" class="form-control" placeholder="Age">
+        </span>
+        <span *ngIf="ageAtEvent.operator === 'Between'" class="form-inline">
+          <input type="text" class="form-control" placeholder="Age">&nbsp;and&nbsp;<input type="text" class="form-control" placeholder="Age">
+        </span>
+      </div>
+      <div class="form-group form-inline">
+        <label class="mr-sm-2 font-weight-bold" for="eventDate">Event date:</label>
+        <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="eventDate" [(ngModel)]="eventDate.operator" name="eventDate" #operator="ngModel">
+          <option *ngFor="let eventDate of eventDateSelectList" value="{{eventDate}}">{{eventDate}}</option>
+        </select>
+        <span *ngIf="eventDate.operator === 'Within x year(s)'">
+          <input type="text" class="form-control" placeholder="x Years">
+        </span>
+        <span *ngIf="eventDate.operator === 'GTE >=' || eventDate.operator === 'LTE <='">
+          <!--<app-date-picker></app-date-picker>-->
+        </span>
+        <span *ngIf="eventDate.operator === 'Between'" class="form-inline">
+          <!--<app-date-picker></app-date-picker>&nbsp;and&nbsp;<app-date-picker></app-date-picker>-->
+        </span>
+      </div>
+      <div class="form-group form-inline">
+        <label class="mr-sm-2 font-weight-bold" for="hasOccurrences">Occurrences:</label>
+        <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="hasOccurrences"[(ngModel)]="hasOccurrences.operator" name="hasOccurrences" #operator="ngModel">
+          <option *ngFor="let hasOccurrences of hasOccurrencesSelectList" value="{{hasOccurrences}}">{{hasOccurrences}}</option>
+        </select>
+        <span *ngIf="hasOccurrences.operator === '1 or more'">
+          <input type="text" class="form-control" placeholder="Occurrences">
+        </span>
+        <span *ngIf="hasOccurrences.operator === 'within x days/years'">
+          <input type="text" class="form-control" placeholder="Occurrences">&nbsp;within&nbsp;<input type="text" class="form-control"  placeholder="x">
+          <select class="custom-select mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="hasOccurrences.value3" name="hasOccurrences1" #value3="ngModel">
+            <option *ngFor="let daysOrYears of daysOrYearsSelectList" value="{{daysOrYears}}">{{daysOrYears}}</option>
+          </select>
+        </span>
+        <span *ngIf="hasOccurrences.operator === 'x days/years apart'">
+          <input type="text" class="form-control" placeholder="Occurrences">&nbsp;<input type="text" class="form-control"  placeholder="x">
+          <select class="custom-select mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="hasOccurrences.value3" name="hasOccurrences2" #value3="ngModel">
+            <option *ngFor="let daysOrYears of daysOrYearsSelectList" value="{{daysOrYears}}">{{daysOrYears}}</option>
+          </select>
+          apart
+        </span>
+      </div>
+      <div class="form-group form-inline">
+        <label class="mr-sm-2 font-weight-bold" for="eventOccurredDuring">Visit type:</label>
+        <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="eventOccurredDuring">
+          <option selected>Any</option>
+          <option *ngFor="let eventOccurredDuring of eventOccurredDuringSelectList" value="{{eventOccurredDuring}}">{{eventOccurredDuring}}</option>
+        </select>
+      </div>
+    </form>
+    <div class="text-right pr-1 pb-1"><button type="button" class="btn btn-success btn-sm" (click)="updateTotal">Update Total</button> Total: {{totalCount}}</div>
+  </div>
