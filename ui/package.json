@@ -28,9 +28,10 @@
     "clarity-icons": "^0.10.0-rc.1",
     "clarity-ui": "^0.10.0-rc.1",
     "core-js": "^2.4.1",
-    "mutationobserver-shim": "^0.3.2",
     "enhanced-resolve": "3.3.0",
+    "mutationobserver-shim": "^0.3.2",
     "rxjs": "^5.1.0",
+    "set-manipulator": "^0.3.1",
     "zone.js": "0.8.12"
   },
   "devDependencies": {

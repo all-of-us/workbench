@@ -9,8 +9,7 @@ import {ClarityModule} from 'clarity-angular';
 
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
-import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
-import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
+import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {LoginComponent} from 'app/views/login/component';
@@ -23,6 +22,21 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters} from 'generated';
 import {environment} from 'environments/environment';
+import { SearchGroupComponent } from 'app/views/cohort-builder/search/search-group/search-group.component';
+import { CriteriaTreeComponent } from 'app/views/cohort-builder/search/criteria-tree/criteria-tree.component';
+import { CriteriaGroupComponent } from 'app/views/cohort-builder/search/criteria-group/criteria-group.component';
+import { SearchResultComponent } from 'app/views/cohort-builder/search/search-result/search-result.component';
+import { GoogleChartDirective } from 'app/views/cohort-builder/search/google-chart/google-chart.directive';
+import { GenderChartComponent } from 'app/views/cohort-builder/search/gender-chart/gender-chart.component';
+import { RaceChartComponent } from 'app/views/cohort-builder/search/race-chart/race-chart.component';
+import { CohortReviewComponent } from 'app/views/cohort-builder/review/cohort-review/cohort-review.component';
+import { SubjectListComponent } from 'app/views/cohort-builder/review/subject-list/subject-list.component';
+import { SubjectDetailComponent } from 'app/views/cohort-builder/review/subject-detail/subject-detail.component';
+import { AnnotationsComponent } from 'app/views/cohort-builder/review/annotations/annotations.component';
+import { MedicationsComponent } from 'app/views/cohort-builder/review/medications/medications.component';
+import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-select/wizard-select.component';
+import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
+import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
 
 export function getVaadin(): VaadinNs {
   // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
@@ -56,12 +70,26 @@ export function getConfiguration(signInService: SignInService): Configuration {
     LoginComponent,
     SelectRepositoryComponent,
     CohortBuilderComponent,
-    CohortBuilderPlaceholderComponent,
+    SearchGroupComponent,
+    CriteriaTreeComponent,
+    CriteriaGroupComponent,
+    SearchResultComponent,
+    GoogleChartDirective,
+    GenderChartComponent,
+    RaceChartComponent,
+    CohortReviewComponent,
+    SubjectListComponent,
+    SubjectDetailComponent,
+    AnnotationsComponent,
+    MedicationsComponent,
+    WizardSelectComponent,
+    WizardModalComponent,
     CohortEditComponent,
     HomePageComponent,
     WorkspaceComponent,
     WorkspaceEditComponent
   ],
+  entryComponents: [WizardModalComponent],
   providers: [
     UserService,
     RepositoryService,
@@ -73,7 +101,9 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useFactory: getConfiguration
     },
     CohortsService,
-    WorkspacesService
+    WorkspacesService,
+    BroadcastService,
+    SearchService
   ],
 
   // This specifies the top-level component, to load first.

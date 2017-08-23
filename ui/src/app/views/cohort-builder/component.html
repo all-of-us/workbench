@@ -1,9 +1,0 @@
-<h2>Cohort Builder</h2>
-<div *ngIf="repository else loading">
-  <h3>{{repository.name}}</h3>
-  <div id="cohort-builder-widget">
-    Loading VAADIN. If this fails, try <a href="{{vaadinJsUrl}}">loading its javascript directly</a>
-    and electing to trust the self-signed certificate, then refresh.
-  </div>
-</div>
-<ng-template #loading>Loading...</ng-template>
