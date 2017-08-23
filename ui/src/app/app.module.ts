@@ -13,9 +13,7 @@ import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
-import {LoginComponent} from 'app/views/login/component';
 import {RepositoryService} from 'app/services/repository.service';
-import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
@@ -53,8 +51,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AppComponent,
-    LoginComponent,
-    SelectRepositoryComponent,
     CohortBuilderComponent,
     CohortBuilderPlaceholderComponent,
     CohortEditComponent,
