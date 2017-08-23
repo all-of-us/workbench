@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output, OnDestroy, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, Input, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { BroadcastService, SearchService } from '../service';
 import { SearchResult, SearchGroup, Subject, CriteriaType } from '../model';
 

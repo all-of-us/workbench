@@ -25,12 +25,19 @@ export class SearchResult {
 
   update(description: string, criteriaGroup: CriteriaGroupComponent) {
     this.description = description;
-    criteriaGroup.modifierList ? this.modifierList = criteriaGroup.modifierList : this.modifierList = [];
-    criteriaGroup.criteriaList ? this.criteriaList = criteriaGroup.criteriaList : this.criteriaList = [];
+    criteriaGroup.modifierList ?
+        this.modifierList = criteriaGroup.modifierList :
+        this.modifierList = [];
+    criteriaGroup.criteriaList ?
+        this.criteriaList = criteriaGroup.criteriaList :
+        this.criteriaList = [];
     this.count = -1;
     for (const criteria of this.criteriaList) {
       this.searchType = criteria.type;
-      this.values.push(new SearchParameter(criteria.code, criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId));
+      this.values.push(new SearchParameter(criteria.code,
+          criteria.type.startsWith('DEMO') ?
+              criteria.type :
+              criteria.domainId));
     }
   }
 

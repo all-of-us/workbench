@@ -36,7 +36,10 @@ export class RaceChartComponent implements OnInit, OnDestroy {
   }
 
   redraw(data: any) {
-    this.raceChartDirective.drawGraph(this.options, this.type, data, this.raceChartDirective._element);
+    this.raceChartDirective.drawGraph(this.options,
+        this.type,
+        data,
+        this.raceChartDirective._element);
   }
 
   ngOnDestroy() {

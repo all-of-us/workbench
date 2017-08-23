@@ -98,7 +98,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     if (searchGroup.groupSet.length === 0) {
       searchGroup.groupSet = searchResult.resultSet;
     } else {
-      searchGroup.groupSet = union(searchGroup.groupSet, searchResult.resultSet, (object) => object.val);
+      searchGroup.groupSet = union(searchGroup.groupSet,
+          searchResult.resultSet,
+          (object) => object.val);
     }
   }
 
@@ -108,7 +110,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       if (index === 0) {
         searchGroup.groupSet = result.resultSet;
       } else if (searchGroup.groupSet.length !== 0) {
-        searchGroup.groupSet = union(searchGroup.groupSet, result.resultSet, (object) => object.val);
+        searchGroup.groupSet = union(searchGroup.groupSet,
+            result.resultSet,
+            (object) => object.val);
       }
     });
   }
@@ -121,7 +125,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
     this.totalSet = includedSets;
     if (excludedSets.length > 0) {
-      this.totalSet = complement(includedSets, excludedSets, (object) => object.val);
+      this.totalSet = complement(includedSets,
+          excludedSets,
+          (object) => object.val);
     }
   }
 
@@ -131,7 +137,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       if (index === 0) {
         set = group.groupSet;
       } else if (group.groupSet.length !== 0) {
-        set = intersection(set, group.groupSet, (object) => object.val);
+        set = intersection(set,
+            group.groupSet,
+            (object) => object.val);
       }
     });
     return set;

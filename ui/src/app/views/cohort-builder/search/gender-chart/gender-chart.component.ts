@@ -43,7 +43,10 @@ export class GenderChartComponent implements OnInit, OnDestroy {
   }
 
   redraw(data: any) {
-    this.genderChartDirective.drawGraph(this.options, this.type, data, this.genderChartDirective._element);
+    this.genderChartDirective.drawGraph(this.options,
+        this.type,
+        data,
+        this.genderChartDirective._element);
   }
 
   ngOnDestroy() {
