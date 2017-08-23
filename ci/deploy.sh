@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 ./ci/activate_creds.sh ~/gcloud-credentials.key
-if ["$1" == "api"]
+if [ "$1" == "api" ]
 then
   (cd ./api && ./project.rb run-cloud-migrations --project all-of-us-workbench-test \
     --creds_file ~/gcloud-credentials.key)
