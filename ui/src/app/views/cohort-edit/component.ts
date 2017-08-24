@@ -31,8 +31,8 @@ export class CohortEditComponent implements OnInit {
     } else {
       this.cohortsService
           .getCohort(
-              WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-              WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+              this.workspaceNamespace,
+              this.workspaceId,
               this.cohortId)
           .retry(2)
           .subscribe(this.handleCohortFetched);
