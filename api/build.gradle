@@ -87,6 +87,10 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
+    resources {
+      srcDir "db"
+      include "changelog/*.xml"
+    }
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
@@ -136,6 +140,9 @@ dependencies {
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
   testCompile 'com.google.truth:truth:+'
+  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
+  testCompile 'com.h2database:h2:+'
+  testCompile 'org.liquibase:liquibase-core:+'
 
   // For Swagger generation
   generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'

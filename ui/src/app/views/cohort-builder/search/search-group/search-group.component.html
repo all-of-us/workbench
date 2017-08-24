@@ -1,0 +1,18 @@
+<div class="card">
+  <span *ngIf="searchGroup.displayMessage.indexOf('Exclude') > -1; then exGroup else sGroup"></span>
+  <ng-template #sGroup>
+    <span class="text-danger close text-right pr-1" (click)="removeSearchGroup(searchGroup)">&times;</span>
+  </ng-template>
+  <ng-template #exGroup>
+    <span class="text-danger close text-right pr-1" (click)="removeExclusionGroup(searchGroup)">&times;</span>
+  </ng-template>
+  <div class="card-block pt-0 pb-2">
+    <div *ngFor="let searchResult of searchGroup.results; let i = index" class="pb-1">
+      <app-search-result [searchResult]="searchResult" [index]="i" (onRemove)="removeSearchResult($event)" (click)="selectSearchGroup()"></app-search-result>
+    </div>
+    <!--<app-select-criteria source="create" (click)="selectSearchGroup()"></app-select-criteria>-->
+    <app-wizard-select></app-wizard-select>
+  </div>
+  <div class="card-footer font-weight-bold bg-count text-right">Group Count: {{searchGroup.groupSet.length}}</div>
+</div>
+<br/>

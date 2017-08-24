@@ -181,8 +181,8 @@ def do_drop_db(project)
   end
 end
 
-def run_with_creds(args, proc)
-  options = ProjectAndAccountOptions.new("drop-cloud-db").parse(args)
+def run_with_creds(args, command, proc)
+  options = ProjectAndAccountOptions.new(command).parse(args)
   project = options.project
   account = options.account
   creds_file = options.creds_file
@@ -199,8 +199,8 @@ def run_with_creds(args, proc)
   end
 end
 
-def run_with_cloud_sql_proxy(args, proc)
-  run_with_creds(args, Proc.new { |project, account, creds_file|
+def run_with_cloud_sql_proxy(args, command, proc)
+  run_with_creds(args, command, lambda { |project, account, creds_file|
     pid = run_cloud_sql_proxy(project, creds_file)
     begin
       proc.call(project, account, creds_file)
@@ -211,13 +211,13 @@ def run_with_cloud_sql_proxy(args, proc)
 end
 
 def drop_cloud_db(args)
-  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
+  run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
     do_drop_db(project)
   })
 end
 
 def connect_to_cloud_db(args)
-  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
+  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(project)
     system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
            "--port 3307 --database #{ENV["DB_NAME"]}")
@@ -225,7 +225,7 @@ def connect_to_cloud_db(args)
 end
 
 def run_cloud_migrations(args)
-  run_with_cloud_sql_proxy(args, Proc.new { |project, account, creds_file|
+  run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
     do_run_migrations(project)
   })
@@ -274,7 +274,7 @@ def do_create_db_creds(project, account, creds_file)
 end
 
 def create_db_creds(args)
-  run_with_creds(args, Proc.new { |project, account, creds_file|
+  run_with_creds(args, "create-db-creds", lambda { |project, account, creds_file|
     do_create_db_creds(project, account, creds_file)
   })
 end
@@ -282,13 +282,13 @@ end
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
-  :fn => Proc.new { |args| dev_up(args) }
+  :fn => lambda { |args| dev_up(args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => Proc.new { |args| connect_to_db(args) }
+  :fn => lambda { |args| connect_to_db(args) }
 })
 
 Common.register_command({
@@ -296,35 +296,35 @@ Common.register_command({
   :description => \
     "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
     "start from scratch (e.g., the database will be re-created).",
-  :fn => Proc.new { |args| docker_clean(args) }
+  :fn => lambda { |args| docker_clean(args) }
 })
 
 Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => Proc.new { |args| rebuild_image(args) }
+  :fn => lambda { |args| rebuild_image(args) }
 })
 
 Common.register_command({
   :invocation => "create-db-creds",
   :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => Proc.new { |args| create_db_creds(args) }
+  :fn => lambda { |args| create_db_creds(args) }
 })
 
 Common.register_command({
   :invocation => "drop-cloud-db",
   :description => "Drops the Cloud SQL database for the specified project",
-  :fn => Proc.new { |args| drop_cloud_db(args) }
+  :fn => lambda { |args| drop_cloud_db(args) }
 })
 
 Common.register_command({
   :invocation => "run-cloud-migrations",
   :description => "Runs database migrations on the Cloud SQL database for the specified project.",
-  :fn => Proc.new { |args| run_cloud_migrations(args) }
+  :fn => lambda { |args| run_cloud_migrations(args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
-  :fn => Proc.new { |args| connect_to_cloud_db(args) }
+  :fn => lambda { |args| connect_to_cloud_db(args) }
 })

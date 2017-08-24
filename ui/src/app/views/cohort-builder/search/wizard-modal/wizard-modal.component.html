@@ -1,0 +1,171 @@
+<clr-wizard #wizard [(clrWizardOpen)]="open" [clrWizardSize]="'xl'">
+  <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
+
+  <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
+  <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Choose {{criteriaType.toUpperCase()}} Codes</ng-template>
+    <!--<app-clarity-tree></app-clarity-tree>-->
+    <app-criteria-tree [criteriaType]="criteriaType"></app-criteria-tree>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <div class="row">
+      <div class="col-7">
+        <ng-template clrPageTitle>Modifiers</ng-template>
+        <form class="compact">
+          <div class="row">
+            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label class="mr-sm-2 font-weight-bold" for="ageAtEvent">Age at event:</label>
+            </div>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="ageAtEvent" [(ngModel)]="ageAtEvent.operator" name="ageAtEvent" #operator="ngModel">
+              <option *ngFor="let ageAtEvent of ageAtEventSelectList" [value]="ageAtEvent">{{ageAtEvent}}</option>
+            </select>
+            <span *ngIf="ageAtEvent.operator === 'GTE >=' || ageAtEvent.operator === 'LTE <='">
+          <input type="text" class="form-control" placeholder="Age">
+        </span>
+            <span *ngIf="ageAtEvent.operator === 'Between'" class="form-inline">
+          <input type="text" class="form-control" placeholder="Age">&nbsp;and&nbsp;<input type="text" class="form-control" placeholder="Age">
+        </span>
+          </div>
+          <div class="row">
+            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label class="mr-sm-2 font-weight-bold" for="eventDate">Event date:</label>
+            </div>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="eventDate" [(ngModel)]="eventDate.operator" name="eventDate" #operator="ngModel">
+              <option *ngFor="let eventDate of eventDateSelectList" value="{{eventDate}}">{{eventDate}}</option>
+            </select>
+            <span *ngIf="eventDate.operator === 'Within x year(s)'">
+          <input type="text" class="form-control" placeholder="x Years">
+        </span>
+            <span *ngIf="eventDate.operator === 'GTE >=' || eventDate.operator === 'LTE <='">
+          <!--<app-date-picker></app-date-picker>-->
+        </span>
+            <span *ngIf="eventDate.operator === 'Between'" class="form-inline">
+          <!--<app-date-picker></app-date-picker>&nbsp;and&nbsp;<app-date-picker></app-date-picker>-->
+        </span>
+          </div>
+          <div class="row">
+            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label class="mr-sm-2 font-weight-bold" for="hasOccurrences">Occurrences:</label>
+            </div>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="hasOccurrences"[(ngModel)]="hasOccurrences.operator" name="hasOccurrences" #operator="ngModel">
+              <option *ngFor="let hasOccurrences of hasOccurrencesSelectList" value="{{hasOccurrences}}">{{hasOccurrences}}</option>
+            </select>
+            <span *ngIf="hasOccurrences.operator === '1 or more'">
+          <input type="text" class="form-control" placeholder="Occurrences">
+        </span>
+            <span *ngIf="hasOccurrences.operator === 'within x days/years'">
+          <input type="text" class="form-control" placeholder="Occurrences">&nbsp;within&nbsp;<input type="text" class="form-control"  placeholder="x">
+          <select class="custom-select mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="hasOccurrences.value3" name="hasOccurrences1" #value3="ngModel">
+            <option *ngFor="let daysOrYears of daysOrYearsSelectList" value="{{daysOrYears}}">{{daysOrYears}}</option>
+          </select>
+        </span>
+            <span *ngIf="hasOccurrences.operator === 'x days/years apart'">
+          <input type="text" class="form-control" placeholder="Occurrences">&nbsp;<input type="text" class="form-control"  placeholder="x">
+          <select class="custom-select mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="hasOccurrences.value3" name="hasOccurrences2" #value3="ngModel">
+            <option *ngFor="let daysOrYears of daysOrYearsSelectList" value="{{daysOrYears}}">{{daysOrYears}}</option>
+          </select>
+          apart
+        </span>
+          </div>
+          <div class="row">
+            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label class="mr-sm-2 font-weight-bold" for="eventOccurredDuring">Visit type:</label>
+            </div>
+            <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="eventOccurredDuring">
+              <option selected>Any</option>
+              <option *ngFor="let eventOccurredDuring of eventOccurredDuringSelectList" value="{{eventOccurredDuring}}">{{eventOccurredDuring}}</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="col-1"></div>
+      <div class="col-4 box">
+        <h4>Selected ICD9 Codes</h4>
+        <div id="scrollable-criteria-group1 " class="scrolling-criteria-group">
+          <div class="row">
+            <div class="col-11 text-truncate">
+              <small class="font-weight-bold">001-Cholera</small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-11 text-truncate">
+              <small class="font-weight-bold">OR</small>
+              <small class="font-weight-bold">002-Typhoid and paratyphoid fevers</small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-11 text-truncate">
+              <small class="font-weight-bold">OR</small>
+              <small class="font-weight-bold">003-Other salmonella infections</small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-11 text-truncate">
+              <small class="font-weight-bold">OR</small>
+              <small class="font-weight-bold">004-Shinellosis</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Totals</ng-template>
+    <div id="scrollable-criteria-group" class="scrolling-criteria-group">
+      <div class="row">
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger">
+            &times;
+          </span>
+          <small class="text-muted">Contains group</small>
+          <small class="font-weight-bold">001-Cholera</small>
+          <small class="text-muted">[001...]</small>
+        </div>
+        <div class="col-1 text-right"><small class="font-weight-bold">20</small></div>
+      </div>
+      <div class="row">
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger">
+            &times;
+          </span>
+          <small class="font-weight-bold">OR</small>
+          <small class="text-muted">Contains group</small>
+          <small class="font-weight-bold">002-Typhoid and paratyphoid fevers</small>
+          <small class="text-muted">[002...]</small>
+        </div>
+        <div class="col-1 text-right"><small class="font-weight-bold">16</small></div>
+      </div>
+      <div class="row">
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger">
+            &times;
+          </span>
+          <small class="font-weight-bold">OR</small>
+          <small class="text-muted">Contains group</small>
+          <small class="font-weight-bold">003-Other salmonella infections</small>
+          <small class="text-muted">[003...]</small>
+        </div>
+        <div class="col-1 text-right"><small class="font-weight-bold">32</small></div>
+      </div>
+      <div class="row">
+        <div class="col-11 text-truncate">
+          <span class="search-result-close text-right text-danger">
+            &times;
+          </span>
+          <small class="font-weight-bold">OR</small>
+          <small class="text-muted">Contains group</small>
+          <small class="font-weight-bold">004-Shinellosis</small>
+          <small class="text-muted">[004...]</small>
+        </div>
+        <div class="col-1 text-right"><small class="font-weight-bold">50</small></div>
+      </div>
+    </div>
+    <div class="text-right"><h5>Total Count: 100</h5></div>
+  </clr-wizard-page>
+</clr-wizard>

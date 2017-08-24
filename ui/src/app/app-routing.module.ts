@@ -4,12 +4,12 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
-import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
+import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
+import { CohortReviewComponent } from 'app/views/cohort-builder/review/cohort-review/cohort-review.component';
 
 
 const routes: Routes = [
@@ -25,10 +25,10 @@ const routes: Routes = [
           component: CohortEditComponent,
           data: {title: 'Create Cohort'}},
   {path: 'workspace/:ns/:wsid/cohorts/build',
-          component: CohortBuilderPlaceholderComponent,
+          component: CohortBuilderComponent,
           data: {title: 'Build Cohort Criteria'}},
   {path: 'workspace/:ns/:wsid/cohorts/:cid/build',
-          component: CohortBuilderPlaceholderComponent,
+          component: CohortReviewComponent,
           data: {title: 'Edit Cohort Criteria'}},
   {path: 'workspace/build',
           component: WorkspaceEditComponent,
