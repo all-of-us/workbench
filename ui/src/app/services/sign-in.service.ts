@@ -2,7 +2,6 @@ import 'rxjs/Rx';
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {User} from 'app/models/user';
 
 declare const gapi: any;
 

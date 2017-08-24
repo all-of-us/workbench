@@ -13,9 +13,7 @@ import {CohortBuilderComponent} from 'app/views/cohort-builder/component';
 import {CohortBuilderPlaceholderComponent} from 'app/views/cohort-builder-placeholder/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
-import {RepositoryService} from 'app/services/repository.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
@@ -59,8 +57,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceEditComponent
   ],
   providers: [
-    UserService,
-    RepositoryService,
     SignInService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin},
     {

@@ -8,9 +8,6 @@ import {resetDateObject} from 'helper-functions';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
-import {RepositoryService} from 'app/services/repository.service';
-import {User} from 'app/models/user';
-import {UserService} from 'app/services/user.service';
 /*
 * Search filters used by the workspace data table to
 * determine which of the cohorts loaded into client side memory
@@ -44,20 +41,16 @@ export class HomePageComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
-  user: User;  // to detect if logged in
   workspaceList: Workspace[] = [];
   workspacesLoading = false;
   constructor(
       private router: Router,
       private route: ActivatedRoute,
-      private userService: UserService,
-      private repositoryService: RepositoryService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.userService.getLoggedInUser().then(user => this.user = user);
     this.workspacesService
         .getWorkspaces()
         .retry(2)
