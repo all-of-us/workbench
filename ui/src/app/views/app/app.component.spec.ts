@@ -1,6 +1,6 @@
 import {TestBed, async} from '@angular/core/testing';
 import {Title} from '@angular/platform-browser';
-import {AppComponent} from 'app/views/app/component';
+import {AppComponent} from 'app/views/app/app.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {SignInService} from 'app/services/sign-in.service';

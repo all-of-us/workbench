@@ -65,8 +65,8 @@ class NotebookDescriptionComparator implements Comparator<Notebook> {
 
 
 @Component({
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html',
+  styleUrls: ['./workspace.component.css'],
+  templateUrl: './workspace.component.html',
 })
 export class WorkspaceComponent implements OnInit {
   public static DEFAULT_WORKSPACE_NS = 'defaultNamespace';

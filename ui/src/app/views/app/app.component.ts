@@ -13,8 +13,8 @@ declare const gapi: any;
 
 @Component({
   selector: 'app-aou',
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html'
+  styleUrls: ['./app.component.css'],
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   private baseTitle: string;

@@ -3,10 +3,10 @@ import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/t
 import {Title, By} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
-import {CohortEditComponent} from 'app/views/cohort-edit/component';
+import {CohortEditComponent} from 'app/views/cohort-edit/cohort-edit.component';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceComponent} from 'app/views/workspace/workspace.component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {CohortsService} from 'generated';
