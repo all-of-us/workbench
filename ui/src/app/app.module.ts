@@ -12,11 +12,7 @@ import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
-import {LoginComponent} from 'app/views/login/component';
-import {RepositoryService} from 'app/services/repository.service';
-import {SelectRepositoryComponent} from 'app/views/select-repository/component';
 import {SignInService} from 'app/services/sign-in.service';
-import {UserService} from 'app/services/user.service';
 import {VAADIN_CLIENT} from 'app/vaadin-client';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
@@ -67,8 +63,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AppComponent,
-    LoginComponent,
-    SelectRepositoryComponent,
     CohortBuilderComponent,
     SearchGroupComponent,
     CriteriaTreeComponent,
@@ -91,8 +85,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   entryComponents: [WizardModalComponent],
   providers: [
-    UserService,
-    RepositoryService,
     SignInService,
     {provide: VAADIN_CLIENT, useFactory: getVaadin},
     {

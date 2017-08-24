@@ -1,27 +1,24 @@
 <h2>AoU Research Portal</h2>
-<div *ngIf="user else loggedout">
-  <div class="area-block">
-    <div class="table-header">
-      <h3 class="table-header-descriptor">Workspaces</h3>
-      <a class="btn btn-link" routerLink="/workspace/build">Add a Workspace</a>
-    </div>
-    <div class="indented">
-      <clr-datagrid [clrDgLoading]="workspacesLoading">
-        <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
-          Name
-          <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>URL</clr-dg-column>
-        <clr-dg-column>Last Modified</clr-dg-column>
-        <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
-        <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
-          <clr-dg-cell><a routerLink="/workspace/{{workspace.namespace}}/{{workspace.id}}">{{workspace.name}}</a></clr-dg-cell>
-          <clr-dg-cell>{{this.document.location.href}}workspace/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
-          <clr-dg-cell>{{workspace.lastModifiedTime}}</clr-dg-cell>
-          <!-- TODO: Research purpose -->
-        </clr-dg-row>
-      </clr-datagrid>
-    </div>
+<div class="area-block">
+  <div class="table-header">
+    <h3 class="table-header-descriptor">Workspaces</h3>
+    <a class="btn btn-link" routerLink="/workspace/build">Add a Workspace</a>
+  </div>
+  <div class="indented">
+    <clr-datagrid [clrDgLoading]="workspacesLoading">
+      <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
+        Name
+        <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
+      </clr-dg-column>
+      <clr-dg-column>URL</clr-dg-column>
+      <clr-dg-column>Last Modified</clr-dg-column>
+      <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
+      <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
+        <clr-dg-cell><a routerLink="/workspace/{{workspace.namespace}}/{{workspace.id}}">{{workspace.name}}</a></clr-dg-cell>
+        <clr-dg-cell>{{this.document.location.href}}workspace/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
+        <clr-dg-cell>{{workspace.lastModifiedTime}}</clr-dg-cell>
+        <!-- TODO: Research purpose -->
+      </clr-dg-row>
+    </clr-datagrid>
   </div>
 </div>
-<ng-template #loggedout><p class="logged-out-message">Log in to view workspace.</p></ng-template>
