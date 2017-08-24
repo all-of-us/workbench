@@ -3,11 +3,11 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceComponent} from 'app/views/workspace/workspace.component';
 
 @Component({
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html',
+  styleUrls: ['./workspace-edit.component.css'],
+  templateUrl: './workspace-edit.component.html',
 })
 export class WorkspaceEditComponent implements OnInit {
   workspace: Workspace;

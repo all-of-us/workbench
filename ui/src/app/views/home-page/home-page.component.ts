@@ -3,7 +3,6 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter, Comparator} from 'clarity-angular';
 
-import {WorkspaceComponent} from 'app/views/workspace/component';
 import {resetDateObject} from 'helper-functions';
 
 import {Workspace} from 'generated';
@@ -34,8 +33,8 @@ class WorkspaceResearchPurposeFilter implements StringFilter<Workspace> {
 
 
 @Component({
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html',
+  styleUrls: ['./home-page.component.css'],
+  templateUrl: './home-page.component.html',
 })
 export class HomePageComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();

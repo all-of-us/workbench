@@ -3,11 +3,10 @@ import {Router, ActivatedRoute} from '@angular/router';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 
 @Component({
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html',
+  styleUrls: ['./cohort-edit.component.css'],
+  templateUrl: './cohort-edit.component.html',
 })
 export class CohortEditComponent implements OnInit {
   cohort: Cohort = {id: '', name: '', description: '', criteria: '', type: ''};

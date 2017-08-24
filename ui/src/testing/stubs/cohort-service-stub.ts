@@ -1,5 +1,5 @@
 
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceComponent} from 'app/views/workspace/workspace.component';
 import {Cohort, CohortListResponse, Workspace} from 'generated';
 
 import {Observable} from 'rxjs/Observable';
