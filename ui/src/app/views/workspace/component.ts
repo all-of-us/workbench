@@ -6,10 +6,6 @@ import {DOCUMENT} from '@angular/platform-browser';
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
 import {resetDateObject} from 'helper-functions';
-import {Repository} from 'app/models/repository';
-import {RepositoryService} from 'app/services/repository.service';
-import {User} from 'app/models/user';
-import {UserService} from 'app/services/user.service';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 // TODO: use a real swagger generated class for this.
@@ -91,8 +87,6 @@ export class WorkspaceComponent implements OnInit {
   cohortsLoading = true;
   cohortsError = false;
   notebooksLoading = false;
-  repositories: Repository[] = [];
-  user: User;  // to detect if logged in
   cohortList: Cohort[] = [];
   // TODO: Replace with real data/notebooks
   notebookList = [new Notebook('Notebook 1',
@@ -104,14 +98,11 @@ export class WorkspaceComponent implements OnInit {
   constructor(
       private router: Router,
       private route: ActivatedRoute,
-      private userService: UserService,
-      private repositoryService: RepositoryService,
       private cohortsService: CohortsService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
-    this.userService.getLoggedInUser().then(user => this.user = user);
     this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.url[1].path;
     this.wsId = this.route.snapshot.url[2].path;
