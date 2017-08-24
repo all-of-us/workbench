@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import { SearchGroup, Subject, SearchResult } from '../model';
 import 'rxjs/add/operator/takeWhile';
@@ -35,12 +35,19 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   totalSet: Subject[] = [];
 
+  adding = false;
+
   constructor(private changeDetectorRef: ChangeDetectorRef,
               private broadcastService: BroadcastService,
               private router: Router,
+              private route: ActivatedRoute,
               @Inject(DOCUMENT) private document: any) {}
 
   ngOnInit() {
+    if (this.route.snapshot.url[5] === undefined) {
+      this.adding = true;
+    }
+
     this.searchGroups = [new SearchGroup()];
     this.exclusionGroups = [new SearchGroup('Exclude participants where:')];
 
@@ -92,6 +99,14 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
     this.updateTotalSet();
     this.updateCharts();
+  }
+
+  save(): void {
+    if (this.adding) {
+      this.router.navigate(['../create'], {relativeTo : this.route});
+    } else {
+      this.router.navigate(['../edit'], {relativeTo : this.route});
+    }
   }
 
   private updateGroupSet(searchGroup: SearchGroup, searchResult: SearchResult) {
