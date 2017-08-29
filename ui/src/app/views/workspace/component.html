@@ -24,21 +24,32 @@
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="cohortsLoading">
-      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
+      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" [style.width.%]="25">
         Name
         <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
+      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" [style.width.%]="50">
         Description
         <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column>URL</clr-dg-column>
-      <clr-dg-column>Created Date</clr-dg-column>
+      <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
       <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
       <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-        <clr-dg-cell><a routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">{{cohort.name}}</a></clr-dg-cell>
+        <clr-dg-cell>
+          <div style="display: flex; justify-content: space-between; overflow: hidden;">
+            <div style="display: flex;">
+              <span>{{cohort.name}}</span>
+            </div>
+            <div style="display: flex; height: 2vh;">
+              <a style="padding-right: 1vh; border-right: 1px solid black;"
+                  routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
+                Edit
+              </a>
+              <a style="padding-left: 1vh;" routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">Review</a>
+            </div>
+          </div>
+        </clr-dg-cell>
         <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-        <clr-dg-cell>{{this.document.location.href}}/cohort/{{cohort.id}}</clr-dg-cell>
         <clr-dg-cell>{{cohort.creationTime}}</clr-dg-cell>
       </clr-dg-row>
     </clr-datagrid>
