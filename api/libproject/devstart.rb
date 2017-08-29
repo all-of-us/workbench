@@ -158,7 +158,7 @@ def do_run_migrations(project)
   end
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
-  unless system("cd db && ../gradlew --no-daemon --info update && cd ..")
+  unless system("cd db && ../gradlew --info update && cd ..")
     raise("Error upgrading database. Exiting.")
   end
 end

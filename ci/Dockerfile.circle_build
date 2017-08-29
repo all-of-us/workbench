@@ -1,5 +1,5 @@
 # To build and deploy:
-# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-0.0.5 .
+# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-X.Y.Z .
 # Update BOTH the api and ui versions of allofustest/workbench:buildimage-X.Y.Z
 # in .circleci/circle.yml by incrementing the numbers. Using the new values, run:
 # $ docker push allofustest/workbench:buildimage-X.Y.Z
@@ -25,3 +25,6 @@ RUN cd && \
 RUN sudo apt-get install gettext ruby mysql-client
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
+
+# It never makes sense for Gradle to run a daemon within a docker container.
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
