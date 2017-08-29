@@ -24,3 +24,11 @@
 h3 {
   display: inline-block;
 }
+
+.quarter-table {
+  width: 25%;
+}
+
+.half-table {
+  width: 50%;
+}
