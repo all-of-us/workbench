@@ -13,9 +13,9 @@ services:
     depends_on:
       - db
     volumes:
-      - gradle-cache-api:/root/.gradle
+      - gradle-cache:/root/.gradle
       - .:/w:cached
-    command: ./gradlew --no-daemon appengineRun
+    command: ./gradlew appengineRun
     env_file:
       - db/vars.env
     ports:
@@ -25,12 +25,11 @@ services:
       context: ./src/dev/server
     working_dir: /w/db
     volumes:
-      - gradle-cache-migration:/root/.gradle
+      - gradle-cache:/root/.gradle
       - .:/w:cached
     command: wait-for db:3306 -- ./run-migrations.sh
     env_file:
       - db/vars.env
 volumes:
   db:
-  gradle-cache-api:
-  gradle-cache-migration:
+  gradle-cache:
