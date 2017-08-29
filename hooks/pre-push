@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
 # Checks to run before pushing to a remote git repo for review/merging.
 cd ui
 ng lint

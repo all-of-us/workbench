@@ -2,6 +2,13 @@ require "optparse"
 require_relative "download-swagger-codegen-cli"
 require_relative "utils/common"
 
+def ensure_git_hooks()
+  common = Common.new
+  unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
+    common.run_inline %W{git config core.hooksPath hooks}
+  end
+end
+
 def install_dependencies()
   common = Common.new
   common.docker.requires_docker
@@ -46,6 +53,8 @@ def dev_up(*args)
   common.docker.requires_docker
 
   options = DevUpOptions.new.parse(args)
+
+  ensure_git_hooks
 
   unless Dir.exist?("node_modules")
     install_dependencies

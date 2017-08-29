@@ -3,6 +3,13 @@ require "io/console"
 require "optparse"
 require "tempfile"
 
+def ensure_git_hooks()
+  common = Common.new
+  unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
+    common.run_inline %W{git config core.hooksPath hooks}
+  end
+end
+
 class ProjectAndAccountOptions
   attr_accessor :project
   attr_accessor :account
@@ -44,6 +51,8 @@ end
 def dev_up(args)
   common = Common.new
   common.docker.requires_docker
+
+  ensure_git_hooks
 
   at_exit { common.run_inline %W{docker-compose down} }
   common.run_inline %W{docker-compose up -d db}
