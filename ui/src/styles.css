@@ -66,3 +66,11 @@ button:disabled {
 * {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.quarter-table {
+  width: 25%;
+}
+
+.half-table {
+  width: 50%;
+}

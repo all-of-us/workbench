@@ -24,15 +24,15 @@
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="cohortsLoading">
-      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" [style.width.%]="25">
+      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" class="quarter-table">
         Name
         <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" [style.width.%]="50">
+      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" class="half-table">
         Description
         <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
+      <clr-dg-column class="quarter-table">Created Date</clr-dg-column>
       <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
       <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
         <clr-dg-cell>
