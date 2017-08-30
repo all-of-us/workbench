@@ -47,7 +47,6 @@ class ProjectAndAccountOptions
   end
 end
 
-
 def dev_up(args)
   common = Common.new
   common.docker.requires_docker
@@ -55,8 +54,13 @@ def dev_up(args)
   ensure_git_hooks
 
   at_exit { common.run_inline %W{docker-compose down} }
+  common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
+  common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+  common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
+  common.status "are here:"
+  common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
   common.run_inline_swallowing_interrupt %W{docker-compose up api}
 end
 
