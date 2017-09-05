@@ -13,7 +13,6 @@ import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-bui
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {SignInService} from 'app/services/sign-in.service';
-import {VAADIN_CLIENT} from 'app/vaadin-client';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters} from 'generated';
@@ -34,15 +33,6 @@ import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-se
 import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
 import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
 
-export function getVaadin(): VaadinNs {
-  // If the Vaadin javascript file fails to load, the "vaadin" symbol doesn't get defined,
-  // and referencing it directly results in an error.
-  if (typeof vaadin === 'undefined') {
-    return undefined;
-  } else {
-    return vaadin;
-  }
-}
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
@@ -86,7 +76,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
   entryComponents: [WizardModalComponent],
   providers: [
     SignInService,
-    {provide: VAADIN_CLIENT, useFactory: getVaadin},
     {
       provide: Configuration,
       deps: [SignInService],
