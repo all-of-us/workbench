@@ -34,6 +34,7 @@ import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-se
 import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
 import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
 
+
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
     return new Configuration({
