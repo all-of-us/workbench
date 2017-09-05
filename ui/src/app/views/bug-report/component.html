@@ -1,0 +1,24 @@
+<button class="bug-report btn btn-primary" (click)="reportBug()">Report A Bug</button>
+<clr-modal [(clrModalOpen)]="reporting" [clrModalSize]="'lg'">
+  <h3 class="modal-title">Report Bug</h3>
+  <div class="modal-body">
+
+    <div class="form-area">
+      <div class="form-section">
+        <label>Description:</label>
+        <input type="text" class="input" name="short-description" autofocus
+            [(ngModel)]="shortDescription">
+      </div>
+      <div class="form-section">
+        <label>How to Reproduce:</label>
+        <textarea class="input" name="repro-steps"
+            [(ngModel)]="reproSteps">
+        </textarea>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="reporting=false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="send()">Send</button>
+  </div>
+</clr-modal>

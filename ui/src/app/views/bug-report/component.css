@@ -1,0 +1,13 @@
+.bug-report {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+}
+
+.input {
+  width: 100%;
+}
+
+.form-section {
+  margin-bottom: 1rem;
+}
