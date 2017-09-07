@@ -20,6 +20,7 @@ services:
       - db/vars.env
     ports:
       - 8081:8081
+      - 8001:8001
   db-migration:
     build:
       context: ./src/dev/server
