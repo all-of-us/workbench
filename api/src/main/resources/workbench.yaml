@@ -42,6 +42,44 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/register:
+    post:
+      tags:
+        - profile
+      description: Registers a profile for the user in AllOfUs and Firecloud
+      operationId: "register"
+      parameters:
+        - in: body
+          name: registrationRequest
+          description: registration request
+          schema:
+            $ref: "#/definitions/RegistrationRequest"
+      responses:
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+  # Billing projects #####################################################################
+
+  /api/v1/billingProjects:
+    get:
+      tags:
+        - Profile
+      operationId: billing
+      summary: List billing projects for a user
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BillingProjectMembership'
+        404:
+          description: User Not Found
+        500:
+          description: Internal Server Error
+
   # Workspaces ###########################################################################
 
   /api/v1/workspaces:
@@ -276,6 +314,28 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+  # Mirrors BillingProjectMembership from fireCloud.yaml
+  BillingProjectMembership:
+    description: ''
+    required:
+      - projectName
+      - role
+      - status
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the project
+      role:
+        type: string
+        description: the role of the current user in the project
+      status:
+        type: string
+        enum: ["Creating", "Ready", "Error"]
+      message:
+        type: string
+        description: informational message about the project
+
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
@@ -367,6 +427,9 @@ definitions:
       enabledInFireCloud:
         description: true if the user is enabled in FireCloud, false if they are not
         type: boolean
+      freeTierBillingProjectName:
+        description: name of the AllOfUs free tier billing project created for this user
+        type: string
       dataAccessLevel:
         description: what level of data access the user has
         type: string
@@ -379,4 +442,31 @@ definitions:
         type: string
       familyName:
         description: the user's family  name (e.g. Jones)
+        type: string
+      phoneNumber:
+        description: the user's phone number
+        type: string
+
+  RegistrationRequest:
+    type: "object"
+    required:
+      - "email"
+      - "fullName"
+      - "givenName"
+      - "familyName"
+    properties:
+      email:
+        description: email address of the user
+        type: string
+      fullName:
+        description: the user's full name
+        type: string
+      givenName:
+        description: the user's given name (e.g. Alice)
+        type: string
+      familyName:
+        description: the user's family  name (e.g. Jones)
+        type: string
+      phoneNumber:
+        description: the user's phone number
         type: string
