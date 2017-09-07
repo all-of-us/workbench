@@ -1,0 +1,6 @@
+// Also log stdout and stderr when running tests
+test {
+  testLogging {
+    events "standardOut", "standardError"
+  }
+}

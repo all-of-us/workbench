@@ -10,8 +10,6 @@ services:
     build:
       context: ./src/dev/server
     working_dir: /w
-    depends_on:
-      - db
     volumes:
       - gradle-cache:/root/.gradle
       - .:/w:cached
