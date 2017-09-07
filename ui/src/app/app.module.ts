@@ -7,6 +7,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 
+import {DOM_TO_IMAGE_CLIENT} from 'app/dom-to-image-client';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
@@ -51,6 +52,15 @@ export function getConfiguration(signInService: SignInService): Configuration {
       accessToken: () => signInService.currentAccessToken
     });
 }
+
+export function getDomToImage(): DomToImageNs {
+  if (typeof domtoimage === 'undefined') {
+    return undefined;
+  } else {
+    return domtoimage;
+  }
+}
+
 
 @NgModule({
   imports:      [
@@ -98,7 +108,12 @@ export function getConfiguration(signInService: SignInService): Configuration {
     SearchService
   ],
 
+<<<<<<< Updated upstream
   // This specifies the top-level component, to load first.
   bootstrap: [AppComponent]
+=======
+  // This specifies the top-level components, to load first.
+  bootstrap: [AppComponent, BugReportComponent]
+>>>>>>> Stashed changes
 })
 export class AppModule {}
