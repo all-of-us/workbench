@@ -26,7 +26,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<BillingProjectMembership>> billing() {
+  public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
     // TODO: retrieve billing projects
     return ResponseEntity.ok(new ArrayList<>());
   }
