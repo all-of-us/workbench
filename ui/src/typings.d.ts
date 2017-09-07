@@ -1,3 +1,7 @@
+import * as domtoimage from 'dom-to-image';
+
+declare const domtoimage: any;
+
 /* SystemJS module definition */
 declare var module: NodeModule;
 interface NodeModule {
@@ -5,7 +9,7 @@ interface NodeModule {
 }
 
 /*
-Declare TypeScript types for the plain-javascript VAADIN third-party script.
+Declare TypeScript types for the plain-javascript third-party scripts.
 This gets included by the compiler; its symbols do not need to be imported by
 other source files but are globally available.
 */
@@ -16,3 +20,7 @@ interface VaadinNs {
 
 // This var name matches the third-party symbol name.
 declare var vaadin: VaadinNs;
+
+interface DomToImageNs {
+  initApplication: (a: string, b: any) => any;
+}
