@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ComponentRef } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { Criteria, SearchGroup, SearchResult } from '../model';
+import { Criteria, SearchGroup, SearchResult, Modifier } from '../model';
+import { SearchRequest } from '../model/search-request';
 
 @Injectable()
 export class BroadcastService {
@@ -11,6 +12,11 @@ export class BroadcastService {
    * criteria tree.
    */
   private selectedCriteria = new Subject<Criteria>();
+
+  /**
+   * Represents the selected criteria type.
+   */
+  private selectedCriteriaType = new ReplaySubject<string>(1);
 
   /**
    * Represents the selected search group for the
@@ -40,10 +46,26 @@ export class BroadcastService {
   private updatedCharts = new Subject<any>();
 
   /**
+   * Represents the summary page that needs updating.
+   */
+  private summaryCriteriaGroup = new Subject<Criteria[]>();
+
+  /**
+   * Represents the summary page that needs updating.
+   */
+  private summaryModifierList = new Subject<Modifier[]>();
+
+  /**
    * The Observable that allows other components
    * to subscribe to this criteria subject.
    */
   public selectedCriteria$ = this.selectedCriteria.asObservable();
+
+  /**
+   * The Observable that allows other components
+   * to subscribe to this criteria type subject.
+   */
+  public selectedCriteriaType$ = this.selectedCriteriaType.asObservable();
 
   /**
    * The Observable that allows other components
@@ -76,12 +98,33 @@ export class BroadcastService {
   public updatedCharts$ = this.updatedCharts.asObservable();
 
   /**
+   * The Observable that allows other components
+   * to subscribe to this event.
+   */
+  public summaryCriteriaGroup$ = this.summaryCriteriaGroup.asObservable();
+
+  /**
+   * The Observable that allows other components
+   * to subscribe to this event.
+   */
+  public summaryModifierList$ = this.summaryModifierList.asObservable();
+
+  /**
    * Add the specified criteria to the subject.
    *
    * @param criteria
    */
   selectCriteria(criteria: Criteria) {
     this.selectedCriteria.next(criteria);
+  }
+
+  /**
+   * Add the specified criteria type to the subject.
+   *
+   * @param criteriaType
+   */
+  selectCriteriaType(criteriaType: string) {
+    this.selectedCriteriaType.next(criteriaType);
   }
 
   /**
@@ -131,5 +174,13 @@ export class BroadcastService {
    */
   updateCharts(gender: any[], race: any[]) {
     this.updatedCharts.next({'gender': gender, 'race': race});
+  }
+
+  setSummaryCriteriaGroup(criteriaList: Criteria[]) {
+    this.summaryCriteriaGroup.next(criteriaList);
+  }
+
+  setSummaryModifierList(modifierList: Modifier[]) {
+    this.summaryModifierList.next(modifierList);
   }
 }

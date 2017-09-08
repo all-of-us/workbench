@@ -1,61 +1,81 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { Modifier } from '../model';
-import { SearchService } from '../service';
-import {Wizard} from 'clarity-angular/wizard/wizard';
+import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
+import { Wizard } from 'clarity-angular/wizard/wizard';
+import { SearchGroup, SearchResult, Criteria, Modifier, SearchRequest } from '../model';
+import { BroadcastService, SearchService } from '../service';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-wizard-modal',
   templateUrl: './wizard-modal.component.html',
-  styleUrls: ['./wizard-modal.component.css']
+  styleUrls: ['./wizard-modal.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
-export class WizardModalComponent implements OnInit {
+export class WizardModalComponent implements OnInit, OnDestroy {
 
   @ViewChild('wizard') wizard: Wizard;
-  modifierList: Modifier[] = [];
-  ageAtEventSelectList: string[] = [];
-  eventDateSelectList: string[] = [];
-  hasOccurrencesSelectList: string[] = [];
-  eventOccurredDuringSelectList: string[] = [];
-  daysOrYearsSelectList: string[] = [];
-  private alive = true;
-  ageAtEvent: Modifier;
-  eventDate: Modifier;
-  hasOccurrences: Modifier;
+  private selectedSearchGroup: SearchGroup;
+  private selectedSearchResult: SearchResult;
+  private criteriaList: Criteria[] = [];
+  private modifierList: Modifier[] = [];
   criteriaType: string;
+  wizardModalRef: ComponentRef<WizardModalComponent>;
+  private criteriaTypeSubscription: Subscription;
+  private searchGroupSubscription: Subscription;
+  private criteriaListSubscription: Subscription;
+  private modifierListSubscription: Subscription;
 
-  constructor(private searchService: SearchService) { }
+  constructor(private broadcastService: BroadcastService,
+              private searchService: SearchService) { }
 
   ngOnInit() {
-    this.ageAtEventSelectList = this.searchService.getAgeAtEventSelectList();
+    this.criteriaTypeSubscription = this.broadcastService.selectedCriteriaType$
+      .subscribe(criteriaType => this.criteriaType = criteriaType);
+    this.searchGroupSubscription = this.broadcastService.selectedSearchGroup$
+      .subscribe(searchGroup => this.selectedSearchGroup = searchGroup);
+    this.criteriaListSubscription = this.broadcastService.summaryCriteriaGroup$
+      .subscribe(criteriaList => this.criteriaList = criteriaList);
+    this.modifierListSubscription = this.broadcastService.summaryModifierList$
+      .subscribe(modifierList => this.modifierList = modifierList);
+  }
 
-    this.eventDateSelectList = this.searchService.getEventDateSelectList();
-
-    this.hasOccurrencesSelectList = this.searchService.getHasOccurrencesSelectList();
-    this.daysOrYearsSelectList = this.searchService.getDaysOrYearsSelectList();
-
-    this.eventOccurredDuringSelectList = this.searchService.getEventOccurredDuringSelectList();
-
-    if (this.modifierList.length === 0) {
-      this.ageAtEvent = new Modifier();
-      this.ageAtEvent.operator = this.ageAtEventSelectList[0];
-      this.ageAtEvent.name = 'ageAtEvent';
-      this.modifierList.push(this.ageAtEvent);
-
-      this.eventDate = new Modifier();
-      this.eventDate.operator = this.eventDateSelectList[0];
-      this.eventDate.name = 'eventDate';
-      this.modifierList.push(this.eventDate);
-
-      this.hasOccurrences = new Modifier();
-      this.hasOccurrences.operator = this.hasOccurrencesSelectList[0];
-      this.hasOccurrences.value3 = this.daysOrYearsSelectList[0];
-      this.hasOccurrences.name = 'hasOccurrences';
-      this.modifierList.push(this.hasOccurrences);
-    } else {
-      this.ageAtEvent = this.modifierList[0];
-      this.eventDate = this.modifierList[1];
-      this.hasOccurrences = this.modifierList[2];
+  public doCustomClick(type: string): void {
+    if ('finish' === type) {
+      this.wizard.finish();
+      this.updateSearchResults();
     }
+  }
+
+  public doCancel() {
+    this.wizard.finish();
+    this.wizardModalRef.destroy();
+  }
+
+  updateSearchResults() {
+    this.updateOrCreateSearchResult();
+
+    this.searchGroupSubscription = this.searchService.getResults(
+      new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
+      .subscribe(response => {
+        this.selectedSearchResult.updateWithResponse(response);
+        this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
+        this.wizardModalRef.destroy();
+      });
+  }
+
+  updateOrCreateSearchResult() {
+    if (this.selectedSearchResult) {
+      this.selectedSearchResult.update(this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
+    } else {
+      this.selectedSearchResult = new SearchResult(this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
+      this.selectedSearchGroup.results.push(this.selectedSearchResult);
+    }
+  }
+
+  ngOnDestroy() {
+    this.criteriaTypeSubscription.unsubscribe();
+    this.searchGroupSubscription.unsubscribe();
+    this.criteriaListSubscription.unsubscribe();
+    this.modifierListSubscription.unsubscribe();
   }
 
 }

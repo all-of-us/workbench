@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import { Criteria, CriteriaType, SearchRequest, SearchResponse } from '../model';
@@ -20,7 +20,7 @@ const AGE_AT_EVENT: string[] = ['Any', 'GTE >=', 'LTE <=', 'Between'];
 
 const EVENT_DATE: string[] = ['Any', 'Within x year(s)', 'GTE >=', 'LTE <=', 'Between'];
 
-const EVENT_OCCURRED_DURING: string[] = ['Inpatient visit', 'Outpatient visit'];
+const VISIT_TYPE: string[] = ['Any', 'Inpatient visit', 'Outpatient visit'];
 
 const DAYS_OR_YEARS: string[] = ['Days', 'Years'];
 
@@ -49,8 +49,8 @@ export class SearchService {
     return HAS_OCCURRENCES;
   }
 
-  getEventOccurredDuringSelectList(): string[] {
-    return EVENT_OCCURRED_DURING;
+  getVisitTypeSelectList(): string[] {
+    return VISIT_TYPE;
   }
 
   getDaysOrYearsSelectList(): string[] {
@@ -58,18 +58,20 @@ export class SearchService {
   }
 
   getParentNodes(type: string): Observable<Criteria[]> {
-    return this.http.get(this.baseUrl + '/' + type.toLowerCase() + '/0')
+    return this.http.get('/api/' + type.toLowerCase() + '/0')
       .map(res => res.json());
   }
 
   getChildNodes(criteria: any): Observable<Criteria[]> {
-    return this.http.get(this.baseUrl + '/' + criteria.type.toLowerCase() + '/' + criteria.id)
+    return this.http.get('/api/' + criteria.type.toLowerCase() + '/' + criteria.id)
       .map(res => res.json());
   }
 
   getResults(searchRequest: SearchRequest): Observable<SearchResponse> {
-    return this.http.post(this.baseUrl + '/search', searchRequest)
-      .map(res => res.json());
+    return this.http.post('/api/searchrequest', searchRequest)
+      .map(
+        res => res.json()
+      );
   }
 
 }
