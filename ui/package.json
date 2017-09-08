@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "codegen-clean": "rm -rf src/generated",
-    "codegen": "npm run codegen-clean && java -jar libproject/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2"
+    "codegen": "npm run codegen-clean && java -jar ../libproject/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2"
   },
   "private": true,
   "dependencies": {

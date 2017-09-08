@@ -1,7 +1,10 @@
 require "open-uri"
 require_relative "utils/common"
+require_relative "workbench-common"
 
-SWAGGER_CODEGEN_CLI_JAR = "libproject/swagger-codegen-cli.jar"
+SWAGGER_CODEGEN_CLI_JAR = File.join(WORKBENCH_ROOT, "libproject", "swagger-codegen-cli.jar")
+SWAGGER_SPEC = File.join(
+    WORKBENCH_ROOT, "api", "src", "main", "resources", "workbench.yaml")
 
 def download(url, path)
   File.open(path, "wb") do |f|
