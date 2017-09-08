@@ -1,6 +1,6 @@
 require "optparse"
-require_relative "download-swagger-codegen-cli"
-require_relative "utils/common"
+require_relative "../libproject/download-swagger-codegen-cli"
+require_relative "../libproject/utils/common"
 
 def ensure_git_hooks()
   common = Common.new
@@ -20,9 +20,7 @@ def swagger_regen()
   common = Common.new
   common.docker.requires_docker
 
-  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
-    download_swagger_codegen_cli
-  end
+  download_swagger_codegen_cli
 
   common.run_inline %W{docker-compose run --rm ui npm run codegen}
 end

@@ -1,4 +1,4 @@
-require_relative "utils/common"
+require_relative "../libproject/utils/common"
 require "io/console"
 require "json"
 require "optparse"
