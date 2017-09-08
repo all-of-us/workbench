@@ -22,7 +22,9 @@ module Workbench
   end
   module_function :ensure_git_hooks
 
-  def handle_argv_or_die()
+  def handle_argv_or_die(main_filename)
+    Dir.chdir(File.dirname(main_filename))
+
     check_submodules
     ensure_git_hooks
 
