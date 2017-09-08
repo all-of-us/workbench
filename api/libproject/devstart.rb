@@ -300,13 +300,13 @@ end
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
-  :fn => lambda { |args| dev_up(args) }
+  :fn => lambda { |*args| dev_up(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => lambda { |args| connect_to_db(args) }
+  :fn => lambda { |*args| connect_to_db(*args) }
 })
 
 Common.register_command({
@@ -314,35 +314,35 @@ Common.register_command({
   :description => \
     "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
     "start from scratch (e.g., the database will be re-created).",
-  :fn => lambda { |args| docker_clean(args) }
+  :fn => lambda { |*args| docker_clean(*args) }
 })
 
 Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => lambda { |args| rebuild_image(args) }
+  :fn => lambda { |*args| rebuild_image(*args) }
 })
 
 Common.register_command({
   :invocation => "create-db-creds",
   :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => lambda { |args| create_db_creds(args) }
+  :fn => lambda { |*args| create_db_creds(*args) }
 })
 
 Common.register_command({
   :invocation => "drop-cloud-db",
   :description => "Drops the Cloud SQL database for the specified project",
-  :fn => lambda { |args| drop_cloud_db(args) }
+  :fn => lambda { |*args| drop_cloud_db(*args) }
 })
 
 Common.register_command({
   :invocation => "run-cloud-migrations",
   :description => "Runs database migrations on the Cloud SQL database for the specified project.",
-  :fn => lambda { |args| run_cloud_migrations(args) }
+  :fn => lambda { |*args| run_cloud_migrations(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
-  :fn => lambda { |args| connect_to_cloud_db(args) }
+  :fn => lambda { |*args| connect_to_cloud_db(*args) }
 })
