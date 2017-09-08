@@ -2,6 +2,7 @@
   <service>api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
+  <application>all-of-us-workbench-test</application>
 
   <env-variables>
     <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
