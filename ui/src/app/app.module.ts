@@ -7,7 +7,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 
-import {DOM_TO_IMAGE_CLIENT} from 'app/dom-to-image-client';
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
 import {BugReportComponent} from 'app/views/bug-report/component';
@@ -44,13 +43,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     });
 }
 
-export function getDomToImage(): DomToImageNs {
-  if (typeof domtoimage === 'undefined') {
-    return undefined;
-  } else {
-    return domtoimage;
-  }
-}
 
 
 @NgModule({

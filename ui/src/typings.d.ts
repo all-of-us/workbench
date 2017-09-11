@@ -1,6 +1,7 @@
-import * as domtoimage from 'dom-to-image';
+// import * as domtoimage from 'dom-to-image';
 
-declare const domtoimage: any;
+
+// declare const domtoimage: any;
 
 /* SystemJS module definition */
 declare var module: NodeModule;
@@ -14,13 +15,11 @@ This gets included by the compiler; its symbols do not need to be imported by
 other source files but are globally available.
 */
 
-interface VaadinNs {
-  initApplication: (a: string, b: any) => any;
-}
+// interface DomToImageNs {
+//   toPng: (element: any) => any;
+//   toBlob: (image: any) => any;
+// }
+//
+// declare var domtoimage: DomToImageNs;
 
-// This var name matches the third-party symbol name.
-declare var vaadin: VaadinNs;
-
-interface DomToImageNs {
-  initApplication: (a: string, b: any) => any;
-}
+declare module "dom-to-image";
