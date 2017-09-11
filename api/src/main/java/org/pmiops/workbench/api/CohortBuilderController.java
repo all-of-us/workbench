@@ -16,10 +16,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
-    public static final String CRTIERIA_QUERY = "SELECT id, type, code, name, est_count, is_group, is_selectable, domain_id\n"
-            + "FROM `pmi-drc-api-test.synpuf.%s`\n"
-            + "WHERE parent_id = @parentId\n"
-            + "order by id asc";
+    public static final String CRITERIA_QUERY =
+            "SELECT id,\n" +
+                    "type,\n" +
+                    "code,\n" +
+                    "name,\n" +
+                    "est_count,\n" +
+                    "is_group,\n" +
+                    "is_selectable,\n" +
+                    "domain_id\n" +
+                    "FROM `pmi-drc-api-test.synpuf.%s`\n" +
+                    "WHERE parent_id = @parentId\n" +
+                    "order by id asc";
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, String parentId) {
@@ -85,6 +93,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected String getQueryString(String type) {
-        return String.format(CRTIERIA_QUERY, type + "_criteria");
+        return String.format(CRITERIA_QUERY, type + "_criteria");
     }
 }
