@@ -42,6 +42,26 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/sendBug:
+    post:
+      tags:
+        - bugs
+      description: Sends an email to developers about a user reported bug
+      operationId: "sendBug"
+      parameters:
+        - in: body
+          name: bugReport
+          description: user reported bug
+          required: true
+          schema:
+            $ref: "#/definitions/BugReport"
+      responses:
+        "200":
+          description: Success message
+          schema:
+            $ref: "#/definitions/BugReport"
+
+
   # Workspaces ###########################################################################
 
   /api/v1/workspaces:
@@ -353,6 +373,19 @@ definitions:
       lastModifiedTime:
         type: string
         format: date-time
+
+  BugReport:
+    type: "object"
+    required:
+      - "shortDescription"
+      - "reproSteps"
+    properties:
+      shortDescription:
+        description: A short description of the bug
+        type: string
+      reproSteps:
+        description: Steps to reproduce the bug
+        type: string
 
   Profile:
     type: "object"
