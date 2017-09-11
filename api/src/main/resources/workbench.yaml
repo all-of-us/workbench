@@ -523,7 +523,7 @@ definitions:
         description: type of criteria
         type: string
       code:
-        description: what level of data access the user has
+        description: code that identifies this criteria
         type: string
       name:
         description: description of criteria
@@ -533,10 +533,10 @@ definitions:
         type: integer
         format: int64
       group:
-        description: specifies of child or parent
+        description: specifies if child or parent
         type: boolean
       selectable:
-        description: specifies if use can search with
+        description: specifies if user can search with
         type: boolean
       domainId:
         description: clue to determine which tables to search
