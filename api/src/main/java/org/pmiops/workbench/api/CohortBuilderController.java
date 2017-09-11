@@ -6,7 +6,9 @@ import org.pmiops.workbench.model.CriteriaListResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
@@ -14,20 +16,42 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
+    public static final String CRTIERIA_QUERY = "SELECT id, type, code, name, est_count, is_group, is_selectable, domain_id\n"
+            + "FROM `pmi-drc-api-test.synpuf.%s`\n"
+            + "WHERE parent_id = @parentId\n"
+            + "order by id asc";
+
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, String parentId) {
 
+        QueryResult result = getQueryResult(type, parentId);
+
+        Map<String, Integer> rm = getResultMapper(result);
+
+        CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+        for (List<FieldValue> row : result.iterateAll()) {
+            final Criteria criteria = new Criteria();
+            criteria.setId(row.get(rm.get("id")).getLongValue());
+            criteria.setType(row.get(rm.get("type")).getStringValue());
+            criteria.setCode(row.get(rm.get("code")).getStringValue());
+            criteria.setName(row.get(rm.get("name")).getStringValue());
+            criteria.setCount(row.get(rm.get("est_count")).isNull() ? 0 : row.get(rm.get("est_count")).getLongValue());
+            criteria.setGroup(row.get(rm.get("is_group")).getBooleanValue());
+            criteria.setSelectable(row.get(rm.get("is_selectable")).getBooleanValue());
+            criteria.setDomainId(row.get(rm.get("domain_id")).isNull() ? null : row.get(rm.get("domain_id")).getStringValue());
+            criteriaResponse.addItemsItem(criteria);
+        }
+
+        return ResponseEntity.ok(criteriaResponse);
+    }
+
+    protected QueryResult getQueryResult(String type, String parentId) {
         BigQuery bigquery =
                 new BigQueryOptions.DefaultBigqueryFactory().create(BigQueryOptions.getDefaultInstance());
 
-        String queryString =
-                "SELECT id, type, code, name, est_count, is_group, is_selectable, domain_id "
-                        + "FROM `pmi-drc-api-test.synpuf.icd9_crtieria` "
-                        + "WHERE parent_id = @parentId "
-                        + "order by id asc";
         QueryRequest queryRequest =
-                QueryRequest.newBuilder(queryString)
-                        .addNamedParameter("parentId", QueryParameterValue.string(parentId))
+                QueryRequest.newBuilder(getQueryString(type))
+                        .addNamedParameter("parentId", QueryParameterValue.int64(new Integer(parentId)))
                         .setUseLegacySql(false)
                         .build();
 
@@ -48,23 +72,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             throw new RuntimeException(firstError);
         }
 
-        // Print all pages of the results.
-        QueryResult result = response.getResult();
+        return response.getResult();
+    }
 
-        CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-        for (List<FieldValue> row : result.iterateAll()) {
-            final Criteria criteria = new Criteria();
-            criteria.setId(row.get(0).getLongValue());
-            criteria.setType(row.get(1).getStringValue());
-            criteria.setCode(row.get(2).getStringValue());
-            criteria.setName(row.get(3).getStringValue());
-            criteria.setCount(row.get(4).isNull() ? 0 : row.get(4).getLongValue());
-            criteria.setGroup(row.get(5).getBooleanValue());
-            criteria.setSelectable(row.get(6).getBooleanValue());
-            criteria.setDomainId(row.get(7).isNull() ? null : row.get(7).getStringValue());
-            criteriaResponse.addItemsItem(criteria);
+    protected Map<String, Integer> getResultMapper(QueryResult result) {
+        Map<String, Integer> resultMapper = new HashMap<String, Integer>();
+        int i = 0;
+        for (Field field : result.getSchema().getFields()) {
+            resultMapper.put(field.getName(), i++);
         }
+        return resultMapper;
+    }
 
-        return ResponseEntity.ok(criteriaResponse);
+    protected String getQueryString(String type) {
+        return String.format(CRTIERIA_QUERY, type + "_criteria");
     }
 }
