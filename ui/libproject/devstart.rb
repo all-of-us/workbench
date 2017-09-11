@@ -61,10 +61,6 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
 
-def clean_git_hooks()
-  common.run_inline %W{find ../.git/hooks -type l -delete}
-end
-
 def rebuild_image()
   common = Common.new
   common.docker.requires_docker
