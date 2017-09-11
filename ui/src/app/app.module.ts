@@ -15,7 +15,7 @@ import {HomePageComponent} from 'app/views/home-page/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters} from 'generated';
+import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters, CohortBuilderService} from 'generated';
 import {environment} from 'environments/environment';
 import { SearchGroupComponent } from 'app/views/cohort-builder/search/search-group/search-group.component';
 import { CriteriaTreeComponent } from 'app/views/cohort-builder/search/criteria-tree/criteria-tree.component';
@@ -31,6 +31,7 @@ import { AnnotationsComponent } from 'app/views/cohort-builder/review/annotation
 import { MedicationsComponent } from 'app/views/cohort-builder/review/medications/medications.component';
 import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-select/wizard-select.component';
 import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
+import { WizardTreeParentComponent } from './views/cohort-builder/search/wizard-tree-parent/wizard-tree-parent.component';
 import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
 
 
@@ -68,6 +69,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     MedicationsComponent,
     WizardSelectComponent,
     WizardModalComponent,
+    WizardTreeParentComponent,
     CohortEditComponent,
     HomePageComponent,
     WorkspaceComponent,
@@ -84,7 +86,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortsService,
     WorkspacesService,
     BroadcastService,
-    SearchService
+    SearchService,
+    CohortBuilderService
   ],
 
   // This specifies the top-level component, to load first.

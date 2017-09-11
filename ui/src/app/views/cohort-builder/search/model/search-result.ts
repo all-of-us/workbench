@@ -1,5 +1,4 @@
 import { Criteria, Modifier, Subject, SearchParameter } from './';
-import { CriteriaGroupComponent } from '../criteria-group/criteria-group.component';
 import { SearchResponse } from './search-response';
 
 export class SearchResult {
@@ -15,35 +14,27 @@ export class SearchResult {
 
   constructor()
 
-  constructor(description: string, criteriaGroup: CriteriaGroupComponent)
+  constructor(description: string, criteriaList: Criteria[], modifierList: Modifier[])
 
-  constructor(description?: string, criteriaGroup?: CriteriaGroupComponent) {
-    if (description && criteriaGroup) {
-      this.update(description, criteriaGroup);
+  constructor(description?: string, criteriaList?: Criteria[], modifierList?: Modifier[]) {
+    if (description && criteriaList && modifierList) {
+      this.update(description, criteriaList, modifierList);
     }
   }
 
-  update(description: string, criteriaGroup: CriteriaGroupComponent) {
+  update(description: string, criteriaList: Criteria[], modifierList: Modifier[]) {
     this.description = description;
-    criteriaGroup.modifierList ?
-        this.modifierList = criteriaGroup.modifierList :
-        this.modifierList = [];
-    criteriaGroup.criteriaList ?
-        this.criteriaList = criteriaGroup.criteriaList :
-        this.criteriaList = [];
+    criteriaList ? this.criteriaList = criteriaList : this.criteriaList = [];
+    modifierList ? this.modifierList = modifierList : this.modifierList = [];
     this.count = -1;
     for (const criteria of this.criteriaList) {
       this.searchType = criteria.type;
-      this.values.push(new SearchParameter(criteria.code,
-          criteria.type.startsWith('DEMO') ?
-              criteria.type :
-              criteria.domainId));
+      this.values.push(new SearchParameter(criteria.code, criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId));
     }
   }
 
   updateWithResponse(response: SearchResponse) {
     this.resultSet = response.subjectList;
-    this.values = response.searchParameterList;
     this.count = response.subjectList.length;
   }
 

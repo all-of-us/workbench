@@ -310,6 +310,30 @@ paths:
           required: true
           description: ID of the workspace containing the cohort definition
 
+  # Cohort Builder #######################################################################
+  /api/v1/cohort-builder/criteria/{type}/{parentId}:
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaByTypeAndParentId"
+      parameters:
+              - in: path
+                name: type
+                type: string
+                required: true
+                description: the specific type of criteria to get
+              - in: path
+                name: parentId
+                type: string
+                required: true
+                description: fetch children of parentId
+      responses:
+              "200":
+                description: A collection of criteria
+                schema:
+                  $ref: "#/definitions/CriteriaListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -469,4 +493,51 @@ definitions:
         type: string
       phoneNumber:
         description: the user's phone number
+        type: string
+
+  CriteriaListResponse:
+    type: "object"
+    required:
+      - "items"
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Criteria"
+
+  Criteria:
+    type: "object"
+    required:
+      - "id"
+      - "type"
+      - "code"
+      - "name"
+      - "group"
+      - "selectable"
+    properties:
+      id:
+        description: id of the criteria
+        type: integer
+        format: int64
+      type:
+        description: type of criteria
+        type: string
+      code:
+        description: code that identifies this criteria
+        type: string
+      name:
+        description: description of criteria
+        type: string
+      count:
+        description: est. count in the cdr
+        type: integer
+        format: int64
+      group:
+        description: specifies if child or parent
+        type: boolean
+      selectable:
+        description: specifies if user can search with
+        type: boolean
+      domainId:
+        description: clue to determine which tables to search
         type: string

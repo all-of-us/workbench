@@ -16,6 +16,8 @@ services:
       - gradle-cache:/root/.gradle
       - .:/w:cached
     command: ./gradlew appengineRun
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
     env_file:
       - db/vars.env
     ports:

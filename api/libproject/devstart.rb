@@ -1,5 +1,6 @@
 require_relative "utils/common"
 require "io/console"
+require "json"
 require "optparse"
 require "tempfile"
 
@@ -58,6 +59,19 @@ def dev_up(args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+  common.status "Creating service account for API..."
+  iam_account = "bigqueryservice@all-of-us-workbench-test.iam.gserviceaccount.com"
+  common.run_inline %W{
+    gcloud iam service-accounts keys create sa-key.json --iam-account #{iam_account}
+  }
+  at_exit {
+    # use JSON library to parse sa-key.json and extract key ID
+    keyFile = File.read("sa-key.json")
+    key_id = JSON.parse(keyFile)["private_key_id"]
+    common.run_inline %W{
+      gcloud iam service-accounts keys delete #{key_id} --iam-account #{iam_account}
+    }
+  }
   common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
   common.status "are here:"
   common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
