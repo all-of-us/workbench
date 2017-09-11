@@ -3,13 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.*;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
@@ -20,50 +17,38 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, String parentId) {
 
-        // Instantiates a client
-        BigQuery bigquery = BigQueryOptions.getDefaultInstance().getService();
+        BigQuery bigquery =
+                new BigQueryOptions.DefaultBigqueryFactory().create(BigQueryOptions.getDefaultInstance());
 
-        QueryJobConfiguration queryConfig =
-                QueryJobConfiguration.newBuilder(
-                        "SELECT id, " +
-                                "type, " +
-                                "code, " +
-                                "name, " +
-                                "est_count, " +
-                                "is_group, " +
-                                "is_selectable, " +
-                                "domain_id " +
-                                "FROM `pmi-drc-api-test.synpuf.icd9_criteria` " +
-                                "where parent_id = 0 " +
-                                "order by id asc;")
-                        // Use standard SQL syntax for queries.
-                        // See: https://cloud.google.com/bigquery/sql-reference/
+        String queryString =
+                "SELECT id, type, code, name, est_count, is_group, is_selectable, domain_id "
+                        + "FROM `pmi-drc-api-test.synpuf.icd9_crtieria` "
+                        + "WHERE parent_id = @parentId "
+                        + "order by id asc";
+        QueryRequest queryRequest =
+                QueryRequest.newBuilder(queryString)
+                        .addNamedParameter("parentId", QueryParameterValue.string(parentId))
                         .setUseLegacySql(false)
                         .build();
 
-        // Create a job ID so that we can safely retry.
-        JobId jobId = JobId.of(UUID.randomUUID().toString());
-        Job queryJob = bigquery.create(JobInfo.newBuilder(queryConfig).setJobId(jobId).build());
+        // Execute the query.
+        QueryResponse response = bigquery.query(queryRequest);
 
-        // Wait for the query to complete.
-        try {
-            queryJob = queryJob.waitFor();
-        } catch (Exception e) {
-            log.log(Level.INFO, "Timeout occurred: ", e);
-            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build();
+        // Wait for the job to finish
+        while (!response.jobCompleted()) {
+            response = bigquery.getQueryResults(response.getJobId());
         }
 
-        // Check for errors
-        if (queryJob == null) {
-            throw new RuntimeException("Job no longer exists");
-        } else if (queryJob.getStatus().getError() != null) {
-            // You can also look at queryJob.getStatus().getExecutionErrors() for all
-            // errors, not just the latest one.
-            throw new RuntimeException(queryJob.getStatus().getError().toString());
+        // Check for errors.
+        if (response.hasErrors()) {
+            String firstError = "";
+            if (response.getExecutionErrors().size() != 0) {
+                firstError = response.getExecutionErrors().get(0).getMessage();
+            }
+            throw new RuntimeException(firstError);
         }
 
-        // Get the results.
-        QueryResponse response = bigquery.getQueryResults(jobId);
+        // Print all pages of the results.
         QueryResult result = response.getResult();
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
