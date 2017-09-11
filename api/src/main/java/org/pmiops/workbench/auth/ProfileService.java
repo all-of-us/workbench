@@ -1,6 +1,5 @@
 package org.pmiops.workbench.auth;
 
-import com.google.api.services.oauth2.model.Userinfoplus;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
@@ -15,27 +14,28 @@ public class ProfileService {
 
   private final FireCloudService fireCloudService;
   private final Provider<User> userProvider;
-  private final Provider<Userinfoplus> userInfoProvider;
 
   @Autowired
-  ProfileService(FireCloudService fireCloudService, UserDao userDao,
-      Provider<Userinfoplus> userInfoProvider, Provider<User> userProvider) {
+  ProfileService(FireCloudService fireCloudService, UserDao userDao, Provider<User> userProvider) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
-    this.userInfoProvider = userInfoProvider;
   }
 
   public Profile getProfile() throws ApiException {
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
-    Userinfoplus userInfo = userInfoProvider.get();
-    Profile profile = new Profile();
-    profile.setEmail(userInfo.getEmail());
-    profile.setFamilyName(userInfo.getFamilyName());
-    profile.setFullName(userInfo.getName());
-    profile.setGivenName(userInfo.getGivenName());
-    profile.setEnabledInFireCloud(enabledInFireCloud);
+    return getProfile(userProvider.get());
+  }
 
-    User user = userProvider.get();
+  public Profile getProfile(User user) throws ApiException {
+    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
+    Profile profile = new Profile();
+    profile.setEmail(user.getEmail());
+    profile.setFamilyName(user.getFamilyName());
+    profile.setFullName(user.getFullName());
+    profile.setGivenName(user.getGivenName());
+    profile.setContactEmail(user.getContactEmail());
+    profile.setPhoneNumber(user.getPhoneNumber());
+    profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
+    profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setDataAccessLevel(Profile.DataAccessLevelEnum.fromValue(
         user.getDataAccessLevel().toString().toLowerCase()));
 

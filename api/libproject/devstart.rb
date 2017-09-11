@@ -94,6 +94,16 @@ def get_service_account_creds_file(project, account, creds_file)
     --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
 
+def get_access_token(creds_file)
+  common = Common.new
+  scopes = ["https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email"]
+  authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
+    json_key_io: File.open(creds_file),
+    scope: scopes)
+  return authorizer.fetch_access_token!
+end
+
 def delete_service_accounts_creds(project, account, creds_file)
   tmp_private_key = `grep private_key_id #{creds_file.path} | cut -d\\\" -f4`.strip()
   service_account ="#{project}@appspot.gserviceaccount.com"
@@ -228,6 +238,15 @@ def run_with_cloud_sql_proxy(args, command, proc)
   })
 end
 
+def register_service_account(*args)
+  run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
+    common = Common.new
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+    system("cd ../firecloud-tools &&  ./run.sh " \
+      "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+  })
+end
+
 def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
     do_drop_db(project)
@@ -345,4 +364,10 @@ Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
   :fn => lambda { |*args| connect_to_cloud_db(*args) }
+})
+
+Common.register_command({
+  :invocation => "register-service-account",
+  :description => "Registers a service account with Firecloud; do this once per account we use.",
+  :fn => lambda { |*args| register_service_account(*args) }
 })

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="danrodney" id="changelog-2">
+    <addColumn tableName="user">
+      <column name="contact_email" type="varchar(255)"/>
+      <column name="full_name" type="varchar(255)"/>
+      <column name="given_name" type="varchar(80)"/>
+      <column name="family_name" type="varchar(80)"/>
+      <column name="phone_number" type="varchar(30)"/>
+      <column name="free_tier_billing_project_name" type="varchar(255)"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

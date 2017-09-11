@@ -383,7 +383,7 @@ definitions:
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
-    enum: &DATA_ACCESS_LEVEL [registered, protected]
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
 
   WorkspaceListResponse:
     type: object
@@ -482,7 +482,10 @@ definitions:
       - dataAccessLevel
     properties:
       email:
-        description: email address of the user
+        description: Google email address that the user signs in with
+        type: string
+      contactEmail:
+        description: email address that can be used to contact the user
         type: string
       enabledInFireCloud:
         description: true if the user is enabled in FireCloud, false if they are not
@@ -510,13 +513,13 @@ definitions:
   RegistrationRequest:
     type: object
     required:
-      - email
+      - contactEmail
       - fullName
       - givenName
       - familyName
     properties:
-      email:
-        description: email address of the user
+      contactEmail:
+        description: email address that can be used to contact the user
         type: string
       fullName:
         description: the user's full name

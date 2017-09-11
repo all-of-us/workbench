@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInfoService {
 
+  private static final String APPLICATION_NAME = "AllOfUs Workbench";
+
   private final HttpTransport httpTransport;
   private final JsonFactory jsonFactory;
 
@@ -23,7 +25,8 @@ public class UserInfoService {
 
   public Userinfoplus getUserInfo(String token) throws IOException {
     GoogleCredential credential = new GoogleCredential().setAccessToken(token);
-    Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential).build();
+    Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential)
+        .setApplicationName(APPLICATION_NAME).build();
     return oauth2.userinfo().get().execute();
   }
 }

@@ -96,6 +96,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortsService,
     WorkspacesService,
     BroadcastService,
+    ProfileService,
     SearchService,
     CohortBuilderService,
     BugReportService

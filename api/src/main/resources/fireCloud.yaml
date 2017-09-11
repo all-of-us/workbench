@@ -168,44 +168,6 @@ paths:
           description: Service Unavailable. Could not reach underlying services to determine user status.
 
   /register/profile:
-    get:
-      tags:
-        - Profile
-      operationId: getAll
-      summary: Returns a list of all keys and values stored in the user profile service for the currently logged-in user.
-      produces:
-        - application/json
-        - text/plain
-      responses:
-        200:
-          description: OK
-          schema:
-            {
-              "properties": {
-                "userId": {
-                  type: "string"
-                },
-                "keyValuePairs": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [ "key", "value" ],
-                    "properties": {
-                      "key": {
-                        "type": "string"
-                      },
-                      "value": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              },
-              "type": "object",
-              "required": [ "userId", "keyValuePairs" ]
-            }
-        500:
-          description: Internal server error
       post:
         tags:
           - Profile
@@ -317,18 +279,39 @@ definitions:
   Profile:
       type: object
       properties:
-        name:
+        firstName:
           type: string
-          description: User's full name
-        email:
+          description: User's first name
+        lastName:
           type: string
-          description: User's email address
-        institution:
+          description: User's last name
+        title:
+          type: string
+          description: User's title
+        contactEmail:
+          type: string
+          description: User's contact email
+        institute:
           type: string
           description: User's home institution
+        institutionalProgram:
+          type: string
+          description: User's institutional program
+        programLocationCity:
+          type: string
+          description: City where the program is run
+        programLocationState:
+          type: string
+          description: State where the program is run
+        programLocationCountry:
+          type: string
+          description: Country where the program is run
         pi:
           type: string
-          description: Primary Investigator
+          description: Principal investigator for the program
+        nonProfitStatus:
+          type: string
+          description: Non-profit status of the institution
 
   StackTraceElement:
       description: ''
