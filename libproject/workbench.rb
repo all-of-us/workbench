@@ -7,7 +7,7 @@ module Workbench
     # `git clone` includes submodule folders but nothing else.
     unless File.exists? File.join(WORKBENCH_ROOT, "libproject", "utils", "README.md")
       unless system(*%W{git submodule update --init})
-        STDERR.puts "`git submodule update` failed."
+        common.error "`git submodule update` failed."
         exit 1
       end
     end
