@@ -56,23 +56,21 @@ def dev_up(*args)
 
   ensure_git_hooks
 
-  unless Dir.exist?("node_modules")
-    install_dependencies
-  end
+  install_dependencies
 
   unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
     download_swagger_codegen_cli
   end
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
-  common.run_inline %W{docker-compose up -d}
   at_exit { common.run_inline %W{docker-compose down} }
+  common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
   common.status "    http://localhost:9876/debug.html\n"
   common.status "in a browser to view/run tests."
 
-  common.run_inline_swallowing_interrupt %W{docker-compose up ui}
+  common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
 
 def clean_git_hooks()
