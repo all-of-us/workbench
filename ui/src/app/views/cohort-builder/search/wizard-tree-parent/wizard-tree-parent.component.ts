@@ -25,7 +25,8 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.subscription =
       this.broadcastService.selectedCriteriaType$
-      .mergeMap(criteriaType => this.cohortBuilderService.getCriteriaByTypeAndParentId(criteriaType, '0'))
+      .mergeMap(criteriaType => this.cohortBuilderService.getCriteriaByTypeAndParentId(
+          criteriaType, '0'))
       .subscribe(nodes => {
         this.nodes = nodes.items;
         this.loading = false;

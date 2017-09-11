@@ -1,5 +1,9 @@
 // Import all the pieces of the app centrally.
 
+// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
+// https://github.com/palantir/tslint/pull/3099
+// tslint:disable:max-line-length
+
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
@@ -33,6 +37,8 @@ import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-se
 import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
 import { WizardTreeParentComponent } from './views/cohort-builder/search/wizard-tree-parent/wizard-tree-parent.component';
 import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
+
+// tslint:enable:max-line-length
 
 
 // "Configuration" means Swagger API Client configuration.
