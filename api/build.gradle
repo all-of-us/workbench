@@ -6,6 +6,7 @@ def swaggerSourceFile = 'src/main/resources/workbench.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateApi {
+  delete("${projectDir}/$swaggerTargetFolder")
   inputs.file("$projectDir/$swaggerSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
