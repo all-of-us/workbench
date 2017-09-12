@@ -45,28 +45,21 @@ def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
 
+  account = get_auth_login_account()
+  if account == nil
+    raise("Please run 'gcloud auth login' before starting the server.")
+  end
   at_exit { common.run_inline %W{docker-compose down} }
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
-  common.status "Creating service account for API..."
-  iam_account = "bigqueryservice@all-of-us-workbench-test.iam.gserviceaccount.com"
-  common.run_inline %W{
-    gcloud iam service-accounts keys create sa-key.json --iam-account #{iam_account}
-  }
-  at_exit {
-    # use JSON library to parse sa-key.json and extract key ID
-    keyFile = File.read("sa-key.json")
-    key_id = JSON.parse(keyFile)["private_key_id"]
-    common.run_inline %W{
-      gcloud iam service-accounts keys delete #{key_id} --iam-account #{iam_account}
-    }
-  }
-  common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-  common.status "are here:"
-  common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-  common.run_inline_swallowing_interrupt %W{docker-compose up api}
+  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
+    common.status "are here:"
+    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+    common.run_inline_swallowing_interrupt %W{docker-compose up api}
+  })
 end
 
 def connect_to_db(*args)
@@ -93,7 +86,7 @@ end
 
 def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
-  service_account ="#{project}@appspot.gserviceaccount.com"
+  service_account = "#{project}@appspot.gserviceaccount.com"
   common.run_inline %W{gcloud iam service-accounts keys create #{creds_file.path}
     --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
@@ -183,7 +176,6 @@ end
 
 def do_drop_db(project)
   read_db_vars(project)
-  common = Common.new
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   begin
     unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
@@ -199,11 +191,16 @@ def do_drop_db(project)
   end
 end
 
+def get_auth_login_account()
+  return `gcloud config get-value account`.strip()
+end
+
 def run_with_creds(args, command, proc)
   options = ProjectAndAccountOptions.new(command).parse(args)
-  project = options.project
-  account = options.account
-  creds_file = options.creds_file
+  do_run_with_creds(options.project, options.account, options.creds_file, proc)
+end
+
+def do_run_with_creds(project, account, creds_file, proc)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     get_service_account_creds_file(project, account, service_account_creds_file)
