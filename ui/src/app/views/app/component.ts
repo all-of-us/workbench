@@ -54,14 +54,14 @@ export class AppComponent implements OnInit {
       }
     });
     this.user = this.signInService.user;
-    alert("HELLO")
+    alert("HELLO");
     this.profileService.getMe().subscribe(x => {
-      alert(x.dataAccessLevel)
-      alert(x.contactEmail)
-      alert(x.fullName)
+      alert(x.dataAccessLevel);
+      alert(x.contactEmail);
+      alert(x.fullName);
       this.profileService.register({ contactEmail: 'danrodney@hotmail.com', fullName: 'Dan Rodney',
          givenName: 'Dan', familyName: 'Rodney'}).subscribe(z => alert(z), b => alert(b))
-    }, e => console.error(e))
+    }, e => console.error(e));
   }
 
   signIn(e: Event): void {
