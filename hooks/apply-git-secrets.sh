@@ -13,8 +13,5 @@ IFS=$'\n\t'
 } || {
   :
 }
-git secrets --add 'private_key'
-git secrets --add 'private_key_id'
-git secrets --add --allowed --literal "git secrets --add 'private_key'"
-git secrets --add --allowed --literal "git secrets --add 'private_key_id'"
-git secrets --add --allowed --literal 'tmp_private_key = `grep private_key_id #{creds_file.path} | cut -d\\\" -f4`.strip()'
+git secrets --add '"private_key":'
+git secrets --add --allowed 'git secrets --add *'
