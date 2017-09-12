@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import domtoimage from 'dom-to-image';
-import {BugsService} from 'generated'
-import {BugReport} from 'generated'
+import {BugsService} from 'generated';
+import {BugReport} from 'generated';
 // import { saveAs } from 'file-saver';
 
 @Component({
@@ -13,7 +13,7 @@ export class BugReportComponent implements OnInit {
   reporting = false;
   shortDescription: string;
   reproSteps: string;
-  bugReport: BugReport = {shortDescription: "", reproSteps: ""};
+  bugReport: BugReport = {shortDescription: '', reproSteps: ''};
   constructor(
     private bugsService: BugsService
   ) {}
@@ -23,8 +23,8 @@ export class BugReportComponent implements OnInit {
 
   reportBug() {
     this.reporting = true;
-    this.shortDescription='';
-    this.reproSteps='';
+    this.shortDescription = '';
+    this.reproSteps = '';
   }
 
   send() {
@@ -45,7 +45,7 @@ export class BugReportComponent implements OnInit {
     this.bugReport.shortDescription = this.shortDescription;
     this.bugReport.reproSteps = this.reproSteps;
     // TODO: Handle error reporting error.
-    this.bugsService.sendBug(this.bugReport).subscribe((bugReport: BugReport)=>{});
+    this.bugsService.sendBug(this.bugReport).subscribe((bugReport: BugReport) => {});
 
     console.log(this.shortDescription);
     console.log(this.reproSteps);
