@@ -26,10 +26,10 @@ public class BugReportController implements BugsApiDelegate {
 
 
   @Override
-  public ResponseEntity<BugReport> sendBug(BugReport bugReport) throws MessagingException, AddressException, UnsupportedEncodingException {
+  public ResponseEntity<BugReport> sendBug(BugReport bugReport) {
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
-    // try {
+    try {
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress("all-of-us-research-tools@googlegroups.com"));
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress("brubenst@broadinstitute.org", "My Email"));
@@ -38,13 +38,12 @@ public class BugReportController implements BugsApiDelegate {
       Transport.send(msg);
       System.out.println("[AofU Bug Report]: " + bugReport.getShortDescription());
       System.out.println(bugReport.getReproSteps());
-    // } catch MessagingException {
-    //
-    // } catch AddressException {
-    //
-    // } catch UnsupportedEncodingException {
-    //
-    // }
+    } catch (MessagingException e) {
+      throw new RuntimeException(e.toString());
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e.toString());
+    }
+
     return ResponseEntity.ok(bugReport);
   }
 }
