@@ -1,8 +1,14 @@
+// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
+// https://github.com/palantir/tslint/pull/3099
+// tslint:disable:max-line-length
+
 import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
 import { Wizard } from 'clarity-angular/wizard/wizard';
 import { SearchGroup, SearchResult, Criteria, Modifier, SearchRequest } from '../model';
 import { BroadcastService, SearchService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
+
+// tslint:enable:max-line-length
 
 @Component({
   selector: 'app-wizard-modal',
@@ -64,9 +70,11 @@ export class WizardModalComponent implements OnInit, OnDestroy {
 
   updateOrCreateSearchResult() {
     if (this.selectedSearchResult) {
-      this.selectedSearchResult.update(this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
+      this.selectedSearchResult.update(
+          this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
     } else {
-      this.selectedSearchResult = new SearchResult(this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
+      this.selectedSearchResult = new SearchResult(
+          this.criteriaType.toUpperCase() + ' Group', this.criteriaList, this.modifierList);
       this.selectedSearchGroup.results.push(this.selectedSearchResult);
     }
   }
