@@ -1,15 +1,8 @@
-require_relative "utils/common"
+require_relative "../../libproject/utils/common"
 require "io/console"
 require "json"
 require "optparse"
 require "tempfile"
-
-def ensure_git_hooks()
-  common = Common.new
-  unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
-    common.run_inline %W{git config core.hooksPath hooks}
-  end
-end
 
 class ProjectAndAccountOptions
   attr_accessor :project
@@ -48,11 +41,9 @@ class ProjectAndAccountOptions
   end
 end
 
-def dev_up(args)
+def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
-
-  ensure_git_hooks
 
   at_exit { common.run_inline %W{docker-compose down} }
   common.status "Starting database..."
@@ -78,7 +69,7 @@ def dev_up(args)
   common.run_inline_swallowing_interrupt %W{docker-compose up api}
 end
 
-def connect_to_db(args)
+def connect_to_db(*args)
   common = Common.new
   common.docker.requires_docker
 
@@ -86,14 +77,14 @@ def connect_to_db(args)
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end
 
-def docker_clean(args)
+def docker_clean(*args)
   common = Common.new
   common.docker.requires_docker
 
   common.run_inline %W{docker-compose down --volumes}
 end
 
-def rebuild_image(args)
+def rebuild_image(*args)
   common = Common.new
   common.docker.requires_docker
 
@@ -237,13 +228,13 @@ def run_with_cloud_sql_proxy(args, command, proc)
   })
 end
 
-def drop_cloud_db(args)
+def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
     do_drop_db(project)
   })
 end
 
-def connect_to_cloud_db(args)
+def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(project)
     system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
@@ -251,7 +242,7 @@ def connect_to_cloud_db(args)
   })
 end
 
-def run_cloud_migrations(args)
+def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
     do_run_migrations(project)
@@ -309,13 +300,13 @@ end
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
-  :fn => lambda { |args| dev_up(args) }
+  :fn => lambda { |*args| dev_up(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => lambda { |args| connect_to_db(args) }
+  :fn => lambda { |*args| connect_to_db(*args) }
 })
 
 Common.register_command({
@@ -323,35 +314,35 @@ Common.register_command({
   :description => \
     "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
     "start from scratch (e.g., the database will be re-created).",
-  :fn => lambda { |args| docker_clean(args) }
+  :fn => lambda { |*args| docker_clean(*args) }
 })
 
 Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => lambda { |args| rebuild_image(args) }
+  :fn => lambda { |*args| rebuild_image(*args) }
 })
 
 Common.register_command({
   :invocation => "create-db-creds",
   :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => lambda { |args| create_db_creds(args) }
+  :fn => lambda { |*args| create_db_creds(*args) }
 })
 
 Common.register_command({
   :invocation => "drop-cloud-db",
   :description => "Drops the Cloud SQL database for the specified project",
-  :fn => lambda { |args| drop_cloud_db(args) }
+  :fn => lambda { |*args| drop_cloud_db(*args) }
 })
 
 Common.register_command({
   :invocation => "run-cloud-migrations",
   :description => "Runs database migrations on the Cloud SQL database for the specified project.",
-  :fn => lambda { |args| run_cloud_migrations(args) }
+  :fn => lambda { |*args| run_cloud_migrations(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
-  :fn => lambda { |args| connect_to_cloud_db(args) }
+  :fn => lambda { |*args| connect_to_cloud_db(*args) }
 })
