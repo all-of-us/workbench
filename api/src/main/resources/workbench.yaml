@@ -61,6 +61,43 @@ paths:
           schema:
             $ref: "#/definitions/BugReport"
 
+  /api/v1/register:
+    post:
+      tags:
+        - profile
+      description: Registers a profile for the user in AllOfUs and Firecloud
+      operationId: "register"
+      parameters:
+        - in: body
+          name: registrationRequest
+          description: registration request
+          schema:
+            $ref: "#/definitions/RegistrationRequest"
+      responses:
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+  # Billing projects #####################################################################
+
+  /api/v1/billingProjects:
+    get:
+      tags:
+        - Profile
+      operationId: getBillingProjects
+      summary: List billing projects for a user
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BillingProjectMembership'
+        404:
+          description: User Not Found
+        500:
+          description: Internal Server Error
 
   # Workspaces ###########################################################################
 
@@ -292,10 +329,56 @@ paths:
           required: true
           description: ID of the workspace containing the cohort definition
 
+  # Cohort Builder #######################################################################
+  /api/v1/cohort-builder/criteria/{type}/{parentId}:
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaByTypeAndParentId"
+      parameters:
+              - in: path
+                name: type
+                type: string
+                required: true
+                description: the specific type of criteria to get
+              - in: path
+                name: parentId
+                type: string
+                required: true
+                description: fetch children of parentId
+      responses:
+              "200":
+                description: A collection of criteria
+                schema:
+                  $ref: "#/definitions/CriteriaListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+  # Mirrors BillingProjectMembership from fireCloud.yaml
+  BillingProjectMembership:
+    description: ''
+    required:
+      - projectName
+      - role
+      - status
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the project
+      role:
+        type: string
+        description: the role of the current user in the project
+      status:
+        type: string
+        enum: ["Creating", "Ready", "Error"]
+      message:
+        type: string
+        description: informational message about the project
+
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
@@ -400,6 +483,9 @@ definitions:
       enabledInFireCloud:
         description: true if the user is enabled in FireCloud, false if they are not
         type: boolean
+      freeTierBillingProjectName:
+        description: name of the AllOfUs free tier billing project created for this user
+        type: string
       dataAccessLevel:
         description: what level of data access the user has
         type: string
@@ -412,4 +498,78 @@ definitions:
         type: string
       familyName:
         description: the user's family  name (e.g. Jones)
+        type: string
+      phoneNumber:
+        description: the user's phone number
+        type: string
+
+  RegistrationRequest:
+    type: "object"
+    required:
+      - "email"
+      - "fullName"
+      - "givenName"
+      - "familyName"
+    properties:
+      email:
+        description: email address of the user
+        type: string
+      fullName:
+        description: the user's full name
+        type: string
+      givenName:
+        description: the user's given name (e.g. Alice)
+        type: string
+      familyName:
+        description: the user's family  name (e.g. Jones)
+        type: string
+      phoneNumber:
+        description: the user's phone number
+        type: string
+
+  CriteriaListResponse:
+    type: "object"
+    required:
+      - "items"
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Criteria"
+
+  Criteria:
+    type: "object"
+    required:
+      - "id"
+      - "type"
+      - "code"
+      - "name"
+      - "group"
+      - "selectable"
+    properties:
+      id:
+        description: id of the criteria
+        type: integer
+        format: int64
+      type:
+        description: type of criteria
+        type: string
+      code:
+        description: code that identifies this criteria
+        type: string
+      name:
+        description: description of criteria
+        type: string
+      count:
+        description: est. count in the cdr
+        type: integer
+        format: int64
+      group:
+        description: specifies if child or parent
+        type: boolean
+      selectable:
+        description: specifies if user can search with
+        type: boolean
+      domainId:
+        description: clue to determine which tables to search
         type: string

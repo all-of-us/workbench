@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -21,6 +22,14 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ProfileApi profileApi(ApiClient apiClient) {
     ProfileApi api = new ProfileApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public BillingApi billingApi(ApiClient apiClient) {
+    BillingApi api = new BillingApi();
     api.setApiClient(apiClient);
     return api;
   }

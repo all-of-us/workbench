@@ -46,7 +46,7 @@ export class CriteriaGroupComponent implements OnInit, OnDestroy {
     this.hasOccurrencesSelectList = this.searchService.getHasOccurrencesSelectList();
     this.daysOrYearsSelectList = this.searchService.getDaysOrYearsSelectList();
 
-    this.eventOccurredDuringSelectList = this.searchService.getEventOccurredDuringSelectList();
+    // this.eventOccurredDuringSelectList = this.searchService.getEventOccurredDuringSelectList();
 
     if (this.modifierList.length === 0) {
       this.ageAtEvent = new Modifier();

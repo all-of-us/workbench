@@ -45,6 +45,106 @@ securityDefinitions:
 ## PATHS
 ##########################################################################################
 paths:
+
+  /api/billing:
+    post:
+      responses:
+        204:
+          description: Successfully Created Billing Project in FireCloud and Google
+        400:
+          description: FireCloud billing user must be an admin of the billing account
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        403:
+          description: You must be an admin of the google billing account
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        409:
+          description: project already exists in FireCloud or google
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: body
+          description: create project request
+          name: createProjectRequest
+          required: true
+          schema:
+            $ref: '#/definitions/CreateRawlsBillingProjectFullRequest'
+      tags:
+        - Billing
+      summary: create billing project in FireCloud and google
+      operationId: createBillingProjectFull
+      security:
+        - googleoauth:
+        - openid
+        - email
+        - profile
+        - https://www.googleapis.com/auth/cloud-billing
+
+  /api/billing/{projectId}/{role}/{email}:
+      put:
+        responses:
+          200:
+            description: Successfully Added User To Billing Project
+          403:
+            description: You must be a project owner to add a user to a billing project
+            schema:
+              $ref: '#/definitions/ErrorReport'
+          404:
+            description: User not found
+            schema:
+              $ref: '#/definitions/ErrorReport'
+          500:
+            description: FireCloud Internal Error
+            schema:
+              $ref: '#/definitions/ErrorReport'
+        parameters:
+          - in: path
+            description: Project ID
+            name: projectId
+            required: true
+            type: string
+          - in: path
+            description: role of user for project
+            name: role
+            required: true
+            type: string
+            enum: ["user", "owner"]
+          - in: path
+            description: email of user or group to add
+            name: email
+            required: true
+            type: string
+        tags:
+          - Billing
+        summary: add user to billing project the caller owns
+        operationId: addUserToBillingProject
+        security:
+          - googleoauth:
+              - openid
+              - email
+              - profile
+
+  /api/profile/billing:
+    get:
+      tags:
+        - Profile
+      operationId: billing
+      summary: List billing projects for a user
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BillingProjectMembership'
+        404:
+          description: User Not Found
+        500:
+          description: Internal Server Error
+
   /me:
     get:
       tags:
@@ -67,10 +167,104 @@ paths:
         503:
           description: Service Unavailable. Could not reach underlying services to determine user status.
 
+  /register/profile:
+    get:
+      tags:
+        - Profile
+      operationId: getAll
+      summary: Returns a list of all keys and values stored in the user profile service for the currently logged-in user.
+      produces:
+        - application/json
+        - text/plain
+      responses:
+        200:
+          description: OK
+          schema:
+            {
+              "properties": {
+                "userId": {
+                  type: "string"
+                },
+                "keyValuePairs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [ "key", "value" ],
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "type": "object",
+              "required": [ "userId", "keyValuePairs" ]
+            }
+        500:
+          description: Internal server error
+      post:
+        tags:
+          - Profile
+        operationId: setProfile
+        summary: Sets a profile object in the user profile service for the currently logged-in user.
+        parameters:
+        - name: profile
+          description: A complete profile
+          in: body
+          schema:
+            $ref: '#/definitions/Profile'
+        responses:
+          200:
+            description: OK
+          400:
+            description: Bad request
+          500:
+            description: Internal server error
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+
+  BillingProjectMembership:
+    description: ''
+    required:
+      - projectName
+      - role
+      - status
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the project to create
+      role:
+        type: string
+        description: the role of the current user in the project
+      status:
+        type: string
+        enum: ["Creating", "Ready", "Error"]
+      message:
+        type: string
+        description: informational message about the project
+
+  CreateRawlsBillingProjectFullRequest:
+    description: ''
+    required:
+      - projectName
+      - billingAccount
+    type: object
+    properties:
+      projectName:
+        type: string
+        description: the name of the project to create
+      billingAccount:
+        type: string
+        description: the id of the billing account to use, must start with 'billingAccounts/'
+
   Enabled:
     type: object
     properties:
@@ -83,6 +277,36 @@ definitions:
       allUsersGroup:
         type: boolean
         description: User is a member of the "All Users" group?
+
+  ErrorReport:
+    description: ''
+    required:
+      - source
+      - message
+      - causes
+      - stackTrace
+    type: object
+    properties:
+      source:
+        type: string
+        description: service causing error
+      message:
+        type: string
+        description: what went wrong
+      statusCode:
+        type: integer
+        description: HTTP status code
+      causes:
+        type: array
+        description: errors triggering this one
+        items:
+          $ref: '#/definitions/ErrorReport'
+      stackTrace:
+        type: array
+        description: stack trace
+        items:
+          $ref: '#/definitions/StackTraceElement'
+
   Me:
     type: object
     properties:
@@ -90,6 +314,44 @@ definitions:
         $ref: '#/definitions/UserInfo'
       enabled:
         $ref: '#/definitions/Enabled'
+  Profile:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          description: User's email address
+        institution:
+          type: string
+          description: User's home institution
+        pi:
+          type: string
+          description: Primary Investigator
+
+  StackTraceElement:
+      description: ''
+      required:
+        - className
+        - methodName
+        - fileName
+        - lineNumber
+      type: object
+      properties:
+        className:
+          type: string
+          description: class name
+        methodName:
+          type: string
+          description: method name
+        fileName:
+          type: string
+          description: source file name
+        lineNumber:
+          type: integer
+          description: line number
+
   UserInfo:
     type: object
     properties:

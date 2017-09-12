@@ -1,6 +1,10 @@
 // Based on the URL mapping in "routes" below, the RouterModule attaches
 // UI Components to the <router-outlet> element in the main AppComponent.
 
+// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
+// https://github.com/palantir/tslint/pull/3099
+// tslint:disable:max-line-length
+
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
@@ -10,6 +14,8 @@ import {HomePageComponent} from 'app/views/home-page/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import { CohortReviewComponent } from 'app/views/cohort-builder/review/cohort-review/cohort-review.component';
+
+// tslint:enable:max-line-length
 
 
 const routes: Routes = [

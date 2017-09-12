@@ -1,4 +1,4 @@
-FROM alpine
+FROM node:alpine
 
 RUN apk --no-cache add nodejs-npm
 
