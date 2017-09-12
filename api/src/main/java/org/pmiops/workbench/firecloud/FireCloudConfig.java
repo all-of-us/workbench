@@ -2,6 +2,8 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
+import java.util.logging.Logger;
+import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -14,6 +16,8 @@ import org.springframework.web.context.annotation.RequestScope;
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {
 
+  private static final Logger log = Logger.getLogger(FireCloudConfig.class.getName());
+
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
 
@@ -21,7 +25,9 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient fireCloudApiClient(UserAuthentication userAuthentication) {
     ApiClient apiClient = new ApiClient();
+    log.info("User access token = " + userAuthentication.getCredentials());
     apiClient.setAccessToken(userAuthentication.getCredentials());
+    apiClient.setDebugging(true);
     return apiClient;
   }
 
@@ -30,8 +36,12 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient() {
     ApiClient apiClient = new ApiClient();
     try {
-      String accessToken = GoogleCredential.getApplicationDefault().getAccessToken();
+      GoogleCredential credential = GoogleCredential.getApplicationDefault();
+      credential.refreshToken();
+      String accessToken = credential.getAccessToken();
+      log.info("Billing access token = " + accessToken);
       apiClient.setAccessToken(accessToken);
+      apiClient.setDebugging(true);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
