@@ -63,14 +63,8 @@ def dev_up(*args)
   end
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
-<<<<<<< HEAD
-  # common.run_inline %W{docker-compose up -d}
-  at_exit { common.run_inline %W{docker-compose down} }
-  common.run_inline %W{docker-compose run -d tests}
-=======
   at_exit { common.run_inline %W{docker-compose down} }
   common.run_inline %W{docker-compose run -d --service-ports tests}
->>>>>>> master
 
   common.status "Tests started. Open\n"
   common.status "    http://localhost:9876/debug.html\n"
