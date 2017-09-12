@@ -87,12 +87,8 @@ end
 def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
   service_account = "#{project}@appspot.gserviceaccount.com"
-  account_flag = ""
-  if account != nil
-    account_flag = "--account=#{account}"
-  end
   common.run_inline %W{gcloud iam service-accounts keys create #{creds_file.path}
-    --iam-account=#{service_account} --project=#{project} #{account_flag}}
+    --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
 
 def delete_service_accounts_creds(project, account, creds_file)
