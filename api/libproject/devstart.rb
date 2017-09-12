@@ -94,16 +94,6 @@ def get_service_account_creds_file(project, account, creds_file)
     --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
 
-def get_access_token(creds_file)
-  common = Common.new
-  scopes = ["https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email"]
-  authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
-    json_key_io: File.open(creds_file),
-    scope: scopes)
-  return authorizer.fetch_access_token!
-end
-
 def delete_service_accounts_creds(project, account, creds_file)
   tmp_private_key = `grep private_key_id #{creds_file.path} | cut -d\\\" -f4`.strip()
   service_account ="#{project}@appspot.gserviceaccount.com"
