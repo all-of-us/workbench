@@ -1,5 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import javax.inject.Provider;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -29,10 +31,17 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();
-    Me me = profileApi.me();
-    // Users can only use FireCloud if the Google and LDAP flags are enabled.
-    return me.getEnabled() != null
-        && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
+    try {
+      Me me = profileApi.me();
+      // Users can only use FireCloud if the Google and LDAP flags are enabled.
+      return me.getEnabled() != null
+          && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
+    } catch (ApiException e) {
+      if (e.getCode() == NOT_FOUND.value()) {
+        return false;
+      }
+      throw e;
+    }
   }
 
   @Override
