@@ -14,5 +14,4 @@ IFS=$'\n\t'
   :
 }
 git secrets --add '"private_key":'
-git secrets --add '"private_key_id":'
 git secrets --add --allowed 'git secrets --add *'
