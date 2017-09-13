@@ -1,15 +1,8 @@
-require_relative "utils/common"
+require_relative "../../libproject/utils/common"
 require "io/console"
 require "json"
 require "optparse"
 require "tempfile"
-
-def ensure_git_hooks()
-  common = Common.new
-  unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
-    common.run_inline %W{git config core.hooksPath hooks}
-  end
-end
 
 class ProjectAndAccountOptions
   attr_accessor :project
@@ -48,37 +41,28 @@ class ProjectAndAccountOptions
   end
 end
 
-def dev_up(args)
+def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
 
-  ensure_git_hooks
-
+  account = get_auth_login_account()
+  if account == nil
+    raise("Please run 'gcloud auth login' before starting the server.")
+  end
   at_exit { common.run_inline %W{docker-compose down} }
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
-  common.status "Creating service account for API..."
-  iam_account = "bigqueryservice@all-of-us-workbench-test.iam.gserviceaccount.com"
-  common.run_inline %W{
-    gcloud iam service-accounts keys create sa-key.json --iam-account #{iam_account}
-  }
-  at_exit {
-    # use JSON library to parse sa-key.json and extract key ID
-    keyFile = File.read("sa-key.json")
-    key_id = JSON.parse(keyFile)["private_key_id"]
-    common.run_inline %W{
-      gcloud iam service-accounts keys delete #{key_id} --iam-account #{iam_account}
-    }
-  }
-  common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-  common.status "are here:"
-  common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-  common.run_inline_swallowing_interrupt %W{docker-compose up api}
+  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
+    common.status "are here:"
+    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+    common.run_inline_swallowing_interrupt %W{docker-compose up api}
+  })
 end
 
-def connect_to_db(args)
+def connect_to_db(*args)
   common = Common.new
   common.docker.requires_docker
 
@@ -86,14 +70,14 @@ def connect_to_db(args)
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end
 
-def docker_clean(args)
+def docker_clean(*args)
   common = Common.new
   common.docker.requires_docker
 
   common.run_inline %W{docker-compose down --volumes}
 end
 
-def rebuild_image(args)
+def rebuild_image(*args)
   common = Common.new
   common.docker.requires_docker
 
@@ -102,7 +86,7 @@ end
 
 def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
-  service_account ="#{project}@appspot.gserviceaccount.com"
+  service_account = "#{project}@appspot.gserviceaccount.com"
   common.run_inline %W{gcloud iam service-accounts keys create #{creds_file.path}
     --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
@@ -192,7 +176,6 @@ end
 
 def do_drop_db(project)
   read_db_vars(project)
-  common = Common.new
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   begin
     unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
@@ -208,11 +191,16 @@ def do_drop_db(project)
   end
 end
 
+def get_auth_login_account()
+  return `gcloud config get-value account`.strip()
+end
+
 def run_with_creds(args, command, proc)
   options = ProjectAndAccountOptions.new(command).parse(args)
-  project = options.project
-  account = options.account
-  creds_file = options.creds_file
+  do_run_with_creds(options.project, options.account, options.creds_file, proc)
+end
+
+def do_run_with_creds(project, account, creds_file, proc)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     get_service_account_creds_file(project, account, service_account_creds_file)
@@ -237,13 +225,13 @@ def run_with_cloud_sql_proxy(args, command, proc)
   })
 end
 
-def drop_cloud_db(args)
+def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
     do_drop_db(project)
   })
 end
 
-def connect_to_cloud_db(args)
+def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(project)
     system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
@@ -251,7 +239,7 @@ def connect_to_cloud_db(args)
   })
 end
 
-def run_cloud_migrations(args)
+def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
     do_run_migrations(project)
@@ -309,13 +297,13 @@ end
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
-  :fn => lambda { |args| dev_up(args) }
+  :fn => lambda { |*args| dev_up(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => lambda { |args| connect_to_db(args) }
+  :fn => lambda { |*args| connect_to_db(*args) }
 })
 
 Common.register_command({
@@ -323,35 +311,35 @@ Common.register_command({
   :description => \
     "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
     "start from scratch (e.g., the database will be re-created).",
-  :fn => lambda { |args| docker_clean(args) }
+  :fn => lambda { |*args| docker_clean(*args) }
 })
 
 Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => lambda { |args| rebuild_image(args) }
+  :fn => lambda { |*args| rebuild_image(*args) }
 })
 
 Common.register_command({
   :invocation => "create-db-creds",
   :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => lambda { |args| create_db_creds(args) }
+  :fn => lambda { |*args| create_db_creds(*args) }
 })
 
 Common.register_command({
   :invocation => "drop-cloud-db",
   :description => "Drops the Cloud SQL database for the specified project",
-  :fn => lambda { |args| drop_cloud_db(args) }
+  :fn => lambda { |*args| drop_cloud_db(*args) }
 })
 
 Common.register_command({
   :invocation => "run-cloud-migrations",
   :description => "Runs database migrations on the Cloud SQL database for the specified project.",
-  :fn => lambda { |args| run_cloud_migrations(args) }
+  :fn => lambda { |*args| run_cloud_migrations(*args) }
 })
 
 Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
-  :fn => lambda { |args| connect_to_cloud_db(args) }
+  :fn => lambda { |*args| connect_to_cloud_db(*args) }
 })

@@ -1,13 +1,9 @@
-require "optparse"
-require_relative "download-swagger-codegen-cli"
-require_relative "utils/common"
+# UI project management commands and command-line flag definitions.
 
-def ensure_git_hooks()
-  common = Common.new
-  unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
-    common.run_inline %W{git config core.hooksPath hooks}
-  end
-end
+require "optparse"
+require_relative "../../libproject/utils/common"
+require_relative "../../libproject/workbench"
+require_relative "../../libproject/swagger"
 
 def install_dependencies()
   common = Common.new
@@ -20,9 +16,7 @@ def swagger_regen()
   common = Common.new
   common.docker.requires_docker
 
-  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
-    download_swagger_codegen_cli
-  end
+  Workbench::Swagger.download_swagger_codegen_cli
 
   common.run_inline %W{docker-compose run --rm ui npm run codegen}
 end
@@ -54,13 +48,7 @@ def dev_up(*args)
 
   options = DevUpOptions.new.parse(args)
 
-  ensure_git_hooks
-
   install_dependencies
-
-  unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
-    download_swagger_codegen_cli
-  end
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
@@ -71,10 +59,6 @@ def dev_up(*args)
   common.status "in a browser to view/run tests."
 
   common.run_inline %W{docker-compose run --rm --service-ports ui}
-end
-
-def clean_git_hooks()
-  common.run_inline %W{find ../.git/hooks -type l -delete}
 end
 
 def rebuild_image()

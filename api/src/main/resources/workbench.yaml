@@ -443,6 +443,9 @@ definitions:
       name:
         type: string
       criteria:
+        description: >
+          Internal representation of the cohort definition. Clients should not depend directly
+          on this, but instead call client functions to issue a SQL query for the cohort.
         type: string
       type:
         type: string
