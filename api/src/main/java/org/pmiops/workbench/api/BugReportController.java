@@ -31,6 +31,7 @@ public class BugReportController implements BugsApiDelegate {
     Session session = Session.getDefaultInstance(props, null);
     try {
       Message msg = new MimeMessage(session);
+      // To test the bug reporting functionality, change the recipient email to your email rather than the group.
       msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
