@@ -30,7 +30,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     "order by id asc";
 
     @Override
-    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, String parentId) {
+    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
         QueryResult result = getQueryResult(type, parentId);
 
@@ -53,13 +53,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.ok(criteriaResponse);
     }
 
-    protected QueryResult getQueryResult(String type, String parentId) {
+    protected QueryResult getQueryResult(String type, Long parentId) {
         BigQuery bigquery =
                 new BigQueryOptions.DefaultBigqueryFactory().create(BigQueryOptions.getDefaultInstance());
 
         QueryRequest queryRequest =
                 QueryRequest.newBuilder(getQueryString(type))
-                        .addNamedParameter("parentId", QueryParameterValue.int64(new Integer(parentId)))
+                        .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
                         .setUseLegacySql(false)
                         .build();
 
