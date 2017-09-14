@@ -344,7 +344,8 @@ paths:
                 description: the specific type of criteria to get
               - in: path
                 name: parentId
-                type: string
+                type: integer
+                format: int64
                 required: true
                 description: fetch children of parentId
       responses:

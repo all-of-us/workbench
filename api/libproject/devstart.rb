@@ -3,6 +3,7 @@ require "io/console"
 require "json"
 require "optparse"
 require "tempfile"
+require "fileutils"
 
 class ProjectAndAccountOptions
   attr_accessor :project
@@ -54,7 +55,9 @@ def dev_up(*args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+  at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+    FileUtils.cp(creds_file, "sa-key.json")
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
