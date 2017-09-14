@@ -1,4 +1,7 @@
-export class Criteria {
+import { Criteria } from 'generated';
+import { SearchParameter } from './search-parameter';
+
+export class SearchCriteria implements Criteria {
   constructor(public id = 0,
               public name = '',
               public type = '',
@@ -6,7 +9,6 @@ export class Criteria {
               public count = 0,
               public group = false,
               public selectable = false,
-              public hasChildren = false,
               public domainId = '',
-              public children = []) {}
+              public searchParameters: SearchParameter[] = []) {}
 }

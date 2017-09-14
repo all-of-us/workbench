@@ -4,7 +4,7 @@
 
 import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
 import { Wizard } from 'clarity-angular/wizard/wizard';
-import { SearchGroup, SearchResult, Criteria, Modifier, SearchRequest } from '../model';
+import { SearchGroup, SearchResult, SearchCriteria, Modifier, SearchRequest } from '../model';
 import { BroadcastService, SearchService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -21,7 +21,7 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   @ViewChild('wizard') wizard: Wizard;
   private selectedSearchGroup: SearchGroup;
   private selectedSearchResult: SearchResult;
-  private criteriaList: Criteria[] = [];
+  private criteriaList: SearchCriteria[] = [];
   private modifierList: Modifier[] = [];
   criteriaType: string;
   wizardModalRef: ComponentRef<WizardModalComponent>;

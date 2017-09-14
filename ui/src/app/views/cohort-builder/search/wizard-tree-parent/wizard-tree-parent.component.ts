@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { BroadcastService } from '../service';
-import { SearchParameter } from '../model';
+import { SearchParameter, SearchCriteria } from '../model';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/mergeMap';
 import { CohortBuilderService } from 'generated';
@@ -33,8 +33,8 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
       });
   }
 
-  public selectCriteria(node: any): void {
-    node.values.push(new SearchParameter(node.code, node.domainId));
+  public selectCriteria(node: SearchCriteria): void {
+    node.searchParameters.push(new SearchParameter(node.code, node.domainId));
     this.broadcastService.selectCriteria(node);
   }
 

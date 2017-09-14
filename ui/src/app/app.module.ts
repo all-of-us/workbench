@@ -35,6 +35,7 @@ import { WizardSelectComponent } from 'app/views/cohort-builder/search/wizard-se
 import { WizardModalComponent } from 'app/views/cohort-builder/search/wizard-modal/wizard-modal.component';
 import { WizardTreeParentComponent } from './views/cohort-builder/search/wizard-tree-parent/wizard-tree-parent.component';
 import { WizardTreeChildrenComponent } from './views/cohort-builder/search/wizard-tree-children/wizard-tree-children.component';
+import { WizardCriteriaGroupComponent } from './views/cohort-builder/search/wizard-criteria-group/wizard-criteria-group.component';
 import { BroadcastService, SearchService } from './views/cohort-builder/search/service';
 
 // tslint:enable:max-line-length
@@ -74,6 +75,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WizardModalComponent,
     WizardTreeParentComponent,
     WizardTreeChildrenComponent,
+    WizardCriteriaGroupComponent,
     CohortEditComponent,
     HomePageComponent,
     WorkspaceComponent,

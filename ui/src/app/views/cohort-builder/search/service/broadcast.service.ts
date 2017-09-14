@@ -1,8 +1,7 @@
 import { Injectable, ComponentRef } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { Criteria, SearchGroup, SearchResult, Modifier } from '../model';
-import { SearchRequest } from '../model/search-request';
+import { SearchCriteria, SearchGroup, SearchResult, Modifier } from '../model';
 
 @Injectable()
 export class BroadcastService {
@@ -11,7 +10,7 @@ export class BroadcastService {
    * Represents the selected criteria in the
    * criteria tree.
    */
-  private selectedCriteria = new Subject<Criteria>();
+  private selectedCriteria = new Subject<SearchCriteria>();
 
   /**
    * Represents the selected criteria type.
@@ -48,7 +47,7 @@ export class BroadcastService {
   /**
    * Represents the summary page that needs updating.
    */
-  private summaryCriteriaGroup = new Subject<Criteria[]>();
+  private summaryCriteriaGroup = new Subject<SearchCriteria[]>();
 
   /**
    * Represents the summary page that needs updating.
@@ -114,7 +113,7 @@ export class BroadcastService {
    *
    * @param criteria
    */
-  selectCriteria(criteria: Criteria) {
+  selectCriteria(criteria: SearchCriteria) {
     this.selectedCriteria.next(criteria);
   }
 
@@ -176,7 +175,7 @@ export class BroadcastService {
     this.updatedCharts.next({'gender': gender, 'race': race});
   }
 
-  setSummaryCriteriaGroup(criteriaList: Criteria[]) {
+  setSummaryCriteriaGroup(criteriaList: SearchCriteria[]) {
     this.summaryCriteriaGroup.next(criteriaList);
   }
 
