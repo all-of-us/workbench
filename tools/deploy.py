@@ -49,8 +49,6 @@ def deploy(args):
           args.project,
           '--account',
           args.account,
-          '--version',
-          'brubenst---pr'
         ],
         cwd=paths.get_ui_dir())
   else:
