@@ -34,6 +34,9 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
   }
 
   public selectCriteria(node: SearchCriteria): void {
+    if (!node.searchParameters) {
+      node.searchParameters = [];
+    }
     node.searchParameters.push(new SearchParameter(node.code, node.domainId));
     this.broadcastService.selectCriteria(node);
   }
