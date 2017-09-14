@@ -7,7 +7,6 @@ services:
     volumes:
       - ..:/w:cached
     command: npm start -- --host=0.0.0.0 ${ENV_FLAG}
-    # command: sh
     ports:
       - 4200:4200
   tests:
