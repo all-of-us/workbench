@@ -59,13 +59,13 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   updateSearchResults() {
     this.updateOrCreateSearchResult();
 
-    this.searchGroupSubscription = this.searchService.getResults(
-      new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
-      .subscribe(response => {
-        this.selectedSearchResult.updateWithResponse(response);
-        this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
-        this.wizardModalRef.destroy();
-      });
+    // this.searchGroupSubscription = this.searchService.getResults(
+    //   new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
+    //   .subscribe(response => {
+    //     this.selectedSearchResult.updateWithResponse(response);
+    //     this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
+    //     this.wizardModalRef.destroy();
+    //   });
   }
 
   updateOrCreateSearchResult() {
