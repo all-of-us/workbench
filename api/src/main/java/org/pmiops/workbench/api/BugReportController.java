@@ -31,8 +31,8 @@ public class BugReportController implements BugsApiDelegate {
     Session session = Session.getDefaultInstance(props, null);
     try {
       Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress("all-of-us-research-tools@googlegroups.com"));
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("brubenst@broadinstitute.org", "My Email"));
+      msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
