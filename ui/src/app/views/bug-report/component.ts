@@ -43,11 +43,6 @@ export class BugReportComponent implements OnInit {
     //   })
     this.bugReport.shortDescription = this.shortDescription;
     this.bugReport.reproSteps = this.reproSteps;
-    // TODO: Handle error reporting error.
     this.bugsService.sendBug(this.bugReport).subscribe((bugReport: BugReport) => {});
-
-    console.log(this.shortDescription);
-    console.log(this.reproSteps);
-
   }
 }

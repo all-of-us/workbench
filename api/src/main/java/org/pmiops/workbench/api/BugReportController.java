@@ -37,8 +37,6 @@ public class BugReportController implements BugsApiDelegate {
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
-      System.out.println("[AofU Bug Report]: " + bugReport.getShortDescription());
-      System.out.println(bugReport.getReproSteps());
     } catch (MessagingException e) {
       throw new RuntimeException(e.toString());
     } catch (UnsupportedEncodingException e) {
