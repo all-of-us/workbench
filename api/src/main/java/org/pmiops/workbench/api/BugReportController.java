@@ -26,7 +26,7 @@ public class BugReportController implements BugsApiDelegate {
 
 
   @Override
-  public ResponseEntity<BugReport> sendBug(BugReport bugReport) {
+  public ResponseEntity<BugReport> sendBugReport(BugReport bugReport) {
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
     try {
@@ -38,9 +38,9 @@ public class BugReportController implements BugsApiDelegate {
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
     } catch (MessagingException e) {
-      throw new RuntimeException(e.toString());
+      throw new RuntimeException(e);
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e.toString());
+      throw new RuntimeException(e);
     }
 
     return ResponseEntity.ok(bugReport);

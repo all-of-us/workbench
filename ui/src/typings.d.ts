@@ -1,8 +1,3 @@
-// import * as domtoimage from 'dom-to-image';
-
-
-// declare const domtoimage: any;
-
 /* SystemJS module definition */
 declare var module: NodeModule;
 interface NodeModule {

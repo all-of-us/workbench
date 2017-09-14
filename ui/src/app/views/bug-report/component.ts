@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {BugsService} from 'generated';
 import {BugReport} from 'generated';
-// import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-bug-report',
@@ -28,19 +27,6 @@ export class BugReportComponent implements OnInit {
 
   send() {
     this.reporting = false;
-    // let root = document.getElementById('body');
-    // console.log(root);
-    // console.log(domtoimage)
-    // console.log(domtoimage.toPng(root))
-    // domtoimage.toSvg(document.getElementById('body'), {quality: 0.95})
-    //   .then(function (dataUrl : any) {
-    //     var link = document.createElement('a');
-    //     link.download = 'my-image-name.svg';
-    //     link.href = dataUrl;
-    //     link.click();
-    //   }).catch(function(error:any){
-    //     console.error("error", error);
-    //   })
     this.bugReport.shortDescription = this.shortDescription;
     this.bugReport.reproSteps = this.reproSteps;
     this.bugsService.sendBug(this.bugReport).subscribe((bugReport: BugReport) => {});

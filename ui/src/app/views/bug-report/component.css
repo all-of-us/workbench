@@ -9,5 +9,9 @@
 }
 
 .form-section {
-  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.form-section:first-child {
+  margin-top: 0;
 }

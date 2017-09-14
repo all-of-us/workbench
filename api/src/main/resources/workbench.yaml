@@ -42,12 +42,12 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /api/v1/sendBug:
+  /api/v1/sendBugReport:
     post:
       tags:
         - bugs
       description: Sends an email to developers about a user reported bug
-      operationId: "sendBug"
+      operationId: "sendBugReport"
       parameters:
         - in: body
           name: bugReport
@@ -85,7 +85,7 @@ paths:
     get:
       tags:
         - Profile
-      operationId: getBillingProjects
+      operationId: "getBillingProjects"
       summary: List billing projects for a user
       responses:
         200:
