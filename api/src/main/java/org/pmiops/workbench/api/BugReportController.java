@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.model.BugReport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,16 @@ public class BugReportController implements BugReportApiDelegate {
     try {
       Message msg = new MimeMessage(session);
       // To test the bug reporting functionality, change the recipient email to your email rather than the group.
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
       msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
     } catch (MessagingException e) {
-      throw new RuntimeException(e);
+      throw new EmailException(e);
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+      throw new EmailException(e);
     }
 
     return ResponseEntity.ok(bugReport);
