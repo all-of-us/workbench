@@ -23,8 +23,9 @@ setup(
     long_description=readme_contents,
     url='https://github.com/all-of-us/workbench',
 
-    # These packages may be imported after the egg is installed.
-    packages=['aou_workbench_client'],
+    # These packages may be imported after the egg is installed. (We want all Python packages
+    # rooted under client/py, so we use automatic discovery.)
+    packages=setuptools.find_packages(),
 
     install_requires=requirements_list,
 )
