@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class BugReportController implements BugsApiDelegate {
+public class BugReportController implements BugReportApiDelegate {
 
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
 

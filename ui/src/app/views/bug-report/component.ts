@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {BugsService} from 'generated';
+import {BugReportService} from 'generated';
 import {BugReport} from 'generated';
 
 @Component({
@@ -13,7 +13,7 @@ export class BugReportComponent implements OnInit {
   reproSteps: string;
   bugReport: BugReport = {shortDescription: '', reproSteps: ''};
   constructor(
-    private bugsService: BugsService
+    private bugReportService: BugReportService
   ) {}
 
   ngOnInit() {
@@ -29,6 +29,6 @@ export class BugReportComponent implements OnInit {
     this.reporting = false;
     this.bugReport.shortDescription = this.shortDescription;
     this.bugReport.reproSteps = this.reproSteps;
-    this.bugsService.sendBug(this.bugReport).subscribe((bugReport: BugReport) => {});
+    this.bugReportService.sendBugReport(this.bugReport).subscribe((bugReport: BugReport) => {});
   }
 }
