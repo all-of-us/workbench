@@ -18,6 +18,7 @@ def swagger_regen()
   FileUtils.remove_dir('py/tmp')
   # TODO(markfickett) Automatically check out generated-py-client when running the above.
   common.status "Only commit generated files on the generated-py-client branch."
+  common.status "Publish a version with `git tag pyclient-vN-N-rcN` and `git push --tags`."
 end
 
 Common.register_command({
