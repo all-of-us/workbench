@@ -20,6 +20,9 @@ setup(
     # This is what people 'pip install'.
     name='aou-workbench-client',
 
+    # TODO(markfickett) Provide a version string here. Automatically bump when publishing (maybe
+    # from swagger-regen).
+
     long_description=readme_contents,
     url='https://github.com/all-of-us/workbench',
 
