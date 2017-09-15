@@ -39,11 +39,13 @@ public class FireCloudServiceImplTest {
     service.isRequesterEnabledInFirecloud();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_enabledNull() throws ApiException {
     when(profileApi.me()).thenReturn(new Me());
     assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_enabledNoFlags() throws ApiException {
     Me me = new Me();
     me.setEnabled(new Enabled());
@@ -51,6 +53,7 @@ public class FireCloudServiceImplTest {
     assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_noLdap() throws ApiException {
     Me me = new Me();
     Enabled enabled = new Enabled();
@@ -61,6 +64,7 @@ public class FireCloudServiceImplTest {
     assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_noGoogle() throws ApiException {
     Me me = new Me();
     Enabled enabled = new Enabled();
@@ -71,6 +75,7 @@ public class FireCloudServiceImplTest {
     assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_noAllUsers() throws ApiException {
     Me me = new Me();
     Enabled enabled = new Enabled();
@@ -78,9 +83,10 @@ public class FireCloudServiceImplTest {
     enabled.setLdap(true);
     me.setEnabled(enabled);
     when(profileApi.me()).thenReturn(me);
-    assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
+    assertThat(service.isRequesterEnabledInFirecloud()).isTrue();
   }
 
+  @Test
   public void testIsRequesterEnabledInFirecloud_all() throws ApiException {
     Me me = new Me();
     Enabled enabled = new Enabled();
