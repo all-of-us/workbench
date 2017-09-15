@@ -7,7 +7,6 @@ def swagger_regen()
   Workbench::Swagger.download_swagger_codegen_cli
 
   common = Common.new
-  #check out py-client branch
   common.run_inline %W{
       java -jar #{Workbench::Swagger::SWAGGER_CODEGEN_CLI_JAR}
       generate --lang python --input-spec #{Workbench::Swagger::SWAGGER_SPEC} --output py/tmp}
@@ -17,6 +16,8 @@ def swagger_regen()
   FileUtils.mv('py/tmp/README.md', 'py/README.swagger.md', move_opts)
   FileUtils.mv('py/tmp/requirements.txt', 'py/swagger-requirements.txt', move_opts)
   FileUtils.remove_dir('py/tmp')
+  # TODO(markfickett) Automatically check out generated-py-client when running the above.
+  common.status "Only commit generated files on the generated-py-client branch."
 end
 
 Common.register_command({
