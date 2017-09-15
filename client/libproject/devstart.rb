@@ -11,10 +11,11 @@ def swagger_regen()
   common.run_inline %W{
       java -jar #{Workbench::Swagger::SWAGGER_CODEGEN_CLI_JAR}
       generate --lang python --input-spec #{Workbench::Swagger::SWAGGER_SPEC} --output py/tmp}
-  FileUtils.mv('py/tmp/swagger_client', 'py/aou_workbench_client/')
-  FileUtils.mv('py/tmp/docs', 'py/swagger_docs')
-  FileUtils.mv('py/tmp/README.md', 'py/README.swagger.md')
-  FileUtils.mv('py/tmp/requirements.txt', 'py/swagger-requirements.txt')
+  move_opts = {:force => true, :verbose => true}
+  FileUtils.mv('py/tmp/swagger_client', 'py/aou_workbench_client/', move_opts)
+  FileUtils.mv('py/tmp/docs', 'py/swagger_docs', move_opts)
+  FileUtils.mv('py/tmp/README.md', 'py/README.swagger.md', move_opts)
+  FileUtils.mv('py/tmp/requirements.txt', 'py/swagger-requirements.txt', move_opts)
   FileUtils.remove_dir('py/tmp')
 end
 
