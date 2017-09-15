@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -21,11 +22,16 @@ public class FireCloudConfig {
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
 
+  private static final String[] BILLING_SCOPES = new String[] {
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/cloud-billing"
+  };
+
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient fireCloudApiClient(UserAuthentication userAuthentication) {
     ApiClient apiClient = new ApiClient();
-    log.info("User access token = " + userAuthentication.getCredentials());
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(true);
     return apiClient;
@@ -36,10 +42,10 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient() {
     ApiClient apiClient = new ApiClient();
     try {
-      GoogleCredential credential = GoogleCredential.getApplicationDefault();
+      GoogleCredential credential = GoogleCredential.getApplicationDefault()
+          .createScoped(Arrays.asList(BILLING_SCOPES));
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
-      log.info("Billing access token = " + accessToken);
       apiClient.setAccessToken(accessToken);
       apiClient.setDebugging(true);
     } catch (IOException e) {
