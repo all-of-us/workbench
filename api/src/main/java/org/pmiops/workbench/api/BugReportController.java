@@ -12,8 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.BugReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +39,9 @@ public class BugReportController implements BugReportApiDelegate {
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
     } catch (MessagingException e) {
-      throw new EmailException(e);
+      throw new EmailException("Error sending bug report", e);
     } catch (UnsupportedEncodingException e) {
-      throw new EmailException(e);
+      throw new EmailException("Error sending bug report", e);
     }
 
     return ResponseEntity.ok(bugReport);
