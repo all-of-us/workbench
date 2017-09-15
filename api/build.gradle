@@ -131,7 +131,6 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
-  compile 'com.google.api-client:google-api-client:1.20.0'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
@@ -145,7 +144,6 @@ dependencies {
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
-  testCompile 'com.google.guava:guava:+' // required for com.google.truth:truth
   testCompile 'com.google.truth:truth:+'
   testCompile 'org.springframework.boot:spring-boot-starter-test:+'
   testCompile 'com.h2database:h2:+'
