@@ -33,7 +33,8 @@ public class FireCloudConfig {
   public ApiClient fireCloudApiClient(UserAuthentication userAuthentication) {
     ApiClient apiClient = new ApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient.setDebugging(true);
+    // Uncomment to enable REST API debugging.
+    //apiClient.setDebugging(true);
     return apiClient;
   }
 
@@ -47,7 +48,8 @@ public class FireCloudConfig {
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
       apiClient.setAccessToken(accessToken);
-      apiClient.setDebugging(true);
+      // Uncomment to enable REST API debugging.
+      // apiClient.setDebugging(true);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

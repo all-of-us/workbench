@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class FireCloudServiceImpl implements FireCloudService {
 
   // TODO: put this in a config object in the database
-  private static final String ALL_OF_US_BILLING_ACCOUNT = "all-of-us-broad";
+  private static final String ALL_OF_US_BILLING_ACCOUNT = "billingAccounts/001A68-D1B344-975E93";
 
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
