@@ -1,0 +1,18 @@
+# Workspace
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**id** | **str** |  | [optional] 
+**name** | **str** |  | 
+**namespace** | **str** |  | [optional] 
+**description** | **str** |  | [optional] 
+**cdr_version_id** | **str** |  | [optional] 
+**creator** | **str** |  | [optional] 
+**data_access_level** | **str** |  | [optional] 
+**creation_time** | **datetime** |  | [optional] 
+**last_modified_time** | **datetime** |  | [optional] 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
