@@ -5,13 +5,6 @@ require "optparse"
 require "tempfile"
 require "fileutils"
 
-def ensure_personal_gradle()
-  common = Common.new
-  unless File.exist? "personal.gradle"
-    common.run_inline %W{touch personal.gradle}
-  end
-end
-
 class ProjectAndAccountOptions
   attr_accessor :project
   attr_accessor :account
@@ -53,9 +46,6 @@ def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
 
-  ensure_git_hooks
-  ensure_personal_gradle
-
   account = get_auth_login_account()
   if account == nil
     raise("Please run 'gcloud auth login' before starting the server.")
@@ -79,9 +69,6 @@ end
 def run_tests(*args)
   common = Common.new
   common.docker.requires_docker
-
-  ensure_git_hooks
-  ensure_personal_gradle
 
   common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
 end

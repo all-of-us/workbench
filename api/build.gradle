@@ -161,8 +161,15 @@ dependencies {
 }
 
 test {
-  testLogging {
-    events "passed", "skipped", "failed"
+  def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
+  if (verboseTestLogging == 'yes') {
+    testLogging {
+      events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+  } else {
+    testLogging {
+      events "passed", "skipped", "failed"
+    }
   }
 }
 
@@ -190,5 +197,3 @@ version = '0.1.0'          // Version in generated output
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-apply from: "personal.gradle"
