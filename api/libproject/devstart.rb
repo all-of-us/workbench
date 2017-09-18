@@ -228,6 +228,15 @@ def run_with_cloud_sql_proxy(args, command, proc)
   })
 end
 
+def register_service_account(*args)
+  run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
+    common = Common.new
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+    system("cd ../firecloud-tools &&  ./run.sh " \
+      "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+  })
+end
+
 def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
     do_drop_db(project)
@@ -345,4 +354,10 @@ Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
   :fn => lambda { |*args| connect_to_cloud_db(*args) }
+})
+
+Common.register_command({
+  :invocation => "register-service-account",
+  :description => "Registers a service account with Firecloud; do this once per account we use.",
+  :fn => lambda { |*args| register_service_account(*args) }
 })
