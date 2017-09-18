@@ -31,6 +31,18 @@ services:
     command: wait-for db:3306 -- ./run-migrations.sh
     env_file:
       - db/vars.env
+  config:
+    build:
+     context: ./src/dev/server
+    depends_on:
+      - db-migration
+    working_dir: /w/tools
+    volumes:
+      - gradle-cache:/root/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ../gradlew loadConfig
+    env_file:
+      - db/vars.env
 volumes:
   db:
   gradle-cache:

@@ -259,6 +259,16 @@ def connect_to_cloud_db(*args)
   })
 end
 
+def update_cloud_config(*args)
+  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
+    read_db_vars(project)
+    ENV["DB_PORT"] = "3307"
+    unless system("cd tools && ../gradlew --info loadConfig && cd ..")
+        raise("Error updating configuration. Exiting.")
+    end
+  })
+end
+
 def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
@@ -374,4 +384,10 @@ Common.register_command({
   :invocation => "register-service-account",
   :description => "Registers a service account with Firecloud; do this once per account we use.",
   :fn => lambda { |*args| register_service_account(*args) }
+})
+
+Common.register_command({
+  :invocation => "update-cloud-config",
+  :description => "Updates configuration in Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| update_cloud_config(*args) }
 })
