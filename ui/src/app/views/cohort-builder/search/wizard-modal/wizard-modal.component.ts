@@ -4,7 +4,7 @@
 
 import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
 import { Wizard } from 'clarity-angular/wizard/wizard';
-import { SearchGroup, SearchResult, Criteria, Modifier, SearchRequest } from '../model';
+import { SearchGroup, SearchResult, SearchCriteria, Modifier, SearchRequest } from '../model';
 import { BroadcastService, SearchService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -21,7 +21,7 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   @ViewChild('wizard') wizard: Wizard;
   private selectedSearchGroup: SearchGroup;
   private selectedSearchResult: SearchResult;
-  private criteriaList: Criteria[] = [];
+  private criteriaList: SearchCriteria[] = [];
   private modifierList: Modifier[] = [];
   criteriaType: string;
   wizardModalRef: ComponentRef<WizardModalComponent>;
@@ -59,13 +59,15 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   updateSearchResults() {
     this.updateOrCreateSearchResult();
 
-    this.searchGroupSubscription = this.searchService.getResults(
-      new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
-      .subscribe(response => {
-        this.selectedSearchResult.updateWithResponse(response);
-        this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
-        this.wizardModalRef.destroy();
-      });
+    // TODO: fix this when implementing this story
+    // https://precisionmedicineinitiative.atlassian.net/projects/CB/issues/CB-15
+    // this.searchGroupSubscription = this.searchService.getResults(
+    //   new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
+    //   .subscribe(response => {
+    //     this.selectedSearchResult.updateWithResponse(response);
+    //     this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
+    //     this.wizardModalRef.destroy();
+    //   });
   }
 
   updateOrCreateSearchResult() {

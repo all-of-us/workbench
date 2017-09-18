@@ -1,4 +1,4 @@
-import { Criteria, Modifier, Subject, SearchParameter } from './';
+import { SearchCriteria, Modifier, Subject, SearchParameter } from './';
 import { SearchResponse } from './search-response';
 
 export class SearchResult {
@@ -8,21 +8,21 @@ export class SearchResult {
   searchType: string;
   count = 0;
   values: SearchParameter[] = [];
-  criteriaList: Criteria[] = [];
+  criteriaList: SearchCriteria[] = [];
   modifierList: Modifier[] = [];
   resultSet: Subject[] = [];
 
   constructor()
 
-  constructor(description: string, criteriaList: Criteria[], modifierList: Modifier[])
+  constructor(description: string, criteriaList: SearchCriteria[], modifierList: Modifier[])
 
-  constructor(description?: string, criteriaList?: Criteria[], modifierList?: Modifier[]) {
+  constructor(description?: string, criteriaList?: SearchCriteria[], modifierList?: Modifier[]) {
     if (description && criteriaList && modifierList) {
       this.update(description, criteriaList, modifierList);
     }
   }
 
-  update(description: string, criteriaList: Criteria[], modifierList: Modifier[]) {
+  update(description: string, criteriaList: SearchCriteria[], modifierList: Modifier[]) {
     this.description = description;
     criteriaList ? this.criteriaList = criteriaList : this.criteriaList = [];
     modifierList ? this.modifierList = modifierList : this.modifierList = [];
@@ -39,7 +39,7 @@ export class SearchResult {
     this.count = response.subjectList.length;
   }
 
-  displayValues(): string[] {
+  displayValues(): string {
     let displayValues;
     for (const value of this.values) {
       if (displayValues) {

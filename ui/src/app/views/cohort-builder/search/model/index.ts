@@ -1,5 +1,5 @@
 export * from './search-parameter';
-export * from './criteria';
+export * from './search-criteria';
 export * from './criteria-type';
 export * from './modifier';
 export * from './search-group';

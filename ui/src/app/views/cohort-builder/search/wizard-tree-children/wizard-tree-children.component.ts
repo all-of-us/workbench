@@ -2,35 +2,33 @@ import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular
 import { BroadcastService } from '../service';
 import { SearchParameter, SearchCriteria } from '../model';
 import { Subscription } from 'rxjs/Subscription';
-import 'rxjs/add/operator/mergeMap';
 import { CohortBuilderService } from 'generated';
 import { Criteria } from 'generated';
 
 @Component({
-  selector: 'app-wizard-tree-parent',
-  templateUrl: 'wizard-tree-parent.component.html',
-  styleUrls: ['wizard-tree-parent.component.css'],
+  selector: 'app-wizard-tree-children',
+  templateUrl: 'wizard-tree-children.component.html',
+  styleUrls: ['wizard-tree-children.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class WizardTreeParentComponent implements OnInit, OnDestroy {
+export class WizardTreeChildrenComponent implements OnInit, OnDestroy {
 
-  nodes: Criteria[];
-  private subscription: Subscription;
+  @Input() node: Criteria;
   loading: boolean;
+  nodes: Criteria[] = [];
+  subscription: Subscription;
 
   constructor(private cohortBuilderService: CohortBuilderService,
-              private broadcastService: BroadcastService) {}
+              private broadcastService: BroadcastService) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loading = true;
-    this.subscription =
-      this.broadcastService.selectedCriteriaType$
-      .mergeMap(criteriaType => this.cohortBuilderService.getCriteriaByTypeAndParentId(
-          criteriaType, 0))
-      .subscribe(nodes => {
-        this.nodes = nodes.items;
-        this.loading = false;
-      });
+    this.subscription = this.cohortBuilderService.getCriteriaByTypeAndParentId(
+        this.node.type.toLocaleLowerCase(), this.node.id)
+        .subscribe(nodes => {
+          this.nodes = nodes.items;
+          this.loading = false;
+        });
   }
 
   public selectCriteria(node: SearchCriteria): void {
@@ -46,5 +44,3 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
   }
 
 }
-
-

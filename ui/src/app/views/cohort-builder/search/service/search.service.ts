@@ -1,7 +1,7 @@
 import { Injectable, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
-import { Criteria, CriteriaType, SearchRequest, SearchResponse } from '../model';
+import { SearchCriteria, CriteriaType, SearchRequest, SearchResponse } from '../model';
 import { Http } from '@angular/http';
 
 const CRITERIA: CriteriaType[] = [
@@ -55,16 +55,6 @@ export class SearchService {
 
   getDaysOrYearsSelectList(): string[] {
     return DAYS_OR_YEARS;
-  }
-
-  getParentNodes(type: string): Observable<Criteria[]> {
-    return this.http.get('/api/' + type.toLowerCase() + '/0')
-      .map(res => res.json());
-  }
-
-  getChildNodes(criteria: any): Observable<Criteria[]> {
-    return this.http.get('/api/' + criteria.type.toLowerCase() + '/' + criteria.id)
-      .map(res => res.json());
   }
 
   getResults(searchRequest: SearchRequest): Observable<SearchResponse> {
