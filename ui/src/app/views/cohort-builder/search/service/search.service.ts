@@ -1,7 +1,7 @@
 import { Injectable, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
-import { SearchCriteria, CriteriaType, SearchRequest, SearchResponse } from '../model';
+import { CriteriaType, SearchRequest, SearchResponse } from '../model';
 import { Http } from '@angular/http';
 
 const CRITERIA: CriteriaType[] = [

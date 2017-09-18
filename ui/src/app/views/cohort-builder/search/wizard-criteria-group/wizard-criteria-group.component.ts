@@ -3,8 +3,8 @@ import {
   ViewEncapsulation, Input, ViewChild
 } from '@angular/core';
 import { BroadcastService } from '../service';
-import { SearchCriteria } from '../model';
 import { Subscription } from 'rxjs/Subscription';
+import { Criteria } from '../../../../../generated/model/criteria';
 
 @Component({
   selector: 'app-wizard-criteria-group',
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs/Subscription';
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
-  criteriaList: SearchCriteria[] = [];
+  criteriaList: Criteria[] = [];
   criteriaType: string;
   @ViewChild('groupDiv') groupDiv: any;
   private criteriaSubscription: Subscription;
@@ -43,7 +43,7 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
     return this.criteriaType;
   }
 
-  private updateCriteriaList(criteria: SearchCriteria) {
+  private updateCriteriaList(criteria: Criteria) {
     const index: number = this.criteriaList.indexOf(criteria);
     if (index !== -1) {
       this.criteriaList[index] = criteria;
@@ -58,7 +58,7 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
     this.groupDiv.scrollTop = this.groupDiv.scrollHeight;
   }
 
-  removeCriteria(criteria: SearchCriteria) {
+  removeCriteria(criteria: Criteria) {
     const index: number = this.criteriaList.indexOf(criteria);
     if (index !== -1) {
       this.criteriaList.splice(index, 1);
