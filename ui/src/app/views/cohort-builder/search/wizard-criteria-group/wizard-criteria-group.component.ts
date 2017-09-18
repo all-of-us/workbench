@@ -36,8 +36,8 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
   public getTypeDescription(): string {
     if (this.criteriaType === 'icd9'
-    || this.criteriaType === 'icd10'
-    || this.criteriaType === 'cpt') {
+        || this.criteriaType === 'icd10'
+        || this.criteriaType === 'cpt') {
       return this.criteriaType.toUpperCase() + ' Codes';
     }
     return this.criteriaType;
