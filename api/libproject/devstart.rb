@@ -50,6 +50,7 @@ def dev_up(*args)
   if account == nil
     raise("Please run 'gcloud auth login' before starting the server.")
   end
+
   at_exit { common.run_inline %W{docker-compose down} }
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
@@ -63,6 +64,13 @@ def dev_up(*args)
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   })
+end
+
+def run_tests(*args)
+  common = Common.new
+  common.docker.requires_docker
+
+  common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
 end
 
 def connect_to_db(*args)
@@ -310,6 +318,12 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment.",
   :fn => lambda { |*args| dev_up(*args) }
+})
+
+Common.register_command({
+  :invocation => "test",
+  :description => "Runs tests.",
+  :fn => lambda { |*args| run_tests(*args) }
 })
 
 Common.register_command({

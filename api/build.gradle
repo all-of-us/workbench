@@ -131,7 +131,9 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
+  compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
   compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
   compile 'com.google.code.gson:gson:+'
@@ -159,8 +161,15 @@ dependencies {
 }
 
 test {
-  testLogging {
-    events "passed", "skipped", "failed", "standardOut", "standardError"
+  def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
+  if (verboseTestLogging == 'yes') {
+    testLogging {
+      events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+  } else {
+    testLogging {
+      events "passed", "skipped", "failed"
+    }
   }
 }
 

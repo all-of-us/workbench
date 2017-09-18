@@ -20,7 +20,7 @@ jobs:
           - api-cache-
       - run:
           working_directory: ~/workbench/api
-          command: gradle test
+          command: gradle test --project-prop verboseTestLogging=yes
       - save_cache:
           paths:
             - ~/.gradle
