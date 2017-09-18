@@ -354,6 +354,25 @@ paths:
                 schema:
                   $ref: "#/definitions/CriteriaListResponse"
 
+  /api/v1/cohort-builder/search:
+    post:
+      tags:
+        - cohortBuilder
+      description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
+      operationId: "searchSubjects"
+      parameters:
+        - in: body
+          name: request
+          description: object of parameters by which to perform the search
+          schema:
+            $ref: "#/definitions/SearchRequest"
+          required: true
+      responses:
+        "200":
+          description: A collection of subjects
+          schema:
+            $ref: "#/definitions/SubjectListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -579,4 +598,68 @@ definitions:
         type: boolean
       domainId:
         description: clue to determine which tables to search
+        type: string
+
+  SearchRequest:
+    type: object
+    required:
+      - type
+      - searchParameters
+      - modifiers
+    properties:
+      type:
+        description: type of criteria
+        type: string
+      searchParameters:
+        description: criteria by category code
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchParameter"
+      modifiers:
+        description: criteria by operation or predicate
+        type: "array"
+        items:
+          $ref: "#/definitions/Modifier"
+
+  SearchParameter:
+    type: object
+    required:
+      - code
+      - domainId
+    properties:
+      code:
+        type: string
+      domainId:
+        type: string
+
+  Modifier:
+    type: object
+    required:
+      - name
+      - operator
+      - values
+    properties:
+      name:
+        type: string
+      operator:
+        type: string
+      operands:
+        type: "array"
+        items:
+          type: string
+
+  SubjectListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Subject"
+
+  Subject:
+    type: object
+    properties:
+      val:
         type: string
