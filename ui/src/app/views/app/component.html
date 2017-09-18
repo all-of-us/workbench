@@ -1,6 +1,6 @@
 <ng-template *ngIf="(user | async).isSignedIn; then signedIn else notSignedIn"></ng-template>
 <ng-template #logoImages>
-  <a routerLink="/" style="text-decoration: none">
+  <a class="image-link-wrapper" routerLink="/">
     <img class="main-logo" src="assets/images/all-of-us-logo.svg" alt="All of Us"
     style="height: 100%;">
   </a>

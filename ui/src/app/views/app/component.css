@@ -33,6 +33,6 @@
   transition: box-shadow 0.05s ease-in;
 }
 
-.main-logo:hover {
-  cursor: pointer;
+.image-link-wrapper {
+  text-decoration: none;
 }
