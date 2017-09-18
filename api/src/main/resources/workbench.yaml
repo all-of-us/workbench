@@ -35,19 +35,38 @@ paths:
       tags:
         - profile
       description: Returns the user's profile information
-      operationId: "getMe"
+      operationId: getMe
       responses:
         "200":
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/sendBugReport:
+    post:
+      tags:
+        - bugReport
+      description: Sends an email to developers about a user reported bug
+      operationId: sendBugReport
+      parameters:
+        - in: body
+          name: bugReport
+          description: user reported bug
+          required: true
+          schema:
+            $ref: "#/definitions/BugReport"
+      responses:
+        "200":
+          description: Success message
+          schema:
+            $ref: "#/definitions/BugReport"
+
   /api/v1/register:
     post:
       tags:
         - profile
       description: Registers a profile for the user in AllOfUs and Firecloud
-      operationId: "register"
+      operationId: register
       parameters:
         - in: body
           name: registrationRequest
@@ -87,7 +106,7 @@ paths:
       tags:
         - workspaces
       description: Returns all workspaces that a user has access to
-      operationId: "getWorkspaces"
+      operationId: getWorkspaces
       responses:
         "200":
           description: A list of workspace definitions.
@@ -97,7 +116,7 @@ paths:
       tags:
         - workspaces
       description: Creates a workspace
-      operationId: "createWorkspace"
+      operationId: createWorkspace
       parameters:
         - in: body
           name: workspace
@@ -114,7 +133,7 @@ paths:
       tags:
         - workspaces
       description: Returns the workspace definition with the specified ID and namespace
-      operationId: "getWorkspace"
+      operationId: getWorkspace
       parameters:
         - in: path
           name: workspaceNamespace
@@ -137,7 +156,7 @@ paths:
       description: >
         Modifies the workspace definition with the specified ID and namespace;
         fields that are omitted will not be modified
-      operationId: "updateWorkspace"
+      operationId: updateWorkspace
       parameters:
         - in: path
           name: workspaceNamespace
@@ -163,7 +182,7 @@ paths:
       tags:
         - workspaces
       description: Deletes the workspace definition with the specified ID and namespace
-      operationId: "deleteWorkspace"
+      operationId: deleteWorkspace
       parameters:
         - in: path
           name: workspaceNamespace
@@ -367,9 +386,9 @@ definitions:
     enum: &DATA_ACCESS_LEVEL [registered, protected]
 
   WorkspaceListResponse:
-    type: "object"
+    type: object
     required:
-     - "items"
+     - items
     properties:
       items:
         type: "array"
@@ -377,9 +396,9 @@ definitions:
            $ref: "#/definitions/Workspace"
 
   Workspace:
-    type: "object"
+    type: object
     required:
-     - "name"
+     - name
     properties:
       id:
         type: string
@@ -404,9 +423,9 @@ definitions:
         format: date-time
 
   CohortListResponse:
-    type: "object"
+    type: object
     required:
-     - "items"
+     - items
     properties:
       items:
         type: "array"
@@ -414,11 +433,11 @@ definitions:
            $ref: "#/definitions/Cohort"
 
   Cohort:
-    type: "object"
+    type: object
     required:
-      - "name"
-      - "criteria"
-      - "type"
+      - name
+      - criteria
+      - type
     properties:
       id:
         type: string
@@ -442,12 +461,25 @@ definitions:
         type: string
         format: date-time
 
-  Profile:
-    type: "object"
+  BugReport:
+    type: object
     required:
-      - "email"
-      - "enabledInFireCloud"
-      - "dataAccessLevel"
+      - shortDescription
+      - reproSteps
+    properties:
+      shortDescription:
+        description: A short description of the bug
+        type: string
+      reproSteps:
+        description: Steps to reproduce the bug
+        type: string
+
+  Profile:
+    type: object
+    required:
+      - email
+      - enabledInFireCloud
+      - dataAccessLevel
     properties:
       email:
         description: email address of the user
@@ -476,12 +508,12 @@ definitions:
         type: string
 
   RegistrationRequest:
-    type: "object"
+    type: object
     required:
-      - "email"
-      - "fullName"
-      - "givenName"
-      - "familyName"
+      - email
+      - fullName
+      - givenName
+      - familyName
     properties:
       email:
         description: email address of the user
@@ -500,9 +532,9 @@ definitions:
         type: string
 
   CriteriaListResponse:
-    type: "object"
+    type: object
     required:
-      - "items"
+      - items
     properties:
       items:
         type: "array"
@@ -510,14 +542,14 @@ definitions:
           $ref: "#/definitions/Criteria"
 
   Criteria:
-    type: "object"
+    type: object
     required:
-      - "id"
-      - "type"
-      - "code"
-      - "name"
-      - "group"
-      - "selectable"
+      - id
+      - type
+      - code
+      - name
+      - group
+      - selectable
     properties:
       id:
         description: id of the criteria

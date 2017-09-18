@@ -13,12 +13,13 @@ import {ClarityModule} from 'clarity-angular';
 
 import {AppRoutingModule} from 'app/app-routing.module';
 import {AppComponent} from 'app/views/app/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {CohortsService, WorkspacesService, Configuration, ConfigurationParameters, CohortBuilderService} from 'generated';
+import {CohortsService, WorkspacesService, BugReportService, Configuration, ConfigurationParameters, CohortBuilderService} from 'generated';
 import {environment} from 'environments/environment';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import { SearchGroupComponent } from 'app/views/cohort-builder/search/search-group/search-group.component';
@@ -49,6 +50,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     });
 }
 
+
+
 @NgModule({
   imports:      [
     AppRoutingModule,
@@ -60,6 +63,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AppComponent,
+    BugReportComponent,
     CohortBuilderComponent,
     SearchGroupComponent,
     SearchResultComponent,
@@ -93,10 +97,11 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspacesService,
     BroadcastService,
     SearchService,
-    CohortBuilderService
+    CohortBuilderService,
+    BugReportService
   ],
 
-  // This specifies the top-level component, to load first.
-  bootstrap: [AppComponent]
+  // This specifies the top-level components, to load first.
+  bootstrap: [AppComponent, BugReportComponent]
 })
 export class AppModule {}
