@@ -1,12 +1,24 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryResponse;
+import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.api.util.SQLGenerator;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.security.auth.Subject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +29,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Autowired
     private SQLGenerator generator;
+
+    @Autowired
+    BigQuery bigquery;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -35,13 +50,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
-        QueryRequest queryRequest = QueryRequest
-                .newBuilder(getQueryString(type))
-                .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
-                .setUseLegacySql(false)
-                .build();
 
-        QueryResult result = executeQuery(queryRequest);
+        QueryResult result = getQueryResult(type, parentId);
 
         Map<String, Integer> rm = getResultMapper(result);
 
@@ -60,6 +70,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
 
         return ResponseEntity.ok(criteriaResponse);
+    }
+
+    protected QueryResult getQueryResult(String type, Long parentId) {
+        QueryRequest queryRequest =
+                QueryRequest.newBuilder(getQueryString(type))
+                        .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
+                        .setUseLegacySql(false)
+                        .build();
     }
 
     @Override
