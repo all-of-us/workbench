@@ -1,6 +1,6 @@
 import unittest
-import aou_workbench_client
-from aou_workbench_client import swagger_client
+import aou_workbench_client  # pylint: disable=unused-import
+from aou_workbench_client import swagger_client  # pylint: disable=unused-import
 
 
 class ModuleTest(unittest.TestCase):
