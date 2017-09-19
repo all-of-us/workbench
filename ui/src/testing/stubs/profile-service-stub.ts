@@ -4,7 +4,7 @@ import {Observable} from 'rxjs/Observable';
 export class ProfileStubVariables {
   static PROFILE_STUB = {
     email: 'testers@researchallofus.org!@#$%^&*()><script>alert("hello");</script>',
-    contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
+    contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
     enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
     dataAccessLevel: Profile.DataAccessLevelEnum.Registered,
