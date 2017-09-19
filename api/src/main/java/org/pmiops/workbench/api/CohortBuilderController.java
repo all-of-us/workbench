@@ -30,6 +30,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Autowired
     private SQLGenerator generator;
 
+    @Value("${bigQuery.projectId}")
+    private String bigQueryProjectId;
+
     @Autowired
     BigQuery bigquery;
 
