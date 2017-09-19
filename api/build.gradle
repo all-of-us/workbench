@@ -6,7 +6,6 @@ def swaggerSourceFile = 'src/main/resources/workbench.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateApi {
-  delete("${projectDir}/$swaggerTargetFolder")
   inputs.file("$projectDir/$swaggerSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -79,6 +78,11 @@ apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 
+configurations {
+  integrationCompile.extendsFrom testCompile
+  integrationRuntime.extendsFrom testRuntime
+}
+
 sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
@@ -100,6 +104,13 @@ sourceSets {
 
     compileClasspath += generated.output
     runtimeClasspath += generated.output
+  }
+  integration {
+    java {
+      compileClasspath += main.output + test.output + generated.output
+      runtimeClasspath += main.output + test.output + generated.output
+      srcDir file('src/integration/java')
+    }
   }
 }
 
@@ -167,7 +178,16 @@ dependencies {
 
 }
 
-test {
+task integration(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.integration.output.classesDirs
+  classpath = sourceSets.integration.runtimeClasspath
+  // Option to control size of stack trace:
+  // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
+}
+
+tasks.withType(Test) {
+  outputs.upToDateWhen { false }
   def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
   if (verboseTestLogging == 'yes') {
     testLogging {

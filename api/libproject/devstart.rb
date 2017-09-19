@@ -1,5 +1,6 @@
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
+require_relative "serviceaccounts"
 require "io/console"
 require "json"
 require "optparse"
@@ -66,6 +67,8 @@ end
 
 def run_api(account)
   common = Common.new
+
+  ServiceAccounts.new.maybe_download(:dev, :directory_service)
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
@@ -91,6 +94,14 @@ def run_tests(*args)
   common.docker.requires_docker
 
   common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
+end
+
+def run_integration_tests(*args)
+  common = Common.new
+  common.docker.requires_docker
+
+  ServiceAccounts.new.maybe_download(:dev, :directory_service)
+  common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
 end
 
 def connect_to_db(*args)
@@ -404,6 +415,12 @@ Common.register_command({
   :invocation => "test",
   :description => "Runs tests.",
   :fn => lambda { |*args| run_tests(*args) }
+})
+
+Common.register_command({
+  :invocation => "integration",
+  :description => "Runs integration tests.",
+  :fn => lambda { |*args| run_integration_tests(*args) }
 })
 
 Common.register_command({

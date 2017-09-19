@@ -40,6 +40,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
 
+    if (request.getRequestURI().endsWith("is-username-taken")) {
+      return true;
+    }
+
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {

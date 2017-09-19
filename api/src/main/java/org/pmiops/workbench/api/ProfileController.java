@@ -13,10 +13,12 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
+import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,14 +32,16 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<User> userProvider;
   private final UserDao userDao;
   private final FireCloudService fireCloudService;
+  private final DirectoryService directoryService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
-        FireCloudService fireCloudService) {
+        FireCloudService fireCloudService, DirectoryService directoryService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.fireCloudService = fireCloudService;
+    this.directoryService = directoryService;
   }
 
   @Override
@@ -54,6 +58,12 @@ public class ProfileController implements ProfileApiDelegate {
       log.log(Level.INFO, "Error calling FireCloud", e);
       return ResponseEntity.status(e.getCode()).build();
     }
+  }
+
+  @Override
+  public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
+    return ResponseEntity.ok(
+        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
   }
 
   @Override
