@@ -12,6 +12,6 @@ public class DataSetId {
     private String dataSetId;
 
     public String getDataSetId() {
-        return this.dataSetId == null ? UUID.randomUUID().toString() : this.dataSetId;
+        return this.dataSetId == null ? UUID.randomUUID().toString().replaceAll("-", "_") : this.dataSetId;
     }
 }

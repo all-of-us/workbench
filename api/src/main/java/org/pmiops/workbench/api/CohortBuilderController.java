@@ -36,7 +36,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     "is_group,\n" +
                     "is_selectable,\n" +
                     "domain_id\n" +
-                    "FROM `pmi-drc-api-test.synpuf.%s`\n" +
+                    "FROM `%s.%s.%s`\n" +
                     "WHERE parent_id = @parentId\n" +
                     "order by id asc";
 
@@ -101,6 +101,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected String getQueryString(String type) {
-        return String.format(CRITERIA_QUERY, type + "_criteria");
+        return String.format(CRITERIA_QUERY, bigQueryProjectId, dataSetId, type + "_criteria");
+    }
+
+    public String getDataSetId() {
+        return dataSetId;
+    }
+
+    public String getBigQueryProjectId() {
+        return bigQueryProjectId;
     }
 }
