@@ -56,6 +56,8 @@ def dev_up(*args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+  common.status "Updating configuration..."
+  common.run_inline %W{docker-compose run update-config}
   at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
     FileUtils.cp(creds_file, "sa-key.json")

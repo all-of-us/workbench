@@ -16,6 +16,7 @@ task loadConfig(type: JavaExec) {
       'spring.datasource.username': '${workbench_db_user}',
       'spring.datasource.password': '${workbench_db_password}'
     ]
+    args config_file
 }
 
 
@@ -48,6 +49,7 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     compile 'joda-time:joda-time:+'
+    compile 'com.github.fge:json-patch:+'
     compile 'io.swagger:swagger-annotations:1.5.9'
     compile 'com.google.cloud.sql:mysql-socket-factory:+'
     compile rootProject
