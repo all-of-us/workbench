@@ -34,9 +34,12 @@ public class BugReportController implements BugReportApiDelegate {
       // To test the bug reporting functionality, change the recipient email to your email rather than the group.
       // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
       msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
+      InternetAddress[] replyTo = new InternetAddress[1];
+      replyTo[0] = new InternetAddress(bugReport.getContactEmail());
+      msg.setReplyTo(replyTo);
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("brubenst@broadinstitute.org", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
-      msg.setText(bugReport.getReproSteps() + "\n\n\nTo contact the reporter of this bug, email:\n" + bugReport.getContactEmail());
+      msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
     } catch (MessagingException e) {
       throw new EmailException("Error sending bug report", e);

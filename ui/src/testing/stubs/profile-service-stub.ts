@@ -1,62 +1,30 @@
 import {Profile} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
-class ProfileStub implements Profile {
-  email: string;
-
-  contactEmail: string;
-
-  enabledInFireCloud: boolean;
-
-  freeTierBillingProjectName: string;
-
-  dataAccessLevel: Profile.DataAccessLevelEnum;
-
-  fullName: string;
-
-  givenName: string;
-
-  familyName: string;
-
-  phoneNumber: string;
-
-  constructor(profile: Profile) {
-    this.email = profile.email;
-    this.contactEmail = profile.contactEmail;
-    this.enabledInFireCloud = profile.enabledInFireCloud;
-    this.freeTierBillingProjectName = profile.freeTierBillingProjectName;
-    this.dataAccessLevel = profile.dataAccessLevel;
-    this.fullName = profile.fullName;
-    this.givenName = profile.givenName;
-    this.familyName = profile.familyName;
-    this.phoneNumber = profile.phoneNumber;
-  }
-}
-
 export class ProfileStubVariables {
   static PROFILE_STUB = {
-    email: 'testers@researchallofus.org',
-    contactEmail: 'tester@mactesterson.edu',
+    email: 'testers@researchallofus.org!@#$%^&*()><script>alert("hello");</script>',
+    contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
     enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
     dataAccessLevel: Profile.DataAccessLevelEnum.Registered,
-    fullName:  'Tester MacTesterson',
-    givenName: 'Tester',
-    familyName: 'MacTesterson',
+    fullName:  'Tester MacTesterson><script>alert("hello");</script>',
+    givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
+    familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999'
   };
 }
 
 export class ProfileServiceStub {
-  public profileStub: ProfileStub;
+  public profile: Profile;
   constructor() {
-    this.profileStub = ProfileStubVariables.PROFILE_STUB;
+    this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
   public getMe(): Observable<Profile> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        observer.next(this.profileStub);
+        observer.next(this.profile);
         observer.complete();
       }, 0);
     });
