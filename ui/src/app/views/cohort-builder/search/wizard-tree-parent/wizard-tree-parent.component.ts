@@ -3,8 +3,7 @@ import { BroadcastService } from '../service';
 import { SearchParameter } from '../model';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/mergeMap';
-import { CohortBuilderService } from 'generated';
-import { Criteria } from 'generated';
+import { CohortBuilderService, Criteria } from 'generated';
 
 @Component({
   selector: 'app-wizard-tree-parent',

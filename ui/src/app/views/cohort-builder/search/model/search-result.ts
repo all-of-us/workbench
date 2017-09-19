@@ -1,6 +1,6 @@
 import { Modifier, Subject, SearchParameter } from './';
 import { SearchResponse } from './search-response';
-import { Criteria } from '../../../../../generated/model/criteria';
+import { Criteria } from 'generated';
 
 export class SearchResult {
 

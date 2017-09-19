@@ -7,7 +7,7 @@ import { Wizard } from 'clarity-angular/wizard/wizard';
 import { SearchGroup, SearchResult, Modifier } from '../model';
 import { BroadcastService, SearchService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
-import { Criteria } from '../../../../../generated/model/criteria';
+import { Criteria } from 'generated';
 
 // tslint:enable:max-line-length
 

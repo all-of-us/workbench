@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { BroadcastService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
-import { Criteria } from '../../../../../generated/model/criteria';
+import { Criteria } from 'generated';
 
 @Component({
   selector: 'app-wizard-criteria-group',
