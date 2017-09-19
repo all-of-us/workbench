@@ -3,8 +3,10 @@ package org.pmiops.workbench.tools;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.diff.JsonDiff;
+import com.google.gson.Gson;
 import java.io.FileInputStream;
 import java.util.logging.Logger;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
 import org.springframework.boot.CommandLineRunner;
@@ -29,6 +31,21 @@ public class ConfigLoader {
       }
       ObjectMapper jackson = new ObjectMapper();
       JsonNode newJson = jackson.readTree(new FileInputStream(args[0]));
+
+      // Make sure the config parses as a WorkbenchConfig, and has the same representation after
+      // being marshalled back to JSON.
+      Gson gson = new Gson();
+      WorkbenchConfig workbenchConfig = gson.fromJson(newJson.toString(), WorkbenchConfig.class);
+      String marshalledJson = gson.toJson(workbenchConfig, WorkbenchConfig.class);
+      log.info("Marshalled JSON = " + marshalledJson);
+      JsonNode marshalledNode = jackson.readTree(marshalledJson);
+      log.info("Marshalled node = " + marshalledNode + ", new JSON = " + newJson);
+      JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
+      if (marshalledDiff.size() > 0) {
+        log.info("Configuration doesn't match WorkbenchConfig format; see diff.");
+        log.info(marshalledDiff.toString());
+        return;
+      }
       Config existingConfig = configDao.findOne(Config.MAIN_CONFIG_ID);
       if (existingConfig == null) {
         log.info("No configuration exists, creating one.");

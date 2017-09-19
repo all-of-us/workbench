@@ -30,11 +30,11 @@ public class FireCloudConfig {
 
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
+  public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    apiClient.setDebugging(workbenchConfig.firecloud.debugging);
+    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     return apiClient;
   }
 
@@ -48,7 +48,7 @@ public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
       apiClient.setAccessToken(accessToken);
-      apiClient.setDebugging(workbenchConfig.firecloud.debugging);
+      apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
