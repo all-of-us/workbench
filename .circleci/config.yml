@@ -80,11 +80,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Lint (Excluding Generated Files)
-          command: TODO pylint
-      - run:
           name: Generate Swagger Python Client
           command: client/project.rb swagger-regen
+      - run:
+          name: Lint
+          command: client/project.rb pylint
       - run:
           name: Test Python Client
           command: client/py/run_tests.py
