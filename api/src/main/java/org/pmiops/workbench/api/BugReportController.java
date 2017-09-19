@@ -36,7 +36,7 @@ public class BugReportController implements BugReportApiDelegate {
       msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
-      msg.setText(bugReport.getReproSteps());
+      msg.setText(bugReport.getReproSteps() + "\n\n\nTo contact the reporter of this bug, email:\n" + bugReport.getContactEmail());
       Transport.send(msg);
     } catch (MessagingException e) {
       throw new EmailException("Error sending bug report", e);

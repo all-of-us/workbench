@@ -19,7 +19,7 @@ import {HomePageComponent} from 'app/views/home-page/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {CohortsService, WorkspacesService, BugReportService, Configuration, ConfigurationParameters, CohortBuilderService} from 'generated';
+import {BugReportService, CohortBuilderService, CohortsService, Configuration, ConfigurationParameters, ProfileService, WorkspacesService} from 'generated';
 import {environment} from 'environments/environment';
 import {CohortBuilderComponent} from 'app/views/cohort-builder/search/cohort-builder/cohort-builder.component';
 import { SearchGroupComponent } from 'app/views/cohort-builder/search/search-group/search-group.component';
@@ -98,7 +98,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BroadcastService,
     SearchService,
     CohortBuilderService,
-    BugReportService
+    BugReportService,
+    ProfileService
   ],
 
   // This specifies the top-level components, to load first.
