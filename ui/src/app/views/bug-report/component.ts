@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {BugReportService} from 'generated';
 import {BugReport} from 'generated';
-import {ProfileService} from 'generated'
+import {ProfileService} from 'generated';
 
 @Component({
   selector: 'app-bug-report',
@@ -28,7 +28,7 @@ export class BugReportComponent implements OnInit {
     this.reporting = true;
     this.shortDescription = '';
     this.reproSteps = '';
-    this.profileService.getMe().subscribe(profile =>{
+    this.profileService.getMe().subscribe(profile => {
       this.contactEmail = profile.contactEmail;
     });
   }

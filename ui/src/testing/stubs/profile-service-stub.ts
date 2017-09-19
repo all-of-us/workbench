@@ -35,16 +35,16 @@ class ProfileStub implements Profile {
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
-    email: 'cool-cat-testers@researchallofus.org',
+    email: 'testers@researchallofus.org',
     contactEmail: 'tester@mactesterson.edu',
     enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
     dataAccessLevel: Profile.DataAccessLevelEnum.Registered,
-    fullName:  "Tester MacTesterson",
+    fullName:  'Tester MacTesterson',
     givenName: 'Tester',
     familyName: 'MacTesterson',
     phoneNumber: '999-999-9999'
-  }
+  };
 }
 
 export class ProfileServiceStub {

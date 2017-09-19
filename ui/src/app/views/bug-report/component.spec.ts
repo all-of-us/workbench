@@ -10,7 +10,7 @@ import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {BugReportService} from 'generated';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {ProfileService} from 'generated'
+import {ProfileService} from 'generated';
 import {ClarityModule} from 'clarity-angular';
 
 class BugReportPage {
@@ -79,7 +79,7 @@ describe('BugReportComponent', () => {
       .toBe(testShortDescription);
     expect(bugReportPage.fixture.componentInstance.bugReport.reproSteps).toBe(testReproSteps);
     expect(bugReportPage.fixture.componentInstance.bugReport.contactEmail)
-      .toBe(ProfileStubVariables.PROFILE_STUB.contactEmail)
+      .toBe(ProfileStubVariables.PROFILE_STUB.contactEmail);
   }));
 
 
