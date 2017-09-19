@@ -16,7 +16,7 @@
         <ng-template #selectable><button type="button" class="btn btn-link btn-sm" (click)="selectCriteria(node)"><clr-icon shape="plus-circle" size="20"></clr-icon></button></ng-template>
       </div>
     </div>
-    <span *ngIf="node.hasChildren">
+    <span *ngIf="node.group">
       <ng-template clrIfExpanded>
         <app-wizard-tree-children [node]="node"></app-wizard-tree-children>
       </ng-template>
