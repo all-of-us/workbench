@@ -31,13 +31,13 @@ public class BugReportController implements BugReportApiDelegate {
     Session session = Session.getDefaultInstance(props, null);
     try {
       Message msg = new MimeMessage(session);
-      // To test the bug reporting functionality, change the recipient email to your email rather than the group.
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
       msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
       InternetAddress[] replyTo = new InternetAddress[1];
       replyTo[0] = new InternetAddress(bugReport.getContactEmail());
       msg.setReplyTo(replyTo);
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("brubenst@broadinstitute.org", "AofU Workbench Engineers"));
+      // To test the bug reporting functionality, change the recipient email to your email rather than the group.
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);
