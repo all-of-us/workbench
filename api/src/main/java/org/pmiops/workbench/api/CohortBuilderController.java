@@ -3,6 +3,8 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.*;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +17,12 @@ import java.util.logging.Logger;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
+
+    @Value("#{dataSetId.getDataSetId()}")
+    private String dataSetId;
+
+    @Autowired
+    BigQuery bigquery;
 
     public static final String CRITERIA_QUERY =
             "SELECT id,\n" +
@@ -54,9 +62,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected QueryResult getQueryResult(String type, Long parentId) {
-        BigQuery bigquery =
-                new BigQueryOptions.DefaultBigqueryFactory().create(BigQueryOptions.getDefaultInstance());
-
         QueryRequest queryRequest =
                 QueryRequest.newBuilder(getQueryString(type))
                         .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
