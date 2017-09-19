@@ -2,7 +2,7 @@
 # Docs/example setup.py: https://github.com/pypa/sampleproject/blob/master/setup.py
 
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 client_dir = os.path.abspath(os.path.dirname(__file__))
@@ -28,7 +28,7 @@ setup(
 
     # These packages may be imported after the egg is installed. (We want all Python packages
     # rooted under client/py, so we use automatic discovery.)
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
 
     install_requires=requirements_list,
 )
