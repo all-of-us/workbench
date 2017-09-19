@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.7
+      - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -33,7 +33,7 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.7
+      - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
     environment: []
     steps:
@@ -70,7 +70,7 @@ jobs:
             fi
   test_client:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.7
+      - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
     environment: []
     steps:
