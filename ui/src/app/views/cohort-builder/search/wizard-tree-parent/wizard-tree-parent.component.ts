@@ -33,7 +33,7 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
   }
 
   public selectCriteria(criteria: Criteria): void {
-    let newCriteria;
+    let newCriteria = criteria;
     if (!criteria['searchParameters']) {
       newCriteria = { searchParameters: [], ...criteria } as Criteria;
     }
