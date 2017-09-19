@@ -1,16 +1,12 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaListResponse;
-import org.pmiops.workbench.model.SubjectListResponse;
-import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.api.util.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 @RestController
@@ -58,7 +54,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
         SubjectListResponse subjects = new SubjectListResponse();
-        // put the subjects in the list and send it back
+        
         return ResponseEntity.ok(subjects);
     }
 
@@ -91,6 +87,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
         return response.getResult();
     }
+
+
 
     protected Map<String, Integer> getResultMapper(QueryResult result) {
         Map<String, Integer> resultMapper = new HashMap<String, Integer>();
