@@ -21,6 +21,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Value("#{dataSetId.getDataSetId()}")
     private String dataSetId;
 
+    @Value("${bigQuery.projectId}")
+    private String bigQueryProjectId;
+
     @Autowired
     BigQuery bigquery;
 

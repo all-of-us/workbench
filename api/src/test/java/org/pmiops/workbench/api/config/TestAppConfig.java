@@ -1,9 +1,8 @@
 package org.pmiops.workbench.api.config;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 
-@Configuration
-@ComponentScan("org.pmiops.workbench.api.*")
+@SpringBootApplication(exclude = LiquibaseAutoConfiguration.class)
 public class TestAppConfig {
 }
