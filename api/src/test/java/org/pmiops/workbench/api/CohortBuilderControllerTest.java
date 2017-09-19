@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { TestAppConfig.class, CohortBuilderController.class })
-@ActiveProfiles("test")
+@ActiveProfiles("local")
 public class CohortBuilderControllerTest {
 
     @Autowired
