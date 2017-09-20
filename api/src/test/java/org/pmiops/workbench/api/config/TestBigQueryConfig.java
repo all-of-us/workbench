@@ -4,5 +4,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 
 @SpringBootApplication(exclude = LiquibaseAutoConfiguration.class)
-public class TestAppConfig {
+public class TestBigQueryConfig {
 }
