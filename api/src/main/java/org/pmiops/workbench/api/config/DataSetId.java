@@ -12,6 +12,7 @@ public class DataSetId {
     private String dataSetId;
 
     public String getDataSetId() {
+        //replacing the dash with underscore because bigquery doesn't like dashes in names
         return this.dataSetId == null ? UUID.randomUUID().toString().replaceAll("-", "_") : this.dataSetId;
     }
 }
