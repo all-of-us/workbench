@@ -1,14 +1,15 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
+import org.pmiops.workbench.api.util.SQLGenerator;
 import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.api.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
-import java.util.logging.FileHandler;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
@@ -102,7 +103,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             }
             return ResponseEntity.ok(subjectSet);
         }
-        return null;
+        return ResponseEntity.badRequest().build();
     }
 
     protected QueryResult executeQuery(QueryRequest query) {

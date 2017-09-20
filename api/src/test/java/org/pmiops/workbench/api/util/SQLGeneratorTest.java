@@ -30,7 +30,7 @@ public class SQLGeneratorTest {
     public void findGroupCodes() throws Exception {
         QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
-                "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".ICD9_criteria` " +
+                "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".icd9_criteria` " +
                 "WHERE (code LIKE @11.1 OR code LIKE @11.2 OR code LIKE @11.3) " +
                 "AND is_selectable = 1 AND is_group = 0 ORDER BY code ASC";
         String actual = result.getQuery();
@@ -61,22 +61,23 @@ public class SQLGeneratorTest {
         QueryRequest request = generator.handleSearch("ICD9", params);
         String actual = request.getQuery();
         String expected = 
-            "SELECT PERSON_ID || ',' || gender_source_value || ',' || x_race_ui AS val " +
-            "FROM `" + TABLE_PREFIX + ".PERSON` " +
-            "WHERE PERSON_ID IN " +
-            "(SELECT PERSON_ID FROM (" +
-                "SELECT DISTINCT PERSON_ID, CONDITION_START_DATE as ENTRY_DATE " +
-                "FROM `" + TABLE_PREFIX + ".CONDITION_OCCURRENCE` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
+            "SELECT DISTINCT CONCAT(" +
+                "CAST(p.person_id AS string), ',', " +
+                "p.gender_source_value, ',', " +
+                "p.race_source_value) AS val "+
+            "FROM `" + TABLE_PREFIX + ".person` p " +
+            "WHERE PERSON_ID IN (" +
+                "SELECT DISTINCT PERSON_ID " +
+                "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
                 "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
                 "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                "AND CONDITION_SOURCE_VALUE IN (@Conditioncodes)"+
-                " UNION " +
-                "SELECT DISTINCT PERSON_ID, MEASUREMENT_DATE as ENTRY_DATE "+
-                "FROM `" + TABLE_PREFIX + ".MEASUREMENT` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-                "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-                "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-                "AND MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes)" +
-            "))";
+                "AND a.CONDITION_SOURCE_VALUE IN (@Conditioncodes)"+
+                " UNION DISTINCT " +
+                "SELECT DISTINCT PERSON_ID " +
+                "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
+                "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
+                "AND b.VOCABULARY_ID IN (@cm,@proc) " +
+                "AND a.MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes))";
         assert actual.equals(expected) : showValues(expected, actual);
 
         /* Check the query parameters */
@@ -122,46 +123,46 @@ public class SQLGeneratorTest {
     public void getSubQuery() throws Exception {
         Map<String, String> expectedByKey = new HashMap<String, String>();
         expectedByKey.put("Condition",
-            "SELECT DISTINCT PERSON_ID, CONDITION_START_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".CONDITION_OCCURRENCE` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND CONDITION_SOURCE_VALUE IN (@Conditioncodes)"
+            "AND a.CONDITION_SOURCE_VALUE IN (@Conditioncodes)"
         );
         expectedByKey.put("Observation",
-            "SELECT DISTINCT PERSON_ID, OBSERVATION_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".OBSERVATION` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".observation` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.OBSERVATION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND OBSERVATION_SOURCE_VALUE IN (@Observationcodes)"
+            "AND a.OBSERVATION_SOURCE_VALUE IN (@Observationcodes)"
         );
         expectedByKey.put("Measurement",
-            "SELECT DISTINCT PERSON_ID, MEASUREMENT_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".MEASUREMENT` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes)"
+            "AND a.MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes)"
         );
         expectedByKey.put("Exposure",
-            "SELECT DISTINCT PERSON_ID, DEVICE_EXPOSURE_START_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".DEVICE_EXPOSURE` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".device_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.DEVICE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND DEVICE_SOURCE_VALUE IN (@Exposurecodes)"
+            "AND a.DEVICE_SOURCE_VALUE IN (@Exposurecodes)"
         );
         expectedByKey.put("Drug",
-            "SELECT DISTINCT PERSON_ID, DRUG_EXPOSURE_START_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".DRUG_EXPOSURE` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".drug_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.DRUG_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND DRUG_SOURCE_VALUE IN (@Drugcodes)"
+            "AND a.DRUG_SOURCE_VALUE IN (@Drugcodes)"
         );
         expectedByKey.put("Procedure",
-            "SELECT DISTINCT PERSON_ID, PROCEDURE_DATE as ENTRY_DATE "+
-            "FROM `" + TABLE_PREFIX + ".PROCEDURE_OCCURRENCE` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "SELECT DISTINCT PERSON_ID " +
+            "FROM `" + TABLE_PREFIX + ".procedure_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.PROCEDURE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND PROCEDURE_SOURCE_VALUE IN (@Procedurecodes)"
+            "AND a.PROCEDURE_SOURCE_VALUE IN (@Procedurecodes)"
         );
 
         List<String> keys = Arrays.asList("Condition", "Observation", "Measurement", "Exposure", "Drug", "Procedure");
