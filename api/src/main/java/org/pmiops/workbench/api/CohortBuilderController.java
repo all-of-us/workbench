@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.*;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.api.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,9 @@ import java.util.logging.Logger;
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
+
+    @Autowired
+    private SQLGenerator generator;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -64,7 +68,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         Map<String, Integer> resultMapper;
 
         SubjectListResponse subjectSet = new SubjectListResponse();
-        SQLGenerator generator = new SQLGenerator();
 
         if (request.getType().equals("ICD9")) {
             List<SearchParameter> params = request.getSearchParameters();
@@ -89,7 +92,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             /*  Generate the actual query that will grab all the subjects based on criteria.
                 TODO: modifier handling
              */
-            query = generator.handleICD9Search(params);
+            query = generator.handleSearch(request.getType(), params);
             result = executeQuery(query);
             resultMapper = getResultMapper(result);
             for (List<FieldValue> row : result.iterateAll()) {

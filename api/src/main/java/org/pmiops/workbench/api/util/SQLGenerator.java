@@ -3,13 +3,16 @@ package org.pmiops.workbench.api.util;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.model.SearchParameter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class SQLGenerator {
 
-    private static Map<String, String> typeCM = new HashMap<>();
-    private static Map<String, String> typeProc = new HashMap<>();
+    private static final Map<String, String> typeCM = new HashMap<>();
+    private static final Map<String, String> typeProc = new HashMap<>();
     static {
         typeCM.put("ICD9", "ICD9CM");
         typeCM.put("ICD10", "ICD10CM");
@@ -43,7 +46,7 @@ public class SQLGenerator {
                 .build();
     }
 
-    public QueryRequest handleICD9Search(List<SearchParameter> params) {
+    public QueryRequest handleSearch(String type, List<SearchParameter> params) {
         Map<String, List<String>> paramMap = getMappedParameters(params);
         List<String> queryParts = new ArrayList<String>();
 
@@ -57,8 +60,8 @@ public class SQLGenerator {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-        queryParams.put("cm", QueryParameterValue.string(typeCM.get("ICD9")));
-        queryParams.put("proc", QueryParameterValue.string(typeProc.get("ICD9")));
+        queryParams.put("cm", QueryParameterValue.string(typeCM.get(type)));
+        queryParams.put("proc", QueryParameterValue.string(typeProc.get(type)));
 
         for (String key : paramMap.keySet()) {
             List<String> values = paramMap.get(key);
@@ -77,7 +80,7 @@ public class SQLGenerator {
                 .build();
     }
 
-    public Map<String, List<String>> getMappedParameters(List<SearchParameter> searchParameters) {
+    protected Map<String, List<String>> getMappedParameters(List<SearchParameter> searchParameters) {
         Map<String, List<String>> mappedParameters = new HashMap<String, List<String>>();
         for (SearchParameter parameter : searchParameters) {
             List<String> codes = mappedParameters.get(parameter.getDomainId());
@@ -104,7 +107,7 @@ public class SQLGenerator {
         return returnParameters;
     }
 
-    public String getSubQuery(String key) {
+    protected String getSubQuery(String key) {
         String codesSymbol = "@" + key + "codes";
         String tablePrefix = getTablePrefix();
         Map<String, String> subqueryByCode = new HashMap<String, String>();
@@ -154,7 +157,7 @@ public class SQLGenerator {
         return String.format(subQuery, tablePrefix, tablePrefix, codesSymbol);
     }
 
-    public String getTablePrefix() {
+    protected String getTablePrefix() {
         return "pmi-drc-api-test.synpuf";
     }
 }

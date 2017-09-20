@@ -1,14 +1,21 @@
 package org.pmiops.workbench.api.util;
 
+import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+@RunWith(SpringRunner.class)
+@Import({SQLGenerator.class})
 public class SQLGeneratorTest {
     static String TABLE_PREFIX = "pmi-drc-api-test.synpuf";
 
@@ -16,9 +23,11 @@ public class SQLGeneratorTest {
         return String.format("\nExpected: %s\nActual:   %s", expected, actual);
     }
 
+    @Autowired
+    SQLGenerator generator;
+
     @Test
     public void findGroupCodes() throws Exception {
-        SQLGenerator generator = new SQLGenerator();
         QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
                 "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".ICD9_criteria` " +
@@ -29,8 +38,7 @@ public class SQLGeneratorTest {
     }
 
     @Test
-    public void handleICD9Search() throws Exception {
-        SQLGenerator generator = new SQLGenerator();
+    public void handleSearch() throws Exception {
         List<SearchParameter> params = new ArrayList<>();
         SearchParameter p;
 
@@ -49,7 +57,9 @@ public class SQLGeneratorTest {
         p.setCode("30.3");
         params.add(p);
 
-        String actual = generator.handleICD9Search(params).getQuery();
+        /* Check the generated query */
+        QueryRequest request = generator.handleSearch("ICD9", params);
+        String actual = request.getQuery();
         String expected = 
             "SELECT PERSON_ID || ',' || gender_source_value || ',' || x_race_ui AS val " +
             "FROM `" + TABLE_PREFIX + ".PERSON` " +
@@ -68,6 +78,18 @@ public class SQLGeneratorTest {
                 "AND MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes)" +
             "))";
         assert actual.equals(expected) : showValues(expected, actual);
+
+        /* Check the query parameters */
+        QueryParameterValue param;
+        Map<String, QueryParameterValue> preparedParams = request.getNamedParameters();
+        param = preparedParams.get("Conditioncodes");
+        assert param.getValue().equals("10.1, 20.2");
+        param = preparedParams.get("Measurementcodes");
+        assert param.getValue().equals("30.3");
+        param = preparedParams.get("cm");
+        assert param.getValue().equals("ICD9CM");
+        param = preparedParams.get("proc");
+        assert param.getValue().equals("ICD9Proc");
     }
 
     @Test
@@ -87,8 +109,7 @@ public class SQLGeneratorTest {
         request.setType("ICD9");
         request.setSearchParameters(parameterList);
 
-        SQLGenerator controller = new SQLGenerator();
-        assertEquals(Arrays.asList("001%"), controller.findParametersWithEmptyDomainIds(request.getSearchParameters()));
+        assertEquals(Arrays.asList("001%"), generator.findParametersWithEmptyDomainIds(request.getSearchParameters()));
         assertEquals(1, request.getSearchParameters().size());
 
         SearchParameter searchParameter = new SearchParameter();
@@ -144,7 +165,6 @@ public class SQLGeneratorTest {
         );
 
         List<String> keys = Arrays.asList("Condition", "Observation", "Measurement", "Exposure", "Drug", "Procedure");
-        SQLGenerator generator = new SQLGenerator();
         String actual, expected;
         for (String key : keys) {
             actual = generator.getSubQuery(key);
@@ -156,7 +176,6 @@ public class SQLGeneratorTest {
     @Test
     public void getTablePrefix() throws Exception {
         // FYI: This is basically a Stub
-        SQLGenerator generator = new SQLGenerator();
         String actual = generator.getTablePrefix();
         assert actual.equals(TABLE_PREFIX) : showValues(TABLE_PREFIX, actual);
     }
@@ -179,11 +198,10 @@ public class SQLGeneratorTest {
         request.setType("ICD9");
         request.setSearchParameters(Arrays.asList(searchParameterCondtion, searchParameterProc1, searchParameterProc2));
 
-        SQLGenerator controller = new SQLGenerator();
         List<SearchParameter> parameters = request.getSearchParameters();
-        assertEquals(2, controller.getMappedParameters(parameters).size());
-        assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), controller.getMappedParameters(parameters).keySet());
-        assertEquals(Arrays.asList("001"), controller.getMappedParameters(parameters).get("Condition"));
-        assertEquals(Arrays.asList("002", "003"), controller.getMappedParameters(parameters).get("Procedure"));
+        assertEquals(2, generator.getMappedParameters(parameters).size());
+        assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), generator.getMappedParameters(parameters).keySet());
+        assertEquals(Arrays.asList("001"), generator.getMappedParameters(parameters).get("Condition"));
+        assertEquals(Arrays.asList("002", "003"), generator.getMappedParameters(parameters).get("Procedure"));
     }
 }
