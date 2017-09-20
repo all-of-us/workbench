@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.gson.Gson;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
@@ -19,6 +22,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench.db.dao")
 @EntityScan("org.pmiops.workbench.db.model")
+/**
+ * Run by api/project.rb update-cloud-config and (locally) docker-compose run update-config, which
+ * is automatically invoked during api/project.rb dev-up.
+ */
 public class ConfigLoader {
 
   private static final Logger log = Logger.getLogger(ConfigLoader.class.getName());
@@ -30,16 +37,17 @@ public class ConfigLoader {
         throw new IllegalArgumentException("Must pass filename of config file");
       }
       ObjectMapper jackson = new ObjectMapper();
-      JsonNode newJson = jackson.readTree(new FileInputStream(args[0]));
+      String rawJson = new String(Files.readAllBytes(Paths.get(args[0])), Charset.defaultCharset());
+      // Strip all lines starting with '//'.
+      String strippedJson = rawJson.replaceAll("\\s*//.*", "");
+      JsonNode newJson = jackson.readTree(strippedJson);
 
       // Make sure the config parses as a WorkbenchConfig, and has the same representation after
       // being marshalled back to JSON.
       Gson gson = new Gson();
       WorkbenchConfig workbenchConfig = gson.fromJson(newJson.toString(), WorkbenchConfig.class);
       String marshalledJson = gson.toJson(workbenchConfig, WorkbenchConfig.class);
-      log.info("Marshalled JSON = " + marshalledJson);
       JsonNode marshalledNode = jackson.readTree(marshalledJson);
-      log.info("Marshalled node = " + marshalledNode + ", new JSON = " + newJson);
       JsonNode marshalledDiff = JsonDiff.asJson(newJson, marshalledNode);
       if (marshalledDiff.size() > 0) {
         log.info("Configuration doesn't match WorkbenchConfig format; see diff.");

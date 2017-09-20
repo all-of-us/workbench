@@ -16,7 +16,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
-public class CacheConfig {
+public class CacheSpringConfiguration {
 
   private static final Map<String, Class<?>> CONFIG_CLASS_MAP = new HashMap<>();
 

@@ -1,3 +1,4 @@
+// Configuration for the all-of-us-workbench-test and local development environments.
 {
   "firecloud": {
     "debugEndpoints": false

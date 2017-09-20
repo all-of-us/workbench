@@ -58,10 +58,10 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run db-migration}
   common.status "Updating configuration..."
   common.run_inline %W{docker-compose run update-config}
-  do_run_api(account)
+  run_api(account)
 end
 
-def do_run_api(account)
+def run_api(account)
   common = Common.new
   at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
@@ -73,7 +73,7 @@ def do_run_api(account)
   })
 end
 
-def run_api(*args)
+def run_api_and_db(*args)
   common = Common.new
   common.docker.requires_docker
   account = get_auth_login_account()
@@ -82,7 +82,7 @@ def run_api(*args)
   end
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
-  do_run_api(account)
+  run_api(account)
 end
 
 def run_tests(*args)
@@ -345,14 +345,15 @@ end
 
 Common.register_command({
   :invocation => "dev-up",
-  :description => "Brings up the development environment.",
+  :description => "Brings up the development environment, including db migrations and config " \
+     "update. (You can use run-api instead if database and config are up-to-date.)",
   :fn => lambda { |*args| dev_up(*args) }
 })
 
 Common.register_command({
   :invocation => "run-api",
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
-  :fn => lambda { |*args| run_api(*args) }
+  :fn => lambda { |*args| run_api_and_db(*args) }
 })
 
 Common.register_command({
