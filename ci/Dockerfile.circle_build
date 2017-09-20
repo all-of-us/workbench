@@ -1,8 +1,10 @@
 # To build and deploy, from this directory:
 # $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-X.Y.Z .
-# Update BOTH the api and ui versions of allofustest/workbench:buildimage-X.Y.Z
-# in .circleci/circle.yml by incrementing the numbers. Using the new values, run:
+# Update all mentions of allofustest/workbench:buildimage-X.Y.Z in
+# .circleci/circle.yml by incrementing the numbers. Using the new values, run:
+# $ docker login  # interactive prompts
 # $ docker push allofustest/workbench:buildimage-X.Y.Z
+# For permission to push, request to be added to the DockerHub repository.
 # Include your changes to circle.yml in the PR that uses the build image.
 
 FROM circleci/openjdk:8-jdk-browsers
