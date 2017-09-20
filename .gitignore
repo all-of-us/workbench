@@ -15,6 +15,8 @@
 /api/out/*
 /api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/generated
+/api/tools/build/*
+/api/tools/.gradle/*
 /build/*
 /ui/ui.iml
 /ui/.idea/*

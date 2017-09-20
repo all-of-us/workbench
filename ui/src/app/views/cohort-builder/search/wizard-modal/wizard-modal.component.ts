@@ -4,10 +4,10 @@
 
 import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
 import { Wizard } from 'clarity-angular/wizard/wizard';
-import { SearchGroup, SearchResult, SearchCriteria, Modifier, SearchRequest } from '../model';
 import { BroadcastService } from '../service';
 import { Subscription } from 'rxjs/Subscription';
-import { CohortBuilderService } from 'generated';
+import { CohortBuilderService, Criteria } from 'generated';
+import { SearchGroup, SearchResult, Modifier } from '../model';
 
 // tslint:enable:max-line-length
 
@@ -32,7 +32,7 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   @ViewChild('wizard') wizard: Wizard;
   private selectedSearchGroup: SearchGroup;
   private selectedSearchResult: SearchResult;
-  private criteriaList: SearchCriteria[] = [];
+  private criteriaList: Criteria[] = [];
   private modifierList: Modifier[] = [];
   criteriaType: string;
   wizardModalRef: ComponentRef<WizardModalComponent>;

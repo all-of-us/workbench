@@ -4,8 +4,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Logger;
-import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -30,17 +30,17 @@ public class FireCloudConfig {
 
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient fireCloudApiClient(UserAuthentication userAuthentication) {
+  public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
+      WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
-    // Uncomment to enable REST API debugging.
-    //apiClient.setDebugging(true);
+    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     return apiClient;
   }
 
   @Bean(name=ALL_OF_US_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient() {
+  public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
       GoogleCredential credential = GoogleCredential.getApplicationDefault()
@@ -48,8 +48,7 @@ public class FireCloudConfig {
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
       apiClient.setAccessToken(accessToken);
-      // Uncomment to enable REST API debugging.
-      // apiClient.setDebugging(true);
+      apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

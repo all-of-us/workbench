@@ -485,12 +485,16 @@ definitions:
     required:
       - shortDescription
       - reproSteps
+      - contactEmail
     properties:
       shortDescription:
         description: A short description of the bug
         type: string
       reproSteps:
         description: Steps to reproduce the bug
+        type: string
+      contactEmail:
+        description: The email with which to contact the bug reporter.
         type: string
 
   Profile:
