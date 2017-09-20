@@ -56,6 +56,13 @@ def dev_up(*args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+  common.status "Updating configuration..."
+  common.run_inline %W{docker-compose run update-config}
+  run_api(account)
+end
+
+def run_api(account)
+  common = Common.new
   at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
     FileUtils.cp(creds_file, "sa-key.json")
@@ -64,6 +71,18 @@ def dev_up(*args)
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   })
+end
+
+def run_api_and_db(*args)
+  common = Common.new
+  common.docker.requires_docker
+  account = get_auth_login_account()
+  if account == nil
+    raise("Please run 'gcloud auth login' before starting the server.")
+  end
+  common.status "Starting database..."
+  common.run_inline %W{docker-compose up -d db}
+  run_api(account)
 end
 
 def run_tests(*args)
@@ -259,6 +278,16 @@ def connect_to_cloud_db(*args)
   })
 end
 
+def update_cloud_config(*args)
+  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
+    read_db_vars(project)
+    ENV["DB_PORT"] = "3307"
+    unless system("cd tools && ../gradlew --info loadConfig && cd ..")
+        raise("Error updating configuration. Exiting.")
+    end
+  })
+end
+
 def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
@@ -316,8 +345,15 @@ end
 
 Common.register_command({
   :invocation => "dev-up",
-  :description => "Brings up the development environment.",
+  :description => "Brings up the development environment, including db migrations and config " \
+     "update. (You can use run-api instead if database and config are up-to-date.)",
   :fn => lambda { |*args| dev_up(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-api",
+  :description => "Runs the api server (assumes database and config are already up-to-date.)",
+  :fn => lambda { |*args| run_api_and_db(*args) }
 })
 
 Common.register_command({
@@ -374,4 +410,10 @@ Common.register_command({
   :invocation => "register-service-account",
   :description => "Registers a service account with Firecloud; do this once per account we use.",
   :fn => lambda { |*args| register_service_account(*args) }
+})
+
+Common.register_command({
+  :invocation => "update-cloud-config",
+  :description => "Updates configuration in Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| update_cloud_config(*args) }
 })

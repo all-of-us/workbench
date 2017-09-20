@@ -1,0 +1,61 @@
+// Gradle targets for tools, used by Ruby commands and docker-compose.
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+def db_host = System.getenv("DB_HOST")
+def db_port = System.getenv("DB_PORT")
+def workbench_db_user = System.getenv("WORKBENCH_DB_USER")
+def workbench_db_password = System.getenv("WORKBENCH_DB_PASSWORD")
+
+// Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
+// which is automatically run during api/project.rb dev-up.
+task loadConfig(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ConfigLoader"
+  systemProperties = [
+    'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+    'spring.datasource.url': 'jdbc:mysql://${db_host}:${db_port}/workbench',
+    'spring.datasource.username': '${workbench_db_user}',
+    'spring.datasource.password': '${workbench_db_password}'
+  ]
+  args config_file
+}
+
+
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+  }
+  dependencies {
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+  }
+}
+
+
+sourceSets {
+  main {
+    java {
+       srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java']
+       includes = ['org/pmiops/workbench/tools/**/*.java',
+                   'org/pmiops/workbench/db/**/*.java',
+                   'org/pmiops/workbench/model/DataAccessLevel.java' ]
+    }
+  }
+}
+
+repositories {   // repositories for Jar's you access in your code
+  jcenter()
+}
+
+
+dependencies {
+  compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+  compile 'commons-io:commons-io:+'
+  compile 'joda-time:joda-time:+'
+  compile 'com.github.fge:json-patch:+'
+  compile 'io.swagger:swagger-annotations:1.5.9'
+  compile 'com.google.cloud.sql:mysql-socket-factory:+'
+  compile rootProject
+}
