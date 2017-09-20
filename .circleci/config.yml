@@ -86,7 +86,7 @@ jobs:
           command: client/project.rb pylint
       - run:
           name: Test Python Client
-          command: client/py/run_tests.py
+          command: client/project.rb test
 
 workflows:
   version: 2
