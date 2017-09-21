@@ -4,7 +4,7 @@ import 'rxjs/add/operator/map';
 import { CriteriaType, SearchRequest, SearchResponse } from '../model';
 import { Http } from '@angular/http';
 
-const CRITERIA: CriteriaType[] = [
+export const CRITERIA: CriteriaType[] = [
   { id: 1, name: 'Demographics', type: 'demo' },
   { id: 2, name: 'ICD9 Codes', type: 'icd9' },
   { id: 3, name: 'ICD10 Codes', type: 'icd10' },

@@ -1,8 +1,9 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.api.util.SQLGenerator;
+import org.pmiops.workbench.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +14,9 @@ import java.util.logging.Logger;
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
+
+    @Autowired
+    private SQLGenerator generator;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -31,8 +35,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
+        QueryRequest queryRequest = QueryRequest
+                .newBuilder(getQueryString(type))
+                .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
+                .setUseLegacySql(false)
+                .build();
 
-        QueryResult result = getQueryResult(type, parentId);
+        QueryResult result = executeQuery(queryRequest);
 
         Map<String, Integer> rm = getResultMapper(result);
 
@@ -53,18 +62,57 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.ok(criteriaResponse);
     }
 
-    protected QueryResult getQueryResult(String type, Long parentId) {
-        BigQuery bigquery =
-                new BigQueryOptions.DefaultBigqueryFactory().create(BigQueryOptions.getDefaultInstance());
+    @Override
+    public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
+        QueryRequest query;
+        QueryResult result;
+        Map<String, Integer> resultMapper;
 
-        QueryRequest queryRequest =
-                QueryRequest.newBuilder(getQueryString(type))
-                        .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
-                        .setUseLegacySql(false)
-                        .build();
+        SubjectListResponse subjectSet = new SubjectListResponse();
 
-        // Execute the query.
-        QueryResponse response = bigquery.query(queryRequest);
+        if (request.getType().equals("ICD9")) {
+            List<SearchParameter> params = request.getSearchParameters();
+
+            /*  Check for SearchParameters without Domain IDs.
+                If any are present, generate a query to retrieve the missing domain IDs, then append the new parameters
+                to the parameter set
+             */
+            List<String> paramsWithoutDomains = generator.findParametersWithEmptyDomainIds(params);
+            if (!paramsWithoutDomains.isEmpty()) {
+                query = generator.findGroupCodes(request.getType(), paramsWithoutDomains);
+                result = executeQuery(query);
+                Map <String, Integer> resultMap = getResultMapper(result);
+                for (List<FieldValue> row: result.iterateAll()) {
+                    final SearchParameter newParam = new SearchParameter();
+                    newParam.setDomainId(row.get(resultMap.get("domainId")).getStringValue());
+                    newParam.setCode(row.get(resultMap.get("code")).getStringValue());
+                    params.add(newParam);
+                }
+            }
+
+            /*  Generate the actual query that will grab all the subjects based on criteria.
+                TODO: modifier handling
+             */
+            query = generator.handleSearch(request.getType(), params);
+            result = executeQuery(query);
+            resultMapper = getResultMapper(result);
+            for (List<FieldValue> row : result.iterateAll()) {
+                final Subject subject = new Subject();
+                subject.setVal(row.get(resultMapper.get("val")).getStringValue());
+                subjectSet.addItemsItem(subject);
+            }
+            return ResponseEntity.ok(subjectSet);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    protected QueryResult executeQuery(QueryRequest query) {
+        BigQuery bigquery = new BigQueryOptions
+                .DefaultBigqueryFactory()
+                .create(BigQueryOptions.getDefaultInstance());
+
+        // Execute the query
+        QueryResponse response = bigquery.query(query);
 
         // Wait for the job to finish
         while (!response.jobCompleted()) {
@@ -84,7 +132,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected Map<String, Integer> getResultMapper(QueryResult result) {
-        Map<String, Integer> resultMapper = new HashMap<String, Integer>();
+        Map<String, Integer> resultMapper = new HashMap<>();
         int i = 0;
         for (Field field : result.getSchema().getFields()) {
             resultMapper.put(field.getName(), i++);
