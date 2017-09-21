@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @Import({SQLGenerator.class})
 public class SQLGeneratorTest {
+
     static String TABLE_PREFIX = "pmi-drc-api-test.synpuf";
 
     private String showValues(String expected, String actual) {
@@ -31,7 +32,7 @@ public class SQLGeneratorTest {
         QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
                 "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".icd9_criteria` " +
-                "WHERE (code LIKE @11.1 OR code LIKE @11.2 OR code LIKE @11.3) " +
+                "WHERE (code LIKE @code0 OR code LIKE @code1 OR code LIKE @code2) " +
                 "AND is_selectable = 1 AND is_group = 0 ORDER BY code ASC";
         String actual = result.getQuery();
         assert actual.equals(expected) : showValues(expected, actual);
@@ -176,7 +177,7 @@ public class SQLGeneratorTest {
 
     @Test
     public void getTablePrefix() throws Exception {
-        // FYI: This is basically a Stub
+        // TODO: use the configuration injection framework to grab the table prefix info
         String actual = generator.getTablePrefix();
         assert actual.equals(TABLE_PREFIX) : showValues(TABLE_PREFIX, actual);
     }
@@ -200,7 +201,7 @@ public class SQLGeneratorTest {
         request.setSearchParameters(Arrays.asList(searchParameterCondtion, searchParameterProc1, searchParameterProc2));
 
         List<SearchParameter> parameters = request.getSearchParameters();
-        assertEquals(2, generator.getMappedParameters(parameters).size());
+        assertEquals(2, generator.getMappedParameters(parameters).keySet().size());
         assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), generator.getMappedParameters(parameters).keySet());
         assertEquals(Arrays.asList("001"), generator.getMappedParameters(parameters).get("Condition"));
         assertEquals(Arrays.asList("002", "003"), generator.getMappedParameters(parameters).get("Procedure"));

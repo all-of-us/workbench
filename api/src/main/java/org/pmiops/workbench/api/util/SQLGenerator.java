@@ -2,6 +2,8 @@ package org.pmiops.workbench.api.util;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ public class SQLGenerator {
 
     private static final Map<String, String> typeCM = new HashMap<>();
     private static final Map<String, String> typeProc = new HashMap<>();
+    private static final Map<String, Map<String, String>> tableInfo = new HashMap<>();
     static {
         typeCM.put("ICD9", "ICD9CM");
         typeCM.put("ICD10", "ICD10CM");
@@ -20,6 +23,42 @@ public class SQLGenerator {
         typeProc.put("ICD9", "ICD9Proc");
         typeProc.put("ICD10", "ICD10PCS");
         typeProc.put("CPT", "CPT4");
+
+        Map<String, String> table = new HashMap<>();
+        table.put("tableName", "condition_occurrence");
+        table.put("sourceConceptIdColumn", "CONDITION_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "CONDITION_SOURCE_VALUE");
+        tableInfo.put("Condition", table);
+
+        table = new HashMap<>();
+        table.put("tableName", "observation");
+        table.put("sourceConceptIdColumn", "OBSERVATION_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "OBSERVATION_SOURCE_VALUE");
+        tableInfo.put("Observation", table);
+
+        table = new HashMap<>();
+        table.put("tableName", "measurement");
+        table.put("sourceConceptIdColumn", "MEASUREMENT_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "MEASUREMENT_SOURCE_VALUE");
+        tableInfo.put("Measurement", table);
+
+        table = new HashMap<>();
+        table.put("tableName", "device_exposure");
+        table.put("sourceConceptIdColumn", "DEVICE_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "DEVICE_SOURCE_VALUE");
+        tableInfo.put("Exposure", table);
+
+        table = new HashMap<>();
+        table.put("tableName", "drug_exposure");
+        table.put("sourceConceptIdColumn", "DRUG_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "DRUG_SOURCE_VALUE");
+        tableInfo.put("Drug", table);
+
+        table = new HashMap<>();
+        table.put("tableName", "procedure_occurrence");
+        table.put("sourceConceptIdColumn", "PROCEDURE_SOURCE_CONCEPT_ID");
+        table.put("sourceValueColumn", "PROCEDURE_SOURCE_VALUE");
+        tableInfo.put("Procedure", table);
     }
 
     public QueryRequest findGroupCodes(String type, List<String> codes) {
@@ -30,9 +69,11 @@ public class SQLGenerator {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
-        for (String code: codes) {
-            queryParams.put(code, QueryParameterValue.string(code));
-            queryParts.add("code LIKE @"+code);
+        for (int i = 0; i < codes.size(); i++) {
+            String code = codes.get(i);
+            String name = String.format("code%d", i);
+            queryParams.put(name, QueryParameterValue.string(code));
+            queryParts.add("code LIKE @"+name);
         }
         queryBuilder.append(String.join(" OR ", queryParts));
         queryBuilder.append(") ");
@@ -47,7 +88,7 @@ public class SQLGenerator {
     }
 
     public QueryRequest handleSearch(String type, List<SearchParameter> params) {
-        Map<String, List<String>> paramMap = getMappedParameters(params);
+        ListMultimap<String, String> paramMap = getMappedParameters(params);
         List<String> queryParts = new ArrayList<String>();
 
         StringBuilder queryBuilder = new StringBuilder();
@@ -83,18 +124,10 @@ public class SQLGenerator {
         return request;
     }
 
-    protected Map<String, List<String>> getMappedParameters(List<SearchParameter> searchParameters) {
-        Map<String, List<String>> mappedParameters = new HashMap<String, List<String>>();
-        for (SearchParameter parameter : searchParameters) {
-            List<String> codes = mappedParameters.get(parameter.getDomainId());
-            if (codes != null) {
-                codes.add(parameter.getCode());
-            } else {
-                List<String> codeList = new ArrayList<>();
-                codeList.add(parameter.getCode());
-                mappedParameters.put(parameter.getDomainId(), codeList);
-            }
-        }
+    protected ListMultimap<String, String> getMappedParameters(List<SearchParameter> searchParameters) {
+        ListMultimap<String, String> mappedParameters = ArrayListMultimap.create();
+        for (SearchParameter parameter : searchParameters)
+            mappedParameters.put(parameter.getDomainId(), parameter.getCode());
         return mappedParameters;
     }
 
@@ -110,57 +143,38 @@ public class SQLGenerator {
         return returnParameters;
     }
 
+    /*
+     * The format placeholders stand for, in order:
+     *  - the table prefix (e.g., something like "pmi-drc-api-test.synpuf")
+     *  - the table name
+     *  - the table prefix again
+     *  - the *_SOURCE_CONCEPT_ID column identifier for that table
+     *  - the *_SOURCE_VALUE column identifier for that table
+     *  - a BigQuery "named parameter" indicating the list of codes to search by
+     */
+    private static final String subqueryTemplate = 
+        "SELECT DISTINCT PERSON_ID " +
+        "FROM `%s.%s` a, `%s.CONCEPT` b "+
+        "WHERE a.%s = b.CONCEPT_ID "+
+        "AND b.VOCABULARY_ID IN (@cm,@proc) " +
+        "AND a.%s IN (%s)";
+
     protected String getSubQuery(String key) {
-        String codesSymbol = "@" + key + "codes";
         String tablePrefix = getTablePrefix();
-        Map<String, String> subqueryByCode = new HashMap<String, String>();
-        subqueryByCode.put("Condition",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.condition_occurrence` a, `%s.CONCEPT` b "+
-            "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND a.CONDITION_SOURCE_VALUE IN (%s)"
+        Map<String, String> info = tableInfo.get(key);
+
+        return String.format(subqueryTemplate, 
+            tablePrefix, 
+            info.get("tableName"),
+            tablePrefix, 
+            info.get("sourceConceptIdColumn"),
+            info.get("sourceValueColumn"),
+            "@" + key + "codes"
         );
-        subqueryByCode.put("Observation",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.observation` a, `%s.CONCEPT` b "+
-            "WHERE a.OBSERVATION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND a.OBSERVATION_SOURCE_VALUE IN (%s)"
-        );
-        subqueryByCode.put("Measurement",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.measurement` a, `%s.CONCEPT` b "+
-            "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.MEASUREMENT_SOURCE_VALUE IN (%s)"
-        );
-        subqueryByCode.put("Exposure",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.device_exposure` a, `%s.CONCEPT` b "+
-            "WHERE a.DEVICE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.DEVICE_SOURCE_VALUE IN (%s)"
-        );
-        subqueryByCode.put("Drug",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.drug_exposure` a, `%s.CONCEPT` b "+
-            "WHERE a.DRUG_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.DRUG_SOURCE_VALUE IN (%s)"
-        );
-        subqueryByCode.put("Procedure",
-            "SELECT DISTINCT PERSON_ID "+
-            "FROM `%s.procedure_occurrence` a, `%s.CONCEPT` b "+
-            "WHERE a.PROCEDURE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.PROCEDURE_SOURCE_VALUE IN (%s)"
-        );
-        String subQuery = subqueryByCode.get(key);
-        return String.format(subQuery, tablePrefix, tablePrefix, codesSymbol);
     }
 
     protected String getTablePrefix() {
+        // TODO: use the injectable config to grab this info
         return "pmi-drc-api-test.synpuf";
     }
 }
