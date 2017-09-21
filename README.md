@@ -125,3 +125,16 @@ git secrets --scan /path/to/file (/other/path/to/file *)
 ```Shell
 git secrets --scan -r /path/to/directory
 ```
+
+## API Server Configuration
+
+Spring application configs, in `application.properties` files, specify behavior
+like logging. They are static files bundled with the built Java binary.
+
+Database connection information is read from `application-web.xml`. These
+secrets vary per-environment; Ruby setup scripts pull the values from Google
+Cloud Storage and generate the XML, which is then deployed with the Java binary.
+
+Server behavior configuration is stored in the database. It may be changed without
+restarting the server, but is usually set only at deployment time. It's based on
+config_$ENV.json files, loaded into the database by `workbench.tools.ConfigLoader`.
