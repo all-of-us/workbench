@@ -34,11 +34,11 @@ services:
   update-config:
     build:
      context: ./src/dev/server
-    working_dir: /w/tools
+    working_dir: /w
     volumes:
       - gradle-cache:/root/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ../gradlew loadConfig
+    command: wait-for db:3306 -- ./gradlew tools:loadConfig
     env_file:
       - db/vars.env
 volumes:
