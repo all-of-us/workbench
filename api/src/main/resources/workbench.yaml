@@ -624,6 +624,17 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Modifier"
+    example:
+      {
+        type: "ICD9",
+        searchParameters: [
+          { code: "E9293", domainId: "Condition" },
+          { code: "E979-E979.9", domainId: null }
+        ],
+        modifiers: [
+          { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
+        ]
+      }
 
   SearchParameter:
     type: object
@@ -632,9 +643,18 @@ definitions:
       - domainId
     properties:
       code:
+        description: The Code of the Criteria within its Category Tree
         type: string
       domainId:
+        description: The Domain ID of the Criteria if applicable
         type: string
+    examples:
+      leafExample:
+        code: "E9293"
+        domainId: "Condition"
+      parentExample:
+        code: "E979-E979.9"
+        domainId: null
 
   Modifier:
     type: object
@@ -651,6 +671,10 @@ definitions:
         type: "array"
         items:
           type: string
+    example:
+      name: "age_at_event"
+      operator: "GTE >="
+      operands: [ "Arg1", "Arg2" ]
 
   SubjectListResponse:
     type: object
@@ -661,9 +685,17 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Subject"
+    example:
+      [ 
+        { val: "12345,1,5" },
+        { val: "67890,2,1" }
+      ]
 
   Subject:
     type: object
     properties:
       val:
+        description: A String of Subject ID, Gender Code, Ethnicity Code
         type: string
+    example:
+      val: "12345,1,5"
