@@ -15,7 +15,7 @@ _METADATA_URL = (
 _METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 _TOKEN_INFO_URL_T = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
 # TODO(markfickett) Get workbench host dynamically based on environment.
-_WORKBENCH_API_HOST = 'https://all-of-us-workbench-test.appspot.com/'
+_WORKBENCH_API_HOST = 'https://api-dot-all-of-us-workbench-test.appspot.com/'
 
 
 # Note that we use custom cache management because cachetools.TTLCache (for example) uses a
