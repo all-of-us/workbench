@@ -6,8 +6,8 @@ import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRe
 import { Wizard } from 'clarity-angular/wizard/wizard';
 import { BroadcastService } from '../broadcast.service';
 import { Subscription } from 'rxjs/Subscription';
-import { CohortBuilderService, Criteria } from 'generated';
-import { SearchGroup, SearchResult, Modifier } from '../model';
+import { CohortBuilderService, Criteria, Modifier } from 'generated';
+import { SearchGroup, SearchResult } from '../model';
 
 // tslint:enable:max-line-length
 

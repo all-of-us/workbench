@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
-import { SearchGroup, Subject, SearchResult } from '../model';
+import { SearchGroup, SearchResult } from '../model';
 import 'rxjs/add/operator/takeWhile';
 import { BroadcastService } from '../broadcast.service';
 import { intersection, complement, union } from 'set-manipulator';
+import {Subject} from 'generated';
 
 @Component({
   selector: 'app-search',

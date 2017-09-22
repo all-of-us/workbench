@@ -1,6 +1,7 @@
-import { Component, Input, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
-import { BroadcastService } from '../broadcast.service';
-import { SearchResult, SearchGroup, Subject, CriteriaType } from '../model';
+import {Component, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
+import {BroadcastService} from '../broadcast.service';
+import {SearchResult, SearchGroup} from '../model';
+import {Subject} from 'generated';
 
 @Component({
   selector: 'app-search-group',
