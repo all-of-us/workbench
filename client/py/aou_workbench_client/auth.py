@@ -86,6 +86,9 @@ if __name__ == '__main__':
     print _run_print_access_token()
 
     # Make an example API call.
-    from swagger_client.apis.profile_api import ProfileApi
-    profile_client = ProfileApi(api_client=get_authenticated_swagger_client())
-    print profile_client.get_me()
+    from swagger_client.apis.workspaces_api import WorkspacesApi
+    client = WorkspacesApi(api_client=get_authenticated_swagger_client())
+    workspace_list = client.get_workspaces()
+    print 'Workspaces:'
+    for ws in workspace_list.items:
+        print '%s/%s\t%s\t%s' % (ws.namespace, ws.id, ws.name, ws.description)
