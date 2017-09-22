@@ -29,4 +29,8 @@ public interface FireCloudService {
    */
   void addUserToBillingProject(String email, String projectName) throws ApiException;
 
+  /**
+   * Creates a new FC workspace.
+   */
+  void createWorkspace(String projectName, String workspaceName);
 }

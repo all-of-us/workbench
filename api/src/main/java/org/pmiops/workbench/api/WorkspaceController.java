@@ -126,30 +126,26 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     }
   }
 
-  private FirecloudWorkspaceId generateFirecloudWorkspaceId(String name) {
+  private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
     // Find a unique workspace namespace based off of the provided name.
     String strippedName = name.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
       strippedName = generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
     }
-    String workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName;
-    int suffixNumber = 1;
-    List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
-    // Keep looking until we find an unused workspace namespace.
-    while (!workspaces.isEmpty()) {
-      suffixNumber++;
-      workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName + "-" + suffixNumber;
-      workspaces = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
-      // TODO: add Firecloud workspace namespace lookup here, too
-    }
-    return new FirecloudWorkspaceId(workspaceNamespace, strippedName);
+    return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getName());
+    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
+        workspace.getName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace =
+        getDbWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    if (existingWorkspace != null) {
+      throw new BadRequestException("Workspace {0}/{1} already exists".format(
+          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
+    }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization

@@ -81,6 +81,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     billingApi.addUserToBillingProject(projectName, "user", email);
   }
 
+  @Override
+  public void createWorkspace(String projectName, String workspaceName) {
+
+  }
+
   private boolean isTrue(Boolean b) {
     return b != null && b == true;
   }
