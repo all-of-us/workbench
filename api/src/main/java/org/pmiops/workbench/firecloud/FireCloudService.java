@@ -32,5 +32,5 @@ public interface FireCloudService {
   /**
    * Creates a new FC workspace.
    */
-  void createWorkspace(String projectName, String workspaceName);
+  void createWorkspace(String projectName, String workspaceName) throws ApiException;
 }

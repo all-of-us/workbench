@@ -5,9 +5,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import javax.inject.Provider;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.Profile;
+import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +22,15 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
+  private final Provider<WorkspacesApi> workspacesApiProvider;
 
   @Autowired
   public FireCloudServiceImpl(Provider<ProfileApi> profileApiProvider,
-      Provider<BillingApi> billingApiProvider) {
+      Provider<BillingApi> billingApiProvider,
+      Provider<WorkspacesApi> workspacesApiProvider) {
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
+    this.workspacesApiProvider = workspacesApiProvider;
   }
 
   @Override
@@ -82,8 +87,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createWorkspace(String projectName, String workspaceName) {
-
+  public void createWorkspace(String projectName, String workspaceName) throws ApiException {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspaceIngest workspaceIngest = new WorkspaceIngest();
+    workspaceIngest.setName(workspaceName);
+    workspaceIngest.setNamespace(projectName);
+    // TODO: set authorization domain here
+    workspacesApi.createWorkspace(workspaceIngest);
   }
 
   private boolean isTrue(Boolean b) {
