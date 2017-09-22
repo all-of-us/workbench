@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {TestBigQueryConfig.class})
 public class BigQueryBaseTest {
 
