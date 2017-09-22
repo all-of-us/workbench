@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.joda.time.DateTime;
@@ -13,7 +14,11 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
+<<<<<<< HEAD
 import org.pmiops.workbench.model.ResearchPurpose;
+=======
+import org.pmiops.workbench.firecloud.FireCloudService;
+>>>>>>> Fixing tests
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -43,6 +48,8 @@ public class WorkspaceControllerTest {
   UserDao userDao;
   @Mock
   Provider<User> userProvider;
+  @Mock
+  FireCloudService fireCloudService;
 
   private WorkspaceController workspaceController;
 
@@ -58,7 +65,7 @@ public class WorkspaceControllerTest {
     when(userProvider.get()).thenReturn(user);
 
     this.workspaceController = new WorkspaceController(workspaceDao, cdrVersionDao,
-        userProvider, Clock.fixed(NOW, ZoneId.systemDefault()));
+        userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
   public Workspace createDefaultWorkspace() {
@@ -76,6 +83,7 @@ public class WorkspaceControllerTest {
 
     Workspace workspace = new Workspace();
     workspace.setName("name");
+    workspace.setNamespace("namespace");
     workspace.setDescription("description");
     workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
@@ -87,9 +95,11 @@ public class WorkspaceControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspaceController.createWorkspace(workspace);
+    verify(fireCloudService).createWorkspace("namespace", "name");
 
     Workspace workspace2 =
-        workspaceController.getWorkspace("allofus-name", "name").getBody();
+        workspaceController.getWorkspace("namespace", "name")
+            .getBody();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isNull();
@@ -109,5 +119,6 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
+    assertThat(workspace2.getNamespace()).isEqualTo("namespace");
   }
 }
