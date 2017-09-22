@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import { SearchGroup, Subject, SearchResult } from '../model';
 import 'rxjs/add/operator/takeWhile';
-import { BroadcastService } from '../service/broadcast.service';
+import { BroadcastService } from '../broadcast.service';
 import { intersection, complement, union } from 'set-manipulator';
 
 @Component({

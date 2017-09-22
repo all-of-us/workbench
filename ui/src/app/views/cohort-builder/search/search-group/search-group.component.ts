@@ -1,5 +1,5 @@
 import { Component, Input, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
-import { BroadcastService } from '../service';
+import { BroadcastService } from '../broadcast.service';
 import { SearchResult, SearchGroup, Subject, CriteriaType } from '../model';
 
 @Component({

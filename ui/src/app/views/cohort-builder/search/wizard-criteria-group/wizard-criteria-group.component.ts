@@ -2,7 +2,7 @@ import {
   Component, OnDestroy, Output, EventEmitter, OnInit, ChangeDetectorRef,
   ViewEncapsulation, Input, ViewChild
 } from '@angular/core';
-import { BroadcastService } from '../service';
+import { BroadcastService } from '../broadcast.service';
 import { Subscription } from 'rxjs/Subscription';
 import { Criteria } from 'generated';
 

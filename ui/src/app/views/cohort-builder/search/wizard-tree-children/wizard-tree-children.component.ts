@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { BroadcastService } from '../service';
+import { BroadcastService } from '../broadcast.service';
 import { SearchParameter } from '../model';
 import { Subscription } from 'rxjs/Subscription';
 import { CohortBuilderService, Criteria } from 'generated';

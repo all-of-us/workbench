@@ -4,7 +4,7 @@
 
 import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
 import { Wizard } from 'clarity-angular/wizard/wizard';
-import { BroadcastService } from '../service';
+import { BroadcastService } from '../broadcast.service';
 import { Subscription } from 'rxjs/Subscription';
 import { CohortBuilderService, Criteria } from 'generated';
 import { SearchGroup, SearchResult, Modifier } from '../model';

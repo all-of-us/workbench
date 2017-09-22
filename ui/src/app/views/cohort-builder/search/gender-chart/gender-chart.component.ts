@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild, Input, OnDestroy} from '@angular/core';
 import { GoogleChartDirective } from '../google-chart/google-chart.directive';
 import 'rxjs/add/operator/takeWhile';
-import { BroadcastService } from '../service/broadcast.service';
+import { BroadcastService } from '../broadcast.service';
 
 @Component({
   selector: 'app-gender-chart',

@@ -1,8 +1,11 @@
-import { Injectable, ComponentRef } from '@angular/core';
-import { Subject } from 'rxjs/Subject';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { SearchGroup, SearchResult, Modifier } from '../model';
-import { Criteria } from 'generated';
+import {Injectable, ComponentRef} from '@angular/core';
+import {Subject} from 'rxjs/Subject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+
+import {SearchGroup, SearchResult, Modifier} from './model';
+
+import {Criteria} from 'generated';
+
 
 @Injectable()
 export class BroadcastService {

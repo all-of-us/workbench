@@ -1,6 +1,6 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { SearchResult } from '../model';
-import { BroadcastService } from '../service';
+import { BroadcastService } from '../broadcast.service';
 
 @Component({
   selector: 'app-search-result',
