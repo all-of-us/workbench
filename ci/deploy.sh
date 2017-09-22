@@ -23,4 +23,5 @@ fi
   --target $1 \
   --skip-confirmation \
   --project all-of-us-workbench-test \
-  --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com
+  --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+  --version $VERSION
