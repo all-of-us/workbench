@@ -28,7 +28,7 @@ def get_authenticated_swagger_client(force=False):
     global _token_expiration
     if _cached_client is None:
         _cached_client = ApiClient()
-    if force or (time.time() >= _token_expiration_time):
+    if force or (time.time() >= _token_expiration):
         token, _token_expiration = _get_bearer_token_and_expiration()
         _cached_client.set_default_header(name, value)
     return _cached_client
@@ -48,7 +48,7 @@ def _query_metadata_api():
     # the request.
     t = int(time.time())
 
-    respones = urllib2.urlopen(urllib2.Request(url=_METADATA_URL, headers=_METADATA_HEADER))
+    response = urllib2.urlopen(urllib2.Request(url=_METADATA_URL, headers=_METADATA_HEADER))
     response_json = json.loads(response.read())
     return response_json['access_token'], t + response_json['expires_in']
 
@@ -69,3 +69,14 @@ def clear_cache():
     global _token_expiration
     _cached_client = None
     _token_expiration = 0
+
+
+if __name__ == '__main__':
+    # Self-test: Print tokens from each source.
+    print 'Metadata API'
+    try:
+        print _query_metadata_api()
+    except urllib2.URLError as e:
+        print 'unavailable:', e
+    print 'print-access-token'
+    print _run_print_access_token()
