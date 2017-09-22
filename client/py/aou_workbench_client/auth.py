@@ -14,6 +14,8 @@ _METADATA_URL = (
         'instance/service-accounts/default/token')
 _METADATA_HEADER = {'Metadata-Flavor': 'Google'}
 _TOKEN_INFO_URL_T = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+# TODO(markfickett) Get workbench host dynamically based on environment.
+_WORKBENCH_API_HOST = 'https://all-of-us-workbench-test.appspot.com/'
 
 
 # Note that we use custom cache management because cachetools.TTLCache (for example) uses a
@@ -28,9 +30,10 @@ def get_authenticated_swagger_client(force=False):
     global _token_expiration
     if _cached_client is None:
         _cached_client = ApiClient()
+        _cached_client.configuration.host = _WORKBENCH_API_HOST
     if force or (time.time() >= _token_expiration):
         token, _token_expiration = _get_bearer_token_and_expiration()
-        _cached_client.set_default_header(name, value)
+        _cached_client.configuration.access_token = token
     return _cached_client
 
 
@@ -71,8 +74,9 @@ def clear_cache():
     _token_expiration = 0
 
 
+# Self-test / simple example.
 if __name__ == '__main__':
-    # Self-test: Print tokens from each source.
+    # Print tokens from each source.
     print 'Metadata API'
     try:
         print _query_metadata_api()
@@ -80,3 +84,8 @@ if __name__ == '__main__':
         print 'unavailable:', e
     print 'print-access-token'
     print _run_print_access_token()
+
+    # Make an example API call.
+    from swagger_client.apis.profile_api import ProfileApi
+    profile_client = ProfileApi(api_client=get_authenticated_swagger_client())
+    print profile_client.get_me()
