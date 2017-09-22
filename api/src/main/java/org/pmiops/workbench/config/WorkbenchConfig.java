@@ -11,4 +11,11 @@ public class WorkbenchConfig {
   }
 
   public FireCloudConfig firecloud;
+
+  public static class BigQueryConfig {
+    public String dataSetId;
+    public String projectId;
+  }
+
+  public BigQueryConfig bigquery;
 }

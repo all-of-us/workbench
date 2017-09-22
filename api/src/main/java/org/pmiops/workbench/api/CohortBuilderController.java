@@ -1,10 +1,10 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,11 +18,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
-    @Value("#{dataSetId.getDataSetId()}")
-    private String dataSetId;
-
-    @Value("${bigQuery.projectId}")
-    private String bigQueryProjectId;
+    @Autowired
+    WorkbenchConfig workbenchConfig;
 
     @Autowired
     BigQuery bigquery;
@@ -101,14 +98,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected String getQueryString(String type) {
-        return String.format(CRITERIA_QUERY, bigQueryProjectId, dataSetId, type + "_criteria");
-    }
-
-    public String getDataSetId() {
-        return dataSetId;
-    }
-
-    public String getBigQueryProjectId() {
-        return bigQueryProjectId;
+        return String.format(CRITERIA_QUERY,
+                workbenchConfig.bigquery.projectId,
+                workbenchConfig.bigquery.dataSetId,
+                type + "_criteria");
     }
 }
