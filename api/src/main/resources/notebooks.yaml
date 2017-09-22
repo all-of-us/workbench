@@ -1,0 +1,361 @@
+swagger: '2.0'
+info:
+  title: Leonardo
+  description: |
+    Workbench notebooks service.
+  version: '0.1'
+  license:
+    name: BSD
+    url: 'http://opensource.org/licenses/BSD-3-Clause'
+  termsOfService: 'https://github.com/broadinstitute/leonardo'
+basePath: /
+produces:
+  - application/json
+tags:
+  - name: test
+    description: Test API
+  - name: cluster
+    description: Clusters API
+  - name: notebooks
+    description: Notebooks API
+
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+
+  '/ping':
+    get:
+      summary: Ping
+      responses:
+        '200':
+          description: Pong
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      operationId: ping
+      tags:
+        - test
+  '/api/clusters':
+    get:
+      summary: List all clusters
+      description: List all clusters, optionally filtering on a set of labels
+      operationId: listClusters
+      tags:
+        - cluster
+      parameters:
+        - in: query
+          name: _labels
+          description: |
+            Optional label key-value pairs to filter results by. Example: key1=val1,key2=val2.
+
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: List of clusters
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+  '/api/cluster/{googleProject}/{clusterName}':
+    get:
+      summary: Get details of a dataproc cluster
+      description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
+      operationId: getCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Cluster found, here are the details
+          schema:
+            $ref: '#/definitions/Cluster'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    put:
+      summary: Creates a new dataproc cluster in the given project with the given name
+      description: creates dataproc cluster with jupyters
+      operationId: createCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+        - in: body
+          description: Request for new cluster
+          name: clusterRequest
+          required: true
+          schema:
+            $ref: '#/definitions/ClusterRequest'
+      responses:
+        '200':
+          description: Cluster creation successful
+          schema:
+            $ref: '#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    delete:
+      summary: Deletes an existing dataproc cluster in the given project
+      description: deletes a dataproc cluster
+      operationId: deleteCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster deletion request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/notebooks/{googleProject}/{clusterName}':
+    get:
+      summary: Access Jupyter notebooks on a dataproc cluster
+      description: Serves as a proxy for the Jupyer notebook server running the given dataproc cluster managed by Leo.
+      operationId: proxyCluster
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxy connection successful
+        '401':
+          description: Proxy connection unauthorized
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '420':
+          description: Cluster not ready
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  ErrorReport:
+    description: ''
+    required:
+      - source
+      - message
+      - causes
+      - stackTrace
+    properties:
+      source:
+        type: string
+        description: service causing error
+      message:
+        type: string
+        description: what went wrong
+      exceptionClass:
+        type: string
+        description: class of exception thrown
+      statusCode:
+        type: integer
+        description: HTTP status code
+      causes:
+        type: array
+        description: errors triggering this one
+        items:
+          $ref: '#/definitions/ErrorReport'
+      stackTrace:
+        type: array
+        description: stack trace
+        items:
+          $ref: '#/definitions/StackTraceElement'
+  StackTraceElement:
+    description: ''
+    required:
+      - className
+      - methodName
+      - fileName
+      - lineNumber
+    properties:
+      className:
+        type: string
+        description: class name
+      methodName:
+        type: string
+        description: method name
+      fileName:
+        type: string
+        description: source file name
+      lineNumber:
+        type: integer
+        description: line number
+  Cluster:
+    description: ''
+    required:
+      - clusterName
+      - googleId
+      - googleProject
+      - googleServiceAccount
+      - googleBucket
+      - operationName
+      - status
+      - createdDate
+      - labels
+    properties:
+      clusterName:
+        type: string
+        description: The user-supplied name for the cluster
+      googleId:
+        type: string
+        description: Google's UUID for the cluster
+      googleProject:
+        type: string
+        description: The Google Project used to create the cluster
+      googleServiceAccount:
+        type: string
+        description: The Google Service Account used to create the cluster
+      googleBucket:
+        type: string
+        description: The Google Bucket associated with the cluster
+      operationName:
+        type: string
+        description: Google's operation ID for the cluster
+      status:
+        type: string
+        description: The current state of the cluster
+      hostIp:
+        type: string
+        description: The IP address of the cluster master node
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      destroyedDate:
+        type: string
+        description: The date and time the cluster was destroyed, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+  ClusterRequest:
+    description: ''
+    required:
+      - bucketPath
+      - serviceAccount
+      - labels
+    properties:
+      bucketPath:
+        type: string
+        description: The bucket where user's notebooks will be saved
+      serviceAccount:
+        type: string
+        description: The service account of the user
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      jupyterExtensionUri:
+        type: string
+        description: |
+          Optional bucket URI to an archive containing Jupyter notebook extension files.
+          The archive must be in tar.gz format, must not include a parent directory, and
+          must have an entry point named 'main'. For more information on notebook extensions,
+          see: http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
+
