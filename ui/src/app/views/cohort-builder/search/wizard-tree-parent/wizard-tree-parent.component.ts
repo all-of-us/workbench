@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { BroadcastService } from '../broadcast.service';
-import { Subscription } from 'rxjs/Subscription';
+import {Component, OnDestroy, OnInit, Input, ViewEncapsulation} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
 import 'rxjs/add/operator/mergeMap';
+
+import {BroadcastService} from '../broadcast.service';
 import {CohortBuilderService, Criteria, SearchParameter } from 'generated';
 
 @Component({
@@ -44,7 +45,4 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-
 }
-
-

@@ -1,10 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import {Component, OnInit, ChangeDetectorRef, OnDestroy, Inject} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
-import { SearchGroup, SearchResult } from '../model';
+import {intersection, complement, union} from 'set-manipulator';
 import 'rxjs/add/operator/takeWhile';
-import { BroadcastService } from '../broadcast.service';
-import { intersection, complement, union } from 'set-manipulator';
+
+import {BroadcastService} from '../broadcast.service';
+import {SearchGroup, SearchResult} from '../model';
+
 import {Subject} from 'generated';
 
 @Component({
@@ -217,5 +219,4 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.alive = false;
   }
-
 }

@@ -4,7 +4,6 @@ import {
 } from 'generated';
 
 export class SearchResult {
-
   id: number;
   description: string;
   searchType: string;

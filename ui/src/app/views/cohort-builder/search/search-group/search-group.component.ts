@@ -1,6 +1,8 @@
 import {Component, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
+
 import {BroadcastService} from '../broadcast.service';
 import {SearchResult, SearchGroup} from '../model';
+
 import {Subject} from 'generated';
 
 @Component({
@@ -83,5 +85,4 @@ export class SearchGroupComponent {
   selectSearchGroup() {
     this.broadcastService.selectSearchGroup(this.searchGroup);
   }
-
 }

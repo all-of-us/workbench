@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { BroadcastService } from '../broadcast.service';
-import { Subscription } from 'rxjs/Subscription';
-import { CohortBuilderService, Criteria, SearchParameter } from 'generated';
+import {Component, OnDestroy, OnInit, Input, ViewEncapsulation} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
+
+import {BroadcastService} from '../broadcast.service';
+import {CohortBuilderService, Criteria, SearchParameter} from 'generated';
 
 @Component({
   selector: 'app-wizard-tree-children',

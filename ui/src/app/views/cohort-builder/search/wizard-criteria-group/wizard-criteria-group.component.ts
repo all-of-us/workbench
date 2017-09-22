@@ -2,9 +2,10 @@ import {
   Component, OnDestroy, Output, EventEmitter, OnInit, ChangeDetectorRef,
   ViewEncapsulation, Input, ViewChild
 } from '@angular/core';
-import { BroadcastService } from '../broadcast.service';
-import { Subscription } from 'rxjs/Subscription';
-import { Criteria } from 'generated';
+import {Subscription} from 'rxjs/Subscription';
+
+import {BroadcastService} from '../broadcast.service';
+import {Criteria} from 'generated';
 
 @Component({
   selector: 'app-wizard-criteria-group',

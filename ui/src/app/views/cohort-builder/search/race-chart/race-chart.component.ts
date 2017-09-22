@@ -1,7 +1,8 @@
 import {Component, OnInit, ViewChild, OnDestroy} from '@angular/core';
-import { GoogleChartDirective } from '../google-chart/google-chart.directive';
 import 'rxjs/add/operator/takeWhile';
-import { BroadcastService } from '../broadcast.service';
+
+import {BroadcastService} from '../broadcast.service';
+import {GoogleChartDirective} from '../google-chart/google-chart.directive';
 
 @Component({
   selector: 'app-race-chart',
@@ -45,5 +46,4 @@ export class RaceChartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.alive = false;
   }
-
 }

@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnInit } from '@angular/core';
+import {Directive, ElementRef, Input, OnInit} from '@angular/core';
 
 declare var google: any;
 declare var googleLoaded: any;
@@ -37,7 +37,5 @@ export class GoogleChartDirective implements OnInit {
 
       wrapper.draw();
     }
-
   }
-
 }

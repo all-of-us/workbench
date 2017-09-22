@@ -1,7 +1,3 @@
-/**
- * NgModule constants
- */
-
 /* Criteria categories */
 export const CRITERIA_TYPES = [
   { id: 1, name: 'Demographics', type: 'demo' },
