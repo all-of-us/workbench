@@ -71,7 +71,8 @@ if __name__ == '__main__':
     configure_logging()
     parser = get_parser()
     parser.add_argument(
-            '-v', '--version', help='Version name for Workbench to deploy')
+            '-v', '--version', help='Version name for Workbench to deploy',
+            required=True)
     parser.add_argument(
             '-t', '--target',
             default=_TargetChoices.ALL, choices=_TargetChoices.ALL_TARGET_CHOICES,
