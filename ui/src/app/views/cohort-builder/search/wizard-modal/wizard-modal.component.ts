@@ -1,15 +1,16 @@
-// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
-// https://github.com/palantir/tslint/pull/3099
-// tslint:disable:max-line-length
+import {
+  Component, ComponentRef,
+  OnDestroy, OnInit,
+  ViewChild, ViewEncapsulation
+} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
+import {Wizard} from 'clarity-angular/wizard/wizard';
 
-import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
-import { Wizard } from 'clarity-angular/wizard/wizard';
-import { BroadcastService } from '../service';
-import { Subscription } from 'rxjs/Subscription';
-import { CohortBuilderService, Criteria } from 'generated';
-import { SearchGroup, SearchResult, Modifier } from '../model';
+import {BroadcastService} from '../broadcast.service';
+import {SearchGroup, SearchResult} from '../model';
 
-// tslint:enable:max-line-length
+import {CohortBuilderService, Criteria, Modifier} from 'generated';
+
 
 const CANARY_REQUEST = {
   // Expected number of results as of Wed Sep 20 15:07:46 CDT 2017: 175
@@ -105,5 +106,4 @@ export class WizardModalComponent implements OnInit, OnDestroy {
     this.criteriaListSubscription.unsubscribe();
     this.modifierListSubscription.unsubscribe();
   }
-
 }

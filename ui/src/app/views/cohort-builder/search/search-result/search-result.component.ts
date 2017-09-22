@@ -1,6 +1,7 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core';
-import { SearchResult } from '../model';
-import { BroadcastService } from '../service';
+import {Component, Input, EventEmitter, Output} from '@angular/core';
+
+import {BroadcastService} from '../broadcast.service';
+import {SearchResult} from '../model';
 
 @Component({
   selector: 'app-search-result',
@@ -25,5 +26,4 @@ export class SearchResultComponent {
   selectSearchResult() {
     this.broadcastService.selectSearchResult(this.searchResult);
   }
-
 }
