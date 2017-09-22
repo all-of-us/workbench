@@ -1,12 +1,15 @@
 // UI Component framing the overall app (title and nav).
 // Content is in other Components.
 
-import {environment} from 'environments/environment';
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {Router, NavigationEnd, ActivatedRoute} from '@angular/router';
-import {SignInService, SignInDetails} from 'app/services/sign-in.service';
 import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+
 import {Observable} from 'rxjs/Observable';
+
+import {SignInDetails, SignInService} from 'app/services/sign-in.service';
+import {environment} from 'environments/environment';
+
 import {CohortsService, Configuration, ConfigurationParameters} from 'generated';
 
 declare const gapi: any;
