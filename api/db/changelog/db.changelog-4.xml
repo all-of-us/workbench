@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="blrubenstein" id="changelog-4">
+    <addColumn tableName="workspace">
+      <column name="disease_focused_research" type="boolean"/>
+      <column name="disease_of_focus" type="varchar(80)"/>
+      <column name="methods_development" type="boolean"/>
+      <column name="control_set" type="boolean"/>
+      <column name="aggregate_analysis" type="boolean"/>
+      <column name="ancestry" type="boolean"/>
+      <column name="commercial_purpose" type="boolean"/>
+      <column name="population" type="boolean"/>
+      <column name="population_of_focus" type="varchar(30)"/>
+      <column name="additional_notes" type="varchar(255)"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

@@ -1,15 +1,83 @@
 <h2>Create a new Workspace</h2>
 <div class="form-area">
   <div>
-    <label>Name:</label>
+    <label class="text-label">Name:</label>
     <input type="text" class="input name" name="workspace-name" autofocus
         [(ngModel)]="workspace.name">
   </div>
   <div>
-    <label>Description:</label>
+    <label class="text-label">Description:</label>
     <textarea class="input description" name="workspace-description"
         [(ngModel)]="workspace.description">
     </textarea>
+  </div>
+  <div>
+    <h3>Research Purpose</h3>
+    <!-- TODO: Real description of workspace purpose -->
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+    <section class="form-block">
+      <div class="form-group">
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="disease-focused-research"
+              id="disease-focused-research"
+              [(ngModel)]="this.workspace.researchPurpose.diseaseFocusedResearch">
+            Disease focused research
+          </clr-checkbox>
+          <input type="text" class="input" name="disease-specification"
+              [(ngModel)]="this.workspace.researchPurpose.diseaseOfFocus">
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="methods-development"
+              id="methods-development"
+              [(ngModel)]="this.workspace.researchPurpose.methodsDevelopment">
+            Methods development/validation study
+          </clr-checkbox>
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="control-set"
+              id="control-set"
+              [(ngModel)]="this.workspace.researchPurpose.controlSet">
+            Control set
+          </clr-checkbox>
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="aggregate-analysis"
+              id="aggregate-analysis"
+              [(ngModel)]="this.workspace.researchPurpose.aggregateAnalysis">
+            Aggregate analysis to understand variation in general population
+          </clr-checkbox>
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="ancestry"
+              id="ancestry"
+              [(ngModel)]="this.workspace.researchPurpose.ancestry">
+            Population origins or ancestry
+          </clr-checkbox>
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="commercial-purpose"
+              id="commercial-purpose"
+              [(ngModel)]="this.workspace.researchPurpose.commercialPurpose">
+            Commercial purpose/entity
+          </clr-checkbox>
+        </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="population"
+              id="population"
+              [(ngModel)]="this.workspace.researchPurpose.population">
+            Restricted to a specific population
+          </clr-checkbox>
+          <!-- TODO: Dropdown for population-->
+        </div>
+      </div>
+    </section>
   </div>
   <div class="button">
     <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>

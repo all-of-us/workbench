@@ -1,4 +1,4 @@
-label {
+.text-label {
   display: block;
   padding: 1em 0;
   color: #333;
@@ -11,4 +11,8 @@ label {
 .form-area {
   width: 40em;
   padding: 1em;
+}
+
+.checkbox-group {
+  padding: 1em 0;
 }

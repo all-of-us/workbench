@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
+import {WorkspaceComponent} from 'app/views/workspace/component';
+
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -14,6 +15,8 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceId: string;
   adding = false;
   buttonClicked = false;
+
+
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -24,10 +27,21 @@ export class WorkspaceEditComponent implements OnInit {
     this.workspace = {
       name: '',
       description: '',
-      dataAccessLevel: Workspace.DataAccessLevelEnum.Registered};
+      dataAccessLevel: Workspace.DataAccessLevelEnum.Registered,
+      researchPurpose: {
+        diseaseFocusedResearch: false,
+        methodsDevelopment: false,
+        controlSet: false,
+        aggregateAnalysis: false,
+        ancestry: false,
+        commercialPurpose: false,
+        population: false
+      }};
   }
 
   addWorkspace(): void {
+    console.log(this.workspace);
+
     if (!this.buttonClicked) {
       this.buttonClicked = true;
       this.workspacesService

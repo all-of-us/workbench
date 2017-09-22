@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.Workspace.DataAccessLevelEnum;
 import org.pmiops.workbench.model.WorkspaceListResponse;
@@ -39,6 +40,17 @@ public class WorkspaceController implements WorkspacesApiDelegate {
         @Override
         public Workspace apply(org.pmiops.workbench.db.model.Workspace workspace) {
           FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
+          ResearchPurpose researchPurpose = new ResearchPurpose()
+              .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
+              .diseaseOfFocus(workspace.getDiseaseOfFocus())
+              .methodsDevelopment(workspace.getMethodsDevelopment())
+              .controlSet(workspace.getControlSet())
+              .aggregateAnalysis(workspace.getAggregateAnalysis())
+              .ancestry(workspace.getAncestry())
+              .commercialPurpose(workspace.getCommercialPurpose())
+              .population(workspace.getPopulation())
+              .populationOfFocus(workspace.getPopulationOfFocus())
+              .additionalNotes(workspace.getAdditionalNotes());
           Workspace result = new Workspace()
               .lastModifiedTime(new DateTime(workspace.getLastModifiedTime(), DateTimeZone.UTC))
               .creationTime(new DateTime(workspace.getCreationTime(), DateTimeZone.UTC))
@@ -47,7 +59,8 @@ public class WorkspaceController implements WorkspacesApiDelegate {
               .name(workspace.getName())
               .id(workspaceId.getWorkspaceName())
               .namespace(workspaceId.getWorkspaceNamespace())
-              .description(workspace.getDescription());
+              .description(workspace.getDescription())
+              .researchPurpose(researchPurpose);
           if (workspace.getCreator() != null) {
             result.setCreator(workspace.getCreator().getEmail());
           }
@@ -146,7 +159,16 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    // TODO: handle research purpose
+    dbWorkspace.setDiseaseFocusedResearch(workspace.getResearchPurpose().getDiseaseFocusedResearch());
+    dbWorkspace.setDiseaseOfFocus(workspace.getResearchPurpose().getDiseaseOfFocus());
+    dbWorkspace.setMethodsDevelopment(workspace.getResearchPurpose().getMethodsDevelopment());
+    dbWorkspace.setControlSet(workspace.getResearchPurpose().getControlSet());
+    dbWorkspace.setAggregateAnalysis(workspace.getResearchPurpose().getAggregateAnalysis());
+    dbWorkspace.setAncestry(workspace.getResearchPurpose().getAncestry());
+    dbWorkspace.setCommercialPurpose(workspace.getResearchPurpose().getCommercialPurpose());
+    dbWorkspace.setPopulation(workspace.getResearchPurpose().getPopulation());
+    dbWorkspace.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
+    dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose.getAdditionalNotes());
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));

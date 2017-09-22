@@ -67,6 +67,17 @@ public class Workspace {
   private Timestamp lastModifiedTime;
   private List<Cohort> cohorts;
 
+  private boolean diseaseFocusedResearch;
+  private String diseaseOfFocus;
+  private boolean methodsDevelopment;
+  private boolean controlSet;
+  private boolean aggregateAnalysis;
+  private boolean ancestry;
+  private boolean commercialPurpose;
+  private boolean population;
+  private String populationOfFocus;
+  private String additionalNotes;
+
   @Id
   @GeneratedValue
   @Column(name = "workspace_id")
@@ -160,6 +171,96 @@ public class Workspace {
 
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @Column(name = "disease_focused_research")
+  public boolean getDiseaseFocusedResearch() {
+    return this.diseaseFocusedResearch;
+  }
+
+  public void setDiseaseFocusedResearch(boolean diseaseFocusedResearch) {
+    this.diseaseFocusedResearch = diseaseFocusedResearch;
+  }
+
+  @Column(name = "disease_of_focus")
+  public String getDiseaseOfFocus() {
+    return this.diseaseOfFocus;
+  }
+
+  public void setDiseaseOfFocus(String diseaseOfFocus) {
+    this.diseaseOfFocus = diseaseOfFocus;
+  }
+
+  @Column(name = "methods_development")
+  public boolean getMethodsDevelopment() {
+    return this.methodsDevelopment;
+  }
+
+  public void setMethodsDevelopment(boolean methodsDevelopment) {
+    this.methodsDevelopment = methodsDevelopment;
+  }
+
+  @Column(name = "control_set")
+  public boolean getControlSet() {
+    return this.controlSet;
+  }
+
+  public void setControlSet(boolean controlSet) {
+    this.controlSet = controlSet;
+  }
+
+  @Column(name = "aggregate_analysis")
+  public boolean getAggregateAnalysis() {
+    return this.aggregateAnalysis;
+  }
+
+  public void setAggregateAnalysis(boolean aggregateAnalysis) {
+    this.aggregateAnalysis = aggregateAnalysis;
+  }
+
+  @Column(name = "ancestry")
+  public boolean getAncestry() {
+    return this.ancestry;
+  }
+
+  public void setAncestry(boolean ancestry) {
+    this.ancestry = ancestry;
+  }
+
+  @Column(name = "commercial_purpose")
+  public boolean getCommercialPurpose() {
+    return this.commercialPurpose;
+  }
+
+  public void setCommercialPurpose(boolean commercialPurpose) {
+    this.commercialPurpose = commercialPurpose;
+  }
+
+  @Column(name = "population")
+  public boolean getPopulation() {
+    return this.population;
+  }
+
+  public void setPopulation(boolean population) {
+    this.population = population;
+  }
+
+  @Column(name = "population_of_focus")
+  public String getPopulationOfFocus() {
+    return this.populationOfFocus;
+  }
+
+  public void setPopulationOfFocus(String populationOfFocus) {
+    this.populationOfFocus = populationOfFocus;
+  }
+
+  @Column(name = "additional_notes")
+  public String getAdditionalNotes() {
+    return this.additionalNotes;
+  }
+
+  public void setAdditionalNotes(String additionalNotes) {
+    this.additionalNotes = additionalNotes;
   }
 
   @OneToMany(mappedBy = "workspaceId")
