@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.7
+      - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -10,10 +10,8 @@ jobs:
     steps:
       - checkout
       - run:
-          working_directory: ~/workbench/api
-          name: Fetch submodules
-          command: |
-            git submodule update --init
+          name: Fetch Submodules
+          command: git submodule update --init
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -35,16 +33,14 @@ jobs:
             fi
   build_and_test_and_deploy_ui:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.7
+      - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
     environment: []
     steps:
       - checkout
       - run:
-          working_directory: ~/workbench/ui
-          name: Fetch submodules
-          command: |
-            git submodule update --init
+          name: Fetch Submodules
+          command: git submodule update --init
       - run:
           working_directory: ~/workbench
           name: Download Swagger CLI
@@ -72,6 +68,25 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy.sh ui
             fi
+  test_client:
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.8
+    working_directory: ~/workbench
+    environment: []
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init
+      - run:
+          name: Generate Swagger Python Client
+          command: client/project.rb swagger-regen
+      - run:
+          name: Lint
+          command: client/project.rb pylint
+      - run:
+          name: Test Python Client
+          command: client/project.rb test
 
 workflows:
   version: 2
@@ -79,3 +94,4 @@ workflows:
     jobs:
       - build_and_test_and_deploy_api
       - build_and_test_and_deploy_ui
+      - test_client
