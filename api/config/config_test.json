@@ -2,5 +2,9 @@
 {
   "firecloud": {
     "debugEndpoints": false
+  },
+  "bigquery": {
+    "dataSetId": "synpuf",
+    "projectId": "pmi-drc-api-test"
   }
 }

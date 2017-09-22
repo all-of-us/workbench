@@ -9,16 +9,17 @@ import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.api.util.SQLGenerator;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.Subject;
 import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.security.auth.Subject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,16 +28,16 @@ import java.util.logging.Logger;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
-    @Autowired
-    private SQLGenerator generator;
+    private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
-    @Value("${bigQuery.projectId}")
-    private String bigQueryProjectId;
+    @Autowired
+    WorkbenchConfig workbenchConfig;
 
     @Autowired
     BigQuery bigquery;
 
-    private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
+    @Autowired
+    SQLGenerator generator;
 
     public static final String CRITERIA_QUERY =
             "SELECT id,\n" +
@@ -153,7 +154,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected Map<String, Integer> getResultMapper(QueryResult result) {
-        Map<String, Integer> resultMapper = new HashMap<>();
+        Map<String, Integer> resultMapper = new HashMap<String, Integer>();
         int i = 0;
         for (Field field : result.getSchema().getFields()) {
             resultMapper.put(field.getName(), i++);
@@ -162,14 +163,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     protected String getQueryString(String type) {
-        return String.format(CRITERIA_QUERY, bigQueryProjectId, dataSetId, type + "_criteria");
-    }
-
-    public String getDataSetId() {
-        return dataSetId;
-    }
-
-    public String getBigQueryProjectId() {
-        return bigQueryProjectId;
+        return String.format(CRITERIA_QUERY,
+                workbenchConfig.bigquery.projectId,
+                workbenchConfig.bigquery.dataSetId,
+                type + "_criteria");
     }
 }
