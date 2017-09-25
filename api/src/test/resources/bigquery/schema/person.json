@@ -1,0 +1,32 @@
+{
+  "fields":
+  [
+    {
+      "name":"person_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"gender_source_value",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"race_source_value",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    }
+  ]
+}
