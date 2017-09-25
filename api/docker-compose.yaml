@@ -27,6 +27,7 @@ services:
   db-migration:
     build:
       context: ./src/dev/server
+    user: ${UID}
     working_dir: /w/db
     volumes:
       - gradle-cache:/.gradle
@@ -37,6 +38,7 @@ services:
   update-config:
     build:
      context: ./src/dev/server
+    user: ${UID}
     working_dir: /w
     volumes:
       - gradle-cache:/.gradle
