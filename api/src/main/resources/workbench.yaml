@@ -354,6 +354,25 @@ paths:
                 schema:
                   $ref: "#/definitions/CriteriaListResponse"
 
+  /api/v1/cohort-builder/search:
+    post:
+      tags:
+        - cohortBuilder
+      description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
+      operationId: "searchSubjects"
+      parameters:
+        - in: body
+          name: request
+          description: object of parameters by which to perform the search
+          schema:
+            $ref: "#/definitions/SearchRequest"
+          required: true
+      responses:
+        "200":
+          description: A collection of subjects
+          schema:
+            $ref: "#/definitions/SubjectListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -584,3 +603,101 @@ definitions:
       domainId:
         description: clue to determine which tables to search
         type: string
+
+  SearchRequest:
+    type: object
+    required:
+      - type
+      - searchParameters
+      - modifiers
+    properties:
+      type:
+        description: type of criteria
+        type: string
+      searchParameters:
+        description: criteria by category code
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchParameter"
+      modifiers:
+        description: criteria by operation or predicate
+        type: "array"
+        items:
+          $ref: "#/definitions/Modifier"
+    example:
+      {
+        type: "ICD9",
+        searchParameters: [
+          { code: "E9293", domainId: "Condition" },
+          { code: "E979-E979.9", domainId: null }
+        ],
+        modifiers: [
+          { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
+        ]
+      }
+
+  SearchParameter:
+    type: object
+    required:
+      - code
+      - domainId
+    properties:
+      code:
+        description: The Code of the Criteria within its Category Tree
+        type: string
+      domainId:
+        description: The Domain ID of the Criteria if applicable
+        type: string
+    examples:
+      leafExample:
+        code: "E9293"
+        domainId: "Condition"
+      parentExample:
+        code: "E979-E979.9"
+        domainId: null
+
+  Modifier:
+    type: object
+    required:
+      - name
+      - operator
+      - values
+    properties:
+      name:
+        type: string
+      operator:
+        type: string
+      operands:
+        type: "array"
+        items:
+          type: string
+    example:
+      name: "age_at_event"
+      operator: "GTE >="
+      operands: [ "Arg1", "Arg2" ]
+
+  SubjectListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Subject"
+    example:
+      [ 
+        { val: "12345,1,5" },
+        { val: "67890,2,1" }
+      ]
+
+  Subject:
+    type: object
+    required:
+      - val
+    properties:
+      val:
+        description: A String of Subject ID, Gender Code, Ethnicity Code
+        type: string
+    example:
+      val: "12345,1,5"

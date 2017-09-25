@@ -1,0 +1,32 @@
+{
+  "fields":
+  [
+    {
+      "name":"concept_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"vocabulary_id",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"concept_code",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    }
+  ]
+}

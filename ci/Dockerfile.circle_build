@@ -1,8 +1,12 @@
-# To build and deploy:
+# To build and deploy, from this directory:
 # $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-X.Y.Z .
-# Update BOTH the api and ui versions of allofustest/workbench:buildimage-X.Y.Z
-# in .circleci/circle.yml by incrementing the numbers. Using the new values, run:
+# Test out the new image with:
+# $ docker run -it allofustest/workbench:buildimage-X.Y.Z /bin/bash
+# Update all mentions of allofustest/workbench:buildimage-X.Y.Z in
+# .circleci/circle.yml by incrementing the numbers. Using the new values, run:
+# $ docker login  # interactive prompts
 # $ docker push allofustest/workbench:buildimage-X.Y.Z
+# For permission to push, request to be added to the DockerHub repository.
 # Include your changes to circle.yml in the PR that uses the build image.
 
 FROM circleci/openjdk:8-jdk-browsers
@@ -22,7 +26,9 @@ RUN cd && \
   mv node-v6.11.1-linux-x64 node && \
   rm -rf node.tar.xz
 
-RUN sudo apt-get install gettext ruby mysql-client
+RUN sudo apt-get install gettext ruby mysql-client python-pip
+RUN sudo pip install --upgrade pip
+RUN sudo pip install --upgrade pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
 

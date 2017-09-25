@@ -1,15 +1,26 @@
-// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
-// https://github.com/palantir/tslint/pull/3099
-// tslint:disable:max-line-length
+import {
+  Component, ComponentRef,
+  OnDestroy, OnInit,
+  ViewChild, ViewEncapsulation
+} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
+import {Wizard} from 'clarity-angular/wizard/wizard';
 
-import { Component, OnInit, ViewChild, ViewEncapsulation, OnDestroy, ComponentRef } from '@angular/core';
-import { Wizard } from 'clarity-angular/wizard/wizard';
-import { SearchGroup, SearchResult, Modifier } from '../model';
-import { BroadcastService, SearchService } from '../service';
-import { Subscription } from 'rxjs/Subscription';
-import { Criteria } from 'generated';
+import {BroadcastService} from '../broadcast.service';
+import {SearchGroup, SearchResult} from '../model';
 
-// tslint:enable:max-line-length
+import {CohortBuilderService, Criteria, Modifier} from 'generated';
+
+
+const CANARY_REQUEST = {
+  // Expected number of results as of Wed Sep 20 15:07:46 CDT 2017: 175
+  type: 'ICD9',
+  searchParameters: [
+    { code: 'E9293', domainId: 'Condition' },
+    { code: '7831', domainId: 'Measurement' },
+  ],
+  modifiers: []
+};
 
 @Component({
   selector: 'app-wizard-modal',
@@ -32,7 +43,7 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   private modifierListSubscription: Subscription;
 
   constructor(private broadcastService: BroadcastService,
-              private searchService: SearchService) { }
+              private searchService: CohortBuilderService) { }
 
   ngOnInit() {
     this.criteriaTypeSubscription = this.broadcastService.selectedCriteriaType$
@@ -69,6 +80,13 @@ export class WizardModalComponent implements OnInit, OnDestroy {
     //     this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
     //     this.wizardModalRef.destroy();
     //   });
+
+    // FIXME: this is a Canary call using canary data, NOT an actual implementation
+    this.searchGroupSubscription = this.searchService.searchSubjects(CANARY_REQUEST)
+      .subscribe(resp => console.log(resp));
+
+    this.searchService.searchSubjects({...CANARY_REQUEST, type: 'nonsense'})
+      .subscribe(resp => console.log(resp));
   }
 
   updateOrCreateSearchResult() {
@@ -88,5 +106,4 @@ export class WizardModalComponent implements OnInit, OnDestroy {
     this.criteriaListSubscription.unsubscribe();
     this.modifierListSubscription.unsubscribe();
   }
-
 }

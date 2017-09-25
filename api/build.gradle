@@ -13,7 +13,7 @@ task generateApi {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
     config.setOutputDir("$projectDir")
-    config.setTemplateDir("$swaggerTemplateDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
     config.setAdditionalProperties([
             'apiPackage'     : 'org.pmiops.workbench.api',
@@ -37,7 +37,7 @@ task generateFireCloudClient {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$fireCloudApiFile")
     config.setOutputDir("$projectDir")
-    config.setTemplateDir("$swaggerTemplateDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
     config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.firecloud',

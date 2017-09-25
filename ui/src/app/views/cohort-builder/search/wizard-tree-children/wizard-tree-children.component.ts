@@ -1,8 +1,8 @@
-import { Component, OnInit, Input, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { BroadcastService } from '../service';
-import { SearchParameter } from '../model';
-import { Subscription } from 'rxjs/Subscription';
-import { CohortBuilderService, Criteria } from 'generated';
+import {Component, OnDestroy, OnInit, Input, ViewEncapsulation} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
+
+import {BroadcastService} from '../broadcast.service';
+import {CohortBuilderService, Criteria, SearchParameter} from 'generated';
 
 @Component({
   selector: 'app-wizard-tree-children',
@@ -35,13 +35,12 @@ export class WizardTreeChildrenComponent implements OnInit, OnDestroy {
     if (!criteria['searchParameters']) {
       newCriteria = { searchParameters: [], ...criteria } as Criteria;
     }
-
-    newCriteria['searchParameters'].push(new SearchParameter(criteria.code, criteria.domainId));
+    const {code, domainId} = criteria;
+    newCriteria['searchParameters'].push(<SearchParameter>{code, domainId});
     this.broadcastService.selectCriteria(newCriteria);
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-
 }

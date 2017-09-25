@@ -1,7 +1,8 @@
 import {Component, OnInit, ViewChild, Input, OnDestroy} from '@angular/core';
-import { GoogleChartDirective } from '../google-chart/google-chart.directive';
 import 'rxjs/add/operator/takeWhile';
-import { BroadcastService } from '../service/broadcast.service';
+
+import {BroadcastService} from '../broadcast.service';
+import {GoogleChartDirective} from '../google-chart/google-chart.directive';
 
 @Component({
   selector: 'app-gender-chart',
@@ -52,5 +53,4 @@ export class GenderChartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.alive = false;
   }
-
 }

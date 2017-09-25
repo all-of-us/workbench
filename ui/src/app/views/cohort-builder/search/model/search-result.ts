@@ -1,9 +1,9 @@
-import { Modifier, Subject, SearchParameter } from './';
-import { SearchResponse } from './search-response';
-import { Criteria } from 'generated';
+import {
+  Criteria, Modifier,
+  SearchParameter, SubjectListResponse, Subject
+} from 'generated';
 
 export class SearchResult {
-
   id: number;
   description: string;
   searchType: string;
@@ -30,14 +30,16 @@ export class SearchResult {
     this.count = -1;
     for (const criteria of this.criteriaList) {
       this.searchType = criteria.type;
-      this.values.push(new SearchParameter(
-          criteria.code, criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId));
+      this.values.push(<SearchParameter>{
+        code: criteria.code,
+        domainId: criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId
+      });
     }
   }
 
-  updateWithResponse(response: SearchResponse) {
-    this.resultSet = response.subjectList;
-    this.count = response.subjectList.length;
+  updateWithResponse(response: SubjectListResponse) {
+    this.resultSet = response.items;
+    this.count = response.items.length;
   }
 
   displayValues(): string {
