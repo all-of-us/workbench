@@ -19,6 +19,7 @@ import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import javax.inject.Provider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +32,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     @Autowired
-    WorkbenchConfig workbenchConfig;
+    private Provider<WorkbenchConfig> workbenchConfig;
 
     @Autowired
-    BigQuery bigquery;
+    private BigQuery bigquery;
 
     @Autowired
     SQLGenerator generator;
@@ -164,8 +165,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     protected String getQueryString(String type) {
         return String.format(CRITERIA_QUERY,
-                workbenchConfig.bigquery.projectId,
-                workbenchConfig.bigquery.dataSetId,
+                workbenchConfig.get().bigquery.projectId,
+                workbenchConfig.get().bigquery.dataSetId,
                 type + "_criteria");
     }
 }

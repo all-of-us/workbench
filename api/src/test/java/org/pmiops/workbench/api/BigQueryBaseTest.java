@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.config.TestBigQueryConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -20,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {TestBigQueryConfig.class})
 public class BigQueryBaseTest {
 
