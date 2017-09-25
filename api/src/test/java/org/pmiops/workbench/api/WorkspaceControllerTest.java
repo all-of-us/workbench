@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -62,10 +63,20 @@ public class WorkspaceControllerTest {
 
   @Test
   public void testCreateWorkspace() throws Exception {
+    ResearchPurpose researchPurpose = new ResearchPurpose();
+    researchPurpose.setDiseaseFocusedResearch(false);
+    researchPurpose.setMethodsDevelopment(false);
+    researchPurpose.setControlSet(false);
+    researchPurpose.setAggregateAnalysis(false);
+    researchPurpose.setAncestry(false);
+    researchPurpose.setCommercialPurpose(false);
+    researchPurpose.setPopulation(false);
+
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setDescription("description");
     workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
+    workspace.setResearchPurpose(researchPurpose);
     workspaceController.createWorkspace(workspace);
 
     Workspace workspace2 =
