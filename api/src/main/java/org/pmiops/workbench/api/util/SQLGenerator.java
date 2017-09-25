@@ -39,13 +39,15 @@ public class SQLGenerator {
      *  - the *_SOURCE_CONCEPT_ID column identifier for that table
      *  - the *_SOURCE_VALUE column identifier for that table
      *  - a BigQuery "named parameter" indicating the list of codes to search by
+     *  See the link below about IN and UNNEST
++    * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
      */
     private static final String SUBQUERY_TEMPLATE =
             "SELECT DISTINCT PERSON_ID " +
                     "FROM `%s.%s.%s` a, `%s.%s.%s` b "+
                     "WHERE a.%s = b.CONCEPT_ID "+
                     "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                    "AND b.%s IN (%s)";
+                    "AND b.CONCEPT_CODE IN UNNEST(%s)";
 
     private static final Map<String, String> typeCM = new HashMap<>();
     private static final Map<String, String> typeProc = new HashMap<>();
@@ -62,7 +64,6 @@ public class SQLGenerator {
         Map<String, String> table = new HashMap<>();
         table.put("tableName", "condition_occurrence");
         table.put("sourceConceptIdColumn", "CONDITION_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "CONCEPT_CODE");
         tableInfo.put("Condition", table);
 
         table = new HashMap<>();
@@ -120,7 +121,7 @@ public class SQLGenerator {
         }
         queryBuilder.append(String.join(" OR ", queryParts));
         queryBuilder.append(") ");
-        queryBuilder.append("AND is_selectable = 1 AND is_group = 0 ");
+        queryBuilder.append("AND is_selectable = TRUE AND is_group = FALSE ");
         queryBuilder.append("ORDER BY code ASC");
 
         QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
@@ -150,10 +151,10 @@ public class SQLGenerator {
         queryParams.put("proc", QueryParameterValue.string(typeProc.get(type)));
 
         for (String key : paramMap.keySet()) {
-            List<String> values = paramMap.get(key);
-            String codes = String.join(", ", values);
+            List<String> rawValues = paramMap.get(key);
+            String[] values = rawValues.toArray(new String[rawValues.size()]);
             String subquery = getSubQuery(key);
-            queryParams.put(key+"codes", QueryParameterValue.string(codes));
+            queryParams.put(key + "codes", QueryParameterValue.array(values, String.class));
             queryParts.add(subquery);
         }
 
@@ -197,7 +198,6 @@ public class SQLGenerator {
                 workbenchConfig.get().bigquery.dataSetId,
                 "CONCEPT",
                 info.get("sourceConceptIdColumn"),
-                info.get("sourceValueColumn"),
                 "@" + key + "codes"
         );
     }
