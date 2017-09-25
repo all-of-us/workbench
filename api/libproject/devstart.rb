@@ -45,6 +45,7 @@ end
 def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
+  ENV["UID"] = "#{Process.euid}"
 
   account = get_auth_login_account()
   if account == nil
@@ -55,9 +56,17 @@ def dev_up(*args)
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-migration}
+  common.run_inline [
+    "docker-compose", "run", "--no-deps", "api", "sh", "-c",
+    "cd /w/db && wait-for db:3306 -- ./run-migrations.sh"
+  ]
+
   common.status "Updating configuration..."
-  common.run_inline %W{docker-compose run update-config}
+  common.run_inline [
+    "docker-compose", "run", "--no-deps", "api", "sh", "-c",
+    "wait-for db:3306 -- ./gradlew tools:loadConfig"
+  ]
+
   run_api(account)
 end
 
