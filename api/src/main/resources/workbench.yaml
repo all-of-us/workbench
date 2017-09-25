@@ -434,12 +434,53 @@ definitions:
       dataAccessLevel:
         type: string
         enum: *DATA_ACCESS_LEVEL
+      researchPurpose:
+        $ref: "#/definitions/ResearchPurpose"
       creationTime:
         type: string
         format: date-time
       lastModifiedTime:
         type: string
         format: date-time
+
+  ResearchPurpose:
+    type: object
+    required:
+     - diseaseFocusedResearch
+     - methodsDevelopment
+     - controlSet
+     - aggregateAnalysis
+     - ancestry
+     - commercialPurpose
+     - population
+    properties:
+      diseaseFocusedResearch:
+        type: boolean
+        default: false
+      diseaseOfFocus:
+        type: string
+      methodsDevelopment:
+        type: boolean
+        default: false
+      controlSet:
+        type: boolean
+        default: false
+      aggregateAnalysis:
+        type: boolean
+        default: false
+      ancestry:
+        type: boolean
+        default: false
+      commercialPurpose:
+        type: boolean
+        default: false
+      population:
+        type: boolean
+        default: false
+      populationOfFocus:
+        type: string
+      additionalNotes:
+        type: string
 
   CohortListResponse:
     type: object
@@ -686,7 +727,7 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
     example:
-      [ 
+      [
         { val: "12345,1,5" },
         { val: "67890,2,1" }
       ]

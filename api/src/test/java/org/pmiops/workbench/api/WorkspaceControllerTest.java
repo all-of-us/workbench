@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -60,12 +61,31 @@ public class WorkspaceControllerTest {
         userProvider, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
-  @Test
-  public void testCreateWorkspace() throws Exception {
+  public Workspace createDefaultWorkspace() {
+    ResearchPurpose researchPurpose = new ResearchPurpose();
+    researchPurpose.setDiseaseFocusedResearch(true);
+    researchPurpose.setDiseaseOfFocus("cancer");
+    researchPurpose.setMethodsDevelopment(true);
+    researchPurpose.setControlSet(true);
+    researchPurpose.setAggregateAnalysis(true);
+    researchPurpose.setAncestry(true);
+    researchPurpose.setCommercialPurpose(true);
+    researchPurpose.setPopulation(true);
+    researchPurpose.setPopulationOfFocus("population");
+    researchPurpose.setAdditionalNotes("additional notes");
+
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setDescription("description");
     workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
+    workspace.setResearchPurpose(researchPurpose);
+
+    return workspace;
+  }
+
+  @Test
+  public void testCreateWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
     workspaceController.createWorkspace(workspace);
 
     Workspace workspace2 =
@@ -79,5 +99,15 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
     assertThat(workspace2.getNamespace()).isEqualTo("allofus-name");
+    assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
+    assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getControlSet()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getAggregateAnalysis()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getAncestry()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getCommercialPurpose()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
+    assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
   }
 }
