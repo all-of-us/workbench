@@ -168,7 +168,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     dbWorkspace.setCommercialPurpose(workspace.getResearchPurpose().getCommercialPurpose());
     dbWorkspace.setPopulation(workspace.getResearchPurpose().getPopulation());
     dbWorkspace.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
-    dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose.getAdditionalNotes());
+    dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
