@@ -2,24 +2,29 @@ package org.pmiops.workbench.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.Dataset;
+import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.InsertAllRequest;
+import com.google.cloud.bigquery.InsertAllResponse;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.StandardTableDefinition;
+import com.google.cloud.bigquery.TableId;
+import com.google.cloud.bigquery.TableInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.junit.After;
-import org.junit.Before;
-import org.pmiops.workbench.api.config.TestBigQueryConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.pmiops.workbench.api.config.TestBigQueryConfig;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.test.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = {TestBigQueryConfig.class})
 public abstract class BigQueryBaseTest {
@@ -31,8 +36,6 @@ public abstract class BigQueryBaseTest {
 
     @Autowired
     WorkbenchConfig workbenchConfig;
-
-    public static final String BASE_PATH = "src/test/resources/bigquery/";
 
     @Before
     public void setUp() throws Exception {
@@ -59,8 +62,8 @@ public abstract class BigQueryBaseTest {
 
     private void createTable(String dataSetId, String tableId) throws Exception {
         ObjectMapper jackson = new ObjectMapper();
-        String rawJson =
-                new String(Files.readAllBytes(Paths.get(BASE_PATH + "schema/" + tableId.toLowerCase() + ".json")), Charset.defaultCharset());
+        String rawJson = FileUtils.readFileContents(
+            "bigquery/schema/" + tableId.toLowerCase() + ".json");
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();
@@ -71,8 +74,8 @@ public abstract class BigQueryBaseTest {
 
     private boolean insertData(String dataSetId, String tableId) throws Exception {
         ObjectMapper jackson = new ObjectMapper();
-        String rawJson =
-                new String(Files.readAllBytes(Paths.get(BASE_PATH + "data/" + tableId.toLowerCase() + "_data.json")), Charset.defaultCharset());
+        String rawJson = FileUtils.readFileContents(
+            "bigquery/data/" + tableId.toLowerCase() + "_data.json");
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();

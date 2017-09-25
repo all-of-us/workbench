@@ -7,6 +7,8 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.io.InputStream;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -21,8 +23,12 @@ public class TestBigQueryConfig {
 
     @Bean
     public BigQuery bigQueryService() throws Exception {
-        GoogleCredentials credentials = ServiceAccountCredentials
-                .fromStream(new FileInputStream(new File("bq-test-key.json")));
+        InputStream keyStream = TestBigQueryConfig.class.getClassLoader().getResourceAsStream(
+            "bq-test-key.json");
+        if (keyStream == null) {
+            throw new IOException("Couldn't find bq-test-key.json");
+        }
+        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(keyStream);
 
         return BigQueryOptions.newBuilder()
                 .setProjectId("all-of-us-workbench-test")
