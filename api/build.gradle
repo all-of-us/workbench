@@ -92,6 +92,13 @@ sourceSets {
       srcDir "db"
       include "changelog/*.xml"
     }
+    resources {
+      srcDir "test/resources"
+      include "bigquery/**"
+      include "bq-test-key.json"
+      //include "application.properties"
+    }
+
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
