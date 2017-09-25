@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
@@ -10,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.google.common.truth.Truth.assertThat;
 
+@RunWith(SpringJUnit4ClassRunner.class)
 @Import(CohortBuilderController.class)
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
