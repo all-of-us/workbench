@@ -5,6 +5,8 @@ require "optparse"
 require "tempfile"
 require "fileutils"
 
+ENV["UID"] = "#{Process.euid}"
+
 class ProjectAndAccountOptions
   attr_accessor :project
   attr_accessor :account
@@ -45,7 +47,6 @@ end
 def dev_up(*args)
   common = Common.new
   common.docker.requires_docker
-  ENV["UID"] = "#{Process.euid}"
 
   account = get_auth_login_account()
   if account == nil
