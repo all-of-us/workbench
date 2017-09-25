@@ -1,11 +1,13 @@
-{
-  "is_selectable":false,
-  "domain_id":"Condition",
-  "code":"001.1",
-  "parent_id":0,
-  "name":"Cholera",
-  "id":1,
-  "est_count":10,
-  "type":"ICD9",
-  "is_group":true
-}
+[
+  {
+    "is_selectable":false,
+    "domain_id":"Condition",
+    "code":"001.1",
+    "parent_id":0,
+    "name":"Cholera",
+    "id":1,
+    "est_count":10,
+    "type":"ICD9",
+    "is_group":true
+  }
+]
