@@ -5,6 +5,8 @@ require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require_relative "../../libproject/swagger"
 
+ENV["UID"] = "#{Process.euid}"
+
 def install_dependencies()
   common = Common.new
   common.docker.requires_docker
@@ -52,6 +54,7 @@ def dev_up(*args)
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
+  swagger_regen()
   common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
