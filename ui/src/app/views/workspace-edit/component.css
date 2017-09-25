@@ -1,6 +1,6 @@
 .text-label {
   display: block;
-  padding: 1em 0;
+  padding: 1rem 0;
   color: #333;
 }
 
@@ -10,9 +10,9 @@
 
 .form-area {
   width: 40em;
-  padding: 1em;
+  padding: 1rem;
 }
 
 .checkbox-group {
-  padding: 1em 0;
+  padding: 1rem 0;
 }

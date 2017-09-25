@@ -40,8 +40,6 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    console.log(this.workspace);
-
     if (!this.buttonClicked) {
       this.buttonClicked = true;
       this.workspacesService

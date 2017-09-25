@@ -6,16 +6,22 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="blrubenstein" id="changelog-4">
     <addColumn tableName="workspace">
-      <column name="disease_focused_research" type="boolean"/>
-      <column name="disease_of_focus" type="varchar(80)"/>
-      <column name="methods_development" type="boolean"/>
-      <column name="control_set" type="boolean"/>
-      <column name="aggregate_analysis" type="boolean"/>
-      <column name="ancestry" type="boolean"/>
-      <column name="commercial_purpose" type="boolean"/>
-      <column name="population" type="boolean"/>
-      <column name="population_of_focus" type="varchar(30)"/>
-      <column name="additional_notes" type="varchar(255)"/>
+      <column name="rp_disease_focused_research" type="boolean"/>
+      <!-- This is a single line of text about the disease of focus.
+      80 Characters should be sufficient. -->
+      <column name="rp_disease_of_focus" type="varchar(80)"/>
+      <column name="rp_methods_development" type="boolean"/>
+      <column name="rp_control_set" type="boolean"/>
+      <column name="rp_aggregate_analysis" type="boolean"/>
+      <column name="rp_ancestry" type="boolean"/>
+      <column name="rp_commercial_purpose" type="boolean"/>
+      <column name="rp_population" type="boolean"/>
+      <!-- This will eventually be a dropdown of options. 30 characters
+      should be enough to cover any option we put there, but if it is
+      not we can increase column size then. -->
+      <column name="rp_population_of_focus" type="varchar(30)"/>
+      <!-- This is an open text field, could be long. -->
+      <column name="rp_additional_notes" type="varchar(1024)"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

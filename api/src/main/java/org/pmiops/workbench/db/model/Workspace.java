@@ -173,7 +173,7 @@ public class Workspace {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @Column(name = "disease_focused_research")
+  @Column(name = "rp_disease_focused_research")
   public boolean getDiseaseFocusedResearch() {
     return this.diseaseFocusedResearch;
   }
@@ -182,7 +182,7 @@ public class Workspace {
     this.diseaseFocusedResearch = diseaseFocusedResearch;
   }
 
-  @Column(name = "disease_of_focus")
+  @Column(name = "rp_disease_of_focus")
   public String getDiseaseOfFocus() {
     return this.diseaseOfFocus;
   }
@@ -191,7 +191,7 @@ public class Workspace {
     this.diseaseOfFocus = diseaseOfFocus;
   }
 
-  @Column(name = "methods_development")
+  @Column(name = "rp_methods_development")
   public boolean getMethodsDevelopment() {
     return this.methodsDevelopment;
   }
@@ -200,7 +200,7 @@ public class Workspace {
     this.methodsDevelopment = methodsDevelopment;
   }
 
-  @Column(name = "control_set")
+  @Column(name = "rp_control_set")
   public boolean getControlSet() {
     return this.controlSet;
   }
@@ -209,7 +209,7 @@ public class Workspace {
     this.controlSet = controlSet;
   }
 
-  @Column(name = "aggregate_analysis")
+  @Column(name = "rp_aggregate_analysis")
   public boolean getAggregateAnalysis() {
     return this.aggregateAnalysis;
   }
@@ -218,7 +218,7 @@ public class Workspace {
     this.aggregateAnalysis = aggregateAnalysis;
   }
 
-  @Column(name = "ancestry")
+  @Column(name = "rp_ancestry")
   public boolean getAncestry() {
     return this.ancestry;
   }
@@ -227,7 +227,7 @@ public class Workspace {
     this.ancestry = ancestry;
   }
 
-  @Column(name = "commercial_purpose")
+  @Column(name = "rp_commercial_purpose")
   public boolean getCommercialPurpose() {
     return this.commercialPurpose;
   }
@@ -236,7 +236,7 @@ public class Workspace {
     this.commercialPurpose = commercialPurpose;
   }
 
-  @Column(name = "population")
+  @Column(name = "rp_population")
   public boolean getPopulation() {
     return this.population;
   }
@@ -245,7 +245,7 @@ public class Workspace {
     this.population = population;
   }
 
-  @Column(name = "population_of_focus")
+  @Column(name = "rp_population_of_focus")
   public String getPopulationOfFocus() {
     return this.populationOfFocus;
   }
@@ -254,7 +254,7 @@ public class Workspace {
     this.populationOfFocus = populationOfFocus;
   }
 
-  @Column(name = "additional_notes")
+  @Column(name = "rp_additional_notes")
   public String getAdditionalNotes() {
     return this.additionalNotes;
   }
