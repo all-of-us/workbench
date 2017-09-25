@@ -1,6 +1,9 @@
 # A subset of the FireCloud API spec that we use to generate Java client libraries. The
 # original API spec can be found here:
 # https://github.com/broadinstitute/firecloud-orchestration/blob/develop/src/main/resources/swagger/api-docs.yaml
+# WorkspaceResponse and its children are not in the current FC API spec and can be found in the
+# Rawls spec here:
+# https://github.com/broadinstitute/rawls/blob/develop/core/src/main/resources/swagger/rawls.yaml#L5034
 
 swagger: '2.0'
 
@@ -145,6 +148,86 @@ paths:
         500:
           description: Internal Server Error
 
+  /api/workspaces:
+    get:
+      tags:
+      - Workspaces
+      operationId: listWorkspaces
+      summary: |
+        Lists workspaces.
+      produces:
+        - application/json
+        - text/plain
+      responses:
+        200:
+          description: List of workspaces.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/WorkspaceResponse'
+    post:
+      tags:
+        - Workspaces
+      operationId: createWorkspace
+      summary: Create workspace
+      parameters:
+        - name: workspace
+          description: New workspace information
+          required: true
+          in: body
+          schema:
+            type: object
+            $ref: '#/definitions/WorkspaceIngest'
+      responses:
+        200:
+          description: No response was specified
+        201:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/Workspace'
+        403:
+          description: Unable to create bucket for workspace
+        409:
+          description: Workspace by that name already exists
+        500:
+          description: Internal Server Error
+
+  /api/workspaces/{workspaceNamespace}/{workspaceName}:
+    get:
+      tags:
+        - Workspaces
+      operationId: getWorkspace
+      summary: Get workspace
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/Workspace'
+        404:
+          description: Workspace does not exist
+        500:
+          description: Internal Server Error
+    delete:
+      tags:
+        - Workspaces
+      operationId: deleteWorkspace
+      summary: Delete workspace
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+      responses:
+        202:
+          description: Request Accepted
+        403:
+          description: User does not have correct permissions to delete a published workspace
+        404:
+          description: Workspace does not exist
+        500:
+          description: Internal Server Error
+
   /me:
     get:
       tags:
@@ -186,6 +269,23 @@ paths:
             description: Bad request
           500:
             description: Internal server error
+
+##########################################################################################
+## PARAMETERS
+##########################################################################################
+parameters:
+  workspaceNamespaceParam:
+    name: workspaceNamespace
+    description: Workspace Namespace
+    required: true
+    type: string
+    in: path
+  workspaceNameParam:
+    name: workspaceName
+    description: Workspace Name
+    required: true
+    type: string
+    in: path
 
 ##########################################################################################
 ## DEFINITIONS
@@ -269,6 +369,15 @@ definitions:
         items:
           $ref: '#/definitions/StackTraceElement'
 
+  ManagedGroupRef:
+    description: a reference to a group that can be managed by users
+    type: object
+    required:
+      - membersGroupName
+    properties:
+      membersGroupName:
+        type: string
+
   Me:
     type: object
     properties:
@@ -276,6 +385,7 @@ definitions:
         $ref: '#/definitions/UserInfo'
       enabled:
         $ref: '#/definitions/Enabled'
+
   Profile:
       type: object
       properties:
@@ -290,7 +400,7 @@ definitions:
           description: User's title
         contactEmail:
           type: string
-          description: User's contact email
+          description: User's contact email (if different from account email)
         institute:
           type: string
           description: User's home institution
@@ -299,19 +409,30 @@ definitions:
           description: User's institutional program
         programLocationCity:
           type: string
-          description: City where the program is run
+          description: User's program location city
         programLocationState:
           type: string
-          description: State where the program is run
+          description: User's program location state
         programLocationCountry:
           type: string
-          description: Country where the program is run
+          description: User's program location country
         pi:
           type: string
-          description: Principal investigator for the program
+          description: Principal Investigator
         nonProfitStatus:
           type: string
-          description: Non-profit status of the institution
+          description: User's program non-profit status
+      required:
+        - firstName
+        - lastName
+        - title
+        - institute
+        - institutionalProgram
+        - programLocationCity
+        - programLocationState
+        - programLocationCountry
+        - pi
+        - nonProfitStatus
 
   StackTraceElement:
       description: ''
@@ -344,3 +465,127 @@ definitions:
       userEmail:
         type: string
         description: User's email
+
+  Workspace:
+    description: ''
+    required:
+      - namespace
+      - name
+      - workspaceId
+      - authorizationDomain
+      - bucketName
+      - createdDate
+      - lastModified
+      - createdBy
+      - attributes
+      - accessLevels
+      - authDomainACLs
+      - isLocked
+    type: object
+    properties:
+      namespace:
+        type: string
+        description: The namespace the workspace belongs to
+      name:
+        type: string
+        description: The name of the workspace
+      authorizationDomain:
+        type: array
+        items:
+          $ref: '#/definitions/ManagedGroupRef'
+        description: The list of groups to form the Authorization Domain (empty if no Authorization Domain is set)
+      workspaceId:
+        type: string
+        description: A UUID associated with the workspace
+      bucketName:
+        type: string
+        description: The name of the bucket associated with the workspace
+      createdDate:
+        type: string
+        format: date-time
+        description: 'The date the workspace was created in yyyy-MM-ddTHH:mm:ss.SSSZZ format'
+      lastModified:
+        type: string
+        format: date-time
+        description: 'The date the workspace was last modified in yyyy-MM-ddTHH:mm:ss.SSSZZ format'
+      createdBy:
+        type: string
+        description: The user who created the workspace
+      attributes:
+        type: object
+        description: Map[String, Attribute]
+      accessLevels:
+        type: object
+        description: Map[String, RawlsGroupRef]
+      authDomainACLs:
+         type: object
+         description: Map[String, RawlsGroupRef]
+      isLocked:
+        type: boolean
+        description: Can the Workspace currently be modified?
+
+  WorkspaceAccessLevel:
+    description: 'The level of access a user or group has on a Workspace. NoAccess, Read, Write, Owner, ProjectOwner'
+    properties:
+      name:
+        type: string
+        description: Workspace Access Level
+
+  WorkspaceIngest:
+    required:
+      - namespace
+      - name
+      - attributes
+    type: object
+    properties:
+      namespace:
+        type: string
+        description: New workspace namespace
+      name:
+        type: string
+        description: New workspace name
+      attributes:
+        type: object
+        additionalProperties:
+          type: string
+        description: Map of attributes
+      authorizationDomain:
+        type: array
+        items:
+          $ref: '#/definitions/ManagedGroupRef'
+        description: The list of groups to form the Authorization Domain (empty if no Authorization Domain is set)
+
+  WorkspaceResponse:
+    description: ''
+    properties:
+      accessLevel:
+        $ref: '#/definitions/WorkspaceAccessLevel'
+      canShare:
+        type: boolean
+      catalog:
+        type: boolean
+      workspace:
+        $ref: '#/definitions/Workspace'
+      workspaceSubmissionStats:
+        $ref: '#/definitions/WorkspaceSubmissionStats'
+      owners:
+        type: array
+        items:
+          type: string
+
+  WorkspaceSubmissionStats:
+    description: Statistics about submissions in a workspace
+    required:
+      - runningSubmissionsCount
+    properties:
+      lastSuccessDate:
+        type: string
+        format: date-time
+        description: The date of the last successful submission
+      lastFailureDate:
+        type: string
+        format: date-time
+        description: The date of the last failed submission
+      runningSubmissionsCount:
+        type: integer
+        description: Count of all the running submissions

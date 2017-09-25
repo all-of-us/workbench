@@ -5,6 +5,8 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.joda.time.DateTime;
@@ -16,6 +18,8 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
@@ -27,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspaceController implements WorkspacesApiDelegate {
+
+  private static final Logger log = Logger.getLogger(WorkspaceController.class.getName());
 
   private static final String WORKSPACE_NAMESPACE_PREFIX = "allofus-";
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
@@ -89,14 +95,16 @@ public class WorkspaceController implements WorkspacesApiDelegate {
   private final WorkspaceDao workspaceDao;
   private final CdrVersionDao cdrVersionDao;
   private final Provider<User> userProvider;
+  private final FireCloudService fireCloudService;
   private final Clock clock;
 
   @Autowired
   WorkspaceController(WorkspaceDao workspaceDao, CdrVersionDao cdrVersionDao,
-      Provider<User> userProvider, Clock clock) {
+      Provider<User> userProvider, FireCloudService fireCloudService, Clock clock) {
     this.workspaceDao = workspaceDao;
     this.cdrVersionDao = cdrVersionDao;
     this.userProvider = userProvider;
+    this.fireCloudService = fireCloudService;
     this.clock = clock;
   }
 
@@ -126,31 +134,36 @@ public class WorkspaceController implements WorkspacesApiDelegate {
     }
   }
 
-  private FirecloudWorkspaceId generateFirecloudWorkspaceId(String name) {
+  private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
     // Find a unique workspace namespace based off of the provided name.
     String strippedName = name.toLowerCase().replaceAll("[^0-9a-z]", "");
     // If the stripped name has no chars, generate a random name.
     if (strippedName.isEmpty()) {
       strippedName = generateRandomChars(RANDOM_CHARS, NUM_RANDOM_CHARS);
     }
-    String workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName;
-    int suffixNumber = 1;
-    List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
-    // Keep looking until we find an unused workspace namespace.
-    while (!workspaces.isEmpty()) {
-      suffixNumber++;
-      workspaceNamespace = WORKSPACE_NAMESPACE_PREFIX + strippedName + "-" + suffixNumber;
-      workspaces = workspaceDao.findByWorkspaceNamespace(workspaceNamespace);
-      // TODO: add Firecloud workspace namespace lookup here, too
-    }
-    return new FirecloudWorkspaceId(workspaceNamespace, strippedName);
+    return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getName());
-
+    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
+        workspace.getName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace =
+        getDbWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    if (existingWorkspace != null) {
+      throw new BadRequestException("Workspace {0}/{1} already exists".format(
+          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
+    }
+    try {
+      fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
+          workspaceId.getWorkspaceName());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      log.log(Level.SEVERE, "Error creating FC workspace {0}/{1}: {2} ".format(
+          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName(), e.getResponseBody()),
+          e);
+      // TODO: figure out what happens if the workspace already exists
+      throw new ServerErrorException("Error creating FC workspace", e);
+    }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization
     org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
