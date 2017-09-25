@@ -1,6 +1,9 @@
 # A subset of the FireCloud API spec that we use to generate Java client libraries. The
 # original API spec can be found here:
 # https://github.com/broadinstitute/firecloud-orchestration/blob/develop/src/main/resources/swagger/api-docs.yaml
+# WorkspaceResponse and its children are not in the current FC API spec and can be found in the
+# Rawls spec here:
+# https://github.com/broadinstitute/rawls/blob/develop/core/src/main/resources/swagger/rawls.yaml#L5034
 
 swagger: '2.0'
 
@@ -161,7 +164,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/WorkspaceListEntry'
+              $ref: '#/definitions/WorkspaceResponse'
     post:
       tags:
         - Workspaces
@@ -521,6 +524,13 @@ definitions:
         type: boolean
         description: Can the Workspace currently be modified?
 
+  WorkspaceAccessLevel:
+    description: 'The level of access a user or group has on a Workspace. NoAccess, Read, Write, Owner, ProjectOwner'
+    properties:
+      name:
+        type: string
+        description: Workspace Access Level
+
   WorkspaceIngest:
     required:
       - namespace
@@ -545,21 +555,37 @@ definitions:
           $ref: '#/definitions/ManagedGroupRef'
         description: The list of groups to form the Authorization Domain (empty if no Authorization Domain is set)
 
-  WorkspaceListEntry:
-    required:
-      - workspace
+  WorkspaceResponse:
+    description: ''
     properties:
-      # We are ignoring this part.
-      #"workspaceSubmissionStats": {
-      #    "runningSubmissionsCount": 0
-      #},
       accessLevel:
-        type: string
+        $ref: '#/definitions/WorkspaceAccessLevel'
+      canShare:
+        type: boolean
+      catalog:
+        type: boolean
+      workspace:
+        $ref: '#/definitions/Workspace'
+      workspaceSubmissionStats:
+        $ref: '#/definitions/WorkspaceSubmissionStats'
       owners:
         type: array
         items:
           type: string
-      public:
-        type: boolean
-      workspace:
-        $ref: '#/definitions/Workspace'
+
+  WorkspaceSubmissionStats:
+    description: Statistics about submissions in a workspace
+    required:
+      - runningSubmissionsCount
+    properties:
+      lastSuccessDate:
+        type: string
+        format: date-time
+        description: The date of the last successful submission
+      lastFailureDate:
+        type: string
+        format: date-time
+        description: The date of the last failed submission
+      runningSubmissionsCount:
+        type: integer
+        description: Count of all the running submissions
