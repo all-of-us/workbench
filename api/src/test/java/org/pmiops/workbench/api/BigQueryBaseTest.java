@@ -15,6 +15,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -44,7 +46,7 @@ public class BigQueryBaseTest {
         bigquery.create(TableInfo.of(TableId.of(dataSetId, tableId), tableDef));
     }
 
-    public boolean insertRow(String dataSetId, String tableId) throws Exception {
+    public boolean insertData(String dataSetId, String tableId) throws Exception {
         String basePath = "src/test/resources/bigquery/data/";
         ObjectMapper jackson = new ObjectMapper();
         String rawJson =
@@ -52,12 +54,18 @@ public class BigQueryBaseTest {
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Map<String, Object>>(){}.getType();
-        Map<String, Object> row = gson.fromJson(newJson.toString(), type);
+        Type type = new TypeToken<List<Map<String, Object>>>(){}.getType();
+        List<Map<String, Object>> rows = gson.fromJson(newJson.toString(), type);
+
+        List<InsertAllRequest.RowToInsert> allRows = new ArrayList<>();
+        int i = 0;
+        for (Map<String, Object> row: rows) {
+            allRows.add(InsertAllRequest.RowToInsert.of("key" + i++, row));
+        }
 
         InsertAllRequest insertRequest = InsertAllRequest
                 .newBuilder(TableId.of(dataSetId, tableId))
-                .addRow(row).build();
+                .setRows(allRows).build();
 
         InsertAllResponse insertResponse = bigquery.insertAll(insertRequest);
         if (insertResponse.hasErrors()) {

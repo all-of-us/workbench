@@ -29,7 +29,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void setUp() throws Exception {
         createDataSet(workbenchConfig.bigquery.dataSetId);
         createTable(workbenchConfig.bigquery.dataSetId, "icd9_criteria");
-        insertRow(workbenchConfig.bigquery.dataSetId, "icd9_criteria");
+        insertData(workbenchConfig.bigquery.dataSetId, "icd9_criteria");
     }
 
     @After
