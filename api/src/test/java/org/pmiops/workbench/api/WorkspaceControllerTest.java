@@ -61,22 +61,31 @@ public class WorkspaceControllerTest {
         userProvider, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
-  @Test
-  public void testCreateWorkspace() throws Exception {
+  public Workspace createDefaultWorkspace() {
     ResearchPurpose researchPurpose = new ResearchPurpose();
-    researchPurpose.setDiseaseFocusedResearch(false);
-    researchPurpose.setMethodsDevelopment(false);
-    researchPurpose.setControlSet(false);
-    researchPurpose.setAggregateAnalysis(false);
-    researchPurpose.setAncestry(false);
-    researchPurpose.setCommercialPurpose(false);
-    researchPurpose.setPopulation(false);
+    researchPurpose.setDiseaseFocusedResearch(true);
+    researchPurpose.setDiseaseOfFocus("cancer");
+    researchPurpose.setMethodsDevelopment(true);
+    researchPurpose.setControlSet(true);
+    researchPurpose.setAggregateAnalysis(true);
+    researchPurpose.setAncestry(true);
+    researchPurpose.setCommercialPurpose(true);
+    researchPurpose.setPopulation(true);
+    researchPurpose.setPopulationOfFocus("population");
+    researchPurpose.setAdditionalNotes("additional notes");
 
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setDescription("description");
     workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
+
+    return workspace;
+  }
+
+  @Test
+  public void testCreateWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
     workspaceController.createWorkspace(workspace);
 
     Workspace workspace2 =
@@ -90,5 +99,15 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
     assertThat(workspace2.getNamespace()).isEqualTo("allofus-name");
+    assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
+    assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getControlSet()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getAggregateAnalysis()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getAncestry()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getCommercialPurpose()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
+    assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
   }
 }

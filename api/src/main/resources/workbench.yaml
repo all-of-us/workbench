@@ -456,20 +456,27 @@ definitions:
     properties:
       diseaseFocusedResearch:
         type: boolean
+        default: false
       diseaseOfFocus:
         type: string
       methodsDevelopment:
         type: boolean
+        default: false
       controlSet:
         type: boolean
+        default: false
       aggregateAnalysis:
         type: boolean
+        default: false
       ancestry:
         type: boolean
+        default: false
       commercialPurpose:
         type: boolean
+        default: false
       population:
         type: boolean
+        default: false
       populationOfFocus:
         type: string
       additionalNotes:
