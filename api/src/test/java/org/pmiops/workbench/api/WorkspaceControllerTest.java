@@ -103,7 +103,6 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getDescription()).isEqualTo("description");
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
-    assertThat(workspace2.getNamespace()).isEqualTo("allofus-name");
     assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
     assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
     assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
