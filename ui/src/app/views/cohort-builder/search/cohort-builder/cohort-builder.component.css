@@ -4,10 +4,10 @@
 }
 
 .my-border {
-    border-radius: 3px;
+    border-radius: 0.2rem;
     border: 1px solid #d7d7d7;
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 1rem;
+    padding-left: 1rem;
     background-color: #e9f0f1;
 }
 
