@@ -198,7 +198,6 @@ public class SQLGenerator {
                 workbenchConfig.get().bigquery.dataSetId,
                 "CONCEPT",
                 info.get("sourceConceptIdColumn"),
-                info.get("sourceValueColumn"),
                 "@" + key + "codes"
         );
     }

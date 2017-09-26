@@ -1,14 +1,12 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.api.util.SQLGenerator;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchParameter;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,29 +25,13 @@ import java.util.logging.Logger;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
-    private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-
     @Autowired
-    private Provider<WorkbenchConfig> workbenchConfig;
+    private SQLGenerator generator;
 
     @Autowired
     private BigQuery bigquery;
 
-    @Autowired
-    SQLGenerator generator;
-
-    public static final String CRITERIA_QUERY =
-            "SELECT id,\n" +
-                    "type,\n" +
-                    "code,\n" +
-                    "name,\n" +
-                    "est_count,\n" +
-                    "is_group,\n" +
-                    "is_selectable,\n" +
-                    "domain_id\n" +
-                    "FROM `%s.%s.%s`\n" +
-                    "WHERE parent_id = @parentId\n" +
-                    "order by id asc";
+    private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
@@ -122,10 +103,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.badRequest().build();
     }
 
-    protected QueryResult executeQuery(QueryRequest query) {
-        BigQuery bigquery = new BigQueryOptions
-                .DefaultBigqueryFactory()
-                .create(BigQueryOptions.getDefaultInstance());
+    private QueryResult executeQuery(QueryRequest query) {
 
         // Execute the query
         QueryResponse response = bigquery.query(query);
@@ -147,19 +125,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return response.getResult();
     }
 
-    protected Map<String, Integer> getResultMapper(QueryResult result) {
-        Map<String, Integer> resultMapper = new HashMap<String, Integer>();
+    private Map<String, Integer> getResultMapper(QueryResult result) {
+        Map<String, Integer> resultMapper = new HashMap<>();
         int i = 0;
         for (Field field : result.getSchema().getFields()) {
             resultMapper.put(field.getName(), i++);
         }
         return resultMapper;
-    }
-
-    protected String getQueryString(String type) {
-        return String.format(CRITERIA_QUERY,
-                workbenchConfig.get().bigquery.projectId,
-                workbenchConfig.get().bigquery.dataSetId,
-                type + "_criteria");
     }
 }
