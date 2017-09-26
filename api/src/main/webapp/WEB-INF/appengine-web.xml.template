@@ -4,6 +4,10 @@
   <threadsafe>true</threadsafe>
   <application>all-of-us-workbench-test</application>
 
+  <system-properties>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+  </system-properties>
+
   <env-variables>
     <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
     <env-var name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
