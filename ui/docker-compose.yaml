@@ -3,9 +3,7 @@ services:
   ui:
     build:
       context: ./src/dev/server
-      args:
-        - UID=${UID}
-        - GID=${GID}
+    user: ${UID}
     working_dir: /w/ui
     volumes:
       - ..:/w:cached
@@ -15,9 +13,7 @@ services:
   tests:
     build:
       context: ./src/dev/server
-      args:
-        - UID=${UID}
-        - GID=${GID}
+    user: ${UID}
     working_dir: /w/ui
     volumes:
       - ..:/w:cached
