@@ -13,7 +13,7 @@ task generateApi {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
     config.setOutputDir("$projectDir")
-    config.setTemplateDir("$swaggerTemplateDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
     config.setAdditionalProperties([
             'apiPackage'     : 'org.pmiops.workbench.api',
@@ -37,7 +37,7 @@ task generateFireCloudClient {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$fireCloudApiFile")
     config.setOutputDir("$projectDir")
-    config.setTemplateDir("$swaggerTemplateDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
     config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.firecloud',
@@ -92,6 +92,13 @@ sourceSets {
       srcDir "db"
       include "changelog/*.xml"
     }
+    resources {
+      srcDir "test/resources"
+      include "bigquery/**"
+      include "bq-test-key.json"
+      //include "application.properties"
+    }
+
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
@@ -148,6 +155,7 @@ dependencies {
   testCompile 'org.springframework.boot:spring-boot-starter-test:+'
   testCompile 'com.h2database:h2:+'
   testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
   // For Swagger generation
   generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'

@@ -4,13 +4,50 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchParameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
 import java.util.*;
 
 @Service
 public class SQLGenerator {
+
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfig;
+
+    private static final String CRITERIA_QUERY =
+            "SELECT id,\n" +
+                    "type,\n" +
+                    "code,\n" +
+                    "name,\n" +
+                    "est_count,\n" +
+                    "is_group,\n" +
+                    "is_selectable,\n" +
+                    "domain_id\n" +
+                    "FROM `%s.%s.%s`\n" +
+                    "WHERE parent_id = @parentId\n" +
+                    "order by id asc";
+
+    /*
+     * The format placeholders stand for, in order:
+     *  - the table prefix (e.g., something like "pmi-drc-api-test.synpuf")
+     *  - the table name
+     *  - the table prefix again
+     *  - the *_SOURCE_CONCEPT_ID column identifier for that table
+     *  - the *_SOURCE_VALUE column identifier for that table
+     *  - a BigQuery "named parameter" indicating the list of codes to search by
+     *  See the link below about IN and UNNEST
++    * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
+     */
+    private static final String SUBQUERY_TEMPLATE =
+            "SELECT DISTINCT PERSON_ID " +
+                    "FROM `%s.%s.%s` a, `%s.%s.%s` b "+
+                    "WHERE a.%s = b.CONCEPT_ID "+
+                    "AND b.VOCABULARY_ID IN (@cm,@proc) " +
+                    "AND b.CONCEPT_CODE IN UNNEST(%s)";
 
     private static final Map<String, String> typeCM = new HashMap<>();
     private static final Map<String, String> typeProc = new HashMap<>();
@@ -27,7 +64,6 @@ public class SQLGenerator {
         Map<String, String> table = new HashMap<>();
         table.put("tableName", "condition_occurrence");
         table.put("sourceConceptIdColumn", "CONDITION_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "CONDITION_SOURCE_VALUE");
         tableInfo.put("Condition", table);
 
         table = new HashMap<>();
@@ -61,10 +97,18 @@ public class SQLGenerator {
         tableInfo.put("Procedure", table);
     }
 
+    public QueryRequest getCriteriaByTypeAndParentId(String type, Long parentId) {
+        return QueryRequest
+                .newBuilder(setBigQueryConfig(CRITERIA_QUERY, type + "_criteria"))
+                .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
+                .setUseLegacySql(false)
+                .build();
+    }
+
     public QueryRequest findGroupCodes(String type, List<String> codes) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("SELECT code, domain_id AS domainId FROM ");
-        queryBuilder.append(String.format("`%s.%s_criteria` ", getTablePrefix(), type.toLowerCase()));
+        queryBuilder.append(setBigQueryConfig("`%s.%s.%s` ", type.toLowerCase() + "_criteria"));
         queryBuilder.append("WHERE (");
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -77,7 +121,7 @@ public class SQLGenerator {
         }
         queryBuilder.append(String.join(" OR ", queryParts));
         queryBuilder.append(") ");
-        queryBuilder.append("AND is_selectable = 1 AND is_group = 0 ");
+        queryBuilder.append("AND is_selectable = TRUE AND is_group = FALSE ");
         queryBuilder.append("ORDER BY code ASC");
 
         QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
@@ -97,7 +141,7 @@ public class SQLGenerator {
                 "CAST(p.person_id AS string), ',', " +
                 "p.gender_source_value, ',', " +
                 "p.race_source_value) AS val "+
-            "FROM `" + getTablePrefix() + ".person` p "+
+            "FROM " + setBigQueryConfig("`%s.%s.%s` ", "person") + " p "+
             "WHERE PERSON_ID IN ("
         );
 
@@ -107,10 +151,10 @@ public class SQLGenerator {
         queryParams.put("proc", QueryParameterValue.string(typeProc.get(type)));
 
         for (String key : paramMap.keySet()) {
-            List<String> values = paramMap.get(key);
-            String codes = String.join(", ", values);
+            List<String> rawValues = paramMap.get(key);
+            String[] values = rawValues.toArray(new String[rawValues.size()]);
             String subquery = getSubQuery(key);
-            queryParams.put(key+"codes", QueryParameterValue.string(codes));
+            queryParams.put(key + "codes", QueryParameterValue.array(values, String.class));
             queryParts.add(subquery);
         }
 
@@ -143,38 +187,25 @@ public class SQLGenerator {
         return returnParameters;
     }
 
-    /*
-     * The format placeholders stand for, in order:
-     *  - the table prefix (e.g., something like "pmi-drc-api-test.synpuf")
-     *  - the table name
-     *  - the table prefix again
-     *  - the *_SOURCE_CONCEPT_ID column identifier for that table
-     *  - the *_SOURCE_VALUE column identifier for that table
-     *  - a BigQuery "named parameter" indicating the list of codes to search by
-     */
-    private static final String subqueryTemplate = 
-        "SELECT DISTINCT PERSON_ID " +
-        "FROM `%s.%s` a, `%s.CONCEPT` b "+
-        "WHERE a.%s = b.CONCEPT_ID "+
-        "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-        "AND a.%s IN (%s)";
-
-    protected String getSubQuery(String key) {
-        String tablePrefix = getTablePrefix();
+    private String getSubQuery(String key) {
         Map<String, String> info = tableInfo.get(key);
 
-        return String.format(subqueryTemplate, 
-            tablePrefix, 
-            info.get("tableName"),
-            tablePrefix, 
-            info.get("sourceConceptIdColumn"),
-            info.get("sourceValueColumn"),
-            "@" + key + "codes"
+        return String.format(SUBQUERY_TEMPLATE,
+                workbenchConfig.get().bigquery.projectId,
+                workbenchConfig.get().bigquery.dataSetId,
+                info.get("tableName"),
+                workbenchConfig.get().bigquery.projectId,
+                workbenchConfig.get().bigquery.dataSetId,
+                "CONCEPT",
+                info.get("sourceConceptIdColumn"),
+                "@" + key + "codes"
         );
     }
 
-    protected String getTablePrefix() {
-        // TODO: use the injectable config to grab this info
-        return "pmi-drc-api-test.synpuf";
+    private String setBigQueryConfig(String sqlStatement, String tableName) {
+        return String.format(sqlStatement,
+                workbenchConfig.get().bigquery.projectId,
+                workbenchConfig.get().bigquery.dataSetId,
+                tableName);
     }
 }
