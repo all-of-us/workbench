@@ -138,7 +138,6 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   /* Update any changes to the overall set. */
   private updateTotalSet() {
     const includedSets = this.performIntersection(this.searchGroups);
-
     const excludedSets = this.performIntersection(this.exclusionGroups);
 
     this.totalSet = includedSets;
@@ -164,55 +163,61 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   }
 
   private updateCharts() {
-    let female = 0;
-    let male = 0;
-    let unknown = 0;
-    let aa = 0;
-    let ap = 0;
-    let c = 0;
-    let na = 0;
-    let h = 0;
-    let o = 0;
-    let u = 0;
+    /*
+     * TODO:
+     * Determine exactly how and what data is to be bundled with each Subject
+     * and whether decoding that data should take place in browser or in SQL.
+     * Until the exact encoding is finalized, this hack should generate some
+     * nice charts for a visual response to searches.
+     */
+    const genders = {
+      'Male': 0,
+      'Female': 0,
+      'Unknown': 0,
+    };
+    const races = {
+      'African American': 0,
+      'Asian/Pacific': 0,
+      'Caucasian': 0,
+      'Native American': 0,
+      'Hispanic': 0,
+      'Other': 0,
+      'Unknown': 0,
+    };
+
     this.totalSet.forEach((subject, index) => {
-      const values = subject.val.split(',');
-      if (values[1] === 'M') {
-        male++;
-      } else if (values[1] === 'F') {
-        female++;
-      } else {
-        unknown++;
+      const [uid, gender, race] = subject.val.split(',');
+      switch (gender) {
+          case '1': genders.Male++    ; break;
+          case '2': genders.Female++  ; break;
+          default : genders.Unknown++;
       }
-      if (values[2] === 'B') {
-        aa++;
-      } else if (values[2] === 'A') {
-        ap++;
-      } else if (values[2] === 'W') {
-        c++;
-      } else if (values[2] === 'I') {
-        na++;
-      } else if (values[2] === 'H') {
-        h++;
-      } else if (values[2] === 'N') {
-        o++;
-      } else {
-        u++;
+      switch (race) {
+          case '1': races.Caucasian++           ; break;
+          case '2': races['African American']++ ; break;
+          default : races.Unknown++;
       }
     });
+
     const genderData = [
       ['Gender', 'Count', { role: 'style' }],
-      ['Female', female, 'blue'],
-      ['Male', male, 'red'],
-      ['Unknown', unknown, 'gray']];
+      ['Female', genders.Female, 'blue'],
+      ['Male', genders.Male, 'red'],
+      ['Unknown', genders.Unknown, 'gray']];
+
+    // ethnicity_source_value
+    // '5': Hispanic or Latino: 38003563
+    // '1', '2', '3': Not Hispanic: 38003564
+    //
+    // race_source_value:
+    // '2': 8516: "black or african american" j
+    // '1': 8527: "white"
     const raceData = [
       ['Race', 'Count Per'],
-      ['African American', aa],
-      ['Asian/Pacific', ap],
-      ['Caucasian', c],
-      ['Native American', na],
-      ['Hispanic', h],
-      ['Other', o],
-      ['Unknown', u]];
+      ['African American', races['African American']],
+      ['Caucasian', races.Caucasian],
+      ['Unknown', races.Unknown]];
+
     this.broadcastService.updateCharts(genderData, raceData);
   }
 

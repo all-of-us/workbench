@@ -52,6 +52,7 @@ def dev_up(*args)
 
   ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
+  swagger_regen()
   common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
