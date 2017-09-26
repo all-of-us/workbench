@@ -28,6 +28,10 @@ export class WorkspaceEditComponent implements OnInit {
       name: '',
       description: '',
       dataAccessLevel: Workspace.DataAccessLevelEnum.Registered,
+      /**
+       * TODO: use the free billing project created for the user once registration work is done
+       */
+      namespace: 'all-of-us-broad',
       researchPurpose: {
         diseaseFocusedResearch: false,
         methodsDevelopment: false,

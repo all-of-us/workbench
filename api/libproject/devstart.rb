@@ -104,6 +104,10 @@ def docker_clean(*args)
   common = Common.new
   common.docker.requires_docker
 
+  docker_images = `docker ps -aq`.gsub(/\s+/, " ")
+  if !docker_images.empty?
+    system("docker rm -f #{docker_images}")
+  end
   common.run_inline %W{docker-compose down --volumes}
 end
 

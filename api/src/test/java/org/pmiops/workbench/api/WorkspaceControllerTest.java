@@ -1,8 +1,14 @@
 package org.pmiops.workbench.api;
 
-import static org.mockito.Mockito.when;
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import javax.inject.Provider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
@@ -13,21 +19,15 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -43,6 +43,8 @@ public class WorkspaceControllerTest {
   UserDao userDao;
   @Mock
   Provider<User> userProvider;
+  @Mock
+  FireCloudService fireCloudService;
 
   private WorkspaceController workspaceController;
 
@@ -58,7 +60,7 @@ public class WorkspaceControllerTest {
     when(userProvider.get()).thenReturn(user);
 
     this.workspaceController = new WorkspaceController(workspaceDao, cdrVersionDao,
-        userProvider, Clock.fixed(NOW, ZoneId.systemDefault()));
+        userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
   public Workspace createDefaultWorkspace() {
@@ -76,6 +78,7 @@ public class WorkspaceControllerTest {
 
     Workspace workspace = new Workspace();
     workspace.setName("name");
+    workspace.setNamespace("namespace");
     workspace.setDescription("description");
     workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
@@ -87,9 +90,11 @@ public class WorkspaceControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspaceController.createWorkspace(workspace);
+    verify(fireCloudService).createWorkspace("namespace", "name");
 
     Workspace workspace2 =
-        workspaceController.getWorkspace("allofus-name", "name").getBody();
+        workspaceController.getWorkspace("namespace", "name")
+            .getBody();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isNull();
@@ -98,7 +103,6 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getDescription()).isEqualTo("description");
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
-    assertThat(workspace2.getNamespace()).isEqualTo("allofus-name");
     assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
     assertThat(workspace2.getResearchPurpose().getDiseaseOfFocus()).isEqualTo("cancer");
     assertThat(workspace2.getResearchPurpose().getMethodsDevelopment()).isTrue();
@@ -109,5 +113,6 @@ public class WorkspaceControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulation()).isTrue();
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
+    assertThat(workspace2.getNamespace()).isEqualTo("namespace");
   }
 }

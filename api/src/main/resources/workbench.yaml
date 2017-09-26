@@ -122,7 +122,7 @@ paths:
           name: workspace
           description: workspace definition
           schema:
-            $ref: "#/definitons/Workspace"
+            $ref: "#/definitions/Workspace"
       responses:
         "200":
           description: The workspace that was created.
