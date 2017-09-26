@@ -29,7 +29,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Override
     public List<String> getTableNames() {
-        return Arrays.asList("icd9_criteria", "person", "CONCEPT", "condition_occurrence");
+        return Arrays.asList(
+                "icd9_criteria",
+                "person",
+                "CONCEPT",
+                "condition_occurrence",
+                "procedure_occurrence",
+                "measurement",
+                "drug_exposure");
     }
 
     @Test
@@ -50,20 +57,46 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects() throws Exception {
-        final SearchParameter searchParameter = new SearchParameter();
-        searchParameter.setCode("001.1");
-        searchParameter.setDomainId("Condition");
-
-        final SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setType("ICD9");
-        searchRequest.setSearchParameters(Arrays.asList(searchParameter));
-
-        ResponseEntity response = controller.searchSubjects(searchRequest );
+    public void searchSubjects_ConditionOccurrence() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "001.1", "Condition") );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
         Subject subject = listResponse.getItems().get(0);
         assertThat(subject.getVal()).isEqualTo("1,1,1");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrence() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "001.2", "Procedure") );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        Subject subject = listResponse.getItems().get(0);
+        assertThat(subject.getVal()).isEqualTo("2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_Measurement() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "001.3", "Measurement") );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        Subject subject = listResponse.getItems().get(0);
+        assertThat(subject.getVal()).isEqualTo("3,3,3");
+    }
+
+    private SearchRequest createSearchRequest(String type, String code, String domainId) {
+        final SearchParameter searchParameter = new SearchParameter();
+        searchParameter.setCode(code);
+        searchParameter.setDomainId(domainId);
+
+        final SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setType(type);
+        searchRequest.setSearchParameters(Arrays.asList(searchParameter));
+        return searchRequest;
     }
 }

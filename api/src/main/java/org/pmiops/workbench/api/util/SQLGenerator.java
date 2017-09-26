@@ -69,31 +69,26 @@ public class SQLGenerator {
         table = new HashMap<>();
         table.put("tableName", "observation");
         table.put("sourceConceptIdColumn", "OBSERVATION_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "OBSERVATION_SOURCE_VALUE");
         tableInfo.put("Observation", table);
 
         table = new HashMap<>();
         table.put("tableName", "measurement");
         table.put("sourceConceptIdColumn", "MEASUREMENT_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "MEASUREMENT_SOURCE_VALUE");
         tableInfo.put("Measurement", table);
 
         table = new HashMap<>();
         table.put("tableName", "device_exposure");
         table.put("sourceConceptIdColumn", "DEVICE_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "DEVICE_SOURCE_VALUE");
         tableInfo.put("Exposure", table);
 
         table = new HashMap<>();
         table.put("tableName", "drug_exposure");
         table.put("sourceConceptIdColumn", "DRUG_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "DRUG_SOURCE_VALUE");
         tableInfo.put("Drug", table);
 
         table = new HashMap<>();
         table.put("tableName", "procedure_occurrence");
         table.put("sourceConceptIdColumn", "PROCEDURE_SOURCE_CONCEPT_ID");
-        table.put("sourceValueColumn", "PROCEDURE_SOURCE_VALUE");
         tableInfo.put("Procedure", table);
     }
 

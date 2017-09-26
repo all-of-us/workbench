@@ -11,6 +11,24 @@
       }
     },
     {
+      "name":"concept_name",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"domain_id",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
       "name":"vocabulary_id",
       "type":{
         "value":{
@@ -20,7 +38,52 @@
       }
     },
     {
+      "name":"concept_class_id",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"standard_concept",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
       "name":"concept_code",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"valid_start_date",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"valid_end_date",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"invalid_reason",
       "type":{
         "value":{
           "equivalent":"STRING",
