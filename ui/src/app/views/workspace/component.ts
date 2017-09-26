@@ -111,7 +111,9 @@ export class WorkspaceComponent implements OnInit {
         .retry(2)
         .subscribe(
             cohortsReceived => {
-              this.cohortList = cohortsReceived;
+              for (const coho of cohortsReceived.items) {
+                this.cohortList.push(coho);
+              }
               this.cohortsLoading = false;
             },
             error => {
