@@ -35,23 +35,8 @@ export class CohortEditComponent implements OnInit {
               this.workspaceId,
               this.cohortId)
           .retry(2)
-          .subscribe(this.handleCohortFetched);
+          .subscribe(cohort => this.cohort = cohort);
     }
-  }
-
-  /**
-   * Copy in only the client-used fields of the Cohort.
-   * TODO: Remove this and copy the Cohort wholesale once deserialization of all fields
-   * works server-side. (Currently creationTime deserialization causes errors.)
-   */
-  handleCohortFetched = (cohort: Cohort) => {
-    console.log(cohort);
-    console.log(this.cohort);
-    this.cohort.id = cohort.id;
-    this.cohort.name = cohort.name;
-    this.cohort.description = cohort.description;
-    this.cohort.criteria = cohort.criteria;
-    this.cohort.type = cohort.type;
   }
 
   saveCohort(): void {

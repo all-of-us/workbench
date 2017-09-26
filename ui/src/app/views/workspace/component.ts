@@ -5,7 +5,6 @@ import {DOCUMENT} from '@angular/platform-browser';
 
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {resetDateObject} from 'helper-functions';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 // TODO: use a real swagger generated class for this.
@@ -112,11 +111,7 @@ export class WorkspaceComponent implements OnInit {
         .retry(2)
         .subscribe(
             cohortsReceived => {
-              for (const coho of cohortsReceived.items) {
-                coho.creationTime = resetDateObject(coho.creationTime);
-                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime);
-                this.cohortList.push(coho);
-              }
+              this.cohortList = cohortsReceived;
               this.cohortsLoading = false;
             },
             error => {
