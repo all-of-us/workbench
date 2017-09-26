@@ -13,8 +13,8 @@ import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableInfo;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.junit.After;
-import org.junit.Before;
+import org.bitbucket.radistao.test.annotation.AfterAllMethods;
+import org.bitbucket.radistao.test.annotation.BeforeAllMethods;
 import org.pmiops.workbench.api.config.TestBigQueryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public abstract class BigQueryBaseTest {
 
     public static final String BASE_PATH = "src/test/resources/bigquery/";
 
-    @Before
+    @BeforeAllMethods
     public void setUp() throws Exception {
         createDataSet(workbenchConfig.bigquery.dataSetId);
         for (String tableName: getTableNames()) {
@@ -51,7 +51,7 @@ public abstract class BigQueryBaseTest {
         }
     }
 
-    @After
+    @AfterAllMethods
     public void tearDown() {
         for (String tableName: getTableNames()) {
             deleteTable(workbenchConfig.bigquery.dataSetId, tableName);

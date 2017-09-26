@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
@@ -19,8 +18,8 @@ import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import javax.inject.Provider;
 
+import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
-        QueryResult result = getQueryResult(type, parentId);
+        QueryRequest queryRequest = generator.getCriteriaByTypeAndParentId(type, parentId);
+
+        QueryResult result = executeQuery(queryRequest);
 
         Map<String, Integer> rm = getResultMapper(result);
 
@@ -75,14 +76,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
 
         return ResponseEntity.ok(criteriaResponse);
-    }
-
-    protected QueryResult getQueryResult(String type, Long parentId) {
-        QueryRequest queryRequest =
-                QueryRequest.newBuilder(getQueryString(type))
-                        .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
-                        .setUseLegacySql(false)
-                        .build();
     }
 
     @Override
