@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @SpringBootApplication(exclude = LiquibaseAutoConfiguration.class)
@@ -21,8 +23,15 @@ public class TestBigQueryConfig {
 
     @Bean
     public BigQuery bigQueryService() throws Exception {
-        GoogleCredentials credentials = ServiceAccountCredentials
-                .fromStream(new FileInputStream(new File("bq-test-key.json")));
+        InputStream keyStream = TestBigQueryConfig.class.getClassLoader().getResourceAsStream(
+            "bq-test-key.json");
+        if (keyStream == null) {
+            keyStream = new FileInputStream(new File("src/test/resources/bq-test-key.json"));
+            if (keyStream == null ) {
+                throw new IOException("Couldn't find bq-test-key.json");
+            }
+        }
+        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(keyStream);
 
         return BigQueryOptions.newBuilder()
                 .setProjectId("all-of-us-workbench-test")
