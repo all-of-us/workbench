@@ -12,14 +12,14 @@ import {CohortReviewRouter} from './router.module';
 
 @NgModule({
   imports: [
-    ClarityModule
+    ClarityModule,
     CohortReviewRouter,
     CommonModule,
   ],
   declarations: [
     AnnotationsComponent,
     CohortReviewComponent,
-    MedicationsComponent
+    MedicationsComponent,
     SubjectListComponent,
     SubjectDetailComponent,
   ]
