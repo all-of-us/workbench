@@ -43,7 +43,7 @@ public class TestBigQueryConfig {
     @Bean
     public WorkbenchConfig workbenchConfig() throws Exception {
         ObjectMapper jackson = new ObjectMapper();
-        String dataSetId = UUID
+        String dataSetId = "test_" + UUID
                 .randomUUID()
                 .toString()
                 .replaceAll("-", "_");
