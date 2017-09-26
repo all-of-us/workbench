@@ -45,6 +45,8 @@ RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
 RUN curl https://raw.githubusercontent.com/mrako/wait-for/d9699cb9fe8a4622f05c4ee32adf2fd93239d005/wait-for \
   > /usr/local/bin/wait-for && chmod +x /usr/local/bin/wait-for
 
+# Create a gradle cache directory as a volume that can be read/written by any
+# container (including containers running as any user -- hence the a+rwx)
 RUN mkdir /.gradle && chmod a+rwx -R /.gradle
 VOLUME /.gradle
 ENV GRADLE_USER_HOME /.gradle

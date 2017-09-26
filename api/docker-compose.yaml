@@ -11,8 +11,6 @@ services:
       context: ./src/dev/server
     user: ${UID}
     working_dir: /w
-    depends_on:
-      - db
     volumes:
       - .:/w:cached
       - gradle-cache:/.gradle

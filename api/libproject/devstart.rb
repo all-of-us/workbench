@@ -1,11 +1,10 @@
 require_relative "../../libproject/utils/common"
+require_relative "../../libproject/workbench"
 require "io/console"
 require "json"
 require "optparse"
 require "tempfile"
 require "fileutils"
-
-ENV["UID"] = "#{Process.euid}"
 
 class ProjectAndAccountOptions
   attr_accessor :project

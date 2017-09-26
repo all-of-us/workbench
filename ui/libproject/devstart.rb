@@ -5,8 +5,6 @@ require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require_relative "../../libproject/swagger"
 
-ENV["UID"] = "#{Process.euid}"
-
 def install_dependencies()
   common = Common.new
   common.docker.requires_docker
