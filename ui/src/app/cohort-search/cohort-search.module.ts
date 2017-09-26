@@ -1,9 +1,9 @@
+// tslint:disable:max-line-length
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
 
 /* Components */
-// tslint:disable:max-line-length
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {RaceChartComponent} from './race-chart/race-chart.component';
@@ -14,7 +14,6 @@ import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
 import {WizardTreeParentComponent} from './wizard-tree-parent/wizard-tree-parent.component';
 import {WizardTreeChildrenComponent} from './wizard-tree-children/wizard-tree-children.component';
 import {WizardSelectComponent} from './wizard-select/wizard-select.component';
-// tslint:enable:max-line-length
 
 /* Other Objects */
 import {BroadcastService} from './broadcast.service';
@@ -23,11 +22,13 @@ import {GoogleChartDirective} from './google-chart.directive';
 
 import {CohortBuilderService} from 'generated';
 
+// tslint:enable:max-line-length
+
 @NgModule({
   imports: [
-    CommonModule,
-    CohortSearchRouter,
     ClarityModule,
+    CohortSearchRouter,
+    CommonModule,
   ],
   declarations: [
     CohortBuilderComponent,
@@ -44,8 +45,8 @@ import {CohortBuilderService} from 'generated';
   ],
   entryComponents: [WizardModalComponent],
   providers: [
+    BroadcastService,
     CohortBuilderService,
-    BroadcastService
   ]
 })
 export class CohortSearchModule {}
