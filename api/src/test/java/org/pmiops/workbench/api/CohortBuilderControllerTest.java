@@ -1,21 +1,26 @@
 package org.pmiops.workbench.api;
 
+import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.util.SQLGenerator;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.Subject;
+import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(BeforeAfterSpringTestRunner.class)
 @Import({CohortBuilderController.class, SQLGenerator.class})
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
