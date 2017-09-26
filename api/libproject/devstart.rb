@@ -1,4 +1,5 @@
 require_relative "../../libproject/utils/common"
+require_relative "../../libproject/workbench"
 require "io/console"
 require "json"
 require "optparse"
@@ -56,8 +57,10 @@ def dev_up(*args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+
   common.status "Updating configuration..."
   common.run_inline %W{docker-compose run update-config}
+
   run_api(account)
 end
 
