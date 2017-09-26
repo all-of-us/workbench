@@ -52,7 +52,7 @@ public abstract class BigQueryBaseTest {
     }
 
     @AfterAllMethods
-    public void tearDown() {
+    public void tearDown() throws Exception {
         for (String tableName: getTableNames()) {
             deleteTable(workbenchConfig.bigquery.dataSetId, tableName);
         }
@@ -77,7 +77,7 @@ public abstract class BigQueryBaseTest {
         bigquery.create(TableInfo.of(TableId.of(dataSetId, tableId), tableDef));
     }
 
-    private boolean insertData(String dataSetId, String tableId) throws Exception {
+    private void insertData(String dataSetId, String tableId) throws Exception {
         ObjectMapper jackson = new ObjectMapper();
         String rawJson =
                 new String(Files.readAllBytes(Paths.get(BASE_PATH + "data/" + tableId.toLowerCase() + "_data.json")), Charset.defaultCharset());
@@ -99,17 +99,19 @@ public abstract class BigQueryBaseTest {
 
         InsertAllResponse insertResponse = bigquery.insertAll(insertRequest);
         if (insertResponse.hasErrors()) {
-            log.info("Errors occurred while inserting rows");
-            return false;
+            throw new RuntimeException("Errors occurred while inserting rows: " + insertResponse.getInsertErrors().toString());
         }
-        return true;
     }
 
-    private boolean deleteTable(String dataSetId, String tableId) {
-        return bigquery.delete(TableId.of(dataSetId, tableId));
+    private void deleteTable(String dataSetId, String tableId) throws Exception {
+        if (!bigquery.delete(TableId.of(dataSetId, tableId))) {
+            throw new RuntimeException("Errors occurred while deleting table: " + dataSetId + ":" + tableId);
+        }
     }
 
-    private boolean deleteDataSet(String dataSetId) {
-        return bigquery.delete(dataSetId);
+    private void deleteDataSet(String dataSetId) throws Exception {
+        if (!bigquery.delete(dataSetId)) {
+            throw new RuntimeException("Errors occurred while deleting dataset: " + dataSetId);
+        }
     }
 }
