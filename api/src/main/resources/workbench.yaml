@@ -681,7 +681,6 @@ definitions:
     type: object
     required:
       - code
-      - domainId
     properties:
       code:
         description: The Code of the Criteria within its Category Tree

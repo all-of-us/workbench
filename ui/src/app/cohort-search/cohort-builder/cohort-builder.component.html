@@ -34,9 +34,9 @@
           <div id="scrollable-groups" class="scrolling-groups">
             <div  class="my-border">
               <div *ngFor="let searchGroup of searchGroups; let i = index">
-            <span *ngIf="i > 0">
-              <div class="text-center font-weight-bold">AND</div>
-            </span>
+                <span *ngIf="i > 0">
+                  <div class="text-center font-weight-bold">AND</div>
+                </span>
                 <app-search-group [searchGroup]="searchGroup" [index]="index" (onRemove)="removeSearchGroup($event)"></app-search-group>
               </div>
             </div>
@@ -51,9 +51,9 @@
           <div id="scrollable-groups1" class="scrolling-groups">
             <div  class="my-border">
               <div *ngFor="let exclusionGroup of exclusionGroups; let i = index">
-          <span *ngIf="i > 0">
-            <div class="text-center font-weight-bold">AND</div>
-          </span>
+                <span *ngIf="i > 0">
+                  <div class="text-center font-weight-bold">AND</div>
+                </span>
                 <app-search-group [searchGroup]="exclusionGroup" (onRemove)="removeExclusionGroup($event)"></app-search-group>
               </div>
             </div>
