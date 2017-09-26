@@ -149,9 +149,10 @@ def get_file_from_gcs(bucket, filename, target_path)
   common.run_inline %W{gsutil cp gs://#{bucket}/#{filename} #{target_path}}
 end
 
-def read_db_vars(project)
+def read_db_vars(creds_file, project)
   db_creds_file = Tempfile.new("#{project}-vars.env")
   begin
+    activate_service_account(creds_file)
     get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
     db_creds_file.open
     db_creds_file.each_line do |line|
@@ -185,8 +186,8 @@ def run_cloud_sql_proxy(project, creds_file)
   return pid
 end
 
-def do_run_migrations(project)
-  read_db_vars(project)
+def do_run_migrations(creds_file, project)
+  read_db_vars(creds_file, project)
   common = Common.new
   create_db_file = Tempfile.new("#{project}-create-db.sql")
   begin
@@ -208,8 +209,8 @@ def do_run_migrations(project)
   end
 end
 
-def do_drop_db(project)
-  read_db_vars(project)
+def do_drop_db(creds_file, project)
+  read_db_vars(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   begin
     unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
@@ -270,13 +271,13 @@ end
 
 def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
-    do_drop_db(project)
+    do_drop_db(creds_file, project)
   })
 end
 
 def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(project)
+    read_db_vars(creds_file, project)
     system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
            "--port 3307 --database #{ENV["DB_NAME"]}")
   })
@@ -284,7 +285,7 @@ end
 
 def update_cloud_config(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(project)
+    read_db_vars(creds_file, project)
     ENV["DB_PORT"] = "3307"
     unless system("cd tools && ../gradlew --info loadConfig && cd ..")
         raise("Error updating configuration. Exiting.")
@@ -295,7 +296,7 @@ end
 def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
-    do_run_migrations(project)
+    do_run_migrations(creds_file, project)
   })
 end
 
