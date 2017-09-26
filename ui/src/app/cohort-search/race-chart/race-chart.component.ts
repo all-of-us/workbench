@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild, OnDestroy} from '@angular/core';
 import 'rxjs/add/operator/takeWhile';
 
 import {BroadcastService} from '../broadcast.service';
-import {GoogleChartDirective} from '../google-chart/google-chart.directive';
+import {GoogleChartDirective} from '../google-chart.directive';
 
 @Component({
   selector: 'app-race-chart',
