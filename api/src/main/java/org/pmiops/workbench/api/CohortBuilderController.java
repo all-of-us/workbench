@@ -96,8 +96,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             result = executeQuery(query);
             resultMapper = getResultMapper(result);
             for (List<FieldValue> row : result.iterateAll()) {
-                final String subject;
-                subject = row.get(resultMapper.get("val")).getStringValue();
+                String subject = row.get(resultMapper.get("val")).getStringValue();
                 subjectSet.add(subject);
             }
             return ResponseEntity.ok(subjectSet);
