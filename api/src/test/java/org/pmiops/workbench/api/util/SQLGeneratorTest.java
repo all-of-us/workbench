@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.config.TestBigQueryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -120,17 +120,17 @@ public class SQLGeneratorTest {
         parameterList.add(searchParameterCondtion);
         parameterList.add(searchParameterCondtion2);
 
-        SearchRequest request = new SearchRequest();
-        request.setType("ICD9");
-        request.setSearchParameters(parameterList);
+        SearchGroupItem item = new SearchGroupItem();
+        item.setType("ICD9");
+        item.setSearchParameters(parameterList);
 
-        assertEquals(Arrays.asList("001%"), generator.findParametersWithEmptyDomainIds(request.getSearchParameters()));
-        assertEquals(1, request.getSearchParameters().size());
+        assertEquals(Arrays.asList("001%"), generator.findParametersWithEmptyDomainIds(item.getSearchParameters()));
+        assertEquals(1, item.getSearchParameters().size());
 
         SearchParameter searchParameter = new SearchParameter();
         searchParameter.setCode("002");
         searchParameter.setDomainId("Condition");
-        assertEquals(searchParameter, request.getSearchParameters().get(0));
+        assertEquals(searchParameter, item.getSearchParameters().get(0));
     }
 
     @Test
@@ -203,11 +203,11 @@ public class SQLGeneratorTest {
         searchParameterProc2.setDomainId("Procedure");
         searchParameterProc2.setCode("003");
 
-        SearchRequest request = new SearchRequest();
-        request.setType("ICD9");
-        request.setSearchParameters(Arrays.asList(searchParameterCondtion, searchParameterProc1, searchParameterProc2));
+        SearchGroupItem item = new SearchGroupItem();
+        item.setType("ICD9");
+        item.setSearchParameters(Arrays.asList(searchParameterCondtion, searchParameterProc1, searchParameterProc2));
 
-        List<SearchParameter> parameters = request.getSearchParameters();
+        List<SearchParameter> parameters = item.getSearchParameters();
         assertEquals(2, generator.getMappedParameters(parameters).keySet().size());
         assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), generator.getMappedParameters(parameters).keySet());
         assertEquals(Arrays.asList("001"), generator.getMappedParameters(parameters).get("Condition"));

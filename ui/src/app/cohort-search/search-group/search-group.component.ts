@@ -3,8 +3,6 @@ import {Component, Input, EventEmitter, Output, ChangeDetectorRef} from '@angula
 import {BroadcastService} from '../broadcast.service';
 import {SearchResult, SearchGroup} from '../model';
 
-import {Subject} from 'generated';
-
 @Component({
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
@@ -24,10 +22,10 @@ export class SearchGroupComponent {
   /**
    * The group set for this component.
    *
-   * @type {Subject[]}
+   * @type {String[]}
    * @memberof SearchGroupComponent
    */
-  public groupSet: Subject[] = [];
+  public groupSet: String[] = [];
 
   /**
    * Event emitter when the delete search group button is pushed.

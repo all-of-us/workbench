@@ -1,6 +1,6 @@
 import {
   Criteria, Modifier,
-  SearchParameter, SubjectListResponse, Subject
+  SearchParameter, SubjectListResponse,
 } from 'generated';
 
 export class SearchResult {
@@ -11,7 +11,7 @@ export class SearchResult {
   values: SearchParameter[] = [];
   criteriaList: Criteria[] = [];
   modifierList: Modifier[] = [];
-  resultSet: Subject[] = [];
+  resultSet: String[] = [];
 
   constructor()
 
@@ -38,8 +38,8 @@ export class SearchResult {
   }
 
   updateWithResponse(response: SubjectListResponse) {
-    this.resultSet = response.items;
-    this.count = response.items.length;
+    this.resultSet = response;
+    this.count = response.length;
   }
 
   displayValues(): string {

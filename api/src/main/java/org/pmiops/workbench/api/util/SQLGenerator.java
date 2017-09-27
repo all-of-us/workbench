@@ -37,10 +37,9 @@ public class SQLGenerator {
      *  - the table name
      *  - the table prefix again
      *  - the *_SOURCE_CONCEPT_ID column identifier for that table
-     *  - the *_SOURCE_VALUE column identifier for that table
      *  - a BigQuery "named parameter" indicating the list of codes to search by
      *  See the link below about IN and UNNEST
-+    * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
+     * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
      */
     private static final String SUBQUERY_TEMPLATE =
             "SELECT DISTINCT PERSON_ID " +

@@ -6,9 +6,10 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.util.SQLGenerator;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Subject;
 import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -57,14 +58,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ConditionOccurrenceLeaf() throws Exception {
+    public void searchSubjects() throws Exception {
         ResponseEntity response = controller
                 .searchSubjects(createSearchRequest("ICD9", "001.1", "Condition") );
+
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("1,1,1");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("1,1,1");
     }
 
     @Test
@@ -74,8 +76,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("1,1,1");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("1,1,1");
     }
 
     @Test
@@ -85,8 +87,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("2,2,2");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("2,2,2");
     }
 
     @Test
@@ -96,8 +98,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("2,2,2");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("2,2,2");
     }
 
     @Test
@@ -107,8 +109,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("3,3,3");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("3,3,3");
     }
 
     @Test
@@ -118,8 +120,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("3,3,3");
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo("3,3,3");
     }
 
     private SearchRequest createSearchRequest(String type, String code, String domainId) {
@@ -129,9 +131,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         searchParameter.setDomainId(domainId);
         parameters.add(searchParameter);
 
+        final SearchGroupItem searchGroupItem = new SearchGroupItem();
+        searchGroupItem.setType("ICD9");
+        searchGroupItem.setSearchParameters(parameters);
+
+        final SearchGroup searchGroup = new SearchGroup();
+        searchGroup.add(searchGroupItem);
+
         final SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setType(type);
-        searchRequest.setSearchParameters(parameters);
+        searchRequest.setInclude(Arrays.asList(searchGroup));
         return searchRequest;
     }
 }

@@ -63,9 +63,14 @@ export class WizardModalComponent implements OnInit, OnDestroy {
 
     this.searchGroupSubscription = this.cohortBuilderService
       .searchSubjects({
-        type: this.criteriaType.toUpperCase(),
-        searchParameters: this.selectedSearchResult.values,
-        modifiers: this.selectedSearchResult.modifierList
+        // TODO: constructing minimum viable SearchRequest from a single
+        // we'll need to reorganize where this logic happens, given that it
+        // needs to be accessible to a higher level handler
+        include: [[{
+          type: this.criteriaType.toUpperCase(),
+          searchParameters: this.selectedSearchResult.values,
+          modifiers: this.selectedSearchResult.modifierList
+        }]]
       })
       .subscribe((response) => {
         this.selectedSearchResult.updateWithResponse(response);

@@ -9,9 +9,9 @@ import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.api.util.SQLGenerator;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Subject;
 import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,14 +61,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
+        /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
+        SearchGroupItem item = request.getInclude().get(0).get(0);
         QueryRequest query;
         QueryResult result;
         Map<String, Integer> resultMapper;
 
         SubjectListResponse subjectSet = new SubjectListResponse();
 
-        if (request.getType().equals("ICD9")) {
-            List<SearchParameter> params = request.getSearchParameters();
+        if (item.getType().equals("ICD9")) {
+            List<SearchParameter> params = item.getSearchParameters();
 
             /*  Check for SearchParameters without Domain IDs.
                 If any are present, generate a query to retrieve the missing domain IDs, then append the new parameters
@@ -76,7 +78,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
              */
             List<String> paramsWithoutDomains = generator.findParametersWithEmptyDomainIds(params);
             if (!paramsWithoutDomains.isEmpty()) {
-                query = generator.findGroupCodes(request.getType(), paramsWithoutDomains);
+                query = generator.findGroupCodes(item.getType(), paramsWithoutDomains);
                 result = executeQuery(query);
                 Map <String, Integer> resultMap = getResultMapper(result);
                 for (List<FieldValue> row: result.iterateAll()) {
@@ -90,13 +92,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             /*  Generate the actual query that will grab all the subjects based on criteria.
                 TODO: modifier handling
              */
-            query = generator.handleSearch(request.getType(), params);
+            query = generator.handleSearch(item.getType(), params);
             result = executeQuery(query);
             resultMapper = getResultMapper(result);
             for (List<FieldValue> row : result.iterateAll()) {
-                final Subject subject = new Subject();
-                subject.setVal(row.get(resultMapper.get("val")).getStringValue());
-                subjectSet.addItemsItem(subject);
+                String subject = row.get(resultMapper.get("val")).getStringValue();
+                subjectSet.add(subject);
             }
             return ResponseEntity.ok(subjectSet);
         }

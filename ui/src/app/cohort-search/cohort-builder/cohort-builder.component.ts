@@ -7,8 +7,6 @@ import 'rxjs/add/operator/takeWhile';
 import {BroadcastService} from '../broadcast.service';
 import {SearchGroup, SearchResult} from '../model';
 
-import {Subject} from 'generated';
-
 @Component({
   selector: 'app-search',
   templateUrl: 'cohort-builder.component.html',
@@ -36,7 +34,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   private alive = true;
 
-  totalSet: Subject[] = [];
+  totalSet: String[] = [];
 
   adding = false;
 
@@ -116,9 +114,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     if (searchGroup.groupSet.length === 0) {
       searchGroup.groupSet = searchResult.resultSet;
     } else {
-      searchGroup.groupSet = union(searchGroup.groupSet,
-          searchResult.resultSet,
-          (object) => object.val);
+      searchGroup.groupSet = union(searchGroup.groupSet, searchResult.resultSet);
     }
   }
 
@@ -128,9 +124,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       if (index === 0) {
         searchGroup.groupSet = result.resultSet;
       } else if (searchGroup.groupSet.length !== 0) {
-        searchGroup.groupSet = union(searchGroup.groupSet,
-            result.resultSet,
-            (object) => object.val);
+        searchGroup.groupSet = union(searchGroup.groupSet, result.resultSet);
       }
     });
   }
@@ -142,9 +136,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
     this.totalSet = includedSets;
     if (excludedSets.length > 0) {
-      this.totalSet = complement(includedSets,
-          excludedSets,
-          (object) => object.val);
+      this.totalSet = complement(includedSets, excludedSets);
     }
   }
 
@@ -154,9 +146,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       if (index === 0) {
         set = group.groupSet;
       } else if (group.groupSet.length !== 0) {
-        set = intersection(set,
-            group.groupSet,
-            (object) => object.val);
+        set = intersection(set, group.groupSet);
       }
     });
     return set;
@@ -186,7 +176,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     };
 
     this.totalSet.forEach((subject, index) => {
-      const [uid, gender, race] = subject.val.split(',');
+      const [uid, gender, race] = subject.split(',');
       switch (gender) {
           case '1': genders.Male++    ; break;
           case '2': genders.Female++  ; break;
