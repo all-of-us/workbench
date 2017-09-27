@@ -18,8 +18,8 @@ export class WorkspacesServiceStub {
       namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS,
       description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
       cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
-      creationTime: new Date(),
-      lastModifiedTime: new Date()
+      creationTime: new Date().getTime(),
+      lastModifiedTime: new Date().getTime()
     };
 
 

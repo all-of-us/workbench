@@ -415,8 +415,9 @@ Common.register_command({
 Common.register_command({
   :invocation => "docker-clean",
   :description => \
-    "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
-    "start from scratch (e.g., the database will be re-created).",
+    "Removes docker containers and volumes, allowing the next `dev-up` to" \
+    " start from scratch (e.g., the database will be re-created). Includes ALL" \
+    " docker images, not just for the API.",
   :fn => lambda { |*args| docker_clean(*args) }
 })
 
