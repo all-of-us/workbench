@@ -101,9 +101,20 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_Measurement() throws Exception {
+    public void searchSubjects_MeasurementLeaf() throws Exception {
         ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "001.3", "Measurement") );
+                .searchSubjects(createSearchRequest("ICD9", "003.1", "Measurement") );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        Subject subject = listResponse.getItems().get(0);
+        assertThat(subject.getVal()).isEqualTo("3,3,3");
+    }
+
+    @Test
+    public void searchSubjects_MeasurementParent() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "003", null) );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();

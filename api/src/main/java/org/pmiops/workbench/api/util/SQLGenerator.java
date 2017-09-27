@@ -136,7 +136,7 @@ public class SQLGenerator {
                 "CAST(p.person_id AS string), ',', " +
                 "p.gender_source_value, ',', " +
                 "p.race_source_value) AS val "+
-            "FROM " + setBigQueryConfig("`%s.%s.%s` ", "person") + " p "+
+            "FROM " + setBigQueryConfig("`%s.%s.%s` ", "person") + "p "+
             "WHERE PERSON_ID IN ("
         );
 
@@ -182,7 +182,7 @@ public class SQLGenerator {
         return returnParameters;
     }
 
-    private String getSubQuery(String key) {
+    protected String getSubQuery(String key) {
         Map<String, String> info = tableInfo.get(key);
 
         return String.format(SUBQUERY_TEMPLATE,

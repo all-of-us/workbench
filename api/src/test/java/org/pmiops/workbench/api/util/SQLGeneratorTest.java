@@ -4,9 +4,12 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.api.config.TestBigQueryConfig;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -21,9 +24,8 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({SQLGenerator.class})
+@SpringBootTest(classes = {TestBigQueryConfig.class})
 public class SQLGeneratorTest {
-
-    static String TABLE_PREFIX = "pmi-drc-api-test.synpuf";
 
     private String showValues(String expected, String actual) {
         return String.format("\nExpected: %s\nActual:   %s", expected, actual);
@@ -32,19 +34,24 @@ public class SQLGeneratorTest {
     @Autowired
     SQLGenerator generator;
 
+    @Autowired
+    WorkbenchConfig workbenchConfig;
+
     @Test
     public void findGroupCodes() throws Exception {
+        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
                 "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".icd9_criteria` " +
                 "WHERE (code LIKE @code0 OR code LIKE @code1 OR code LIKE @code2) " +
-                "AND is_selectable = 1 AND is_group = 0 ORDER BY code ASC";
+                "AND is_selectable = TRUE AND is_group = FALSE ORDER BY code ASC";
         String actual = result.getQuery();
         assert actual.equals(expected) : showValues(expected, actual);
     }
 
     @Test
     public void handleSearch() throws Exception {
+        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         List<SearchParameter> params = new ArrayList<>();
         SearchParameter p;
 
@@ -77,22 +84,23 @@ public class SQLGeneratorTest {
                 "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
                 "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
                 "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                "AND a.CONDITION_SOURCE_VALUE IN (@Conditioncodes)"+
+                "AND b.CONCEPT_CODE IN UNNEST(@Conditioncodes)"+
                 " UNION DISTINCT " +
                 "SELECT DISTINCT PERSON_ID " +
                 "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
                 "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
                 "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                "AND a.MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes))";
+                "AND b.CONCEPT_CODE IN UNNEST(@Measurementcodes))";
         assert actual.equals(expected) : showValues(expected, actual);
 
         /* Check the query parameters */
         QueryParameterValue param;
         Map<String, QueryParameterValue> preparedParams = request.getNamedParameters();
         param = preparedParams.get("Conditioncodes");
-        assert param.getValue().equals("10.1, 20.2");
+        assert param.getArrayValues().get(0).getValue().equals("10.1");
+        assert param.getArrayValues().get(1).getValue().equals("20.2");
         param = preparedParams.get("Measurementcodes");
-        assert param.getValue().equals("30.3");
+        assert param.getArrayValues().get(0).getValue().equals("30.3");
         param = preparedParams.get("cm");
         assert param.getValue().equals("ICD9CM");
         param = preparedParams.get("proc");
@@ -127,64 +135,58 @@ public class SQLGeneratorTest {
 
     @Test
     public void getSubQuery() throws Exception {
+        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         Map<String, String> expectedByKey = new HashMap<String, String>();
         expectedByKey.put("Condition",
             "SELECT DISTINCT PERSON_ID " +
             "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND a.CONDITION_SOURCE_VALUE IN (@Conditioncodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Conditioncodes)"
         );
         expectedByKey.put("Observation",
             "SELECT DISTINCT PERSON_ID " +
             "FROM `" + TABLE_PREFIX + ".observation` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.OBSERVATION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND a.OBSERVATION_SOURCE_VALUE IN (@Observationcodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Observationcodes)"
         );
         expectedByKey.put("Measurement",
             "SELECT DISTINCT PERSON_ID " +
             "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.MEASUREMENT_SOURCE_VALUE IN (@Measurementcodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Measurementcodes)"
         );
         expectedByKey.put("Exposure",
             "SELECT DISTINCT PERSON_ID " +
             "FROM `" + TABLE_PREFIX + ".device_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.DEVICE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.DEVICE_SOURCE_VALUE IN (@Exposurecodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Exposurecodes)"
         );
         expectedByKey.put("Drug",
             "SELECT DISTINCT PERSON_ID " +
             "FROM `" + TABLE_PREFIX + ".drug_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.DRUG_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.DRUG_SOURCE_VALUE IN (@Drugcodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Drugcodes)"
         );
         expectedByKey.put("Procedure",
             "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".procedure_occurrence.json` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
+            "FROM `" + TABLE_PREFIX + ".procedure_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
             "WHERE a.PROCEDURE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
             "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND a.PROCEDURE_SOURCE_VALUE IN (@Procedurecodes)"
+            "AND b.CONCEPT_CODE IN UNNEST(@Procedurecodes)"
         );
 
         List<String> keys = Arrays.asList("Condition", "Observation", "Measurement", "Exposure", "Drug", "Procedure");
         String actual, expected;
-//        for (String key : keys) {
-//            actual = generator.getSubQuery(key);
-//            expected = expectedByKey.get(key);
-//            assert actual.equals(expected) : showValues(expected, actual);
-//        }
-    }
-
-    @Test
-    public void getTablePrefix() throws Exception {
-        // TODO: use the configuration injection framework to grab the table prefix info
-//        String actual = generator.getTablePrefix();
-//        assert actual.equals(TABLE_PREFIX) : showValues(TABLE_PREFIX, actual);
+        for (String key : keys) {
+            actual = generator.getSubQuery(key);
+            expected = expectedByKey.get(key);
+            assert actual.equals(expected) : showValues(expected, actual);
+        }
     }
 
     @Test
