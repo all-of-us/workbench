@@ -6,9 +6,10 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.util.SQLGenerator;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Subject;
 import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -56,14 +57,18 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         searchParameter.setDomainId("Condition");
 
         final SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setType("ICD9");
-        searchRequest.setSearchParameters(Arrays.asList(searchParameter));
+        final SearchGroupItem item = new SearchGroupItem();
+        final SearchGroup group = new SearchGroup();
+        item.setType("ICD9");
+        item.setSearchParameters(Arrays.asList(searchParameter));
+        group.add(item);
+        searchRequest.setInclude(Arrays.asList(group));
 
-        ResponseEntity response = controller.searchSubjects(searchRequest );
+        ResponseEntity response = controller.searchSubjects(searchRequest);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        Subject subject = listResponse.getItems().get(0);
-        assertThat(subject.getVal()).isEqualTo("1,1,1");
+        String subject = listResponse.get(0);
+        assertThat(subject.equals("1,1,1"));
     }
 }
