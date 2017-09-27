@@ -95,7 +95,6 @@ sourceSets {
     resources {
       srcDir "test/resources"
       include "bigquery/**"
-      include "bq-test-key.json"
       //include "application.properties"
     }
 

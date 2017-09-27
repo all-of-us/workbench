@@ -17,6 +17,9 @@ jobs:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
       - run:
+          working_directory: ~/workbench
+          command: ci/activate_creds.sh api/sa-key.json
+      - run:
           working_directory: ~/workbench/api
           command: gradle test --project-prop verboseTestLogging=yes
       - save_cache:

@@ -66,9 +66,7 @@ end
 
 def run_api(account)
   common = Common.new
-  at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
-    FileUtils.cp(creds_file, "sa-key.json")
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
@@ -241,11 +239,34 @@ end
 def do_run_with_creds(project, account, creds_file, proc)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
-    get_service_account_creds_file(project, account, service_account_creds_file)
-    begin
-      proc.call(project, account, service_account_creds_file.path)
-    ensure
-      delete_service_accounts_creds(project, account, service_account_creds_file)
+    if project == "all-of-us-workbench-test"
+      creds_filename = "sa-key.json"
+      # For test, use a locally stored key file copied from GCS (which we leave hanging
+      # around.)
+      if !File.file?(creds_filename)
+        # Create a temporary creds file for accessing GCS.
+        get_service_account_creds_file(project, account, service_account_creds_file)
+        begin
+          activate_service_account(service_account_creds_file.path)
+          # Copy the stable creds file from its path in GCS to sa-key.json.
+          # Important: we must leave this key file in GCS, and not delete it in Cloud Console,
+          # or local development will stop working.
+          get_file_from_gcs("all-of-us-workbench-test-credentials",
+              "all-of-us-workbench-test-9b5c623a838e.json", creds_filename)
+        ensure
+          # Delete the temporary creds we created.
+          delete_service_accounts_creds(project, account, service_account_creds_file)
+        end
+      end
+      proc.call(project, account, creds_filename)
+    else
+      # Create a creds file and use it; clean up when done.
+      get_service_account_creds_file(project, account, service_account_creds_file)
+      begin
+        proc.call(project, account, service_account_creds_file.path)
+      ensure
+        delete_service_accounts_creds(project, account, service_account_creds_file)
+      end
     end
   else
     proc.call(project, account, creds_file)
@@ -345,9 +366,18 @@ def do_create_db_creds(project, account, creds_file)
   end
 end
 
-def create_db_creds(args)
+def create_db_creds(*args)
   run_with_creds(args, "create-db-creds", lambda { |project, account, creds_file|
     do_create_db_creds(project, account, creds_file)
+  })
+end
+
+def get_test_service_account_creds(*args)
+  run_with_creds(args, "get-service-creds", lambda { |project, account, creds_file|
+    if project != "all-of-us-workbench-test"
+      raise("Only call this with all-of-us-workbench-test")
+    end
+    puts "Creds file is now at: #{creds_file}"
   })
 end
 
@@ -362,6 +392,12 @@ Common.register_command({
   :invocation => "run-api",
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
   :fn => lambda { |*args| run_api_and_db(*args) }
+})
+
+Common.register_command({
+  :invocation => "get-service-creds",
+  :description => "Creates sa-key.json locally (for use when running tests, etc.)",
+  :fn => lambda { |*args| get_test_service_account_creds(*args) }
 })
 
 Common.register_command({
