@@ -18,9 +18,9 @@ class CohortStub implements Cohort {
 
   creator?: string;
 
-  creationTime?: Date;
+  creationTime?: number;
 
-  lastModifiedTime?: Date;
+  lastModifiedTime?: number;
 
   workspaceId: string;
 
@@ -52,8 +52,8 @@ export class CohortsServiceStub {
     exampleCohort.id = '1';
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';
-    exampleCohort.creationTime = new Date();
-    exampleCohort.lastModifiedTime = new Date();
+    exampleCohort.creationTime = new Date().getTime();
+    exampleCohort.lastModifiedTime = new Date().getTime();
     this.cohorts = [exampleCohort];
     this.workspaces = [stubWorkspace];
   }

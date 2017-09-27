@@ -9,8 +9,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import javax.inject.Provider;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +47,7 @@ public class WorkspaceControllerTest {
   private WorkspaceController workspaceController;
 
   private static final Instant NOW = Instant.now();
-  private static final DateTime NOW_TIME = new DateTime(Timestamp.from(NOW), DateTimeZone.UTC);
+  private static final long NOW_TIME = Timestamp.from(NOW).getTime();
 
   @Before
   public void setUp() {

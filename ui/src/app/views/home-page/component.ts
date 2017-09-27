@@ -4,7 +4,6 @@ import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter, Comparator} from 'clarity-angular';
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {resetDateObject} from 'helper-functions';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -57,10 +56,6 @@ export class HomePageComponent implements OnInit {
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;
-              this.workspaceList.forEach(workspace => {
-                workspace.lastModifiedTime = resetDateObject(workspace.lastModifiedTime);
-                workspace.creationTime = resetDateObject(workspace.creationTime);
-              });
               this.workspacesLoading = false;
             },
             error => {
