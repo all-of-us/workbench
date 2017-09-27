@@ -6,9 +6,13 @@ The target API in this case is Google's User Admin or Directory API. Google has 
 
 [1] https://developers.google.com/identity/protocols/OAuth2ServiceAccount
 
-According to the documentation, after creating the service account, you can delegate access to certain API scopes using the Admin console [2]. In this case, "Client Name" is the client ID of the service account and the scopes are a comma-delimited list. In fact, if you use the email address of the service account in the Client Name field, it will be replaced by the client ID of the account, so this page does seem to have some knowledge about service accounts generally.
+According to the documentation, after creating the service account, you can delegate access to certain API scopes using the Admin console [1] [2]. In this case, "Client Name" is the client ID of the service account and the scopes are a comma-delimited list. In fact, if you use the email address of the service account in the Client Name field, it will be replaced by the client ID of the account, so this page does seem to have some knowledge about service accounts generally.
 
-![2](gsuite-account-creation-1.png)
+![Admin Console](gsuite-account-creation-1.png)
+[1] Admin Console
+
+![Service Account Added](gsuite-account-creation-2.png)
+[2] Service Account Added
 
 It is a red herring.
 
