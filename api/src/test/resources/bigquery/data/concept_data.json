@@ -18,7 +18,7 @@
     "vocabulary_id":"ICD9Proc",
     "concept_class_id":"2",
     "standard_concept":"sc",
-    "concept_code":"001.2",
+    "concept_code":"002.1",
     "valid_start_date":"2009-12-03",
     "valid_end_date":"2009-12-03",
     "invalid_reason":"ir"

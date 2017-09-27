@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,8 +36,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "CONCEPT",
                 "condition_occurrence",
                 "procedure_occurrence",
-                "measurement",
-                "drug_exposure");
+                "measurement");
     }
 
     @Test
@@ -48,16 +48,16 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         Criteria criteria = listResponse.getItems().get(0);
         assertThat(criteria.getId()).isEqualTo(1);
         assertThat(criteria.getType()).isEqualTo("ICD9");
-        assertThat(criteria.getCode()).isEqualTo("001.1");
-        assertThat(criteria.getName()).isEqualTo("Cholera");
-        assertThat(criteria.getGroup()).isEqualTo(true);
+        assertThat(criteria.getCode()).isEqualTo("001-139.99");
+        assertThat(criteria.getName()).isEqualTo("Infectious and parasitic diseases");
+        assertThat(criteria.getGroup()).isEqualTo(false);
         assertThat(criteria.getSelectable()).isEqualTo(false);
-        assertThat(criteria.getCount()).isEqualTo(10);
-        assertThat(criteria.getDomainId()).isEqualTo("Condition");
+        assertThat(criteria.getCount()).isEqualTo(0);
+        assertThat(criteria.getDomainId()).isNull();
     }
 
     @Test
-    public void searchSubjects_ConditionOccurrence() throws Exception {
+    public void searchSubjects_ConditionOccurrenceLeaf() throws Exception {
         ResponseEntity response = controller
                 .searchSubjects(createSearchRequest("ICD9", "001.1", "Condition") );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -68,9 +68,31 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ProcedureOccurrence() throws Exception {
+    public void searchSubjects_ConditionOccurrenceParent() throws Exception {
         ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "001.2", "Procedure") );
+                .searchSubjects(createSearchRequest("ICD9", "001", null) );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        Subject subject = listResponse.getItems().get(0);
+        assertThat(subject.getVal()).isEqualTo("1,1,1");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrenceLeaf() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "002.1", "Procedure") );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        Subject subject = listResponse.getItems().get(0);
+        assertThat(subject.getVal()).isEqualTo("2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrenceParent() throws Exception {
+        ResponseEntity response = controller
+                .searchSubjects(createSearchRequest("ICD9", "002", null) );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
@@ -90,13 +112,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     private SearchRequest createSearchRequest(String type, String code, String domainId) {
+        List<SearchParameter> parameters = new ArrayList<>();
         final SearchParameter searchParameter = new SearchParameter();
         searchParameter.setCode(code);
         searchParameter.setDomainId(domainId);
+        parameters.add(searchParameter);
 
         final SearchRequest searchRequest = new SearchRequest();
         searchRequest.setType(type);
-        searchRequest.setSearchParameters(Arrays.asList(searchParameter));
+        searchRequest.setSearchParameters(parameters);
         return searchRequest;
     }
 }

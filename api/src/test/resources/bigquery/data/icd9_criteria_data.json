@@ -1,13 +1,141 @@
 [
   {
-    "is_selectable":false,
-    "domain_id":"Condition",
-    "code":"001.1",
-    "parent_id":0,
-    "name":"Cholera",
-    "id":1,
-    "est_count":10,
-    "type":"ICD9",
-    "is_group":true
+    "id": "2",
+    "parent_id": "1",
+    "type": "ICD9",
+    "code": "001",
+    "name": "Cholera",
+    "is_group": "true",
+    "is_selectable": "true",
+    "est_count": "27"
+  },
+  {
+    "id": "1410",
+    "parent_id": "2",
+    "type": "ICD9",
+    "code": "001",
+    "name": "Cholera",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "16",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1",
+    "parent_id": "0",
+    "type": "ICD9",
+    "code": "001-139.99",
+    "name": "Infectious and parasitic diseases",
+    "is_group": "false",
+    "is_selectable": "false"
+  },
+  {
+    "id": "1411",
+    "parent_id": "2",
+    "type": "ICD9",
+    "code": "001.0",
+    "name": "Cholera due to vibrio cholerae",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "2",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1412",
+    "parent_id": "2",
+    "type": "ICD9",
+    "code": "001.1",
+    "name": "Cholera due to vibrio cholerae el tor",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "2",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1413",
+    "parent_id": "2",
+    "type": "ICD9",
+    "code": "001.9",
+    "name": "Cholera, unspecified",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "7",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "3",
+    "parent_id": "1",
+    "type": "ICD9",
+    "code": "002",
+    "name": "Typhoid and paratyphoid fevers",
+    "is_group": "true",
+    "is_selectable": "true",
+    "est_count": "51"
+  },
+  {
+    "id": "1414",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002",
+    "name": "Typhoid and paratyphoid fevers",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "25",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1415",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002.0",
+    "name": "Typhoid fever",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "12",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1416",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002.1",
+    "name": "Paratyphoid fever A",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "4",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1417",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002.2",
+    "name": "Paratyphoid fever B",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "0",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1418",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002.3",
+    "name": "Paratyphoid fever C",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "0",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "1419",
+    "parent_id": "3",
+    "type": "ICD9",
+    "code": "002.9",
+    "name": "Paratyphoid fever, unspecified",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "10",
+    "domain_id": "Condition"
   }
 ]
