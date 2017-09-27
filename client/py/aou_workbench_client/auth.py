@@ -77,18 +77,18 @@ def clear_cache():
 # Self-test / simple example.
 if __name__ == '__main__':
     # Print tokens from each source.
-    print 'Metadata API'
+    print 'Trying to get token via Metadata API (works only in VM).'
     try:
         print _query_metadata_api()
     except urllib2.URLError as e:
         print 'unavailable:', e
-    print 'print-access-token'
+    print 'Trying print-access-token (works when `gcloud auth login` is done previously).'
     print _run_print_access_token()
 
     # Make an example API call.
+    print 'Listing workspaces via authenticated API:'
     from swagger_client.apis.workspaces_api import WorkspacesApi
     client = WorkspacesApi(api_client=get_authenticated_swagger_client())
     workspace_list = client.get_workspaces()
-    print 'Workspaces:'
     for ws in workspace_list.items:
         print '%s/%s\t%s\t%s' % (ws.namespace, ws.id, ws.name, ws.description)
