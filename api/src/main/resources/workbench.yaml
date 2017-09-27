@@ -648,9 +648,27 @@ definitions:
   SearchRequest:
     type: object
     required:
+      - include
+    properties:
+      include:
+        type: array
+        items:
+          $ref: "#/definitions/SearchGroup"
+      exclude:
+        type: array
+        items:
+          $ref: "#/definitions/SearchGroup"
+
+  SearchGroup:
+    type: array
+    items:
+      $ref: "#/definitions/SearchGroupItem"
+
+  SearchGroupItem:
+    type: object
+    required:
       - type
       - searchParameters
-      - modifiers
     properties:
       type:
         description: type of criteria
@@ -717,27 +735,11 @@ definitions:
       operands: [ "Arg1", "Arg2" ]
 
   SubjectListResponse:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: "array"
-        items:
-          $ref: "#/definitions/Subject"
+    type: array
+    items:
+      type: string
     example:
       [
-        { val: "12345,1,5" },
-        { val: "67890,2,1" }
+        "12345,1,5",
+        "67890,2,1"
       ]
-
-  Subject:
-    type: object
-    required:
-      - val
-    properties:
-      val:
-        description: A String of Subject ID, Gender Code, Ethnicity Code
-        type: string
-    example:
-      val: "12345,1,5"
