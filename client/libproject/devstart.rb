@@ -11,12 +11,14 @@ def swagger_regen()
   common.run_inline %W{
       java -jar #{Workbench::Swagger::SWAGGER_CODEGEN_CLI_JAR}
       generate --lang python --input-spec #{Workbench::Swagger::SWAGGER_SPEC} --output py/tmp}
-  move_opts = {:force => true, :verbose => true}
-  FileUtils.mv('py/tmp/swagger_client', 'py/aou_workbench_client/', move_opts)
-  FileUtils.mv('py/tmp/docs', 'py/swagger_docs', move_opts)
-  FileUtils.mv('py/tmp/README.md', 'py/README.swagger.md', move_opts)
-  FileUtils.mv('py/tmp/requirements.txt', 'py/swagger-requirements.txt', move_opts)
-  FileUtils.remove_dir('py/tmp')
+  file_opts = {:verbose => true}
+  FileUtils.rm_rf('py/aou_workbench_client/swagger_client', file_opts)
+  FileUtils.rm_rf('py/swagger_docs', file_opts)
+  FileUtils.mv('py/tmp/swagger_client', 'py/aou_workbench_client/', file_opts)
+  FileUtils.mv('py/tmp/docs', 'py/swagger_docs', file_opts)
+  FileUtils.mv('py/tmp/README.md', 'py/README.swagger.md', file_opts)
+  FileUtils.mv('py/tmp/requirements.txt', 'py/swagger-requirements.txt', file_opts)
+  FileUtils.remove_dir('py/tmp', file_opts)
   # TODO(markfickett) Automatically check out generated-py-client when running the above.
   common.status "Only commit generated files on the generated-py-client branch."
   common.status "Publish a version with `git tag pyclient-vN-N-rcN` and `git push --tags`."
