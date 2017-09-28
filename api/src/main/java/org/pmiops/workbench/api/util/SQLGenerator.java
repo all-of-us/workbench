@@ -26,6 +26,7 @@ public class SQLGenerator {
                     "est_count,\n" +
                     "is_group,\n" +
                     "is_selectable,\n" +
+                    "concept_id,\n" +
                     "domain_id\n" +
                     "from `%s.%s.%s`\n" +
                     "where parent_id = @parentId\n" +

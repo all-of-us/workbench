@@ -52,6 +52,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             criteria.setCount(row.get(rm.get("est_count")).isNull() ? 0 : row.get(rm.get("est_count")).getLongValue());
             criteria.setGroup(row.get(rm.get("is_group")).getBooleanValue());
             criteria.setSelectable(row.get(rm.get("is_selectable")).getBooleanValue());
+            criteria.setConceptId(row.get(rm.get("concept_id")).isNull() ? 0: row.get(rm.get("concept_id")).getLongValue());
             criteria.setDomainId(row.get(rm.get("domain_id")).isNull() ? null : row.get(rm.get("domain_id")).getStringValue());
             criteriaResponse.addItemsItem(criteria);
         }

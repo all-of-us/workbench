@@ -650,6 +650,10 @@ definitions:
       selectable:
         description: specifies if user can search with
         type: boolean
+      conceptId:
+        description: will allow for more efficient querying with parent criteria
+        type: integer
+        format: int64
       domainId:
         description: clue to determine which tables to search
         type: string

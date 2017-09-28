@@ -52,7 +52,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .name("Infectious and parasitic diseases")
                         .group(false)
                         .selectable(false)
-                        .count(0L));
+                        .count(0L)
+                        .conceptId(0L));
     }
 
     @Test
@@ -65,7 +66,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .name("Age")
                         .group(false)
                         .selectable(true)
-                        .count(0L));
+                        .count(0L)
+                        .conceptId(12L));
     }
 
     @Test
