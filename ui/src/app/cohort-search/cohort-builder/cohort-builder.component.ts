@@ -1,11 +1,14 @@
 import {Component, OnInit, ChangeDetectorRef, OnDestroy, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
+import {NgRedux} from '@angular-redux/store';
 import {intersection, complement, union} from 'set-manipulator';
 import 'rxjs/add/operator/takeWhile';
 
 import {BroadcastService} from '../broadcast.service';
 import {SearchGroup, SearchResult} from '../model';
+import {CohortSearchActions} from '../actions';
+import {CohortSearchState} from '../store';
 
 @Component({
   selector: 'app-search',
@@ -42,6 +45,8 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
               private broadcastService: BroadcastService,
               private router: Router,
               private route: ActivatedRoute,
+              private ngRedux: NgRedux<CohortSearchState>,
+              private actions: CohortSearchActions,
               @Inject(DOCUMENT) private document: any) {}
 
   ngOnInit() {
@@ -69,6 +74,8 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   }
 
   addSearchGroup() {
+    this.ngRedux.dispatch(this.actions.initGroup('include'));
+
     this.searchGroups.push(new SearchGroup());
     this.changeDetectorRef.detectChanges();
     const scrollableDiv = window.document.getElementById('scrollable-groups');
@@ -76,6 +83,8 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   }
 
   addExclusionGroup() {
+    this.ngRedux.dispatch(this.actions.initGroup('exclude'));
+
     this.exclusionGroups.push(new SearchGroup('Exclude participants where:'));
     this.changeDetectorRef.detectChanges();
     const scrollableDiv = window.document.getElementById('scrollable-groups');

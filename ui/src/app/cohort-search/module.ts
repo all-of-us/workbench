@@ -2,7 +2,7 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
-import {NgReduxModule, NgRedux} from '@angular-redux/store';
+import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
 
 /* Components */
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
@@ -17,9 +17,11 @@ import {WizardTreeChildrenComponent} from './wizard-tree-children/wizard-tree-ch
 import {WizardSelectComponent} from './wizard-select/wizard-select.component';
 
 /* Other Objects */
+import {environment} from 'environments/environment';
 import {BroadcastService} from './broadcast.service';
 import {CohortSearchState, InitialState, rootReducer} from './store';
 import {CohortSearchRouter} from './router';
+import {CohortSearchActions} from './actions';
 import {GoogleChartDirective} from './google-chart.directive';
 
 import {CohortBuilderService} from 'generated';
@@ -50,10 +52,23 @@ import {CohortBuilderService} from 'generated';
   providers: [
     BroadcastService,
     CohortBuilderService,
+    CohortSearchActions
   ]
 })
 export class CohortSearchModule {
-  constructor(ngRedux: NgRedux<CohortSearchState>) {
-    ngRedux.configureStore(rootReducer, InitialState);
+  constructor(private ngRedux: NgRedux<CohortSearchState>,
+              private devTools: DevToolsExtension) {
+
+    let storeEnhancers = [];
+    if (environment.debug && devTools.isEnabled()) {
+      storeEnhancers = [...storeEnhancers, devTools.enhancer()];
+    }
+
+    ngRedux.configureStore(
+      rootReducer,
+      InitialState,
+      [],
+      storeEnhancers
+    );
   }
 }
