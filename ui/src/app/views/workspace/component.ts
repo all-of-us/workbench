@@ -9,7 +9,6 @@ import {ClusterRequest} from 'generated';
 import {ClusterService} from 'generated';
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {ProfileService} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 // TODO: use a real swagger generated class for this.
@@ -104,7 +103,6 @@ export class WorkspaceComponent implements OnInit {
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
-      private profileService: ProfileService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}

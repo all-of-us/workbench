@@ -1,16 +1,19 @@
 import {Component, DebugElement} from '@angular/core';
 import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
 import {Title, By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {FormsModule} from '@angular/forms';
+import {ClarityModule} from 'clarity-angular';
+
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {updateAndTick, simulateInput} from 'testing/test-helpers';
+
+import {ClusterService} from 'generated';
 import {CohortsService} from 'generated';
 import {WorkspacesService} from 'generated';
-import {ClarityModule} from 'clarity-angular';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -71,6 +74,7 @@ describe('WorkspaceComponent', () => {
       providers: [
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: ClusterService, useValue: ClusterService },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ] }).compileComponents().then(() => {
         workspacePage = new WorkspacePage(TestBed);
