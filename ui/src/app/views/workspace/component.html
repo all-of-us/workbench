@@ -68,7 +68,7 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Notebooks</h3>
-    <button class="btn">Launch Notebook Server</button>
+    <button class="btn" (click)="launchNotebook()">Launch Notebook Server</button>
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="notebooksLoading">

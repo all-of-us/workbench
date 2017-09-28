@@ -3,9 +3,13 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {StringFilter, Comparator} from 'clarity-angular';
 import {DOCUMENT} from '@angular/platform-browser';
 
+import {resetDateObject} from 'helper-functions';
+
+import {ClusterRequest} from 'generated';
+import {ClusterService} from 'generated';
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {resetDateObject} from 'helper-functions';
+import {ProfileService} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 // TODO: use a real swagger generated class for this.
@@ -99,6 +103,8 @@ export class WorkspaceComponent implements OnInit {
       private router: Router,
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
+      private clusterService: ClusterService,
+      private profileService: ProfileService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}
@@ -135,5 +141,21 @@ export class WorkspaceComponent implements OnInit {
           error => {
             this.workspaceLoading = false;
           });
+  }
+
+  launchNotebook(): void {
+    let request: ClusterRequest;
+    // TODO: Fill out this information
+    request = {
+      bucketPath: '',
+      serviceAccount: '',
+      labels: ''
+    };
+    console.log(this.workspace);
+    this.clusterService
+        .createCluster(this.workspace.namespace, 'test-cluster',
+        request).subscribe((cluster) => {
+      console.log(cluster);
+    });
   }
 }

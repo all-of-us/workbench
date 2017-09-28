@@ -1,0 +1,76 @@
+package org.pmiops.workbench.notebooks;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+import java.util.List;
+import javax.inject.Provider;
+import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.notebooks.api.NotebooksApi;
+import org.pmiops.workbench.notebooks.api.TestApi;
+import org.pmiops.workbench.notebooks.model.Cluster;
+import org.pmiops.workbench.notebooks.model.ClusterRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotebooksServiceImpl implements NotebooksService {
+
+  private final Provider<ClusterApi> clusterApiProvider;
+  private final Provider<NotebooksApi> notebooksApiProvider;
+  private final Provider<TestApi> testApiProvider;
+
+  @Autowired
+  public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
+      Provider<NotebooksApi> notebooksApiProvider,
+      Provider<TestApi> testApiProvider) {
+    this.clusterApiProvider = clusterApiProvider;
+    this.notebooksApiProvider = notebooksApiProvider;
+    this.testApiProvider = testApiProvider;
+  }
+
+  @Override
+  public Cluster createCluster(String googleProject, String clusterName, ClusterRequest clusterRequest)
+      throws ApiException {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      return clusterApi.createCluster(googleProject, clusterName, clusterRequest);
+    } catch (ApiException e) {
+      // TODO: Handle notebook cluster creation exceptions cleanly.
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void deleteCluster(String googleProject, String clusterName) throws ApiException {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      clusterApi.deleteCluster(googleProject, clusterName);
+    } catch (ApiException e) {
+      // TODO: Handle notebook cluster deletion exceptions cleanly.
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public List<Cluster> listClusters(String labels) throws ApiException {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      return clusterApi.listClusters(labels);
+    } catch (ApiException e) {
+      // TODO: Handle list clusters exceptions cleanly
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Cluster getCluster(String googleProject, String clusterName) throws ApiException {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    try {
+      return clusterApi.getCluster(googleProject, clusterName);
+    } catch (ApiException e) {
+      // TODO: Handle get cluster exceptions cleanly
+      throw new RuntimeException(e);
+    }
+  }
+}

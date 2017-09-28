@@ -26,6 +26,7 @@ import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 
 import {BugReportService, CohortsService, Configuration, ConfigurationParameters, ProfileService, WorkspacesService} from 'generated';
+import {ClusterService} from 'generated';
 // tslint:enable:max-line-length
 
 
@@ -59,16 +60,17 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceEditComponent
   ],
   providers: [
+    BugReportService,
+    ClusterService,
+    CohortsService,
+    ProfileService,
     SignInService,
     {
       provide: Configuration,
       deps: [SignInService],
       useFactory: getConfiguration
     },
-    CohortsService,
     WorkspacesService,
-    BugReportService,
-    ProfileService
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent]
