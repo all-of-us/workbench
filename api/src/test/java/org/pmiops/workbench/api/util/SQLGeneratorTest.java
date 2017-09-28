@@ -79,13 +79,13 @@ public class SQLGeneratorTest {
             "from `" + getTablePrefix() + ".person` p " +
             "where person_id in (" +
                 "select distinct person_id " +
-                "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b " +
+                "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b " +
                 "where a.condition_source_concept_id = b.concept_id " +
                 "and b.vocabulary_id in (@cm,@proc) " +
                 "and b.concept_code in unnest(@Conditioncodes)"+
                 " union distinct " +
                 "select distinct person_id " +
-                "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".CONCEPT` b " +
+                "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b " +
                 "where a.measurement_source_concept_id = b.concept_id " +
                 "and b.vocabulary_id in (@cm,@proc) " +
                 "and b.concept_code in unnest(@Measurementcodes))";
@@ -136,42 +136,42 @@ public class SQLGeneratorTest {
         Map<String, String> expectedByKey = new HashMap<String, String>();
         expectedByKey.put("Condition",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b "+
             "where a.condition_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) " +
             "and b.concept_code in unnest(@Conditioncodes)"
         );
         expectedByKey.put("Observation",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".observation` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".observation` a, `" + getTablePrefix() + ".concept` b "+
             "where a.observation_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) " +
             "and b.concept_code in unnest(@Observationcodes)"
         );
         expectedByKey.put("Measurement",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b "+
             "where a.measurement_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) "+
             "and b.concept_code in unnest(@Measurementcodes)"
         );
         expectedByKey.put("Exposure",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".device_exposure` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".device_exposure` a, `" + getTablePrefix() + ".concept` b "+
             "where a.device_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) "+
             "and b.concept_code in unnest(@Exposurecodes)"
         );
         expectedByKey.put("Drug",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".drug_exposure` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".drug_exposure` a, `" + getTablePrefix() + ".concept` b "+
             "where a.drug_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) "+
             "and b.concept_code in unnest(@Drugcodes)"
         );
         expectedByKey.put("Procedure",
             "select distinct person_id " +
-            "from `" + getTablePrefix() + ".procedure_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "from `" + getTablePrefix() + ".procedure_occurrence` a, `" + getTablePrefix() + ".concept` b "+
             "where a.procedure_source_concept_id = b.concept_id "+
             "and b.vocabulary_id in (@cm,@proc) "+
             "and b.concept_code in unnest(@Procedurecodes)"
