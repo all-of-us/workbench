@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +31,13 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Override
     public List<String> getTableNames() {
-        return Arrays.asList("icd9_criteria", "person", "CONCEPT", "condition_occurrence");
+        return Arrays.asList(
+                "icd9_criteria",
+                "person",
+                "CONCEPT",
+                "condition_occurrence",
+                "procedure_occurrence",
+                "measurement");
     }
 
     @Test
@@ -42,33 +49,86 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         Criteria criteria = listResponse.getItems().get(0);
         assertThat(criteria.getId()).isEqualTo(1);
         assertThat(criteria.getType()).isEqualTo("ICD9");
-        assertThat(criteria.getCode()).isEqualTo("001.1");
-        assertThat(criteria.getName()).isEqualTo("Cholera");
-        assertThat(criteria.getGroup()).isEqualTo(true);
+        assertThat(criteria.getCode()).isEqualTo("001-139.99");
+        assertThat(criteria.getName()).isEqualTo("Infectious and parasitic diseases");
+        assertThat(criteria.getGroup()).isEqualTo(false);
         assertThat(criteria.getSelectable()).isEqualTo(false);
-        assertThat(criteria.getCount()).isEqualTo(10);
-        assertThat(criteria.getDomainId()).isEqualTo("Condition");
+        assertThat(criteria.getCount()).isEqualTo(0);
+        assertThat(criteria.getDomainId()).isNull();
     }
 
     @Test
     public void searchSubjects() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001.1", "Condition")),
+                "1,1,1");
+    }
+
+    @Test
+    public void searchSubjects_ConditionOccurrenceParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001", null) ),
+                "1,1,1");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrenceLeaf() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002.1", "Procedure") ),
+                "2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrenceParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002", null) ),
+                "2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_MeasurementLeaf() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003.1", "Measurement") ),
+                "3,3,3");
+    }
+
+    @Test
+    public void searchSubjects_MeasurementParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003", null) ),
+                "3,3,3");
+    }
+
+    private SearchRequest createSearchRequest(String type, String code, String domainId) {
+        List<SearchParameter> parameters = new ArrayList<>();
         final SearchParameter searchParameter = new SearchParameter();
-        searchParameter.setCode("001.1");
-        searchParameter.setDomainId("Condition");
+        searchParameter.setCode(code);
+        searchParameter.setDomainId(domainId);
+        parameters.add(searchParameter);
+
+        final SearchGroupItem searchGroupItem = new SearchGroupItem();
+        searchGroupItem.setType("ICD9");
+        searchGroupItem.setSearchParameters(parameters);
+
+        final SearchGroup searchGroup = new SearchGroup();
+        searchGroup.add(searchGroupItem);
 
         final SearchRequest searchRequest = new SearchRequest();
-        final SearchGroupItem item = new SearchGroupItem();
-        final SearchGroup group = new SearchGroup();
-        item.setType("ICD9");
-        item.setSearchParameters(Arrays.asList(searchParameter));
-        group.add(item);
-        searchRequest.setInclude(Arrays.asList(group));
+        searchRequest.setInclude(Arrays.asList(searchGroup));
+        return searchRequest;
+    }
 
-        ResponseEntity response = controller.searchSubjects(searchRequest);
+    private void assertSubjects(ResponseEntity response, String expectedSubject) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
         String subject = listResponse.get(0);
-        assertThat(subject.equals("1,1,1"));
+        assertThat(subject).isEqualTo(expectedSubject);
     }
 }

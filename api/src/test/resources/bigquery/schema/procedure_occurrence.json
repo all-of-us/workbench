@@ -2,6 +2,15 @@
   "fields":
   [
     {
+      "name":"procedure_occurrence_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
       "name":"person_id",
       "type":{
         "value":{
@@ -11,7 +20,7 @@
       }
     },
     {
-      "name":"gender_concept_id",
+      "name":"procedure_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -20,34 +29,16 @@
       }
     },
     {
-      "name":"year_of_birth",
+      "name":"procedure_date",
       "type":{
         "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
+          "equivalent":"DATE",
+          "constant":"DATE"
         }
       }
     },
     {
-      "name":"month_of_birth",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"day_of_birth",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"birth_datetime",
+      "name":"procedure_datetime",
       "type":{
         "value":{
           "equivalent":"TIMESTAMP",
@@ -56,7 +47,7 @@
       }
     },
     {
-      "name":"race_concept_id",
+      "name":"procedure_type_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -65,7 +56,7 @@
       }
     },
     {
-      "name":"ethnicity_concept_id",
+      "name":"modifier_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -74,7 +65,7 @@
       }
     },
     {
-      "name":"location_id",
+      "name":"quantity",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -92,7 +83,7 @@
       }
     },
     {
-      "name":"care_site_id",
+      "name":"visit_occurrence_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -101,7 +92,7 @@
       }
     },
     {
-      "name":"person_source_value",
+      "name":"procedure_source_value",
       "type":{
         "value":{
           "equivalent":"STRING",
@@ -110,16 +101,7 @@
       }
     },
     {
-      "name":"gender_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"gender_source_concept_id",
+      "name":"procedure_source_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -128,38 +110,11 @@
       }
     },
     {
-      "name":"race_source_value",
+      "name":"qualifier_source_value",
       "type":{
         "value":{
           "equivalent":"STRING",
           "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"race_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"ethnicity_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"ethnicity_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
         }
       }
     }
