@@ -2,6 +2,7 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
+import {NgReduxModule, NgRedux} from '@angular-redux/store';
 
 /* Components */
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
@@ -17,7 +18,8 @@ import {WizardSelectComponent} from './wizard-select/wizard-select.component';
 
 /* Other Objects */
 import {BroadcastService} from './broadcast.service';
-import {CohortSearchRouter} from './router.module';
+import {CohortSearchState, InitialState, rootReducer} from './store';
+import {CohortSearchRouter} from './router';
 import {GoogleChartDirective} from './google-chart.directive';
 
 import {CohortBuilderService} from 'generated';
@@ -29,6 +31,7 @@ import {CohortBuilderService} from 'generated';
     ClarityModule,
     CohortSearchRouter,
     CommonModule,
+    NgReduxModule,
   ],
   declarations: [
     CohortBuilderComponent,
@@ -49,4 +52,8 @@ import {CohortBuilderService} from 'generated';
     CohortBuilderService,
   ]
 })
-export class CohortSearchModule {}
+export class CohortSearchModule {
+  constructor(ngRedux: NgRedux<CohortSearchState>) {
+    ngRedux.configureStore(rootReducer, InitialState);
+  }
+}
