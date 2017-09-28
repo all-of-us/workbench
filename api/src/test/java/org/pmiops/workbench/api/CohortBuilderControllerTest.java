@@ -59,69 +59,50 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void searchSubjects() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "001.1", "Condition") );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("1,1,1");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001.1", "Condition")),
+                "1,1,1");
     }
 
     @Test
     public void searchSubjects_ConditionOccurrenceParent() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "001", null) );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("1,1,1");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001", null) ),
+                "1,1,1");
     }
 
     @Test
     public void searchSubjects_ProcedureOccurrenceLeaf() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "002.1", "Procedure") );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("2,2,2");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002.1", "Procedure") ),
+                "2,2,2");
     }
 
     @Test
     public void searchSubjects_ProcedureOccurrenceParent() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "002", null) );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("2,2,2");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002", null) ),
+                "2,2,2");
     }
 
     @Test
     public void searchSubjects_MeasurementLeaf() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "003.1", "Measurement") );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("3,3,3");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003.1", "Measurement") ),
+                "3,3,3");
     }
 
     @Test
     public void searchSubjects_MeasurementParent() throws Exception {
-        ResponseEntity response = controller
-                .searchSubjects(createSearchRequest("ICD9", "003", null) );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        String subject = listResponse.get(0);
-        assertThat(subject).isEqualTo("3,3,3");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003", null) ),
+                "3,3,3");
     }
 
     private SearchRequest createSearchRequest(String type, String code, String domainId) {
@@ -141,5 +122,13 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         final SearchRequest searchRequest = new SearchRequest();
         searchRequest.setInclude(Arrays.asList(searchGroup));
         return searchRequest;
+    }
+
+    private void assertSubjects(ResponseEntity response, String expectedSubject) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
+        String subject = listResponse.get(0);
+        assertThat(subject).isEqualTo(expectedSubject);
     }
 }

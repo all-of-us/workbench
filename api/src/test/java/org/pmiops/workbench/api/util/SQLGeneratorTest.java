@@ -39,19 +39,17 @@ public class SQLGeneratorTest {
 
     @Test
     public void findGroupCodes() throws Exception {
-        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
-                "SELECT code, domain_id AS domainId FROM `" + TABLE_PREFIX + ".icd9_criteria` " +
-                "WHERE (code LIKE @code0 OR code LIKE @code1 OR code LIKE @code2) " +
-                "AND is_selectable = TRUE AND is_group = FALSE ORDER BY code ASC";
+                "select code, domain_id as domainId from `" + getTablePrefix() + ".icd9_criteria` " +
+                "where (code like @code0 or code like @code1 or code like @code2) " +
+                "and is_selectable = TRUE and is_group = FALSE order by code asc";
         String actual = result.getQuery();
         assert actual.equals(expected) : showValues(expected, actual);
     }
 
     @Test
     public void handleSearch() throws Exception {
-        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         List<SearchParameter> params = new ArrayList<>();
         SearchParameter p;
 
@@ -74,23 +72,23 @@ public class SQLGeneratorTest {
         QueryRequest request = generator.handleSearch("ICD9", params);
         String actual = request.getQuery();
         String expected =
-            "SELECT DISTINCT CONCAT(" +
-                "CAST(p.person_id AS string), ',', " +
+            "select distinct concat(" +
+                "cast(p.person_id as string), ',', " +
                 "p.gender_source_value, ',', " +
-                "p.race_source_value) AS val "+
-            "FROM `" + TABLE_PREFIX + ".person` p " +
-            "WHERE PERSON_ID IN (" +
-                "SELECT DISTINCT PERSON_ID " +
-                "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
-                "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
-                "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                "AND b.CONCEPT_CODE IN UNNEST(@Conditioncodes)"+
-                " UNION DISTINCT " +
-                "SELECT DISTINCT PERSON_ID " +
-                "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b " +
-                "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID " +
-                "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-                "AND b.CONCEPT_CODE IN UNNEST(@Measurementcodes))";
+                "p.race_source_value) as val "+
+            "from `" + getTablePrefix() + ".person` p " +
+            "where person_id in (" +
+                "select distinct person_id " +
+                "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b " +
+                "where a.condition_source_concept_id = b.concept_id " +
+                "and b.vocabulary_id in (@cm,@proc) " +
+                "and b.concept_code in unnest(@Conditioncodes)"+
+                " union distinct " +
+                "select distinct person_id " +
+                "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".CONCEPT` b " +
+                "where a.measurement_source_concept_id = b.concept_id " +
+                "and b.vocabulary_id in (@cm,@proc) " +
+                "and b.concept_code in unnest(@Measurementcodes))";
         assert actual.equals(expected) : showValues(expected, actual);
 
         /* Check the query parameters */
@@ -135,49 +133,48 @@ public class SQLGeneratorTest {
 
     @Test
     public void getSubQuery() throws Exception {
-        String TABLE_PREFIX = workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
         Map<String, String> expectedByKey = new HashMap<String, String>();
         expectedByKey.put("Condition",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".condition_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.CONDITION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND b.CONCEPT_CODE IN UNNEST(@Conditioncodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.condition_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) " +
+            "and b.concept_code in unnest(@Conditioncodes)"
         );
         expectedByKey.put("Observation",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".observation` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.OBSERVATION_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) " +
-            "AND b.CONCEPT_CODE IN UNNEST(@Observationcodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".observation` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.observation_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) " +
+            "and b.concept_code in unnest(@Observationcodes)"
         );
         expectedByKey.put("Measurement",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".measurement` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.MEASUREMENT_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND b.CONCEPT_CODE IN UNNEST(@Measurementcodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.measurement_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) "+
+            "and b.concept_code in unnest(@Measurementcodes)"
         );
         expectedByKey.put("Exposure",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".device_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.DEVICE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND b.CONCEPT_CODE IN UNNEST(@Exposurecodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".device_exposure` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.device_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) "+
+            "and b.concept_code in unnest(@Exposurecodes)"
         );
         expectedByKey.put("Drug",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".drug_exposure` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.DRUG_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND b.CONCEPT_CODE IN UNNEST(@Drugcodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".drug_exposure` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.drug_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) "+
+            "and b.concept_code in unnest(@Drugcodes)"
         );
         expectedByKey.put("Procedure",
-            "SELECT DISTINCT PERSON_ID " +
-            "FROM `" + TABLE_PREFIX + ".procedure_occurrence` a, `" + TABLE_PREFIX + ".CONCEPT` b "+
-            "WHERE a.PROCEDURE_SOURCE_CONCEPT_ID = b.CONCEPT_ID "+
-            "AND b.VOCABULARY_ID IN (@cm,@proc) "+
-            "AND b.CONCEPT_CODE IN UNNEST(@Procedurecodes)"
+            "select distinct person_id " +
+            "from `" + getTablePrefix() + ".procedure_occurrence` a, `" + getTablePrefix() + ".CONCEPT` b "+
+            "where a.procedure_source_concept_id = b.concept_id "+
+            "and b.vocabulary_id in (@cm,@proc) "+
+            "and b.concept_code in unnest(@Procedurecodes)"
         );
 
         List<String> keys = Arrays.asList("Condition", "Observation", "Measurement", "Exposure", "Drug", "Procedure");
@@ -212,5 +209,9 @@ public class SQLGeneratorTest {
         assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), generator.getMappedParameters(parameters).keySet());
         assertEquals(Arrays.asList("001"), generator.getMappedParameters(parameters).get("Condition"));
         assertEquals(Arrays.asList("002", "003"), generator.getMappedParameters(parameters).get("Procedure"));
+    }
+
+    private String getTablePrefix() {
+        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
     }
 }
