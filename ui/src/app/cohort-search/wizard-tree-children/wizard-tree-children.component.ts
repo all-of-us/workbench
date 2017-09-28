@@ -22,8 +22,9 @@ export class WizardTreeChildrenComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = true;
-    this.subscription = this.cohortBuilderService.getCriteriaByTypeAndParentId(
-        this.node.type.toLocaleLowerCase(), this.node.id)
+      const nodeType = this.node.type.match(/^DEMO.*$/) ? 'demo' : this.node.type;
+      this.subscription = this.cohortBuilderService.getCriteriaByTypeAndParentId(
+        nodeType.toLocaleLowerCase(), this.node.id)
         .subscribe(nodes => {
           this.nodes = nodes.items;
           this.loading = false;

@@ -47,7 +47,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             final Criteria criteria = new Criteria();
             criteria.setId(row.get(rm.get("id")).getLongValue());
             criteria.setType(row.get(rm.get("type")).getStringValue());
-            criteria.setCode(row.get(rm.get("code")).getStringValue());
+            criteria.setCode(row.get(rm.get("code")).isNull() ? null : row.get(rm.get("code")).getStringValue());
             criteria.setName(row.get(rm.get("name")).getStringValue());
             criteria.setCount(row.get(rm.get("est_count")).isNull() ? 0 : row.get(rm.get("est_count")).getLongValue());
             criteria.setGroup(row.get(rm.get("is_group")).getBooleanValue());

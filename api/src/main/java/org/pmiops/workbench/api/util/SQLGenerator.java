@@ -94,7 +94,7 @@ public class SQLGenerator {
     public QueryRequest getCriteriaByTypeAndParentId(String type, Long parentId) {
         return QueryRequest
                 .newBuilder(setBigQueryConfig(CRITERIA_QUERY, type + "_criteria"))
-                .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
+                .addNamedParameter("parentId", QueryParameterValue.int64(parentId))
                 .setUseLegacySql(false)
                 .build();
     }
