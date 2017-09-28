@@ -33,6 +33,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public List<String> getTableNames() {
         return Arrays.asList(
                 "icd9_criteria",
+                "demo_criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
@@ -41,20 +42,30 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId() throws Exception {
-        ResponseEntity response = controller.getCriteriaByTypeAndParentId("icd9", 0L );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("icd9", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("ICD9")
+                        .code("001-139.99")
+                        .name("Infectious and parasitic diseases")
+                        .group(false)
+                        .selectable(false)
+                        .count(0L));
+    }
 
-        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
-        Criteria criteria = listResponse.getItems().get(0);
-        assertThat(criteria.getId()).isEqualTo(1);
-        assertThat(criteria.getType()).isEqualTo("ICD9");
-        assertThat(criteria.getCode()).isEqualTo("001-139.99");
-        assertThat(criteria.getName()).isEqualTo("Infectious and parasitic diseases");
-        assertThat(criteria.getGroup()).isEqualTo(false);
-        assertThat(criteria.getSelectable()).isEqualTo(false);
-        assertThat(criteria.getCount()).isEqualTo(0);
-        assertThat(criteria.getDomainId()).isNull();
+    @Test
+    public void getCriteriaByTypeAndParentId_demo() throws Exception {
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("demo", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("DEMO_AGE")
+                        .name("Age")
+                        .group(false)
+                        .selectable(true)
+                        .count(0L));
     }
 
     @Test
@@ -105,23 +116,23 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "3,3,3");
     }
 
+    private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
+        assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
+    }
+
     private SearchRequest createSearchRequest(String type, String code, String domainId) {
         List<SearchParameter> parameters = new ArrayList<>();
-        final SearchParameter searchParameter = new SearchParameter();
-        searchParameter.setCode(code);
-        searchParameter.setDomainId(domainId);
-        parameters.add(searchParameter);
+        parameters.add(new SearchParameter().code(code).domainId(domainId));
 
-        final SearchGroupItem searchGroupItem = new SearchGroupItem();
-        searchGroupItem.setType("ICD9");
-        searchGroupItem.setSearchParameters(parameters);
+        final SearchGroupItem searchGroupItem = new SearchGroupItem().type(type).searchParameters(parameters);
 
         final SearchGroup searchGroup = new SearchGroup();
         searchGroup.add(searchGroupItem);
 
-        final SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setInclude(Arrays.asList(searchGroup));
-        return searchRequest;
+        return new SearchRequest().include(Arrays.asList(searchGroup));
     }
 
     private void assertSubjects(ResponseEntity response, String expectedSubject) {
