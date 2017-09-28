@@ -26,6 +26,7 @@ public class SQLGenerator {
                     "est_count,\n" +
                     "is_group,\n" +
                     "is_selectable,\n" +
+                    "concept_id,\n" +
                     "domain_id\n" +
                     "from `%s.%s.%s`\n" +
                     "where parent_id = @parentId\n" +
@@ -94,7 +95,7 @@ public class SQLGenerator {
     public QueryRequest getCriteriaByTypeAndParentId(String type, Long parentId) {
         return QueryRequest
                 .newBuilder(setBigQueryConfig(CRITERIA_QUERY, type + "_criteria"))
-                .addNamedParameter("parentId", QueryParameterValue.int64(new Long(parentId)))
+                .addNamedParameter("parentId", QueryParameterValue.int64(parentId))
                 .setUseLegacySql(false)
                 .build();
     }

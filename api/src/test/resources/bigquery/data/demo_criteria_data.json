@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "parent_id": "0",
+    "type": "DEMO_AGE",
+    "name": "Age",
+    "is_group": "false",
+    "is_selectable": "true",
+    "concept_id":12
+  }
+]
