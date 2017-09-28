@@ -28,7 +28,7 @@ public class SQLGenerator {
                     "is_selectable,\n" +
                     "domain_id\n" +
                     "from `%s.%s.%s`\n" +
-                    "WHERE parent_id = @parentId\n" +
+                    "where parent_id = @parentId\n" +
                     "order by id asc";
 
     /*
@@ -36,7 +36,7 @@ public class SQLGenerator {
      *  - the table prefix (e.g., something like "pmi-drc-api-test.synpuf")
      *  - the table name
      *  - the table prefix again
-     *  - the *_SOURCE_CONCEPT_ID column identifier for that table
+     *  - the *_source_concept_id column identifier for that table
      *  - a BigQuery "named parameter" indicating the list of codes to search by
      *  See the link below about IN and UNNEST
      * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
@@ -190,7 +190,7 @@ public class SQLGenerator {
                 info.get("tableName"),
                 workbenchConfig.get().bigquery.projectId,
                 workbenchConfig.get().bigquery.dataSetId,
-                "CONCEPT",
+                "concept",
                 info.get("sourceConceptIdColumn"),
                 "@" + key + "codes"
         );

@@ -34,7 +34,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         return Arrays.asList(
                 "icd9_criteria",
                 "person",
-                "CONCEPT",
+                "concept",
                 "condition_occurrence",
                 "procedure_occurrence",
                 "measurement");

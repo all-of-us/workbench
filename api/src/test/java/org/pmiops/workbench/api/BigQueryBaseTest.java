@@ -68,7 +68,7 @@ public abstract class BigQueryBaseTest {
     private void createTable(String dataSetId, String tableId) throws Exception {
         ObjectMapper jackson = new ObjectMapper();
         String rawJson =
-                new String(Files.readAllBytes(Paths.get(BASE_PATH + "schema/" + tableId.toLowerCase() + ".json")), Charset.defaultCharset());
+                new String(Files.readAllBytes(Paths.get(BASE_PATH + "schema/" + tableId + ".json")), Charset.defaultCharset());
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();
