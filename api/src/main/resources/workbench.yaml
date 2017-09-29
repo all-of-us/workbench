@@ -635,7 +635,10 @@ definitions:
         description: type of criteria
         type: string
       code:
-        description: code that identifies this criteria
+        description: >
+          code that identifies this criteria, ex: icd9, icd10 or cpt all
+          have codes that map to the concept_code column in the concept
+          table.
         type: string
       name:
         description: description of criteria
@@ -650,8 +653,18 @@ definitions:
       selectable:
         description: specifies if user can search with
         type: boolean
+      conceptId:
+        description: >
+          concept ids are ids associated with a specific vocabulary item,
+          in the concept table and allow you to search for that code in
+          its domain table.
+        type: integer
+        format: int64
       domainId:
-        description: clue to determine which tables to search
+        description: >
+          clue to determine which tables to search, but these only exist
+          for leaves in the tree. Parents don't have domain ids and concept
+          id will be used in the case that a parent is selectable.
         type: string
 
   SearchRequest:

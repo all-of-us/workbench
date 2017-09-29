@@ -2,6 +2,15 @@
   "fields":
   [
     {
+      "name":"measurement_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
       "name":"person_id",
       "type":{
         "value":{
@@ -11,7 +20,7 @@
       }
     },
     {
-      "name":"gender_concept_id",
+      "name":"measurement_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -20,34 +29,16 @@
       }
     },
     {
-      "name":"year_of_birth",
+      "name":"measurement_date",
       "type":{
         "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
+          "equivalent":"DATE",
+          "constant":"DATE"
         }
       }
     },
     {
-      "name":"month_of_birth",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"day_of_birth",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"birth_datetime",
+      "name":"measurement_datetime",
       "type":{
         "value":{
           "equivalent":"TIMESTAMP",
@@ -56,7 +47,7 @@
       }
     },
     {
-      "name":"race_concept_id",
+      "name":"measurement_type_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -65,7 +56,7 @@
       }
     },
     {
-      "name":"ethnicity_concept_id",
+      "name":"operator_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -74,11 +65,47 @@
       }
     },
     {
-      "name":"location_id",
+      "name":"value_as_number",
+      "type":{
+        "value":{
+          "equivalent":"FLOAT",
+          "constant":"FLOAT"
+        }
+      }
+    },
+    {
+      "name":"value_as_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
           "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"unit_concept_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"range_low",
+      "type":{
+        "value":{
+          "equivalent":"FLOAT",
+          "constant":"FLOAT"
+        }
+      }
+    },
+    {
+      "name":"range_high",
+      "type":{
+        "value":{
+          "equivalent":"FLOAT",
+          "constant":"FLOAT"
         }
       }
     },
@@ -92,7 +119,7 @@
       }
     },
     {
-      "name":"care_site_id",
+      "name":"visit_occurrence_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -101,7 +128,7 @@
       }
     },
     {
-      "name":"person_source_value",
+      "name":"measurement_source_value",
       "type":{
         "value":{
           "equivalent":"STRING",
@@ -110,16 +137,7 @@
       }
     },
     {
-      "name":"gender_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"gender_source_concept_id",
+      "name":"measurement_source_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -128,7 +146,7 @@
       }
     },
     {
-      "name":"race_source_value",
+      "name":"unit_source_value",
       "type":{
         "value":{
           "equivalent":"STRING",
@@ -137,29 +155,11 @@
       }
     },
     {
-      "name":"race_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"ethnicity_source_value",
+      "name":"value_source_value",
       "type":{
         "value":{
           "equivalent":"STRING",
           "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"ethnicity_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
         }
       }
     }

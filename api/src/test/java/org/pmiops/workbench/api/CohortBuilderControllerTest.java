@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,45 +31,117 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Override
     public List<String> getTableNames() {
-        return Arrays.asList("icd9_criteria", "person", "CONCEPT", "condition_occurrence");
+        return Arrays.asList(
+                "icd9_criteria",
+                "demo_criteria",
+                "person",
+                "concept",
+                "condition_occurrence",
+                "procedure_occurrence",
+                "measurement");
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId() throws Exception {
-        ResponseEntity response = controller.getCriteriaByTypeAndParentId("icd9", 0L );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("icd9", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("ICD9")
+                        .code("001-139.99")
+                        .name("Infectious and parasitic diseases")
+                        .group(false)
+                        .selectable(false)
+                        .count(0L)
+                        .conceptId(0L));
+    }
 
-        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
-        Criteria criteria = listResponse.getItems().get(0);
-        assertThat(criteria.getId()).isEqualTo(1);
-        assertThat(criteria.getType()).isEqualTo("ICD9");
-        assertThat(criteria.getCode()).isEqualTo("001.1");
-        assertThat(criteria.getName()).isEqualTo("Cholera");
-        assertThat(criteria.getGroup()).isEqualTo(true);
-        assertThat(criteria.getSelectable()).isEqualTo(false);
-        assertThat(criteria.getCount()).isEqualTo(10);
-        assertThat(criteria.getDomainId()).isEqualTo("Condition");
+    @Test
+    public void getCriteriaByTypeAndParentId_demo() throws Exception {
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("demo", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("DEMO_AGE")
+                        .name("Age")
+                        .group(false)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(12L));
     }
 
     @Test
     public void searchSubjects() throws Exception {
-        final SearchParameter searchParameter = new SearchParameter();
-        searchParameter.setCode("001.1");
-        searchParameter.setDomainId("Condition");
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001.1", "Condition")),
+                "1,1,1");
+    }
 
-        final SearchRequest searchRequest = new SearchRequest();
-        final SearchGroupItem item = new SearchGroupItem();
-        final SearchGroup group = new SearchGroup();
-        item.setType("ICD9");
-        item.setSearchParameters(Arrays.asList(searchParameter));
-        group.add(item);
-        searchRequest.setInclude(Arrays.asList(group));
+    @Test
+    public void searchSubjects_ConditionOccurrenceParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "001", null) ),
+                "1,1,1");
+    }
 
-        ResponseEntity response = controller.searchSubjects(searchRequest);
+    @Test
+    public void searchSubjects_ProcedureOccurrenceLeaf() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002.1", "Procedure") ),
+                "2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_ProcedureOccurrenceParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "002", null) ),
+                "2,2,2");
+    }
+
+    @Test
+    public void searchSubjects_MeasurementLeaf() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003.1", "Measurement") ),
+                "3,3,3");
+    }
+
+    @Test
+    public void searchSubjects_MeasurementParent() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("ICD9", "003", null) ),
+                "3,3,3");
+    }
+
+    private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
+        assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
+    }
+
+    private SearchRequest createSearchRequest(String type, String code, String domainId) {
+        List<SearchParameter> parameters = new ArrayList<>();
+        parameters.add(new SearchParameter().code(code).domainId(domainId));
+
+        final SearchGroupItem searchGroupItem = new SearchGroupItem().type(type).searchParameters(parameters);
+
+        final SearchGroup searchGroup = new SearchGroup();
+        searchGroup.add(searchGroupItem);
+
+        return new SearchRequest().include(Arrays.asList(searchGroup));
+    }
+
+    private void assertSubjects(ResponseEntity response, String expectedSubject) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
         String subject = listResponse.get(0);
-        assertThat(subject.equals("1,1,1"));
+        assertThat(subject).isEqualTo(expectedSubject);
     }
 }
