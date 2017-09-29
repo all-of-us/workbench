@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util;
+package org.pmiops.workbench.api.util.query;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
@@ -23,7 +23,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-@Import({SQLGenerator.class})
+@Import({CodesSqlGenerator.class})
 @SpringBootTest(classes = {TestBigQueryConfig.class})
 public class SQLGeneratorTest {
 
@@ -32,14 +32,14 @@ public class SQLGeneratorTest {
     }
 
     @Autowired
-    SQLGenerator generator;
+    BigQuerySqlGenerator generator;
 
     @Autowired
     WorkbenchConfig workbenchConfig;
 
     @Test
     public void findGroupCodes() throws Exception {
-        QueryRequest result = generator.findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
+        QueryRequest result = ((CodesSqlGenerator)generator).findGroupCodes("ICD9", Arrays.asList("11.1", "11.2", "11.3"));
         String expected =
                 "select code, domain_id as domainId from `" + getTablePrefix() + ".icd9_criteria` " +
                 "where (code like @code0 or code like @code1 or code like @code2) " +
@@ -69,7 +69,7 @@ public class SQLGeneratorTest {
         params.add(p);
 
         /* Check the generated query */
-        QueryRequest request = generator.handleSearch("ICD9", params);
+        QueryRequest request = ((CodesSqlGenerator)generator).handleSearch("ICD9", params);
         String actual = request.getQuery();
         String expected =
             "select distinct concat(" +
@@ -122,7 +122,7 @@ public class SQLGeneratorTest {
         item.setType("ICD9");
         item.setSearchParameters(parameterList);
 
-        assertEquals(Arrays.asList("001%"), generator.findParametersWithEmptyDomainIds(item.getSearchParameters()));
+        assertEquals(Arrays.asList("001%"), ((CodesSqlGenerator)generator).findParametersWithEmptyDomainIds(item.getSearchParameters()));
         assertEquals(1, item.getSearchParameters().size());
 
         SearchParameter searchParameter = new SearchParameter();
@@ -180,7 +180,7 @@ public class SQLGeneratorTest {
         List<String> keys = Arrays.asList("Condition", "Observation", "Measurement", "Exposure", "Drug", "Procedure");
         String actual, expected;
         for (String key : keys) {
-            actual = generator.getSubQuery(key);
+            actual = ((CodesSqlGenerator)generator).getSubQuery(key);
             expected = expectedByKey.get(key);
             assert actual.equals(expected) : showValues(expected, actual);
         }
@@ -205,10 +205,10 @@ public class SQLGeneratorTest {
         item.setSearchParameters(Arrays.asList(searchParameterCondtion, searchParameterProc1, searchParameterProc2));
 
         List<SearchParameter> parameters = item.getSearchParameters();
-        assertEquals(2, generator.getMappedParameters(parameters).keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), generator.getMappedParameters(parameters).keySet());
-        assertEquals(Arrays.asList("001"), generator.getMappedParameters(parameters).get("Condition"));
-        assertEquals(Arrays.asList("002", "003"), generator.getMappedParameters(parameters).get("Procedure"));
+        assertEquals(2, ((CodesSqlGenerator)generator).getMappedParameters(parameters).keySet().size());
+        assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), ((CodesSqlGenerator)generator).getMappedParameters(parameters).keySet());
+        assertEquals(Arrays.asList("001"), ((CodesSqlGenerator)generator).getMappedParameters(parameters).get("Condition"));
+        assertEquals(Arrays.asList("002", "003"), ((CodesSqlGenerator)generator).getMappedParameters(parameters).get("Procedure"));
     }
 
     private String getTablePrefix() {

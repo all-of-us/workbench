@@ -6,7 +6,10 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
-import org.pmiops.workbench.api.util.SQLGenerator;
+import org.pmiops.workbench.api.util.QueryBuilderFactory;
+import org.pmiops.workbench.api.util.query.AbstractQueryBuilder;
+import org.pmiops.workbench.api.util.query.FactoryKey;
+import org.pmiops.workbench.api.util.query.QueryParameters;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -26,9 +29,6 @@ import java.util.logging.Logger;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Autowired
-    private SQLGenerator generator;
-
-    @Autowired
     private BigQuery bigquery;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
@@ -36,7 +36,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
-        QueryRequest queryRequest = generator.getCriteriaByTypeAndParentId(type, parentId);
+        QueryRequest queryRequest = QueryBuilderFactory
+                .getQueryBuilder(FactoryKey.getKey(type))
+                .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
 
         QueryResult result = executeQuery(queryRequest);
 
@@ -64,6 +66,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
         /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
         SearchGroupItem item = request.getInclude().get(0).get(0);
+
+        QueryRequest queryRequest = QueryBuilderFactory
+                .getQueryBuilder(FactoryKey.getKey(item.getType()))
+                .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(item.getSearchParameters()));
+
+
         QueryRequest query;
         QueryResult result;
         Map<String, Integer> resultMapper;
@@ -77,9 +85,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 If any are present, generate a query to retrieve the missing domain IDs, then append the new parameters
                 to the parameter set
              */
+            AbstractQueryBuilder generator = QueryBuilderFactory.getQueryBuilder(FactoryKey.getKey(item.getType()));
             List<String> paramsWithoutDomains = generator.findParametersWithEmptyDomainIds(params);
             if (!paramsWithoutDomains.isEmpty()) {
-                query = generator.findGroupCodes(item.getType(), paramsWithoutDomains);
+                query = generator.buildQueryRequest(new QueryParameters().type(item.getType()).codes(paramsWithoutDomains));
                 result = executeQuery(query);
                 Map <String, Integer> resultMap = getResultMapper(result);
                 for (List<FieldValue> row: result.iterateAll()) {

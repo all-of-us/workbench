@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util;
+package org.pmiops.workbench.api.util.query;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
@@ -7,30 +7,61 @@ import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import javax.inject.Provider;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-@Service
-public class SQLGenerator {
+public class CodesQueryBuilder extends AbstractQueryBuilder {
 
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
 
-    private static final String CRITERIA_QUERY =
-            "select id,\n" +
-                    "type,\n" +
-                    "code,\n" +
-                    "name,\n" +
-                    "est_count,\n" +
-                    "is_group,\n" +
-                    "is_selectable,\n" +
-                    "concept_id,\n" +
-                    "domain_id\n" +
-                    "from `%s.%s.%s`\n" +
-                    "where parent_id = @parentId\n" +
-                    "order by id asc";
+    @Override
+    public QueryRequest buildQueryRequest(QueryParameters params) {
+        ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
+        List<String> queryParts = new ArrayList<String>();
+
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append(
+                "select distinct concat(" +
+                        "cast(p.person_id as string), ',', " +
+                        "p.gender_source_value, ',', " +
+                        "p.race_source_value) as val "+
+                        "from " + setBigQueryConfig("`%s.%s.%s` ", "person") + "p "+
+                        "where person_id in ("
+        );
+
+        Map<String, QueryParameterValue> queryParams = new HashMap<>();
+
+        queryParams.put("cm", QueryParameterValue.string(typeCM.get(params.getType())));
+        queryParams.put("proc", QueryParameterValue.string(typeProc.get(params.getType())));
+
+        for (String key : paramMap.keySet()) {
+            List<String> rawValues = paramMap.get(key);
+            String[] values = rawValues.toArray(new String[rawValues.size()]);
+            String subquery = getSubQuery(key);
+            queryParams.put(key + "codes", QueryParameterValue.array(values, String.class));
+            queryParts.add(subquery);
+        }
+
+        queryBuilder.append(String.join(" union distinct ", queryParts));
+        queryBuilder.append(")");
+
+        QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
+                .setNamedParameters(queryParams)
+                .setUseLegacySql(false)
+                .build();
+        return request;
+    }
+
+    @Override
+    public String getType() {
+        return FactoryKey.CODES.name();
+    }
 
     /*
      * The format placeholders stand for, in order:
@@ -92,14 +123,6 @@ public class SQLGenerator {
         tableInfo.put("Procedure", table);
     }
 
-    public QueryRequest getCriteriaByTypeAndParentId(String type, Long parentId) {
-        return QueryRequest
-                .newBuilder(setBigQueryConfig(CRITERIA_QUERY, type + "_criteria"))
-                .addNamedParameter("parentId", QueryParameterValue.int64(parentId))
-                .setUseLegacySql(false)
-                .build();
-    }
-
     public QueryRequest findGroupCodes(String type, List<String> codes) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("select code, domain_id as domainId from ");
@@ -122,43 +145,6 @@ public class SQLGenerator {
         QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
             .setNamedParameters(queryParams)
             .setUseLegacySql(false)     // required for queries that use named parameters
-            .build();
-        return request;
-    }
-
-    public QueryRequest handleSearch(String type, List<SearchParameter> params) {
-        ListMultimap<String, String> paramMap = getMappedParameters(params);
-        List<String> queryParts = new ArrayList<String>();
-
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append(
-            "select distinct concat(" +
-                "cast(p.person_id as string), ',', " +
-                "p.gender_source_value, ',', " +
-                "p.race_source_value) as val "+
-            "from " + setBigQueryConfig("`%s.%s.%s` ", "person") + "p "+
-            "where person_id in ("
-        );
-
-        Map<String, QueryParameterValue> queryParams = new HashMap<>();
-
-        queryParams.put("cm", QueryParameterValue.string(typeCM.get(type)));
-        queryParams.put("proc", QueryParameterValue.string(typeProc.get(type)));
-
-        for (String key : paramMap.keySet()) {
-            List<String> rawValues = paramMap.get(key);
-            String[] values = rawValues.toArray(new String[rawValues.size()]);
-            String subquery = getSubQuery(key);
-            queryParams.put(key + "codes", QueryParameterValue.array(values, String.class));
-            queryParts.add(subquery);
-        }
-
-        queryBuilder.append(String.join(" union distinct ", queryParts));
-        queryBuilder.append(")");
-
-        QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
-            .setNamedParameters(queryParams)
-            .setUseLegacySql(false)
             .build();
         return request;
     }
@@ -197,7 +183,7 @@ public class SQLGenerator {
         );
     }
 
-    private String setBigQueryConfig(String sqlStatement, String tableName) {
+    private String setBigQueryConfig1(String sqlStatement, String tableName) {
         return String.format(sqlStatement,
                 workbenchConfig.get().bigquery.projectId,
                 workbenchConfig.get().bigquery.dataSetId,
