@@ -1,7 +1,10 @@
-import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
 
-import {BroadcastService} from '../broadcast.service';
-import {SearchResult} from '../model';
+import {CohortSearchActions} from '../actions';
+import {CohortSearchState} from '../store';
+import {SearchGroupItem} from 'generated';
+
 
 @Component({
   selector: 'app-search-result',
@@ -9,21 +12,20 @@ import {SearchResult} from '../model';
   styleUrls: ['search-result.component.css']
 })
 export class SearchResultComponent {
+  @Input() item: SearchGroupItem;
+  @Input() index: number;
 
-  @Input()
-  searchResult: SearchResult;
-  @Input()
-  index: number;
-  @Output()
-  onRemove = new EventEmitter<SearchResult>();
+  private _description: any;
+  private _count: number;
 
-  constructor(private broadcastService: BroadcastService) {}
+  constructor(private ngRedux: NgRedux<CohortSearchState>,
+              private actions: CohortSearchActions) {}
 
-  removeSearchResult(searchResult: SearchResult) {
-    this.onRemove.emit(searchResult);
+  get description() {
+    return 'Describe the thing here';
   }
 
-  selectSearchResult() {
-    this.broadcastService.selectSearchResult(this.searchResult);
+  get count() {
+    return 42;
   }
 }

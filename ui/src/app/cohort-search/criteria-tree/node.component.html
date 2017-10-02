@@ -1,0 +1,13 @@
+<ng-container [clrLoading]="loading">
+  <clr-tree-node *ngFor="let node of children">
+
+    <app-node-info [node]="node"></app-node-info>
+
+    <span *ngIf="node.group">
+      <ng-template clrIfExpanded>
+        <app-tree-node [node]="node"></app-tree-node>
+      </ng-template>
+    </span>
+
+  </clr-tree-node>
+</ng-container>

@@ -1,7 +1,13 @@
-import {Component, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
+import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {NgRedux, select, dispatch} from '@angular-redux/store';
 
 import {BroadcastService} from '../broadcast.service';
-import {SearchResult, SearchGroup} from '../model';
+import {CohortSearchActions} from '../actions';
+import {CohortSearchState} from '../store';
+import {SearchResult} from '../model';
+
+import {SearchGroup} from 'generated';
+
 
 @Component({
   selector: 'app-search-group',
@@ -9,78 +15,13 @@ import {SearchResult, SearchGroup} from '../model';
   styleUrls: ['search-group.component.css']
 })
 export class SearchGroupComponent {
+  @Input() index: number;
+  @Input() group: SearchGroup;
+  @Output() onRemove = new EventEmitter<boolean>();
 
-  /**
-   * The search group for this component.
-   *
-   * @type {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  @Input()
-  public searchGroup: SearchGroup;
+  constructor(private ngRedux: NgRedux<CohortSearchState>,
+              private actions: CohortSearchActions) {}
 
-  /**
-   * The group set for this component.
-   *
-   * @type {String[]}
-   * @memberof SearchGroupComponent
-   */
-  public groupSet: String[] = [];
-
-  /**
-   * Event emitter when the delete search group button is pushed.
-   *
-   * @type {EventEmitter<SearchGroup>}
-   * @memberof SearchGroupComponent
-   */
-  @Output()
-  public onRemove = new EventEmitter<SearchGroup>();
-
-  @Input()
-  public index: number;
-
-  constructor(private changeDetectorRef: ChangeDetectorRef,
-              private broadcastService: BroadcastService) {}
-
-  /**
-   * Remove the specified SearchGroup.
-   *
-   * @public
-   * @param {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  public removeSearchGroup(searchGroup: SearchGroup) {
-    this.onRemove.emit(searchGroup);
-  }
-
-  /**
-   * Remove the specified SearchGroup.
-   *
-   * @public
-   * @param {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  public removeExclusionGroup(searchGroup: SearchGroup) {
-    this.onRemove.emit(searchGroup);
-  }
-
-  /**
-   * Remove the specified SearchResult.
-   *
-   * @public
-   * @param {SearchResult}
-   * @memberof SearchGroupComponent
-   */
-  public removeSearchResult(searchResult: SearchResult) {
-    const index: number = this.searchGroup.results.indexOf(searchResult);
-    if (index !== -1) {
-      this.searchGroup.results.splice(index, 1);
-    }
-    this.changeDetectorRef.detectChanges();
-    this.broadcastService.removeSearchResult(this.searchGroup);
-  }
-
-  selectSearchGroup() {
-    this.broadcastService.selectSearchGroup(this.searchGroup);
-  }
+  remove(event) { this.onRemove.emit(true); }
+  selectSearchGroup() {}
 }

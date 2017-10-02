@@ -1,61 +1,39 @@
-import {Component, OnInit, ChangeDetectorRef, OnDestroy, Inject} from '@angular/core';
+import {Component} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select, dispatch} from '@angular-redux/store';
 import {intersection, complement, union} from 'set-manipulator';
+import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/takeWhile';
 
-import {BroadcastService} from '../broadcast.service';
-import {SearchGroup, SearchResult} from '../model';
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchState, InclusionGroups, ExclusionGroups} from '../store';
+
+import {SearchGroup, SubjectListResponse as SubjectList} from 'generated';
+
 
 @Component({
   selector: 'app-search',
   templateUrl: 'cohort-builder.component.html',
   styleUrls: ['cohort-builder.component.css']
 })
-export class CohortBuilderComponent implements OnInit, OnDestroy {
+export class CohortBuilderComponent {
 
-  /**
-   * The search groups that make up the inclusion group.
-   *
-   * @public
-   * @type {SearchGroup[]}
-   * @memberof CohortBuilderComponent
-   */
-  public searchGroups: SearchGroup[];
+  @select(InclusionGroups) includeGroups$: Observable<SearchGroup[]>;
+  @select(ExclusionGroups) excludeGroups$: Observable<SearchGroup[]>;
+  @select('subjects') subjects$: Observable<SubjectList>;
+  @select(['ui', 'wizardOpen']) readonly open$: Observable<boolean>;
 
-  /**
-   * The search groups that make up the exclusion group.
-   *
-   * @public
-   * @type {SearchGroup[]}
-   * @memberof CohortBuilderComponent
-   */
-  public exclusionGroups: SearchGroup[];
-
-  private alive = true;
-
-  totalSet: String[] = [];
-
-  adding = false;
-
-  constructor(private changeDetectorRef: ChangeDetectorRef,
-              private broadcastService: BroadcastService,
-              private router: Router,
+  constructor(private router: Router,
               private route: ActivatedRoute,
               private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions,
-              @Inject(DOCUMENT) private document: any) {}
-
+              private actions: CohortSearchActions) {}
+}
+    /*
   ngOnInit() {
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     }
-
-    this.searchGroups = [new SearchGroup()];
-    this.exclusionGroups = [new SearchGroup('Exclude participants where:')];
 
     this.broadcastService.updatedCounts$
       .takeWhile(() => this.alive)
@@ -73,39 +51,23 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       });
   }
 
-  addSearchGroup() {
-    this.ngRedux.dispatch(this.actions.initGroup('include'));
-
-    this.searchGroups.push(new SearchGroup());
+    this.i$ncludeGroups.push(new SearchGroup());
     this.changeDetectorRef.detectChanges();
     const scrollableDiv = window.document.getElementById('scrollable-groups');
     scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-  }
 
-  addExclusionGroup() {
-    this.ngRedux.dispatch(this.actions.initGroup('exclude'));
-
-    this.exclusionGroups.push(new SearchGroup('Exclude participants where:'));
+    this.excludeGroups.push(new SearchGroup('Exclude participants where:'));
     this.changeDetectorRef.detectChanges();
     const scrollableDiv = window.document.getElementById('scrollable-groups');
     scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-  }
 
   removeSearchGroup(searchGroup: SearchGroup) {
-    const index: number = this.searchGroups.indexOf(searchGroup);
-    if (index !== -1) {
-      this.searchGroups.splice(index, 1);
-    }
     this.changeDetectorRef.detectChanges();
     this.updateTotalSet();
     this.updateCharts();
   }
 
   removeExclusionGroup(searchGroup: SearchGroup) {
-    const index: number = this.exclusionGroups.indexOf(searchGroup);
-    if (index !== -1) {
-      this.exclusionGroups.splice(index, 1);
-    }
     this.changeDetectorRef.detectChanges();
     this.updateTotalSet();
     this.updateCharts();
@@ -138,14 +100,14 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* Update any changes to the overall set. */
+  /* Update any changes to the overall set.
   private updateTotalSet() {
-    const includedSets = this.performIntersection(this.searchGroups);
-    const excludedSets = this.performIntersection(this.exclusionGroups);
+    const includedSets = this.performIntersection(this.includeGroups$);
+    const excludedSets = this.performIntersection(this.excludeGroups);
 
-    this.totalSet = includedSets;
+    this.subjects = includedSets;
     if (excludedSets.length > 0) {
-      this.totalSet = complement(includedSets, excludedSets);
+      this.subjects = complement(includedSets, excludedSets);
     }
   }
 
@@ -160,8 +122,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     });
     return set;
   }
+   */
 
-  private updateCharts() {
+  // private updateCharts() {
     /*
      * TODO:
      * Determine exactly how and what data is to be bundled with each Subject
@@ -169,6 +132,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
      * Until the exact encoding is finalized, this hack should generate some
      * nice charts for a visual response to searches.
      */
+    /*
     const genders = {
       'Male': 0,
       'Female': 0,
@@ -184,7 +148,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       'Unknown': 0,
     };
 
-    this.totalSet.forEach((subject, index) => {
+    this.subjects$.forEach((subject, index) => {
       const [uid, gender, race] = subject.split(',');
       switch (gender) {
           case '1': genders.Male++    ; break;
@@ -224,3 +188,4 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     this.alive = false;
   }
 }
+     */

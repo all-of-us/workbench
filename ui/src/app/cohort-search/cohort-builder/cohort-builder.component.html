@@ -1,5 +1,6 @@
 <div class="main-container">
   <div class="alert alert-app-level"></div>
+
   <clr-header class="header-6">
     <div class="branding">
       <span class="title">AoU Discover</span>
@@ -22,6 +23,7 @@
       </clr-dropdown>
     </div>
   </clr-header>
+
   <div class="content-container">
     <div class="content-area">
 
@@ -29,15 +31,23 @@
         <div class="col-xs-4">
           <div class="row">
             <div class="col-xs-8"><h3 class="mt-1">Include Participants</h3></div>
-            <div class="col-xs-4 text-right"><button type="button" class="btn btn-outline" (click)="addSearchGroup()"><clr-icon shape="plus"></clr-icon> Add Group</button></div>
+            <div class="col-xs-4 text-right">
+              <button type="button" class="btn btn-outline" 
+                                    (click)="actions.initGroup('include')">
+                <clr-icon shape="plus"></clr-icon> Add Group</button>
+            </div>
           </div>
           <div id="scrollable-groups" class="scrolling-groups">
             <div  class="my-border">
-              <div *ngFor="let searchGroup of searchGroups; let i = index">
+              <div *ngFor="let group of includeGroups$ | async; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
-                <app-search-group [searchGroup]="searchGroup" [index]="index" (onRemove)="removeSearchGroup($event)"></app-search-group>
+                <app-search-group 
+                  [group]="group" 
+                  [index]="index"
+                  (onRemove)="actions.removeGroup('include', i)">
+                </app-search-group>
               </div>
             </div>
           </div>
@@ -46,15 +56,23 @@
         <div class="col-xs-4">
           <div class="row">
             <div class="col-xs-8"><h3 class="mt-1">Exclude Participants</h3></div>
-            <div class="col-xs-4 text-right"><button type="button" class="btn btn-outline" (click)="addExclusionGroup()"><clr-icon shape="plus"></clr-icon> Add Group</button></div>
+            <div class="col-xs-4 text-right">
+              <button type="button" class="btn btn-outline" 
+                                    (click)="actions.initGroup('exclude')">
+                <clr-icon shape="plus"></clr-icon> Add Group</button>
+            </div>
           </div>
           <div id="scrollable-groups1" class="scrolling-groups">
             <div  class="my-border">
-              <div *ngFor="let exclusionGroup of exclusionGroups; let i = index">
+              <div *ngFor="let group of excludeGroups$ | async; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
-                <app-search-group [searchGroup]="exclusionGroup" (onRemove)="removeExclusionGroup($event)"></app-search-group>
+                <app-search-group 
+                  [group]="group" 
+                  [index]="i"
+                  (onRemove)="actions.removeGroup('exclude', i)">
+                </app-search-group>
               </div>
             </div>
           </div>
@@ -62,9 +80,16 @@
 
         <div class="col-xs-4">
           <div class="row">
-            <div class="col-xs-4 text-left"><button type="button" class="btn btn-outline" (click)="save()"><clr-icon shape="floppy"></clr-icon> Save Set</button></div>
-            <div class="col-xs-8 text-right"><h3 class="mt-1">Set Total: {{totalSet.length}}</h3></div>
+            <div class="col-xs-4 text-left">
+              <button type="button" class="btn btn-outline" 
+                (click)="save()"><clr-icon shape="floppy"></clr-icon> Save Set
+              </button>
+            </div>
+            <div class="col-xs-8 text-right">
+              <h3 class="mt-1">Set Total: {{(subjects$ | async)?.length || 0}}</h3>
+            </div>
           </div>
+
           <div class="box">
             <app-gender-chart></app-gender-chart>
           </div>
@@ -72,9 +97,11 @@
           <div class="box">
             <app-race-chart></app-race-chart>
           </div>
+
         </div>
       </div>
-
     </div>
   </div>
 </div>
+
+<app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>
