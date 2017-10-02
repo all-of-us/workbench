@@ -23,5 +23,7 @@ export class SearchGroupComponent {
               private actions: CohortSearchActions) {}
 
   remove(event) { this.onRemove.emit(true); }
+
+  // TODO(jms)
   selectSearchGroup() {}
 }

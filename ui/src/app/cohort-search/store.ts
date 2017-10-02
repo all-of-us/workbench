@@ -1,13 +1,18 @@
 import {combineReducers, AnyAction, Reducer} from 'redux';
 import {CohortSearchActions as Actions} from './actions';
-import {SearchRequest, SubjectListResponse as SubjectList} from 'generated';
+import {SearchRequest, SubjectListResponse as SubjectList, SearchGroupItem} from 'generated';
 
 export type RequestKey = 'include' | 'exclude';
+
+export interface AppContext {
+  wizardOpen: boolean;
+  activeSearchGroupItem?: SearchGroupItem;
+}
 
 export interface CohortSearchState {
   search: SearchRequest;
   subjects?: SubjectList;
-  ui?: object;
+  context?: AppContext;
   criteriaTree?: object;
   loading?: object;
 }
@@ -15,15 +20,19 @@ export interface CohortSearchState {
 export const InitialState = {
   search: {include: [[]], exclude: [[]]},
   subjects: [],
-  ui: {wizardOpen: false},
+  context: {
+    wizardOpen: false,
+  },
   criteriaTree: {},
   loading: {},
 };
 
 
 // Pathspecs & selectors
-export const InclusionGroups = ['search', 'include'];
-export const ExclusionGroups = ['search', 'exclude'];
+export const inclusionGroups = ['search', 'include'];
+export const exclusionGroups = ['search', 'exclude'];
+export const wizardOpen = ['context', 'wizardOpen'];
+export const activeCriteriaType = ['context', 'activeSearchGroupItem', 'type'];
 
 
 export const rootReducer: Reducer<CohortSearchState> =
@@ -59,17 +68,21 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.OPEN_WIZARD: {
-        const ui = {
-          ...state.ui,
+        const context = {
+          ...state.context,
           wizardOpen: true,
-          wizardCriteriaType: action.criteria
+          activeSearchGroupItem: {
+            type: action.criteria,
+            searchParameters: [],
+            modifiers: []
+          },
         };
-        return {...state, ui};
+        return {...state, context};
       }
 
       case Actions.CLOSE_WIZARD: {
-        const ui = {wizardOpen: false};
-        return {...state, ui};
+        const context = {wizardOpen: false};
+        return {...state, context};
       }
 
       case Actions.FETCH_CRITERIA: {
@@ -99,6 +112,18 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
 
         return {...state, criteriaTree: tree, loading};
+      }
+
+      case Actions.SELECT_CRITERIA: {
+        const {code, domainId} = action.criteria;
+        const params = state.context.activeSearchGroupItem.searchParameters.concat({
+          code, domainId
+        });
+        const activeSearchGroupItem = {
+          ...state.context.activeSearchGroupItem,
+          searchParameters: params,
+        };
+        return {...state, context: {...state.context, activeSearchGroupItem}};
       }
 
       default: return state;

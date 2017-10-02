@@ -3,7 +3,7 @@ import {NgRedux} from '@angular-redux/store';
 import {AnyAction} from 'redux';
 
 import {CohortSearchState, RequestKey} from './store';
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, Criteria} from 'generated';
 
 
 @Injectable()
@@ -15,6 +15,7 @@ export class CohortSearchActions {
   static CLOSE_WIZARD = 'CLOSE_WIZARD';
   static LOAD_CRITERIA = 'LOAD_CRITERIA';
   static FETCH_CRITERIA = 'FETCH_CRITERIA';
+  static SELECT_CRITERIA = 'SELECT_CRITERIA';
   static ERROR = 'ERROR';
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
@@ -45,5 +46,12 @@ export class CohortSearchActions {
   public fetchCriteria(critType: string, parentId: number): void {
     critType = critType.toLowerCase();
     this.ngRedux.dispatch({type: CohortSearchActions.FETCH_CRITERIA, critType, parentId});
+  }
+
+  /**
+   * Pushes a SearchParameter into the active SearchGroupItem
+   */
+  public selectCriteria(criteria: Criteria) {
+    this.ngRedux.dispatch({type: CohortSearchActions.SELECT_CRITERIA, criteria});
   }
 }

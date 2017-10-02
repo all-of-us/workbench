@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {CohortSearchActions} from '../actions';
 import {Criteria} from 'generated';
 
 
@@ -8,4 +9,6 @@ import {Criteria} from 'generated';
 })
 export class NodeInfoComponent {
   @Input() node: Criteria;
+
+  constructor(private actions: CohortSearchActions) {}
 }

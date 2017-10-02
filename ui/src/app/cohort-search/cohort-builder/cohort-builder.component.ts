@@ -7,7 +7,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/takeWhile';
 
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState, InclusionGroups, ExclusionGroups} from '../store';
+import {CohortSearchState, inclusionGroups, exclusionGroups, wizardOpen} from '../store';
 
 import {SearchGroup, SubjectListResponse as SubjectList} from 'generated';
 
@@ -19,10 +19,10 @@ import {SearchGroup, SubjectListResponse as SubjectList} from 'generated';
 })
 export class CohortBuilderComponent {
 
-  @select(InclusionGroups) includeGroups$: Observable<SearchGroup[]>;
-  @select(ExclusionGroups) excludeGroups$: Observable<SearchGroup[]>;
+  @select(inclusionGroups) includeGroups$: Observable<SearchGroup[]>;
+  @select(exclusionGroups) excludeGroups$: Observable<SearchGroup[]>;
   @select('subjects') subjects$: Observable<SubjectList>;
-  @select(['ui', 'wizardOpen']) readonly open$: Observable<boolean>;
+  @select(wizardOpen) readonly open$: Observable<boolean>;
 
   constructor(private router: Router,
               private route: ActivatedRoute,

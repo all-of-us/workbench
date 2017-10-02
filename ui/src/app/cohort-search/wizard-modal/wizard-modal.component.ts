@@ -11,7 +11,7 @@ import {Wizard} from 'clarity-angular/wizard/wizard';
 import {BroadcastService} from '../broadcast.service';
 import {SearchGroup, SearchResult} from '../model';
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
 
 import {CohortBuilderService, Criteria, Modifier} from 'generated';
 
@@ -24,8 +24,8 @@ import {CohortBuilderService, Criteria, Modifier} from 'generated';
 })
 export class WizardModalComponent {
 
-  @select(['ui', 'wizardOpen']) readonly open$: Observable<boolean>;
-  @select(['ui', 'wizardCriteriaType']) criteriaType$: Observable<string>;
+  @select(wizardOpen) readonly open$: Observable<boolean>;
+  @select(activeCriteriaType) criteriaType$: Observable<string>;
   @ViewChild('wizard') wizard: Wizard;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
