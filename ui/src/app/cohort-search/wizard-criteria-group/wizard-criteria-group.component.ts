@@ -10,7 +10,6 @@ import {Criteria} from 'generated';
 @Component({
   selector: 'app-wizard-criteria-group',
   templateUrl: 'wizard-criteria-group.component.html',
-  styleUrls: ['wizard-criteria-group.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {

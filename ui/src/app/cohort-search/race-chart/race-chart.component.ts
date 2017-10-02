@@ -7,7 +7,6 @@ import {GoogleChartDirective} from '../google-chart.directive';
 @Component({
   selector: 'app-race-chart',
   templateUrl: 'race-chart.component.html',
-  styleUrls: ['race-chart.component.css']
 })
 export class RaceChartComponent implements OnInit, OnDestroy {
 
