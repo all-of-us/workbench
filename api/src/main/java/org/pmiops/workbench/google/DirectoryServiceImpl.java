@@ -45,6 +45,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   public boolean isUsernameTaken(String username) {
     try {
+      // TODO(dmohs): Domain should come from config.
       getGoogleDirectoryService().users().get(username + "@fake-research-aou.org").execute();
       return true; // successful call means user exists
     } catch (GoogleJsonResponseException e) {
