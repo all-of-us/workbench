@@ -31,6 +31,7 @@
     "core-js": "^2.4.1",
     "dom-to-image": "^2.5.2",
     "enhanced-resolve": "3.3.0",
+    "immutable": "^4.0.0-rc.4",
     "mutationobserver-shim": "^0.3.2",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",

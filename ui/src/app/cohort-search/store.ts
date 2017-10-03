@@ -1,10 +1,13 @@
 import {AnyAction, Reducer} from 'redux';
+import {Map, List, Set, fromJS} from 'immutable';
 
 import {CohortSearchActions as Actions} from './actions';
 import {SearchRequest, SubjectListResponse as SubjectList, SearchGroupItem} from 'generated';
-import {AppContext, CohortSearchState, SearchGroupRole} from './store.interfaces';
 
-export const InitialState = {
+
+export type CohortSearchState = Map<string, any>;
+
+export const InitialState = fromJS({
   search: {include: [[]], exclude: [[]]},
   subjects: [],
   context: {
@@ -12,7 +15,7 @@ export const InitialState = {
   },
   criteriaTree: {},
   loading: {},
-};
+});
 
 
 // Pathspecs & selectors
@@ -20,125 +23,87 @@ export const inclusionGroups = ['search', 'include'];
 export const exclusionGroups = ['search', 'exclude'];
 export const wizardOpen = ['context', 'wizardOpen'];
 export const activeCriteriaType = ['context', 'active', 'criteriaType'];
+export const activeSGRole = ['context', 'active', 'sgRole'];
+export const activeSGIndex = ['context', 'active', 'sgIndex'];
+export const activeSGItemIndex = ['context', 'active', 'sgItemIndex'];
 
 
 export const rootReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = InitialState, action: AnyAction): CohortSearchState => {
     switch (action.type) {
 
-      /* Appends a new empty list to the end of whichever seearch group list is
-       * specified by action.list */
       case Actions.INIT_SEARCH_GROUP: {
-        const key = action.key;
-        const newGroupList = [...state.search[key], []];
-        return {...state, search: {...state.search, [key]: newGroupList}};
+        return state.updateIn(['search', action.sgRole], list => list.push(List()));
       }
 
       case Actions.REMOVE_SEARCH_GROUP: {
-        const {key, index} = action;
-        const newGroupList = [
-          ...state.search[key].slice(0, index),
-          ...state.search[key].slice(index + 1)
-        ];
-        return {...state, search: {...state.search, [key]: newGroupList}};
+        return state.deleteIn(['search', action.sgRole, action.index]);
       }
 
       case Actions.INIT_GROUP_ITEM: {
-        const {criteriaType, sgIndex, sgRole} = state.context.active;
-        const newItem = {
+        const criteriaType = state.getIn(activeCriteriaType);
+        const sgRole = state.getIn(activeSGRole);
+        const sgIndex = state.getIn(activeSGIndex);
+        const newItem = Map({
           type: criteriaType,
-          searchParameters: [],
-          modifiers: [],
-        };
-        const searchGroup = state.search[sgRole][sgIndex].concat([newItem]);
-        const sgItemIndex = searchGroup.length - 1;
-        const stateCopy = {
-          ...state,
-          context: {
-            ...state.context,
-            active: {
-              ...state.context.active,
-              sgItemIndex
-            }
-          },
-          search: {
-            ...state.search,
-            [sgRole]: [
-              ...state.search[sgRole]
-            ]
-          }
-        };
-        stateCopy.search[sgRole][sgIndex] = searchGroup;
-        return stateCopy;
+          searchParameters: List(),
+          modifiers: List(),
+        });
+        const sgPath = ['search', sgRole, sgIndex];
+        return state.updateIn(sgPath, group => group.push(newItem))
+          .setIn(activeSGItemIndex, state.getIn(sgPath).size);
       }
 
       case Actions.REMOVE_GROUP_ITEM: {
-        const {key, groupIndex, itemIndex} = action;
-        const newGroup = state.search[key][groupIndex].filter(
-          (elem, i) => (i !== itemIndex)
-        );
-        const newGroupList = state.search[key].filter(
-          (elem, i) => (i === groupIndex ? newGroup : elem)
-        );
-        return {...state, search: {...state.search, [key]: newGroupList}};
+        const {sgRole, groupIndex, itemIndex} = action;
+        return state.deleteIn(['search', sgRole, groupIndex, itemIndex]);
       }
 
       case Actions.SET_CONTEXT: {
         const {criteriaType, sgIndex, sgRole} = action;
-        const context = {
-          ...state.context,
-          active: { ...state.context.active, criteriaType, sgIndex, sgRole }
-        };
-        return {...state, context};
+        const newContext = Map({criteriaType, sgIndex, sgRole});
+        return state.mergeIn(['context', 'active'], newContext);
       }
 
       case Actions.OPEN_WIZARD: {
-        const context = {
-          ...state.context,
-          wizardOpen: true,
-        };
-        return {...state, context};
+        return state.setIn(['context', 'wizardOpen'], true);
       }
 
-      case Actions.CLOSE_WIZARD: {
-        const context = {wizardOpen: false};
-        return {...state, context};
+      case Actions.FINISH_WIZARD: {
+        // TODO(jms): this is where "successfull" closing of wizard happens;
+        // some more processing is due here
+        return state.setIn(['context', 'wizardOpen'], false);
+      }
+
+      case Actions.CANCEL_WIZARD: {
+        const sgRole = state.getIn(activeSGRole);
+        const sgIndex = state.getIn(activeSGIndex);
+        const sgItemIndex = state.getIn(activeSGItemIndex);
+        return state
+          .deleteIn(['search', sgRole, sgIndex, sgItemIndex])
+          .setIn(['context', 'wizardOpen'], false);
       }
 
       case Actions.FETCH_CRITERIA: {
         const {critType: _type, parentId} = action;
-        const loading = {...state.loading};
-        if (loading[_type] === undefined) {
-          loading[_type] = {};
-        }
-        loading[_type][parentId] = true;
-        return {...state, loading};
+        return state.setIn(['loading', _type, parentId], true);
       }
 
       case Actions.LOAD_CRITERIA: {
-        // load in the children
         const {children, critType: _type, parentId} = action;
-        const tree = {...state.criteriaTree};
-        if (tree[_type] === undefined) {
-          tree[_type] = {};
-        }
-        tree[_type][parentId] = children;
-
-        // remove from loading area
-        const loading = {...state.loading};
-        delete loading[_type][parentId];
-        if (loading[_type] === {}) {
-          delete loading[_type];
-        }
-
-        return {...state, criteriaTree: tree, loading};
+        return state
+          .setIn(['criteriaTree', _type, parentId], children)
+          .deleteIn(['loading', _type, parentId]);
       }
 
       case Actions.SELECT_CRITERIA: {
-        // push the criteria onto the search parameters
-        // TODO(jms)
-        const {sgIndex, sgItemIndex, sgRole} = state.context.active;
-        const params = state['search'][sgRole][sgIndex]['searchParameters'].concat([action.criteria]);
+        const sgRole = state.getIn(activeSGRole);
+        const sgIndex = state.getIn(activeSGIndex);
+        const sgItemIndex = state.getIn(activeSGItemIndex);
+
+        const paramPath = ['search', sgRole, sgIndex, sgItemIndex, 'searchParameters'];
+        const addCriteria = (list) => list.push(action.criteria);
+        return state.updateIn(paramPath, List(), addCriteria);
       }
 
       default: return state;

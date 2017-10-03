@@ -11,8 +11,7 @@ import {Wizard} from 'clarity-angular/wizard/wizard';
 import {BroadcastService} from '../broadcast.service';
 import {SearchGroup, SearchResult} from '../model';
 import {CohortSearchActions} from '../actions';
-import {wizardOpen, activeCriteriaType} from '../store';
-import {CohortSearchState} from '../store.interfaces';
+import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
 
 import {CohortBuilderService, Criteria, Modifier} from 'generated';
 
@@ -34,11 +33,11 @@ export class WizardModalComponent {
 
   close() {
     this.wizard.close();
-    this.actions.closeWizard();
+    this.actions.cancelWizard();
   }
 
   finish() {
     this.wizard.finish();
-    this.actions.closeWizard();
+    this.actions.finishWizard();
   }
 }

@@ -7,8 +7,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/takeWhile';
 
 import {CohortSearchActions} from '../actions';
-import {inclusionGroups, exclusionGroups, wizardOpen} from '../store';
-import {CohortSearchState} from '../store.interfaces';
+import {CohortSearchState, inclusionGroups, exclusionGroups, wizardOpen} from '../store';
 
 import {SearchGroup, SubjectListResponse as SubjectList} from 'generated';
 

@@ -4,7 +4,7 @@ import {Subscription} from 'rxjs/Subscription';
 import 'rxjs/add/operator/mergeMap';
 
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store.interfaces';
+import {CohortSearchState} from '../store';
 import {CohortBuilderService, Criteria, SearchParameter} from 'generated';
 
 

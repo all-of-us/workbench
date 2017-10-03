@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {AnyAction} from 'redux';
 
-import {CohortSearchState, SearchGroupRole} from './store.interfaces';
-import {CohortBuilderService, Criteria} from 'generated';
+import {CohortSearchState} from './store';
+import {CohortBuilderService, Criteria, SearchRequest} from 'generated';
 
 
 @Injectable()
@@ -17,7 +17,8 @@ export class CohortSearchActions {
   static REMOVE_GROUP_ITEM = 'REMOVE_GROUP_ITEM';
 
   static OPEN_WIZARD = 'OPEN_WIZARD';
-  static CLOSE_WIZARD = 'CLOSE_WIZARD';
+  static FINISH_WIZARD = 'FINISH_WIZARD';
+  static CANCEL_WIZARD = 'CANCEL_WIZARD';
 
   static LOAD_CRITERIA = 'LOAD_CRITERIA';
   static FETCH_CRITERIA = 'FETCH_CRITERIA';
@@ -29,28 +30,32 @@ export class CohortSearchActions {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private cohortBuilderService: CohortBuilderService) {}
 
-  public initGroup(key: SearchGroupRole): void {
-    this.ngRedux.dispatch({type: CohortSearchActions.INIT_SEARCH_GROUP, key});
+  public initGroup(sgRole: keyof SearchRequest): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.INIT_SEARCH_GROUP, sgRole});
   }
 
-  public removeGroup(key: SearchGroupRole, index: number): void {
-    this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_SEARCH_GROUP, key, index});
+  public removeGroup(sgRole: keyof SearchRequest, index: number): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_SEARCH_GROUP, sgRole, index});
   }
 
-  public removeGroupItem(key: SearchGroupRole, groupIndex: number, itemIndex: number): void {
+  public removeGroupItem(sgRole: keyof SearchRequest, groupIndex: number, itemIndex: number): void {
     this.ngRedux.dispatch({
-      type: CohortSearchActions.REMOVE_GROUP_ITEM, key, groupIndex, itemIndex
+      type: CohortSearchActions.REMOVE_GROUP_ITEM, sgRole, groupIndex, itemIndex
     });
   }
 
-  public openWizard(criteriaType: string, sgIndex: number, sgRole: SearchGroupRole): void {
+  public openWizard(criteriaType: string, sgIndex: number, sgRole: keyof SearchRequest): void {
     this.ngRedux.dispatch({type: CohortSearchActions.SET_CONTEXT, criteriaType, sgIndex, sgRole});
     this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD});
     this.ngRedux.dispatch({type: CohortSearchActions.INIT_GROUP_ITEM});
   }
 
-  public closeWizard(): void {
-    this.ngRedux.dispatch({type: CohortSearchActions.CLOSE_WIZARD});
+  public finishWizard(): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.FINISH_WIZARD});
+  }
+
+  public cancelWizard(): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.CANCEL_WIZARD});
   }
 
   public fetchCriteria(critType: string, parentId: number): void {

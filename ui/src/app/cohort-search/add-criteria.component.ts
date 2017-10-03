@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 
 import {CohortSearchActions} from './actions';
-import {SearchGroupRole} from './store.interfaces';
+import {SearchRequest} from 'generated';
 
 
 const CRITERIA_TYPES = [
@@ -37,7 +37,7 @@ const CRITERIA_TYPES = [
 })
 export class AddCriteriaComponent {
   @Input() index: number;
-  @Input() role: SearchGroupRole;
+  @Input() role: keyof SearchRequest;
 
   readonly criteriaTypes = CRITERIA_TYPES;
   constructor(private actions: CohortSearchActions) {}
