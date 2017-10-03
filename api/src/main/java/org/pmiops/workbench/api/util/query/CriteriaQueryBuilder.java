@@ -2,7 +2,9 @@ package org.pmiops.workbench.api.util.query;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CriteriaQueryBuilder extends AbstractQueryBuilder {
 
     private static final String CRITERIA_QUERY =
@@ -15,21 +17,21 @@ public class CriteriaQueryBuilder extends AbstractQueryBuilder {
                     "is_selectable,\n" +
                     "concept_id,\n" +
                     "domain_id\n" +
-                    "from `%s.%s.%s`\n" +
+                    "from `${projectId}.${dataSetId}.${tableName}`\n" +
                     "where parent_id = @parentId\n" +
                     "order by id asc";
 
     @Override
-    public QueryRequest buildQueryRequest(QueryParameters wrapper) {
+    public QueryRequest buildQueryRequest(QueryParameters parameters) {
         return QueryRequest
-                .newBuilder(setBigQueryConfig(CRITERIA_QUERY, wrapper.getType() + "_criteria"))
-                .addNamedParameter("parentId", QueryParameterValue.int64(wrapper.getParentId()))
+                .newBuilder(filterBigQueryConfig(CRITERIA_QUERY, parameters.getType().toLowerCase() + "_criteria"))
+                .addNamedParameter("parentId", QueryParameterValue.int64(parameters.getParentId()))
                 .setUseLegacySql(false)
                 .build();
     }
 
     @Override
     public String getType() {
-        return FactoryKey.CRITERIA.name();
+        return FactoryKey.CRITERIA.getName();
     }
 }

@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.api.util.SQLGenerator;
+import org.pmiops.workbench.api.util.QueryBuilderFactory;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,8 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({CohortBuilderController.class, SQLGenerator.class})
+@Import({QueryBuilderFactory.class, CohortBuilderController.class})
+@ComponentScan(basePackages = "org.pmiops.workbench.api.util.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
@@ -116,6 +118,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 controller.searchSubjects(
                         createSearchRequest("ICD9", "003", null) ),
                 "3,3,3");
+    }
+
+    @Test
+    public void findParametersWithEmptyDomainIds() throws Exception {
+        List<SearchParameter> parameterList = new ArrayList<>();
+        parameterList.add(new SearchParameter().code("001"));
+        parameterList.add(new SearchParameter().code("002").domainId("Condition"));
+        assertThat(controller.findParametersWithEmptyDomainIds(parameterList))
+                .isEqualTo(Arrays.asList("001%"));
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {

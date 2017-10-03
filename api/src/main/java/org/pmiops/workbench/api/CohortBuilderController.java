@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.api.util.QueryBuilderFactory;
-import org.pmiops.workbench.api.util.query.AbstractQueryBuilder;
 import org.pmiops.workbench.api.util.query.FactoryKey;
 import org.pmiops.workbench.api.util.query.QueryParameters;
 import org.pmiops.workbench.model.Criteria;
@@ -20,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -66,52 +67,39 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
         /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
         SearchGroupItem item = request.getInclude().get(0).get(0);
+        SubjectListResponse subjectSet = new SubjectListResponse();
+
+        List<SearchParameter> params = item.getSearchParameters();
+        List<String> paramsWithoutDomains = findParametersWithEmptyDomainIds(item.getSearchParameters());
+
+        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
+        if (!paramsWithoutDomains.isEmpty()) {
+            QueryRequest queryRequest = QueryBuilderFactory
+                    .getQueryBuilder(FactoryKey.getKey("group-codes"))
+                    .buildQueryRequest(new QueryParameters().type(item.getType()).codes(paramsWithoutDomains));
+
+            QueryResult result = executeQuery(queryRequest);
+            Map<String, Integer> resultMapper = getResultMapper(result);
+            for (List<FieldValue> row : result.iterateAll()) {
+                final SearchParameter newParam = new SearchParameter();
+                newParam.setDomainId(row.get(resultMapper.get("domainId")).getStringValue());
+                newParam.setCode(row.get(resultMapper.get("code")).getStringValue());
+                params.add(newParam);
+            }
+        }
 
         QueryRequest queryRequest = QueryBuilderFactory
                 .getQueryBuilder(FactoryKey.getKey(item.getType()))
-                .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(item.getSearchParameters()));
+                .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(params));
 
-
-        QueryRequest query;
-        QueryResult result;
-        Map<String, Integer> resultMapper;
-
-        SubjectListResponse subjectSet = new SubjectListResponse();
-
-        if (item.getType().equals("ICD9")) {
-            List<SearchParameter> params = item.getSearchParameters();
-
-            /*  Check for SearchParameters without Domain IDs.
-                If any are present, generate a query to retrieve the missing domain IDs, then append the new parameters
-                to the parameter set
-             */
-            AbstractQueryBuilder generator = QueryBuilderFactory.getQueryBuilder(FactoryKey.getKey(item.getType()));
-            List<String> paramsWithoutDomains = generator.findParametersWithEmptyDomainIds(params);
-            if (!paramsWithoutDomains.isEmpty()) {
-                query = generator.buildQueryRequest(new QueryParameters().type(item.getType()).codes(paramsWithoutDomains));
-                result = executeQuery(query);
-                Map <String, Integer> resultMap = getResultMapper(result);
-                for (List<FieldValue> row: result.iterateAll()) {
-                    final SearchParameter newParam = new SearchParameter();
-                    newParam.setDomainId(row.get(resultMap.get("domainId")).getStringValue());
-                    newParam.setCode(row.get(resultMap.get("code")).getStringValue());
-                    params.add(newParam);
-                }
-            }
-
-            /*  Generate the actual query that will grab all the subjects based on criteria.
-                TODO: modifier handling
-             */
-            query = generator.handleSearch(item.getType(), params);
-            result = executeQuery(query);
-            resultMapper = getResultMapper(result);
-            for (List<FieldValue> row : result.iterateAll()) {
-                String subject = row.get(resultMapper.get("val")).getStringValue();
-                subjectSet.add(subject);
-            }
-            return ResponseEntity.ok(subjectSet);
+        QueryResult result = executeQuery(queryRequest);
+        Map<String, Integer> resultMapper = getResultMapper(result);
+        for (List<FieldValue> row : result.iterateAll()) {
+            String subject = row.get(resultMapper.get("val")).getStringValue();
+            subjectSet.add(subject);
         }
-        return ResponseEntity.badRequest().build();
+
+        return subjectSet.isEmpty() ? ResponseEntity.badRequest().build() : ResponseEntity.ok(subjectSet);
     }
 
     private QueryResult executeQuery(QueryRequest query) {
@@ -143,5 +131,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             resultMapper.put(field.getName(), i++);
         }
         return resultMapper;
+    }
+
+    public List<String> findParametersWithEmptyDomainIds(List<SearchParameter> searchParameters) {
+        List<String> returnParameters = new ArrayList<>();
+        for (Iterator<SearchParameter> iter = searchParameters.iterator(); iter.hasNext();) {
+            SearchParameter parameter = iter.next();
+            if (parameter.getDomainId() == null || parameter.getDomainId().isEmpty()) {
+                returnParameters.add(parameter.getCode() + "%");
+                iter.remove();
+            }
+        }
+        return returnParameters;
     }
 }

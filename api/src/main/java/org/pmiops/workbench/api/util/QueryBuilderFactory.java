@@ -2,14 +2,14 @@ package org.pmiops.workbench.api.util;
 
 import org.pmiops.workbench.api.util.query.AbstractQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Component
 public class QueryBuilderFactory {
 
     @Autowired

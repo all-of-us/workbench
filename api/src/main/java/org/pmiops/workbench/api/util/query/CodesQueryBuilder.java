@@ -3,64 +3,30 @@ package org.pmiops.workbench.api.util.query;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.model.SearchParameter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
-    @Autowired
-    private Provider<WorkbenchConfig> workbenchConfig;
+    private static final Map<String, String> typeCM = new HashMap<>();
+    private static final Map<String, String> typeProc = new HashMap<>();
+    static {
+        typeCM.put("ICD9", "ICD9CM");
+        typeCM.put("ICD10", "ICD10CM");
+        typeCM.put("CPT", "CPT4");
 
-    @Override
-    public QueryRequest buildQueryRequest(QueryParameters params) {
-        ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
-        List<String> queryParts = new ArrayList<String>();
-
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append(
-                "select distinct concat(" +
-                        "cast(p.person_id as string), ',', " +
-                        "p.gender_source_value, ',', " +
-                        "p.race_source_value) as val "+
-                        "from " + setBigQueryConfig("`%s.%s.%s` ", "person") + "p "+
-                        "where person_id in ("
-        );
-
-        Map<String, QueryParameterValue> queryParams = new HashMap<>();
-
-        queryParams.put("cm", QueryParameterValue.string(typeCM.get(params.getType())));
-        queryParams.put("proc", QueryParameterValue.string(typeProc.get(params.getType())));
-
-        for (String key : paramMap.keySet()) {
-            List<String> rawValues = paramMap.get(key);
-            String[] values = rawValues.toArray(new String[rawValues.size()]);
-            String subquery = getSubQuery(key);
-            queryParams.put(key + "codes", QueryParameterValue.array(values, String.class));
-            queryParts.add(subquery);
-        }
-
-        queryBuilder.append(String.join(" union distinct ", queryParts));
-        queryBuilder.append(")");
-
-        QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
-                .setNamedParameters(queryParams)
-                .setUseLegacySql(false)
-                .build();
-        return request;
-    }
-
-    @Override
-    public String getType() {
-        return FactoryKey.CODES.name();
+        typeProc.put("ICD9", "ICD9Proc");
+        typeProc.put("ICD10", "ICD10PCS");
+        typeProc.put("CPT", "CPT4");
     }
 
     /*
@@ -73,80 +39,54 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
      *  See the link below about IN and UNNEST
      * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
      */
-    private static final String SUBQUERY_TEMPLATE =
+    private static final String INNER_SQL_TEMPLATE =
             "select distinct person_id " +
-                    "from `%s.%s.%s` a, `%s.%s.%s` b "+
-                    "where a.%s = b.concept_id "+
+                    "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b "+
+                    "where a.${tableId} = b.concept_id "+
                     "and b.vocabulary_id in (@cm,@proc) " +
-                    "and b.concept_code in unnest(%s)";
+                    "and b.concept_code in unnest(${conceptCodes})";
 
-    private static final Map<String, String> typeCM = new HashMap<>();
-    private static final Map<String, String> typeProc = new HashMap<>();
-    private static final Map<String, Map<String, String>> tableInfo = new HashMap<>();
-    static {
-        typeCM.put("ICD9", "ICD9CM");
-        typeCM.put("ICD10", "ICD10CM");
-        typeCM.put("CPT", "CPT4");
+    private static final String UNION_TEMPLATE = " union distinct ";
 
-        typeProc.put("ICD9", "ICD9Proc");
-        typeProc.put("ICD10", "ICD10PCS");
-        typeProc.put("CPT", "CPT4");
+    private static final String OUTER_SQL_TEMPLATE =
+            "select distinct concat(" +
+                    "cast(p.person_id as string), ',', " +
+                    "p.gender_source_value, ',', " +
+                    "p.race_source_value) as val "+
+                    "from `${projectId}.${dataSetId}.person` p "+
+                    "where person_id in (${innerSql})";
 
-        Map<String, String> table = new HashMap<>();
-        table.put("tableName", "condition_occurrence");
-        table.put("sourceConceptIdColumn", "condition_source_concept_id");
-        tableInfo.put("Condition", table);
+    @Override
+    public QueryRequest buildQueryRequest(QueryParameters params) {
+        ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
+        List<String> queryParts = new ArrayList<String>();
+        Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-        table = new HashMap<>();
-        table.put("tableName", "observation");
-        table.put("sourceConceptIdColumn", "observation_source_concept_id");
-        tableInfo.put("Observation", table);
+        queryParams.put("cm", QueryParameterValue.string(typeCM.get(params.getType())));
+        queryParams.put("proc", QueryParameterValue.string(typeProc.get(params.getType())));
 
-        table = new HashMap<>();
-        table.put("tableName", "measurement");
-        table.put("sourceConceptIdColumn", "measurement_source_concept_id");
-        tableInfo.put("Measurement", table);
+        for (String key : paramMap.keySet()) {
+            queryParams.put(TableEnum.getConceptCodes(key),
+                    QueryParameterValue.array(paramMap.get(key).stream().toArray(String[]::new), String.class));
+            queryParts.add(filterSql(INNER_SQL_TEMPLATE,
+                    ImmutableMap.of("${tableName}", TableEnum.getTableName(key),
+                            "${tableId}", TableEnum.getSourceConceptId(key),
+                            "${conceptCodes}", "@" + TableEnum.getConceptCodes(key))));
+        }
 
-        table = new HashMap<>();
-        table.put("tableName", "device_exposure");
-        table.put("sourceConceptIdColumn", "device_source_concept_id");
-        tableInfo.put("Exposure", table);
 
-        table = new HashMap<>();
-        table.put("tableName", "drug_exposure");
-        table.put("sourceConceptIdColumn", "drug_source_concept_id");
-        tableInfo.put("Drug", table);
+        String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", String.join(UNION_TEMPLATE, queryParts));
 
-        table = new HashMap<>();
-        table.put("tableName", "procedure_occurrence");
-        table.put("sourceConceptIdColumn", "procedure_source_concept_id");
-        tableInfo.put("Procedure", table);
+        return QueryRequest
+                .newBuilder(filterBigQueryConfig(finalSql))
+                .setNamedParameters(queryParams)
+                .setUseLegacySql(false)
+                .build();
     }
 
-    public QueryRequest findGroupCodes(String type, List<String> codes) {
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("select code, domain_id as domainId from ");
-        queryBuilder.append(setBigQueryConfig("`%s.%s.%s` ", type.toLowerCase() + "_criteria"));
-        queryBuilder.append("where (");
-
-        Map<String, QueryParameterValue> queryParams = new HashMap<>();
-        List<String> queryParts = new ArrayList<>();
-        for (int i = 0; i < codes.size(); i++) {
-            String code = codes.get(i);
-            String name = String.format("code%d", i);
-            queryParams.put(name, QueryParameterValue.string(code));
-            queryParts.add("code like @"+name);
-        }
-        queryBuilder.append(String.join(" or ", queryParts));
-        queryBuilder.append(") ");
-        queryBuilder.append("and is_selectable = TRUE and is_group = FALSE ");
-        queryBuilder.append("order by code asc");
-
-        QueryRequest request = QueryRequest.newBuilder(queryBuilder.toString())
-            .setNamedParameters(queryParams)
-            .setUseLegacySql(false)     // required for queries that use named parameters
-            .build();
-        return request;
+    @Override
+    public String getType() {
+        return FactoryKey.CODES.getName();
     }
 
     protected ListMultimap<String, String> getMappedParameters(List<SearchParameter> searchParameters) {
@@ -156,37 +96,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         return mappedParameters;
     }
 
-    public List<String> findParametersWithEmptyDomainIds(List<SearchParameter> searchParameters) {
-        List<String> returnParameters = new ArrayList<>();
-        for (Iterator<SearchParameter> iter = searchParameters.iterator(); iter.hasNext();) {
-            SearchParameter parameter = iter.next();
-            if (parameter.getDomainId() == null || parameter.getDomainId().isEmpty()) {
-                returnParameters.add(parameter.getCode() + "%");
-                iter.remove();
-            }
+    private String filterSql(String sqlStatement, ImmutableMap replacements) {
+        String returnSql = sqlStatement;
+        for (UnmodifiableIterator iterator = replacements.keySet().iterator(); iterator.hasNext();) {
+            String key = (String)iterator.next();
+            returnSql = returnSql.replace(key, replacements.get(key).toString());
         }
-        return returnParameters;
-    }
+        return returnSql;
 
-    protected String getSubQuery(String key) {
-        Map<String, String> info = tableInfo.get(key);
-
-        return String.format(SUBQUERY_TEMPLATE,
-                workbenchConfig.get().bigquery.projectId,
-                workbenchConfig.get().bigquery.dataSetId,
-                info.get("tableName"),
-                workbenchConfig.get().bigquery.projectId,
-                workbenchConfig.get().bigquery.dataSetId,
-                "concept",
-                info.get("sourceConceptIdColumn"),
-                "@" + key + "codes"
-        );
-    }
-
-    private String setBigQueryConfig1(String sqlStatement, String tableName) {
-        return String.format(sqlStatement,
-                workbenchConfig.get().bigquery.projectId,
-                workbenchConfig.get().bigquery.dataSetId,
-                tableName);
     }
 }
