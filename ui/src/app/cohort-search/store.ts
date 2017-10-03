@@ -9,13 +9,12 @@ export type CohortSearchState = Map<string, any>;
 
 export const InitialState = fromJS({
   search: {include: [[]], exclude: [[]]},
-  subjects: Set(),
+  results: {include: [[]], exlude: [[]]},
   context: {
     wizardOpen: false,
   },
   criteriaTree: {},
   loading: {},
-  chartData: {},
 });
 
 
@@ -28,19 +27,25 @@ export const activeSGRole = ['context', 'active', 'sgRole'];
 export const activeSGIndex = ['context', 'active', 'sgIndex'];
 export const activeSGItemIndex = ['context', 'active', 'sgItemIndex'];
 
-export const sgiPath = (state) => ([
-  'search', 
-  state.getIn(['context', 'request', 'sgRole']),
-  state.getIn(['context', 'request', 'sgIndex']),
-  state.getIn(['context', 'request', 'sgItemIndex']),
+/* The actual, not symbolic path */
+export const getActiveSGIPath = (state) => List([
+  state.getIn(activeSGRole),
+  state.getIn(activeSGIndex),
+  state.getIn(activeSGItemIndex),
 ]);
 
-export const activeSGIPath = (state) => ([
-  'search', 
-  state.getIn(['context', 'active', 'sgRole']),
-  state.getIn(['context', 'active', 'sgIndex']),
-  state.getIn(['context', 'active', 'sgItemIndex']),
-]);
+export const subjects = (state) => {
+  const unions = (role) => (
+    state
+      .getIn(['results', role], List())
+      .map(group => Set.union(group.map(item => item.get('subjects', Set()))))
+  );
+  const include = Set.intersect(unions('include'));
+  const exclude = Set.intersect(unions('exclude'));
+  console.log('Generating total set: ');
+  console.log(include.subtract(exclude));
+  return include.subtract(exclude);
+};
 
 
 export const rootReducer: Reducer<CohortSearchState> =
@@ -51,8 +56,12 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.updateIn(['search', action.sgRole], list => list.push(List()));
       }
 
-      case Actions.REMOVE_SEARCH_GROUP: {
-        return state.deleteIn(['search', action.sgRole, action.sgIndex]);
+      case Actions.REMOVE_GROUP_ITEM:
+      case Actions.REMOVE_SEARCH_GROUP:
+      case Actions.REMOVE_CRITERIA: {
+        return state
+          .deleteIn(action.path.unshift('search'))
+          .deleteIn(action.path.unshift('results'));
       }
 
       case Actions.INIT_GROUP_ITEM: {
@@ -67,11 +76,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         const sgPath = ['search', sgRole, sgIndex];
         return state.updateIn(sgPath, group => group.push(newItem))
           .setIn(activeSGItemIndex, state.getIn(sgPath).size);
-      }
-
-      case Actions.REMOVE_GROUP_ITEM: {
-        const {sgRole, groupIndex, itemIndex} = action;
-        return state.deleteIn(['search', sgRole, groupIndex, itemIndex]);
       }
 
       case Actions.SET_WIZARD_CONTEXT: {
@@ -91,11 +95,10 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.CANCEL_WIZARD: {
-        const sgRole = state.getIn(activeSGRole);
-        const sgIndex = state.getIn(activeSGIndex);
-        const sgItemIndex = state.getIn(activeSGItemIndex);
+        const path = getActiveSGIPath(state);
         return state
-          .deleteIn(['search', sgRole, sgIndex, sgItemIndex])
+          .deleteIn(path.unshift('search'))
+          .deleteIn(path.unshift('results'))
           .setIn(['context', 'wizardOpen'], false);
       }
 
@@ -106,9 +109,13 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case Actions.LOAD_CRITERIA: {
         const {children, critType: _type, parentId} = action;
-        return state
+        state = state
           .setIn(['criteriaTree', _type, parentId], children)
           .deleteIn(['loading', _type, parentId]);
+        if (state.getIn(['loading', _type]).isEmpty()) {
+          state = state.deleteIn(['loading', _type]);
+        }
+        return state;
       }
 
       case Actions.SELECT_CRITERIA: {
@@ -122,10 +129,11 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.LOAD_SEARCH_RESULTS: {
-        const resultSet = Set(action.results);
-        const countPath = sgiPath(state).concat(['count']);
-        return state.setIn(countPath, resultSet.size)
-          .update('subjects', Set(), subjectSet => subjectSet.union(resultSet));
+        const result = Set(action.results);
+        const path = action.sgiPath.unshift('results');
+        return state
+          .setIn(path.push('count'), result.size)
+          .setIn(path.push('subjects'), result);
       }
 
       case Actions.ERROR: {

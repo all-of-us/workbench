@@ -20,12 +20,14 @@ export class SearchGroupItemComponent {
               private actions: CohortSearchActions) {}
 
   get description() {
-    // TODO(jms)
-    return this.item.description;
+    const _type = this.item.get('type');
+    return this.item.get('description', `${_type} Codes`);
   }
 
   get count() {
-    // TODO(jms)
-    return this.item.count;
+    return this.ngRedux.getState().getIn(
+      ['results', this.role, this.index, this.itemIndex, 'count'],
+      0 // default
+    );
   }
 }

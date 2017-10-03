@@ -8,8 +8,6 @@ import {Subscription} from 'rxjs/Subscription';
 import {Observable} from 'rxjs/Observable';
 import {Wizard} from 'clarity-angular/wizard/wizard';
 
-import {BroadcastService} from '../broadcast.service';
-import {SearchGroup, SearchResult} from '../model';
 import {CohortSearchActions} from '../actions';
 import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
 

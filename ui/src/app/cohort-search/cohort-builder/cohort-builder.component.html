@@ -88,17 +88,11 @@
               </button>
             </div>
             <div class="col-xs-8 text-right">
-              <h3 class="mt-1">Set Total: {{(subjects$ | async)?.length || 0}}</h3>
+              <h3 class="mt-1">Set Total: {{ (subjects$ | async)?.size || 0 }}</h3>
             </div>
           </div>
 
-          <div class="box">
-            <app-gender-chart></app-gender-chart>
-          </div>
-          <div>&nbsp;</div>
-          <div class="box">
-            <app-race-chart></app-race-chart>
-          </div>
+          <app-charts [subjects]="(subjects$ | async) || []"></app-charts>
 
         </div>
       </div>
