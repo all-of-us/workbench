@@ -188,6 +188,9 @@ task integration(type: Test) {
 
 tasks.withType(Test) {
   outputs.upToDateWhen { false }
+  testLogging {
+    exceptionFormat "full"
+  }
   def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
   if (verboseTestLogging == 'yes') {
     testLogging {
