@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
 import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.ApiException;
@@ -68,14 +69,15 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
-  public ResponseEntity<Void> deleteCluster(String googleProject,
+  public ResponseEntity<EmptyResponse> deleteCluster(String googleProject,
       String clusterName) {
     try {
       this.notebooksService.deleteCluster(googleProject, clusterName);
     } catch (ApiException e) {
       throw new RuntimeException(e);
     }
-    return ResponseEntity.ok(null);
+    EmptyResponse e = new EmptyResponse();
+    return ResponseEntity.ok(e);
   }
 
 

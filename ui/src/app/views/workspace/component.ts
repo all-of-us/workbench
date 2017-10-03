@@ -2,9 +2,11 @@ import {Component, OnInit, Inject} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {StringFilter, Comparator} from 'clarity-angular';
 import {DOCUMENT} from '@angular/platform-browser';
+import {Observable} from 'rxjs/Observable';
 
 import {resetDateObject} from 'helper-functions';
 
+import {Cluster} from 'generated';
 import {ClusterRequest} from 'generated';
 import {ClusterService} from 'generated';
 import {Cohort} from 'generated';
@@ -91,13 +93,13 @@ export class WorkspaceComponent implements OnInit {
   cohortsError = false;
   notebooksLoading = false;
   cohortList: Cohort[] = [];
-  // TODO: Replace with real data/notebooks
-  notebookList = [new Notebook('Notebook 1',
-                    'This is the user defined description for notebook 1',
-                    '/cohort/notebook1'),
-                  new Notebook('Notebook 2',
-                    'This is the user defined description for notebook 2',
-                    '/cohort/notebook2')];
+  cluster: Cluster;
+  clusterPulled = false;
+  clusterNamespace: string;
+  clusterName: string;
+  clusterLoading = false;
+  // TODO: Replace with real data/notebooks read in from GCS
+  notebookList: Notebook[] = [];
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -135,25 +137,72 @@ export class WorkspaceComponent implements OnInit {
           workspaceReceived => {
             this.workspace = workspaceReceived;
             this.workspaceLoading = false;
+            this.clusterName = this.workspace.name;
           },
           error => {
             this.workspaceLoading = false;
           });
+    // TODO: Replace with real cluster namespace.
+    this.clusterNamespace = 'broad-dsde-dev';
   }
 
   launchNotebook(): void {
+    this.pollCluster().subscribe(cluster => {
+      this.cluster = cluster;
+      this.clusterPulled = true;
+    })
+  }
+
+  pollCluster(): Observable<Cluster> {
+    const observable = new Observable(observer => {
+      this.clusterService.getCluster(this.clusterNamespace, this.clusterName).subscribe((cluster) => {
+        if(cluster.status != 'Running' && cluster.status != 'Deleting') {
+          setTimeout(() => {
+              this.pollCluster().subscribe(newCluster => {
+                this.cluster = newCluster;
+                observer.next(newCluster);
+                observer.complete();
+              })
+            }, 60000
+          )
+        } else {
+          this.cluster = cluster;
+          observer.next(cluster);
+          observer.complete();
+        }})});
+    return observable;
+  }
+
+  cancelCluster(): void {
+    this.clusterPulled = false;
+  }
+
+  openCluster(): void {
+    const url = 'https://leonardo.dsde-dev.broadinstitute.org/notebooks/' + this.cluster.googleProject + '/' + this.cluster.clusterName;
+    window.location.href = url;
+  }
+
+  createAndLaunchNotebook(): void {
     let request: ClusterRequest;
     // TODO: Fill out this information
     request = {
       bucketPath: '',
       serviceAccount: '',
-      labels: ''
+      labels: {'all-of-us': 'true'}
     };
-    console.log(this.workspace);
+    this.clusterLoading = true;
     this.clusterService
-        .createCluster(this.workspace.namespace, 'test-cluster',
+        .createCluster(this.clusterNamespace, this.clusterName,
         request).subscribe((cluster) => {
-      console.log(cluster);
+      this.pollCluster().subscribe(cluster => {
+        this.clusterLoading = false;
+        this.cluster = cluster;
+        this.clusterPulled = true;
+      })
     });
+  }
+
+  killNotebook(): void {
+    this.clusterService.deleteCluster(this.clusterNamespace, this.clusterName).subscribe(() => {});
   }
 }

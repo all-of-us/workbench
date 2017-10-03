@@ -201,6 +201,8 @@ paths:
       responses:
         "202":
           description: Cluster deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
         "404":
           description: Cluster not found
           schema:
@@ -535,6 +537,12 @@ definitions:
     type: string
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
+
+  EmptyResponse:
+    type: object
+    properties:
+      additionalInfo:
+        type: string
 
   WorkspaceListResponse:
     type: object
