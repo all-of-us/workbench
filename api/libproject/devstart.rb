@@ -101,7 +101,10 @@ def run_integration_tests(*args)
   common.docker.requires_docker
 
   ServiceAccounts.new.maybe_download(:dev, :directory_service)
-  common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
+  account = get_auth_login_account()
+  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
+  })
 end
 
 def connect_to_db(*args)

@@ -7,12 +7,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
-import com.google.api.services.admin.directory.model.User;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import org.pmiops.workbench.google.Utils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,17 +21,8 @@ public class DirectoryServiceImpl implements DirectoryService {
       DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
-  private GoogleCredential getGoogleCredentialFromFile(String fileName) {
-    try (InputStream is = new FileInputStream(fileName)) {
-      return GoogleCredential.fromStream(is);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   private GoogleCredential createCredentialWithImpersonation() {
-    GoogleCredential credential =
-        getGoogleCredentialFromFile("./directory-service-sa.json");
+    GoogleCredential credential = Utils.getDefaultGoogleCredential();
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
