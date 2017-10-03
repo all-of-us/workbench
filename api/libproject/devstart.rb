@@ -1,4 +1,5 @@
 require_relative "../../libproject/utils/common"
+require_relative "../../libproject/workbench"
 require "io/console"
 require "json"
 require "optparse"
@@ -56,16 +57,16 @@ def dev_up(*args)
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
+
   common.status "Updating configuration..."
   common.run_inline %W{docker-compose run update-config}
+
   run_api(account)
 end
 
 def run_api(account)
   common = Common.new
-  at_exit { FileUtils.rm("sa-key.json") }
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
-    FileUtils.cp(creds_file, "sa-key.json")
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
@@ -149,9 +150,10 @@ def get_file_from_gcs(bucket, filename, target_path)
   common.run_inline %W{gsutil cp gs://#{bucket}/#{filename} #{target_path}}
 end
 
-def read_db_vars(project)
+def read_db_vars(creds_file, project)
   db_creds_file = Tempfile.new("#{project}-vars.env")
   begin
+    activate_service_account(creds_file)
     get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
     db_creds_file.open
     db_creds_file.each_line do |line|
@@ -185,8 +187,8 @@ def run_cloud_sql_proxy(project, creds_file)
   return pid
 end
 
-def do_run_migrations(project)
-  read_db_vars(project)
+def do_run_migrations(creds_file, project)
+  read_db_vars(creds_file, project)
   common = Common.new
   create_db_file = Tempfile.new("#{project}-create-db.sql")
   begin
@@ -208,8 +210,8 @@ def do_run_migrations(project)
   end
 end
 
-def do_drop_db(project)
-  read_db_vars(project)
+def do_drop_db(creds_file, project)
+  read_db_vars(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   begin
     unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
@@ -237,11 +239,34 @@ end
 def do_run_with_creds(project, account, creds_file, proc)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
-    get_service_account_creds_file(project, account, service_account_creds_file)
-    begin
-      proc.call(project, account, service_account_creds_file.path)
-    ensure
-      delete_service_accounts_creds(project, account, service_account_creds_file)
+    if project == "all-of-us-workbench-test"
+      creds_filename = "sa-key.json"
+      # For test, use a locally stored key file copied from GCS (which we leave hanging
+      # around.)
+      if !File.file?(creds_filename)
+        # Create a temporary creds file for accessing GCS.
+        get_service_account_creds_file(project, account, service_account_creds_file)
+        begin
+          activate_service_account(service_account_creds_file.path)
+          # Copy the stable creds file from its path in GCS to sa-key.json.
+          # Important: we must leave this key file in GCS, and not delete it in Cloud Console,
+          # or local development will stop working.
+          get_file_from_gcs("all-of-us-workbench-test-credentials",
+              "all-of-us-workbench-test-9b5c623a838e.json", creds_filename)
+        ensure
+          # Delete the temporary creds we created.
+          delete_service_accounts_creds(project, account, service_account_creds_file)
+        end
+      end
+      proc.call(project, account, creds_filename)
+    else
+      # Create a creds file and use it; clean up when done.
+      get_service_account_creds_file(project, account, service_account_creds_file)
+      begin
+        proc.call(project, account, service_account_creds_file.path)
+      ensure
+        delete_service_accounts_creds(project, account, service_account_creds_file)
+      end
     end
   else
     proc.call(project, account, creds_file)
@@ -270,13 +295,13 @@ end
 
 def drop_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
-    do_drop_db(project)
+    do_drop_db(creds_file, project)
   })
 end
 
 def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(project)
+    read_db_vars(creds_file, project)
     system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
            "--port 3307 --database #{ENV["DB_NAME"]}")
   })
@@ -284,7 +309,7 @@ end
 
 def update_cloud_config(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(project)
+    read_db_vars(creds_file, project)
     ENV["DB_PORT"] = "3307"
     unless system("cd tools && ../gradlew --info loadConfig && cd ..")
         raise("Error updating configuration. Exiting.")
@@ -295,7 +320,7 @@ end
 def run_cloud_migrations(*args)
   run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
     puts "Running migrations..."
-    do_run_migrations(project)
+    do_run_migrations(creds_file, project)
   })
 end
 
@@ -341,9 +366,18 @@ def do_create_db_creds(project, account, creds_file)
   end
 end
 
-def create_db_creds(args)
+def create_db_creds(*args)
   run_with_creds(args, "create-db-creds", lambda { |project, account, creds_file|
     do_create_db_creds(project, account, creds_file)
+  })
+end
+
+def get_test_service_account_creds(*args)
+  run_with_creds(args, "get-service-creds", lambda { |project, account, creds_file|
+    if project != "all-of-us-workbench-test"
+      raise("Only call this with all-of-us-workbench-test")
+    end
+    puts "Creds file is now at: #{creds_file}"
   })
 end
 
@@ -361,6 +395,12 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "get-service-creds",
+  :description => "Creates sa-key.json locally (for use when running tests, etc.)",
+  :fn => lambda { |*args| get_test_service_account_creds(*args) }
+})
+
+Common.register_command({
   :invocation => "test",
   :description => "Runs tests.",
   :fn => lambda { |*args| run_tests(*args) }
@@ -375,8 +415,9 @@ Common.register_command({
 Common.register_command({
   :invocation => "docker-clean",
   :description => \
-    "Removes docker containers and volumes, allowing the next `dev-up` to\n" \
-    "start from scratch (e.g., the database will be re-created).",
+    "Removes docker containers and volumes, allowing the next `dev-up` to" \
+    " start from scratch (e.g., the database will be re-created). Includes ALL" \
+    " docker images, not just for the API.",
   :fn => lambda { |*args| docker_clean(*args) }
 })
 

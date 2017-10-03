@@ -1,7 +1,38 @@
 [
   {
     "concept_id":1,
+    "concept_name":"name",
+    "domain_id":"Condition",
     "vocabulary_id":"ICD9CM",
-    "concept_code":"001.1"
+    "concept_class_id":"1",
+    "standard_concept":"sc",
+    "concept_code":"001.1",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":2,
+    "concept_name":"name",
+    "domain_id":"Procedure",
+    "vocabulary_id":"ICD9Proc",
+    "concept_class_id":"2",
+    "standard_concept":"sc",
+    "concept_code":"002.1",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":3,
+    "concept_name":"name",
+    "domain_id":"Measurement",
+    "vocabulary_id":"ICD9CM",
+    "concept_class_id":"3",
+    "standard_concept":"sc",
+    "concept_code":"003.1",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
   }
 ]

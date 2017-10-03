@@ -9,10 +9,11 @@ services:
   api:
     build:
       context: ./src/dev/server
+    user: ${UID}
     working_dir: /w
     volumes:
-      - gradle-cache:/root/.gradle
       - .:/w:cached
+      - gradle-cache:/.gradle
     command: ./gradlew appengineRun
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
@@ -24,9 +25,10 @@ services:
   db-migration:
     build:
       context: ./src/dev/server
+    user: ${UID}
     working_dir: /w/db
     volumes:
-      - gradle-cache:/root/.gradle
+      - gradle-cache:/.gradle
       - .:/w:cached
     command: wait-for db:3306 -- ./run-migrations.sh
     env_file:
@@ -34,9 +36,10 @@ services:
   update-config:
     build:
      context: ./src/dev/server
+    user: ${UID}
     working_dir: /w
     volumes:
-      - gradle-cache:/root/.gradle
+      - gradle-cache:/.gradle
       - .:/w:cached
     command: wait-for db:3306 -- ./gradlew tools:loadConfig
     env_file:

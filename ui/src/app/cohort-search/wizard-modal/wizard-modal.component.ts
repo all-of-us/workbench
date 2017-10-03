@@ -12,16 +12,6 @@ import {SearchGroup, SearchResult} from '../model';
 import {CohortBuilderService, Criteria, Modifier} from 'generated';
 
 
-const CANARY_REQUEST = {
-  // Expected number of results as of Wed Sep 20 15:07:46 CDT 2017: 175
-  type: 'ICD9',
-  searchParameters: [
-    { code: 'E9293', domainId: 'Condition' },
-    { code: '7831', domainId: 'Measurement' },
-  ],
-  modifiers: []
-};
-
 @Component({
   selector: 'app-wizard-modal',
   templateUrl: './wizard-modal.component.html',
@@ -43,7 +33,7 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   private modifierListSubscription: Subscription;
 
   constructor(private broadcastService: BroadcastService,
-              private searchService: CohortBuilderService) { }
+              private cohortBuilderService: CohortBuilderService) { }
 
   ngOnInit() {
     this.criteriaTypeSubscription = this.broadcastService.selectedCriteriaType$
@@ -71,22 +61,22 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   updateSearchResults() {
     this.updateOrCreateSearchResult();
 
-    // TODO: fix this when implementing this story
-    // https://precisionmedicineinitiative.atlassian.net/projects/CB/issues/CB-15
-    // this.searchGroupSubscription = this.searchService.getResults(
-    //   new SearchRequest(this.criteriaType.toUpperCase(), this.selectedSearchResult))
-    //   .subscribe(response => {
-    //     this.selectedSearchResult.updateWithResponse(response);
-    //     this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
-    //     this.wizardModalRef.destroy();
-    //   });
-
-    // FIXME: this is a Canary call using canary data, NOT an actual implementation
-    this.searchGroupSubscription = this.searchService.searchSubjects(CANARY_REQUEST)
-      .subscribe(resp => console.log(resp));
-
-    this.searchService.searchSubjects({...CANARY_REQUEST, type: 'nonsense'})
-      .subscribe(resp => console.log(resp));
+    this.searchGroupSubscription = this.cohortBuilderService
+      .searchSubjects({
+        // TODO: constructing minimum viable SearchRequest from a single
+        // we'll need to reorganize where this logic happens, given that it
+        // needs to be accessible to a higher level handler
+        include: [[{
+          type: this.criteriaType.toUpperCase(),
+          searchParameters: this.selectedSearchResult.values,
+          modifiers: this.selectedSearchResult.modifierList
+        }]]
+      })
+      .subscribe((response) => {
+        this.selectedSearchResult.updateWithResponse(response);
+        this.broadcastService.updateCounts(this.selectedSearchGroup, this.selectedSearchResult);
+        this.wizardModalRef.destroy();
+      });
   }
 
   updateOrCreateSearchResult() {

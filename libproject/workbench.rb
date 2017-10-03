@@ -1,5 +1,7 @@
 require_relative "utils/common"
 
+ENV["UID"] = "#{Process.euid}"
+
 module Workbench
   WORKBENCH_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 

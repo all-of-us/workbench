@@ -11,7 +11,7 @@
       }
     },
     {
-      "name":"condition_source_concept_id",
+      "name":"person_id",
       "type":{
         "value":{
           "equivalent":"INT64",
@@ -20,7 +20,97 @@
       }
     },
     {
-      "name":"person_id",
+      "name":"condition_concept_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"condition_start_date",
+      "type":{
+        "value":{
+          "equivalent":"DATE",
+          "constant":"DATE"
+        }
+      }
+    },
+    {
+      "name":"condition_start_datetime",
+      "type":{
+        "value":{
+          "equivalent":"TIMESTAMP",
+          "constant":"TIMESTAMP"
+        }
+      }
+    },
+    {
+      "name":"condition_end_date",
+      "type":{
+        "value":{
+          "equivalent":"DATE",
+          "constant":"DATE"
+        }
+      }
+    },
+    {
+      "name":"condition_end_datetime",
+      "type":{
+        "value":{
+          "equivalent":"TIMESTAMP",
+          "constant":"TIMESTAMP"
+        }
+      }
+    },
+    {
+      "name":"condition_type_concept_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"stop_reason",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"provider_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"visit_occurrence_id",
+      "type":{
+        "value":{
+          "equivalent":"INT64",
+          "constant":"INTEGER"
+        }
+      }
+    },
+    {
+      "name":"condition_source_value",
+      "type":{
+        "value":{
+          "equivalent":"STRING",
+          "constant":"STRING"
+        }
+      }
+    },
+    {
+      "name":"condition_source_concept_id",
       "type":{
         "value":{
           "equivalent":"INT64",

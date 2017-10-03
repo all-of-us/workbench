@@ -119,8 +119,6 @@ export class WorkspaceComponent implements OnInit {
         .subscribe(
             cohortsReceived => {
               for (const coho of cohortsReceived.items) {
-                coho.creationTime = resetDateObject(coho.creationTime);
-                coho.lastModifiedTime = resetDateObject(coho.lastModifiedTime);
                 this.cohortList.push(coho);
               }
               this.cohortsLoading = false;
