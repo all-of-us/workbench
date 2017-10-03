@@ -93,7 +93,7 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
-    expect(workspacePage.notebookTableRows.length).toEqual(2);
+    expect(workspacePage.notebookTableRows.length).toEqual(0);
   }));
 
   it('fetches the correct workspace', fakeAsync(() => {
@@ -106,14 +106,6 @@ describe('WorkspaceComponent', () => {
       .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
   }));
 
-  it('errors if it tries to access a non-existant workspace', fakeAsync(() => {
-    workspacePage.route[1].path = 'fakeNamespace';
-    workspacePage.route[2].path = '5';
-    workspacePage.readPageData();
-    workspacePage.fixture.componentRef.instance.ngOnInit();
-    updateAndTick(workspacePage.fixture);
-    expect(workspacePage.fixture.debugElement.context.cohortsError).toBe(true);
-  }));
 
 
 });
