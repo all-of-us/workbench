@@ -45,7 +45,8 @@
                 </span>
                 <app-search-group 
                   [group]="group" 
-                  [index]="index"
+                  [index]="i"
+                  [role]="'include'"
                   (onRemove)="actions.removeGroup('include', i)">
                 </app-search-group>
               </div>
@@ -71,6 +72,7 @@
                 <app-search-group 
                   [group]="group" 
                   [index]="i"
+                  [role]="'exclude'"
                   (onRemove)="actions.removeGroup('exclude', i)">
                 </app-search-group>
               </div>

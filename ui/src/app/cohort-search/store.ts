@@ -1,21 +1,7 @@
 import {combineReducers, AnyAction, Reducer} from 'redux';
 import {CohortSearchActions as Actions} from './actions';
 import {SearchRequest, SubjectListResponse as SubjectList, SearchGroupItem} from 'generated';
-
-export type RequestKey = 'include' | 'exclude';
-
-export interface AppContext {
-  wizardOpen: boolean;
-  activeSearchGroupItem?: SearchGroupItem;
-}
-
-export interface CohortSearchState {
-  search: SearchRequest;
-  subjects?: SubjectList;
-  context?: AppContext;
-  criteriaTree?: object;
-  loading?: object;
-}
+import {AppContext, CohortSearchState, SearchGroupRole} from './store.interfaces';
 
 export const InitialState = {
   search: {include: [[]], exclude: [[]]},
@@ -32,7 +18,7 @@ export const InitialState = {
 export const inclusionGroups = ['search', 'include'];
 export const exclusionGroups = ['search', 'exclude'];
 export const wizardOpen = ['context', 'wizardOpen'];
-export const activeCriteriaType = ['context', 'activeSearchGroupItem', 'type'];
+export const activeCriteriaType = ['context', 'active', 'criteria'];
 
 
 export const rootReducer: Reducer<CohortSearchState> =
@@ -68,14 +54,11 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.OPEN_WIZARD: {
+        const {criteria, sgIndex, sgRole} = action;
         const context = {
           ...state.context,
           wizardOpen: true,
-          activeSearchGroupItem: {
-            type: action.criteria,
-            searchParameters: [],
-            modifiers: []
-          },
+          active: { criteria, sgIndex, sgRole }
         };
         return {...state, context};
       }
@@ -115,15 +98,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.SELECT_CRITERIA: {
-        const {code, domainId} = action.criteria;
-        const params = state.context.activeSearchGroupItem.searchParameters.concat({
-          code, domainId
-        });
-        const activeSearchGroupItem = {
-          ...state.context.activeSearchGroupItem,
-          searchParameters: params,
-        };
-        return {...state, context: {...state.context, activeSearchGroupItem}};
+        return state;
       }
 
       default: return state;

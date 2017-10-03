@@ -22,9 +22,10 @@ import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
 import {Epics} from './epics';
 import {environment} from 'environments/environment';
 import {BroadcastService} from './broadcast.service';
-import {CohortSearchState, InitialState, rootReducer} from './store';
+import {InitialState, rootReducer} from './store';
 import {CohortSearchRouter} from './router';
 import {CohortSearchActions} from './actions';
+import {CohortSearchState} from './store.interfaces';
 import {GoogleChartDirective} from './google-chart.directive';
 
 import {CohortBuilderService} from 'generated';

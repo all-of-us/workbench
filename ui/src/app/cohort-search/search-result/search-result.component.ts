@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchState} from '../store.interfaces';
 import {SearchGroupItem} from 'generated';
 
 

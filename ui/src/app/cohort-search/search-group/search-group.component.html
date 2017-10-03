@@ -12,11 +12,11 @@
     </div>
 
     <div *ngFor="let item of group; let i = index" class="pb-0">
-      <app-search-result [index]="i" (click)="selectSearchGroup()">
+      <app-search-result [index]="i">
       </app-search-result>
     </div>
 
-    <app-add-criteria (click)="selectSearchGroup()">
+    <app-add-criteria [index]="index" [role]="role">
     </app-add-criteria>
   </div>
 

@@ -1,5 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
+
 import {CohortSearchActions} from './actions';
+import {SearchGroupRole} from './store.interfaces';
 
 
 const CRITERIA_TYPES = [
@@ -27,13 +29,16 @@ const CRITERIA_TYPES = [
           class="dropdown-item"
           *ngFor="let criteria of criteriaTypes"
           type="button"
-          (click)="actions.openWizard(criteria.type)"
+          (click)="actions.openWizard(criteria.type, index, role)"
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
   `
 })
 export class AddCriteriaComponent {
+  @Input() index: number;
+  @Input() role: SearchGroupRole;
+
   readonly criteriaTypes = CRITERIA_TYPES;
   constructor(private actions: CohortSearchActions) {}
 }

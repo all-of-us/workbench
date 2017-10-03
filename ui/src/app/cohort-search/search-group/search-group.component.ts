@@ -1,10 +1,7 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
-import {NgRedux, select, dispatch} from '@angular-redux/store';
 
-import {BroadcastService} from '../broadcast.service';
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
-import {SearchResult} from '../model';
+import {CohortSearchState, SearchGroupRole} from '../store.interfaces';
 
 import {SearchGroup} from 'generated';
 
@@ -15,15 +12,14 @@ import {SearchGroup} from 'generated';
   styleUrls: ['search-group.component.css']
 })
 export class SearchGroupComponent {
+  /* Passed through from cohort-builder to add-criteria */
   @Input() index: number;
+  @Input() role: SearchGroupRole;
+
   @Input() group: SearchGroup;
   @Output() onRemove = new EventEmitter<boolean>();
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions) {}
 
   remove(event) { this.onRemove.emit(true); }
-
-  // TODO(jms)
-  selectSearchGroup() {}
 }

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {AnyAction} from 'redux';
 
-import {CohortSearchState, RequestKey} from './store';
+import {CohortSearchState, SearchGroupRole} from './store.interfaces';
 import {CohortBuilderService, Criteria} from 'generated';
 
 
@@ -21,22 +21,22 @@ export class CohortSearchActions {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private cohortBuilderService: CohortBuilderService) {}
 
-  public initGroup(key: RequestKey): void {
+  public initGroup(key: SearchGroupRole): void {
     this.ngRedux.dispatch({type: CohortSearchActions.INIT_SEARCH_GROUP, key});
   }
 
-  public removeGroup(key: RequestKey, index: number): void {
+  public removeGroup(key: SearchGroupRole, index: number): void {
     this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_SEARCH_GROUP, key, index});
   }
 
-  public removeGroupItem(key: RequestKey, groupIndex: number, itemIndex: number): void {
+  public removeGroupItem(key: SearchGroupRole, groupIndex: number, itemIndex: number): void {
     this.ngRedux.dispatch({
       type: CohortSearchActions.REMOVE_GROUP_ITEM, key, groupIndex, itemIndex
     });
   }
 
-  public openWizard(criteria: string): void {
-    this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD, criteria});
+  public openWizard(criteria: string, sgIndex: number, sgRole: SearchGroupRole): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD, criteria, sgIndex, sgRole});
   }
 
   public closeWizard(): void {
@@ -48,9 +48,6 @@ export class CohortSearchActions {
     this.ngRedux.dispatch({type: CohortSearchActions.FETCH_CRITERIA, critType, parentId});
   }
 
-  /**
-   * Pushes a SearchParameter into the active SearchGroupItem
-   */
   public selectCriteria(criteria: Criteria) {
     this.ngRedux.dispatch({type: CohortSearchActions.SELECT_CRITERIA, criteria});
   }

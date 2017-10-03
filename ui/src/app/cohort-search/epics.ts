@@ -4,7 +4,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions as Actions} from './actions';
-import {CohortSearchState} from './store';
+import {CohortSearchState} from './store.interfaces';
 
 import {CohortBuilderService} from 'generated';
 

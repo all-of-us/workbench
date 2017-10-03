@@ -11,7 +11,8 @@ import {Wizard} from 'clarity-angular/wizard/wizard';
 import {BroadcastService} from '../broadcast.service';
 import {SearchGroup, SearchResult} from '../model';
 import {CohortSearchActions} from '../actions';
-import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
+import {wizardOpen, activeCriteriaType} from '../store';
+import {CohortSearchState} from '../store.interfaces';
 
 import {CohortBuilderService, Criteria, Modifier} from 'generated';
 
