@@ -187,7 +187,6 @@ task integration(type: Test) {
 }
 
 tasks.withType(Test) {
-  outputs.upToDateWhen { false }
   testLogging {
     exceptionFormat "full"
   }
@@ -201,6 +200,10 @@ tasks.withType(Test) {
       events "passed", "skipped", "failed"
     }
   }
+}
+
+integration {
+  outputs.upToDateWhen { false }
 }
 
 appengine {  // App Engine tasks configuration
