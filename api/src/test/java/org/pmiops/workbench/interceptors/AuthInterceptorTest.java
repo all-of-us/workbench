@@ -36,7 +36,6 @@ public class AuthInterceptorTest {
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   private AuthInterceptor interceptor;
-  private static final String PROTECTED_URL = "/api/v1/workspaces";
 
   @Before
   public void setup() {
@@ -53,7 +52,6 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_noAuthorization() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(request.getRequestURI()).thenReturn(PROTECTED_URL);
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
@@ -61,7 +59,6 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_nonBearerAuthorization() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(request.getRequestURI()).thenReturn(PROTECTED_URL);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("blah");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -70,7 +67,6 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_userInfoError() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(request.getRequestURI()).thenReturn(PROTECTED_URL);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
     when(userInfoService.getUserInfo("foo")).thenThrow(
         new HttpResponseException.Builder(404, null,
@@ -83,7 +79,6 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_userInfoSuccess() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(request.getRequestURI()).thenReturn(PROTECTED_URL);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
     when(userInfoService.getUserInfo("foo")).thenReturn(new Userinfoplus());
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();

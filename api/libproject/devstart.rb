@@ -70,6 +70,7 @@ def run_api(account)
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+    at_exit { common.run_inline %W{docker-compose down} }
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   })
 end

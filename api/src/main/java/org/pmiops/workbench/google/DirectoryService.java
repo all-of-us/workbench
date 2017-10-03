@@ -1,8 +1,10 @@
 package org.pmiops.workbench.google;
 
+import org.pmiops.workbench.auth.Public;
+
 /**
  * Encapsulate Googe APIs for handling GSuite user accounts.
  */
 public interface DirectoryService {
-  public boolean isUsernameTaken(String username);
+  @Public public boolean isUsernameTaken(String username);
 }

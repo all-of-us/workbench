@@ -3,11 +3,14 @@ package org.pmiops.workbench.interceptors;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.auth.Public;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -40,8 +44,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
 
-    if (request.getRequestURI().endsWith("is-username-taken")) {
-      return true;
+    HandlerMethod method = (HandlerMethod) handler;
+
+    System.err.println("MARKER:");
+    System.err.println(method.hasMethodAnnotation(Public.class));
+    System.err.println(method.getBean().getClass());
+    System.err.println(method.getMethod());
+    System.err.println(method.getMethod().getAnnotation(Public.class));
+
+    for (Annotation annotation : Arrays.asList(method.getMethod().getDeclaredAnnotations())) {
+      System.err.println(annotation);
+      if (annotation instanceof Public) {
+        return true;
+      }
     }
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -64,11 +79,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
     // TODO: get token info and check that as well
-    
+
     // TODO: check Google group membership to ensure user is in registered user group
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(userInfo, token));
-    
+
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
