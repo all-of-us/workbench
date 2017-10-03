@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
-import org.pmiops.workbench.auth.Public;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -61,7 +60,6 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  @Public
   @Override
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
     return ResponseEntity.ok(

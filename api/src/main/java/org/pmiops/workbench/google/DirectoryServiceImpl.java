@@ -10,7 +10,6 @@ import com.google.api.services.admin.directory.DirectoryScopes;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import org.pmiops.workbench.auth.Public;
 import org.pmiops.workbench.google.Utils;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +43,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .build();
   }
 
-  @Public public boolean isUsernameTaken(String username) {
+  public boolean isUsernameTaken(String username) {
     try {
       // TODO(dmohs): Domain should come from config.
       getGoogleDirectoryService().users().get(username + "@fake-research-aou.org").execute();
