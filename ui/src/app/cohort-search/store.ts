@@ -1,4 +1,5 @@
-import {combineReducers, AnyAction, Reducer} from 'redux';
+import {AnyAction, Reducer} from 'redux';
+
 import {CohortSearchActions as Actions} from './actions';
 import {SearchRequest, SubjectListResponse as SubjectList, SearchGroupItem} from 'generated';
 import {AppContext, CohortSearchState, SearchGroupRole} from './store.interfaces';
@@ -18,7 +19,7 @@ export const InitialState = {
 export const inclusionGroups = ['search', 'include'];
 export const exclusionGroups = ['search', 'exclude'];
 export const wizardOpen = ['context', 'wizardOpen'];
-export const activeCriteriaType = ['context', 'active', 'criteria'];
+export const activeCriteriaType = ['context', 'active', 'criteriaType'];
 
 
 export const rootReducer: Reducer<CohortSearchState> =
@@ -42,6 +43,35 @@ export const rootReducer: Reducer<CohortSearchState> =
         return {...state, search: {...state.search, [key]: newGroupList}};
       }
 
+      case Actions.INIT_GROUP_ITEM: {
+        const {criteriaType, sgIndex, sgRole} = state.context.active;
+        const newItem = {
+          type: criteriaType,
+          searchParameters: [],
+          modifiers: [],
+        };
+        const searchGroup = state.search[sgRole][sgIndex].concat([newItem]);
+        const sgItemIndex = searchGroup.length - 1;
+        const stateCopy = {
+          ...state,
+          context: {
+            ...state.context,
+            active: {
+              ...state.context.active,
+              sgItemIndex
+            }
+          },
+          search: {
+            ...state.search,
+            [sgRole]: [
+              ...state.search[sgRole]
+            ]
+          }
+        };
+        stateCopy.search[sgRole][sgIndex] = searchGroup;
+        return stateCopy;
+      }
+
       case Actions.REMOVE_GROUP_ITEM: {
         const {key, groupIndex, itemIndex} = action;
         const newGroup = state.search[key][groupIndex].filter(
@@ -53,12 +83,19 @@ export const rootReducer: Reducer<CohortSearchState> =
         return {...state, search: {...state.search, [key]: newGroupList}};
       }
 
+      case Actions.SET_CONTEXT: {
+        const {criteriaType, sgIndex, sgRole} = action;
+        const context = {
+          ...state.context,
+          active: { ...state.context.active, criteriaType, sgIndex, sgRole }
+        };
+        return {...state, context};
+      }
+
       case Actions.OPEN_WIZARD: {
-        const {criteria, sgIndex, sgRole} = action;
         const context = {
           ...state.context,
           wizardOpen: true,
-          active: { criteria, sgIndex, sgRole }
         };
         return {...state, context};
       }
@@ -98,7 +135,10 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.SELECT_CRITERIA: {
-        return state;
+        // push the criteria onto the search parameters
+        // TODO(jms)
+        const {sgIndex, sgItemIndex, sgRole} = state.context.active;
+        const params = state['search'][sgRole][sgIndex]['searchParameters'].concat([action.criteria]);
       }
 
       default: return state;

@@ -6,7 +6,7 @@ export type SearchGroupRole = 'include' | 'exclude';
 export interface AppContext {
   wizardOpen: boolean;
   active?: {
-    criteria: string;
+    criteriaType: string;
     sgIndex: number;
     sgRole: SearchGroupRole;
     sgItemIndex?: number;

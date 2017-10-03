@@ -8,14 +8,22 @@ import {CohortBuilderService, Criteria} from 'generated';
 
 @Injectable()
 export class CohortSearchActions {
+
+  /** Action type symbols */
   static INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
   static REMOVE_SEARCH_GROUP = 'REMOVE_SEARCH_GROUP';
+
+  static INIT_GROUP_ITEM = 'INIT_GROUP_ITEM';
   static REMOVE_GROUP_ITEM = 'REMOVE_GROUP_ITEM';
+
   static OPEN_WIZARD = 'OPEN_WIZARD';
   static CLOSE_WIZARD = 'CLOSE_WIZARD';
+
   static LOAD_CRITERIA = 'LOAD_CRITERIA';
   static FETCH_CRITERIA = 'FETCH_CRITERIA';
   static SELECT_CRITERIA = 'SELECT_CRITERIA';
+
+  static SET_CONTEXT = 'SET_CONTEXT';
   static ERROR = 'ERROR';
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
@@ -35,8 +43,10 @@ export class CohortSearchActions {
     });
   }
 
-  public openWizard(criteria: string, sgIndex: number, sgRole: SearchGroupRole): void {
-    this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD, criteria, sgIndex, sgRole});
+  public openWizard(criteriaType: string, sgIndex: number, sgRole: SearchGroupRole): void {
+    this.ngRedux.dispatch({type: CohortSearchActions.SET_CONTEXT, criteriaType, sgIndex, sgRole});
+    this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD});
+    this.ngRedux.dispatch({type: CohortSearchActions.INIT_GROUP_ITEM});
   }
 
   public closeWizard(): void {
