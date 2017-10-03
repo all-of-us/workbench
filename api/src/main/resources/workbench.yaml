@@ -53,6 +53,7 @@ paths:
         - bugReport
       description: Sends an email to developers about a user reported bug
       operationId: sendBugReport
+      # TODO(dmohs): security: []
       parameters:
         - in: body
           name: bugReport
@@ -74,6 +75,7 @@ paths:
         - profile
       description: Checks to see if the given username is not available.
       operationId: isUsernameTaken
+      security: []
       parameters:
         - in: query
           name: username

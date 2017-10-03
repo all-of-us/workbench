@@ -156,7 +156,7 @@ dependencies {
   compile 'com.google.code.gson:gson:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
-  compile 'io.swagger:swagger-annotations:+'
+  compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'com.google.cloud:google-cloud-bigquery:+'
 
   testCompile 'junit:junit:4.12'

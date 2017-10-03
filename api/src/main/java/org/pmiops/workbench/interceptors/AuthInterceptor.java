@@ -3,6 +3,8 @@ package org.pmiops.workbench.interceptors;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +16,7 @@ import org.pmiops.workbench.auth.Public;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,6 +31,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
+  private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
 
@@ -46,17 +50,16 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     HandlerMethod method = (HandlerMethod) handler;
 
-    System.err.println("MARKER:");
-    System.err.println(method.hasMethodAnnotation(Public.class));
-    System.err.println(method.getBean().getClass());
-    System.err.println(method.getMethod());
-    System.err.println(method.getMethod().getAnnotation(Public.class));
-
-    for (Annotation annotation : Arrays.asList(method.getMethod().getDeclaredAnnotations())) {
-      System.err.println(annotation);
-      if (annotation instanceof Public) {
-        return true;
+    boolean isAuthRequired = false;
+    ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
+    for (Authorization auth : apiOp.authorizations()) {
+      if (auth.value().equals(authName)) {
+        isAuthRequired = true;
+        break;
       }
+    }
+    if (!isAuthRequired) {
+      return true;
     }
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
