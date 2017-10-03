@@ -21,4 +21,13 @@ export class Epics {
         .catch(error => Observable.of({type: Actions.ERROR, error}))
     )
   )
+
+  fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
+    action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
+      ({request}) =>
+      this.service.searchSubjects(request)
+        .map(results => ({type: Actions.LOAD_SEARCH_RESULTS, results}))
+        .catch(error => Observable.of({type: Actions.ERROR, error}))
+    )
+  )
 }

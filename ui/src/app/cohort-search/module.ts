@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
 import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
-import {createEpicMiddleware} from 'redux-observable';
+import {createEpicMiddleware, combineEpics} from 'redux-observable';
 
 /* Components */
 import {AddCriteriaComponent} from './add-criteria.component';
@@ -14,14 +14,13 @@ import {NodeInfoComponent} from './criteria-tree/node-info.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {RaceChartComponent} from './race-chart/race-chart.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
-import {SearchResultComponent} from './search-result/search-result.component';
+import {SearchGroupItemComponent} from './search-group-item/component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
 
 /* Other Objects */
 import {Epics} from './epics';
 import {environment} from 'environments/environment';
-import {BroadcastService} from './broadcast.service';
 import {CohortSearchState, InitialState, rootReducer} from './store';
 import {CohortSearchRouter} from './router';
 import {CohortSearchActions} from './actions';
@@ -48,13 +47,12 @@ import {CohortBuilderService} from 'generated';
     GoogleChartDirective,
     RaceChartComponent,
     SearchGroupComponent,
-    SearchResultComponent,
+    SearchGroupItemComponent,
     WizardModalComponent,
     WizardCriteriaGroupComponent,
   ],
   entryComponents: [WizardModalComponent],
   providers: [
-    BroadcastService,
     CohortBuilderService,
     CohortSearchActions,
     Epics,
@@ -71,7 +69,11 @@ export class CohortSearchModule {
     }
 
     const middleware = [
-      createEpicMiddleware(this.epics.fetchCriteria)
+      createEpicMiddleware(
+        combineEpics(
+          this.epics.fetchCriteria, this.epics.fetchSearchResults
+        )
+      )
     ];
 
     ngRedux.configureStore(

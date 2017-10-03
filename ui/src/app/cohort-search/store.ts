@@ -9,12 +9,13 @@ export type CohortSearchState = Map<string, any>;
 
 export const InitialState = fromJS({
   search: {include: [[]], exclude: [[]]},
-  subjects: [],
+  subjects: Set(),
   context: {
     wizardOpen: false,
   },
   criteriaTree: {},
   loading: {},
+  chartData: {},
 });
 
 
@@ -27,6 +28,20 @@ export const activeSGRole = ['context', 'active', 'sgRole'];
 export const activeSGIndex = ['context', 'active', 'sgIndex'];
 export const activeSGItemIndex = ['context', 'active', 'sgItemIndex'];
 
+export const sgiPath = (state) => ([
+  'search', 
+  state.getIn(['context', 'request', 'sgRole']),
+  state.getIn(['context', 'request', 'sgIndex']),
+  state.getIn(['context', 'request', 'sgItemIndex']),
+]);
+
+export const activeSGIPath = (state) => ([
+  'search', 
+  state.getIn(['context', 'active', 'sgRole']),
+  state.getIn(['context', 'active', 'sgIndex']),
+  state.getIn(['context', 'active', 'sgItemIndex']),
+]);
+
 
 export const rootReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = InitialState, action: AnyAction): CohortSearchState => {
@@ -37,7 +52,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.REMOVE_SEARCH_GROUP: {
-        return state.deleteIn(['search', action.sgRole, action.index]);
+        return state.deleteIn(['search', action.sgRole, action.sgIndex]);
       }
 
       case Actions.INIT_GROUP_ITEM: {
@@ -59,7 +74,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.deleteIn(['search', sgRole, groupIndex, itemIndex]);
       }
 
-      case Actions.SET_CONTEXT: {
+      case Actions.SET_WIZARD_CONTEXT: {
         const {criteriaType, sgIndex, sgRole} = action;
         const newContext = Map({criteriaType, sgIndex, sgRole});
         return state.mergeIn(['context', 'active'], newContext);
@@ -104,6 +119,18 @@ export const rootReducer: Reducer<CohortSearchState> =
         const paramPath = ['search', sgRole, sgIndex, sgItemIndex, 'searchParameters'];
         const addCriteria = (list) => list.push(action.criteria);
         return state.updateIn(paramPath, List(), addCriteria);
+      }
+
+      case Actions.LOAD_SEARCH_RESULTS: {
+        const resultSet = Set(action.results);
+        const countPath = sgiPath(state).concat(['count']);
+        return state.setIn(countPath, resultSet.size)
+          .update('subjects', Set(), subjectSet => subjectSet.union(resultSet));
+      }
+
+      case Actions.ERROR: {
+        // TODO (jms)
+        return state;
       }
 
       default: return state;

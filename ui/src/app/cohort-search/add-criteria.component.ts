@@ -29,7 +29,7 @@ const CRITERIA_TYPES = [
           class="dropdown-item"
           *ngFor="let criteria of criteriaTypes"
           type="button"
-          (click)="actions.openWizard(criteria.type, index, role)"
+          (click)="actions.openWizard(criteria.type, role, index)"
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
