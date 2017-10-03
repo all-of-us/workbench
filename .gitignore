@@ -3,6 +3,8 @@
 *~
 .idea/*
 /.gradle/*
+/api/?/
+/api/db/?/
 /api/.gradle/*
 /api/.idea/*
 /api/.project/common/
@@ -33,5 +35,3 @@ tools/*.jar
 tools/cloud_sql_proxy
 /api/sa-key.json
 .DS_Store
-
-**/?/
