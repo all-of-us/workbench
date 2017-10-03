@@ -150,26 +150,30 @@ export class WorkspaceComponent implements OnInit {
     this.pollCluster().subscribe(cluster => {
       this.cluster = cluster;
       this.clusterPulled = true;
-    })
+    });
   }
 
   pollCluster(): Observable<Cluster> {
+    // Polls for cluster startup every minute.
     const observable = new Observable(observer => {
-      this.clusterService.getCluster(this.clusterNamespace, this.clusterName).subscribe((cluster) => {
-        if(cluster.status != 'Running' && cluster.status != 'Deleting') {
+      this.clusterService.getCluster(this.clusterNamespace,
+          this.clusterName).subscribe((cluster) => {
+        if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
           setTimeout(() => {
               this.pollCluster().subscribe(newCluster => {
                 this.cluster = newCluster;
                 observer.next(newCluster);
                 observer.complete();
-              })
+              });
             }, 60000
-          )
+          );
         } else {
           this.cluster = cluster;
           observer.next(cluster);
           observer.complete();
-        }})});
+        }
+      });
+    });
     return observable;
   }
 
@@ -178,7 +182,9 @@ export class WorkspaceComponent implements OnInit {
   }
 
   openCluster(): void {
-    const url = 'https://leonardo.dsde-dev.broadinstitute.org/notebooks/' + this.cluster.googleProject + '/' + this.cluster.clusterName;
+    const url = 'https://leonardo.dsde-dev.broadinstitute.org/notebooks/'
+        + this.cluster.googleProject + '/'
+        + this.cluster.clusterName;
     window.location.href = url;
   }
 
@@ -193,12 +199,12 @@ export class WorkspaceComponent implements OnInit {
     this.clusterLoading = true;
     this.clusterService
         .createCluster(this.clusterNamespace, this.clusterName,
-        request).subscribe((cluster) => {
-      this.pollCluster().subscribe(cluster => {
+        request).subscribe(() => {
+      this.pollCluster().subscribe(polledCluster => {
         this.clusterLoading = false;
-        this.cluster = cluster;
+        this.cluster = polledCluster;
         this.clusterPulled = true;
-      })
+      });
     });
   }
 
