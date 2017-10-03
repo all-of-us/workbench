@@ -66,8 +66,8 @@ paths:
           schema:
             $ref: "#/definitions/BugReport"
 
-  # TODO(dmohs): If the username is not present, this response with 500 Server Error. It should
-  # respond with 400 Bad Request.
+  # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
+  # Error. It should respond with 400 Bad Request.
   /api/v1/is-username-taken:
     get:
       tags:
