@@ -3,6 +3,12 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This enum maps specific implementations of {@link AbstractQueryBuilder} to specific
+ * criteria types/searches. This enum is built specifically for use of the
+ * {@link org.pmiops.workbench.cohortbuilder.QueryBuilderFactory} to get the correct
+ * factory implementation.
+ */
 public enum FactoryKey {
     CRITERIA("criteria-type",  Arrays.asList("ICD9-TREE", "ICD10-TREE", "CPT-TREE")),
     CODES("codes-type", Arrays.asList("ICD9", "ICD10", "CPT")),

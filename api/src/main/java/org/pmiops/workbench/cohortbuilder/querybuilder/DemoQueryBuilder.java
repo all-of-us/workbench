@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DemoQueryBuilder is an object that builds {@link QueryRequest}
+ * for BigQuery for the following criteria types:
+ * DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
+ */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 

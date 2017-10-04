@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+/**
+ * This enum maps different domain types to table name and concept id.
+ */
 public enum TableEnum {
     CONDITION("Condition", "condition_occurrence", "condition_source_concept_id"),
     PROCEDURE("Procedure", "procedure_occurrence", "procedure_source_concept_id"),

@@ -4,6 +4,10 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import org.springframework.stereotype.Service;
 
+/**
+ * CriteriaQueryBuilder is an object that builds {@link QueryRequest}
+ * for BigQuery for all of the cohort builder criteria trees.
+ */
 @Service
 public class CriteriaQueryBuilder extends AbstractQueryBuilder {
 

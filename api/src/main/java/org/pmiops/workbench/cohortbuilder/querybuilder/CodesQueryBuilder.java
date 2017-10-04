@@ -15,6 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * CodesQueryBuilder is an object that builds {@link QueryRequest}
+ * for BigQuery for the following criteria types:
+ * ICD9, ICD10 and CPT.
+ */
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 

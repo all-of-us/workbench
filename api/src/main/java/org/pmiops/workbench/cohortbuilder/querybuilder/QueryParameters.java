@@ -5,8 +5,8 @@ import org.pmiops.workbench.model.SearchParameter;
 import java.util.List;
 
 /**
- * This class is an andapter that allows for the wrapping of all parameters
- * that the {@link org.pmiops.workbench.api.CohortBuilderController} is interested
+ * This class is an adapter that allows for the wrapping of all parameters
+ * that the {@link AbstractQueryBuilder} implementations are interested
  * in.
  */
 public class QueryParameters {
