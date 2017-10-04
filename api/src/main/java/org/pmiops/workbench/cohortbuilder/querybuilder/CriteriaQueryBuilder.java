@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;

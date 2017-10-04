@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.api.util.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, CohortBuilderController.class})
-@ComponentScan(basePackages = "org.pmiops.workbench.api.util.*")
+@ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
@@ -46,7 +48,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("icd9", 0L),
+                controller.getCriteriaByTypeAndParentId("ICD9", 0L),
                 new Criteria()
                         .id(1L)
                         .type("ICD9")
@@ -61,7 +63,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void getCriteriaByTypeAndParentId_demo() throws Exception {
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("demo", 0L),
+                controller.getCriteriaByTypeAndParentId("DEMO", 0L),
                 new Criteria()
                         .id(1L)
                         .type("DEMO_AGE")
@@ -76,7 +78,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "001.1", "Condition")),
+                        createSearchRequest("ICD9", "001.1", "Condition", null)),
                 "1,1,1");
     }
 
@@ -84,7 +86,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects_ConditionOccurrenceParent() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "001", null) ),
+                        createSearchRequest("ICD9", "001", null, null) ),
                 "1,1,1");
     }
 
@@ -92,7 +94,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects_ProcedureOccurrenceLeaf() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "002.1", "Procedure") ),
+                        createSearchRequest("ICD9", "002.1", "Procedure", null) ),
                 "2,2,2");
     }
 
@@ -100,7 +102,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects_ProcedureOccurrenceParent() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "002", null) ),
+                        createSearchRequest("ICD9", "002", null, null) ),
                 "2,2,2");
     }
 
@@ -108,7 +110,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects_MeasurementLeaf() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "003.1", "Measurement") ),
+                        createSearchRequest("ICD9", "003.1", "Measurement", null) ),
                 "3,3,3");
     }
 
@@ -116,17 +118,47 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void searchSubjects_MeasurementParent() throws Exception {
         assertSubjects(
                 controller.searchSubjects(
-                        createSearchRequest("ICD9", "003", null) ),
+                        createSearchRequest("ICD9", "003", null, null) ),
                 "3,3,3");
     }
 
     @Test
-    public void findParametersWithEmptyDomainIds() throws Exception {
+    public void searchSubjects_DemoGender() throws Exception {
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("DEMO", null, "DEMO_GEN", 8507L) ),
+                "4,4,4");
+    }
+
+    @Test
+    public void searchSubjects_DemoAge() throws Exception {
+        LocalDate birthdate = LocalDate.of(1980, 8, 01);
+        LocalDate now = LocalDate.now();
+        int age = Period.between(birthdate, now).getYears();
+        assertSubjects(
+                controller.searchSubjects(
+                        createSearchRequest("DEMO", String.valueOf(age), "DEMO_AGE", null) ),
+                "5,5,5");
+    }
+
+    @Test
+    public void filterSearchParametersWithoutDomainId() throws Exception {
+        final SearchParameter expectedParameter = new SearchParameter().value("001");
         List<SearchParameter> parameterList = new ArrayList<>();
-        parameterList.add(new SearchParameter().code("001"));
-        parameterList.add(new SearchParameter().code("002").domainId("Condition"));
-        assertThat(controller.findParametersWithEmptyDomainIds(parameterList))
-                .isEqualTo(Arrays.asList("001%"));
+        parameterList.add(expectedParameter);
+        parameterList.add(new SearchParameter().value("002").domain("Condition"));
+        assertThat(controller.filterSearchParametersWithoutDomain(parameterList))
+                .isEqualTo(Arrays.asList(expectedParameter));
+    }
+
+    @Test
+    public void filterSearchParametersWithDomainId() throws Exception {
+        final SearchParameter expectedParameter = new SearchParameter().value("002").domain("Condition");
+        List<SearchParameter> parameterList = new ArrayList<>();
+        parameterList.add(new SearchParameter().value("001"));
+        parameterList.add(expectedParameter);
+        assertThat(controller.filterSearchParametersWithDomain(parameterList))
+                .isEqualTo(Arrays.asList(expectedParameter));
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
@@ -136,9 +168,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
     }
 
-    private SearchRequest createSearchRequest(String type, String code, String domainId) {
+    private SearchRequest createSearchRequest(String type, String value, String domain, Long conceptId) {
         List<SearchParameter> parameters = new ArrayList<>();
-        parameters.add(new SearchParameter().code(code).domainId(domainId));
+        parameters.add(new SearchParameter().value(value).domain(domain).conceptId(conceptId));
 
         final SearchGroupItem searchGroupItem = new SearchGroupItem().type(type).searchParameters(parameters);
 

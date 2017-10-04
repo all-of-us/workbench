@@ -55,5 +55,43 @@
     "race_source_concept_id":3,
     "ethnicity_source_value":"esv",
     "ethnicity_source_concept_id":3
+  },
+  {
+    "person_id":4,
+    "gender_source_value":"4",
+    "race_source_value":"4",
+    "gender_concept_id":8507,
+    "year_of_birth":4,
+    "month_of_birth":4,
+    "day_of_birth":4,
+    "race_concept_id":4,
+    "ethnicity_concept_id":4,
+    "location_id":4,
+    "provider_id":4,
+    "care_site_id":4,
+    "person_source_value":"psv",
+    "gender_source_concept_id":4,
+    "race_source_concept_id":4,
+    "ethnicity_source_value":"esv",
+    "ethnicity_source_concept_id":4
+  },
+  {
+    "person_id":5,
+    "gender_source_value":"5",
+    "race_source_value":"5",
+    "gender_concept_id":5,
+    "year_of_birth":1980,
+    "month_of_birth":8,
+    "day_of_birth":1,
+    "race_concept_id":5,
+    "ethnicity_concept_id":5,
+    "location_id":5,
+    "provider_id":5,
+    "care_site_id":5,
+    "person_source_value":"psv",
+    "gender_source_concept_id":5,
+    "race_source_concept_id":5,
+    "ethnicity_source_value":"esv",
+    "ethnicity_source_concept_id":5
   }
 ]

@@ -1,15 +1,14 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public enum FactoryKey {
-    CRITERIA("criteria-type", new ArrayList<String>()),
+    CRITERIA("criteria-type",  Arrays.asList("ICD9-TREE", "ICD10-TREE", "CPT-TREE")),
     CODES("codes-type", Arrays.asList("ICD9", "ICD10", "CPT")),
     /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-    GROUP_CODES("group-codes-type", Arrays.asList("group-codes")),
-    DEMO("demo-type", Arrays.asList("DEMO_RACE", "DEMO_GEN", "DEMO_DEC", "DEMO_AGE"));
+    GROUP_CODES("group-codes-type", Arrays.asList("GROUP_CODES")),
+    DEMO("demo-type", Arrays.asList("DEMO"));
 
     private String name;
     private List<String> types;

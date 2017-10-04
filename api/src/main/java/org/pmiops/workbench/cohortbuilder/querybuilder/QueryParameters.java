@@ -1,14 +1,18 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import org.pmiops.workbench.model.SearchParameter;
 
 import java.util.List;
 
+/**
+ * This class is an andapter that allows for the wrapping of all parameters
+ * that the {@link org.pmiops.workbench.api.CohortBuilderController} is interested
+ * in.
+ */
 public class QueryParameters {
 
     private String type;
     private Long parentId;
-    private List<String> codes;
     private List<SearchParameter> parameters;
 
     public String getType() {
@@ -50,19 +54,6 @@ public class QueryParameters {
         return this;
     }
 
-    public List<String> getCodes() {
-        return codes;
-    }
-
-    public void setCodes(List<String> codes) {
-        this.codes = codes;
-    }
-
-    public QueryParameters codes(List<String> codes) {
-        this.codes = codes;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,7 +63,6 @@ public class QueryParameters {
 
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
         if (parentId != null ? !parentId.equals(that.parentId) : that.parentId != null) return false;
-        if (codes != null ? !codes.equals(that.codes) : that.codes != null) return false;
         return parameters != null ? parameters.equals(that.parameters) : that.parameters == null;
     }
 
@@ -80,7 +70,6 @@ public class QueryParameters {
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (parentId != null ? parentId.hashCode() : 0);
-        result = 31 * result + (codes != null ? codes.hashCode() : 0);
         result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
         return result;
     }

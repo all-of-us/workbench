@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 public enum TableEnum {
     CONDITION("Condition", "condition_occurrence", "condition_source_concept_id"),

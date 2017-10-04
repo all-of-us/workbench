@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -6,12 +6,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Provider;
 
+/**
+ * AbstractQueryBuilder is an object that builds {@link QueryRequest}
+ * for BigQuery.
+ */
 public abstract class AbstractQueryBuilder {
 
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
 
-    public abstract QueryRequest buildQueryRequest(QueryParameters wrapper);
+    /**
+     * Build a {@link QueryRequest} from the specified
+     * {@link QueryParameters} provided.
+     *
+     * @param parameters
+     * @return
+     */
+    public abstract QueryRequest buildQueryRequest(QueryParameters parameters);
 
     public abstract String getType();
 

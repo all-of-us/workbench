@@ -1,4 +1,5 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
+      //org.pmiops.workbench.api.cohortbuilder.querybuilder
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
@@ -92,7 +93,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     protected ListMultimap<String, String> getMappedParameters(List<SearchParameter> searchParameters) {
         ListMultimap<String, String> mappedParameters = ArrayListMultimap.create();
         for (SearchParameter parameter : searchParameters)
-            mappedParameters.put(parameter.getDomainId(), parameter.getCode());
+            mappedParameters.put(parameter.getDomain(), parameter.getValue());
         return mappedParameters;
     }
 

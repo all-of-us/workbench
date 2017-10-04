@@ -1,7 +1,8 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
+import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,10 +29,10 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
-        final List<String> codes = parameters.getCodes();
+        final List<SearchParameter> codes = parameters.getParameters();
         IntStream.range(0, codes.size())
                 .forEach(i -> {
-                    queryParams.put(String.format("code%d", i), QueryParameterValue.string(codes.get(i)));
+                    queryParams.put(String.format("code%d", i), QueryParameterValue.string(codes.get(i).getValue() + "%"));
                     queryParts.add("code like @" + String.format("code%d", i++));
                 });
         String finalSql = GROUP_CODES_QUERY.replace("${codes}", String.join(" or ", queryParts));

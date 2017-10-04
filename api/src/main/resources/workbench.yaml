@@ -754,12 +754,16 @@ definitions:
     required:
       - code
     properties:
-      code:
+      value:
         description: The Code of the Criteria within its Category Tree
         type: string
-      domainId:
-        description: The Domain ID of the Criteria if applicable
+      domain:
+        description: clue to determine which tables to search
         type: string
+      conceptId:
+        description: The concept id that maps to concept table.
+        type: integer
+        format: int64
     examples:
       leafExample:
         code: "E9293"

@@ -1,10 +1,11 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.config.TestBigQueryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -27,7 +28,11 @@ public class GroupCodesQueryBuilderTest {
 
     @Test
     public void buildQueryRequest() throws Exception {
-        QueryParameters parameters = new QueryParameters().type("ICD9").codes(Arrays.asList("11.1", "11.2", "11.3"));
+        QueryParameters parameters = new QueryParameters()
+                .type("ICD9")
+                .parameters(Arrays.asList(new SearchParameter().value("11.1"),
+                        new SearchParameter().value("11.2"),
+                        new SearchParameter().value("11.3")));
         QueryRequest result = queryBuilder.buildQueryRequest(parameters);
         String expected =
                 "select code,\n" +

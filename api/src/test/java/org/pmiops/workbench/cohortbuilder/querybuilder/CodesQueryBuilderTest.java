@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.util.query;
+package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
@@ -37,11 +37,11 @@ public class CodesQueryBuilderTest {
     @Test
     public void buildQueryRequest() throws Exception {
         List<SearchParameter> params = new ArrayList<>();
-        params.add(new SearchParameter().domainId("Condition").code("10.1"));
-        params.add(new SearchParameter().domainId("Condition").code("20.2"));
-        params.add(new SearchParameter().domainId("Measurement").code("30.3"));
+        params.add(new SearchParameter().domain("Condition").value("10.1"));
+        params.add(new SearchParameter().domain("Condition").value("20.2"));
+        params.add(new SearchParameter().domain("Measurement").value("30.3"));
 
-        /* Check the generated query */
+        /* Check the generated querybuilder */
         QueryRequest request = queryBuilder
                 .buildQueryRequest(new QueryParameters().type("ICD9").parameters(params));
 
@@ -66,7 +66,7 @@ public class CodesQueryBuilderTest {
 
         assertEquals(expected, request.getQuery());
 
-        /* Check the query parameters */
+        /* Check the querybuilder parameters */
         List<QueryParameterValue> conditionCodes = request
                 .getNamedParameters()
                 .get("Conditioncodes")
@@ -101,9 +101,9 @@ public class CodesQueryBuilderTest {
         SearchGroupItem item = new SearchGroupItem()
                 .type("ICD9")
                 .searchParameters(Arrays.asList(
-                        new SearchParameter().domainId("Condition").code("001"),
-                        new SearchParameter().domainId("Procedure").code("002"),
-                        new SearchParameter().domainId("Procedure").code("003")));
+                        new SearchParameter().domain("Condition").value("001"),
+                        new SearchParameter().domain("Procedure").value("002"),
+                        new SearchParameter().domain("Procedure").value("003")));
 
         ListMultimap<String, String> mappedParemeters = queryBuilder.getMappedParameters(item.getSearchParameters());
         assertEquals(2, mappedParemeters.keySet().size());
