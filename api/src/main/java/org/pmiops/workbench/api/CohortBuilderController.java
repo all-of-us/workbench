@@ -113,7 +113,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private QueryResult executeQuery(QueryRequest query) {
 
-        // Execute the querybuilder
+        // Execute the query
         QueryResponse response = bigquery.query(query);
 
         // Wait for the job to finish
