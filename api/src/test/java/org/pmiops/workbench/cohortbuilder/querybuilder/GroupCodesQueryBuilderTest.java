@@ -3,11 +3,8 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.api.config.TestBigQueryConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -17,14 +14,10 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({GroupCodesQueryBuilder.class})
-@SpringBootTest(classes = {TestBigQueryConfig.class})
-public class GroupCodesQueryBuilderTest {
+public class GroupCodesQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Autowired
     GroupCodesQueryBuilder queryBuilder;
-
-    @Autowired
-    WorkbenchConfig workbenchConfig;
 
     @Test
     public void buildQueryRequest() throws Exception {
@@ -47,10 +40,6 @@ public class GroupCodesQueryBuilderTest {
     @Test
     public void getType() throws Exception {
         assertEquals(FactoryKey.GROUP_CODES.getName(), queryBuilder.getType());
-    }
-
-    private String getTablePrefix() {
-        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
     }
 
 }

@@ -31,8 +31,9 @@ export class SearchResult {
     for (const criteria of this.criteriaList) {
       this.searchType = criteria.type;
       this.values.push(<SearchParameter>{
-        code: criteria.code,
-        domainId: criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId
+        value: criteria.code,
+        domain: criteria.type.startsWith('DEMO') ? criteria.type : criteria.domainId,
+        conceptId: criteria.conceptId
       });
     }
   }
@@ -46,9 +47,9 @@ export class SearchResult {
     let displayValues;
     for (const value of this.values) {
       if (displayValues) {
-        displayValues = displayValues + ', ' + value.code;
+        displayValues = displayValues + ', ' + value.value;
       } else {
-        displayValues = value.code;
+        displayValues = value.value;
       }
     }
     return displayValues;

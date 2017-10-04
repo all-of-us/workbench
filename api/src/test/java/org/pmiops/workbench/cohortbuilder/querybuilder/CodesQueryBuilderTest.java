@@ -6,12 +6,9 @@ import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.collect.ListMultimap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.api.config.TestBigQueryConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,14 +22,10 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @Import({CodesQueryBuilder.class})
-@SpringBootTest(classes = {TestBigQueryConfig.class})
-public class CodesQueryBuilderTest {
+public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Autowired
     CodesQueryBuilder queryBuilder;
-
-    @Autowired
-    WorkbenchConfig workbenchConfig;
 
     @Test
     public void buildQueryRequest() throws Exception {
@@ -110,9 +103,5 @@ public class CodesQueryBuilderTest {
         assertEquals(new HashSet<String>(Arrays.asList("Condition", "Procedure")), mappedParemeters.keySet());
         assertEquals(Arrays.asList("001"), mappedParemeters.get("Condition"));
         assertEquals(Arrays.asList("002", "003"), mappedParemeters.get("Procedure"));
-    }
-
-    private String getTablePrefix() {
-        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
     }
 }
