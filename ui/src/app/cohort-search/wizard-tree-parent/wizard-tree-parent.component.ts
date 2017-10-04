@@ -37,7 +37,8 @@ export class WizardTreeParentComponent implements OnInit, OnDestroy {
     if (!criteria['searchParameters']) {
       newCriteria = { searchParameters: [], ...criteria } as Criteria;
     }
-    newCriteria['searchParameters'].push(<SearchParameter>{value: criteria.code, domain: criteria.domainId});
+    newCriteria['searchParameters']
+        .push(<SearchParameter>{value: criteria.code, domain: criteria.domainId});
     this.broadcastService.selectCriteria(newCriteria);
   }
 
