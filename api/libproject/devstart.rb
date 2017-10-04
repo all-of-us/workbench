@@ -66,12 +66,19 @@ end
 
 def run_api(account)
   common = Common.new
+  # TODO(dmohs): This can be simplified now that we are using a shared service account.
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+    at_exit { common.run_inline %W{docker-compose down} }
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   })
+end
+
+def clean()
+  common = Common.new
+  common.run_inline %W{docker-compose run --rm api ./gradlew clean}
 end
 
 def run_api_and_db(*args)
@@ -91,6 +98,16 @@ def run_tests(*args)
   common.docker.requires_docker
 
   common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
+end
+
+def run_integration_tests(*args)
+  common = Common.new
+  common.docker.requires_docker
+
+  account = get_auth_login_account()
+  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
+  })
 end
 
 def connect_to_db(*args)
@@ -395,6 +412,12 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "clean",
+  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
+  :fn => lambda { |*args| clean(*args) }
+})
+
+Common.register_command({
   :invocation => "get-service-creds",
   :description => "Creates sa-key.json locally (for use when running tests, etc.)",
   :fn => lambda { |*args| get_test_service_account_creds(*args) }
@@ -404,6 +427,12 @@ Common.register_command({
   :invocation => "test",
   :description => "Runs tests.",
   :fn => lambda { |*args| run_tests(*args) }
+})
+
+Common.register_command({
+  :invocation => "integration",
+  :description => "Runs integration tests.",
+  :fn => lambda { |*args| run_integration_tests(*args) }
 })
 
 Common.register_command({

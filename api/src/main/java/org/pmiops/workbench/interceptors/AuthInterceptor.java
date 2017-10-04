@@ -3,7 +3,9 @@ package org.pmiops.workbench.interceptors;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
-import java.util.Collection;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+import java.lang.annotation.Annotation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -11,11 +13,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -24,6 +28,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
+  private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
 
@@ -37,6 +42,20 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       throws Exception {
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
+      return true;
+    }
+
+    HandlerMethod method = (HandlerMethod) handler;
+
+    boolean isAuthRequired = false;
+    ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
+    for (Authorization auth : apiOp.authorizations()) {
+      if (auth.value().equals(authName)) {
+        isAuthRequired = true;
+        break;
+      }
+    }
+    if (!isAuthRequired) {
       return true;
     }
 
@@ -60,11 +79,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
     // TODO: get token info and check that as well
-    
+
     // TODO: check Google group membership to ensure user is in registered user group
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(userInfo, token));
-    
+
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
