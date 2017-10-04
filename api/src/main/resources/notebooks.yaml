@@ -1,3 +1,4 @@
+# Copied from https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
 swagger: '2.0'
 info:
   title: Leonardo
@@ -12,13 +13,9 @@ info:
 produces:
   - application/json
 tags:
-  - name: test
-    description: Test API
   - name: cluster
     description: Clusters API
-  - name: notebooks
-    description: Notebooks API
-
+# This will only work inside the Broad's network
 host: leonardo.dsde-dev.broadinstitute.org
 
 security:
@@ -41,20 +38,6 @@ securityDefinitions:
 ## PATHS
 ##########################################################################################
 paths:
-
-  '/ping':
-    get:
-      summary: Ping
-      responses:
-        '200':
-          description: Pong
-        '500':
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
-      operationId: ping
-      tags:
-        - test
   '/api/clusters':
     get:
       summary: List all clusters
@@ -192,44 +175,6 @@ paths:
           description: Cluster deletion request accepted
         '404':
           description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '500':
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
-
-  '/notebooks/{googleProject}/{clusterName}':
-    get:
-      summary: Access Jupyter notebooks on a dataproc cluster
-      description: Serves as a proxy for the Jupyer notebook server running the given dataproc cluster managed by Leo.
-      operationId: proxyCluster
-      tags:
-        - notebooks
-      parameters:
-        - in: path
-          name: googleProject
-          description: googleProject
-          required: true
-          type: string
-        - in: path
-          name: clusterName
-          description: clusterName
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Proxy connection successful
-        '401':
-          description: Proxy connection unauthorized
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '404':
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        '420':
-          description: Cluster not ready
           schema:
             $ref: '#/definitions/ErrorReport'
         '500':

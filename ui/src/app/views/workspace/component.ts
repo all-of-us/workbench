@@ -93,8 +93,6 @@ export class WorkspaceComponent implements OnInit {
   cohortList: Cohort[] = [];
   cluster: Cluster;
   clusterPulled = false;
-  clusterNamespace: string;
-  clusterName: string;
   clusterLoading = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
@@ -133,13 +131,10 @@ export class WorkspaceComponent implements OnInit {
           workspaceReceived => {
             this.workspace = workspaceReceived;
             this.workspaceLoading = false;
-            this.clusterName = this.workspace.name;
           },
           error => {
             this.workspaceLoading = false;
           });
-    // TODO: Replace with real cluster namespace.
-    this.clusterNamespace = 'broad-dsde-dev';
   }
 
   launchNotebook(): void {
@@ -152,8 +147,8 @@ export class WorkspaceComponent implements OnInit {
   pollCluster(): Observable<Cluster> {
     // Polls for cluster startup every minute.
     const observable = new Observable(observer => {
-      this.clusterService.getCluster(this.clusterNamespace,
-          this.clusterName).subscribe((cluster) => {
+      this.clusterService.getCluster(this.workspace.namespace,
+          this.workspace.id).subscribe((cluster) => {
         if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
           setTimeout(() => {
               this.pollCluster().subscribe(newCluster => {
@@ -186,7 +181,7 @@ export class WorkspaceComponent implements OnInit {
 
   createAndLaunchNotebook(): void {
     let request: ClusterRequest;
-    // TODO: Fill out this information
+    // TODO: Move this to server and fill out this data.
     request = {
       bucketPath: '',
       serviceAccount: '',
@@ -194,7 +189,7 @@ export class WorkspaceComponent implements OnInit {
     };
     this.clusterLoading = true;
     this.clusterService
-        .createCluster(this.clusterNamespace, this.clusterName,
+        .createCluster(this.workspace.namespace, this.workspace.id,
         request).subscribe(() => {
       this.pollCluster().subscribe(polledCluster => {
         this.clusterLoading = false;
@@ -205,6 +200,6 @@ export class WorkspaceComponent implements OnInit {
   }
 
   killNotebook(): void {
-    this.clusterService.deleteCluster(this.clusterNamespace, this.clusterName).subscribe(() => {});
+    this.clusterService.deleteCluster(this.workspace.namespace, this.workspace.id).subscribe(() => {});
   }
 }

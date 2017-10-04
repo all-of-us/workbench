@@ -119,7 +119,7 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
-  /api/v1/cluster/{googleProject}/{clusterName}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}cluster/:
     get:
       summary: Get details of a dataproc cluster
       description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
@@ -128,13 +128,13 @@ paths:
         - cluster
       parameters:
         - in: path
-          name: googleProject
-          description: googleProject
+          name: workspaceNamespace
+          description: workspaceNamespace
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: workspaceId
+          description: workspaceId
           required: true
           type: string
       responses:
@@ -158,13 +158,13 @@ paths:
         - cluster
       parameters:
         - in: path
-          name: googleProject
-          description: googleProject
+          name: workspaceNamespace
+          description: workspaceNamespace
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: workspaceId
+          description: workspaceId
           required: true
           type: string
         - in: body
@@ -194,13 +194,13 @@ paths:
         - cluster
       parameters:
         - in: path
-          name: googleProject
-          description: googleProject
+          name: workspaceNamespace
+          description: workspaceNamespace
           required: true
           type: string
         - in: path
-          name: clusterName
-          description: clusterName
+          name: workspaceId
+          description: workspaceId
           required: true
           type: string
       responses:
@@ -1000,6 +1000,7 @@ definitions:
       lineNumber:
         type: integer
         description: line number
+  # TODO: Clean up the client representation of the cluster
   Cluster:
     description: ''
     required:

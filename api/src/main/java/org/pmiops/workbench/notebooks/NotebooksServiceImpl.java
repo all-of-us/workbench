@@ -6,8 +6,6 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
-import org.pmiops.workbench.notebooks.api.NotebooksApi;
-import org.pmiops.workbench.notebooks.api.TestApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +16,12 @@ import org.springframework.stereotype.Service;
 public class NotebooksServiceImpl implements NotebooksService {
 
   private final Provider<ClusterApi> clusterApiProvider;
-  private final Provider<NotebooksApi> notebooksApiProvider;
-  private final Provider<TestApi> testApiProvider;
   private final Provider<User> userProvider;
 
   @Autowired
   public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
-      Provider<NotebooksApi> notebooksApiProvider,
-      Provider<TestApi> testApiProvider,
       Provider<User> userProvider) {
     this.clusterApiProvider = clusterApiProvider;
-    this.notebooksApiProvider = notebooksApiProvider;
-    this.testApiProvider = testApiProvider;
     this.userProvider = userProvider;
   }
 
@@ -38,8 +30,6 @@ public class NotebooksServiceImpl implements NotebooksService {
       throws ApiException {
     ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      clusterName = clusterName + this.userProvider.get().getUserId();
-      clusterName = clusterName.toLowerCase();
       return clusterApi.createCluster(googleProject, clusterName, clusterRequest);
     } catch (ApiException e) {
       // TODO: Handle notebook cluster creation exceptions cleanly.
@@ -51,8 +41,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   public void deleteCluster(String googleProject, String clusterName) throws ApiException {
     ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      clusterName = clusterName + this.userProvider.get().getUserId();
-      clusterName = clusterName.toLowerCase();
       clusterApi.deleteCluster(googleProject, clusterName);
     } catch (ApiException e) {
       // TODO: Handle notebook cluster deletion exceptions cleanly.
@@ -75,8 +63,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   public Cluster getCluster(String googleProject, String clusterName) throws ApiException {
     ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      clusterName = clusterName + this.userProvider.get().getUserId();
-      clusterName = clusterName.toLowerCase();
       return clusterApi.getCluster(googleProject, clusterName);
     } catch (ApiException e) {
       // TODO: Handle get cluster exceptions cleanly

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
+import javax.inject.Provider;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
@@ -18,10 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
-
+  // This will currently only work inside the Broad's network.
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
 
   private final NotebooksService notebooksService;
+  private final Provider<User> userProvider;
 
   private Cluster toAllOfUsCluster(org.pmiops.workbench.notebooks.model.Cluster firecloudCluster) {
     Cluster allOfUsCluster = new Cluster();
@@ -50,30 +53,44 @@ public class ClusterController implements ClusterApiDelegate {
     return firecloudClusterRequest;
   }
 
-
-  @Autowired
-  ClusterController(NotebooksService notebooksService) {
-    this.notebooksService = notebooksService;
+  private String convertClusterName(String workspaceId) {
+      String clusterName = workspaceId + this.userProvider.get().getUserId();
+      clusterName = clusterName.toLowerCase();
+      return clusterName;
   }
 
-  public ResponseEntity<Cluster> createCluster(String googleProject,
-      String clusterName,
+  @Autowired
+  ClusterController(NotebooksService notebooksService,
+      Provider<User> userProvider) {
+    this.notebooksService = notebooksService;
+    this.userProvider = userProvider;
+  }
+
+  public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
+      String workspaceId,
       ClusterRequest clusterRequest) {
     Cluster createdCluster;
+
+    String clusterName = this.convertClusterName(workspaceId);
     try {
-      createdCluster = toAllOfUsCluster(this.notebooksService.createCluster(googleProject, clusterName, toFirecloudClusterRequest(clusterRequest)));
+      // TODO: Replace with real workspaceNamespace/billing-project
+      createdCluster = toAllOfUsCluster(this.notebooksService.createCluster("broad-dsde-dev", clusterName, toFirecloudClusterRequest(clusterRequest)));
     } catch (ApiException e) {
+      // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
     }
     return ResponseEntity.ok(createdCluster);
   }
 
 
-  public ResponseEntity<EmptyResponse> deleteCluster(String googleProject,
-      String clusterName) {
+  public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace,
+      String workspaceId) {
+    String clusterName = this.convertClusterName(workspaceId);
     try {
-      this.notebooksService.deleteCluster(googleProject, clusterName);
+      // TODO: Replace with real workspaceNamespace/billing-project
+      this.notebooksService.deleteCluster("broad-dsde-dev", clusterName);
     } catch (ApiException e) {
+      // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
     }
     EmptyResponse e = new EmptyResponse();
@@ -81,12 +98,15 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
-  public ResponseEntity<Cluster> getCluster(String googleProject,
-      String clusterName) {
+  public ResponseEntity<Cluster> getCluster(String workspaceNamespace,
+      String workspaceId) {
+    String clusterName = this.convertClusterName(workspaceId);
     Cluster cluster;
     try {
-      cluster = toAllOfUsCluster(this.notebooksService.getCluster(googleProject, clusterName));
+      // TODO: Replace with real workspaceNamespace/billing-project
+      cluster = toAllOfUsCluster(this.notebooksService.getCluster("broad-dsde-dev", clusterName));
     } catch(ApiException e) {
+      // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
     }
     return ResponseEntity.ok(cluster);
@@ -99,6 +119,7 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       oldClusters = this.notebooksService.listClusters(labels);
     } catch(ApiException e) {
+      // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
     }
     for (org.pmiops.workbench.notebooks.model.Cluster c : oldClusters) {
