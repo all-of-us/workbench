@@ -17,11 +17,7 @@ public class DirectoryServiceImplIntegrationTest {
 
   @Test
   public void testDummyUsernameIsNotTaken() {
-    try {
-      assertThat(service.isUsernameTaken("username-that-should-not-exist")).isFalse();
-    } catch (RuntimeException e) {
-      e.printStackTrace();
-    }
+    assertThat(service.isUsernameTaken("username-that-should-not-exist")).isFalse();
   }
 
   @Test

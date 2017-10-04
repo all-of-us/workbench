@@ -188,6 +188,7 @@ task integration(type: Test) {
 
 tasks.withType(Test) {
   testLogging {
+    // Causes the correct line to be reported on an exception.
     exceptionFormat "full"
   }
   def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
@@ -203,6 +204,7 @@ tasks.withType(Test) {
 }
 
 integration {
+  // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
 }
 

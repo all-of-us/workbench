@@ -66,6 +66,7 @@ end
 
 def run_api(account)
   common = Common.new
+  # TODO(dmohs): This can be simplified now that we are using a shared service account.
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
