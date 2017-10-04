@@ -76,6 +76,11 @@ def run_api(account)
   })
 end
 
+def clean()
+  common = Common.new
+  common.run_inline %W{docker-compose run --rm api ./gradlew clean}
+end
+
 def run_api_and_db(*args)
   common = Common.new
   common.docker.requires_docker
@@ -404,6 +409,12 @@ Common.register_command({
   :invocation => "run-api",
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
   :fn => lambda { |*args| run_api_and_db(*args) }
+})
+
+Common.register_command({
+  :invocation => "clean",
+  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
+  :fn => lambda { |*args| clean(*args) }
 })
 
 Common.register_command({
