@@ -6,7 +6,6 @@ def swaggerSourceFile = 'src/main/resources/workbench.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateApi {
-  delete("${projectDir}/$swaggerTargetFolder")
   inputs.file("$projectDir/$swaggerSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -103,6 +102,11 @@ apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 
+configurations {
+  integrationCompile.extendsFrom testCompile
+  integrationRuntime.extendsFrom testRuntime
+}
+
 sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
@@ -124,6 +128,13 @@ sourceSets {
 
     compileClasspath += generated.output
     runtimeClasspath += generated.output
+  }
+  integration {
+    java {
+      compileClasspath += main.output + test.output + generated.output
+      runtimeClasspath += main.output + test.output + generated.output
+      srcDir file('src/integration/java')
+    }
   }
 }
 
@@ -171,7 +182,7 @@ dependencies {
   compile 'com.google.code.gson:gson:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
-  compile 'io.swagger:swagger-annotations:+'
+  compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'com.google.cloud:google-cloud-bigquery:+'
 
   testCompile 'junit:junit:4.12'
@@ -193,7 +204,19 @@ dependencies {
 
 }
 
-test {
+task integration(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.integration.output.classesDirs
+  classpath = sourceSets.integration.runtimeClasspath
+  // Option to control size of stack trace:
+  // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
+}
+
+tasks.withType(Test) {
+  testLogging {
+    // Causes the correct line to be reported on an exception.
+    exceptionFormat "full"
+  }
   def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
   if (verboseTestLogging == 'yes') {
     testLogging {
@@ -204,6 +227,11 @@ test {
       events "passed", "skipped", "failed"
     }
   }
+}
+
+integration {
+  // These tests should always run when requested since they consume and produce side-effects.
+  outputs.upToDateWhen { false }
 }
 
 appengine {  // App Engine tasks configuration

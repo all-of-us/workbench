@@ -53,6 +53,7 @@ paths:
         - bugReport
       description: Sends an email to developers about a user reported bug
       operationId: sendBugReport
+      # TODO(dmohs): security: []
       parameters:
         - in: body
           name: bugReport
@@ -65,6 +66,26 @@ paths:
           description: Success message
           schema:
             $ref: "#/definitions/BugReport"
+
+  # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
+  # Error. It should respond with 400 Bad Request.
+  /api/v1/is-username-taken:
+    get:
+      tags:
+        - profile
+      description: Checks to see if the given username is not available.
+      operationId: isUsernameTaken
+      security: []
+      parameters:
+        - in: query
+          name: username
+          type: string
+          required: true
+      responses:
+        "200":
+          description: The answer.
+          schema:
+            $ref: "#/definitions/UsernameTakenResponse"
 
   /api/v1/register:
     post:
@@ -1070,3 +1091,13 @@ definitions:
           The archive must be in tar.gz format, must not include a parent directory, and
           must have an entry point named 'main'. For more information on notebook extensions,
           see: http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
+  UsernameTakenResponse:
+    type: object
+    required:
+      - isTaken
+    properties:
+      isTaken:
+        description: Boolean response to whether username is already taken.
+        type: boolean
+    example:
+      isTaken: false
