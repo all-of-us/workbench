@@ -8,13 +8,17 @@ import {createEpicMiddleware, combineEpics} from 'redux-observable';
 /* Components */
 import {AddCriteriaComponent} from './add-criteria.component';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
-import {CriteriaTreeRootComponent} from './criteria-tree/root.component';
-import {CriteriaTreeNodeComponent} from './criteria-tree/node.component';
-import {NodeInfoComponent} from './criteria-tree/node-info.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
-import {SearchGroupItemComponent} from './search-group-item/component';
+import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
+
+import {
+  CriteriaTreeNodeComponent,
+  CriteriaTreeRootComponent,
+  NodeInfoComponent,
+} from './criteria-tree';
+
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -23,11 +27,12 @@ import {
 } from './charts';
 
 /* Other Objects */
-import {Epics} from './epics';
-import {environment} from 'environments/environment';
-import {CohortSearchState, InitialState, rootReducer} from './store';
-import {CohortSearchRouter} from './router';
 import {CohortSearchActions} from './actions';
+import {CohortSearchState, InitialState} from './store';
+import {CohortSearchEpics} from './epics';
+import {CohortSearchRouter} from './router';
+import {environment} from 'environments/environment';
+import {rootReducer} from './reducer';
 
 import {CohortBuilderService} from 'generated';
 
@@ -62,12 +67,12 @@ import {CohortBuilderService} from 'generated';
   providers: [
     CohortBuilderService,
     CohortSearchActions,
-    Epics,
+    CohortSearchEpics,
   ]
 })
 export class CohortSearchModule {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private epics: Epics,
+              private epics: CohortSearchEpics,
               private devTools: DevToolsExtension) {
 
     let storeEnhancers = [];

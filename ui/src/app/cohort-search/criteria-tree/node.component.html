@@ -1,5 +1,5 @@
 <ng-container [clrLoading]="loading">
-  <clr-tree-node *ngFor="let node of children">
+  <clr-tree-node *ngFor="let node of children; trackBy: trackById">
 
     <app-node-info [node]="node"></app-node-info>
 

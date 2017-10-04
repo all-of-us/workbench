@@ -1,16 +1,23 @@
-import {Component, OnDestroy, OnInit, Input, ViewEncapsulation} from '@angular/core';
-import {NgRedux, select, dispatch} from '@angular-redux/store';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  Input,
+  ViewEncapsulation,
+} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
-import 'rxjs/add/operator/mergeMap';
 
 import {CohortSearchActions} from '../actions';
 import {CohortSearchState} from '../store';
-import {CohortBuilderService, Criteria, SearchParameter} from 'generated';
+
+import {Criteria} from 'generated';
 
 
 @Component({
   selector: 'app-tree-node',
   templateUrl: './node.component.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   @Input() node: Criteria;
@@ -40,5 +47,9 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  trackById(index, node) {
+    return node ? node.id : undefined;
   }
 }

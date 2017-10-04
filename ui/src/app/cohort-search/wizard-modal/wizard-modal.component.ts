@@ -1,17 +1,16 @@
 import {
-  Component, ComponentRef,
-  OnDestroy, OnInit,
-  ViewChild, ViewEncapsulation
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Subscription} from 'rxjs/Subscription';
 import {Observable} from 'rxjs/Observable';
 import {Wizard} from 'clarity-angular/wizard/wizard';
 
 import {CohortSearchActions} from '../actions';
 import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
-
-import {CohortBuilderService, Criteria, Modifier} from 'generated';
 
 
 @Component({

@@ -1,4 +1,10 @@
-import {Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -11,6 +17,7 @@ import {Criteria} from 'generated';
 @Component({
   selector: 'app-wizard-criteria-group',
   templateUrl: 'wizard-criteria-group.component.html',
+  encapsulation: ViewEncapsulation.None
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
@@ -21,6 +28,7 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
   private criteriaType: string;
   private criteriaList;
 
+  // TODO (jms) see below
   // @ViewChild('groupDiv') groupDiv: any;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
@@ -32,7 +40,7 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
         console.dir(sgi);
         this.criteriaType = sgi.get('type');
         this.criteriaList = sgi.get('searchParameters').toJS();
-        // fires whenever the crit list is updated
+        // TODO(jms) fix the scrolling bugs
         // this.groupDiv.scrollTop = this.groupDiv.scrollHeight;
     });
   }

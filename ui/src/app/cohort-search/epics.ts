@@ -4,13 +4,18 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions as Actions} from './actions';
-import {CohortSearchState} from './store';
-
 import {CohortBuilderService} from 'generated';
 
-
+/**
+ * CohortSearchEpics
+ *
+ * Exposes functions (called `epics` by redux-observable) that listen in on the
+ * stream of dispatched actions (exposed as an Observable) and attach handlers
+ * to certain of them; this allows us to dispatch actions asynchronously.  This is
+ * the interface between the application state and the backend API.
+ */
 @Injectable()
-export class Epics {
+export class CohortSearchEpics {
   constructor(private service: CohortBuilderService) {}
 
   fetchCriteria = (action$: ActionsObservable<AnyAction>) => (

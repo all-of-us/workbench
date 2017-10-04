@@ -1,6 +1,11 @@
-import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {
+  Component,
+  Input,
+  EventEmitter,
+  Output
+} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
-import {Map, Set} from 'immutable';
+import {List, Set} from 'immutable';
 
 import {CohortSearchActions} from '../actions';
 import {CohortSearchState} from '../store';
@@ -11,7 +16,7 @@ import {SearchGroup, SearchRequest} from 'generated';
 @Component({
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
-  styleUrls: ['search-group.component.css']
+  styleUrls: ['search-group.component.css'],
 })
 export class SearchGroupComponent {
   /* Passed through from cohort-builder to add-criteria */
@@ -29,7 +34,7 @@ export class SearchGroupComponent {
   get count() {
     return Set.union(
       this.ngRedux.getState()
-        .getIn(['results', this.role, this.index], Map())
+        .getIn(['results', this.role, this.index], List())
         .map(item => item.get('subjects'))
     ).size;
   }

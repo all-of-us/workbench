@@ -8,7 +8,7 @@ import {SearchGroupItem} from 'generated';
 
 @Component({
   selector: 'app-search-group-item',
-  templateUrl: './component.html',
+  templateUrl: './search-group-item.component.html',
 })
 export class SearchGroupItemComponent {
   @Input() item;

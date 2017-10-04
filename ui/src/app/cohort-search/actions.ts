@@ -11,7 +11,7 @@ import {CohortBuilderService, Criteria, SearchRequest} from 'generated';
 @Injectable()
 export class CohortSearchActions {
 
-  /** Action type symbols */
+  /* Action type symbols */
   static INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
   static REMOVE_SEARCH_GROUP = 'REMOVE_SEARCH_GROUP';
 
@@ -37,6 +37,11 @@ export class CohortSearchActions {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private cohortBuilderService: CohortBuilderService) {}
 
+  /* Action creators
+   *
+   * These functions are responsible for actually dispatching actions to the redux store;
+   * they are the interface by which components alter application state
+   */
   public initGroup(sgRole: keyof SearchRequest): void {
     this.ngRedux.dispatch({type: CohortSearchActions.INIT_SEARCH_GROUP, sgRole});
   }
@@ -87,7 +92,7 @@ export class CohortSearchActions {
     this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_CRITERIA, path});
   }
 
-  /**
+  /*
    * TODO(jms) the rest of these functions are provisional; waiting on a
    * decision about in-memory sets vs triple queries: the code should be able
    * to go either way. As is, they only handle SearchGroupItems, just as before

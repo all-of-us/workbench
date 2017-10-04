@@ -19,6 +19,13 @@ import {Set} from 'immutable';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChartsComponent {
+  /*
+   * NOTE (jms) PROVISIONAL
+   * The purpose of this component is to generate the chart data from the
+   * aggregated subject set by iterating that set in a single pass; the
+   * actual counting code and type mappings, however, are NOT finished and
+   * should be considered provisional.
+   */
 
   private _subjects: Set<string>;
 
