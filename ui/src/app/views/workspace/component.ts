@@ -4,8 +4,6 @@ import {StringFilter, Comparator} from 'clarity-angular';
 import {DOCUMENT} from '@angular/platform-browser';
 import {Observable} from 'rxjs/Observable';
 
-import {resetDateObject} from 'helper-functions';
-
 import {Cluster} from 'generated';
 import {ClusterRequest} from 'generated';
 import {ClusterService} from 'generated';
