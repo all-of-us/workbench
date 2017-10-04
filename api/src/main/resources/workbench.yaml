@@ -762,8 +762,8 @@ definitions:
       {
         type: "ICD9",
         searchParameters: [
-          { code: "E9293", domainId: "Condition" },
-          { code: "E979-E979.9", domainId: null }
+          { value: "E9293", domain: "Condition", conceptId: null },
+          { value: "E979-E979.9", domain: null, conceptId: null }
         ],
         modifiers: [
           { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
@@ -773,20 +773,24 @@ definitions:
   SearchParameter:
     type: object
     required:
-      - code
+      - value
     properties:
-      code:
+      value:
         description: The Code of the Criteria within its Category Tree
         type: string
-      domainId:
-        description: The Domain ID of the Criteria if applicable
+      domain:
+        description: clue to determine which tables to search
         type: string
+      conceptId:
+        description: The concept id that maps to concept table.
+        type: integer
+        format: int64
     examples:
       leafExample:
-        code: "E9293"
+        value: "E9293"
         domainId: "Condition"
       parentExample:
-        code: "E979-E979.9"
+        value: "E979-E979.9"
         domainId: null
 
   Modifier:
