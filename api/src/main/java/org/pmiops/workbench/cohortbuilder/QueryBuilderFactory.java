@@ -26,13 +26,13 @@ public class QueryBuilderFactory {
     @PostConstruct
     public void initQueryBuilderCache() {
         for(AbstractQueryBuilder queryBuilder : queryBuilders) {
-            queryBuilderCache.put(queryBuilder.getType(), queryBuilder);
+            queryBuilderCache.put(queryBuilder.getType().name(), queryBuilder);
         }
     }
 
     /**
      * Users of this method should use the following:
-     * {@link org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey#getKey(String)}
+     * {@link org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey}
      *
      * @param type
      * @return

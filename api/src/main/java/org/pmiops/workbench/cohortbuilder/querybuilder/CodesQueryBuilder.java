@@ -91,8 +91,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     @Override
-    public String getType() {
-        return FactoryKey.CODES.getName();
+    public FactoryKey getType() {
+        return FactoryKey.CODES;
     }
 
     protected ListMultimap<String, String> getMappedParameters(List<SearchParameter> searchParameters) {

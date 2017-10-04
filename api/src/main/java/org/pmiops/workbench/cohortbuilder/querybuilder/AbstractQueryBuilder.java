@@ -24,7 +24,7 @@ public abstract class AbstractQueryBuilder {
      */
     public abstract QueryRequest buildQueryRequest(QueryParameters parameters);
 
-    public abstract String getType();
+    public abstract FactoryKey getType();
 
     protected String filterBigQueryConfig(String sqlStatement, String tableName) {
         String returnSql = sqlStatement.replace("${projectId}", workbenchConfig.get().bigquery.projectId);

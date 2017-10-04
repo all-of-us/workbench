@@ -39,7 +39,7 @@ public class GroupCodesQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Test
     public void getType() throws Exception {
-        assertEquals(FactoryKey.GROUP_CODES.getName(), queryBuilder.getType());
+        assertEquals(FactoryKey.GROUP_CODES, queryBuilder.getType());
     }
 
 }

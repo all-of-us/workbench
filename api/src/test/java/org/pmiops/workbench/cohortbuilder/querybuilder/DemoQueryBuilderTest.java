@@ -55,7 +55,7 @@ public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Test
     public void getType() throws Exception {
-        assertEquals(FactoryKey.DEMO.getName(), queryBuilder.getType());
+        assertEquals(FactoryKey.DEMO, queryBuilder.getType());
     }
 
 }

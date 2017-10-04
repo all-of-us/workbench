@@ -65,8 +65,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     }
 
     @Override
-    public String getType() {
-        return FactoryKey.DEMO.getName();
+    public FactoryKey getType() {
+        return FactoryKey.DEMO;
     }
 
     private String getDemoSqlStatement(String domain) {

@@ -38,7 +38,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
         QueryRequest queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.getKey(type + "-TREE"))
+                .getQueryBuilder(FactoryKey.CRITERIA.name())
                 .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
 
         QueryResult result = executeQuery(queryRequest);
@@ -73,7 +73,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         if (!paramsWithoutDomains.isEmpty()) {
             QueryRequest queryRequest = QueryBuilderFactory
-                    .getQueryBuilder(FactoryKey.getKey("GROUP_CODES"))
+                    .getQueryBuilder(FactoryKey.GROUP_CODES.name())
                     .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithoutDomains));
 
             QueryResult result = executeQuery(queryRequest);
@@ -86,7 +86,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
 
         QueryRequest queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.getKey(item.getType()))
+                .getQueryBuilder(FactoryKey.getType(item.getType()))
                 .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithDomains));
 
         QueryResult result = executeQuery(queryRequest);

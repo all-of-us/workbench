@@ -1,7 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This enum maps specific implementations of {@link AbstractQueryBuilder} to specific
@@ -10,30 +11,37 @@ import java.util.List;
  * factory implementation.
  */
 public enum FactoryKey {
-    CRITERIA("criteria-type",  Arrays.asList("ICD9-TREE", "ICD10-TREE", "CPT-TREE")),
-    CODES("codes-type", Arrays.asList("ICD9", "ICD10", "CPT")),
+    CRITERIA,
+    CODES,
     /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-    GROUP_CODES("group-codes-type", Arrays.asList("GROUP_CODES")),
-    DEMO("demo-type", Arrays.asList("DEMO"));
+    GROUP_CODES,
+    DEMO;
 
-    private String name;
-    private List<String> types;
+    private static final Map<String, Object> typeMap = Collections.unmodifiableMap(initializeMapping());
 
-    private FactoryKey(String name, List<String> types) {
-        this.name = name;
-        this.types = types;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public static String getKey(String type) {
-        for (FactoryKey key: values()) {
-            if (key.types.contains(type)) {
-                return key.getName();
-            }
+    public static String getType(String type) {
+        if (typeMap.containsKey(type)) {
+            return ((FactoryKey)typeMap.get(type)).name();
         }
-        return CRITERIA.getName();
+        throw new IllegalArgumentException("Invalid type provided: " + type);
+    }
+
+    /**
+     * {@link AbstractQueryBuilder} implementations will have a many to one
+     * relationship with the criteria tree types. This map will only contain
+     * mappings for searching for subject/person data.
+     *
+     * For example: ICD9, ICD10 and CPT criteria will all map to the
+     * {@link CodesQueryBuilder}.
+     *
+     * @return
+     */
+    private static Map<String, Object> initializeMapping() {
+        Map<String, Object> tMap = new HashMap<String, Object>();
+        tMap.put("ICD9", FactoryKey.CODES);
+        tMap.put("ICD10", FactoryKey.CODES);
+        tMap.put("CPT", FactoryKey.CODES);
+        tMap.put("DEMO", FactoryKey.DEMO);
+        return tMap;
     }
 }

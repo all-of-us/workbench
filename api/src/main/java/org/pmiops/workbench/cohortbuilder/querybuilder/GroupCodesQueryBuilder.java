@@ -44,7 +44,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     @Override
-    public String getType() {
-        return FactoryKey.GROUP_CODES.getName();
+    public FactoryKey getType() {
+        return FactoryKey.GROUP_CODES;
     }
 }

@@ -35,7 +35,7 @@ public class CriteriaQueryBuilder extends AbstractQueryBuilder {
     }
 
     @Override
-    public String getType() {
-        return FactoryKey.CRITERIA.getName();
+    public FactoryKey getType() {
+        return FactoryKey.CRITERIA;
     }
 }

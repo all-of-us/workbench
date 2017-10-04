@@ -45,7 +45,7 @@ public class CriteriaQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Test
     public void getType() throws Exception {
-        assertEquals(FactoryKey.CRITERIA.getName(), queryBuilder.getType());
+        assertEquals(FactoryKey.CRITERIA, queryBuilder.getType());
     }
 
     @Test

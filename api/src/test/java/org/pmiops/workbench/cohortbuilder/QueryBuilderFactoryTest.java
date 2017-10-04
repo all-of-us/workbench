@@ -17,7 +17,7 @@ public class QueryBuilderFactoryTest {
     @Test
     public void getQueryBuilder() throws Exception {
         for(FactoryKey key : FactoryKey.values()) {
-            assertEquals(key.getName(), QueryBuilderFactory.getQueryBuilder(key.getName()).getType());
+            assertEquals(key, QueryBuilderFactory.getQueryBuilder(key.name()).getType());
         }
     }
 
