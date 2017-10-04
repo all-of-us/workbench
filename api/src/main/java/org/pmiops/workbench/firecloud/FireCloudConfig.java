@@ -10,6 +10,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -44,7 +45,7 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
-      GoogleCredential credential = GoogleCredential.getApplicationDefault()
+      GoogleCredential credential = Utils.getDefaultGoogleCredential()
           .createScoped(Arrays.asList(BILLING_SCOPES));
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
