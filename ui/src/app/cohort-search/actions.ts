@@ -122,7 +122,7 @@ export class CohortSearchActions {
 
     /* TODO(jms) more flexible solution that handles all the different codes */
     const mapper = param => param.type.match(/^DEMO.*/i)
-      ? asDEMO(param) 
+      ? asDEMO(param)
       : asICD(param);
 
     searchGoupItem = searchGoupItem

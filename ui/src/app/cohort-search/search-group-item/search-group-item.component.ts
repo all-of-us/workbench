@@ -25,7 +25,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() index: number;
   @Input() itemIndex: number;
 
-  private count: number = 0;
+  private count = 0;
   private subscription: Subscription;
 
   constructor(private cd: ChangeDetectorRef,

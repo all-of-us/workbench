@@ -21,10 +21,14 @@ export class CohortSearchEpics {
   fetchCriteria = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(Actions.FETCH_CRITERIA).mergeMap(
       ({critType, parentId}) => {
-        let _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
+        const _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
-          .map(result => ({type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId}))
-          .catch(error => Observable.of({type: Actions.ERROR, error, critType, parentId}))
+          .map(result => ({
+            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId})
+          )
+          .catch(error =>
+            Observable.of({type: Actions.ERROR, error, critType, parentId})
+          );
       }
     )
   )

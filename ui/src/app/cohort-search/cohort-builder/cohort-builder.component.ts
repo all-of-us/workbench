@@ -27,7 +27,7 @@ import {
   styleUrls: ['cohort-builder.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CohortBuilderComponent implements OnInit {
+export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   @select(s => s) state$;
 

@@ -29,7 +29,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group: SearchGroup;
   @Output() onRemove = new EventEmitter<boolean>();
 
-  private count: number = 0;
+  private count = 0;
   private subscription: Subscription;
 
   constructor(private cd: ChangeDetectorRef,
