@@ -39,7 +39,7 @@
           </div>
           <div id="scrollable-groups" class="scrolling-groups">
             <div  class="my-border">
-              <div *ngFor="let group of includeGroups$ | async; let i = index">
+              <div *ngFor="let group of includeGroups; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
@@ -64,7 +64,7 @@
           </div>
           <div id="scrollable-groups1" class="scrolling-groups">
             <div  class="my-border">
-              <div *ngFor="let group of excludeGroups$ | async; let i = index">
+              <div *ngFor="let group of excludeGroups; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
@@ -87,11 +87,11 @@
               </button>
             </div>
             <div class="col-xs-8 text-right">
-              <h3 class="mt-1">Set Total: {{ (subjects$ | async)?.size || 0 }}</h3>
+              <h3 class="mt-1">Set Total: {{ subjects?.size || 0 }}</h3>
             </div>
           </div>
 
-          <app-charts [subjects]="(subjects$ | async) || []"></app-charts>
+          <app-charts [subjects]="subjects || []"></app-charts>
 
         </div>
       </div>
@@ -99,4 +99,4 @@
   </div>
 </div>
 
-<app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>
+<app-wizard-modal *ngIf="open"></app-wizard-modal>

@@ -20,10 +20,12 @@ export class CohortSearchEpics {
 
   fetchCriteria = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(Actions.FETCH_CRITERIA).mergeMap(
-      ({critType, parentId}) =>
-      this.service.getCriteriaByTypeAndParentId(critType, parentId)
-        .map(result => ({type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId}))
-        .catch(error => Observable.of({type: Actions.ERROR, error}))
+      ({critType, parentId}) => {
+        let _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
+        return this.service.getCriteriaByTypeAndParentId(_type, parentId)
+          .map(result => ({type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId}))
+          .catch(error => Observable.of({type: Actions.ERROR, error, critType, parentId}))
+      }
     )
   )
 
@@ -32,7 +34,16 @@ export class CohortSearchEpics {
       ({request, sgiPath}) =>
       this.service.searchSubjects(request)
         .map(results => ({type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath}))
-        .catch(error => Observable.of({type: Actions.ERROR, error}))
+        .catch(error => Observable.of({type: Actions.ERROR, error, sgiPath}))
     )
+  )
+
+  recalculateCounts = (action$: ActionsObservable<AnyAction>) => (
+    action$.ofType(
+      Actions.LOAD_SEARCH_RESULTS,
+      Actions.REMOVE_SEARCH_GROUP,
+      Actions.REMOVE_GROUP_ITEM,
+      Actions.REMOVE_CRITERIA,
+    ).map(() => ({type: Actions.RECALCULATE_COUNTS}))
   )
 }

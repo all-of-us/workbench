@@ -6,12 +6,12 @@
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
 
   <clr-wizard-page><!-- Criteria Selection Page -->
-    <ng-template clrPageTitle>Choose {{(criteriaType$ | async)?.toUpperCase()}} Codes</ng-template>
+    <ng-template clrPageTitle>Choose {{(critType$ | async)?.toUpperCase()}} Codes</ng-template>
 
     <div class="row row-height">
       <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 scrolling-tree">
         <app-tree-root
-          [criteriaType]="(criteriaType$ | async)?.toLowerCase()"
+          [critType]="(critType$ | async)?.toLowerCase()"
           [parentId]="0">
         </app-tree-root>
       </div>

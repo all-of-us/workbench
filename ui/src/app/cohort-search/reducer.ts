@@ -1,5 +1,5 @@
 import {AnyAction, Reducer} from 'redux';
-import {Map, List, Set, fromJS} from 'immutable';
+import {Map, List, Set, fromJS, isCollection} from 'immutable';
 import {
   CohortSearchState,
   InitialState,
@@ -27,15 +27,17 @@ export const rootReducer: Reducer<CohortSearchState> =
       case Actions.REMOVE_GROUP_ITEM:
       case Actions.REMOVE_SEARCH_GROUP:
       case Actions.REMOVE_CRITERIA: {
-        return state.deleteIn(action.path.unshift('search'));
+        return state
+          .deleteIn(action.path.unshift('search'))
+          .deleteIn(action.path.unshift('results'));
       }
 
       case Actions.INIT_GROUP_ITEM: {
-        const criteriaType = state.getIn(activeCriteriaType);
+        const critType = state.getIn(activeCriteriaType);
         const sgRole = state.getIn(activeSGRole);
         const sgIndex = state.getIn(activeSGIndex);
         const newItem = Map({
-          type: criteriaType,
+          type: critType,
           searchParameters: List(),
           modifiers: List(),
         });
@@ -45,8 +47,8 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.SET_WIZARD_CONTEXT: {
-        const {criteriaType, sgIndex, sgRole} = action;
-        const newContext = Map({criteriaType, sgIndex, sgRole});
+        const {critType, sgIndex, sgRole} = action;
+        const newContext = Map({critType, sgIndex, sgRole});
         return state.mergeIn(['context', 'active'], newContext);
       }
 
@@ -66,17 +68,18 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case Actions.FETCH_CRITERIA: {
-        const {critType: _type, parentId} = action;
-        return state.setIn(['loading', _type, parentId], true);
+        const {critType, parentId} = action;
+        return state.setIn(['loading', critType, parentId], true);
       }
 
       case Actions.LOAD_CRITERIA: {
-        const {children, critType: _type, parentId} = action;
+        const {children, critType, parentId} = action;
+
         state = state
-          .setIn(['criteriaTree', _type, parentId], children)
-          .deleteIn(['loading', _type, parentId]);
-        if (state.getIn(['loading', _type]).isEmpty()) {
-          state = state.deleteIn(['loading', _type]);
+          .setIn(['criteriaTree', critType, parentId], children)
+          .deleteIn(['loading', critType, parentId]);
+        if (state.getIn(['loading', critType]).isEmpty()) {
+          state = state.deleteIn(['loading', critType]);
         }
         return state;
       }
@@ -91,24 +94,65 @@ export const rootReducer: Reducer<CohortSearchState> =
          */
       case Actions.LOAD_SEARCH_RESULTS: {
         const result = Set(action.results);
-        const path = action.sgiPath.unshift('search');
+        const path = action.sgiPath.unshift('results');
         return state
           .setIn(path.push('count'), result.size)
           .setIn(path.push('subjects'), result);
       }
 
-      /* NOTE: this would normally be a prime candidate for selectors, given that the
-       * count for any given group, group item, or the total are pure functions of the
-       * size and members of each subcohort.  However, these numbers are needed in enough
-       * places and expensive enough to calculate that we do them all once, whenever new
-       * results are populated.
-       */
       case Actions.RECALCULATE_COUNTS: {
-        return state;
+        const _included = [];
+        const _excluded = [];
+
+        const getSubjects = group => Set.union(
+          group
+            .filter(isCollection)
+            .map(item => item.get('subjects', Set()))
+        );
+
+        const mapper = (memoLoc) => (value, key) => {
+          if (key === 'count') {
+            return value;
+          }
+          const subjects = getSubjects(value);
+          memoLoc.push(subjects);
+          return value.set('count', subjects.size);
+        };
+
+        return state
+          .updateIn(
+            ['results', 'include'], Map(),
+            groupList => groupList.map(mapper(_included)))
+          .updateIn(
+            ['results', 'exclude'], Map(),
+            groupList => groupList.map(mapper(_excluded)))
+          .updateIn(
+            ['results', 'subjects'], Set(),
+            totalSubjects => {
+              const include = Set.intersect(_included);
+              const exclude = Set.intersect(_excluded);
+              return include.subtract(exclude);
+            });
       }
 
       case Actions.ERROR: {
-        // TODO (jms)
+        // TODO (jms) flesh out the rest of error handling / dispatching error
+        // logs to wherever
+        console.log(`ERROR: ${action.error}`);
+
+        if (action.critType && action.parentId) {
+          return state
+            .update('loading', loadZone => {
+              loadZone = loadZone.deleteIn([action.critType, action.parentId]);
+              if (loadZone.get(action.critType).isEmpty()) {
+                loadZone = loadZone.delete(action.critType);
+              }
+              return loadZone;
+            })
+            .deleteIn(getActiveSGIPath(state).unshift('search'))
+            .setIn(['context', 'wizardOpen'], false);
+        }
+
         return state;
       }
 

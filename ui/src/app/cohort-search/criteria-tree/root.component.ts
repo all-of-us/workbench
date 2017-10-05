@@ -19,7 +19,7 @@ import {CohortSearchState} from '../store';
 })
 export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
 
-  @Input() criteriaType: string;
+  @Input() critType: string;
   @Input() parentId: number;
 
   children;
@@ -31,15 +31,15 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const loadPath = ['loading', this.criteriaType, this.parentId];
-    const nodePath = ['criteriaTree', this.criteriaType, this.parentId];
+    const loadPath = ['loading', this.critType, this.parentId];
+    const nodePath = ['criteriaTree', this.critType, this.parentId];
 
     this.subscriptions = [
       this.ngRedux.select(loadPath).subscribe(v => this.loading = v),
       this.ngRedux.select(nodePath).subscribe(n => this.children = n)
     ];
 
-    this.actions.fetchCriteria(this.criteriaType, this.parentId);
+    this.actions.fetchCriteria(this.critType, this.parentId);
   }
 
   ngOnDestroy() {

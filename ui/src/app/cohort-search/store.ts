@@ -6,6 +6,7 @@ import {SearchRequest} from 'generated';
 
 export const InitialState = fromJS({
   search: {include: [[]], exclude: [[]]},
+  results: Map(),
   context: {
     wizardOpen: false,
   },
@@ -16,10 +17,11 @@ export const InitialState = fromJS({
 export type CohortSearchState = Map<string, any>;
 
 // Pathspecs & selectors
+export const subjects = ['results', 'subjects'];
 export const inclusionGroups = ['search', 'include'];
 export const exclusionGroups = ['search', 'exclude'];
 export const wizardOpen = ['context', 'wizardOpen'];
-export const activeCriteriaType = ['context', 'active', 'criteriaType'];
+export const activeCriteriaType = ['context', 'active', 'critType'];
 export const activeSGRole = ['context', 'active', 'sgRole'];
 export const activeSGIndex = ['context', 'active', 'sgIndex'];
 export const activeSGItemIndex = ['context', 'active', 'sgItemIndex'];
@@ -31,16 +33,3 @@ export const getActiveSGIPath = (state) => List([
   state.getIn(activeSGIndex),
   state.getIn(activeSGItemIndex),
 ]);
-
-// TODO (jms) memoize this by state.searcho it isn't recomputed
-// with *every* single change to the state
-export const subjects = (state) => {
-  const unions = (role) => (
-    state
-      .getIn(['search', role], List())
-      .map(group => Set.union(group.map(item => item.get('subjects', Set()))))
-  );
-  const include = Set.intersect(unions('include'));
-  const exclude = Set.intersect(unions('exclude'));
-  return include.subtract(exclude);
-};

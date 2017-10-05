@@ -31,6 +31,7 @@ export class ChartsComponent {
 
   @Input()
   set subjects(maybeSubjects) {
+    console.log('Recalculating chart data');
     const subjectSet = !maybeSubjects ? Set([]) : maybeSubjects;
 
     const genderCounts = {};

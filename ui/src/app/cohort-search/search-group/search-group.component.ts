@@ -1,15 +1,18 @@
 import {
   Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Input,
   EventEmitter,
-  Output
+  Output,
+  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {List, Set} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
 import {CohortSearchState} from '../store';
-
 import {SearchGroup, SearchRequest} from 'generated';
 
 
@@ -17,25 +20,36 @@ import {SearchGroup, SearchRequest} from 'generated';
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
   styleUrls: ['search-group.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchGroupComponent {
+export class SearchGroupComponent implements OnInit, OnDestroy {
   /* Passed through from cohort-builder to add-criteria */
   @Input() index: number;
   @Input() role: keyof SearchRequest;
-
   @Input() group: SearchGroup;
   @Output() onRemove = new EventEmitter<boolean>();
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  private count: number = 0;
+  private subscription: Subscription;
+
+  constructor(private cd: ChangeDetectorRef,
+              private ngRedux: NgRedux<CohortSearchState>) {}
+
+  ngOnInit() {
+    const pathSelector = (state) => state.getIn(
+      ['results', this.role, this.index, 'count'],
+      0  // specifies default; otherwise returns emtpy map
+    );
+    this.subscription = this.ngRedux.select(pathSelector)
+      .subscribe(count => {
+        this.count = count;
+        this.cd.markForCheck();
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   remove(event) { this.onRemove.emit(true); }
-
-  get count() {
-    return Set.union(
-      this.ngRedux.getState()
-        .getIn(['results', this.role, this.index], List())
-        .map(item => item.get('subjects'))
-    ).size;
-  }
 }

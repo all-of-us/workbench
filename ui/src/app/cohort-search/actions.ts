@@ -5,7 +5,12 @@ import {List} from 'immutable';
 
 import {environment} from 'environments/environment';
 import {CohortSearchState, getActiveSGIPath} from './store';
-import {CohortBuilderService, Criteria, SearchRequest} from 'generated';
+import {
+  Criteria,
+  CohortBuilderService,
+  SearchRequest,
+  SearchParameter,
+} from 'generated';
 
 
 @Injectable()
@@ -57,10 +62,10 @@ export class CohortSearchActions {
     this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_GROUP_ITEM, path});
   }
 
-  public openWizard(criteriaType: string, sgRole: keyof SearchRequest, sgIndex: number): void {
+  public openWizard(critType: string, sgRole: keyof SearchRequest, sgIndex: number): void {
     this.ngRedux.dispatch({
       type: CohortSearchActions.SET_WIZARD_CONTEXT,
-      criteriaType, sgRole, sgIndex
+      critType, sgRole, sgIndex
     });
     this.ngRedux.dispatch({type: CohortSearchActions.OPEN_WIZARD});
     this.ngRedux.dispatch({type: CohortSearchActions.INIT_GROUP_ITEM});
@@ -77,7 +82,6 @@ export class CohortSearchActions {
   }
 
   public fetchCriteria(critType: string, parentId: number): void {
-    critType = critType.toLowerCase();
     /* Don't reload already loaded criteria subtrees */
     if (this.ngRedux.getState().getIn(['criteriaTree', critType, parentId])) {
       return;
@@ -108,9 +112,21 @@ export class CohortSearchActions {
     const store = this.ngRedux.getState();
     let searchGoupItem = store.getIn(sgiPath.unshift('search'));
 
+    const asICD = param => (<SearchParameter>{
+      value: param.code, domain: param.domainId
+    });
+
+    const asDEMO = param => (<SearchParameter>{
+      value: param.code, domain: param.type, conceptId: param.conceptId
+    });
+
+    /* TODO(jms) more flexible solution that handles all the different codes */
+    const mapper = param => param.type.match(/^DEMO.*/i)
+      ? asDEMO(param) 
+      : asICD(param);
+
     searchGoupItem = searchGoupItem
-      .update('searchParameters', (params) =>
-        params.map(param => ({code: param.code, domainId: param.domainId})))
+      .update('searchParameters', (params) => params.map(mapper))
       .update('type', _type => _type.toUpperCase());
 
     const newRequest = {include: [[]], exclude: [[]]};

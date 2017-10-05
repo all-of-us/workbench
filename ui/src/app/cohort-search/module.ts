@@ -83,7 +83,9 @@ export class CohortSearchModule {
     const middleware = [
       createEpicMiddleware(
         combineEpics(
-          this.epics.fetchCriteria, this.epics.fetchSearchResults
+          this.epics.fetchCriteria,
+          this.epics.fetchSearchResults,
+          this.epics.recalculateCounts,
         )
       )
     ];

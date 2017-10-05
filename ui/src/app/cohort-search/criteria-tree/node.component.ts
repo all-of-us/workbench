@@ -31,7 +31,7 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const critType = this.node.type.toLowerCase();
+    let critType = this.node.type.toLowerCase();
     const parentId = this.node.id;
 
     const loadPath = ['loading', critType, parentId];
