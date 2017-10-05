@@ -570,7 +570,11 @@ definitions:
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
-        REVIEW_RESEARCH_PURPOSE
+        REVIEW_RESEARCH_PURPOSE,
+        # Swagger trims any common prefix from enum values' corresponding Java
+        # fields by default; include a bogus sentinel value to prevent that.
+        # https://github.com/swagger-api/swagger-codegen/issues/4261
+        _PREVENT_COMMON_PREFIX_TRIMMING
     ]
 
   WorkspaceListResponse:
