@@ -562,6 +562,13 @@ definitions:
       additionalInfo:
         type: string
 
+  Authority:
+    type: string
+    description: actions a user can have authority/permission to perform
+    enum: &AUTHORITY [
+        REVIEW_RESEARCH_PURPOSE
+    ]
+
   WorkspaceListResponse:
     type: object
     required:
@@ -736,10 +743,11 @@ definitions:
         description: the user's phone number
         type: string
       authorities:
-        description: authority enum values of allowed permissions for the user
+        description: authorities granted to this user
         type: "array"
         items:
-          $ref: "#/definitions/Authority"
+          type: string
+          enum: *AUTHORITY
 
   RegistrationRequest:
     type: object
@@ -1075,8 +1083,3 @@ definitions:
     example:
       isTaken: false
 
-  Authority:
-    description: actions a user can have authority/permission to perform
-    type: string
-    enum:
-      - REVIEW_RESEARCHER_REQUESTS
