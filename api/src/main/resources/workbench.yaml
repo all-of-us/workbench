@@ -735,6 +735,11 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      authorities:
+        description: authority enum values of allowed permissions for the user
+        type: "array"
+        items:
+          $ref: "#/definitions/Authority"
 
   RegistrationRequest:
     type: object
@@ -1069,3 +1074,9 @@ definitions:
         type: boolean
     example:
       isTaken: false
+
+  Authority:
+    description: actions a user can have authority/permission to perform
+    type: string
+    enum:
+      - REVIEW_RESEARCHER_REQUESTS
