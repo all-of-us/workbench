@@ -32,6 +32,7 @@ export class CohortSearchActions {
   static REMOVE_SEARCH_RESULTS = 'REMOVE_SEARCH_RESULTS';
   static LOAD_SEARCH_RESULTS = 'LOAD_SEARCH_RESULTS';
 
+  static RECALCULATE_COUNTS = 'RECALCULATE_COUNTS';
   static ERROR = 'ERROR';
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,

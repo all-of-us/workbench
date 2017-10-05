@@ -49,7 +49,7 @@ export class CohortBuilderComponent implements OnInit {
 
   initGroup(kind) {
     this.actions.initGroup(kind);
-    const scrollableDiv = window.document.getElementById('scrollable-groups');
+    const scrollableDiv = document.getElementById('scrollable-groups');
     scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
   }
 }

@@ -27,9 +27,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case Actions.REMOVE_GROUP_ITEM:
       case Actions.REMOVE_SEARCH_GROUP:
       case Actions.REMOVE_CRITERIA: {
-        return state
-          .deleteIn(action.path.unshift('search'))
-          .deleteIn(action.path.unshift('results'));
+        return state.deleteIn(action.path.unshift('search'));
       }
 
       case Actions.INIT_GROUP_ITEM: {
@@ -64,7 +62,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         const path = getActiveSGIPath(state);
         return state
           .deleteIn(path.unshift('search'))
-          .deleteIn(path.unshift('results'))
           .setIn(['context', 'wizardOpen'], false);
       }
 
@@ -89,12 +86,25 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.updateIn(path, List(), critlist => critlist.push(action.criteria));
       }
 
+        /* Annotates the search tree with results
+         * NOTE: as of now this only loads results for a SearchGroupItem
+         */
       case Actions.LOAD_SEARCH_RESULTS: {
         const result = Set(action.results);
-        const path = action.sgiPath.unshift('results');
+        const path = action.sgiPath.unshift('search');
         return state
           .setIn(path.push('count'), result.size)
           .setIn(path.push('subjects'), result);
+      }
+
+      /* NOTE: this would normally be a prime candidate for selectors, given that the
+       * count for any given group, group item, or the total are pure functions of the
+       * size and members of each subcohort.  However, these numbers are needed in enough
+       * places and expensive enough to calculate that we do them all once, whenever new
+       * results are populated.
+       */
+      case Actions.RECALCULATE_COUNTS: {
+        return state;
       }
 
       case Actions.ERROR: {
