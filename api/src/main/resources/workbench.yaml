@@ -569,7 +569,7 @@ definitions:
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
-    enum: &AUTHORITY [
+    enum: [
         REVIEW_RESEARCH_PURPOSE
     ]
 
@@ -750,8 +750,7 @@ definitions:
         description: authorities granted to this user
         type: "array"
         items:
-          type: string
-          enum: *AUTHORITY
+          $ref: "#/definitions/Authority"
 
   RegistrationRequest:
     type: object
