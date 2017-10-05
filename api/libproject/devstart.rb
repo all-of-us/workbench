@@ -110,6 +110,12 @@ def run_integration_tests(*args)
   })
 end
 
+def run_gradle(*args)
+  common = Common.new
+  common.docker.requires_docker
+  common.run_inline %W{docker-compose run --rm api ./gradlew} + args
+end
+
 def connect_to_db(*args)
   common = Common.new
   common.docker.requires_docker
@@ -433,6 +439,12 @@ Common.register_command({
   :invocation => "integration",
   :description => "Runs integration tests.",
   :fn => lambda { |*args| run_integration_tests(*args) }
+})
+
+Common.register_command({
+  :invocation => "gradle",
+  :description => "Runs gradle inside the API docker container with the given arguments.",
+  :fn => lambda { |*args| run_gradle(*args) }
 })
 
 Common.register_command({
