@@ -26,26 +26,41 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() itemIndex: number;
 
   private count = 0;
-  private subscription: Subscription;
+  private loading = true;
+  private subscriptions: Subscription[];
 
   constructor(private cd: ChangeDetectorRef,
               private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const pathSelector = (state) => state.getIn(
+    const countSelector = (state) => state.getIn(
       ['results', this.role, this.index, this.itemIndex, 'count'],
       0  // specifies default; otherwise returns emtpy map
     );
-    this.subscription = this.ngRedux.select(pathSelector)
-      .subscribe(count => {
+
+    const loadingSelector = (state) => state.getIn(
+      ['loading', this.role, this.index, this.itemIndex],
+      false
+    );
+
+    const countSub = this.ngRedux.select(countSelector).subscribe(
+      count => {
         this.count = count;
         this.cd.markForCheck();
     });
+
+    const loadSub = this.ngRedux.select(loadingSelector).subscribe(
+      loading => {
+        this.loading = loading;
+        this.cd.markForCheck();
+    });
+
+    this.subscriptions = [countSub, loadSub];
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   get description() {

@@ -23,7 +23,7 @@
     </span>
   </div>
 
-  <span *ngIf="count < 0; then spinner else noSpinner "></span>
+  <span *ngIf="loading; then spinner else noSpinner "></span>
 
   <ng-template #spinner>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">

@@ -9,6 +9,7 @@ import {
   activeSGRole,
   activeSGIndex,
   activeSGItemIndex,
+  prunePath,
 } from './store';
 import {CohortSearchActions as Actions} from './actions';
 
@@ -76,12 +77,8 @@ export const rootReducer: Reducer<CohortSearchState> =
       case Actions.LOAD_CRITERIA: {
         const {children, critType, parentId} = action;
 
-        state = state
-          .setIn(['criteriaTree', critType, parentId], children)
-          .deleteIn(['loading', critType, parentId]);
-        if (state.getIn(['loading', critType], List()).isEmpty()) {
-          state = state.deleteIn(['loading', critType]);
-        }
+        state = state.setIn(['criteriaTree', critType, parentId], children);
+        state = prunePath(state, ['loading', critType, parentId]);
         return state;
       }
 
@@ -90,15 +87,19 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.updateIn(path, List(), critlist => critlist.push(action.criteria));
       }
 
-        /* Annotates the search tree with results
-         * NOTE: as of now this only loads results for a SearchGroupItem
-         */
+      case Actions.FETCH_SEARCH_RESULTS: {
+        return state.setIn(action.sgiPath.unshift('loading'), true);
+      }
+
       case Actions.LOAD_SEARCH_RESULTS: {
         const result = Set(action.results);
         const path = action.sgiPath.unshift('results');
-        return state
+        state = state
           .setIn(path.push('count'), result.size)
           .setIn(path.push('subjects'), result);
+
+        state = prunePath(state, action.sgiPath.unshift('loading'));
+        return state;
       }
 
       case Actions.RECALCULATE_COUNTS: {
