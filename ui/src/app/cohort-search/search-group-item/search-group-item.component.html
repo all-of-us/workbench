@@ -1,24 +1,30 @@
 <div class="row">
   <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-    <button type="button" class="btn btn-link btn-sm text-danger text-right" (click)="removeSearchResult(searchResult)">
+    <button type="button" 
+      class="btn btn-link btn-sm text-danger text-right" 
+      (click)="actions.removeGroupItem(role, index, itemIndex)">
       <clr-icon shape="close" size="14"></clr-icon>
     </button>
-    <!--<app-select-criteria source="edit" [editCriteriaType]="searchResult.searchType" (click)="selectSearchResult()"></app-select-criteria>-->
+
     <span>
       <span *ngIf="index > 0">
         <small class="font-weight-bold">
           OR
         </small>
       </span>
+
       <small class="text-muted">
         Contains
       </small>
+
       <small class="font-weight-bold">
-        {{searchResult.description}}
+        {{ description }}
       </small>
     </span>
   </div>
-  <span *ngIf="searchResult.count < 0; then spinner else noSpinner "></span>
+
+  <span *ngIf="loading; then spinner else noSpinner "></span>
+
   <ng-template #spinner>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
       <span class="spinner spinner-inline">
@@ -26,10 +32,11 @@
       </span>
     </div>
   </ng-template>
+
   <ng-template #noSpinner>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
       <small class="font-weight-bold">
-        {{searchResult.count}}
+        {{ count || 0 }}
       </small>
     </div>
   </ng-template>

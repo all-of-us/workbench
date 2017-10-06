@@ -1,41 +1,36 @@
-<clr-wizard #wizard [(clrWizardOpen)]="open" [clrWizardSize]="'xl'" (clrWizardOnCancel)="doCancel()" [clrWizardPreventDefaultCancel]="true">
+<clr-wizard 
+  #wizard 
+  [clrWizardOpen]="open$ | async" 
+  (clrWizardOnCancel)="close()"
+  >
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
 
-  <clr-wizard-page>
-    <ng-template clrPageTitle>Choose {{criteriaType.toUpperCase()}} Codes</ng-template>
-    <app-wizard-tree-parent></app-wizard-tree-parent>
+  <clr-wizard-page><!-- Criteria Selection Page -->
+    <ng-template clrPageTitle>Choose {{(critType$ | async)?.toUpperCase()}} Codes</ng-template>
+
+    <div class="row row-height">
+      <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 scrolling-tree">
+        <app-criteria-tree-root
+          [critType]="(critType$ | async)?.toLowerCase()"
+          [parentId]="0">
+        </app-criteria-tree-root>
+      </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+        <app-wizard-criteria-group>
+        </app-wizard-criteria-group>
+      </div>
+    </div>
+
     <ng-template clrPageButtons>
       <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
       <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
       <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-      <button class="btn clr-wizard-btn btn-primary clr-wizard-btn--primary btn-success" type="button" (click)="doCustomClick('finish')">
-        Finish
-      </button>
+      <button 
+        class="btn clr-wizard-btn btn-primary clr-wizard-btn--primary btn-success" 
+        type="button" 
+        (click)="finish()">Finish</button>
     </ng-template>
+
   </clr-wizard-page>
-
-  <!--<clr-wizard-page>-->
-    <!--<ng-template clrPageTitle>Modifiers</ng-template>-->
-    <!--<app-wizard-modifiers></app-wizard-modifiers>-->
-    <!--<ng-template clrPageButtons>-->
-      <!--<clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>-->
-      <!--<clr-wizard-button [type]="'previous'">Back</clr-wizard-button>-->
-      <!--<clr-wizard-button [type]="'next'">Next</clr-wizard-button>-->
-      <!--<button class="btn clr-wizard-btn btn-primary clr-wizard-btn&#45;&#45;primary btn-success" type="button" (click)="doCustomClick('finish')">-->
-        <!--Finish-->
-      <!--</button>-->
-    <!--</ng-template>-->
-  <!--</clr-wizard-page>-->
-
-  <!--<clr-wizard-page>-->
-    <!--<ng-template clrPageTitle>Totals</ng-template>-->
-    <!--<app-wizard-total></app-wizard-total>-->
-    <!--<ng-template clrPageButtons>-->
-      <!--<clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>-->
-      <!--<clr-wizard-button [type]="'previous'">Back</clr-wizard-button>-->
-      <!--<button class="btn clr-wizard-btn btn-primary clr-wizard-btn&#45;&#45;primary btn-success" type="button" (click)="doCustomClick('finish')">-->
-        <!--Finish-->
-      <!--</button>-->
-    <!--</ng-template>-->
-  <!--</clr-wizard-page>-->
 </clr-wizard>

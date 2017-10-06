@@ -2,23 +2,36 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
+import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
+import {createEpicMiddleware, combineEpics} from 'redux-observable';
 
 /* Components */
+import {AddCriteriaComponent} from './misc-ui/add-criteria.component';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
-import {GenderChartComponent} from './gender-chart/gender-chart.component';
-import {RaceChartComponent} from './race-chart/race-chart.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
-import {SearchResultComponent} from './search-result/search-result.component';
+import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
-import {WizardTreeParentComponent} from './wizard-tree-parent/wizard-tree-parent.component';
-import {WizardTreeChildrenComponent} from './wizard-tree-children/wizard-tree-children.component';
-import {WizardSelectComponent} from './wizard-select/wizard-select.component';
+import {
+  CriteriaTreeNodeComponent,
+  CriteriaTreeRootComponent,
+  CriteriaTreeNodeInfoComponent,
+} from './criteria-tree';
+import {
+  ChartsComponent,
+  GenderChartComponent,
+  RaceChartComponent,
+  GoogleChartComponent,
+} from './charts';
 
 /* Other Objects */
-import {BroadcastService} from './broadcast.service';
 import {CohortSearchRouter} from './router.module';
-import {GoogleChartDirective} from './google-chart.directive';
+import {environment} from 'environments/environment';
+
+import {CohortSearchActions} from './redux/actions';
+import {CohortSearchEpics} from './redux/epics';
+import {CohortSearchState, InitialState} from './redux/store';
+import {rootReducer} from './redux/reducer';
 
 import {CohortBuilderService} from 'generated';
 
@@ -29,24 +42,58 @@ import {CohortBuilderService} from 'generated';
     ClarityModule,
     CohortSearchRouter,
     CommonModule,
+    NgReduxModule,
   ],
   declarations: [
+    AddCriteriaComponent,
     CohortBuilderComponent,
-    GenderChartComponent,
-    GoogleChartDirective,
-    RaceChartComponent,
+
+    CriteriaTreeRootComponent,
+    CriteriaTreeNodeComponent,
+    CriteriaTreeNodeInfoComponent,
+
     SearchGroupComponent,
-    SearchResultComponent,
-    WizardSelectComponent,
+    SearchGroupItemComponent,
     WizardModalComponent,
-    WizardTreeParentComponent,
-    WizardTreeChildrenComponent,
     WizardCriteriaGroupComponent,
+
+    ChartsComponent,
+    GenderChartComponent,
+    RaceChartComponent,
+    GoogleChartComponent,
   ],
   entryComponents: [WizardModalComponent],
   providers: [
-    BroadcastService,
     CohortBuilderService,
+    CohortSearchActions,
+    CohortSearchEpics,
   ]
 })
-export class CohortSearchModule {}
+export class CohortSearchModule {
+  constructor(private ngRedux: NgRedux<CohortSearchState>,
+              private epics: CohortSearchEpics,
+              private devTools: DevToolsExtension) {
+
+    let storeEnhancers = [];
+    if (environment.debug && devTools.isEnabled()) {
+      storeEnhancers = [...storeEnhancers, devTools.enhancer()];
+    }
+
+    const middleware = [
+      createEpicMiddleware(
+        combineEpics(
+          this.epics.fetchCriteria,
+          this.epics.fetchSearchResults,
+          this.epics.recalculateCounts,
+        )
+      )
+    ];
+
+    ngRedux.configureStore(
+      rootReducer,
+      InitialState,
+      middleware,
+      storeEnhancers
+    );
+  }
+}

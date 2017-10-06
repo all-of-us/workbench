@@ -1,12 +1,13 @@
 <div class="box pl-1 codes-height w-100">
-  <span class="font-weight-bold">Selected {{getTypeDescription()}}</span>
-  <div #groupDiv class="criteria-group-height scrolling-criteria-group">
+  <span class="font-weight-bold">{{ selection }}</span>
+  <div class="criteria-group-height scrolling-criteria-group">
     <div *ngFor="let criteria of criteriaList; let i = index">
       <div class="row">
+
         <span *ngIf="criteria.group; then group else notGroup"></span>
         <ng-template #group>
           <div class="col-xs-12 text-truncate">
-            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(criteria)">
+            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(i)">
               <clr-icon shape="close" size="14"></clr-icon>
             </button>
             <span *ngIf="i > 0">
@@ -16,13 +17,14 @@
             <small class="font-weight-bold">{{criteria.code}}-{{criteria.name}}</small>
           </div>
         </ng-template>
+
         <ng-template #notGroup>
           <div class="col-xs-12 text-truncate">
-            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(criteria)">
+            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(i)">
               <clr-icon shape="close" size="14"></clr-icon>
             </button>
             <span *ngIf="i > 0">
-               <small class="font-weight-bold">OR</small>
+              <small class="font-weight-bold">OR</small>
             </span>
             <span *ngIf="criteria.type === 'DEMO_GEN'">
               <small class="font-weight-bold">Gender-{{criteria.name}}</small>
@@ -38,6 +40,7 @@
             </span>
           </div>
         </ng-template>
+
       </div>
     </div>
   </div>

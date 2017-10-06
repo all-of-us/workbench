@@ -14,6 +14,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-redux/store": "^6.5.7",
     "@angular/animations": "^4.0.0",
     "@angular/common": "^4.0.0",
     "@angular/compiler": "^4.0.0",
@@ -30,7 +31,10 @@
     "core-js": "^2.4.1",
     "dom-to-image": "^2.5.2",
     "enhanced-resolve": "3.3.0",
+    "immutable": "^4.0.0-rc.4",
     "mutationobserver-shim": "^0.3.2",
+    "redux": "^3.7.2",
+    "redux-observable": "^0.16.0",
     "rxjs": "^5.1.0",
     "set-manipulator": "^0.3.1",
     "zone.js": "0.8.12"

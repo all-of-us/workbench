@@ -1,86 +1,55 @@
-import {Component, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Input,
+  EventEmitter,
+  Output,
+  OnInit,
+  OnDestroy,
+} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {List, Set} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 
-import {BroadcastService} from '../broadcast.service';
-import {SearchResult, SearchGroup} from '../model';
+import {CohortSearchState} from '../redux/store';
+import {SearchGroup, SearchRequest} from 'generated';
+
 
 @Component({
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
-  styleUrls: ['search-group.component.css']
+  styleUrls: ['search-group.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchGroupComponent {
+export class SearchGroupComponent implements OnInit, OnDestroy {
+  /* Passed through from cohort-builder to add-criteria */
+  @Input() index: number;
+  @Input() role: keyof SearchRequest;
+  @Input() group: SearchGroup;
+  @Output() onRemove = new EventEmitter<boolean>();
 
-  /**
-   * The search group for this component.
-   *
-   * @type {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  @Input()
-  public searchGroup: SearchGroup;
+  private count = 0;
+  private subscription: Subscription;
 
-  /**
-   * The group set for this component.
-   *
-   * @type {String[]}
-   * @memberof SearchGroupComponent
-   */
-  public groupSet: String[] = [];
+  constructor(private cd: ChangeDetectorRef,
+              private ngRedux: NgRedux<CohortSearchState>) {}
 
-  /**
-   * Event emitter when the delete search group button is pushed.
-   *
-   * @type {EventEmitter<SearchGroup>}
-   * @memberof SearchGroupComponent
-   */
-  @Output()
-  public onRemove = new EventEmitter<SearchGroup>();
-
-  @Input()
-  public index: number;
-
-  constructor(private changeDetectorRef: ChangeDetectorRef,
-              private broadcastService: BroadcastService) {}
-
-  /**
-   * Remove the specified SearchGroup.
-   *
-   * @public
-   * @param {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  public removeSearchGroup(searchGroup: SearchGroup) {
-    this.onRemove.emit(searchGroup);
+  ngOnInit() {
+    const pathSelector = (state) => state.getIn(
+      ['results', this.role, this.index, 'count'],
+      0  // specifies default; otherwise returns emtpy map
+    );
+    this.subscription = this.ngRedux.select(pathSelector)
+      .subscribe(count => {
+        this.count = count;
+        this.cd.markForCheck();
+    });
   }
 
-  /**
-   * Remove the specified SearchGroup.
-   *
-   * @public
-   * @param {SearchGroup}
-   * @memberof SearchGroupComponent
-   */
-  public removeExclusionGroup(searchGroup: SearchGroup) {
-    this.onRemove.emit(searchGroup);
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
-  /**
-   * Remove the specified SearchResult.
-   *
-   * @public
-   * @param {SearchResult}
-   * @memberof SearchGroupComponent
-   */
-  public removeSearchResult(searchResult: SearchResult) {
-    const index: number = this.searchGroup.results.indexOf(searchResult);
-    if (index !== -1) {
-      this.searchGroup.results.splice(index, 1);
-    }
-    this.changeDetectorRef.detectChanges();
-    this.broadcastService.removeSearchResult(this.searchGroup);
-  }
-
-  selectSearchGroup() {
-    this.broadcastService.selectSearchGroup(this.searchGroup);
-  }
+  remove(event) { this.onRemove.emit(true); }
 }
