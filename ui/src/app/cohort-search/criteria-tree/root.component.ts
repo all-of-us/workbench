@@ -8,13 +8,32 @@ import {
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchState} from '../redux/store';
 
 
 @Component({
-  selector: 'app-tree-root',
-  templateUrl: './root.component.html',
+  selector: 'app-criteria-tree-root',
+  template: `
+    <span *ngIf="loading; then requestingNodes else nodesLoaded"></span>
+
+    <ng-template #requestingNodes>
+      <span class="spinner spinner-inline">Loading...</span>
+      <span>Loading...</span>
+    </ng-template>
+
+    <ng-template #nodesLoaded>
+      <clr-tree-node *ngFor="let node of children; trackBy: trackById">
+        <app-criteria-tree-node-info [node]="node">
+        </app-criteria-tree-node-info>
+
+        <ng-template clrIfExpanded>
+          <app-criteria-tree-node [node]="node">
+          </app-criteria-tree-node>
+        </ng-template>
+      </clr-tree-node>
+    </ng-template>
+  `,
   encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeRootComponent implements OnInit, OnDestroy {

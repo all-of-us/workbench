@@ -8,15 +8,31 @@ import {
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchState} from '../redux/store';
 
 import {Criteria} from 'generated';
 
 
 @Component({
-  selector: 'app-tree-node',
-  templateUrl: './node.component.html',
+  selector: 'app-criteria-tree-node',
+  template: `
+    <ng-container [clrLoading]="loading">
+      <clr-tree-node *ngFor="let node of children; trackBy: trackById">
+
+        <app-criteria-tree-node-info [node]="node">
+        </app-criteria-tree-node-info>
+
+        <span *ngIf="node.group">
+          <ng-template clrIfExpanded>
+            <app-criteria-tree-node [node]="node">
+            </app-criteria-tree-node>
+          </ng-template>
+        </span>
+
+      </clr-tree-node>
+    </ng-container>
+  `,
   encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {

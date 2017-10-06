@@ -12,19 +12,19 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
+import {CohortSearchActions} from '../redux/actions';
 import {
   CohortSearchState,
   inclusionGroups,
   exclusionGroups,
   wizardOpen,
   subjects,
-} from '../store';
+} from '../redux/store';
 
 @Component({
-  selector: 'app-search',
-  templateUrl: 'cohort-builder.component.html',
-  styleUrls: ['cohort-builder.component.css'],
+  selector: 'app-cohort-builder',
+  templateUrl: './cohort-builder.component.html',
+  styleUrls: ['./cohort-builder.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CohortBuilderComponent implements OnInit, OnDestroy {

@@ -9,8 +9,8 @@ import {
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
-import {CohortSearchState} from '../store';
+import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchState} from '../redux/store';
 import {SearchGroupItem} from 'generated';
 
 

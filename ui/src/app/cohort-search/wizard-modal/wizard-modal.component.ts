@@ -9,8 +9,8 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Observable} from 'rxjs/Observable';
 import {Wizard} from 'clarity-angular/wizard/wizard';
 
-import {CohortSearchActions} from '../actions';
-import {CohortSearchState, wizardOpen, activeCriteriaType} from '../store';
+import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchState, wizardOpen, activeCriteriaType} from '../redux/store';
 
 
 @Component({

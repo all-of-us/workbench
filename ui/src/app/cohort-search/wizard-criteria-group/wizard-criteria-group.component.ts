@@ -8,8 +8,8 @@ import {
 import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../actions';
-import {CohortSearchState, getActiveSGIPath} from '../store';
+import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchState, getActiveSGIPath} from '../redux/store';
 
 import {Criteria} from 'generated';
 

@@ -6,19 +6,17 @@ import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
 import {createEpicMiddleware, combineEpics} from 'redux-observable';
 
 /* Components */
-import {AddCriteriaComponent} from './add-criteria.component';
+import {AddCriteriaComponent} from './misc-ui/add-criteria.component';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
-
 import {
   CriteriaTreeNodeComponent,
   CriteriaTreeRootComponent,
-  NodeInfoComponent,
+  CriteriaTreeNodeInfoComponent,
 } from './criteria-tree';
-
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -27,12 +25,13 @@ import {
 } from './charts';
 
 /* Other Objects */
-import {CohortSearchActions} from './actions';
-import {CohortSearchState, InitialState} from './store';
-import {CohortSearchEpics} from './epics';
-import {CohortSearchRouter} from './router';
+import {CohortSearchRouter} from './router.module';
 import {environment} from 'environments/environment';
-import {rootReducer} from './reducer';
+
+import {CohortSearchActions} from './redux/actions';
+import {CohortSearchEpics} from './redux/epics';
+import {CohortSearchState, InitialState} from './redux/store';
+import {rootReducer} from './redux/reducer';
 
 import {CohortBuilderService} from 'generated';
 
@@ -51,7 +50,7 @@ import {CohortBuilderService} from 'generated';
 
     CriteriaTreeRootComponent,
     CriteriaTreeNodeComponent,
-    NodeInfoComponent,
+    CriteriaTreeNodeInfoComponent,
 
     SearchGroupComponent,
     SearchGroupItemComponent,

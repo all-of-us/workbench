@@ -1,5 +1,6 @@
 import {AnyAction, Reducer} from 'redux';
 import {Map, List, Set, fromJS, isCollection} from 'immutable';
+
 import {
   CohortSearchState,
   InitialState,
@@ -78,7 +79,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         state = state
           .setIn(['criteriaTree', critType, parentId], children)
           .deleteIn(['loading', critType, parentId]);
-        if (state.getIn(['loading', critType]).isEmpty()) {
+        if (state.getIn(['loading', critType], List()).isEmpty()) {
           state = state.deleteIn(['loading', critType]);
         }
         return state;

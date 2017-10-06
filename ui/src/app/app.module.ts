@@ -22,7 +22,7 @@ import {environment} from 'environments/environment';
 
 /* Our Modules */
 import {AppRoutingModule} from 'app/app-routing.module';
-import {CohortSearchModule} from './cohort-search/module';
+import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 
 import {BugReportService, CohortsService, Configuration, ConfigurationParameters, ProfileService, WorkspacesService} from 'generated';

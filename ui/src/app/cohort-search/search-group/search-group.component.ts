@@ -12,7 +12,7 @@ import {NgRedux} from '@angular-redux/store';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchState} from '../store';
+import {CohortSearchState} from '../redux/store';
 import {SearchGroup, SearchRequest} from 'generated';
 
 
