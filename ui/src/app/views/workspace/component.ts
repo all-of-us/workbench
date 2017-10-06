@@ -200,6 +200,7 @@ export class WorkspaceComponent implements OnInit {
   }
 
   killNotebook(): void {
-    this.clusterService.deleteCluster(this.workspace.namespace, this.workspace.id).subscribe(() => {});
+    this.clusterService.deleteCluster(this.workspace.namespace,
+        this.workspace.id).subscribe(() => {});
   }
 }
