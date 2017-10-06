@@ -127,11 +127,9 @@ paths:
           type: string
       responses:
         "200":
-          description: List of clusters
+          description: A list of workspace definitions.
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Cluster'
+            $ref: "#/definitions/ClusterListResponse"
         "400":
           description: Bad Request
           schema:
@@ -1068,6 +1066,15 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+  ClusterListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Cluster"
   ClusterRequest:
     description: ''
     required:

@@ -2,15 +2,18 @@ package org.pmiops.workbench.api;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.function.Function;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
+import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -26,22 +29,25 @@ public class ClusterController implements ClusterApiDelegate {
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
 
-  private Cluster toAllOfUsCluster(org.pmiops.workbench.notebooks.model.Cluster firecloudCluster) {
-    Cluster allOfUsCluster = new Cluster();
-    allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
-    allOfUsCluster.setGoogleId(firecloudCluster.getGoogleId());
-    allOfUsCluster.setGoogleProject(firecloudCluster.getGoogleProject());
-    allOfUsCluster.setGoogleServiceAccount(firecloudCluster.getGoogleServiceAccount());
-    allOfUsCluster.setGoogleBucket(firecloudCluster.getGoogleBucket());
-    allOfUsCluster.setOperationName(firecloudCluster.getOperationName());
-    allOfUsCluster.setStatus(firecloudCluster.getStatus());
-    allOfUsCluster.setHostIp(firecloudCluster.getHostIp());
-    allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
-    allOfUsCluster.setDestroyedDate(firecloudCluster.getDestroyedDate());
-    allOfUsCluster.setLabels(firecloudCluster.getLabels());
-
-    return allOfUsCluster;
-  }
+  private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
+    new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
+      @Override
+      public Cluster apply(org.pmiops.workbench.notebooks.model.Cluster firecloudCluster) {
+        Cluster allOfUsCluster = new Cluster();
+        allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
+        allOfUsCluster.setGoogleId(firecloudCluster.getGoogleId());
+        allOfUsCluster.setGoogleProject(firecloudCluster.getGoogleProject());
+        allOfUsCluster.setGoogleServiceAccount(firecloudCluster.getGoogleServiceAccount());
+        allOfUsCluster.setGoogleBucket(firecloudCluster.getGoogleBucket());
+        allOfUsCluster.setOperationName(firecloudCluster.getOperationName());
+        allOfUsCluster.setStatus(firecloudCluster.getStatus());
+        allOfUsCluster.setHostIp(firecloudCluster.getHostIp());
+        allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
+        allOfUsCluster.setDestroyedDate(firecloudCluster.getDestroyedDate());
+        allOfUsCluster.setLabels(firecloudCluster.getLabels());;
+        return allOfUsCluster;
+      }
+    };
 
   private org.pmiops.workbench.notebooks.model.ClusterRequest toFirecloudClusterRequest(ClusterRequest allOfUsClusterRequest) {
     org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
@@ -74,7 +80,7 @@ public class ClusterController implements ClusterApiDelegate {
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      createdCluster = toAllOfUsCluster(this.notebooksService.createCluster("broad-dsde-dev", clusterName, toFirecloudClusterRequest(clusterRequest)));
+      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster("broad-dsde-dev", clusterName, toFirecloudClusterRequest(clusterRequest)));
     } catch (ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
@@ -104,7 +110,7 @@ public class ClusterController implements ClusterApiDelegate {
     Cluster cluster;
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      cluster = toAllOfUsCluster(this.notebooksService.getCluster("broad-dsde-dev", clusterName));
+      cluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.getCluster("broad-dsde-dev", clusterName));
     } catch(ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
@@ -113,7 +119,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
-  public ResponseEntity<List<Cluster>> listClusters(String labels) {
+  public ResponseEntity<ClusterListResponse> listClusters(String labels) {
     List<Cluster> newClusters = new ArrayList<Cluster>();
     List<org.pmiops.workbench.notebooks.model.Cluster> oldClusters;
     try {
@@ -122,9 +128,8 @@ public class ClusterController implements ClusterApiDelegate {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
     }
-    for (org.pmiops.workbench.notebooks.model.Cluster c : oldClusters) {
-      newClusters.add(toAllOfUsCluster(c));
-    }
-    return ResponseEntity.ok(newClusters);
+    ClusterListResponse response = new ClusterListResponse();
+    response.setItems(oldClusters.stream().map(TO_ALL_OF_US_CLUSTER).collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
   }
 }
