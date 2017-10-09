@@ -1,11 +1,16 @@
 import {TestBed, async} from '@angular/core/testing';
 import {Title} from '@angular/platform-browser';
-import {AppComponent} from 'app/views/app/component';
 import {RouterTestingModule} from '@angular/router/testing';
+
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {SignInService} from 'app/services/sign-in.service';
-import {CohortsService} from 'generated';
 import {ClarityModule} from 'clarity-angular';
+
+import {AppComponent} from 'app/views/app/component';
+import {SignInService} from 'app/services/sign-in.service';
+import {ProfileService} from 'generated';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+
+import {CohortsService} from 'generated';
 
 describe('AppComponent', () => {
 
@@ -20,7 +25,8 @@ describe('AppComponent', () => {
       ],
       providers: [
         { provide: SignInService, useValue: {} },
-        { provide: CohortsService, useValue: {} }
+        { provide: CohortsService, useValue: {} },
+        { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents();
   }));
 
