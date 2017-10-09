@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -29,6 +30,8 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Authority;
 
 
@@ -41,10 +44,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
+  private final UserDao userDao;
 
   @Autowired
-  public AuthInterceptor(UserInfoService userInfoService) {
+  public AuthInterceptor(UserInfoService userInfoService, UserDao userDao) {
     this.userInfoService = userInfoService;
+    this.userDao = userDao;
   }
 
   /**
@@ -126,7 +131,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    *
    * @param method The ApiController (Swagger-generated) method which calls our annotated delegate.
    */
-  private static boolean hasRequiredAuthority(Method apiControllerMethod, Userinfoplus userInfo) {
+  private boolean hasRequiredAuthority(Method apiControllerMethod, Userinfoplus userInfo) {
     // There's no concise way to find out what class implements the delegate interface, so instead
     // depend on naming conventions. Essentially, this removes "Api" from the class name.
     Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
@@ -136,10 +141,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     try {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
-      log.severe(
-          "Could not find controller " + controllerName + " by name derived from "
-          + apiControllerName);
-      throw new RuntimeException(e);
+      log.log(
+          Level.SEVERE,
+          "Missing {0} by name derived from {1}. @AuthorityRequired will not be evaluted.",
+          new Object[] {controllerName, apiControllerName});
+      return true;  // Default to allowing access in case of error.
     }
 
     Method controllerMethod;
@@ -155,7 +161,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
 
     if (req != null) {
-      Collection<Authority> granted = ProfileService.getGrantedAuthorities(userInfo.getEmail());
+      Collection<Authority> granted = getGrantedAuthorities(userInfo.getEmail());
       if (granted.containsAll(Arrays.asList(req.value()))) {
         return true;
       } else {
@@ -170,5 +176,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       }
     }
     return true;  // No @AuthorityRequired annotation found at runtime, default to allowed.
+  }
+
+  /**
+   * Returns a User's permissions as stored in the db; or an empty list if no user is found.
+   */
+  private Collection<Authority> getGrantedAuthorities(String email) {
+    User user = userDao.findUserByEmail(email);
+    return user == null ? Collections.emptyList() : user.getAuthorities();
   }
 }
