@@ -64,7 +64,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
         /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
-        SearchGroupItem item = request.getInclude().get(0).get(0);
+        SearchGroupItem item = request.getIncludes().get(0).getItems().get(0);
         SubjectListResponse subjectSet = new SubjectListResponse();
 
         List<SearchParameter> paramsWithDomains = filterSearchParametersWithDomain(item.getSearchParameters());

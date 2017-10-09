@@ -123,17 +123,17 @@ export const rootReducer: Reducer<CohortSearchState> =
 
         return state
           .updateIn(
-            ['results', 'include'], Map(),
+            ['results', 'includes'], Map(),
             groupList => groupList.map(mapper(_included)))
           .updateIn(
-            ['results', 'exclude'], Map(),
+            ['results', 'excludes'], Map(),
             groupList => groupList.map(mapper(_excluded)))
           .updateIn(
             ['results', 'subjects'], Set(),
             totalSubjects => {
-              const include = Set.intersect(_included);
-              const exclude = Set.intersect(_excluded);
-              return include.subtract(exclude);
+              const includes = Set.intersect(_included);
+              const excludes = Set.intersect(_excluded);
+              return includes.subtract(excludes);
             });
       }
 
