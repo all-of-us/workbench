@@ -1,5 +1,6 @@
 package org.pmiops.workbench.auth;
 
+import java.util.ArrayList;
 import javax.inject.Provider;
 
 import org.pmiops.workbench.db.model.User;
@@ -39,6 +40,7 @@ public class ProfileService {
     profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setDataAccessLevel(Profile.DataAccessLevelEnum.fromValue(
         user.getDataAccessLevel().toString().toLowerCase()));
+    profile.setAuthorities(new ArrayList(user.getAuthorities()));
 
     return profile;
   }
