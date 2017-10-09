@@ -37,6 +37,10 @@ import org.pmiops.workbench.model.Authority;
 
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
+ *
+ * Checks handler methods for annotations like
+ *     @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+ * to enforce granular permissions.
  */
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
