@@ -21,9 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CohortController implements CohortsApiDelegate {
+public class CohortsController implements CohortsApiDelegate {
 
-  private static final Logger log = Logger.getLogger(CohortController.class.getName());
+  private static final Logger log = Logger.getLogger(CohortsController.class.getName());
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -67,7 +67,7 @@ public class CohortController implements CohortsApiDelegate {
   private final Clock clock;
 
   @Autowired
-  CohortController(WorkspaceDao workspaceDao, CohortDao cohortDao, Provider<User> userProvider,
+  CohortsController(WorkspaceDao workspaceDao, CohortDao cohortDao, Provider<User> userProvider,
       Clock clock) {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
