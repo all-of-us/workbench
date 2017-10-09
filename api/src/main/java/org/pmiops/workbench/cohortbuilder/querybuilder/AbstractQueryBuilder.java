@@ -5,6 +5,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Provider;
+import java.util.UUID;
 
 /**
  * AbstractQueryBuilder is an object that builds {@link QueryRequest}
@@ -38,5 +39,9 @@ public abstract class AbstractQueryBuilder {
     protected String filterBigQueryConfig(String sqlStatement) {
         return filterBigQueryConfig(sqlStatement, null);
 
+    }
+
+    protected String getUniqueNamedParameter(String parameterName) {
+        return parameterName + UUID.randomUUID().toString().replaceAll("-", "");
     }
 }

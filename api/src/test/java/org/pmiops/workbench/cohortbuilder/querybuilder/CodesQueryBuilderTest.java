@@ -29,6 +29,8 @@ public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
 
     @Test
     public void buildQueryRequest() throws Exception {
+        String measurementNamedParameter = "";
+        String conditionNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
         params.add(new SearchParameter().domain("Condition").value("10.1"));
         params.add(new SearchParameter().domain("Condition").value("20.2"));
@@ -38,31 +40,36 @@ public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
         QueryRequest request = queryBuilder
                 .buildQueryRequest(new QueryParameters().type("ICD9").parameters(params));
 
+        for (String key : request.getNamedParameters().keySet()) {
+            if (key.startsWith("Condition")) {
+                conditionNamedParameter = key;
+            } else if (key.startsWith("Measurement")) {
+                measurementNamedParameter = key;
+            }
+        }
+
         String expected =
-                "select distinct concat(" +
-                        "cast(p.person_id as string), ',', " +
-                        "p.gender_source_value, ',', " +
-                        "p.race_source_value) as val " +
+                "select person_id " +
                         "from `" + getTablePrefix() + ".person` p " +
                         "where person_id in (" +
                         "select distinct person_id " +
                         "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b " +
                         "where a.condition_source_concept_id = b.concept_id " +
                         "and b.vocabulary_id in (@cm,@proc) " +
-                        "and b.concept_code in unnest(@Conditioncodes)" +
+                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")" +
                         " union distinct " +
                         "select distinct person_id " +
                         "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b " +
                         "where a.measurement_source_concept_id = b.concept_id " +
                         "and b.vocabulary_id in (@cm,@proc) " +
-                        "and b.concept_code in unnest(@Measurementcodes))";
+                        "and b.concept_code in unnest(@" + measurementNamedParameter + "))";
 
         assertEquals(expected, request.getQuery());
 
         /* Check the querybuilder parameters */
         List<QueryParameterValue> conditionCodes = request
                 .getNamedParameters()
-                .get("Conditioncodes")
+                .get(conditionNamedParameter)
                 .getArrayValues();
         assertTrue(conditionCodes.contains(QueryParameterValue
                 .newBuilder()
@@ -77,7 +84,7 @@ public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
 
         List<QueryParameterValue> measurementCodes = request
                 .getNamedParameters()
-                .get("Measurementcodes")
+                .get(measurementNamedParameter)
                 .getArrayValues();
         assertTrue(measurementCodes.contains(QueryParameterValue
                 .newBuilder()

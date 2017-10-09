@@ -36,8 +36,4 @@ public enum TableEnum {
         }
         return null;
     }
-
-    public static String getConceptCodes(String domainId) {
-        return domainId + "codes";
-    }
 }

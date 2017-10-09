@@ -2,6 +2,8 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -18,27 +20,23 @@ import java.util.Map;
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
-    private static final String DEMO_GEN =
-            "select distinct concat(cast(p.person_id as string), ',',\n" +
-                    "p.gender_source_value, ',',\n" +
-                    "p.race_source_value) as val\n" +
-                    "FROM `${projectId}.${dataSetId}.person` p\n" +
-                    "where p.gender_concept_id = @genderConceptId\n";
-
-    private static final String DEMO_AGE =
-            "select distinct concat(cast(p.person_id as string), ',',\n" +
-                    "p.gender_source_value, ',',\n" +
-                    "p.race_source_value) as val\n" +
-                    "FROM `${projectId}.${dataSetId}.person` p\n" +
-                    "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @age\n";
-
-    private static final String UNION_TEMPLATE = "union distinct\n";
-
     private static final Map<String, String> DemoParamMap = new HashMap<>();
     static {
-        DemoParamMap.put("DEMO_GEN", "genderConceptId");
+        DemoParamMap.put("DEMO_GEN", "gender");
         DemoParamMap.put("DEMO_AGE", "age");
     }
+
+    private static final String DEMO_GEN =
+            "select distinct person_id\n" +
+                    "FROM `${projectId}.${dataSetId}.person` p\n" +
+                    "where p.gender_concept_id = ${gender}\n";
+
+    private static final String DEMO_AGE =
+            "select distinct person_id\n" +
+                    "FROM `${projectId}.${dataSetId}.person` p\n" +
+                    "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = ${age}\n";
+
+    private static final String UNION_TEMPLATE = "union distinct\n";
 
     @Override
     public QueryRequest buildQueryRequest(QueryParameters parameters) {
@@ -47,9 +45,13 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
         List<String> queryParts = new ArrayList<>();
         for (SearchParameter parameter : parameters.getParameters()) {
-            queryParts.add(getDemoSqlStatement(parameter.getDomain()));
+            final String demoType = DemoParamMap.get(parameter.getDomain());
+            final String parameterToReplace = "${" + demoType + "}";
+            final String namedParameter = getUniqueNamedParameter(demoType);
+            queryParts.add(getDemoSqlStatement(parameter.getDomain())
+                    .replace(parameterToReplace, "@" + namedParameter));
 
-            queryParams.put(DemoParamMap.get(parameter.getDomain()),
+            queryParams.put(namedParameter,
                     parameter.getDomain().equals("DEMO_GEN") ?
                             QueryParameterValue.int64(parameter.getConceptId()) :
                             QueryParameterValue.int64(new Long(parameter.getValue())));
@@ -67,6 +69,16 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     @Override
     public FactoryKey getType() {
         return FactoryKey.DEMO;
+    }
+
+    private String filterSql(String sqlStatement, ImmutableMap replacements) {
+        String returnSql = sqlStatement;
+        for (UnmodifiableIterator iterator = replacements.keySet().iterator(); iterator.hasNext();) {
+            String key = (String)iterator.next();
+            returnSql = returnSql.replace(key, replacements.get(key).toString());
+        }
+        return returnSql;
+
     }
 
     private String getDemoSqlStatement(String domain) {
