@@ -20,14 +20,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.springframework.web.method.HandlerMethod;
+
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
-import org.springframework.web.method.HandlerMethod;
+import org.pmiops.workbench.db.dao.UserDao;
 
 public class AuthInterceptorTest {
 
   @Mock
   private UserInfoService userInfoService;
+  @Mock
+  private UserDao userDao;
   @Mock
   private HttpServletRequest request;
   @Mock
@@ -42,7 +46,7 @@ public class AuthInterceptorTest {
 
   @Before
   public void setup() {
-    interceptor = new AuthInterceptor(userInfoService);
+    interceptor = new AuthInterceptor(userInfoService, userDao);
   }
 
   @Test
