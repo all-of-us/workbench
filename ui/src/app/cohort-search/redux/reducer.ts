@@ -9,16 +9,18 @@ import {
   activeSGRole,
   activeSGIndex,
   activeSGItemIndex,
-  prunePath,
 } from './store';
 import {CohortSearchActions as Actions} from './actions';
+import requestReducer from './requests';
 
-/**
- * the Root Reducer
- * Performs pure (and ideally very simple, atomic) transformations
- * of the application state
- */
-export const rootReducer: Reducer<CohortSearchState> =
+
+export const rootReducer = (state, action) => [
+  mainReducer,
+  requestReducer,
+].reduce((s, r) => r(s, action), state);
+
+
+export const mainReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = InitialState, action: AnyAction): CohortSearchState => {
     switch (action.type) {
 
@@ -69,17 +71,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['context', 'wizardOpen'], false);
       }
 
-      case Actions.FETCH_CRITERIA: {
-        const {critType, parentId} = action;
-        return state.setIn(['loading', critType, parentId], true);
-      }
-
       case Actions.LOAD_CRITERIA: {
         const {children, critType, parentId} = action;
-
-        state = state.setIn(['criteriaTree', critType, parentId], children);
-        state = prunePath(state, ['loading', critType, parentId]);
-        return state;
+        return state.setIn(['criteriaTree', critType, parentId], children);
       }
 
       case Actions.SELECT_CRITERIA: {
@@ -87,23 +81,12 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.updateIn(path, List(), critlist => critlist.push(action.criteria));
       }
 
-      case Actions.FETCH_SEARCH_RESULTS: {
-        return state.setIn(action.sgiPath.unshift('loading'), true);
-      }
-
       case Actions.LOAD_SEARCH_RESULTS: {
         const result = Set(action.results);
         const path = action.sgiPath.unshift('results');
-        state = state
+        return state
           .setIn(path.push('count'), result.size)
           .setIn(path.push('subjects'), result);
-
-        state = prunePath(state, action.sgiPath.unshift('loading'));
-        return state;
-      }
-
-      case Actions.POST_CANCEL_FETCH: {
-        return prunePath(state, action.path.unshift('loading'));
       }
 
       case Actions.RECALCULATE_COUNTS: {
@@ -145,20 +128,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         // TODO (jms) flesh out the rest of error handling / dispatching error
         // logs to wherever
         console.log(`ERROR: ${action.error}`);
-
-        if (action.critType && action.parentId) {
-          return state
-            .update('loading', loadZone => {
-              loadZone = loadZone.deleteIn([action.critType, action.parentId]);
-              if (loadZone.get(action.critType).isEmpty()) {
-                loadZone = loadZone.delete(action.critType);
-              }
-              return loadZone;
-            })
-            .deleteIn(getActiveSGIPath(state).unshift('search'))
-            .setIn(['context', 'wizardOpen'], false);
-        }
-
         return state;
       }
 

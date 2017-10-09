@@ -85,6 +85,7 @@ export class CohortSearchModule {
           this.epics.fetchCriteria,
           this.epics.fetchSearchResults,
           this.epics.recalculateCounts,
+          this.epics.finalizeRequests,
         )
       )
     ];

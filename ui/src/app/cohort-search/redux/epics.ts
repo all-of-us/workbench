@@ -5,17 +5,8 @@ import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
 
 import {CohortSearchActions as Actions} from './actions';
+import {cancelListener, cleanupRequest} from './requests';
 import {CohortBuilderService} from 'generated';
-
-
-/* All fetches are stored in a table in the state.  This function produces an
- * observable that listens for an action of type CANCEL_FETCH with a given path.
- */
-const canceller = (action$, path) => action$
-  .ofType(Actions.CANCEL_FETCH)
-  .filter(action => action.path.equals(path))
-  .map(action => ({type: Actions.POST_CANCEL_FETCH, path}))
-  .take(1);
 
 /**
  * CohortSearchEpics
@@ -35,9 +26,10 @@ export class CohortSearchEpics {
         const _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
           .map(result => ({
-            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId})
-          )
-          .race(canceller(action$, List([critType, parentId])))
+            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId,
+            cleanup: cleanupRequest(List([critType, parentId]))
+          }))
+          .race(cancelListener(action$, List([critType, parentId])))
           .catch(error =>
             Observable.of({type: Actions.ERROR, error, critType, parentId})
           );
@@ -49,8 +41,11 @@ export class CohortSearchEpics {
     action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
       ({request, sgiPath}) =>
       this.service.searchSubjects(request)
-        .map(results => ({type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath}))
-        .race(canceller(action$, sgiPath))
+        .map(results => ({
+          type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath,
+          cleanup: cleanupRequest(sgiPath)
+        }))
+        .race(cancelListener(action$, sgiPath))
         .catch(error => Observable.of({type: Actions.ERROR, error, sgiPath}))
     )
   )
@@ -62,5 +57,12 @@ export class CohortSearchEpics {
       Actions.REMOVE_GROUP_ITEM,
       Actions.REMOVE_CRITERIA,
     ).map(() => ({type: Actions.RECALCULATE_COUNTS}))
+  )
+
+  finalizeRequests = (action$: ActionsObservable<AnyAction>) => (
+    action$.ofType(
+      Actions.LOAD_CRITERIA,
+      Actions.LOAD_SEARCH_RESULTS
+    ).map(action => action.cleanup)
   )
 }

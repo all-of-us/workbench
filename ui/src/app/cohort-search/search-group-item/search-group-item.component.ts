@@ -8,9 +8,11 @@ import {
 } from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
+import {List} from 'immutable';
 
 import {CohortSearchActions} from '../redux/actions';
 import {CohortSearchState} from '../redux/store';
+import {isRequesting} from '../redux/requests';
 import {SearchGroupItem} from 'generated';
 
 
@@ -39,11 +41,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
       0  // specifies default; otherwise returns emtpy map
     );
 
-    const loadingSelector = (state) => state.getIn(
-      ['loading', this.role, this.index, this.itemIndex],
-      false
-    );
-
+    const loadingSelector = isRequesting(List([this.role, this.index, this.itemIndex]));
     const countSub = this.ngRedux.select(countSelector).subscribe(
       count => {
         this.count = count;
