@@ -22,7 +22,7 @@ declare const gapi: any;
 export class AppComponent implements OnInit {
   private baseTitle: string;
   user: Observable<SignInDetails>;
-  hasAdminPermissions: boolean = false;
+  hasAdminPermissions = false;
 
   constructor(
       private titleService: Title,
