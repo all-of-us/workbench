@@ -39,6 +39,8 @@ export class CohortSearchActions {
 
   static RECALCULATE_COUNTS = 'RECALCULATE_COUNTS';
   static ERROR = 'ERROR';
+  static CANCEL_FETCH = 'CANCEL_FETCH';
+  static POST_CANCEL_FETCH = 'POST_CANCEL_FETCH';
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private cohortBuilderService: CohortBuilderService) {}
@@ -58,7 +60,10 @@ export class CohortSearchActions {
   }
 
   public removeGroupItem(sgRole: keyof SearchRequest, sgIndex: number, sgItemIndex: number): void {
-    const path = List([sgRole, sgIndex, sgItemIndex]);
+    const path = List().push(sgRole, sgIndex, sgItemIndex);
+    if (this.ngRedux.getState().getIn(path.unshift('loading'), false)) {
+      this.ngRedux.dispatch({type: CohortSearchActions.CANCEL_FETCH, path});
+    }
     this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_GROUP_ITEM, path});
   }
 
@@ -103,7 +108,6 @@ export class CohortSearchActions {
    * to go either way. As is, they only handle SearchGroupItems, just as before
    */
   public fetchSearchResults(sgiPath): void {
-    const store = this.ngRedux.getState();
     const request = this.prepareRequest(sgiPath);
     this.ngRedux.dispatch({type: CohortSearchActions.FETCH_SEARCH_RESULTS, request, sgiPath});
   }

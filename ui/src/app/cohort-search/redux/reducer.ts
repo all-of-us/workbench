@@ -102,6 +102,10 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state;
       }
 
+      case Actions.POST_CANCEL_FETCH: {
+        return prunePath(state, action.path.unshift('loading'));
+      }
+
       case Actions.RECALCULATE_COUNTS: {
         const _included = [];
         const _excluded = [];
