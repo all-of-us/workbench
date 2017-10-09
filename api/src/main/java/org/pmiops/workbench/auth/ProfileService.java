@@ -1,10 +1,7 @@
 package org.pmiops.workbench.auth;
 
-import java.util.Arrays;
-import java.util.Collection;
 import javax.inject.Provider;
 
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -20,7 +17,7 @@ public class ProfileService {
   private final Provider<User> userProvider;
 
   @Autowired
-  ProfileService(FireCloudService fireCloudService, UserDao userDao, Provider<User> userProvider) {
+  ProfileService(FireCloudService fireCloudService, Provider<User> userProvider) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
   }
@@ -44,9 +41,5 @@ public class ProfileService {
         user.getDataAccessLevel().toString().toLowerCase()));
 
     return profile;
-  }
-
-  public static Collection<Authority> getGrantedAuthorities(String email) {
-    return Arrays.asList(Authority._PREVENT_COMMON_PREFIX_TRIMMING);  // TODO(mwf) implement
   }
 }
