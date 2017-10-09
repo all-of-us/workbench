@@ -12,18 +12,18 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
-import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.model.BugReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.model.BugReport;
+
 
 @RestController
 public class BugReportController implements BugReportApiDelegate {
 
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
-
-
 
   @Override
   public ResponseEntity<BugReport> sendBugReport(BugReport bugReport) {
@@ -35,9 +35,11 @@ public class BugReportController implements BugReportApiDelegate {
       InternetAddress[] replyTo = new InternetAddress[1];
       replyTo[0] = new InternetAddress(bugReport.getContactEmail());
       msg.setReplyTo(replyTo);
-      // To test the bug reporting functionality, change the recipient email to your email rather than the group.
+      // To test the bug reporting functionality, change the recipient email to your email rather
+      // than the group.
       // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress("all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
+          "all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
       msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
       msg.setText(bugReport.getReproSteps());
       Transport.send(msg);

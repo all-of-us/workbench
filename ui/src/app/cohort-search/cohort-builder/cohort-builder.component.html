@@ -33,7 +33,7 @@
             <div class="col-xs-8"><h3 class="mt-1">Include Participants</h3></div>
             <div class="col-xs-4 text-right">
               <button type="button" class="btn btn-outline" 
-                                    (click)="initGroup('include')">
+                                    (click)="initGroup('includes')">
                 <clr-icon shape="plus"></clr-icon> Add Group</button>
             </div>
           </div>
@@ -46,8 +46,8 @@
                 <app-search-group 
                   [group]="group" 
                   [index]="i"
-                  [role]="'include'"
-                  (onRemove)="actions.removeGroup('include', i)">
+                  [role]="'includes'"
+                  (onRemove)="actions.removeGroup('includes', i)">
                 </app-search-group>
               </div>
             </div>
@@ -58,7 +58,7 @@
           <div class="row">
             <div class="col-xs-8"><h3 class="mt-1">Exclude Participants</h3></div> <div class="col-xs-4 text-right">
               <button type="button" class="btn btn-outline" 
-                                    (click)="initGroup('exclude')">
+                                    (click)="initGroup('excludes')">
                 <clr-icon shape="plus"></clr-icon> Add Group</button>
             </div>
           </div>
@@ -71,8 +71,8 @@
                 <app-search-group 
                   [group]="group" 
                   [index]="i"
-                  [role]="'exclude'"
-                  (onRemove)="actions.removeGroup('exclude', i)">
+                  [role]="'excludes'"
+                  (onRemove)="actions.removeGroup('excludes', i)">
                 </app-search-group>
               </div>
             </div>

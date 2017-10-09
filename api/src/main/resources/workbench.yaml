@@ -836,11 +836,11 @@ definitions:
     required:
       - include
     properties:
-      include:
+      includes:
         type: array
         items:
           $ref: "#/definitions/SearchGroup"
-      exclude:
+      excludes:
         type: array
         items:
           $ref: "#/definitions/SearchGroup"
@@ -851,25 +851,30 @@ definitions:
             # SearchGroups
             [
               # SearchGroupItems
-              {type: "ICD9", searchParameters: [{code: "Foo", domainId: "Bar"}, {code: "C"}]},
-              {type: "ICD9", searchParameters: [{code: "Baz"}]}
+              {type: "ICD9", searchParameters: [{value: "Foo", domain: "Bar"}, {value: "C"}]},
+              {type: "ICD9", searchParameters: [{value: "Baz"}]}
             ], [
-              {type: "ICD10", searchParameters: [{code: "Baz", domainId: "Bar"}], modifiers: []},
+              {type: "ICD10", searchParameters: [{value: "Baz", domain: "Bar"}], modifiers: []},
             ]
           ],
           exclude: []
         }
       minimum:
         {
-          include: [[{type: "A Crit Type", searchParameters: [{code: "A code"}]}]]
+          include: [[{type: "A Crit Type", searchParameters: [{value: "A value"}]}]]
         }
 
   SearchGroup:
     description: >
       A SearchGroup is a container for groups of criteria which are `AND`ed together.
-    type: array
-    items:
-      $ref: "#/definitions/SearchGroupItem"
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchGroupItem"
 
   SearchGroupItem:
     # TODO: When we add in modifiers we'll add that to the official description
@@ -887,7 +892,7 @@ definitions:
         description: type of criteria
         type: string
       searchParameters:
-        description: criteria by category code
+        description: values that help search for subjects
         type: "array"
         items:
           $ref: "#/definitions/SearchParameter"
@@ -914,7 +919,7 @@ definitions:
       - value
     properties:
       value:
-        description: The Code of the Criteria within its Category Tree
+        description: The Value of the Criteria within its Category Tree
         type: string
       domain:
         description: clue to determine which tables to search

@@ -10,6 +10,7 @@ import {
   CohortBuilderService,
   SearchRequest,
   SearchParameter,
+  SearchGroup
 } from 'generated';
 
 
@@ -133,8 +134,14 @@ export class CohortSearchActions {
       .update('searchParameters', (params) => params.map(mapper))
       .update('type', _type => _type.toUpperCase());
 
-    const newRequest = {include: [[]], exclude: [[]]};
-    newRequest[sgiPath.first()][0].push(searchGoupItem.toJS());
+    const role = sgiPath.first();
+
+    const newRequest = {
+      [role]: [
+        {items: [searchGoupItem.toJS()]}
+      ]
+    };
+
     if (environment.debug) {
       console.log(`Created a new Request:`); console.dir(newRequest);
     }
