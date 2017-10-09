@@ -527,9 +527,9 @@ paths:
           required: true
       responses:
         "200":
-          description: A collection of subjects
+          description: A count of subjects
           schema:
-            $ref: "#/definitions/SubjectListResponse"
+            $ref: "#/definitions/SubjectCount"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -956,26 +956,17 @@ definitions:
       operator: "GTE >="
       operands: [ "Arg1", "Arg2" ]
 
-  SubjectListResponse:
-    type: array
-    items:
-      type: string
-    example:
-      [
-        "12345,1,5",
-        "67890,2,1"
-      ]
-
-  Subject:
+  SubjectCount:
     type: object
+    description: A Count of subjects
     required:
-      - val
+      - count
     properties:
-      val:
-        description: A String of Subject ID, Gender Code, Ethnicity Code
-        type: string
+      count:
+        type: integer
+        format: int64
     example:
-      val: "12345,1,5"
+      count: 1004
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

@@ -12,10 +12,11 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SubjectListResponse;
+import org.pmiops.workbench.model.SubjectCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,11 +63,24 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
-        /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
-        SearchGroupItem item = request.getIncludes().get(0).getItems().get(0);
-        SubjectListResponse subjectSet = new SubjectListResponse();
+    public ResponseEntity<SubjectCount> searchSubjects(SearchRequest request) {
+        SubjectCount subjectSet = new SubjectCount();
+        QueryRequest queryRequest = null;
 
+        for (SearchGroup searchGroup : request.getIncludes()) {
+            for (SearchGroupItem item : searchGroup.getItems()) {
+                queryRequest = getQueryRequest(item);
+            }
+        }
+
+        QueryResult result = executeQuery(queryRequest);
+        Map<String, Integer> rm = getResultMapper(result);
+
+        List<FieldValue> row = result.iterateAll().iterator().next();
+        return ResponseEntity.ok(new SubjectCount().count(getLong(row, rm.get("person_id"))));
+    }
+
+    private QueryRequest getQueryRequest(SearchGroupItem item) {
         List<SearchParameter> paramsWithDomains = filterSearchParametersWithDomain(item.getSearchParameters());
         List<SearchParameter> paramsWithoutDomains = filterSearchParametersWithoutDomain(item.getSearchParameters());
 
@@ -85,30 +99,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             }
         }
 
-        QueryRequest queryRequest = QueryBuilderFactory
+        return QueryBuilderFactory
                 .getQueryBuilder(FactoryKey.getType(item.getType()))
-                .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithDomains));
-
-        QueryResult result = executeQuery(queryRequest);
-        Map<String, Integer> rm = getResultMapper(result);
-
-        for (List<FieldValue> row : result.iterateAll()) {
-            subjectSet.add(getString(row, rm.get("val")));
-        }
-
-        return ResponseEntity.ok(subjectSet);
-    }
-
-    private Long getLong(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
-    }
-
-    private String getString(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? null : row.get(index).getStringValue();
-    }
-
-    private Boolean getBoolean(List<FieldValue> row, int index) {
-        return row.get(index).getBooleanValue();
+                .buildQueryRequest(new QueryParameters()
+                        .type(item.getType())
+                        .parameters(paramsWithDomains));
     }
 
     private QueryResult executeQuery(QueryRequest query) {
@@ -147,5 +142,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return searchParameters.stream()
                 .filter(parameter -> parameter.getDomain() != null && !parameter.getDomain().isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    private Long getLong(List<FieldValue> row, int index) {
+        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
+    }
+
+    private String getString(List<FieldValue> row, int index) {
+        return row.get(index).isNull() ? null : row.get(index).getStringValue();
+    }
+
+    private Boolean getBoolean(List<FieldValue> row, int index) {
+        return row.get(index).getBooleanValue();
     }
 }

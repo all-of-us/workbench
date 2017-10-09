@@ -55,10 +55,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     private static final String UNION_TEMPLATE = " union distinct ";
 
     private static final String OUTER_SQL_TEMPLATE =
-            "select distinct concat(" +
-                    "cast(p.person_id as string), ',', " +
-                    "p.gender_source_value, ',', " +
-                    "p.race_source_value) as val "+
+            "select person_id "+
                     "from `${projectId}.${dataSetId}.person` p "+
                     "where person_id in (${innerSql})";
 
@@ -72,12 +69,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         queryParams.put("proc", QueryParameterValue.string(typeProc.get(params.getType())));
 
         for (String key : paramMap.keySet()) {
-            queryParams.put(TableEnum.getConceptCodes(key),
+            String namedParameter = getUniqueNamedParameter(key);
+            queryParams.put(namedParameter,
                     QueryParameterValue.array(paramMap.get(key).stream().toArray(String[]::new), String.class));
             queryParts.add(filterSql(INNER_SQL_TEMPLATE,
                     ImmutableMap.of("${tableName}", TableEnum.getTableName(key),
                             "${tableId}", TableEnum.getSourceConceptId(key),
-                            "${conceptCodes}", "@" + TableEnum.getConceptCodes(key))));
+                            "${conceptCodes}", "@" + namedParameter)));
         }
 
 

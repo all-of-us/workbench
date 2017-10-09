@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SubjectListResponse;
+import org.pmiops.workbench.model.SubjectCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -79,7 +79,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
-                Arrays.asList("1,1,1"));
+                1);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1")))),
-                Arrays.asList("1,1,1"));
+                1);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
-                Arrays.asList("2,2,2"));
+                2);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
-                        Arrays.asList("2,2,2"));
+                        2);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
-                        Arrays.asList("3,3,3"));
+                        3);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
-                        Arrays.asList("3,3,3"));
+                        3);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
-                        Arrays.asList("4,4,4"));
+                        4);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE")))),
-                        Arrays.asList("5,5,5"));
+                        5);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        Arrays.asList("4,4,4", "5,5,5"));
+                        4);
     }
 
     @Test
@@ -189,13 +189,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         return new SearchRequest().includes(Arrays.asList(searchGroup));
     }
 
-    private void assertSubjects(ResponseEntity response, List<String> expectedSubjects) {
+    private void assertSubjects(ResponseEntity response, Integer expectedCount) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        assertThat(listResponse.size()).isEqualTo(expectedSubjects.size());
-        for (String subject : listResponse) {
-            assertThat(subject).isIn(expectedSubjects);
-        }
+        SubjectCount subjectCount = (SubjectCount) response.getBody();
+        assertThat(subjectCount.getCount()).isEqualTo(expectedCount);
     }
 }
