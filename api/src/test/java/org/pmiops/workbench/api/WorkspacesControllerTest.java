@@ -31,7 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-public class WorkspaceControllerTest {
+public class WorkspacesControllerTest {
 
   @Autowired
   WorkspaceDao workspaceDao;
@@ -44,7 +44,7 @@ public class WorkspaceControllerTest {
   @Mock
   FireCloudService fireCloudService;
 
-  private WorkspaceController workspaceController;
+  private WorkspacesController workspacesController;
 
   private static final Instant NOW = Instant.now();
   private static final long NOW_TIME = Timestamp.from(NOW).getTime();
@@ -57,7 +57,7 @@ public class WorkspaceControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
-    this.workspaceController = new WorkspaceController(workspaceDao, cdrVersionDao,
+    this.workspacesController = new WorkspacesController(workspaceDao, cdrVersionDao,
         userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
@@ -87,11 +87,11 @@ public class WorkspaceControllerTest {
   @Test
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
-    workspaceController.createWorkspace(workspace);
+    workspacesController.createWorkspace(workspace);
     verify(fireCloudService).createWorkspace("namespace", "name");
 
     Workspace workspace2 =
-        workspaceController.getWorkspace("namespace", "name")
+        workspacesController.getWorkspace("namespace", "name")
             .getBody();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
