@@ -1,10 +1,14 @@
 package org.pmiops.workbench.auth;
 
+import java.util.Arrays;
+import java.util.Collection;
 import javax.inject.Provider;
+
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,5 +44,9 @@ public class ProfileService {
         user.getDataAccessLevel().toString().toLowerCase()));
 
     return profile;
+  }
+
+  public static Collection<Authority> getGrantedAuthorities(String email) {
+    return Arrays.asList(Authority._PREVENT_COMMON_PREFIX_TRIMMING);  // TODO(mwf) implement
   }
 }

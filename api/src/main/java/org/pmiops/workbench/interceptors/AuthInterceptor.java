@@ -2,6 +2,8 @@ package org.pmiops.workbench.interceptors;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -24,8 +26,10 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
+import org.pmiops.workbench.model.Authority;
 
 
 /**
@@ -59,10 +63,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     HandlerMethod method = (HandlerMethod) handler;
 
-    if (!hasRequiredAuthority(method.getMethod())) {
-      return false;
-    }
-
     boolean isAuthRequired = false;
     ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
     for (Authorization auth : apiOp.authorizations()) {
@@ -94,6 +94,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
+
+    if (!hasRequiredAuthority(method.getMethod(), userInfo)) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      return false;
+    }
+
     // TODO: get token info and check that as well
 
     // TODO: check Google group membership to ensure user is in registered user group
@@ -120,7 +126,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    *
    * @param method The ApiController (Swagger-generated) method which calls our annotated delegate.
    */
-  private static boolean hasRequiredAuthority(Method apiControllerMethod) {
+  private static boolean hasRequiredAuthority(Method apiControllerMethod, Userinfoplus userInfo) {
     // There's no concise way to find out what class implements the delegate interface, so instead
     // depend on naming conventions. Essentially, this removes "Api" from the class name.
     Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
@@ -146,18 +152,23 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     String controllerMethodName =
         controllerMethod.getDeclaringClass().getName() + "." + controllerMethod.getName();
 
-
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
 
     if (req != null) {
-      log.warning("Authority required for method " + controllerMethodName + ", calling it un-auth'd.");
-      return false;
-    } else {
-      log.warning("No @AuthorityRequired for method " + controllerMethodName + ", continuing.");
-      for (Annotation a : controllerMethod.getAnnotations()) {
-        log.info("\tHad annotation " + a.toString());
+      Collection<Authority> granted = ProfileService.getGrantedAuthorities(userInfo.getEmail());
+      if (granted.containsAll(Arrays.asList(req.value()))) {
+        return true;
+      } else {
+        log.log(
+            Level.INFO,
+            "{0} required authorities {1} but user had only {2}.",
+            new Object[] {
+                controllerMethodName,
+                Arrays.toString(req.value()),
+                Arrays.toString(granted.toArray())});
+        return false;
       }
-      return true;
     }
+    return true;  // No @AuthorityRequired annotation found at runtime, default to allowed.
   }
 }
