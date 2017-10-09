@@ -184,10 +184,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private SearchRequest createSearchRequests(String type, List<SearchParameter> parameters) {
         final SearchGroupItem searchGroupItem = new SearchGroupItem().type(type).searchParameters(parameters);
 
-        final SearchGroup searchGroup = new SearchGroup();
-        searchGroup.add(searchGroupItem);
+        final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
 
-        return new SearchRequest().include(Arrays.asList(searchGroup));
+        return new SearchRequest().includes(Arrays.asList(searchGroup));
     }
 
     private void assertSubjects(ResponseEntity response, List<String> expectedSubjects) {
