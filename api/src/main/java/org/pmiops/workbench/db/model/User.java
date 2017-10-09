@@ -130,7 +130,6 @@ public class User {
   }
 
   public void setAuthorities(Set<Authority> newAuthorities) {
-    authorities.clear();
-    authorities.addAll(newAuthorities);
+    this.authorities = newAuthorities;
   }
 }
