@@ -136,7 +136,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    * @param method The ApiController (Swagger-generated) method which calls our annotated delegate.
    * @param email E-mail of the authenticated user making the request, used as ID.
    */
-  private boolean hasRequiredAuthority(Method apiControllerMethod, String email) {
+  boolean hasRequiredAuthority(Method apiControllerMethod, String email) {
     // There's no concise way to find out what class implements the delegate interface, so instead
     // depend on naming conventions. Essentially, this removes "Api" from the class name.
     Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
