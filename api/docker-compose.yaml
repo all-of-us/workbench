@@ -23,6 +23,8 @@ services:
       - 8081:8081
       - 8001:8001
   db-migration:
+    depends_on:
+      - db
     build:
       context: ./src/dev/server
     user: ${UID}
@@ -34,6 +36,8 @@ services:
     env_file:
       - db/vars.env
   update-config:
+    depends_on:
+      - db
     build:
      context: ./src/dev/server
     user: ${UID}
