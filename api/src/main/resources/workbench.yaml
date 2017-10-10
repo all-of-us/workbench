@@ -138,7 +138,7 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}cluster/:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
     get:
       summary: Get details of a dataproc cluster
       description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
@@ -186,12 +186,6 @@ paths:
           description: workspaceId
           required: true
           type: string
-        - in: body
-          description: Request for new cluster
-          name: clusterRequest
-          required: true
-          schema:
-            $ref: '#/definitions/ClusterRequest'
       responses:
         "200":
           description: Cluster creation successful
@@ -1033,11 +1027,7 @@ definitions:
     description: ''
     required:
       - clusterName
-      - googleId
-      - googleProject
-      - googleServiceAccount
-      - googleBucket
-      - operationName
+      - clusterNamespace
       - status
       - createdDate
       - labels
@@ -1045,27 +1035,12 @@ definitions:
       clusterName:
         type: string
         description: The user-supplied name for the cluster
-      googleId:
-        type: string
-        description: Google's UUID for the cluster
-      googleProject:
+      clusterNamespace:
         type: string
         description: The Google Project used to create the cluster
-      googleServiceAccount:
-        type: string
-        description: The Google Service Account used to create the cluster
-      googleBucket:
-        type: string
-        description: The Google Bucket associated with the cluster
-      operationName:
-        type: string
-        description: Google's operation ID for the cluster
       status:
         type: string
         description: The current state of the cluster
-      hostIp:
-        type: string
-        description: The IP address of the cluster master node
       createdDate:
         type: string
         description: The date and time the cluster was created, in ISO-8601 format
@@ -1084,29 +1059,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Cluster"
-  ClusterRequest:
-    description: ''
-    required:
-      - bucketPath
-      - serviceAccount
-      - labels
-    properties:
-      bucketPath:
-        type: string
-        description: The bucket where user's notebooks will be saved
-      serviceAccount:
-        type: string
-        description: The service account of the user
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      jupyterExtensionUri:
-        type: string
-        description: |
-          Optional bucket URI to an archive containing Jupyter notebook extension files.
-          The archive must be in tar.gz format, must not include a parent directory, and
-          must have an entry point named 'main'. For more information on notebook extensions,
-          see: http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
   UsernameTakenResponse:
     type: object
     required:
