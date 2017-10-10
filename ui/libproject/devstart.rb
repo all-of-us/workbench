@@ -7,14 +7,12 @@ require_relative "../../libproject/swagger"
 
 def install_dependencies()
   common = Common.new
-  common.docker.requires_docker
 
   common.run_inline %W{docker-compose run --rm ui npm install}
 end
 
 def swagger_regen()
   common = Common.new
-  common.docker.requires_docker
 
   Workbench::Swagger.download_swagger_codegen_cli
 
@@ -44,7 +42,6 @@ end
 
 def dev_up(*args)
   common = Common.new
-  common.docker.requires_docker
 
   options = DevUpOptions.new.parse(args)
 
@@ -64,7 +61,6 @@ end
 
 def rebuild_image()
   common = Common.new
-  common.docker.requires_docker
 
   common.run_inline %W{docker-compose build}
 end
