@@ -7,10 +7,10 @@ import {ClarityModule} from 'clarity-angular';
 
 import {AppComponent} from 'app/views/app/component';
 import {SignInService} from 'app/services/sign-in.service';
-import {ProfileService} from 'generated';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
 import {CohortsService} from 'generated';
+import {ProfileService} from 'generated';
 
 describe('AppComponent', () => {
 
