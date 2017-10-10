@@ -146,7 +146,9 @@ database with a 10 minute expiration.
 
 ## API Server Database Updates
 
-When editing database models, you must write a new changelog XML file.
+When editing database models, you must write a new changelog XML file. See
+[Liquibase change docs](http://www.liquibase.org/documentation/changes/index.html),
+such as [createTable](http://www.liquibase.org/documentation/changes/create_table.html).
 
 You can get Hibernate to update the schema for inspection (and then backport
 that to liquibase's XML files) by editing `api/db/vars.env` to make Hibernate
