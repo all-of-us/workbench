@@ -122,7 +122,8 @@ public class User {
   // INSERT INTO authority VALUES(
   //     (SELECT user_id FROM user WHERE email = 'me@staging.pmi-ops.org'),
   //     0);
-  @ElementCollection(fetch = FetchType.EAGER)
+  // TODO(RW-85) Tool to edit authorities.
+  @ElementCollection(fetch = FetchType.JOIN)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "authority")
   public Set<Authority> getAuthorities() {
