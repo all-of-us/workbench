@@ -5,7 +5,7 @@ import {Map, List, Set, fromJS, isCollection} from 'immutable';
 import {SearchRequest} from 'generated';
 
 export const InitialState = fromJS({
-  search: {include: [[]], exclude: [[]]},
+  search: {includes: [[]], excludes: [[]]},
   results: Map(),
   context: {
     wizardOpen: false,
@@ -18,8 +18,8 @@ export type CohortSearchState = Map<string, any>;
 
 // Pathspecs & selectors
 export const subjects = ['results', 'subjects'];
-export const inclusionGroups = ['search', 'include'];
-export const exclusionGroups = ['search', 'exclude'];
+export const inclusionGroups = ['search', 'includes'];
+export const exclusionGroups = ['search', 'excludes'];
 export const wizardOpen = ['context', 'wizardOpen'];
 export const activeCriteriaType = ['context', 'active', 'critType'];
 export const activeSGRole = ['context', 'active', 'sgRole'];
