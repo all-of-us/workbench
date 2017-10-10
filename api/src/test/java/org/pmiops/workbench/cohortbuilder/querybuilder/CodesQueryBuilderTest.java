@@ -49,20 +49,20 @@ public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
         }
 
         String expected =
-                "select person_id " +
-                        "from `" + getTablePrefix() + ".person` p " +
-                        "where person_id in (" +
-                        "select distinct person_id " +
-                        "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b " +
-                        "where a.condition_source_concept_id = b.concept_id " +
-                        "and b.vocabulary_id in (@cm,@proc) " +
-                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")" +
-                        " union distinct " +
-                        "select distinct person_id " +
-                        "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b " +
-                        "where a.measurement_source_concept_id = b.concept_id " +
-                        "and b.vocabulary_id in (@cm,@proc) " +
-                        "and b.concept_code in unnest(@" + measurementNamedParameter + "))";
+                "select person_id\n" +
+                        "from `" + getTablePrefix() + ".person` p\n" +
+                        "where person_id in (select distinct person_id\n" +
+                        "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b\n" +
+                        "where a.condition_source_concept_id = b.concept_id\n" +
+                        "and b.vocabulary_id in (@cm,@proc)\n" +
+                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+                        " union distinct\n" +
+                        "select distinct person_id\n" +
+                        "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b\n" +
+                        "where a.measurement_source_concept_id = b.concept_id\n" +
+                        "and b.vocabulary_id in (@cm,@proc)\n" +
+                        "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +
+                        ")\n";
 
         assertEquals(expected, request.getQuery());
 
