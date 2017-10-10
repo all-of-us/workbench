@@ -139,6 +139,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   boolean hasRequiredAuthority(Method apiControllerMethod, String email) {
     // There's no concise way to find out what class implements the delegate interface, so instead
     // depend on naming conventions. Essentially, this removes "Api" from the class name.
+    // If this becomes a bottleneck, consider caching the class mapping, or copying annotations
+    // from our implementation to the Swagger wrapper at startup (locally it takes <1ms).
     Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
     String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
     String controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
