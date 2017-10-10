@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.inject.Provider;
 import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +27,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Authority;
 
@@ -47,7 +47,7 @@ public class AuthInterceptorTest {
   @Mock
   private UserInfoService userInfoService;
   @Mock
-  private UserDao userDao;
+  private Provider<User> userProvider;
   @Mock
   private HttpServletRequest request;
   @Mock
@@ -62,7 +62,7 @@ public class AuthInterceptorTest {
 
   @Before
   public void setup() {
-    interceptor = new AuthInterceptor(userInfoService, userDao);
+    interceptor = new AuthInterceptor(userInfoService, userProvider);
   }
 
   @Test
@@ -128,27 +128,23 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckPermitsWithNoAnnotation() throws Exception {
-    String email = "userId@email.com";
     Method method = getProfileApiMethod("getBillingProjects");
-    assertThat(interceptor.hasRequiredAuthority(method, email)).isTrue();
+    assertThat(interceptor.hasRequiredAuthority(method, new User())).isTrue();
   }
 
   @Test
   public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
-    String email = "userId@email.com";
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
-    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, email)).isFalse();
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, new User())).isFalse();
   }
 
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
-    String email = "userId@email.com";
     User user = new User();
     Set<Authority> required = new HashSet<Authority>();
     required.add(Authority.REVIEW_RESEARCH_PURPOSE);
     user.setAuthorities(required);
-    when(userDao.findUserByEmail(email)).thenReturn(user);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
-    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, email)).isTrue();
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
   }
 }
