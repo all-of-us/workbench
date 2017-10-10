@@ -28,9 +28,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class WorkspaceController implements WorkspacesApiDelegate {
+public class WorkspacesController implements WorkspacesApiDelegate {
 
-  private static final Logger log = Logger.getLogger(WorkspaceController.class.getName());
+  private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String WORKSPACE_NAMESPACE_PREFIX = "allofus-";
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
@@ -99,7 +99,7 @@ public class WorkspaceController implements WorkspacesApiDelegate {
   private final Clock clock;
 
   @Autowired
-  WorkspaceController(WorkspaceDao workspaceDao, CdrVersionDao cdrVersionDao,
+  WorkspacesController(WorkspaceDao workspaceDao, CdrVersionDao cdrVersionDao,
       Provider<User> userProvider, FireCloudService fireCloudService, Clock clock) {
     this.workspaceDao = workspaceDao;
     this.cdrVersionDao = cdrVersionDao;
