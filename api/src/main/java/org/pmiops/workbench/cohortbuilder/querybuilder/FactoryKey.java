@@ -15,7 +15,8 @@ public enum FactoryKey {
     CODES,
     /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
     GROUP_CODES,
-    DEMO;
+    DEMO,
+    COUNT;
 
     private static final Map<String, Object> typeMap = Collections.unmodifiableMap(initializeMapping());
 
@@ -42,6 +43,7 @@ public enum FactoryKey {
         tMap.put("ICD10", FactoryKey.CODES);
         tMap.put("CPT", FactoryKey.CODES);
         tMap.put("DEMO", FactoryKey.DEMO);
+        tMap.put("COUNT", FactoryKey.COUNT);
         return tMap;
     }
 }

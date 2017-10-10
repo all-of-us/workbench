@@ -44,7 +44,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final String COUNT_SQL_TEMPLATE =
             "select count(distinct person_id) as count\n" +
-                    "  from `ohdsi-in-a-box.ohdsi.person` person\n" +
+                    "  from `${projectId}.${dataSetId}.person` person\n" +
                     " where 1 = 1\n";
 
     private static final String UNION_TEMPLATE =
@@ -52,6 +52,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final String INCLUDE_SQL_TEMPLATE =
             "and person.person_id in (${includeSql})\n";
+
+    private static final String EXCLUDE_SQL_TEMPLATE =
+            "and not exists\n" +
+                    "(select 'x' from\n" +
+                    "(${excludeSql})\n";
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
@@ -83,18 +88,31 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<Long> searchSubjects(SearchRequest request) {
         Map<String, QueryParameterValue> params = new HashMap<>();
-        List<String> sgQueryParts = new ArrayList<>();
-        List<String> sgiQueryParts = new ArrayList<>();
+        List<String> queryParts = new ArrayList<>();
         String finalSql = COUNT_SQL_TEMPLATE;
 
-        for (SearchGroup searchGroup : request.getIncludes()) {
+        // build query for included search groups
+        for (SearchGroup includeGroup : request.getIncludes()) {
             finalSql = finalSql + INCLUDE_SQL_TEMPLATE;
-            for (SearchGroupItem item : searchGroup.getItems()) {
-                QueryRequest queryRequest = buildQueryRequestForType(item);
+            for (SearchGroupItem includeItem : includeGroup.getItems()) {
+                QueryRequest queryRequest = buildQueryRequestForType(includeItem);
                 params.putAll(queryRequest.getNamedParameters());
-                sgiQueryParts.add(queryRequest.getQuery());
+                queryParts.add(queryRequest.getQuery());
             }
-            finalSql = finalSql.replace("${includeSql}", String.join(UNION_TEMPLATE, sgiQueryParts));
+            finalSql = finalSql.replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts));
+            queryParts = new ArrayList<>();
+        }
+
+        // build query for excluded search groups
+        for (SearchGroup excludeGroup : request.getExcludes()) {
+            finalSql = finalSql + EXCLUDE_SQL_TEMPLATE;
+            for (SearchGroupItem excludeItem : excludeGroup.getItems()) {
+                QueryRequest queryRequest = buildQueryRequestForType(excludeItem);
+                params.putAll(queryRequest.getNamedParameters());
+                queryParts.add(queryRequest.getQuery());
+            }
+            finalSql = finalSql.replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts));
+            queryParts = new ArrayList<>();
         }
 
         QueryRequest queryRequest =

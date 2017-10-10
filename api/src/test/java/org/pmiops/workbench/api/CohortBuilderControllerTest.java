@@ -94,7 +94,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
-                2);
+                1);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
-                        2);
+                        1);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
-                        3);
+                        1);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
-                        3);
+                        1);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
-                        4);
+                        2);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE")))),
-                        5);
+                        1);
     }
 
     @Test
@@ -150,7 +150,39 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        2);
+                        3);
+    }
+
+    @Test
+    public void searchSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
+        LocalDate birthdate = LocalDate.of(1980, 8, 01);
+        LocalDate now = LocalDate.now();
+        int age = Period.between(birthdate, now).getYears();
+
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE");
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
+                .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
+        testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+
+        assertSubjects( controller.searchSubjects(testSearchRequest), 3);
+    }
+
+    @Test
+    public void searchSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
+                .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
+        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
+        testSearchRequest.getIncludes().add(anotherSearchGroup);
+
+        assertSubjects( controller.searchSubjects(testSearchRequest), 1);
     }
 
     @Test
@@ -185,7 +217,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
         final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
 
-        return new SearchRequest().includes(Arrays.asList(searchGroup));
+        List<SearchGroup> groups = new ArrayList<>();
+        groups.add(searchGroup);
+        return new SearchRequest().includes(groups);
     }
 
     private void assertSubjects(ResponseEntity response, Integer expectedCount) {
