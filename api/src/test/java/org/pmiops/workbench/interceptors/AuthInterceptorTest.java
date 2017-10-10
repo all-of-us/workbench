@@ -134,14 +134,14 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void authorityCheckDeniesWhenUserMissingAnnotation() throws Exception {
+  public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
     String email = "userId@email.com";
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, email)).isFalse();
   }
 
   @Test
-  public void authorityCheckPermitsWhenUserHasAnnotation() throws Exception {
+  public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
     String email = "userId@email.com";
     User user = new User();
     Set<Authority> required = new HashSet<Authority>();
