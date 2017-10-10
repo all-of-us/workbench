@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SubjectCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -151,7 +150,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.searchSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        4);
+                        2);
     }
 
     @Test
@@ -192,7 +191,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private void assertSubjects(ResponseEntity response, Integer expectedCount) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        SubjectCount subjectCount = (SubjectCount) response.getBody();
-        assertThat(subjectCount.getCount()).isEqualTo(expectedCount);
+        Long subjectCount = (Long) response.getBody();
+        assertThat(subjectCount).isEqualTo(expectedCount);
     }
 }

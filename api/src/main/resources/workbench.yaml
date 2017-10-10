@@ -527,7 +527,8 @@ paths:
         "200":
           description: A count of subjects
           schema:
-            $ref: "#/definitions/SubjectCount"
+            type: integer
+            format: int64
 
 ##########################################################################################
 ## DEFINITIONS
@@ -985,18 +986,6 @@ definitions:
       name: "age_at_event"
       operator: "GTE >="
       operands: [ "Arg1", "Arg2" ]
-
-  SubjectCount:
-    type: object
-    description: A Count of subjects
-    required:
-      - count
-    properties:
-      count:
-        type: integer
-        format: int64
-    example:
-      count: 1004
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

@@ -32,22 +32,18 @@ public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
                 .buildQueryRequest(new QueryParameters().type("DEMO").parameters(params));
 
         for (String key : request.getNamedParameters().keySet()) {
-            if (key.startsWith("gender")) {
+            if (key.startsWith("demoNamedParameter")) {
                 genderNamedParameter = key;
             } else {
                 ageNamedParameter = key;
             }
         }
 
-        String expected = "select distinct concat(cast(p.person_id as string), ',',\n" +
-                "p.gender_source_value, ',',\n" +
-                "p.race_source_value) as val\n" +
+        String expected = "select distinct person_id\n" +
                 "FROM `" + getTablePrefix() + ".person` p\n" +
                 "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
                 "union distinct\n" +
-                "select distinct concat(cast(p.person_id as string), ',',\n" +
-                "p.gender_source_value, ',',\n" +
-                "p.race_source_value) as val\n" +
+                "select distinct person_id\n" +
                 "FROM `" + getTablePrefix() + ".person` p\n" +
                 "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @" + ageNamedParameter + "\n";
 

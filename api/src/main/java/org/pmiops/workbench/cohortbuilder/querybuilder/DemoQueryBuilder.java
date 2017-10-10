@@ -2,8 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +40,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     public QueryRequest buildQueryRequest(QueryParameters parameters) {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
-
         List<String> queryParts = new ArrayList<>();
+
         for (SearchParameter parameter : parameters.getParameters()) {
             final String demoType = DemoParamMap.get(parameter.getDomain());
             final String parameterToReplace = "${" + demoType + "}";
@@ -69,16 +67,6 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     @Override
     public FactoryKey getType() {
         return FactoryKey.DEMO;
-    }
-
-    private String filterSql(String sqlStatement, ImmutableMap replacements) {
-        String returnSql = sqlStatement;
-        for (UnmodifiableIterator iterator = replacements.keySet().iterator(); iterator.hasNext();) {
-            String key = (String)iterator.next();
-            returnSql = returnSql.replace(key, replacements.get(key).toString());
-        }
-        return returnSql;
-
     }
 
     private String getDemoSqlStatement(String domain) {
