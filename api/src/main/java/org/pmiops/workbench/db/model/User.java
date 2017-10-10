@@ -14,8 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "user",
