@@ -16,7 +16,6 @@ import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
-import org.pmiops.workbench.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
