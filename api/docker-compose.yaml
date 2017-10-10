@@ -14,6 +14,8 @@ services:
     volumes:
       - .:/w:cached
       - gradle-cache:/.gradle
+      - ~/.config:/.config
+      - ~/.gsutil:/.gsutil
     command: ./gradlew appengineRun
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
@@ -48,6 +50,35 @@ services:
     command: wait-for db:3306 -- ./gradlew tools:loadConfig
     env_file:
       - db/vars.env
+  cloud-sql-proxy:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: |
+      cloud_sql_proxy
+        -instances all-of-us-workbench-test:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
+        -credential_file=sa-key.json
+  update-cloud-config:
+    depends_on:
+      - cloud-sql-proxy
+    build:
+     context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for cloud-sql-proxy:3307 -- ./gradlew tools:loadConfig
+    env_file:
+      - db/vars.dev.env
+    environment:
+      - DB_HOST=cloud-sql-proxy
+      - DB_PORT=3307
 volumes:
   db:
   gradle-cache:
