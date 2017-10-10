@@ -1,6 +1,5 @@
 package org.pmiops.workbench.interceptors;
 
-
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static com.google.common.truth.Truth.assertThat;
@@ -9,6 +8,8 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
@@ -22,9 +23,24 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.springframework.web.method.HandlerMethod;
 
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.Authority;
+
+
+/** mimicing a Swagger-generated wrapper */
+class FakeApiController {
+  public void handle() {}
+}
+
+/** mimicing our implementation, annotated */
+class FakeController {
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+  public void handle() {}
+}
 
 public class AuthInterceptorTest {
 
@@ -108,5 +124,31 @@ public class AuthInterceptorTest {
       }
     }
     throw new RuntimeException("Method \""+methodName+"\" not found");
+  }
+
+  @Test
+  public void authorityCheckPermitsWithNoAnnotation() throws Exception {
+    String email = "userId@email.com";
+    Method method = getProfileApiMethod("getBillingProjects");
+    assertThat(interceptor.hasRequiredAuthority(method, email)).isTrue();
+  }
+
+  @Test
+  public void authorityCheckDeniesWhenUserMissingAnnotation() throws Exception {
+    String email = "userId@email.com";
+    Method apiControllerMethod = FakeApiController.class.getMethod("handle");
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, email)).isFalse();
+  }
+
+  @Test
+  public void authorityCheckPermitsWhenUserHasAnnotation() throws Exception {
+    String email = "userId@email.com";
+    User user = new User();
+    Set<Authority> required = new HashSet<Authority>();
+    required.add(Authority.REVIEW_RESEARCH_PURPOSE);
+    user.setAuthorities(required);
+    when(userDao.findUserByEmail(email)).thenReturn(user);
+    Method apiControllerMethod = FakeApiController.class.getMethod("handle");
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, email)).isTrue();
   }
 }
