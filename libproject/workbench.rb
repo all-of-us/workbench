@@ -30,7 +30,9 @@ module Workbench
 
     check_submodules
     ensure_git_hooks
-    common.docker.requires_docker
+    unless ENV["CIRCLECI"] == "true"
+      common.docker.requires_docker
+    end
 
     if ARGV.length == 0 or ARGV[0] == "--help"
       common.print_usage
