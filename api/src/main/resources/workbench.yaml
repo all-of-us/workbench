@@ -574,6 +574,8 @@ definitions:
         # Swagger trims any common prefix from enum values' corresponding Java
         # fields by default; include a bogus sentinel value to prevent that.
         # https://github.com/swagger-api/swagger-codegen/issues/4261
+        # TODO: Remove this sentinel when adding a new enum value with a
+        # unique prefix (but leave the above cautionary comment).
         _PREVENT_COMMON_PREFIX_TRIMMING
     ]
 
