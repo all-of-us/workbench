@@ -148,11 +148,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     try {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
-      log.log(
-          Level.SEVERE,
-          "Missing {0} by name derived from {1}. @AuthorityRequired will not be evaluted.",
-          new Object[] {controllerName, apiControllerName});
-      return true;  // Default to allowing access in case of error.
+      throw new RuntimeException(
+          "Missing " + controllerName + " by name derived from " + apiControllerName + ". "
+          " Cannot check @AuthorityRequired.",
+          e);
     }
 
     Method controllerMethod;
