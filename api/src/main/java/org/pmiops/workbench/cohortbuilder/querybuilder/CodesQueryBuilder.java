@@ -46,18 +46,18 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
      * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
      */
     private static final String INNER_SQL_TEMPLATE =
-            "select distinct person_id " +
-                    "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b "+
-                    "where a.${tableId} = b.concept_id "+
-                    "and b.vocabulary_id in (@cm,@proc) " +
-                    "and b.concept_code in unnest(${conceptCodes})";
+            "select distinct person_id\n" +
+                    "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n"+
+                    "where a.${tableId} = b.concept_id\n"+
+                    "and b.vocabulary_id in (@cm,@proc)\n" +
+                    "and b.concept_code in unnest(${conceptCodes})\n";
 
-    private static final String UNION_TEMPLATE = " union distinct ";
+    private static final String UNION_TEMPLATE = " union distinct\n";
 
     private static final String OUTER_SQL_TEMPLATE =
-            "select person_id "+
-                    "from `${projectId}.${dataSetId}.person` p "+
-                    "where person_id in (${innerSql})";
+            "select person_id\n"+
+                    "from `${projectId}.${dataSetId}.person` p\n"+
+                    "where person_id in (${innerSql})\n";
 
     @Override
     public QueryRequest buildQueryRequest(QueryParameters params) {
@@ -73,8 +73,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             queryParams.put(namedParameter,
                     QueryParameterValue.array(paramMap.get(key).stream().toArray(String[]::new), String.class));
             queryParts.add(filterSql(INNER_SQL_TEMPLATE,
-                    ImmutableMap.of("${tableName}", TableEnum.getTableName(key),
-                            "${tableId}", TableEnum.getSourceConceptId(key),
+                    ImmutableMap.of("${tableName}", DomainTableEnum.getTableName(key),
+                            "${tableId}", DomainTableEnum.getSourceConceptId(key),
                             "${conceptCodes}", "@" + namedParameter)));
         }
 
