@@ -431,7 +431,8 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs tests.",
+  :description => "Runs tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
   :fn => lambda { |*args| run_tests(*args) }
 })
 
