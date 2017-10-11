@@ -1,37 +1,50 @@
-import {Map, List, Set, fromJS, isCollection} from 'immutable';
+import {Map, List, Set, fromJS} from 'immutable';
+import {KeyPath} from './typings';
 import {SearchRequest} from 'generated';
 
+/**
+ * InitialState:
+ *    - search: This holds the data used to generate SearchRequests
+ *    - context: Contains a variety of contextual data for the active wizard
+ *    - criteria: Models the criteria tree loaded so far
+ *    - requests: Table {KeyPath => boolean}; keeps tabs on what requests are in flight
+ *      * Implemented as a Set, not a Map
+ *    - counts: Table {KeyPath => number} tracking entity counts
+ */
 export const InitialState = fromJS({
-  // This holds the data used to generate SearchRequests
   search: {
-    includes: [[]], 
+    includes: [[]],
     excludes: [[]],
   },
-  // Contains a variety of contextual data for the active wizard
   context: {
     wizardOpen: false,
     activePath: [],
   },
-  // Models the criteria tree loaded so far
   criteria: {},
-  // Table of KeyPath => boolean keeping tabs on what requests are in flight
   requests: Set(),
-  // Table of KeyPath => number tracking entity counts
-  counts: Set(),
+  counts: {},
 });
 
-export const activeSearchGroupPath = (state) =>
+
+/**
+ * Selectors: Used to query information from the state
+ */
+
+export const activeSearchGroupPath = (state): KeyPath =>
   List().push(
     'search',
     state.getIn(['context', 'active', 'role']),
     state.getIn(['context', 'active', 'groupIndex'])
   );
 
-export const activeSearchGroupItemPath = (state) =>
+export const activeSearchGroupItemPath = (state): KeyPath =>
   activeSearchGroupPath(state).push(
     'items',
     state.getIn(['context', 'active', 'groupItemIndex'])
   );
 
-export const activeCriteriaType = (state) =>
+export const activeCriteriaType = (state): string =>
   state.getIn(['context', 'active', 'criteriaType']);
+
+export const countFor = (objId: string|KeyPath) => (state): number =>
+  state.getIn(['counts', objId], objId === 'total' ? 0 : null);

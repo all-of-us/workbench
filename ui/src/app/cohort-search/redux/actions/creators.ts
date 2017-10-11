@@ -4,37 +4,41 @@ import {
   KeyPath,
   CriteriaType,
   ParentID,
-  RequestAction, 
+  RequestAction,
   CountRequestAction,
   CriteriaRequestAction,
+  UtilityAction,
 } from '../typings';
 
 import {Criteria, SearchRequest} from 'generated';
 
 
-/*
+/**
  * Each Request is identified by a KeyPath to the resource being requested and
  * tracked in a table of in-flight requests.  These three functions manage
- * that request tracking.
+ * that request tracking by, respectively,
+ *    - pushing a KeyPath into the requests set
+ *    - notifying the request handling Epic to cancel a request
+ *    - or removing a KeyPath from the requests set
  */
-/* Puts `path` into the `state.requests` table */
 export const startRequest =
   (path: KeyPath): RequestAction =>
   ({type: ActionTypes.START_REQUEST, path});
 
-/* Signals to the RequestEpic to cancel the request for `path` */
 export const cancelRequest =
   (path: KeyPath): RequestAction =>
   ({type: ActionTypes.CANCEL_REQUEST, path});
 
-/* Removes `path` from the request table */
 export const cleanupRequest =
   (path: KeyPath): RequestAction =>
   ({type: ActionTypes.CLEANUP_REQUEST, path});
 
 
-/* Signals the RequestEpic to begin the request. The Request's path identifier
- * is `List([kind, parentId])`
+/**
+ * The KeyPath identifier for a Criteria is [criteriaType, parentId], where the
+ * roots of any given criteria tree have parentId === 0.  `requestCriteria`
+ * signals the Epic to begin the request; `loadCriteriaRequestResults` is fired
+ * by the Epic upon success.
  */
 export const requestCriteria =
   (kind: CriteriaType, parentId: ParentID): CriteriaRequestAction =>
@@ -45,9 +49,11 @@ export const loadCriteriaRequestResults =
   ({type: ActionTypes.LOAD_CRITERIA_RESULTS, path, results, cleanup: cleanupRequest(path)});
 
 
-/* A request for counts is scoped to SearchGroupItem, SearchGroup, or global.
- * This function doesn't care about scope; that has already been determined
- * by the time this is dispatched. The path + scope is used as request ID
+/**
+ * The KeyPath identifier for a Count request is the KeyPath to the originating
+ * SearchGroupItem + the scope of the request ( i.e. 'ITEM', 'GROUP', or
+ * 'TOTAL').  `requestCounts` triggers the Epic; `loadCountRequestResults` is
+ * the Epic's success callback
  */
 export const requestCounts =
   (path: KeyPath, request: SearchRequest): CountRequestAction =>
@@ -58,28 +64,56 @@ export const loadCountRequestResults =
   ({type: ActionTypes.LOAD_COUNT_RESULTS, path, count, cleanup: cleanupRequest(path)});
 
 
-/* UI related actions */
+/**
+ * Pushes a Map {items => []} onto the end of either the include or exclude list
+ * of search groups
+ */
 export const initGroup =
-  (role: keyof SearchRequest) => ({type: ActionTypes.INIT_SEARCH_GROUP, role});
+  (role: keyof SearchRequest): UtilityAction =>
+  ({type: ActionTypes.INIT_SEARCH_GROUP, role});
 
+/**
+ * Pushes a new SearchGroupItem onto the end of the specified search group
+ */
 export const initGroupItem =
-  (role: keyof SearchRequest, groupIndex: number) =>
+  (role: keyof SearchRequest, groupIndex: number): UtilityAction =>
   ({type: ActionTypes.INIT_GROUP_ITEM, role, groupIndex});
 
+/**
+ * Copies a criterion from the criteria tree (where it is loaded) into the
+ * active search group item's SearchParameters list
+ */
 export const selectCriteria =
-  (criterion: Criteria) => ({type: ActionTypes.SELECT_CRITERIA, criterion});
+  (criterion: Criteria): UtilityAction =>
+  ({type: ActionTypes.SELECT_CRITERIA, criterion});
 
+/**
+ * Removes the resource at `path`
+ */
 export const remove =
-  (path: KeyPath) => ({type: ActionTypes.REMOVE, path});
+  (path: KeyPath): UtilityAction =>
+  ({type: ActionTypes.REMOVE, path});
 
+/**
+ * The next four all deal with wizard context.  Criteria selection is done via
+ * wizards that are created in a given context, viz: is the wizard open?
+ * The `context` object includes an `active` object that may have the following
+ * keys:
+ *    - criteriaType
+ *    - role
+ *    - groupIndex
+ *    - groupItemIndex
+ * Which collectively specify where to put the criteria once they're selected.
+ */
 export const setWizardOpen =
-  () => ({type: ActionTypes.SET_WIZARD_OPEN});
+  (): UtilityAction => ({type: ActionTypes.SET_WIZARD_OPEN});
 
 export const setWizardClosed =
-  () => ({type: ActionTypes.SET_WIZARD_CLOSED});
+  (): UtilityAction => ({type: ActionTypes.SET_WIZARD_CLOSED});
 
 export const setActiveContext =
-  (context: object) => ({type: ActionTypes.SET_ACTIVE_CONTEXT, context});
+  (context: object): UtilityAction =>
+  ({type: ActionTypes.SET_ACTIVE_CONTEXT, context});
 
 export const clearActiveContext =
-  () => ({type: ActionTypes.CLEAR_ACTIVE_CONTEXT});
+  (): UtilityAction => ({type: ActionTypes.CLEAR_ACTIVE_CONTEXT});

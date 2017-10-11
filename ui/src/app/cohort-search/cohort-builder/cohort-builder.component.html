@@ -87,11 +87,13 @@
               </button>
             </div>
             <div class="col-xs-8 text-right">
-              <h3 class="mt-1">Set Total: {{ subjects?.size || 0 }}</h3>
+              <!-- FIXME -->
+              <h3 class="mt-1">Set Total: {{ total }}</h3>
             </div>
           </div>
 
-          <app-charts [subjects]="subjects || []"></app-charts>
+          <!-- FIXME -->
+          <app-charts [subjects]="[]"></app-charts>
 
         </div>
       </div>

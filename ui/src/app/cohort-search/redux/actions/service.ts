@@ -53,9 +53,9 @@ export class CohortSearchActions {
    * alternate interfaces for a simpler action.
    */
 
-  // TODO(jms)  removals affect in-flight count requests
+  // TODO(jms)  removals affect in-flight count requests: implement that affect
   removeGroup(role: keyof SearchRequest, groupIndex: number): void {
-    this.remove(List([role, groupIndex]));
+    this.remove(List(['search', role, groupIndex]));
   }
 
   removeGroupItem(role: keyof SearchRequest, groupIndex: number, groupItemIndex: number): void {
@@ -103,7 +103,7 @@ export class CohortSearchActions {
   }
 
   getCounts = (path: KeyPath, scope: string) => {
-    const request = this.prepareRequest(path, scope);
+    const request = this.prepareSearchRequest(path, scope);
     this.startRequest(path.push(scope));
     this.requestCounts(path.push(scope), request);
   }
@@ -124,7 +124,7 @@ export class CohortSearchActions {
     this.requestCriteria(kind, parentId);
   }
 
-  prepareRequest(sgiPath, scope): SearchRequest {
+  prepareSearchRequest(sgiPath, scope): SearchRequest {
     const store = this.ngRedux.getState();
     let searchGoupItem = store.getIn(sgiPath.unshift('search'));
 

@@ -1,4 +1,4 @@
-import {AnyAction, Reducer} from 'redux';
+import {Reducer} from 'redux';
 import {Map, List, fromJS} from 'immutable';
 
 import {
@@ -8,10 +8,20 @@ import {
 } from './store';
 
 import * as ActionTypes from './actions/types';
-import {CohortSearchState, CountScope} from './typings';
+import {
+  CohortSearchState,
+  CohortSearchActionType,
+  CountScope,
+} from './typings';
+
+/**
+ * The root Reducer.  Handles synchronous changes to application State
+ */
+type _State = CohortSearchState;
+type _Action = CohortSearchActionType;
 
 export const rootReducer: Reducer<CohortSearchState> =
-  (state: CohortSearchState = InitialState, action: AnyAction): CohortSearchState => {
+  (state: _State = InitialState, action: _Action): _State => {
     switch (action.type) {
 
       case ActionTypes.START_REQUEST:
@@ -24,18 +34,21 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.updateIn(action.path.unshift('criteria'), fromJS(action.results));
 
       case ActionTypes.LOAD_COUNT_RESULTS: {
-        // action.path === [role, groupIndex, groupItemIndex, scope]
+        // action.path is [role, groupIndex, groupItemIndex, scope]
         const scope = action.path.last();
         const pathKey = {
           [CountScope.TOTAL]: 'total',
           [CountScope.GROUP]: action.path.skipLast(2),
           [CountScope.ITEM]: action.path.skipLast(1),
         }[scope];
-        return state.updateIn(['counts', pathKey], action.count);
+        return state.setIn(['counts', pathKey], action.count);
       }
 
       case ActionTypes.INIT_SEARCH_GROUP:
-        return state.updateIn(['search', action.sgRole], list => list.push(List()));
+        return state.updateIn(
+          ['search', action.role],
+          list => list.push(Map({items: List()}))
+        );
 
       case ActionTypes.INIT_GROUP_ITEM: {
         const itemPath = ['search', action.role, action.groupIndex, 'items'];
@@ -47,7 +60,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .updateIn(itemPath, items => items.push(newItem))
           .setIn(
-            ['context', 'active', 'groupItemIndex'], 
+            ['context', 'active', 'groupItemIndex'],
             state.getIn(itemPath).size
           );
       }

@@ -26,10 +26,10 @@ import {
 export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   @select(s => s) state$;
-
   private includeGroups;
   private excludeGroups;
   private open;
+  private total;
 
   private adding = false;
   private subscription: Subscription;
@@ -50,8 +50,13 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       this.includeGroups = state.getIn(['search', 'includes'], []);
       this.excludeGroups = state.getIn(['search', 'exludes'], []);
       this.open = state.getIn(['context', 'wizardOpen'], false);
+      this.total = state.getIn(['counts', 'total'], 0);
       this.cd.markForCheck();
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   save(): void {
@@ -62,13 +67,11 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     }
   }
 
-  initGroup(kind) {
-    this.actions.initGroup(kind);
+  initGroup(role) {
+    this.actions.initGroup(role);
+
+    // FIXME: this doesn't appear to actually do anything
     const scrollableDiv = document.getElementById('scrollable-groups');
     scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

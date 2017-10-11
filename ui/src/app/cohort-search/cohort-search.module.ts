@@ -86,7 +86,7 @@ export class CohortSearchModule {
       createEpicMiddleware(
         combineEpics(
           this.epics.fetchCriteria,
-          this.epics.fetchSearchResults,
+          this.epics.fetchCounts,
           this.epics.finalizeRequests,
         )
       )

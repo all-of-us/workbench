@@ -53,7 +53,7 @@ export class CohortSearchEpics {
     )
   )
 
-  fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
+  fetchCounts = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(ActionTypes.BEGIN_COUNT_REQUEST).mergeMap(
       ({path, request}) =>
       this.service.searchSubjects(request)
