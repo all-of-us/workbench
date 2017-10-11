@@ -39,7 +39,8 @@ export class WorkspaceEditComponent implements OnInit {
         aggregateAnalysis: false,
         ancestry: false,
         commercialPurpose: false,
-        population: false
+        population: false,
+        reviewRequested: false
       }};
   }
 

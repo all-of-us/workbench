@@ -73,7 +73,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setPopulation(true);
     researchPurpose.setPopulationOfFocus("population");
     researchPurpose.setAdditionalNotes("additional notes");
-
+    researchPurpose.setRequestReview(true);
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setNamespace("namespace");
@@ -112,5 +112,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getNamespace()).isEqualTo("namespace");
+    assertThat(workspace2.getResearchPurpose().getRequestReview()).isTrue();
   }
 }

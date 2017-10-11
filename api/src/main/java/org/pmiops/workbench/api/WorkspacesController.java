@@ -56,7 +56,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .commercialPurpose(workspace.getCommercialPurpose())
               .population(workspace.getPopulation())
               .populationOfFocus(workspace.getPopulationOfFocus())
-              .additionalNotes(workspace.getAdditionalNotes());
+              .additionalNotes(workspace.getAdditionalNotes())
+              .reviewRequested(workspace.getReviewRequested())
+              .timeRequested(workspace.getTimeRequested().getTime())
+              .approved(workspace.getApproved())
+              .timeReviewed(workspace.getTimeReviewed().getTime());
           Workspace result = new Workspace()
               .lastModifiedTime(workspace.getLastModifiedTime().getTime())
               .creationTime(workspace.getCreationTime().getTime())
@@ -182,6 +186,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setPopulation(workspace.getResearchPurpose().getPopulation());
     dbWorkspace.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
     dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+    dbWorkspace.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
+    dbWorkspace.setApproved(workspace.getResearchPurpose().getApproved());
+    dbWorkspace.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));

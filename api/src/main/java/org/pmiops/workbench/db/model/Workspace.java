@@ -78,6 +78,11 @@ public class Workspace {
   private String populationOfFocus;
   private String additionalNotes;
 
+  private boolean reviewRequested;
+  private boolean approved;
+  private Timestamp timeRequested;
+  private Timestamp timeReviewed;
+
   @Id
   @GeneratedValue
   @Column(name = "workspace_id")
@@ -261,6 +266,42 @@ public class Workspace {
 
   public void setAdditionalNotes(String additionalNotes) {
     this.additionalNotes = additionalNotes;
+  }
+
+  @Column(name = "rp_review_requested")
+  public boolean getReviewRequested() {
+    return this.reviewRequested;
+  }
+
+  public void setReviewRequested(boolean reviewRequested) {
+    this.reviewRequested = reviewRequested;
+  }
+
+  @Column(name = "rp_approved")
+  public boolean getApproved() {
+    return this.approved;
+  }
+
+  public void setApproved(boolean approved) {
+    this.approved = approved;
+  }
+
+  @Column(name = "rp_time_requested")
+  public Timestamp getTimeRequested() {
+    return this.timeRequested;
+  }
+
+  public void setTimeRequested(Timestamp timeRequested) {
+    this.timeRequested = timeRequested;
+  }
+
+  @Column(name = "rp_time_reviewed")
+  public Timestamp getTimeReviewed() {
+    return this.timeReviewed;
+  }
+
+  public void setTimeReviewed(Timestamp timeReviewed) {
+    this.timeReviewed = timeReviewed;
   }
 
   @OneToMany(mappedBy = "workspaceId")

@@ -613,6 +613,7 @@ definitions:
      - ancestry
      - commercialPurpose
      - population
+     - reviewRequested
     properties:
       diseaseFocusedResearch:
         type: boolean
@@ -639,6 +640,19 @@ definitions:
         default: false
       populationOfFocus:
         type: string
+      reviewRequested:
+        type: boolean
+        default: false
+      timeRequested:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+      approved:
+        type: boolean
+      timeReviewed: 
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
       additionalNotes:
         type: string
 
