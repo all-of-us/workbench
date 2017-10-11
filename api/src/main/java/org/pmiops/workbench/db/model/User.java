@@ -123,8 +123,8 @@ public class User {
   //     (SELECT user_id FROM user WHERE email = 'me@staging.pmi-ops.org'),
   //     0);
   // TODO(RW-85) Tool to edit authorities.
-  // TODO Switch to FetchMode.JOIN when if upgrade past Hibernate 3 (EAGER is deprecated).
-  @ElementCollection(fetch = FetchType.EAGER)
+  // TODO Switch to FetchMode.JOIN when if we upgrade past Hibernate 3.
+  @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "authority")
   public Set<Authority> getAuthorities() {
