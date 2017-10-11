@@ -1,3 +1,7 @@
+# If validation fails, gradle:generateApi fails claiming this file does not exist.
+# For separate validation (with some false positives), do:
+#     sudo npm install -g swagger-cli
+#     swagger validate .../workbench.yaml
 swagger: '2.0'
 info:
   version: "0.1.0"
@@ -20,7 +24,7 @@ schemes:
   - "https"
 produces:
   - "application/json"
- # Establish the fact that all endpoints are protected: this annotation
+# Establish the fact that all endpoints are protected: this annotation
 # ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
@@ -138,7 +142,7 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}cluster/:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
     get:
       summary: Get details of a dataproc cluster
       description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
@@ -186,12 +190,6 @@ paths:
           description: workspaceId
           required: true
           type: string
-        - in: body
-          description: Request for new cluster
-          name: clusterRequest
-          required: true
-          schema:
-            $ref: '#/definitions/ClusterRequest'
       responses:
         "200":
           description: Cluster creation successful
@@ -517,7 +515,7 @@ paths:
       tags:
         - cohortBuilder
       description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
-      operationId: "countSubjects"
+      operationId: "searchSubjects"
       parameters:
         - in: body
           name: request
@@ -527,10 +525,9 @@ paths:
           required: true
       responses:
         "200":
-          description: A count of subjects
+          description: A collection of subjects
           schema:
-            type: integer
-            format: int64
+            $ref: "#/definitions/SubjectListResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -568,6 +565,19 @@ definitions:
     properties:
       additionalInfo:
         type: string
+
+  Authority:
+    type: string
+    description: actions a user can have authority/permission to perform
+    enum: [
+        REVIEW_RESEARCH_PURPOSE,
+        # Swagger trims any common prefix from enum values' corresponding Java
+        # fields by default; include a bogus sentinel value to prevent that.
+        # https://github.com/swagger-api/swagger-codegen/issues/4261
+        # TODO: Remove this sentinel when adding a new enum value with a
+        # unique prefix (but leave the above cautionary comment).
+        _PREVENT_COMMON_PREFIX_TRIMMING
+    ]
 
   WorkspaceListResponse:
     type: object
@@ -742,6 +752,11 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      authorities:
+        description: authorities granted to this user
+        type: "array"
+        items:
+          $ref: "#/definitions/Authority"
 
   RegistrationRequest:
     type: object
@@ -835,8 +850,7 @@ definitions:
       subjects to include or exclude from the cohort.
     type: object
     required:
-      - includes
-      - excludes
+      - include
     properties:
       includes:
         type: array
@@ -958,6 +972,27 @@ definitions:
       operator: "GTE >="
       operands: [ "Arg1", "Arg2" ]
 
+  SubjectListResponse:
+    type: array
+    items:
+      type: string
+    example:
+      [
+        "12345,1,5",
+        "67890,2,1"
+      ]
+
+  Subject:
+    type: object
+    required:
+      - val
+    properties:
+      val:
+        description: A String of Subject ID, Gender Code, Ethnicity Code
+        type: string
+    example:
+      val: "12345,1,5"
+
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
     description: ''
@@ -1014,11 +1049,7 @@ definitions:
     description: ''
     required:
       - clusterName
-      - googleId
-      - googleProject
-      - googleServiceAccount
-      - googleBucket
-      - operationName
+      - clusterNamespace
       - status
       - createdDate
       - labels
@@ -1026,27 +1057,12 @@ definitions:
       clusterName:
         type: string
         description: The user-supplied name for the cluster
-      googleId:
-        type: string
-        description: Google's UUID for the cluster
-      googleProject:
+      clusterNamespace:
         type: string
         description: The Google Project used to create the cluster
-      googleServiceAccount:
-        type: string
-        description: The Google Service Account used to create the cluster
-      googleBucket:
-        type: string
-        description: The Google Bucket associated with the cluster
-      operationName:
-        type: string
-        description: Google's operation ID for the cluster
       status:
         type: string
         description: The current state of the cluster
-      hostIp:
-        type: string
-        description: The IP address of the cluster master node
       createdDate:
         type: string
         description: The date and time the cluster was created, in ISO-8601 format
@@ -1065,29 +1081,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Cluster"
-  ClusterRequest:
-    description: ''
-    required:
-      - bucketPath
-      - serviceAccount
-      - labels
-    properties:
-      bucketPath:
-        type: string
-        description: The bucket where user's notebooks will be saved
-      serviceAccount:
-        type: string
-        description: The service account of the user
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
-      jupyterExtensionUri:
-        type: string
-        description: |
-          Optional bucket URI to an archive containing Jupyter notebook extension files.
-          The archive must be in tar.gz format, must not include a parent directory, and
-          must have an entry point named 'main'. For more information on notebook extensions,
-          see: http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
   UsernameTakenResponse:
     type: object
     required:
@@ -1098,3 +1091,4 @@ definitions:
         type: boolean
     example:
       isTaken: false
+
