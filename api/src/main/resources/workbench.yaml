@@ -515,7 +515,7 @@ paths:
       tags:
         - cohortBuilder
       description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
-      operationId: "searchSubjects"
+      operationId: "countSubjects"
       parameters:
         - in: body
           name: request
