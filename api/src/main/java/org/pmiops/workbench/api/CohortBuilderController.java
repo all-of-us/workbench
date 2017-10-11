@@ -4,27 +4,25 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,31 +36,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     private BigQuery bigquery;
 
     @Autowired
-    private Provider<WorkbenchConfig> workbenchConfig;
+    private SubjectCounter subjectCounter;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-
-    private static final String COUNT_SQL_TEMPLATE =
-            "select count(distinct person_id) as count\n" +
-                    "  from `${projectId}.${dataSetId}.person` person\n" +
-                    " where 1 = 1\n";
-
-    private static final String UNION_TEMPLATE =
-            " union distinct\n";
-
-    private static final String INCLUDE_SQL_TEMPLATE =
-            "and person.person_id in (${includeSql})\n";
-
-    private static final String EXCLUDE_SQL_TEMPLATE =
-            "and not exists\n" +
-                    "(select 'x' from\n" +
-                    "(${excludeSql})\n";
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
         QueryRequest queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.CRITERIA.name())
+                .getQueryBuilder(FactoryKey.CRITERIA)
                 .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
 
         QueryResult result = executeQuery(queryRequest);
@@ -86,73 +68,47 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Long> searchSubjects(SearchRequest request) {
-        Map<String, QueryParameterValue> params = new HashMap<>();
-        List<String> queryParts = new ArrayList<>();
-        String finalSql = COUNT_SQL_TEMPLATE;
+    public ResponseEntity<Long> countSubjects(SearchRequest request) {
 
-        // build query for included search groups
-        for (SearchGroup includeGroup : request.getIncludes()) {
-            finalSql = finalSql + INCLUDE_SQL_TEMPLATE;
-            for (SearchGroupItem includeItem : includeGroup.getItems()) {
-                QueryRequest queryRequest = buildQueryRequestForType(includeItem);
-                params.putAll(queryRequest.getNamedParameters());
-                queryParts.add(queryRequest.getQuery());
-            }
-            finalSql = finalSql.replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts));
-            queryParts = new ArrayList<>();
-        }
+        findCodesForEmptyDomains(request.getIncludes());
+        findCodesForEmptyDomains(request.getExcludes());
 
-        // build query for excluded search groups
-        for (SearchGroup excludeGroup : request.getExcludes()) {
-            finalSql = finalSql + EXCLUDE_SQL_TEMPLATE;
-            for (SearchGroupItem excludeItem : excludeGroup.getItems()) {
-                QueryRequest queryRequest = buildQueryRequestForType(excludeItem);
-                params.putAll(queryRequest.getNamedParameters());
-                queryParts.add(queryRequest.getQuery());
-            }
-            finalSql = finalSql.replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts));
-            queryParts = new ArrayList<>();
-        }
-
-        QueryRequest queryRequest =
-                QueryRequest
-                        .newBuilder(filterBigQueryConfig(finalSql))
-                        .setNamedParameters(params)
-                        .setUseLegacySql(false)
-                        .build();
-
-        QueryResult result = executeQuery(queryRequest);
+        QueryResult result = executeQuery(subjectCounter.buildSubjectCounterQuery(request));
         Map<String, Integer> rm = getResultMapper(result);
 
         List<FieldValue> row = result.iterateAll().iterator().next();
         return ResponseEntity.ok(getLong(row, rm.get("count")));
     }
 
-    private QueryRequest buildQueryRequestForType(SearchGroupItem item) {
-        List<SearchParameter> paramsWithDomains = filterSearchParametersWithDomain(item.getSearchParameters());
-        List<SearchParameter> paramsWithoutDomains = filterSearchParametersWithoutDomain(item.getSearchParameters());
+    /**
+     * TODO: this is temporary and will be removed when we figure out the conceptId mappings
+     * for ICD9, ICD10 and CPT codes.
+     **/
+    private void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
+        AbstractQueryBuilder builder = QueryBuilderFactory.getQueryBuilder(FactoryKey.GROUP_CODES);
+        searchGroups.stream()
+                .flatMap(searchGroup -> searchGroup.getItems().stream())
+                .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
+                .forEach(item -> {
 
-        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-        if (!paramsWithoutDomains.isEmpty()) {
-            QueryRequest queryRequest = QueryBuilderFactory
-                    .getQueryBuilder(FactoryKey.GROUP_CODES.name())
-                    .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithoutDomains));
+                    for (SearchParameter parameter : item.getSearchParameters()) {
+                        if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
+                            QueryResult result = executeQuery(
+                                    builder.buildQueryRequest(new QueryParameters()
+                                            .type(item.getType())
+                                            .parameters(Arrays.asList(parameter))));
 
-            QueryResult result = executeQuery(queryRequest);
-            Map<String, Integer> rm = getResultMapper(result);
-            for (List<FieldValue> row : result.iterateAll()) {
-                paramsWithDomains.add(new SearchParameter()
-                        .domain(getString(row, rm.get("domainId")))
-                        .value(getString(row, rm.get("code"))));
-            }
-        }
-
-        return QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.getType(item.getType()))
-                .buildQueryRequest(new QueryParameters()
-                        .type(item.getType())
-                        .parameters(paramsWithDomains));
+                            Map<String, Integer> rm = getResultMapper(result);
+                            List<SearchParameter> paramsWithDomains = new ArrayList<>();
+                            for (List<FieldValue> row : result.iterateAll()) {
+                                paramsWithDomains.add(new SearchParameter()
+                                        .domain(getString(row, rm.get("domainId")))
+                                        .value(getString(row, rm.get("code"))));
+                            }
+                            item.setSearchParameters(paramsWithDomains);
+                        }
+                    }
+                });
     }
 
     private QueryResult executeQuery(QueryRequest query) {
@@ -179,32 +135,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         AtomicInteger index = new AtomicInteger();
         return result.getSchema().getFields().stream().collect(
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
-    }
-
-    protected List<SearchParameter> filterSearchParametersWithoutDomain(List<SearchParameter> searchParameters) {
-        return searchParameters.stream()
-                .filter(parameter -> parameter.getDomain() == null || parameter.getDomain().isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    protected List<SearchParameter> filterSearchParametersWithDomain(List<SearchParameter> searchParameters) {
-        return searchParameters.stream()
-                .filter(parameter -> parameter.getDomain() != null && !parameter.getDomain().isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    protected String filterBigQueryConfig(String sqlStatement, String tableName) {
-        String returnSql = sqlStatement.replace("${projectId}", workbenchConfig.get().bigquery.projectId);
-        returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
-        if (tableName != null) {
-            returnSql = returnSql.replace("${tableName}", tableName);
-        }
-        return returnSql;
-    }
-
-    protected String filterBigQueryConfig(String sqlStatement) {
-        return filterBigQueryConfig(sqlStatement, null);
-
     }
 
     private Long getLong(List<FieldValue> row, int index) {
