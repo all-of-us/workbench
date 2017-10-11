@@ -58,9 +58,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .populationOfFocus(workspace.getPopulationOfFocus())
               .additionalNotes(workspace.getAdditionalNotes())
               .reviewRequested(workspace.getReviewRequested())
-              .timeRequested(workspace.getTimeRequested().getTime())
-              .approved(workspace.getApproved())
-              .timeReviewed(workspace.getTimeReviewed().getTime());
+              .approved(workspace.getApproved());
+
+          if(workspace.getTimeRequested() != null){
+            researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
+          }
+
+          if(workspace.getTimeReviewed() != null){
+            researchPurpose.timeReviewed(workspace.getTimeReviewed().getTime());
+          }
           Workspace result = new Workspace()
               .lastModifiedTime(workspace.getLastModifiedTime().getTime())
               .creationTime(workspace.getCreationTime().getTime())
@@ -187,9 +193,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
     dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
     dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-    dbWorkspace.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
-    dbWorkspace.setApproved(workspace.getResearchPurpose().getApproved());
-    dbWorkspace.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+    if(workspace.getResearchPurpose().getTimeRequested() != null){
+      dbWorkspace.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
+    }
+    if(workspace.getResearchPurpose().getApproved() != null){
+      dbWorkspace.setApproved(workspace.getResearchPurpose().getApproved());
+    }
+    if(workspace.getResearchPurpose().getTimeReviewed() != null){
+      dbWorkspace.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+    }
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
