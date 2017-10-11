@@ -12,14 +12,10 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../redux/actions';
 import {
+  CohortSearchActions,
   CohortSearchState,
-  inclusionGroups,
-  exclusionGroups,
-  wizardOpen,
-  subjects,
-} from '../redux/store';
+} from '../redux';
 
 @Component({
   selector: 'app-cohort-builder',
@@ -33,7 +29,6 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   private includeGroups;
   private excludeGroups;
-  private subjects;
   private open;
 
   private adding = false;
@@ -52,10 +47,9 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     }
 
     this.subscription = this.state$.subscribe(state => {
-      this.includeGroups = state.getIn(inclusionGroups, []);
-      this.excludeGroups = state.getIn(exclusionGroups, []);
-      this.subjects = state.getIn(subjects, []);
-      this.open = state.getIn(wizardOpen, false);
+      this.includeGroups = state.getIn(['search', 'includes'], []);
+      this.excludeGroups = state.getIn(['search', 'exludes'], []);
+      this.open = state.getIn(['context', 'wizardOpen'], false);
       this.cd.markForCheck();
     });
   }

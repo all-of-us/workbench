@@ -8,8 +8,11 @@ import {
 import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../redux/actions';
-import {CohortSearchState, getActiveSGIPath} from '../redux/store';
+import {
+  activeSearchGroupItemPath,
+  CohortSearchActions,
+  CohortSearchState,
+} from '../redux';
 
 import {Criteria} from 'generated';
 
@@ -21,7 +24,7 @@ import {Criteria} from 'generated';
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
-  @select(s => s.getIn(getActiveSGIPath(s).unshift('search')))
+  @select(s => s.getIn(activeSearchGroupItemPath(s).unshift('search')))
   readonly activeSearchgroup$;
 
   private subscription: Subscription;
@@ -58,9 +61,9 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
   }
 
   removeCriteria(index: number) {
-    const path = getActiveSGIPath(this.ngRedux.getState())
+    const path = activeSearchGroupItemPath(this.ngRedux.getState())
       .push('searchParameters', index);
-    this.actions.removeCriteria(path);
+    this.actions.remove(path);
   }
 
   ngOnDestroy() {

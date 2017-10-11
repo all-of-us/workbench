@@ -4,9 +4,24 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
 
-import {CohortSearchActions as Actions} from './actions';
-import {cancelListener, cleanupRequest} from './requests';
+import * as ActionTypes from './actions/types';
+import {
+  loadCriteriaRequestResults,
+  loadCountRequestResults,
+  cleanupRequest,
+} from './actions/creators';
+import {KeyPath, RequestAction} from './typings';
+
 import {CohortBuilderService} from 'generated';
+
+
+const cancelListener =
+  (action$: ActionsObservable<AnyAction>, path: KeyPath): Observable<RequestAction> =>
+  action$
+    .ofType(ActionTypes.CANCEL_REQUEST)
+    .filter(action => action.path.equals(path))
+    .map(action => cleanupRequest(path))
+    .take(1);
 
 /**
  * CohortSearchEpics
@@ -21,48 +36,41 @@ export class CohortSearchEpics {
   constructor(private service: CohortBuilderService) {}
 
   fetchCriteria = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(Actions.FETCH_CRITERIA).mergeMap(
-      ({critType, parentId}) => {
-        const _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
+    action$.ofType(ActionTypes.BEGIN_CRITERIA_REQUEST).mergeMap(
+      ({path}) => {
+        const kind = path.first();
+        const parentId = path.last();
+        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
-          .map(result => ({
-            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId,
-            cleanup: cleanupRequest(List([critType, parentId]))
-          }))
-          .race(cancelListener(action$, List([critType, parentId])))
-          .catch(error =>
-            Observable.of({type: Actions.ERROR, error, critType, parentId})
-          );
+          .map(result => loadCriteriaRequestResults(path, result.items))
+          .race(cancelListener(action$, path))
+          .catch(error => {
+            console.log('Caught an error: ');
+            console.dir(error);
+            return Observable.of({type: 'ERROR', error});
+          });
       }
     )
   )
 
   fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
-      ({request, sgiPath}) =>
+    action$.ofType(ActionTypes.BEGIN_COUNT_REQUEST).mergeMap(
+      ({path, request}) =>
       this.service.searchSubjects(request)
-        .map(results => ({
-          type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath,
-          cleanup: cleanupRequest(sgiPath)
-        }))
-        .race(cancelListener(action$, sgiPath))
-        .catch(error => Observable.of({type: Actions.ERROR, error, sgiPath}))
+        .map(count => loadCountRequestResults(path, count))
+        .race(cancelListener(action$, path))
+        .catch(error => {
+          console.log('Caught an error: ');
+          console.dir(error);
+          return Observable.of({type: 'ERROR', error});
+        })
     )
-  )
-
-  recalculateCounts = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(
-      Actions.LOAD_SEARCH_RESULTS,
-      Actions.REMOVE_SEARCH_GROUP,
-      Actions.REMOVE_GROUP_ITEM,
-      Actions.REMOVE_CRITERIA,
-    ).map(() => ({type: Actions.RECALCULATE_COUNTS}))
   )
 
   finalizeRequests = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(
-      Actions.LOAD_CRITERIA,
-      Actions.LOAD_SEARCH_RESULTS
+      ActionTypes.LOAD_COUNT_RESULTS,
+      ActionTypes.LOAD_CRITERIA_RESULTS,
     ).map(action => action.cleanup)
   )
 }

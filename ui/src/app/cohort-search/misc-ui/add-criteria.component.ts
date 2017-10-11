@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 
-import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchActions} from '../redux';
 import {SearchRequest} from 'generated';
 
 

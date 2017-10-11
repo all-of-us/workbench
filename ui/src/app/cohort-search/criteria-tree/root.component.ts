@@ -9,9 +9,10 @@ import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 import {List} from 'immutable';
 
-import {CohortSearchActions} from '../redux/actions';
-import {CohortSearchState} from '../redux/store';
-import {isRequesting} from '../redux/requests';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+} from '../redux';
 
 
 @Component({
@@ -55,8 +56,11 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
     const path = List().push(this.critType, this.parentId);
     const nodePath = ['criteriaTree', this.critType, this.parentId];
 
+    const loadSelector = (state) =>
+      state.get('requests').has(path);
+
     this.subscriptions = [
-      this.ngRedux.select(isRequesting(path)).subscribe(v => this.loading = v),
+      this.ngRedux.select(loadSelector).subscribe(v => this.loading = v),
       this.ngRedux.select(nodePath).subscribe(n => this.children = n)
     ];
 

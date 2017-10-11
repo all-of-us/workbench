@@ -4,7 +4,7 @@ import {
   Input,
   ViewEncapsulation
 } from '@angular/core';
-import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchActions} from '../redux';
 import {Criteria} from 'generated';
 
 

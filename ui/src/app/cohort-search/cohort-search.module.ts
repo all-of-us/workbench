@@ -28,10 +28,13 @@ import {
 import {CohortSearchRouter} from './router.module';
 import {environment} from 'environments/environment';
 
-import {CohortSearchActions} from './redux/actions';
-import {CohortSearchEpics} from './redux/epics';
-import {CohortSearchState, InitialState} from './redux/store';
-import {rootReducer} from './redux/reducer';
+import {
+  CohortSearchActions,
+  CohortSearchEpics,
+  CohortSearchState,
+  InitialState,
+  rootReducer
+} from './redux';
 
 import {CohortBuilderService} from 'generated';
 
@@ -84,7 +87,6 @@ export class CohortSearchModule {
         combineEpics(
           this.epics.fetchCriteria,
           this.epics.fetchSearchResults,
-          this.epics.recalculateCounts,
           this.epics.finalizeRequests,
         )
       )

@@ -1,35 +1,37 @@
-/*
- * TODO (jms): strongly type the store, reducers, etc
- */
 import {Map, List, Set, fromJS, isCollection} from 'immutable';
 import {SearchRequest} from 'generated';
 
 export const InitialState = fromJS({
-  search: {includes: [[]], excludes: [[]]},
-  results: Map(),
+  // This holds the data used to generate SearchRequests
+  search: {
+    includes: [[]], 
+    excludes: [[]],
+  },
+  // Contains a variety of contextual data for the active wizard
   context: {
     wizardOpen: false,
+    activePath: [],
   },
-  criteriaTree: {},
+  // Models the criteria tree loaded so far
+  criteria: {},
+  // Table of KeyPath => boolean keeping tabs on what requests are in flight
   requests: Set(),
+  // Table of KeyPath => number tracking entity counts
+  counts: Set(),
 });
 
-export type CohortSearchState = Map<string, any>;
+export const activeSearchGroupPath = (state) =>
+  List().push(
+    'search',
+    state.getIn(['context', 'active', 'role']),
+    state.getIn(['context', 'active', 'groupIndex'])
+  );
 
-// Pathspecs & selectors
-export const subjects = ['results', 'subjects'];
-export const inclusionGroups = ['search', 'includes'];
-export const exclusionGroups = ['search', 'excludes'];
-export const wizardOpen = ['context', 'wizardOpen'];
-export const activeCriteriaType = ['context', 'active', 'critType'];
-export const activeSGRole = ['context', 'active', 'sgRole'];
-export const activeSGIndex = ['context', 'active', 'sgIndex'];
-export const activeSGItemIndex = ['context', 'active', 'sgItemIndex'];
+export const activeSearchGroupItemPath = (state) =>
+  activeSearchGroupPath(state).push(
+    'items',
+    state.getIn(['context', 'active', 'groupItemIndex'])
+  );
 
-// The actual, not symbolic path
-// export type SGIPath = [keyof SearchRequest, number, number];
-export const getActiveSGIPath = (state) => List([
-  state.getIn(activeSGRole),
-  state.getIn(activeSGIndex),
-  state.getIn(activeSGItemIndex),
-]);
+export const activeCriteriaType = (state) =>
+  state.getIn(['context', 'active', 'criteriaType']);
