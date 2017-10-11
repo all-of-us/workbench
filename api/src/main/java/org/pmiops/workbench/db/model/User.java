@@ -1,11 +1,20 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -24,6 +33,7 @@ public class User {
   private String familyName;
   private String phoneNumber;
   private String freeTierBillingProjectName;
+  private Set<Authority> authorities = new HashSet<Authority>();
 
   @Id
   @GeneratedValue
@@ -106,5 +116,21 @@ public class User {
 
   public void setFreeTierBillingProjectName(String freeTierBillingProjectName) {
     this.freeTierBillingProjectName = freeTierBillingProjectName;
+  }
+
+  // Authorities (special permissions) are granted only through direct db edits, for example
+  // INSERT INTO authority VALUES(
+  //     (SELECT user_id FROM user WHERE email = 'me@staging.pmi-ops.org'),
+  //     0);
+  // TODO(RW-85) Tool to edit authorities.
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "authority")
+  public Set<Authority> getAuthorities() {
+    return authorities;
+  }
+
+  public void setAuthorities(Set<Authority> newAuthorities) {
+    this.authorities = newAuthorities;
   }
 }

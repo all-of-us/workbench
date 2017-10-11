@@ -1,6 +1,5 @@
 package org.pmiops.workbench.interceptors;
 
-
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static com.google.common.truth.Truth.assertThat;
@@ -9,8 +8,11 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.inject.Provider;
 import org.apache.http.HttpHeaders;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,14 +22,32 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.springframework.web.method.HandlerMethod;
+
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
-import org.springframework.web.method.HandlerMethod;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.Authority;
+
+
+/** mimicing a Swagger-generated wrapper */
+class FakeApiController {
+  public void handle() {}
+}
+
+/** mimicing our implementation, annotated */
+class FakeController {
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+  public void handle() {}
+}
 
 public class AuthInterceptorTest {
 
   @Mock
   private UserInfoService userInfoService;
+  @Mock
+  private Provider<User> userProvider;
   @Mock
   private HttpServletRequest request;
   @Mock
@@ -42,7 +62,7 @@ public class AuthInterceptorTest {
 
   @Before
   public void setup() {
-    interceptor = new AuthInterceptor(userInfoService);
+    interceptor = new AuthInterceptor(userInfoService, userProvider);
   }
 
   @Test
@@ -104,5 +124,27 @@ public class AuthInterceptorTest {
       }
     }
     throw new RuntimeException("Method \""+methodName+"\" not found");
+  }
+
+  @Test
+  public void authorityCheckPermitsWithNoAnnotation() throws Exception {
+    Method method = getProfileApiMethod("getBillingProjects");
+    assertThat(interceptor.hasRequiredAuthority(method, new User())).isTrue();
+  }
+
+  @Test
+  public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
+    Method apiControllerMethod = FakeApiController.class.getMethod("handle");
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, new User())).isFalse();
+  }
+
+  @Test
+  public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
+    User user = new User();
+    Set<Authority> required = new HashSet<Authority>();
+    required.add(Authority.REVIEW_RESEARCH_PURPOSE);
+    user.setAuthorities(required);
+    Method apiControllerMethod = FakeApiController.class.getMethod("handle");
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
   }
 }

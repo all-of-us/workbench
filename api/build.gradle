@@ -60,7 +60,7 @@ task generateNotebooksClient {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$notebooksApiFile")
     config.setOutputDir("$projectDir")
-    config.setTemplateDir("$swaggerTemplateDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
     config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.notebooks',
