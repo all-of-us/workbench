@@ -112,6 +112,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getNamespace()).isEqualTo("namespace");
-    assertThat(workspace2.getResearchPurpose().getRequestReview()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
   }
 }
