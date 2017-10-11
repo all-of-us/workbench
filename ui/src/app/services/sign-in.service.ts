@@ -1,3 +1,7 @@
+/**
+ * OAuth2 via GAPI sign-in.
+ */
+
 import 'rxjs/Rx';
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';

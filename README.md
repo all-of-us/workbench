@@ -143,3 +143,23 @@ objects) and loaded into the database by `workbench.tools.ConfigLoader`.
 `CacheSpringConfiguration`, a Spring `@Configuration`, provides
 the `@RequestScoped` `WorkbenchConfig`. It caches the values fetched from the
 database with a 10 minute expiration.
+
+## API Server Database Updates
+
+When editing database models, you must write a new changelog XML file. See
+[Liquibase change docs](http://www.liquibase.org/documentation/changes/index.html),
+such as [createTable](http://www.liquibase.org/documentation/changes/create_table.html).
+
+You can get Hibernate to update the schema for inspection (and then backport
+that to liquibase's XML files) by editing `api/db/vars.env` to make Hibernate
+run as the liquibase user and adding `spring.jpa.hibernate.ddl-auto=update`
+to `api/src/main/resources/application.properties`.
+
+Then use `api/project.rb connect-to-db` and `SHOW CREATE TABLE my_new_table`.
+Revert your changes or drop the db when you're done to verify the changelog
+works.
+
+Finally, write a new changelog file in `api/db/changelog/` and include it in
+`db.changelog-master.xml`.
+
+`liquibase` does not roll back partially failed changes.
