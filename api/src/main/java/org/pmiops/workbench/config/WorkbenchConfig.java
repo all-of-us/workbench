@@ -18,4 +18,10 @@ public class WorkbenchConfig {
   }
 
   public BigQueryConfig bigquery;
+
+  public static class GoogleDirectoryServiceConfig {
+    public String gSuiteDomain;
+  }
+
+  public GoogleDirectoryServiceConfig googleDirectoryService;
 }

@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -14,7 +16,6 @@ import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
-import org.pmiops.workbench.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +36,8 @@ public class ClusterController implements ClusterApiDelegate {
       public Cluster apply(org.pmiops.workbench.notebooks.model.Cluster firecloudCluster) {
         Cluster allOfUsCluster = new Cluster();
         allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
-        allOfUsCluster.setGoogleId(firecloudCluster.getGoogleId());
-        allOfUsCluster.setGoogleProject(firecloudCluster.getGoogleProject());
-        allOfUsCluster.setGoogleServiceAccount(firecloudCluster.getGoogleServiceAccount());
-        allOfUsCluster.setGoogleBucket(firecloudCluster.getGoogleBucket());
-        allOfUsCluster.setOperationName(firecloudCluster.getOperationName());
+        allOfUsCluster.setClusterNamespace(firecloudCluster.getGoogleProject());
         allOfUsCluster.setStatus(firecloudCluster.getStatus());
-        allOfUsCluster.setHostIp(firecloudCluster.getHostIp());
         allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
         allOfUsCluster.setDestroyedDate(firecloudCluster.getDestroyedDate());
         allOfUsCluster.setLabels(firecloudCluster.getLabels());;
@@ -49,12 +45,16 @@ public class ClusterController implements ClusterApiDelegate {
       }
     };
 
-  private org.pmiops.workbench.notebooks.model.ClusterRequest toFirecloudClusterRequest(ClusterRequest allOfUsClusterRequest) {
+  private org.pmiops.workbench.notebooks.model.ClusterRequest createFirecloudClusterRequest() {
     org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
-    firecloudClusterRequest.setBucketPath(allOfUsClusterRequest.getBucketPath());
-    firecloudClusterRequest.setServiceAccount(allOfUsClusterRequest.getServiceAccount());
-    firecloudClusterRequest.setLabels(allOfUsClusterRequest.getLabels());
-    firecloudClusterRequest.setJupyterExtensionUri(allOfUsClusterRequest.getJupyterExtensionUri());
+    // TODO: Use real paths and accounts.
+    firecloudClusterRequest.setBucketPath("");
+    firecloudClusterRequest.setServiceAccount("");
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put("all-of-us", "true");
+    firecloudClusterRequest.setLabels(labels);
+    // TODO: Host our extension somewhere.
+    // firecloudClusterRequest.setJupyterExtensionUri("");
 
     return firecloudClusterRequest;
   }
@@ -73,14 +73,13 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
-      String workspaceId,
-      ClusterRequest clusterRequest) {
+      String workspaceId) {
     Cluster createdCluster;
 
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster("broad-dsde-dev", clusterName, toFirecloudClusterRequest(clusterRequest)));
+      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster("broad-dsde-dev", clusterName, createFirecloudClusterRequest()));
     } catch (ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);

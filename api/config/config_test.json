@@ -6,5 +6,8 @@
   "bigquery": {
     "dataSetId": "synpuf",
     "projectId": "pmi-drc-api-test"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "fake-research-aou.org"
   }
 }

@@ -5,7 +5,6 @@ import {DOCUMENT} from '@angular/platform-browser';
 import {Observable} from 'rxjs/Observable';
 
 import {Cluster} from 'generated';
-import {ClusterRequest} from 'generated';
 import {ClusterService} from 'generated';
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
@@ -174,23 +173,15 @@ export class WorkspaceComponent implements OnInit {
 
   openCluster(): void {
     const url = 'https://leonardo.dsde-dev.broadinstitute.org/notebooks/'
-        + this.cluster.googleProject + '/'
+        + this.cluster.clusterNamespace + '/'
         + this.cluster.clusterName;
     window.location.href = url;
   }
 
   createAndLaunchNotebook(): void {
-    let request: ClusterRequest;
-    // TODO: Move this to server and fill out this data.
-    request = {
-      bucketPath: '',
-      serviceAccount: '',
-      labels: {'all-of-us': 'true'}
-    };
     this.clusterLoading = true;
     this.clusterService
-        .createCluster(this.workspace.namespace, this.workspace.id,
-        request).subscribe(() => {
+        .createCluster(this.workspace.namespace, this.workspace.id).subscribe(() => {
       this.pollCluster().subscribe(polledCluster => {
         this.clusterLoading = false;
         this.cluster = polledCluster;
