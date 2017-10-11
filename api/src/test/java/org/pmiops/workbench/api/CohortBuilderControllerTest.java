@@ -186,6 +186,20 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects( controller.countSubjects(testSearchRequest), 1);
     }
 
+    @Test
+    public void searchSubjects_DemoExcluded() throws Exception {
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("DEMO")
+                .searchParameters(Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)));
+        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
+        testSearchRequest.getExcludes().add(anotherSearchGroup);
+
+        assertSubjects( controller.countSubjects(testSearchRequest), 0);
+    }
+
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 

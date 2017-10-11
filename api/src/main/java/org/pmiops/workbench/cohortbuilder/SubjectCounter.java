@@ -37,7 +37,8 @@ public class SubjectCounter {
     private static final String EXCLUDE_SQL_TEMPLATE =
             "and not exists\n" +
                     "(select 'x' from\n" +
-                    "(${excludeSql})\n";
+                    "(${excludeSql})\n" +
+                    "x where x.person_id = person.person_id)\n";
 
     public QueryRequest buildSubjectCounterQuery(SearchRequest request) {
         Map<String, QueryParameterValue> params = new HashMap<>();
