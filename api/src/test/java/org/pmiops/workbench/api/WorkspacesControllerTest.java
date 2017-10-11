@@ -73,7 +73,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setPopulation(true);
     researchPurpose.setPopulationOfFocus("population");
     researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setRequestReview(true);
+    researchPurpose.setReviewRequested(true);
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setNamespace("namespace");
