@@ -515,7 +515,7 @@ paths:
       tags:
         - cohortBuilder
       description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
-      operationId: "searchSubjects"
+      operationId: "countSubjects"
       parameters:
         - in: body
           name: request
@@ -525,9 +525,10 @@ paths:
           required: true
       responses:
         "200":
-          description: A collection of subjects
+          description: A count of subjects
           schema:
-            $ref: "#/definitions/SubjectListResponse"
+            type: integer
+            format: int64
 
 ##########################################################################################
 ## DEFINITIONS
@@ -864,7 +865,8 @@ definitions:
       subjects to include or exclude from the cohort.
     type: object
     required:
-      - include
+      - includes
+      - excludes
     properties:
       includes:
         type: array
@@ -985,27 +987,6 @@ definitions:
       name: "age_at_event"
       operator: "GTE >="
       operands: [ "Arg1", "Arg2" ]
-
-  SubjectListResponse:
-    type: array
-    items:
-      type: string
-    example:
-      [
-        "12345,1,5",
-        "67890,2,1"
-      ]
-
-  Subject:
-    type: object
-    required:
-      - val
-    properties:
-      val:
-        description: A String of Subject ID, Gender Code, Ethnicity Code
-        type: string
-    example:
-      val: "12345,1,5"
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

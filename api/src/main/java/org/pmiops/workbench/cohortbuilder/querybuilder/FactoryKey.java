@@ -19,9 +19,9 @@ public enum FactoryKey {
 
     private static final Map<String, Object> typeMap = Collections.unmodifiableMap(initializeMapping());
 
-    public static String getType(String type) {
+    public static FactoryKey getType(String type) {
         if (typeMap.containsKey(type)) {
-            return ((FactoryKey)typeMap.get(type)).name();
+            return ((FactoryKey)typeMap.get(type));
         }
         throw new IllegalArgumentException("Invalid type provided: " + type);
     }

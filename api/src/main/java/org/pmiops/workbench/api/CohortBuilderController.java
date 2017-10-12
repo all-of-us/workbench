@@ -8,18 +8,23 @@ import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
-import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,16 +37,29 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Autowired
     private BigQuery bigquery;
 
+    @Autowired
+    private SubjectCounter subjectCounter;
+
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfig;
+
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
+    /**
+     * This method list any of the criteria trees.
+     *
+     * @param type
+     * @param parentId
+     * @return
+     */
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
         QueryRequest queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.CRITERIA.name())
+                .getQueryBuilder(FactoryKey.CRITERIA)
                 .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
 
-        QueryResult result = executeQuery(queryRequest);
+        QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
         Map<String, Integer> rm = getResultMapper(result);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
@@ -61,56 +79,65 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.ok(criteriaResponse);
     }
 
+    /**
+     * This method will return a count of unique subjects
+     * defined by the provided {@link SearchRequest}.
+     *
+     * @param request
+     * @return
+     */
     @Override
-    public ResponseEntity<SubjectListResponse> searchSubjects(SearchRequest request) {
-        /* TODO: this function currently processes a SearchGroupItem; higher level handling will be needed */
-        SearchGroupItem item = request.getIncludes().get(0).getItems().get(0);
-        SubjectListResponse subjectSet = new SubjectListResponse();
-
-        List<SearchParameter> paramsWithDomains = filterSearchParametersWithDomain(item.getSearchParameters());
-        List<SearchParameter> paramsWithoutDomains = filterSearchParametersWithoutDomain(item.getSearchParameters());
+    public ResponseEntity<Long> countSubjects(SearchRequest request) {
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-        if (!paramsWithoutDomains.isEmpty()) {
-            QueryRequest queryRequest = QueryBuilderFactory
-                    .getQueryBuilder(FactoryKey.GROUP_CODES.name())
-                    .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithoutDomains));
+        findCodesForEmptyDomains(request.getIncludes());
+        findCodesForEmptyDomains(request.getExcludes());
 
-            QueryResult result = executeQuery(queryRequest);
-            Map<String, Integer> rm = getResultMapper(result);
-            for (List<FieldValue> row : result.iterateAll()) {
-                paramsWithDomains.add(new SearchParameter()
-                        .domain(getString(row, rm.get("domainId")))
-                        .value(getString(row, rm.get("code"))));
-            }
-        }
-
-        QueryRequest queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.getType(item.getType()))
-                .buildQueryRequest(new QueryParameters().type(item.getType()).parameters(paramsWithDomains));
-
-        QueryResult result = executeQuery(queryRequest);
+        QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
         Map<String, Integer> rm = getResultMapper(result);
 
-        for (List<FieldValue> row : result.iterateAll()) {
-            subjectSet.add(getString(row, rm.get("val")));
-        }
-
-        return ResponseEntity.ok(subjectSet);
+        List<FieldValue> row = result.iterateAll().iterator().next();
+        return ResponseEntity.ok(getLong(row, rm.get("count")));
     }
 
-    private Long getLong(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
+    /**
+     * TODO: this is temporary and will be removed when we figure out the conceptId mappings
+     * for ICD9, ICD10 and CPT codes.
+     **/
+    private void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
+        AbstractQueryBuilder builder = QueryBuilderFactory.getQueryBuilder(FactoryKey.GROUP_CODES);
+        searchGroups.stream()
+                .flatMap(searchGroup -> searchGroup.getItems().stream())
+                .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
+                .forEach(item -> {
+
+                    for (SearchParameter parameter : item.getSearchParameters()) {
+                        if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
+                            QueryResult result = executeQuery(
+                                    filterBigQueryConfig(
+                                            builder.buildQueryRequest(new QueryParameters()
+                                            .type(item.getType())
+                                            .parameters(Arrays.asList(parameter)))));
+
+                            Map<String, Integer> rm = getResultMapper(result);
+                            List<SearchParameter> paramsWithDomains = new ArrayList<>();
+                            for (List<FieldValue> row : result.iterateAll()) {
+                                paramsWithDomains.add(new SearchParameter()
+                                        .domain(getString(row, rm.get("domainId")))
+                                        .value(getString(row, rm.get("code"))));
+                            }
+                            item.setSearchParameters(paramsWithDomains);
+                        }
+                    }
+                });
     }
 
-    private String getString(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? null : row.get(index).getStringValue();
-    }
-
-    private Boolean getBoolean(List<FieldValue> row, int index) {
-        return row.get(index).getBooleanValue();
-    }
-
+    /**
+     * Execute the provided query using bigquery.
+     *
+     * @param query
+     * @return
+     */
     private QueryResult executeQuery(QueryRequest query) {
 
         // Execute the query
@@ -137,15 +164,23 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
     }
 
-    protected List<SearchParameter> filterSearchParametersWithoutDomain(List<SearchParameter> searchParameters) {
-        return searchParameters.stream()
-                .filter(parameter -> parameter.getDomain() == null || parameter.getDomain().isEmpty())
-                .collect(Collectors.toList());
+    protected QueryRequest filterBigQueryConfig(QueryRequest request) {
+        String returnSql = request.getQuery().replace("${projectId}", workbenchConfig.get().bigquery.projectId);
+        returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
+        return request.toBuilder()
+                .setQuery(returnSql)
+                .build();
     }
 
-    protected List<SearchParameter> filterSearchParametersWithDomain(List<SearchParameter> searchParameters) {
-        return searchParameters.stream()
-                .filter(parameter -> parameter.getDomain() != null && !parameter.getDomain().isEmpty())
-                .collect(Collectors.toList());
+    private Long getLong(List<FieldValue> row, int index) {
+        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
+    }
+
+    private String getString(List<FieldValue> row, int index) {
+        return row.get(index).isNull() ? null : row.get(index).getStringValue();
+    }
+
+    private Boolean getBoolean(List<FieldValue> row, int index) {
+        return row.get(index).getBooleanValue();
     }
 }
