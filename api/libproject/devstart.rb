@@ -1,6 +1,6 @@
 # Calls to common.run_inline in this file may use a quoted string purposefully
-# to cause system() to run the command in a shell. Calls with %W{..} are not
-# run in a shell, which can break usage of the CloudSQL proxy.
+# to cause system() or spawn() to run the command in a shell. Calls with arrays
+# are not run in a shell, which can break usage of the CloudSQL proxy.
 
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
