@@ -3,43 +3,41 @@ require_relative "../../libproject/workbench"
 require "io/console"
 require "json"
 require "optparse"
+require "ostruct"
 require "tempfile"
 require "fileutils"
 
-class ProjectAndAccountOptions
-  attr_accessor :project
-  attr_accessor :account
-  attr_accessor :command
-  attr_accessor :creds_file
-  attr_accessor :parser
+class Options < OpenStruct
+end
 
-  def initialize(command)
-    self.command = command
-    self.parser = OptionParser.new do |parser|
-      parser.banner = "Usage: ./project.rb #{self.command} [options]"
-      parser.on("--project [PROJECT]",
-          "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-        self.project = project
-      end
-      parser.on("--account [ACCOUNT]",
-           "Account to use when creating credentials (your.name@pmi-ops.org); "\
-           "use this or --creds_file") do |account|
-        self.account = account
-      end
-      parser.on("--creds_file [CREDS_FILE]",
-           "Path to a file containing credentials; use this or --account.") do |creds_file|
-        self.creds_file = creds_file
-      end
-    end
+def create_parser(command)
+  OptionParser.new do |parser|
+    parser.banner = "Usage: ./project.rb #{command} [options]"
+    parser
   end
+end
 
-  def parse args
-    self.parser.parse args
-    if self.project == nil || !((self.account == nil) ^ (self.creds_file == nil))
-      puts self.parser.help
-      raise("Invalid arguments")
-    end
-    self
+def add_default_options(parser, options)
+  parser.on("--project [PROJECT]",
+      "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+    options.project = project
+  end
+  parser.on("--account [ACCOUNT]",
+       "Account to use when creating credentials (your.name@pmi-ops.org); "\
+       "use this or --creds-file") do |account|
+    options.account = account
+  end
+  parser.on("--creds-file [CREDS-FILE]",
+       "Path to a file containing credentials; use this or --account.") do |creds_file|
+    options.creds_file = creds_file
+  end
+  parser
+end
+
+def validate_default_options(parser, options)
+  if options.project == nil || !((options.account == nil) ^ (options.creds_file == nil))
+    puts parser.help
+    exit 1
   end
 end
 
@@ -247,7 +245,10 @@ def get_auth_login_account()
 end
 
 def run_with_creds(args, command, proc)
-  options = ProjectAndAccountOptions.new(command).parse(args)
+  parser = create_parser(command)
+  options = Options.new
+  add_default_options parser, options
+  validate_default_options parser, options
   do_run_with_creds(options.project, options.account, options.creds_file, proc)
 end
 
