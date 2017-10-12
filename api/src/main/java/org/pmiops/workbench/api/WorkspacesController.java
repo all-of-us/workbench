@@ -146,6 +146,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
+    if (workspace.getName().equals("")) {
+      throw new BadRequestException("Cannot create a workspace with no name.");
+    }
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
     org.pmiops.workbench.db.model.Workspace existingWorkspace =

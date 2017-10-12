@@ -1,17 +1,18 @@
 <h2>Create a new Workspace</h2>
+<div>* is a required field</div>
 <div class="form-area">
-  <div>
-    <label class="text-label">Name:</label>
+  <div class="name-area field">
+    <label class="text-label">Name: <span style="color: red">*</span></label>
     <input type="text" class="input name" name="workspace-name" autofocus
         [(ngModel)]="workspace.name">
   </div>
-  <div>
+  <div class="field">
     <label class="text-label">Description:</label>
     <textarea class="input description" name="workspace-description"
         [(ngModel)]="workspace.description">
     </textarea>
   </div>
-  <div>
+  <div class="field">
     <h3>Research Purpose</h3>
     <!-- TODO: Real description of workspace purpose -->
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
@@ -85,8 +86,9 @@
       </div>
     </section>
   </div>
-  <div class="button">
+  <div style="display: inline-block" class="button">
     <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
     <button class="btn" routerLink="/../..">Cancel</button>
   </div>
+  <div *ngIf="this.valueNotEntered;" style="display: inline-block">* is a required field</div>
 </div>

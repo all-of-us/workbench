@@ -1,6 +1,6 @@
 .text-label {
   display: block;
-  padding: 1rem 0;
+  padding: 0rem 0rem 1rem 0rem;
   color: #333;
 }
 
@@ -15,4 +15,12 @@
 
 .checkbox-group {
   padding: 1rem 0;
+}
+
+.red-background {
+  background-color: #FFEEEE;
+}
+
+.field {
+  padding: 1rem;
 }
