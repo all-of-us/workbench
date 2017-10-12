@@ -1,3 +1,7 @@
+# Calls to common.run_inline in this file may use a quoted string purposefully
+# to cause system() to run the command in a shell. Calls with %W{..} are not
+# run in a shell, which can break usage of the CloudSQL proxy.
+
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require "io/console"
@@ -123,7 +127,7 @@ def docker_clean(*args)
 
   docker_images = `docker ps -aq`.gsub(/\s+/, " ")
   if !docker_images.empty?
-    system("docker rm -f #{docker_images}")
+    common.run_inline("docker rm -f #{docker_images}")
   end
   common.run_inline %W{docker-compose down --volumes}
 end
@@ -207,38 +211,29 @@ def do_run_migrations(creds_file, project)
   common = Common.new
   create_db_file = Tempfile.new("#{project}-create-db.sql")
   begin
-    unless system("cat db/create_db.sql | envsubst > #{create_db_file.path}")
-      raise("Error generating create_db file; exiting.")
-    end
+    common.run_inline("cat db/create_db.sql | envsubst > #{create_db_file.path}")
     puts "Creating database if it does not exist..."
-    unless system("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
+    common.run_inline("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
               "--port 3307 < #{create_db_file.path}")
-      raise("Error creating database; exiting.")
-    end
   ensure
     create_db_file.unlink
   end
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
   Dir.chdir("db") do
-    unless system("../gradlew --info update")
-      raise("Error upgrading database. Exiting.")
-    end
+    common.run_inline("../gradlew --info update")
   end
 end
 
 def do_drop_db(creds_file, project)
   read_db_vars(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
+  common = Common.new
   begin
-    unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
-      raise("Error generating drop_db file; exiting.")
-    end
+    common.run_inline("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
     puts "Dropping database..."
-    unless system("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
+    common.run_inline("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
               "--port 3307 < #{drop_db_file.path}")
-      raise("Error dropping database; exiting.")
-    end
   ensure
     drop_db_file.unlink
   end
@@ -310,7 +305,7 @@ def register_service_account(*args)
     common = Common.new
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
     Dir.chdir("../firecloud-tools") do
-      system("./run.sh " \
+      common.run_inline("./run.sh " \
         "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
     end
   })
@@ -325,7 +320,8 @@ end
 def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
-    system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
+    common = Common.new
+    common.run_inline("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
            "--port 3307 --database #{ENV["DB_NAME"]}")
   })
 end
@@ -334,10 +330,9 @@ def update_cloud_config(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
     ENV["DB_PORT"] = "3307"
+    common = Common.new
     Dir.chdir("tools") do
-      unless system("../gradlew --info loadConfig")
-          raise("Error updating configuration. Exiting.")
-      end
+      common.run_inline("../gradlew --info loadConfig")
     end
   })
 end
