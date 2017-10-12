@@ -80,7 +80,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
+    public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
@@ -88,7 +88,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9ConditionOccurrenceParent() throws Exception {
+    public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1")))),
@@ -96,7 +96,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
+    public void countSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
@@ -104,7 +104,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
+    public void countSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
@@ -112,7 +112,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9MeasurementLeaf() throws Exception {
+    public void countSubjects_ICD9MeasurementLeaf() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
@@ -120,7 +120,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9MeasurementParent() throws Exception {
+    public void countSubjects_ICD9MeasurementParent() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
@@ -128,7 +128,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_DemoGender() throws Exception {
+    public void countSubjects_DemoGender() throws Exception {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
@@ -136,7 +136,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_DemoAge() throws Exception {
+    public void countSubjects_DemoAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
@@ -147,7 +147,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_DemoGenderAndAge() throws Exception {
+    public void countSubjects_DemoGenderAndAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
@@ -160,7 +160,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
+    public void countSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
@@ -178,7 +178,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
+    public void countSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
         SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
@@ -192,7 +192,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_DemoExcluded() throws Exception {
+    public void countSubjects_DemoExcluded() throws Exception {
         SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("DEMO")
