@@ -28,7 +28,7 @@ public class CriteriaQueryBuilder extends AbstractQueryBuilder {
     @Override
     public QueryRequest buildQueryRequest(QueryParameters parameters) {
         return QueryRequest
-                .newBuilder(filterBigQueryConfig(CRITERIA_QUERY, parameters.getType().toLowerCase() + "_criteria"))
+                .newBuilder(CRITERIA_QUERY.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
                 .addNamedParameter("parentId", QueryParameterValue.int64(parameters.getParentId()))
                 .setUseLegacySql(false)
                 .build();

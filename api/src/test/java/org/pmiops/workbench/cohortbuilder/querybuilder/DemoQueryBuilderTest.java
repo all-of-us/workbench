@@ -15,13 +15,15 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({DemoQueryBuilder.class})
-public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
+public class DemoQueryBuilderTest {
 
     @Autowired
     DemoQueryBuilder queryBuilder;
 
     @Test
     public void buildQueryRequest() throws Exception {
+        String genderNamedParameter = "";
+        String ageNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
         params.add(new SearchParameter().domain("DEMO_GEN").conceptId(8507L));
         params.add(new SearchParameter().domain("DEMO_AGE").value("20"));
@@ -29,27 +31,31 @@ public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
         QueryRequest request = queryBuilder
                 .buildQueryRequest(new QueryParameters().type("DEMO").parameters(params));
 
-        String expected = "select distinct concat(cast(p.person_id as string), ',',\n" +
-                "p.gender_source_value, ',',\n" +
-                "p.race_source_value) as val\n" +
-                "FROM `" + getTablePrefix() + ".person` p\n" +
-                "where p.gender_concept_id = @genderConceptId\n" +
+        for (String key : request.getNamedParameters().keySet()) {
+            if (key.startsWith("gender")) {
+                genderNamedParameter = key;
+            } else {
+                ageNamedParameter = key;
+            }
+        }
+
+        String expected = "select distinct person_id\n" +
+                "from `${projectId}.${dataSetId}.person` p\n" +
+                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
                 "union distinct\n" +
-                "select distinct concat(cast(p.person_id as string), ',',\n" +
-                "p.gender_source_value, ',',\n" +
-                "p.race_source_value) as val\n" +
-                "FROM `" + getTablePrefix() + ".person` p\n" +
-                "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @age\n";
+                "select distinct person_id\n" +
+                "from `${projectId}.${dataSetId}.person` p\n" +
+                "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @" + ageNamedParameter + "\n";
 
         assertEquals(expected, request.getQuery());
 
         assertEquals("8507", request
                 .getNamedParameters()
-                .get("genderConceptId")
+                .get(genderNamedParameter)
                 .getValue());
         assertEquals("20", request
                 .getNamedParameters()
-                .get("age")
+                .get(ageNamedParameter)
                 .getValue());
     }
 
