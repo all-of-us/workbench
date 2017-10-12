@@ -220,8 +220,10 @@ def do_run_migrations(creds_file, project)
   end
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
-  unless system("cd db && ../gradlew --info update && cd ..")
-    raise("Error upgrading database. Exiting.")
+  Dir.chdir("db") do
+    unless system("../gradlew --info update")
+      raise("Error upgrading database. Exiting.")
+    end
   end
 end
 
@@ -307,8 +309,10 @@ def register_service_account(*args)
   run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
     common = Common.new
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
-    system("cd ../firecloud-tools &&  ./run.sh " \
-      "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+    Dir.chdir("../firecloud-tools") do
+      system("./run.sh " \
+        "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+    end
   })
 end
 
@@ -330,8 +334,10 @@ def update_cloud_config(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
     ENV["DB_PORT"] = "3307"
-    unless system("cd tools && ../gradlew --info loadConfig && cd ..")
-        raise("Error updating configuration. Exiting.")
+    Dir.chdir("tools") do
+      unless system("../gradlew --info loadConfig")
+          raise("Error updating configuration. Exiting.")
+      end
     end
   })
 end
