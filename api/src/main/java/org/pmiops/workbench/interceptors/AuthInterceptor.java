@@ -75,10 +75,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     boolean isAuthRequired = false;
     ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
-    for (Authorization auth : apiOp.authorizations()) {
-      if (auth.value().equals(authName)) {
-        isAuthRequired = true;
-        break;
+    if (apiOp != null) {
+      for (Authorization auth : apiOp.authorizations()) {
+        if (auth.value().equals(authName)) {
+          isAuthRequired = true;
+          break;
+        }
       }
     }
     if (!isAuthRequired) {

@@ -91,6 +91,32 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
+  /api/v1/create-account:
+    post:
+      tags:
+        - profile
+      description: Creates an account in the researchallofus.org domain.
+      operationId: createAccount
+      security: []
+      parameters:
+        - in: body
+          name: createAccountRequest
+          schema:
+            $ref: "#/definitions/CreateAccountRequest"
+      responses:
+        "201":
+          description: Account created successfully.
+
+  /api/v1/delete-account:
+    post:
+      tags:
+        - profile
+      description: Deletes your account in the researchallofus.org domain.
+      operationId: deleteAccount
+      responses:
+        "201":
+          description: Account deleted successfully.
+
   /api/v1/register:
     post:
       tags:
@@ -715,6 +741,28 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
+  CreateAccountRequest:
+    type: object
+    required:
+      - givenName
+      - familyName
+      - username
+      - password
+    properties:
+      givenName:
+        type: string
+      familyName:
+        type: string
+      username:
+        type: string
+      password:
+        type: string
+    example:
+      givenName: "John"
+      familyName: "Doe"
+      username: "john.doe"
+      password: "correct horse battery staple"
+
   BugReport:
     type: object
     required:
@@ -1086,4 +1134,3 @@ definitions:
         type: boolean
     example:
       isTaken: false
-

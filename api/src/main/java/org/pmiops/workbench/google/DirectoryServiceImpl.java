@@ -7,6 +7,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
+import com.google.api.services.admin.directory.model.User;
+import com.google.api.services.admin.directory.model.UserName;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +32,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   // the impression that the email address is an acceptable substitute, but testing shows that this
   // doesn't actually work.
   static final List<String> SCOPES = Arrays.asList(
-      DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
+      DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
   final Provider<WorkbenchConfig> configProvider;
@@ -73,6 +75,28 @@ public class DirectoryServiceImpl implements DirectoryService {
       } else {
         throw new RuntimeException(e);
       }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void createUser(String givenName, String familyName, String username, String password) {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    User user = new User()
+      .setPrimaryEmail(username+"@"+gSuiteDomain)
+      .setPassword(password)
+      .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
+    try {
+      getGoogleDirectoryService().users().insert(user).execute();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void deleteUser(String username) {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    try {
+      getGoogleDirectoryService().users().delete(username+"@"+gSuiteDomain).execute();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
