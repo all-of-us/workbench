@@ -72,7 +72,7 @@ export class CohortSearchEpics {
   fetchCounts: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
       ({path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
-      this.service.searchSubjects(request)
+      this.service.countSubjects(request)
         .map(count => loadCountRequestResults(path, count))
         .race(cancelListener(action$, path))
         .catch(error => {
