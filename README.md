@@ -91,6 +91,13 @@ Example:
 You will be prompted to confirm the deployment. When it finishes, you will be able to access the
 UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot.com.
 
+### Versioned UI deploy
+
+To avoid overriding the currently deployed test version it is useful to add versioning to your deploys.
+To just deploy the UI, add the following flag: `-t ui`.
+To version your deploy, add the flag: `--version VERSION`.
+To enable access to the version, go to cloud console and add the version URL to the `AoU Web Client (Test)` OAuth client ID.
+
 ## git-secrets
 
 ### Setup
