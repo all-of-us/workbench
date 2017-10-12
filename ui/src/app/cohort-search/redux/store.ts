@@ -1,5 +1,5 @@
 import {Map, List, Set, fromJS} from 'immutable';
-import {KeyPath} from './typings';
+import {KeyPath} from './actions/types';
 import {SearchRequest} from 'generated';
 
 /**
@@ -11,7 +11,7 @@ import {SearchRequest} from 'generated';
  *      * Implemented as a Set, not a Map
  *    - counts: Table {KeyPath => number} tracking entity counts
  */
-export const InitialState = fromJS({
+export const initialState = fromJS({
   search: {
     includes: [[]],
     excludes: [[]],
@@ -25,6 +25,8 @@ export const InitialState = fromJS({
   counts: {},
 });
 
+
+export type CohortSearchState = Map<any, any>;
 
 /**
  * Selectors: Used to query information from the state

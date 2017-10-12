@@ -2,55 +2,63 @@ import {Reducer} from 'redux';
 import {Map, List, fromJS} from 'immutable';
 
 import {
-  InitialState,
+  initialState,
   activeSearchGroupItemPath,
   activeCriteriaType,
+  CohortSearchState,
 } from './store';
 
-import * as ActionTypes from './actions/types';
 import {
-  CohortSearchState,
-  CohortSearchActionType,
-  CountScope,
-} from './typings';
+  START_REQUEST,
+  CLEANUP_REQUEST,
+  LOAD_CRITERIA_RESULTS,
+  LOAD_COUNT_RESULTS,
+  INIT_SEARCH_GROUP,
+  INIT_GROUP_ITEM,
+  SELECT_CRITERIA,
+  REMOVE,
+  SET_WIZARD_OPEN,
+  SET_WIZARD_CLOSED,
+  SET_ACTIVE_CONTEXT,
+  CLEAR_ACTIVE_CONTEXT,
+  RootAction,
+} from './actions/types';
 
 /**
  * The root Reducer.  Handles synchronous changes to application State
  */
-type _State = CohortSearchState;
-type _Action = CohortSearchActionType;
 
 export const rootReducer: Reducer<CohortSearchState> =
-  (state: _State = InitialState, action: _Action): _State => {
+  (state: CohortSearchState = initialState, action: RootAction): CohortSearchState => {
     switch (action.type) {
 
-      case ActionTypes.START_REQUEST:
+      case START_REQUEST:
         return state.update('requests', requestTable => requestTable.add(action.path));
 
-      case ActionTypes.CLEANUP_REQUEST:
+      case CLEANUP_REQUEST:
         return state.update('requests', requestTable => requestTable.remove(action.path));
 
-      case ActionTypes.LOAD_CRITERIA_RESULTS:
+      case LOAD_CRITERIA_RESULTS:
         return state.updateIn(action.path.unshift('criteria'), fromJS(action.results));
 
-      case ActionTypes.LOAD_COUNT_RESULTS: {
+      case LOAD_COUNT_RESULTS: {
         // action.path is [role, groupIndex, groupItemIndex, scope]
         const scope = action.path.last();
         const pathKey = {
-          [CountScope.TOTAL]: 'total',
-          [CountScope.GROUP]: action.path.skipLast(2),
-          [CountScope.ITEM]: action.path.skipLast(1),
+          TOTAL: 'total',
+          GROUP: action.path.skipLast(2),
+          ITEM: action.path.skipLast(1),
         }[scope];
         return state.setIn(['counts', pathKey], action.count);
       }
 
-      case ActionTypes.INIT_SEARCH_GROUP:
+      case INIT_SEARCH_GROUP:
         return state.updateIn(
           ['search', action.role],
           list => list.push(Map({items: List()}))
         );
 
-      case ActionTypes.INIT_GROUP_ITEM: {
+      case INIT_GROUP_ITEM: {
         const itemPath = ['search', action.role, action.groupIndex, 'items'];
         const newItem = {
           type: activeCriteriaType(state),
@@ -65,26 +73,26 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
       }
 
-      case ActionTypes.SELECT_CRITERIA:
+      case SELECT_CRITERIA:
         return state.updateIn(
           activeSearchGroupItemPath(state).push('searchParameters'),
           List(),
           criteria => criteria.push(action.criterion)
         );
 
-      case ActionTypes.REMOVE:
+      case REMOVE:
         return state.deleteIn(action.path);
 
-      case ActionTypes.SET_WIZARD_OPEN:
+      case SET_WIZARD_OPEN:
         return state.setIn(['context', 'wizardOpen'], true);
 
-      case ActionTypes.SET_WIZARD_CLOSED:
+      case SET_WIZARD_CLOSED:
         return state.setIn(['context', 'wizardOpen'], false);
 
-      case ActionTypes.SET_ACTIVE_CONTEXT:
+      case SET_ACTIVE_CONTEXT:
         return state.mergeIn(['context', 'active'], action.context);
 
-      case ActionTypes.CLEAR_ACTIVE_CONTEXT:
+      case CLEAR_ACTIVE_CONTEXT:
         return state.setIn(['context', 'active'], Map());
 
       default: return state;

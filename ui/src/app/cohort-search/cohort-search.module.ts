@@ -32,7 +32,7 @@ import {
   CohortSearchActions,
   CohortSearchEpics,
   CohortSearchState,
-  InitialState,
+  initialState,
   rootReducer
 } from './redux';
 
@@ -94,7 +94,7 @@ export class CohortSearchModule {
 
     ngRedux.configureStore(
       rootReducer,
-      InitialState,
+      initialState,
       middleware,
       storeEnhancers
     );

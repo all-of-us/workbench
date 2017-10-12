@@ -5,8 +5,11 @@ import {List} from 'immutable';
 
 import {environment} from 'environments/environment';
 
-import {activeSearchGroupItemPath} from '../store';
-import {CountScope, KeyPath, CohortSearchState} from '../typings';
+import {
+  CohortSearchState,
+  activeSearchGroupItemPath
+} from '../store';
+import {KeyPath} from './types';
 import * as ActionFuncs from './creators';
 
 import {
@@ -26,7 +29,7 @@ export class CohortSearchActions {
 
   /*
    * Auto-dispatched action creators:
-   * We wrap action creators from sub-dux in dispatch here so that we
+   * We wrap the bare action creators in dispatch here so that we
    * (A) provide a unified action dispatching interface to components and
    * (B) can easily perform multi-step, complex actions from this service
    */
@@ -61,7 +64,7 @@ export class CohortSearchActions {
   removeGroupItem(role: keyof SearchRequest, groupIndex: number, groupItemIndex: number): void {
     const path = List().push(role, groupIndex, groupItemIndex);
     const state = this.ngRedux.getState();
-    const isloading = state.get('requests').has(path);;
+    const isloading = state.get('requests').has(path);
     if (isloading) {
       this.cancelRequest(path);
     }
@@ -69,18 +72,18 @@ export class CohortSearchActions {
   }
 
   removeCriterion(
-    role: keyof SearchRequest, 
-    groupIndex: number, 
-    groupItemIndex: number, 
+    role: keyof SearchRequest,
+    groupIndex: number,
+    groupItemIndex: number,
     criterionIndex: number,
   ): void {
     this.remove(List().push(
-      'search', 
-      role, 
-      groupIndex, 
-      'items', 
-      groupItemIndex, 
-      'searchParameters', 
+      'search',
+      role,
+      groupIndex,
+      'items',
+      groupItemIndex,
+      'searchParameters',
       criterionIndex
     ));
   }
@@ -94,9 +97,9 @@ export class CohortSearchActions {
   finishWizard(): void {
     const path = activeSearchGroupItemPath(this.ngRedux.getState());
 
-    this.getCounts(path, CountScope.ITEM);
-    this.getCounts(path, CountScope.GROUP);
-    this.getCounts(path, CountScope.TOTAL);
+    this.getCounts(path, 'ITEM');
+    this.getCounts(path, 'GROUP');
+    this.getCounts(path, 'TOTAL');
 
     this.clearActiveContext();
     this.setWizardClosed();

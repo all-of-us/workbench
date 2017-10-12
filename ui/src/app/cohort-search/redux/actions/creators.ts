@@ -1,17 +1,26 @@
 import {List} from 'immutable';
-import * as ActionTypes from './types';
 import {
-  KeyPath,
-  CriteriaType,
-  ParentID,
-  RequestAction,
-  CountRequestAction,
-  CriteriaRequestAction,
-  UtilityAction,
-} from '../typings';
+  START_REQUEST,
+  CANCEL_REQUEST,
+  CLEANUP_REQUEST,
+  BEGIN_CRITERIA_REQUEST,
+  LOAD_CRITERIA_RESULTS,
+  BEGIN_COUNT_REQUEST,
+  LOAD_COUNT_RESULTS,
+  INIT_SEARCH_GROUP,
+  INIT_GROUP_ITEM,
+  SELECT_CRITERIA,
+  REMOVE,
+  SET_WIZARD_OPEN,
+  SET_WIZARD_CLOSED,
+  SET_ACTIVE_CONTEXT,
+  CLEAR_ACTIVE_CONTEXT,
+  ERROR,
+  ActionTypes
+} from './types';
 
+import {KeyPath} from './types';
 import {Criteria, SearchRequest} from 'generated';
-
 
 /**
  * Each Request is identified by a KeyPath to the resource being requested and
@@ -22,16 +31,16 @@ import {Criteria, SearchRequest} from 'generated';
  *    - or removing a KeyPath from the requests set
  */
 export const startRequest =
-  (path: KeyPath): RequestAction =>
-  ({type: ActionTypes.START_REQUEST, path});
+  (path: KeyPath): ActionTypes[typeof START_REQUEST] =>
+  ({type: START_REQUEST, path});
 
 export const cancelRequest =
-  (path: KeyPath): RequestAction =>
-  ({type: ActionTypes.CANCEL_REQUEST, path});
+  (path: KeyPath): ActionTypes[typeof CANCEL_REQUEST] =>
+  ({type: CANCEL_REQUEST, path});
 
 export const cleanupRequest =
-  (path: KeyPath): RequestAction =>
-  ({type: ActionTypes.CLEANUP_REQUEST, path});
+  (path: KeyPath): ActionTypes[typeof CLEANUP_REQUEST] =>
+  ({type: CLEANUP_REQUEST, path});
 
 
 /**
@@ -41,12 +50,12 @@ export const cleanupRequest =
  * by the Epic upon success.
  */
 export const requestCriteria =
-  (kind: CriteriaType, parentId: ParentID): CriteriaRequestAction =>
-  ({type: ActionTypes.BEGIN_CRITERIA_REQUEST, path: List([kind, parentId])});
+  (kind: string, parentId: number): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
+  ({type: BEGIN_CRITERIA_REQUEST, path: List([kind, parentId])});
 
 export const loadCriteriaRequestResults =
-  (path: KeyPath, results: Criteria[]): CriteriaRequestAction =>
-  ({type: ActionTypes.LOAD_CRITERIA_RESULTS, path, results, cleanup: cleanupRequest(path)});
+  (path: KeyPath, results: Criteria[]): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
+  ({type: LOAD_CRITERIA_RESULTS, path, results, cleanup: cleanupRequest(path)});
 
 
 /**
@@ -56,12 +65,12 @@ export const loadCriteriaRequestResults =
  * the Epic's success callback
  */
 export const requestCounts =
-  (path: KeyPath, request: SearchRequest): CountRequestAction =>
-  ({type: ActionTypes.BEGIN_COUNT_REQUEST, path, request});
+  (path: KeyPath, request: SearchRequest): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
+  ({type: BEGIN_COUNT_REQUEST, path, request});
 
 export const loadCountRequestResults =
-  (path: KeyPath, count: number): CountRequestAction =>
-  ({type: ActionTypes.LOAD_COUNT_RESULTS, path, count, cleanup: cleanupRequest(path)});
+  (path: KeyPath, count: number): ActionTypes[typeof LOAD_COUNT_RESULTS] =>
+  ({type: LOAD_COUNT_RESULTS, path, count, cleanup: cleanupRequest(path)});
 
 
 /**
@@ -69,30 +78,30 @@ export const loadCountRequestResults =
  * of search groups
  */
 export const initGroup =
-  (role: keyof SearchRequest): UtilityAction =>
-  ({type: ActionTypes.INIT_SEARCH_GROUP, role});
+  (role: keyof SearchRequest): ActionTypes[typeof INIT_SEARCH_GROUP] =>
+  ({type: INIT_SEARCH_GROUP, role});
 
 /**
  * Pushes a new SearchGroupItem onto the end of the specified search group
  */
 export const initGroupItem =
-  (role: keyof SearchRequest, groupIndex: number): UtilityAction =>
-  ({type: ActionTypes.INIT_GROUP_ITEM, role, groupIndex});
+  (role: keyof SearchRequest, groupIndex: number): ActionTypes[typeof INIT_GROUP_ITEM] =>
+  ({type: INIT_GROUP_ITEM, role, groupIndex});
 
 /**
  * Copies a criterion from the criteria tree (where it is loaded) into the
  * active search group item's SearchParameters list
  */
 export const selectCriteria =
-  (criterion: Criteria): UtilityAction =>
-  ({type: ActionTypes.SELECT_CRITERIA, criterion});
+  (criterion: Criteria): ActionTypes[typeof SELECT_CRITERIA] =>
+  ({type: SELECT_CRITERIA, criterion});
 
 /**
  * Removes the resource at `path`
  */
 export const remove =
-  (path: KeyPath): UtilityAction =>
-  ({type: ActionTypes.REMOVE, path});
+  (path: KeyPath): ActionTypes[typeof REMOVE] =>
+  ({type: REMOVE, path});
 
 /**
  * The next four all deal with wizard context.  Criteria selection is done via
@@ -106,14 +115,19 @@ export const remove =
  * Which collectively specify where to put the criteria once they're selected.
  */
 export const setWizardOpen =
-  (): UtilityAction => ({type: ActionTypes.SET_WIZARD_OPEN});
+  (): ActionTypes[typeof SET_WIZARD_OPEN] => ({type: SET_WIZARD_OPEN});
 
 export const setWizardClosed =
-  (): UtilityAction => ({type: ActionTypes.SET_WIZARD_CLOSED});
+  (): ActionTypes[typeof SET_WIZARD_CLOSED] => ({type: SET_WIZARD_CLOSED});
 
 export const setActiveContext =
-  (context: object): UtilityAction =>
-  ({type: ActionTypes.SET_ACTIVE_CONTEXT, context});
+  (context: object): ActionTypes[typeof SET_ACTIVE_CONTEXT] =>
+  ({type: SET_ACTIVE_CONTEXT, context});
 
 export const clearActiveContext =
-  (): UtilityAction => ({type: ActionTypes.CLEAR_ACTIVE_CONTEXT});
+  (): ActionTypes[typeof CLEAR_ACTIVE_CONTEXT] => ({type: CLEAR_ACTIVE_CONTEXT});
+
+
+export const errorAction =
+  (error: any): ActionTypes[typeof ERROR] =>
+  ({type: ERROR, error});

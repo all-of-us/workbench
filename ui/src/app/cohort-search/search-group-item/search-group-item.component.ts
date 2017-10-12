@@ -43,7 +43,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
       0  // specifies default; otherwise returns emtpy map
     );
 
-    const loadingSelector = (state) => 
+    const loadingSelector = (state) =>
       state.get('requests').has(List([this.role, this.index, this.itemIndex]));
     const countSub = this.ngRedux.select(countSelector).subscribe(
       count => {

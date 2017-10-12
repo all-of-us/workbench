@@ -1,24 +1,38 @@
-import {ActionsObservable} from 'redux-observable';
-import {AnyAction} from 'redux';
+import {ActionsObservable, Epic} from 'redux-observable';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
 
-import * as ActionTypes from './actions/types';
+import {
+  CANCEL_REQUEST,
+  BEGIN_CRITERIA_REQUEST,
+  BEGIN_COUNT_REQUEST,
+  LOAD_COUNT_RESULTS,
+  LOAD_CRITERIA_RESULTS,
+  ERROR,
+  RootAction,
+  ActionTypes,
+} from './actions/types';
 import {
   loadCriteriaRequestResults,
   loadCountRequestResults,
   cleanupRequest,
+  errorAction,
 } from './actions/creators';
-import {KeyPath, RequestAction} from './typings';
+import {CohortSearchState} from './store';
 
 import {CohortBuilderService} from 'generated';
 
+type CSEpic = Epic<RootAction, CohortSearchState>;
+type LoadAction =
+    ActionTypes[typeof LOAD_CRITERIA_RESULTS]
+  | ActionTypes[typeof LOAD_COUNT_RESULTS]
+  ;
 
 const cancelListener =
-  (action$: ActionsObservable<AnyAction>, path: KeyPath): Observable<RequestAction> =>
+  (action$, path) =>
   action$
-    .ofType(ActionTypes.CANCEL_REQUEST)
+    .ofType(CANCEL_REQUEST)
     .filter(action => action.path.equals(path))
     .map(action => cleanupRequest(path))
     .take(1);
@@ -35,11 +49,13 @@ const cancelListener =
 export class CohortSearchEpics {
   constructor(private service: CohortBuilderService) {}
 
-  fetchCriteria = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(ActionTypes.BEGIN_CRITERIA_REQUEST).mergeMap(
-      ({path}) => {
-        const kind = path.first();
-        const parentId = path.last();
+  fetchCriteria: CSEpic = (action$) => (
+    action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
+      // For the TypeScript compiler to allow the destructuring, we cast to the
+      // appropriate action type
+      ({path}: ActionTypes[typeof BEGIN_CRITERIA_REQUEST]) => {
+        const kind = <string>path.first();
+        const parentId = <number>path.last();
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
           .map(result => loadCriteriaRequestResults(path, result.items))
@@ -47,30 +63,30 @@ export class CohortSearchEpics {
           .catch(error => {
             console.log('Caught an error: ');
             console.dir(error);
-            return Observable.of({type: 'ERROR', error});
+            return Observable.of(errorAction(error));
           });
       }
     )
   )
 
-  fetchCounts = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(ActionTypes.BEGIN_COUNT_REQUEST).mergeMap(
-      ({path, request}) =>
+  fetchCounts: CSEpic = (action$) => (
+    action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
+      ({path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
       this.service.searchSubjects(request)
         .map(count => loadCountRequestResults(path, count))
         .race(cancelListener(action$, path))
         .catch(error => {
           console.log('Caught an error: ');
           console.dir(error);
-          return Observable.of({type: 'ERROR', error});
+            return Observable.of(errorAction(error));
         })
     )
   )
 
-  finalizeRequests = (action$: ActionsObservable<AnyAction>) => (
+  finalizeRequests: CSEpic = (action$) => (
     action$.ofType(
-      ActionTypes.LOAD_COUNT_RESULTS,
-      ActionTypes.LOAD_CRITERIA_RESULTS,
-    ).map(action => action.cleanup)
+      LOAD_COUNT_RESULTS,
+      LOAD_CRITERIA_RESULTS,
+    ).map((action: LoadAction) => action.cleanup)
   )
 }
