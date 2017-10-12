@@ -45,6 +45,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
+    /**
+     * This method list any of the criteria trees.
+     *
+     * @param type
+     * @param parentId
+     * @return
+     */
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
@@ -72,9 +79,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.ok(criteriaResponse);
     }
 
+    /**
+     * This method will return a count of unique subjects
+     * defined by the provided {@link SearchRequest}.
+     *
+     * @param request
+     * @return
+     */
     @Override
     public ResponseEntity<Long> countSubjects(SearchRequest request) {
 
+        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
@@ -117,6 +132,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 });
     }
 
+    /**
+     * Execute the provided query using bigquery.
+     *
+     * @param query
+     * @return
+     */
     private QueryResult executeQuery(QueryRequest query) {
 
         // Execute the query

@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Provides counts of unique subjects
+ * defined by the provided {@link SearchRequest}.
+ */
 @Service
 public class SubjectCounter {
 
@@ -34,6 +38,10 @@ public class SubjectCounter {
                     "(${excludeSql})\n" +
                     "x where x.person_id = person.person_id)\n";
 
+    /**
+     * Provides counts of unique subjects
+     * defined by the provided {@link SearchRequest}.
+     */
     public QueryRequest buildSubjectCounterQuery(SearchRequest request) {
         Map<String, QueryParameterValue> params = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
