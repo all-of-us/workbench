@@ -114,7 +114,7 @@ paths:
       description: Deletes your account in the researchallofus.org domain.
       operationId: deleteAccount
       responses:
-        "201":
+        "204":
           description: Account deleted successfully.
 
   /api/v1/register:
