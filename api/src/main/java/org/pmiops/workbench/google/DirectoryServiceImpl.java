@@ -10,25 +10,44 @@ import com.google.api.services.admin.directory.DirectoryScopes;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-  private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
-  private static final List<String> SCOPES = Arrays.asList(
+  static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+
+  // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
+  // https://admin.google.com/AdminHome?chromeless=1#OGX:ManageOauthClients
+  // For example, ADMIN_DIRECTORY_USER does not encapsulate ADMIN_DIRECTORY_USER_READONLY — it must
+  // be explicit.
+  // The "Client Name" field in that form must be the cient ID of the service account. The field
+  // will accept the email address of the service account and lookup the correct client ID giving
+  // the impression that the email address is an acceptable substitute, but testing shows that this
+  // doesn't actually work.
+  static final List<String> SCOPES = Arrays.asList(
       DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
+  final Provider<WorkbenchConfig> configProvider;
+
+  @Autowired
+  public DirectoryServiceImpl(Provider<WorkbenchConfig> configProvider) {
+    this.configProvider = configProvider;
+  }
+
   private GoogleCredential createCredentialWithImpersonation() {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     GoogleCredential credential = Utils.getDefaultGoogleCredential();
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
-        // TODO(dmohs): Domain should come from config.
-        .setServiceAccountUser("directory-service@fake-research-aou.org")
+        .setServiceAccountUser("directory-service@"+gSuiteDomain)
         .setServiceAccountId(credential.getServiceAccountId())
         .setServiceAccountScopes(SCOPES)
         .setServiceAccountPrivateKey(credential.getServiceAccountPrivateKey())
@@ -44,9 +63,9 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   public boolean isUsernameTaken(String username) {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      // TODO(dmohs): Domain should come from config.
-      getGoogleDirectoryService().users().get(username + "@fake-research-aou.org").execute();
+      getGoogleDirectoryService().users().get(username+"@"+gSuiteDomain).execute();
       return true; // successful call means user exists
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == 404) {

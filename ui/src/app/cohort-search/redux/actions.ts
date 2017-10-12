@@ -1,10 +1,12 @@
 import {Injectable} from '@angular/core';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, dispatch} from '@angular-redux/store';
 import {AnyAction} from 'redux';
 import {List} from 'immutable';
 
 import {environment} from 'environments/environment';
 import {CohortSearchState, getActiveSGIPath} from './store';
+import * as requests from './requests';
+
 import {
   Criteria,
   CohortBuilderService,
@@ -44,6 +46,16 @@ export class CohortSearchActions {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private cohortBuilderService: CohortBuilderService) {}
 
+  /*
+   * Auto-dispatched action creators:
+   * We wrap action creators from sub-dux in dispatch here so that we
+   * (A) provide a unified action dispatching interface to components and
+   * (B) can easily perform multi-step, complex actions from this service
+   */
+  @dispatch() startRequest = requests.startRequest;
+  @dispatch() cancelRequest = requests.cancelRequest;
+  @dispatch() cleanupRequest = requests.cleanupRequest;
+
   /* Action creators
    *
    * These functions are responsible for actually dispatching actions to the redux store;
@@ -59,7 +71,12 @@ export class CohortSearchActions {
   }
 
   public removeGroupItem(sgRole: keyof SearchRequest, sgIndex: number, sgItemIndex: number): void {
-    const path = List([sgRole, sgIndex, sgItemIndex]);
+    const path = List().push(sgRole, sgIndex, sgItemIndex);
+    const predicate = requests.isRequesting(path);
+    const state = this.ngRedux.getState();
+    if (predicate(state)) {
+      this.cancelRequest(path);
+    }
     this.ngRedux.dispatch({type: CohortSearchActions.REMOVE_GROUP_ITEM, path});
   }
 
@@ -87,6 +104,7 @@ export class CohortSearchActions {
     if (this.ngRedux.getState().getIn(['criteriaTree', critType, parentId])) {
       return;
     }
+    this.startRequest(List([critType, parentId]));
     this.ngRedux.dispatch({type: CohortSearchActions.FETCH_CRITERIA, critType, parentId});
   }
 
@@ -104,8 +122,8 @@ export class CohortSearchActions {
    * to go either way. As is, they only handle SearchGroupItems, just as before
    */
   public fetchSearchResults(sgiPath): void {
-    const store = this.ngRedux.getState();
     const request = this.prepareRequest(sgiPath);
+    this.startRequest(sgiPath);
     this.ngRedux.dispatch({type: CohortSearchActions.FETCH_SEARCH_RESULTS, request, sgiPath});
   }
 

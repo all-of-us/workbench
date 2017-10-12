@@ -11,7 +11,7 @@ export const InitialState = fromJS({
     wizardOpen: false,
   },
   criteriaTree: {},
-  loading: {},
+  requests: Set(),
 });
 
 export type CohortSearchState = Map<string, any>;
@@ -33,23 +33,3 @@ export const getActiveSGIPath = (state) => List([
   state.getIn(activeSGIndex),
   state.getIn(activeSGItemIndex),
 ]);
-
-
-/**
- * Helper function that Deletes all entries along the path which exist and are
- * empty
- */
-export const prunePath = (state, path) => {
-  path = List(path);
-  state = state.deleteIn(path);
-  path = path.butLast();
-  while (
-    !path.isEmpty()
-    && isCollection(state.getIn(path))
-    && state.getIn(path).isEmpty()
-  ) {
-      state = state.deleteIn(path);
-      path = path.butLast();
-  }
-  return state;
-};

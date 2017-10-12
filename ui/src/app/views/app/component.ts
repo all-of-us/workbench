@@ -10,7 +10,7 @@ import {Observable} from 'rxjs/Observable';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {CohortsService, Configuration, ConfigurationParameters} from 'generated';
+import {CohortsService, Configuration, ConfigurationParameters, ProfileService} from 'generated';
 
 declare const gapi: any;
 
@@ -22,13 +22,15 @@ declare const gapi: any;
 export class AppComponent implements OnInit {
   private baseTitle: string;
   user: Observable<SignInDetails>;
+  hasAdminPermissions = false;
 
   constructor(
       private titleService: Title,
       private activatedRoute: ActivatedRoute,
       private router: Router,
       private signInService: SignInService,
-      private cohortsService: CohortsService
+      private cohortsService: CohortsService,
+      private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
@@ -56,6 +58,11 @@ export class AppComponent implements OnInit {
       }
     });
     this.user = this.signInService.user;
+    this.profileService.getMe().subscribe(profile => {
+      // TODO(RW-85) Real UI for research purpose review. This is a standin to demonstrate that
+      // we can fetch permissions from the frontend code.
+      this.hasAdminPermissions = profile.authorities.length > 0;
+    });
   }
 
   signIn(e: Event): void {

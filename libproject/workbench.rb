@@ -25,12 +25,15 @@ module Workbench
   module_function :ensure_git_hooks
 
   def handle_argv_or_die(main_filename)
+    common = Common.new
     Dir.chdir(File.dirname(main_filename))
 
     check_submodules
     ensure_git_hooks
+    unless ENV["CIRCLECI"] == "true"
+      common.docker.requires_docker
+    end
 
-    common = Common.new
     if ARGV.length == 0 or ARGV[0] == "--help"
       common.print_usage
       exit 0

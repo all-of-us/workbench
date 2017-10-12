@@ -45,7 +45,6 @@ end
 
 def dev_up(*args)
   common = Common.new
-  common.docker.requires_docker
 
   account = get_auth_login_account()
   if account == nil
@@ -83,7 +82,6 @@ end
 
 def run_api_and_db(*args)
   common = Common.new
-  common.docker.requires_docker
   account = get_auth_login_account()
   if account == nil
     raise("Please run 'gcloud auth login' before starting the server.")
@@ -95,14 +93,12 @@ end
 
 def run_tests(*args)
   common = Common.new
-  common.docker.requires_docker
 
   common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
 end
 
 def run_integration_tests(*args)
   common = Common.new
-  common.docker.requires_docker
 
   account = get_auth_login_account()
   do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
@@ -110,9 +106,13 @@ def run_integration_tests(*args)
   })
 end
 
+def run_gradle(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run --rm api ./gradlew} + args
+end
+
 def connect_to_db(*args)
   common = Common.new
-  common.docker.requires_docker
 
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
@@ -120,7 +120,6 @@ end
 
 def docker_clean(*args)
   common = Common.new
-  common.docker.requires_docker
 
   docker_images = `docker ps -aq`.gsub(/\s+/, " ")
   if !docker_images.empty?
@@ -131,7 +130,6 @@ end
 
 def rebuild_image(*args)
   common = Common.new
-  common.docker.requires_docker
 
   common.run_inline %W{docker-compose build}
 end
@@ -425,7 +423,8 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs tests.",
+  :description => "Runs tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
   :fn => lambda { |*args| run_tests(*args) }
 })
 
@@ -433,6 +432,12 @@ Common.register_command({
   :invocation => "integration",
   :description => "Runs integration tests.",
   :fn => lambda { |*args| run_integration_tests(*args) }
+})
+
+Common.register_command({
+  :invocation => "gradle",
+  :description => "Runs gradle inside the API docker container with the given arguments.",
+  :fn => lambda { |*args| run_gradle(*args) }
 })
 
 Common.register_command({
