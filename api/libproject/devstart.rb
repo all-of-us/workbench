@@ -413,6 +413,19 @@ def get_test_service_account_creds(*args)
   })
 end
 
+def set_authority(*args)
+  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
+    read_db_vars(creds_file, project)
+    ENV["DB_PORT"] = "3307"
+    common = Common.new
+
+    gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
+    Dir.chdir("tools") do
+      common.run_inline %W{#{gradlew_path} --info setAuthority -PappArgs="['one','two','three']"}
+    end
+  })
+end
+
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
@@ -512,4 +525,10 @@ Common.register_command({
   :invocation => "update-cloud-config",
   :description => "Updates configuration in Cloud SQL database for the specified project.",
   :fn => lambda { |*args| update_cloud_config(*args) }
+})
+
+Common.register_command({
+  :invocation => "set-authority",
+  :description => "Set user authorities (permissions). See set-authority --help.",
+  :fn => lambda { |*args| set_authority(*args) }
 })
