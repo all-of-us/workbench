@@ -73,7 +73,10 @@ public class WorkspacesControllerTest {
     researchPurpose.setPopulation(true);
     researchPurpose.setPopulationOfFocus("population");
     researchPurpose.setAdditionalNotes("additional notes");
-
+    researchPurpose.setTimeRequested(new Long(1000));
+    researchPurpose.setTimeReviewed(new Long(1500));
+    researchPurpose.setReviewRequested(true);
+    researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
     workspace.setName("name");
     workspace.setNamespace("namespace");
@@ -112,5 +115,10 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getPopulationOfFocus()).isEqualTo("population");
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getNamespace()).isEqualTo("namespace");
+    assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
+    assertThat(workspace2.getResearchPurpose().getApproved()).isFalse();
+    assertThat(workspace2.getResearchPurpose().getTimeReviewed()).isEqualTo(new Long(1500));
+    assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(new Long(1000));
+
   }
 }
