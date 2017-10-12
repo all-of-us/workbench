@@ -10,9 +10,11 @@ require "fileutils"
 class Options < OpenStruct
 end
 
-def create_parser(command)
+# Creates a default command-line argument parser.
+# command_name: For help text.
+def create_parser(command_name)
   OptionParser.new do |parser|
-    parser.banner = "Usage: ./project.rb #{command} [options]"
+    parser.banner = "Usage: ./project.rb #{command_name} [options]"
     parser
   end
 end
@@ -244,8 +246,8 @@ def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
-def run_with_creds(args, command, proc)
-  parser = create_parser(command)
+def run_with_creds(args, command_name, proc)
+  parser = create_parser(command_name)
   options = Options.new
   add_default_options parser, options
   parser.parse args
@@ -290,8 +292,8 @@ def do_run_with_creds(project, account, creds_file, proc)
   end
 end
 
-def run_with_cloud_sql_proxy(args, command, proc)
-  run_with_creds(args, command, lambda { |project, account, creds_file|
+def run_with_cloud_sql_proxy(args, command_name, proc)
+  run_with_creds(args, command_name, lambda { |project, account, creds_file|
     pid = run_cloud_sql_proxy(project, creds_file)
     begin
       proc.call(project, account, creds_file)
