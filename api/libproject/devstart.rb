@@ -248,7 +248,7 @@ def run_with_creds(args, command, proc)
   parser = create_parser(command)
   options = Options.new
   add_default_options parser, options
-  parser.parse ARGV
+  parser.parse args
   validate_default_options parser, options
   do_run_with_creds(options.project, options.account, options.creds_file, proc)
 end
