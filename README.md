@@ -97,6 +97,11 @@ To avoid overriding the currently deployed test version it is useful to add vers
 To just deploy the UI, add the following flag: `-t ui`.
 To version your deploy, add the flag: `--version VERSION`.
 To enable access to the version, go to cloud console and add the version URL to the `AoU Web Client (Test)` OAuth client ID.
+(See https://console.cloud.google.com/apis/credentials/oauthclient/602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com?project=all-of-us-workbench-test to add Authorized JS origin to the OAuth key.)
+
+#### Example Call
+
+`python tools/deploy.py --project MY_PROJECT --account MY_ACCOUNT -t ui --version brubenst---pr`
 
 ## git-secrets
 
