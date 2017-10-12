@@ -58,7 +58,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         String finalSql = String.join(UNION_TEMPLATE, queryParts);
 
         return QueryRequest
-                .newBuilder(filterBigQueryConfig(finalSql))
+                .newBuilder(finalSql)
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)
                 .build();

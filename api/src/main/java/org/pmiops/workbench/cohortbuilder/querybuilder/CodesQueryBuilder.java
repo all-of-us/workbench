@@ -82,7 +82,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", String.join(UNION_TEMPLATE, queryParts));
 
         return QueryRequest
-                .newBuilder(filterBigQueryConfig(finalSql))
+                .newBuilder(finalSql)
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)
                 .build();

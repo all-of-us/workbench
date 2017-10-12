@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @Import({CodesQueryBuilder.class})
-public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
+public class CodesQueryBuilderTest {
 
     @Autowired
     CodesQueryBuilder queryBuilder;
@@ -50,15 +50,15 @@ public class CodesQueryBuilderTest extends BaseQueryBuilderTest {
 
         String expected =
                 "select person_id\n" +
-                        "from `" + getTablePrefix() + ".person` p\n" +
+                        "from `${projectId}.${dataSetId}.person` p\n" +
                         "where person_id in (select distinct person_id\n" +
-                        "from `" + getTablePrefix() + ".condition_occurrence` a, `" + getTablePrefix() + ".concept` b\n" +
+                        "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.condition_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@cm,@proc)\n" +
                         "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                         " union distinct\n" +
                         "select distinct person_id\n" +
-                        "from `" + getTablePrefix() + ".measurement` a, `" + getTablePrefix() + ".concept` b\n" +
+                        "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.measurement_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@cm,@proc)\n" +
                         "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +

@@ -12,6 +12,7 @@ import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +40,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Autowired
     private SubjectCounter subjectCounter;
 
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfig;
+
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     @Override
@@ -47,7 +52,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 .getQueryBuilder(FactoryKey.CRITERIA)
                 .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
 
-        QueryResult result = executeQuery(queryRequest);
+        QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
         Map<String, Integer> rm = getResultMapper(result);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
@@ -73,7 +78,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
-        QueryResult result = executeQuery(subjectCounter.buildSubjectCounterQuery(request));
+        QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
         Map<String, Integer> rm = getResultMapper(result);
 
         List<FieldValue> row = result.iterateAll().iterator().next();
@@ -94,9 +99,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     for (SearchParameter parameter : item.getSearchParameters()) {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
                             QueryResult result = executeQuery(
-                                    builder.buildQueryRequest(new QueryParameters()
+                                    filterBigQueryConfig(
+                                            builder.buildQueryRequest(new QueryParameters()
                                             .type(item.getType())
-                                            .parameters(Arrays.asList(parameter))));
+                                            .parameters(Arrays.asList(parameter)))));
 
                             Map<String, Integer> rm = getResultMapper(result);
                             List<SearchParameter> paramsWithDomains = new ArrayList<>();
@@ -135,6 +141,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         AtomicInteger index = new AtomicInteger();
         return result.getSchema().getFields().stream().collect(
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
+    }
+
+    protected QueryRequest filterBigQueryConfig(QueryRequest request) {
+        String returnSql = request.getQuery().replace("${projectId}", workbenchConfig.get().bigquery.projectId);
+        returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
+        return request.toBuilder()
+                .setQuery(returnSql)
+                .build();
     }
 
     private Long getLong(List<FieldValue> row, int index) {

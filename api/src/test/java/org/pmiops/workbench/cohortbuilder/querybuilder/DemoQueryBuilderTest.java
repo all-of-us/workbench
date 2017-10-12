@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({DemoQueryBuilder.class})
-public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
+public class DemoQueryBuilderTest {
 
     @Autowired
     DemoQueryBuilder queryBuilder;
@@ -40,11 +40,11 @@ public class DemoQueryBuilderTest extends BaseQueryBuilderTest {
         }
 
         String expected = "select distinct person_id\n" +
-                "from `" + getTablePrefix() + ".person` p\n" +
+                "from `${projectId}.${dataSetId}.person` p\n" +
                 "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
                 "union distinct\n" +
                 "select distinct person_id\n" +
-                "from `" + getTablePrefix() + ".person` p\n" +
+                "from `${projectId}.${dataSetId}.person` p\n" +
                 "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @" + ageNamedParameter + "\n";
 
         assertEquals(expected, request.getQuery());

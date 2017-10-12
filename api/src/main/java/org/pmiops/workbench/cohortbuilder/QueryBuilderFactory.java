@@ -39,7 +39,7 @@ public class QueryBuilderFactory {
      * @return
      */
     public static AbstractQueryBuilder getQueryBuilder(FactoryKey key) {
-        AbstractQueryBuilder queryBuilder = queryBuilderCache.get(key );
+        AbstractQueryBuilder queryBuilder = queryBuilderCache.get(key);
         if(queryBuilder == null) throw new BadRequestException("Unknown queryBuilder type: {0}".format(key.name()));
         return queryBuilder;
     }

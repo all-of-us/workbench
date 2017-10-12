@@ -1,10 +1,12 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.QueryRequest;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -32,6 +34,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
     CohortBuilderController controller;
+
+    @Autowired
+    WorkbenchConfig workbenchConfig;
 
     @Override
     public List<String> getTableNames() {
@@ -198,6 +203,18 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         testSearchRequest.getExcludes().add(anotherSearchGroup);
 
         assertSubjects( controller.countSubjects(testSearchRequest), 0);
+    }
+
+    @Test
+    public void filterBigQueryConfig_WithoutTableName() throws Exception {
+        final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
+        QueryRequest request = QueryRequest.newBuilder(statement).setUseLegacySql(false).build();
+        final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
+        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(request).getQuery());
+    }
+
+    protected String getTablePrefix() {
+        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {

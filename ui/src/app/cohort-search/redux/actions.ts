@@ -133,9 +133,10 @@ export class CohortSearchActions {
     const role = sgiPath.first();
 
     const newRequest = {
-      [role]: [
+      includes: [
         {items: [searchGoupItem.toJS()]}
-      ]
+      ],
+      excludes: []
     };
 
     if (environment.debug) {
