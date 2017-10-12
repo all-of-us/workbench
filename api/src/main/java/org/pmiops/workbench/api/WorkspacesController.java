@@ -97,6 +97,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               DataAccessLevel.fromValue(workspace.getDataAccessLevel().toString()));
           result.setDescription(workspace.getDescription());
           result.setName(workspace.getName());
+          result.setDiseaseFocusedResearch(workspace.getResearchPurpose().getDiseaseFocusedResearch());
+          result.setDiseaseOfFocus(workspace.getResearchPurpose().getDiseaseOfFocus());
+          result.setMethodsDevelopment(workspace.getResearchPurpose().getMethodsDevelopment());
+          result.setControlSet(workspace.getResearchPurpose().getControlSet());
+          result.setAggregateAnalysis(workspace.getResearchPurpose().getAggregateAnalysis());
+          result.setAncestry(workspace.getResearchPurpose().getAncestry());
+          result.setCommercialPurpose(workspace.getResearchPurpose().getCommercialPurpose());
+          result.setPopulation(workspace.getResearchPurpose().getPopulation());
+          result.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
+          result.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
+          result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+          if(workspace.getResearchPurpose().getTimeRequested() != null){
+            result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
+          }
+          result.setApproved(workspace.getResearchPurpose().getApproved());
+          if(workspace.getResearchPurpose().getTimeReviewed() != null){
+            result.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+          }
           return result;
         }
       };
@@ -177,31 +195,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization
     org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
+    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(userProvider.get());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    dbWorkspace.setDiseaseFocusedResearch(workspace.getResearchPurpose().getDiseaseFocusedResearch());
-    dbWorkspace.setDiseaseOfFocus(workspace.getResearchPurpose().getDiseaseOfFocus());
-    dbWorkspace.setMethodsDevelopment(workspace.getResearchPurpose().getMethodsDevelopment());
-    dbWorkspace.setControlSet(workspace.getResearchPurpose().getControlSet());
-    dbWorkspace.setAggregateAnalysis(workspace.getResearchPurpose().getAggregateAnalysis());
-    dbWorkspace.setAncestry(workspace.getResearchPurpose().getAncestry());
-    dbWorkspace.setCommercialPurpose(workspace.getResearchPurpose().getCommercialPurpose());
-    dbWorkspace.setPopulation(workspace.getResearchPurpose().getPopulation());
-    dbWorkspace.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
-    dbWorkspace.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
-    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-    if(workspace.getResearchPurpose().getTimeRequested() != null){
-      dbWorkspace.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
-    }
-    if(workspace.getResearchPurpose().getApproved() != null){
-      dbWorkspace.setApproved(workspace.getResearchPurpose().getApproved());
-    }
-    if(workspace.getResearchPurpose().getTimeReviewed() != null){
-      dbWorkspace.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
-    }
     setCdrVersionId(workspace, dbWorkspace);
     dbWorkspace = workspaceDao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));

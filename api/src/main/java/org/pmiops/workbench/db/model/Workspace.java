@@ -78,8 +78,8 @@ public class Workspace {
   private String populationOfFocus;
   private String additionalNotes;
 
-  private boolean reviewRequested;
-  private boolean approved;
+  private Boolean reviewRequested;
+  private Boolean approved;
   private Timestamp timeRequested;
   private Timestamp timeReviewed;
 
@@ -269,20 +269,26 @@ public class Workspace {
   }
 
   @Column(name = "rp_review_requested")
-  public boolean getReviewRequested() {
+  public Boolean getReviewRequested() {
     return this.reviewRequested;
   }
 
-  public void setReviewRequested(boolean reviewRequested) {
+  public void setReviewRequested(Boolean reviewRequested) {
+    if (reviewRequested && this.timeRequested == null) {
+      this.timeRequested = new Timestamp(System.currentTimeMillis());
+    }
     this.reviewRequested = reviewRequested;
   }
 
   @Column(name = "rp_approved")
-  public boolean getApproved() {
+  public Boolean getApproved() {
     return this.approved;
   }
 
-  public void setApproved(boolean approved) {
+  public void setApproved(Boolean approved) {
+    if (approved != null && this.timeReviewed == null) {
+      this.timeReviewed = new Timestamp(System.currentTimeMillis());
+    }
     this.approved = approved;
   }
 

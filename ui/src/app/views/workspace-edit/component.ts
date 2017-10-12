@@ -47,9 +47,6 @@ export class WorkspaceEditComponent implements OnInit {
   addWorkspace(): void {
     if (!this.buttonClicked) {
       this.buttonClicked = true;
-      if (this.workspace.researchPurpose.reviewRequested) {
-        this.workspace.researchPurpose.timeRequested = new Date().getTime();
-      }
       this.workspacesService
           .createWorkspace(
               this.workspace)
