@@ -2,10 +2,8 @@ import {ActionsObservable} from 'redux-observable';
 import {AnyAction} from 'redux';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {List} from 'immutable';
 
 import {CohortSearchActions as Actions} from './actions';
-import {cancelListener, cleanupRequest} from './requests';
 import {CohortBuilderService} from 'generated';
 
 /**
@@ -26,10 +24,8 @@ export class CohortSearchEpics {
         const _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
           .map(result => ({
-            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId,
-            cleanup: cleanupRequest(List([critType, parentId]))
-          }))
-          .race(cancelListener(action$, List([critType, parentId])))
+            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId})
+          )
           .catch(error =>
             Observable.of({type: Actions.ERROR, error, critType, parentId})
           );
@@ -40,7 +36,7 @@ export class CohortSearchEpics {
   fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
       ({request, sgiPath}) =>
-      this.service.searchSubjects(request)
+      this.service.countSubjects(request)
         .map(results => ({
           type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath,
           cleanup: cleanupRequest(sgiPath)

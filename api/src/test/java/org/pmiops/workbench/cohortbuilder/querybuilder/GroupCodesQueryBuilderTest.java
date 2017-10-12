@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({GroupCodesQueryBuilder.class})
-public class GroupCodesQueryBuilderTest extends BaseQueryBuilderTest {
+public class GroupCodesQueryBuilderTest {
 
     @Autowired
     GroupCodesQueryBuilder queryBuilder;
@@ -30,7 +30,7 @@ public class GroupCodesQueryBuilderTest extends BaseQueryBuilderTest {
         String expected =
                 "select code,\n" +
                         "domain_id as domainId\n" +
-                        "from `" + getTablePrefix() + ".icd9_criteria`\n" +
+                        "from `${projectId}.${dataSetId}.icd9_criteria`\n" +
                         "where (code like @code0 or code like @code1 or code like @code2)\n" +
                         "and is_selectable = TRUE and is_group = FALSE order by code asc";
         String actual = result.getQuery();

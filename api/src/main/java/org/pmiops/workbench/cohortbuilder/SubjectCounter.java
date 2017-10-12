@@ -4,14 +4,11 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +16,6 @@ import java.util.Map;
 
 @Service
 public class SubjectCounter {
-
-    @Autowired
-    private Provider<WorkbenchConfig> workbenchConfig;
 
     private static final String COUNT_SQL_TEMPLATE =
             "select count(distinct person_id) as count\n" +
@@ -78,23 +72,9 @@ public class SubjectCounter {
         }
 
         return QueryRequest
-                        .newBuilder(filterBigQueryConfig(finalSql))
+                        .newBuilder(finalSql)
                         .setNamedParameters(params)
                         .setUseLegacySql(false)
                         .build();
-    }
-
-    protected String filterBigQueryConfig(String sqlStatement, String tableName) {
-        String returnSql = sqlStatement.replace("${projectId}", workbenchConfig.get().bigquery.projectId);
-        returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
-        if (tableName != null) {
-            returnSql = returnSql.replace("${tableName}", tableName);
-        }
-        return returnSql;
-    }
-
-    protected String filterBigQueryConfig(String sqlStatement) {
-        return filterBigQueryConfig(sqlStatement, null);
-
     }
 }
