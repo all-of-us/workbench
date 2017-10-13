@@ -24,10 +24,10 @@ def add_default_options(parser, options)
   end
   parser.on("--account [ACCOUNT]",
        "Account to use when creating credentials (your.name@pmi-ops.org); "\
-       "use this or --creds-file") do |account|
+       "use this or --creds_file") do |account|
     options.account = account
   end
-  parser.on("--creds-file [CREDS-FILE]",
+  parser.on("--creds_file [CREDS_FILE]",
        "Path to a file containing credentials; use this or --account.") do |creds_file|
     options.creds_file = creds_file
   end
