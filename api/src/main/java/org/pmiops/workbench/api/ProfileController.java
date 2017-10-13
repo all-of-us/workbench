@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,7 +76,7 @@ public class ProfileController implements ProfileApiDelegate {
         request.getGivenName(), request.getFamilyName(), request.getUsername(),
         request.getPassword()
     );
-    return null;
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @Override
@@ -85,7 +86,7 @@ public class ProfileController implements ProfileApiDelegate {
     String email = userAuth.getPrincipal().getEmail();
     String[] parts = email.split("@");
     directoryService.deleteUser(parts[0]);
-    return null;
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
