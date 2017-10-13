@@ -25,6 +25,7 @@ module Workbench
   module_function :ensure_git_hooks
 
   def handle_argv_or_die(main_filename)
+    ENV["PROJECTRB_DEBUG"] = "true"  # Use spawn() instead of system() so stderr shows up.
     common = Common.new
     Dir.chdir(File.dirname(main_filename))
 
