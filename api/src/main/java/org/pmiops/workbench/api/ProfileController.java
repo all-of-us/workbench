@@ -14,9 +14,11 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.CreateAccountResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
@@ -37,15 +39,18 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserDao userDao;
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
+  private final CloudStorageService cloudStorageService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
-        FireCloudService fireCloudService, DirectoryService directoryService) {
+        FireCloudService fireCloudService, DirectoryService directoryService,
+        CloudStorageService cloudStorageService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
+    this.cloudStorageService = cloudStorageService;
   }
 
   @Override
@@ -71,7 +76,14 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> createAccount(CreateAccountRequest request) {
+  public ResponseEntity<CreateAccountResponse> createAccount(CreateAccountRequest request) {
+    // TODO(dmohs): Handle errors.
+    if (request.getInvitationKey() == null
+        || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
+      return ResponseEntity.badRequest()
+          .body(new CreateAccountResponse().message(
+              "Missing or incorrect invitationKey (this API is not yet publicly launched)"));
+    }
     directoryService.createUser(
         request.getGivenName(), request.getFamilyName(), request.getUsername(),
         request.getPassword()
