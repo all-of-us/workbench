@@ -1,5 +1,6 @@
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
+require_relative "credentials"
 require "io/console"
 require "json"
 require "optparse"
@@ -44,69 +45,60 @@ end
 def dev_up(*args)
   common = Common.new
 
-  account = get_auth_login_account()
-  if account == nil
-    raise("Please run 'gcloud auth login' before starting the server.")
-  end
+  ensure_gcloud_account
+  Credentials.new.maybe_download_sa :dev
 
   at_exit { common.run_inline %W{docker-compose down} }
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
+  start_db
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
 
   common.status "Updating configuration..."
   common.run_inline %W{docker-compose run update-config}
 
-  run_api(account)
+  run_api
 end
 
-def run_api(account)
+def start_db()
   common = Common.new
-  # TODO(dmohs): This can be simplified now that we are using a shared service account.
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
-    common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
-    common.status "are here:"
-    common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-    at_exit { common.run_inline %W{docker-compose down} }
-    common.run_inline_swallowing_interrupt %W{docker-compose up api}
-  })
-end
-
-def clean()
-  common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew clean}
+  common.status "Starting database..."
+  common.run_inline %W{docker-compose up -d db}
 end
 
 def run_api_and_db(*args)
+  start_db
+  run_api
+end
+
+def run_api()
   common = Common.new
-  account = get_auth_login_account()
-  if account == nil
-    raise("Please run 'gcloud auth login' before starting the server.")
-  end
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  run_api(account)
+  common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
+  common.status "are here:"
+  common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
+  at_exit { common.run_inline %W{docker-compose down} }
+  common.run_inline_swallowing_interrupt %W{docker-compose up api}
+end
+
+def clean()
+  Common.new.run_inline with_docker_run(%W{./gradlew clean})
 end
 
 def run_tests(*args)
-  common = Common.new
-
-  common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
+  Common.new.run_inline with_docker_run(%W{./gradlew test}+args)
 end
 
 def run_integration_tests(*args)
-  common = Common.new
-
-  account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
-    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
-  })
+  ensure_gcloud_account
+  Credentials.new.maybe_download_sa :dev
+  Common.new.run_inline with_docker_run(%W{./gradlew integration}+args)
 end
 
 def run_gradle(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew} + args
+  Common.new.run_inline with_docker_run(%W{./gradlew}+args)
+end
+
+def run_gcloud(*args)
+  Common.new.run_inline with_docker_run(%W{gcloud}+args)
 end
 
 def connect_to_db(*args)
@@ -127,9 +119,7 @@ def docker_clean(*args)
 end
 
 def rebuild_image(*args)
-  common = Common.new
-
-  common.run_inline %W{docker-compose build}
+  Common.new.run_inline %W{docker-compose build}
 end
 
 def get_service_account_creds_file(project, account, creds_file)
@@ -240,8 +230,21 @@ def do_drop_db(creds_file, project)
   end
 end
 
-def get_auth_login_account()
-  return `gcloud config get-value account`.strip()
+def get_active_gcloud_account()
+  account = Common.new.capture_stdout(with_docker_run(%W{gcloud config get-value account})).strip
+  account.empty? ? nil : account
+end
+
+def ensure_gcloud_account()
+  common = Common.new
+  unless get_active_gcloud_account
+    common.run_inline with_docker_run(%W{gcloud auth login})
+  end
+  common.status "Active account for gcloud tools: #{get_active_gcloud_account}"
+end
+
+def with_docker_run(args)
+  %W{docker-compose run --rm api}+args
 end
 
 def run_with_creds(args, command, proc)
@@ -325,13 +328,9 @@ def connect_to_cloud_db(*args)
 end
 
 def update_cloud_config(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    ENV["DB_PORT"] = "3307"
-    unless system("cd tools && ../gradlew --info loadConfig && cd ..")
-        raise("Error updating configuration. Exiting.")
-    end
-  })
+  Credentials.new.maybe_download_db_vars :dev
+  start_cloud_sql_proxy
+  Common.new.run_inline %W{docker-compose run --rm update-cloud-config}
 end
 
 def run_cloud_migrations(*args)
@@ -398,6 +397,12 @@ def get_test_service_account_creds(*args)
   })
 end
 
+def start_cloud_sql_proxy()
+  common = Common.new
+  at_exit { common.run_inline %W{docker-compose down} }
+  common.run_inline %W{docker-compose up -d cloud-sql-proxy}
+end
+
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
@@ -440,6 +445,12 @@ Common.register_command({
   :invocation => "gradle",
   :description => "Runs gradle inside the API docker container with the given arguments.",
   :fn => lambda { |*args| run_gradle(*args) }
+})
+
+Common.register_command({
+  :invocation => "gcloud",
+  :description => "Runs gcloud inside the API docker container with the given arguments.",
+  :fn => lambda { |*args| run_gcloud(*args) }
 })
 
 Common.register_command({
