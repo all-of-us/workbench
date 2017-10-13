@@ -52,7 +52,7 @@ public class ConfigLoader {
       if (marshalledDiff.size() > 0) {
         log.info("Configuration doesn't match WorkbenchConfig format; see diff.");
         log.info(marshalledDiff.toString());
-        return;
+        System.exit(1);
       }
       Config existingConfig = configDao.findOne(Config.MAIN_CONFIG_ID);
       if (existingConfig == null) {
