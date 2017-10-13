@@ -11,6 +11,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Router, ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {List} from 'immutable';
 
 import {
   CohortSearchActions,

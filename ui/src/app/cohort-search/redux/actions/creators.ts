@@ -47,14 +47,11 @@ export const requestError =
   ({type: REQUEST_ERROR, error, cleanup: cleanupRequest(path)});
 
 /**
- * The KeyPath identifier for a Criteria is [criteriaType, parentId], where the
- * roots of any given criteria tree have parentId === 0.  `requestCriteria`
- * signals the Epic to begin the request; `loadCriteriaRequestResults` is fired
- * by the Epic upon success.
+ * path is ['criteria', kind, parentID]
  */
 export const requestCriteria =
-  (kind: string, parentId: number): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
-  ({type: BEGIN_CRITERIA_REQUEST, path: List([kind, parentId])});
+  (path: KeyPath): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
+  ({type: BEGIN_CRITERIA_REQUEST, path});
 
 export const loadCriteriaRequestResults =
   (path: KeyPath, results: Criteria[]): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
@@ -62,10 +59,6 @@ export const loadCriteriaRequestResults =
 
 
 /**
- * The KeyPath identifier for a Count request is the KeyPath to the originating
- * SearchGroupItem + the scope of the request ( i.e. 'ITEM', 'GROUP', or
- * 'TOTAL').  `requestCounts` triggers the Epic; `loadCountRequestResults` is
- * the Epic's success callback
  */
 export const requestCounts =
   (path: KeyPath, request: SearchRequest): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>

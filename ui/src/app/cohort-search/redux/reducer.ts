@@ -6,6 +6,7 @@ import {
   activeSearchGroupItemPath,
   activeCriteriaType,
   CohortSearchState,
+  prunePath,
 } from './store';
 
 import {
@@ -33,31 +34,24 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case START_REQUEST:
-        return state.update(
-          'requests',
-          Set(),
-          requestTable => requestTable.add(action.path)
-        );
+        return state.setIn(action.path.unshift('requests'), true);
 
       case CLEANUP_REQUEST:
-        return state.update(
-          'requests',
-          Set(),
-          requestTable => requestTable.remove(action.path)
-        );
+        return state
+          // First delete the Leaf value of True
+          .deleteIn(action.path.unshift('requests'))
+          // Then prune the tree of any empty collections
+          .update('requests', tree => prunePath(action.path.butLast(), tree));
 
       case LOAD_CRITERIA_RESULTS:
-        return state.setIn(
-          action.path.unshift('criteria'),
-          fromJS(action.results)
-        );
+        return state.setIn(action.path, fromJS(action.results));
 
       case LOAD_COUNT_RESULTS: {
-        // action.path is [role, groupIndex, groupItemIndex, scope]
+        // action.path is ['search', role, groupIndex, 'items', groupItemIndex, scope]
         const scope = action.path.last();
         const pathKey = {
           TOTAL: 'total',
-          GROUP: action.path.skipLast(2),
+          GROUP: action.path.skipLast(3),
           ITEM: action.path.skipLast(1),
         }[scope];
         return state.setIn(['counts', pathKey], action.count);

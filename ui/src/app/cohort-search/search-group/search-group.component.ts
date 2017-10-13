@@ -9,10 +9,9 @@ import {
   OnDestroy,
 } from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
-import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchState} from '../redux';
+import {CohortSearchState, countFor, pathTo, isLoading} from '../redux';
 import {SearchGroup, SearchRequest} from 'generated';
 
 
@@ -36,15 +35,14 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
               private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
-    const pathSelector = (state) => state.getIn(
-      ['results', this.role, this.index, 'count'],
-      0  // specifies default; otherwise returns emtpy map
-    );
-    this.subscription = this.ngRedux.select(pathSelector)
-      .subscribe(count => {
+    this.subscription = this.ngRedux.select(
+      countFor(pathTo(this.role, this.index))
+    ).subscribe(
+      count => {
         this.count = count;
         this.cd.markForCheck();
-    });
+      }
+    );
   }
 
   ngOnDestroy() {

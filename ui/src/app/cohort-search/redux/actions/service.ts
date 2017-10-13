@@ -7,7 +7,8 @@ import {environment} from 'environments/environment';
 
 import {
   CohortSearchState,
-  activeSearchGroupItemPath
+  activeSearchGroupItemPath,
+  criteriaPath,
 } from '../store';
 import {KeyPath} from './types';
 import * as ActionFuncs from './creators';
@@ -17,8 +18,6 @@ import {
   CohortBuilderService,
   SearchRequest,
   SearchParameter,
-  SearchGroup,
-  SearchGroupItem,
 } from 'generated';
 
 
@@ -126,11 +125,13 @@ export class CohortSearchActions {
 
   fetchCriteria(kind: string, parentId: number): void {
     /* Don't reload already loaded criteria subtrees */
-    if (this.ngRedux.getState().getIn(['criteria', kind, parentId])) {
-      return;
+    const path = criteriaPath(kind, parentId);
+    const state = this.ngRedux.getState();
+    if (state.getIn(path)) { 
+      return; 
     }
-    this.startRequest(List([kind, parentId]));
-    this.requestCriteria(kind, parentId);
+    this.startRequest(path);
+    this.requestCriteria(path);
   }
 
   prepareSearchRequest(itemPath, scope): SearchRequest {

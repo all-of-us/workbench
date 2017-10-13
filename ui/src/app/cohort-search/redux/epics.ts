@@ -38,6 +38,11 @@ const cancelListener =
     .map(action => cleanupRequest(path))
     .take(1);
 
+const countOrZero = (count) =>
+  typeof count === 'number'
+    ? count
+    : 0;
+
 /**
  * CohortSearchEpics
  *
@@ -53,10 +58,10 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       // For the TypeScript compiler to allow the destructuring, we cast to the
-      // appropriate action type
+      // appropriate action type.  Path is of form ['criteria', kind, parentId]
       ({path}: ActionTypes[typeof BEGIN_CRITERIA_REQUEST]) => {
-        const kind = <string>path.first();
-        const parentId = <number>path.last();
+        const kind = <string>path.get(1);
+        const parentId = <number>path.get(2);
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
           .map(result => loadCriteriaRequestResults(path, result.items))
@@ -74,6 +79,7 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
       ({path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
       this.service.countSubjects(request)
+        .map(response => countOrZero(response))
         .map(count => loadCountRequestResults(path, count))
         .race(cancelListener(action$, path))
         .catch(error => {

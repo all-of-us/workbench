@@ -8,12 +8,12 @@ import {
 } from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
-import {List} from 'immutable';
 
 import {
   CohortSearchActions,
   CohortSearchState,
   countFor,
+  pathTo,
   isLoading,
 } from '../redux';
 
@@ -40,7 +40,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const path = List().push('search', this.role, this.index, this.itemIndex);
+    const path = pathTo(this.role, this.index, this.itemIndex);
     const countSelect = this.ngRedux.select(countFor(path));
     const loadSelect = this.ngRedux.select(isLoading(path));
     const setAndMark = (name) => (value) => {
