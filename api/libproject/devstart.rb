@@ -1,3 +1,7 @@
+# Calls to common.run_inline in this file may use a quoted string purposefully
+# to cause system() or spawn() to run the command in a shell. Calls with arrays
+# are not run in a shell, which can break usage of the CloudSQL proxy.
+
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require "io/console"
@@ -10,9 +14,11 @@ require "fileutils"
 class Options < OpenStruct
 end
 
-def create_parser(command)
+# Creates a default command-line argument parser.
+# command_name: For help text.
+def create_parser(command_name)
   OptionParser.new do |parser|
-    parser.banner = "Usage: ./project.rb #{command} [options]"
+    parser.banner = "Usage: ./project.rb #{command_name} [options]"
     parser
   end
 end
@@ -121,7 +127,7 @@ def docker_clean(*args)
 
   docker_images = `docker ps -aq`.gsub(/\s+/, " ")
   if !docker_images.empty?
-    system("docker rm -f #{docker_images}")
+    common.run_inline("docker rm -f #{docker_images}")
   end
   common.run_inline %W{docker-compose down --volumes}
 end
@@ -200,52 +206,53 @@ def run_cloud_sql_proxy(project, creds_file)
   return pid
 end
 
+# Common.run_inline uses spawn() which doesn't handle pipes/redirects.
+def run_with_redirects(command_string, to_redact = "")
+  common = Common.new
+  command_to_echo = command_string.clone
+  if to_redact
+    command_to_echo.sub! to_redact, "*" * to_redact.length
+  end
+  common.put_command(command_to_echo)
+  unless system(command_string)
+    raise("Error running: " + command_to_echo)
+  end
+end
+
 def do_run_migrations(creds_file, project)
   read_db_vars(creds_file, project)
   common = Common.new
-  create_db_file = Tempfile.new("#{project}-create-db.sql")
-  begin
-    unless system("cat db/create_db.sql | envsubst > #{create_db_file.path}")
-      raise("Error generating create_db file; exiting.")
-    end
-    puts "Creating database if it does not exist..."
-    unless system("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
-              "--port 3307 < #{create_db_file.path}")
-      raise("Error creating database; exiting.")
-    end
-  ensure
-    create_db_file.unlink
-  end
+  puts "Creating database if it does not exist..."
+  pw = ENV["MYSQL_ROOT_PASSWORD"]
+  run_with_redirects(
+      "cat db/create_db.sql | envsubst | " \
+      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+      to_redact=pw)
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
-  unless system("cd db && ../gradlew --info update && cd ..")
-    raise("Error upgrading database. Exiting.")
+  Dir.chdir("db") do
+    common.run_inline("../gradlew --info update")
   end
 end
 
 def do_drop_db(creds_file, project)
   read_db_vars(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
-  begin
-    unless system("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
-      raise("Error generating drop_db file; exiting.")
-    end
-    puts "Dropping database..."
-    unless system("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
-              "--port 3307 < #{drop_db_file.path}")
-      raise("Error dropping database; exiting.")
-    end
-  ensure
-    drop_db_file.unlink
-  end
+  common = Common.new
+  puts "Dropping database..."
+  pw = ENV["MYSQL_ROOT_PASSWORD"]
+  run_with_redirects(
+      "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+      to_redact=pw)
 end
 
 def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
-def run_with_creds(args, command, proc)
-  parser = create_parser(command)
+def run_with_creds(args, command_name, proc)
+  parser = create_parser(command_name)
   options = Options.new
   add_default_options parser, options
   parser.parse args
@@ -290,8 +297,8 @@ def do_run_with_creds(project, account, creds_file, proc)
   end
 end
 
-def run_with_cloud_sql_proxy(args, command, proc)
-  run_with_creds(args, command, lambda { |project, account, creds_file|
+def run_with_cloud_sql_proxy(args, command_name, proc)
+  run_with_creds(args, command_name, lambda { |project, account, creds_file|
     pid = run_cloud_sql_proxy(project, creds_file)
     begin
       proc.call(project, account, creds_file)
@@ -305,8 +312,10 @@ def register_service_account(*args)
   run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
     common = Common.new
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
-    system("cd ../firecloud-tools &&  ./run.sh " \
-      "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+    Dir.chdir("../firecloud-tools") do
+      common.run_inline("./run.sh " \
+        "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+    end
   })
 end
 
@@ -319,8 +328,13 @@ end
 def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
-    system("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
-           "--port 3307 --database #{ENV["DB_NAME"]}")
+    common = Common.new
+    pw = ENV["WORKBENCH_DB_PASSWORD"]
+    # TODO Switch this to run_inline once Common supports redaction.
+    run_with_redirects(
+        "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
+        "--port 3307 --database #{ENV["DB_NAME"]}",
+        to_redact=pw)
   })
 end
 
@@ -328,8 +342,9 @@ def update_cloud_config(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
     ENV["DB_PORT"] = "3307"
-    unless system("cd tools && ../gradlew --info loadConfig && cd ..")
-        raise("Error updating configuration. Exiting.")
+    common = Common.new
+    Dir.chdir("tools") do
+      common.run_inline("../gradlew --info loadConfig")
     end
   })
 end
