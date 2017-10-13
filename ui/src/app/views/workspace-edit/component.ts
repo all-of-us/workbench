@@ -48,7 +48,7 @@ export class WorkspaceEditComponent implements OnInit {
       if (this.workspace.name === '') {
         this.valueNotEntered = true;
         const nameArea = document.getElementsByClassName('name-area')[0];
-        nameArea.classList.add('red-background');
+        nameArea.classList.add('validation-error');
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;

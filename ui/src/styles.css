@@ -66,3 +66,12 @@ button:disabled {
 * {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.required::after {
+  content: " *";
+  color: red;
+}
+
+.validation-error {
+  background-color: #FFEEEE;
+}

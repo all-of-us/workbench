@@ -1,6 +1,6 @@
 .text-label {
   display: block;
-  padding: 0rem 0rem 1rem 0rem;
+  padding: 0 0 1rem 0;
   color: #333;
 }
 
@@ -17,10 +17,7 @@
   padding: 1rem 0;
 }
 
-.red-background {
-  background-color: #FFEEEE;
-}
 
-.field {
+div.form-area > div {
   padding: 1rem;
 }
