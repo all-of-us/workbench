@@ -12,6 +12,8 @@ import {List} from 'immutable';
 import {
   CohortSearchActions,
   CohortSearchState,
+  criteriaPath,
+  isLoading,
 } from '../redux';
 
 
@@ -53,17 +55,16 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const path = List().push(this.critType, this.parentId);
-    const nodePath = ['criteriaTree', this.critType, this.parentId];
-
-    const loadSelector = (state) =>
-      state.get('requests').has(path);
-
+    const path = criteriaPath(this.critType, this.parentId);
     this.subscriptions = [
-      this.ngRedux.select(loadSelector).subscribe(v => this.loading = v),
-      this.ngRedux.select(nodePath).subscribe(n => this.children = n)
-    ];
+      this.ngRedux.select(
+        isLoading(path)
+      ).subscribe(v => this.loading = v),
 
+      this.ngRedux.select(
+        path.toArray()
+      ).subscribe(n => this.children = n)
+    ];
     this.actions.fetchCriteria(this.critType, this.parentId);
   }
 
@@ -72,6 +73,6 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
   }
 
   trackById(index, node) {
-    return node ? node.id : undefined;
+    return node ? node.get('id') : undefined;
   }
 }

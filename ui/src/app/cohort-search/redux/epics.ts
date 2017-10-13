@@ -9,7 +9,7 @@ import {
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
   LOAD_CRITERIA_RESULTS,
-  ERROR,
+  REQUEST_ERROR,
   RootAction,
   ActionTypes,
 } from './actions/types';
@@ -17,16 +17,17 @@ import {
   loadCriteriaRequestResults,
   loadCountRequestResults,
   cleanupRequest,
-  errorAction,
+  requestError,
 } from './actions/creators';
 import {CohortSearchState} from './store';
 
 import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
-type LoadAction =
+type NeedsCleanup =
     ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof LOAD_COUNT_RESULTS]
+  | ActionTypes[typeof REQUEST_ERROR]
   ;
 
 const cancelListener =
@@ -63,7 +64,7 @@ export class CohortSearchEpics {
           .catch(error => {
             console.log('Caught an error: ');
             console.dir(error);
-            return Observable.of(errorAction(error));
+            return Observable.of(requestError(error, path));
           });
       }
     )
@@ -78,7 +79,7 @@ export class CohortSearchEpics {
         .catch(error => {
           console.log('Caught an error: ');
           console.dir(error);
-            return Observable.of(errorAction(error));
+            return Observable.of(requestError(error, path));
         })
     )
   )
@@ -87,6 +88,7 @@ export class CohortSearchEpics {
     action$.ofType(
       LOAD_COUNT_RESULTS,
       LOAD_CRITERIA_RESULTS,
-    ).map((action: LoadAction) => action.cleanup)
+      REQUEST_ERROR,
+    ).map((action: NeedsCleanup) => action.cleanup)
   )
 }

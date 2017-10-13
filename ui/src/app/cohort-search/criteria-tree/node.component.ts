@@ -12,9 +12,9 @@ import {List} from 'immutable';
 import {
   CohortSearchActions,
   CohortSearchState,
+  criteriaPath,
+  isLoading,
 } from '../redux';
-
-import {Criteria} from 'generated';
 
 
 @Component({
@@ -26,7 +26,7 @@ import {Criteria} from 'generated';
         <app-criteria-tree-node-info [node]="node">
         </app-criteria-tree-node-info>
 
-        <span *ngIf="node.group">
+        <span *ngIf="node.get('group')">
           <ng-template clrIfExpanded>
             <app-criteria-tree-node [node]="node">
             </app-criteria-tree-node>
@@ -39,7 +39,7 @@ import {Criteria} from 'generated';
   encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
-  @Input() node: Criteria;
+  @Input() node;
 
   children;
   loading;
@@ -50,20 +50,18 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const critType = this.node.type.toLowerCase();
-    const parentId = this.node.id;
-
-    const path = List().push(critType, parentId);
-    const nodePath = ['criteria', critType, parentId];
-
-    const loadSelector = (state) =>
-      state.get('requests').has(path);
-
+    const critType = this.node.get('type').toLowerCase();
+    const parentId = this.node.get('id');
+    const path = criteriaPath(critType, parentId);
     this.subscriptions = [
-      this.ngRedux.select(loadSelector).subscribe(v => this.loading = v),
-      this.ngRedux.select(nodePath).subscribe(n => this.children = n)
-    ];
+      this.ngRedux.select(
+        isLoading(path)
+      ).subscribe(v => this.loading = v),
 
+      this.ngRedux.select(
+        path.toArray()
+      ).subscribe(n => this.children = n)
+    ];
     this.actions.fetchCriteria(critType, parentId);
   }
 
@@ -72,6 +70,6 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   }
 
   trackById(index, node) {
-    return node ? node.id : undefined;
+    return node ? node.get('id') : undefined;
   }
 }

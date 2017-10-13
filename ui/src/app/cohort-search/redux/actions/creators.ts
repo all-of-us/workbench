@@ -3,6 +3,7 @@ import {
   START_REQUEST,
   CANCEL_REQUEST,
   CLEANUP_REQUEST,
+  REQUEST_ERROR,
   BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   BEGIN_COUNT_REQUEST,
@@ -15,8 +16,7 @@ import {
   SET_WIZARD_CLOSED,
   SET_ACTIVE_CONTEXT,
   CLEAR_ACTIVE_CONTEXT,
-  ERROR,
-  ActionTypes
+  ActionTypes,
 } from './types';
 
 import {KeyPath} from './types';
@@ -42,6 +42,9 @@ export const cleanupRequest =
   (path: KeyPath): ActionTypes[typeof CLEANUP_REQUEST] =>
   ({type: CLEANUP_REQUEST, path});
 
+export const requestError =
+  (error: any, path: KeyPath): ActionTypes[typeof REQUEST_ERROR] =>
+  ({type: REQUEST_ERROR, error, cleanup: cleanupRequest(path)});
 
 /**
  * The KeyPath identifier for a Criteria is [criteriaType, parentId], where the
@@ -126,8 +129,3 @@ export const setActiveContext =
 
 export const clearActiveContext =
   (): ActionTypes[typeof CLEAR_ACTIVE_CONTEXT] => ({type: CLEAR_ACTIVE_CONTEXT});
-
-
-export const errorAction =
-  (error: any): ActionTypes[typeof ERROR] =>
-  ({type: ERROR, error});

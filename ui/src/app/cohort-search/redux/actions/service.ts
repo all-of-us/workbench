@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {NgRedux, dispatch} from '@angular-redux/store';
 import {AnyAction} from 'redux';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {environment} from 'environments/environment';
 
@@ -17,7 +17,8 @@ import {
   CohortBuilderService,
   SearchRequest,
   SearchParameter,
-  SearchGroup
+  SearchGroup,
+  SearchGroupItem,
 } from 'generated';
 
 
@@ -107,6 +108,11 @@ export class CohortSearchActions {
 
   getCounts = (path: KeyPath, scope: string) => {
     const request = this.prepareSearchRequest(path, scope);
+    if (environment.debug) {
+      console.log('Created a new SearchRequest');
+      console.dir(request);
+      console.log(path);
+    }
     this.startRequest(path.push(scope));
     this.requestCounts(path.push(scope), request);
   }
@@ -127,37 +133,72 @@ export class CohortSearchActions {
     this.requestCriteria(kind, parentId);
   }
 
-  prepareSearchRequest(sgiPath, scope): SearchRequest {
-    const store = this.ngRedux.getState();
-    let searchGoupItem = store.getIn(sgiPath.unshift('search'));
+  prepareSearchRequest(itemPath, scope): SearchRequest {
+    // itemPath should be ['search', role, index, 'items', itemIndex];
+    const state = this.ngRedux.getState();
+    const role = itemPath.get(1);
 
-    const asICD = param => (<SearchParameter>{
-      value: param.code, domain: param.domainId
+    let searchRequest = Map({
+      includes: List(),
+      excludes: List(),
     });
 
-    const asDEMO = param => (<SearchParameter>{
-      value: param.code, domain: param.type, conceptId: param.conceptId
-    });
-
-    /* TODO(jms) more flexible solution that handles all the different codes */
-    const mapper = param => param.type.match(/^DEMO.*/i)
-      ? asDEMO(param)
-      : asICD(param);
-
-    searchGoupItem = searchGoupItem
-      .update('searchParameters', (params) => params.map(mapper))
-      .update('type', _type => _type.toUpperCase());
-
-    const role = sgiPath.first();
-
-    const newRequest = {
-      includes: [ {items: [searchGoupItem.toJS()]} ],
-      excludes: []
-    };
-
-    if (environment.debug) {
-      console.log(`Created a new Request:`); console.dir(newRequest);
+    if (scope === 'TOTAL') {
+      searchRequest = mapAll(state);
+    } else if (scope === 'GROUP') {
+      const group = state.getIn(itemPath.skipLast(2));
+      searchRequest = searchRequest
+        .update(role, groups => groups.push(
+          mapGroup(group)
+        ));
+    } else if (scope === 'ITEM') {
+      const item = state.getIn(itemPath);
+      searchRequest = searchRequest
+        .update(role, groups => groups.push(
+          Map({ items: List([mapGroupItem(item)]) })
+        ));
+    } else {
+      console.log('Unknown scope! (this should be unreachable)');
+      return;
     }
-    return newRequest;
+    return <SearchRequest>searchRequest.toJS();
   }
 }
+
+/*
+ * Helper functions for transforming immutable data into JSON and removing
+ * unneeded properties
+ */
+const mapParameter = (param) => {
+  const _type = param.get('type');
+  if (_type.match(/^DEMO.*/i)) {
+    return <SearchParameter>{
+      value: param.get('code'),
+      domain: param.get('type'),
+      conceptId: param.get('conceptId'),
+    };
+  } else if (_type.match(/^ICD.*/i)) {
+    return <SearchParameter>{
+      value: param.get('code'),
+      domain: param.get('domainId'),
+    };
+  }
+};
+
+const mapGroupItem = (groupItem) =>
+  groupItem
+    .update('searchParameters', List(), params => params.map(mapParameter))
+    .update('type', '', _type => _type.toUpperCase());
+
+const mapGroup = (group) =>
+  group.update('items', Map(), items => items.map(mapGroupItem));
+
+const mapGroupList = (grouplist) =>
+  grouplist
+    .filterNot(group => group.get('items').isEmpty())
+    .map(mapGroup);
+
+const mapAll = (state) =>
+  state.get('search')
+    .update('includes', List(),  mapGroupList)
+    .update('excludes', List(), mapGroupList);

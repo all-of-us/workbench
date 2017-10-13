@@ -24,8 +24,8 @@ import {Criteria} from 'generated';
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
-  @select(s => s.getIn(activeSearchGroupItemPath(s).unshift('search')))
-  readonly activeSearchgroup$;
+  @select(s => s.getIn(activeSearchGroupItemPath(s)))
+  readonly activeSearchGroupItem$;
 
   private subscription: Subscription;
   private criteriaType: string;
@@ -38,14 +38,18 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    this.subscription = this.activeSearchgroup$.subscribe(
+    this.subscription = this.activeSearchGroupItem$.subscribe(
       (sgi) => {
         console.dir(sgi);
         this.criteriaType = sgi.get('type');
-        this.criteriaList = sgi.get('searchParameters').toJS();
+        this.criteriaList = sgi.get('searchParameters');
         // TODO(jms) fix the scrolling bugs
         // this.groupDiv.scrollTop = this.groupDiv.scrollHeight;
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   get selection(): string {
@@ -60,13 +64,28 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
     }
   }
 
+  typeDisplay(criteria): string {
+    const name = criteria.get('name');
+    const code = criteria.get('code');
+
+    switch (criteria.get('type')) {
+      case 'DEMO_GEN':
+        return `Gender-${name}`;
+
+      case 'DEMO_RACE':
+        return `Race/Ethnicity-${name}`;
+
+      case 'DEMO_AGE': case 'DEMO_DEC':
+        return name;
+
+      default:
+        return `${code}-${name}`;
+    }
+  }
+
   removeCriteria(index: number) {
     const path = activeSearchGroupItemPath(this.ngRedux.getState())
       .push('searchParameters', index);
     this.actions.remove(path);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

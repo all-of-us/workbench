@@ -48,7 +48,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
     this.subscription = this.state$.subscribe(state => {
       this.includeGroups = state.getIn(['search', 'includes'], []);
-      this.excludeGroups = state.getIn(['search', 'exludes'], []);
+      this.excludeGroups = state.getIn(['search', 'excludes'], []);
       this.open = state.getIn(['context', 'wizardOpen'], false);
       this.total = state.getIn(['counts', 'total'], 0);
       this.cd.markForCheck();

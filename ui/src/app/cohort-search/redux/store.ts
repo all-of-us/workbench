@@ -1,6 +1,7 @@
 import {Map, List, Set, fromJS} from 'immutable';
 import {KeyPath} from './actions/types';
-import {SearchRequest} from 'generated';
+
+import {Criteria, SearchRequest} from 'generated';
 
 /**
  * InitialState:
@@ -13,8 +14,12 @@ import {SearchRequest} from 'generated';
  */
 export const initialState = fromJS({
   search: {
-    includes: [[]],
-    excludes: [[]],
+    includes: [
+      {items: []},
+    ],
+    excludes: [
+      {items: []},
+    ],
   },
   context: {
     wizardOpen: false,
@@ -27,6 +32,7 @@ export const initialState = fromJS({
 
 
 export type CohortSearchState = Map<any, any>;
+export type ImmCriteria = Map<keyof Criteria, string|number|boolean>;
 
 /**
  * Selectors: Used to query information from the state
@@ -50,3 +56,9 @@ export const activeCriteriaType = (state): string =>
 
 export const countFor = (objId: string|KeyPath) => (state): number =>
   state.getIn(['counts', objId], objId === 'total' ? 0 : null);
+
+export const criteriaPath = (kind: string, parentId: number): KeyPath =>
+  List().push('criteria', kind, parentId);
+
+export const isLoading = (path: KeyPath) => (state): boolean =>
+  state.get('requests').has(path);

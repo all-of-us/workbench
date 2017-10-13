@@ -21,7 +21,7 @@ export const SET_WIZARD_CLOSED = 'SET_WIZARD_CLOSED';
 export const SET_ACTIVE_CONTEXT = 'SET_ACTIVE_CONTEXT';
 export const CLEAR_ACTIVE_CONTEXT = 'CLEAR_ACTIVE_CONTEXT';
 
-export const ERROR = 'ERROR';
+export const REQUEST_ERROR = 'REQUEST_ERROR';
 
 interface ActiveContext {
   criteriaType?: string;
@@ -44,6 +44,11 @@ export interface ActionTypes {
   CLEANUP_REQUEST: {
     type: typeof CLEANUP_REQUEST;
     path: KeyPath;
+  };
+  REQUEST_ERROR: {
+    type: typeof REQUEST_ERROR;
+    error?: any;
+    cleanup?: ActionTypes[typeof CLEANUP_REQUEST];
   };
 
   BEGIN_CRITERIA_REQUEST: {
@@ -100,11 +105,6 @@ export interface ActionTypes {
   CLEAR_ACTIVE_CONTEXT: {
     type: typeof CLEAR_ACTIVE_CONTEXT;
   };
-
-  ERROR: {
-    type: typeof ERROR;
-    error?: any;
-  };
 }
 
 export type RootAction =
@@ -112,6 +112,7 @@ export type RootAction =
   | ActionTypes[typeof START_REQUEST]
   | ActionTypes[typeof CANCEL_REQUEST]
   | ActionTypes[typeof CLEANUP_REQUEST]
+  | ActionTypes[typeof REQUEST_ERROR]
   | ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
@@ -124,5 +125,4 @@ export type RootAction =
   | ActionTypes[typeof SET_WIZARD_CLOSED]
   | ActionTypes[typeof SET_ACTIVE_CONTEXT]
   | ActionTypes[typeof CLEAR_ACTIVE_CONTEXT]
-  | ActionTypes[typeof ERROR]
   ;

@@ -13,6 +13,8 @@ import {List} from 'immutable';
 import {
   CohortSearchActions,
   CohortSearchState,
+  countFor,
+  isLoading,
 } from '../redux';
 
 import {SearchGroupItem} from 'generated';
@@ -38,26 +40,17 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const countSelector = (state) => state.getIn(
-      ['results', this.role, this.index, this.itemIndex, 'count'],
-      0  // specifies default; otherwise returns emtpy map
-    );
-
-    const loadingSelector = (state) =>
-      state.get('requests').has(List([this.role, this.index, this.itemIndex]));
-    const countSub = this.ngRedux.select(countSelector).subscribe(
-      count => {
-        this.count = count;
-        this.cd.markForCheck();
-    });
-
-    const loadSub = this.ngRedux.select(loadingSelector).subscribe(
-      loading => {
-        this.loading = loading;
-        this.cd.markForCheck();
-    });
-
-    this.subscriptions = [countSub, loadSub];
+    const path = List().push('search', this.role, this.index, this.itemIndex);
+    const countSelect = this.ngRedux.select(countFor(path));
+    const loadSelect = this.ngRedux.select(isLoading(path));
+    const setAndMark = (name) => (value) => {
+      this[name] = value;
+      this.cd.markForCheck();
+    };
+    this.subscriptions = [
+      countSelect.subscribe(setAndMark('count')),
+      loadSelect.subscribe(setAndMark('loading'))
+    ];
   }
 
   ngOnDestroy() {

@@ -1,5 +1,5 @@
 import {Reducer} from 'redux';
-import {Map, List, fromJS} from 'immutable';
+import {Map, List, Set, fromJS} from 'immutable';
 
 import {
   initialState,
@@ -33,13 +33,24 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case START_REQUEST:
-        return state.update('requests', requestTable => requestTable.add(action.path));
+        return state.update(
+          'requests',
+          Set(),
+          requestTable => requestTable.add(action.path)
+        );
 
       case CLEANUP_REQUEST:
-        return state.update('requests', requestTable => requestTable.remove(action.path));
+        return state.update(
+          'requests',
+          Set(),
+          requestTable => requestTable.remove(action.path)
+        );
 
       case LOAD_CRITERIA_RESULTS:
-        return state.updateIn(action.path.unshift('criteria'), fromJS(action.results));
+        return state.setIn(
+          action.path.unshift('criteria'),
+          fromJS(action.results)
+        );
 
       case LOAD_COUNT_RESULTS: {
         // action.path is [role, groupIndex, groupItemIndex, scope]
@@ -55,18 +66,19 @@ export const rootReducer: Reducer<CohortSearchState> =
       case INIT_SEARCH_GROUP:
         return state.updateIn(
           ['search', action.role],
+          List(),
           list => list.push(Map({items: List()}))
         );
 
       case INIT_GROUP_ITEM: {
         const itemPath = ['search', action.role, action.groupIndex, 'items'];
-        const newItem = {
+        const newItem = fromJS({
           type: activeCriteriaType(state),
-          searchParameters: List(),
-          modifiers: List(),
-        };
+          searchParameters: [],
+          modifiers: [],
+        });
         return state
-          .updateIn(itemPath, items => items.push(newItem))
+          .updateIn(itemPath, List(), items => items.push(newItem))
           .setIn(
             ['context', 'active', 'groupItemIndex'],
             state.getIn(itemPath).size
