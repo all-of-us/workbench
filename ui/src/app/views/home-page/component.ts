@@ -3,8 +3,10 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {DOCUMENT} from '@angular/platform-browser';
 import {StringFilter, Comparator} from 'clarity-angular';
 
+import {retryApi} from 'app/utils';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
+import {ErrorTestingService} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 /*
@@ -46,13 +48,14 @@ export class HomePageComponent implements OnInit {
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
+      private errorTestingService: ErrorTestingService,
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.workspacesService
-        .getWorkspaces()
-        .retry(2)
+
+    retryApi(this.workspacesService
+        .getWorkspaces(), 3)
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;
