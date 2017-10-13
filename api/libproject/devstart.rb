@@ -206,18 +206,23 @@ def run_cloud_sql_proxy(project, creds_file)
   return pid
 end
 
+# Common.run_inline uses spawn() which doesn't handle pipes/redirects.
+def run_with_redirects(command_string)
+  common = Common.new
+  common.put_command(command_string)
+  unless system(command_string)
+    raise("Error running: " + command_string)
+  end
+end
+
 def do_run_migrations(creds_file, project)
   read_db_vars(creds_file, project)
   common = Common.new
-  create_db_file = Tempfile.new("#{project}-create-db.sql")
-  begin
-    common.run_inline("cat db/create_db.sql | envsubst > #{create_db_file.path}")
-    puts "Creating database if it does not exist..."
-    common.run_inline("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
-              "--port 3307 < #{create_db_file.path}")
-  ensure
-    create_db_file.unlink
-  end
+  puts "Creating database if it does not exist..."
+  run_with_redirects(
+      "cat db/create_db.sql | envsubst | " \
+      "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1" \
+      " --port 3307")
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
   Dir.chdir("db") do
@@ -229,14 +234,11 @@ def do_drop_db(creds_file, project)
   read_db_vars(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   common = Common.new
-  begin
-    common.run_inline("cat db/drop_db.sql | envsubst > #{drop_db_file.path}")
-    puts "Dropping database..."
-    common.run_inline("mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 "\
-              "--port 3307 < #{drop_db_file.path}")
-  ensure
-    drop_db_file.unlink
-  end
+  puts "Dropping database..."
+  run_with_redirects(
+      "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+      "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" " \
+      "--host 127.0.0.1 --port 3307")
 end
 
 def get_auth_login_account()
