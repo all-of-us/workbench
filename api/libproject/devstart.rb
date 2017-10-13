@@ -207,11 +207,15 @@ def run_cloud_sql_proxy(project, creds_file)
 end
 
 # Common.run_inline uses spawn() which doesn't handle pipes/redirects.
-def run_with_redirects(command_string)
+def run_with_redirects(command_string, to_redact = "")
   common = Common.new
-  common.put_command(command_string)
+  command_to_echo = command_string.clone
+  if to_redact
+    command_to_echo.sub! to_redact, "*" * to_redact.length
+  end
+  common.put_command(command_to_echo)
   unless system(command_string)
-    raise("Error running: " + command_string)
+    raise("Error running: " + command_to_echo)
   end
 end
 
@@ -219,10 +223,11 @@ def do_run_migrations(creds_file, project)
   read_db_vars(creds_file, project)
   common = Common.new
   puts "Creating database if it does not exist..."
+  pw = ENV["MYSQL_ROOT_PASSWORD"]
   run_with_redirects(
       "cat db/create_db.sql | envsubst | " \
-      "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1" \
-      " --port 3307")
+      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+      to_redact=pw)
   ENV["DB_PORT"] = "3307"
   puts "Upgrading database..."
   Dir.chdir("db") do
@@ -235,10 +240,11 @@ def do_drop_db(creds_file, project)
   drop_db_file = Tempfile.new("#{project}-drop-db.sql")
   common = Common.new
   puts "Dropping database..."
+  pw = ENV["MYSQL_ROOT_PASSWORD"]
   run_with_redirects(
       "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
-      "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" " \
-      "--host 127.0.0.1 --port 3307")
+      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+      to_redact=pw)
 end
 
 def get_auth_login_account()
@@ -323,8 +329,12 @@ def connect_to_cloud_db(*args)
   run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
     read_db_vars(creds_file, project)
     common = Common.new
-    common.run_inline("mysql -u \"workbench\" -p\"#{ENV["WORKBENCH_DB_PASSWORD"]}\" --host 127.0.0.1 "\
-           "--port 3307 --database #{ENV["DB_NAME"]}")
+    pw = ENV["WORKBENCH_DB_PASSWORD"]
+    # TODO Switch this to run_inline once Common supports redaction.
+    run_with_redirects(
+        "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
+        "--port 3307 --database #{ENV["DB_NAME"]}",
+        to_redact=pw)
   })
 end
 
