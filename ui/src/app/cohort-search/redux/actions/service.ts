@@ -9,6 +9,8 @@ import {
   CohortSearchState,
   activeSearchGroupItemPath,
   criteriaPath,
+  pathTo,
+  isLoading,
 } from '../store';
 import {KeyPath} from './types';
 import * as ActionFuncs from './creators';
@@ -58,34 +60,25 @@ export class CohortSearchActions {
 
   // TODO(jms)  removals affect in-flight count requests: implement that affect
   removeGroup(role: keyof SearchRequest, groupIndex: number): void {
-    this.remove(List(['search', role, groupIndex]));
+    this.remove(pathTo(role, groupIndex));
   }
 
   removeGroupItem(role: keyof SearchRequest, groupIndex: number, groupItemIndex: number): void {
-    const path = List().push(role, groupIndex, groupItemIndex);
+    const path = pathTo(role, groupIndex, groupItemIndex);
     const state = this.ngRedux.getState();
-    const isloading = state.get('requests').has(path);
-    if (isloading) {
+    if (isLoading(path)(state)) {
       this.cancelRequest(path);
     }
-    this.remove(path.unshift('search'));
+    this.remove(path);
   }
 
   removeCriterion(
     role: keyof SearchRequest,
-    groupIndex: number,
-    groupItemIndex: number,
-    criterionIndex: number,
+    index: number,
+    itemIndex: number,
+    criterionIndex: number
   ): void {
-    this.remove(List().push(
-      'search',
-      role,
-      groupIndex,
-      'items',
-      groupItemIndex,
-      'searchParameters',
-      criterionIndex
-    ));
+    this.remove(pathTo(role, index, itemIndex, criterionIndex));
   }
 
   openWizard(criteriaType: string, role: keyof SearchRequest, groupIndex: number): void {
@@ -117,18 +110,17 @@ export class CohortSearchActions {
   }
 
   cancelWizard(): void {
-    const path = activeSearchGroupItemPath(this.ngRedux.getState());
-    this.remove(path);
-    this.clearActiveContext();
     this.setWizardClosed();
+    this.remove(activeSearchGroupItemPath(this.ngRedux.getState()));
+    this.clearActiveContext();
   }
 
   fetchCriteria(kind: string, parentId: number): void {
     /* Don't reload already loaded criteria subtrees */
     const path = criteriaPath(kind, parentId);
     const state = this.ngRedux.getState();
-    if (state.getIn(path)) { 
-      return; 
+    if (state.getIn(path)) {
+      return;
     }
     this.startRequest(path);
     this.requestCriteria(path);

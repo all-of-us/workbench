@@ -22,7 +22,6 @@ export const initialState = fromJS({
   },
   context: {
     wizardOpen: false,
-    activePath: [],
   },
   criteria: {},
   requests: {},
@@ -55,10 +54,16 @@ export const criteriaPath = (kind: string, parentId: number): KeyPath =>
   List().push('criteria', kind, parentId);
 
 export const pathTo =
-  (role: string, index: number, itemIndex?: number): KeyPath =>
-  itemIndex 
-    ? List().push('search', role, index, 'items', itemIndex)
-    : List().push('search', role, index);
+  (role: string, index: number, itemIndex?: number, criterionIndex?: number): KeyPath => {
+    let rval = List().push('search', role, index);
+    if (typeof itemIndex === 'number') {
+      rval = rval.push('items', itemIndex);
+      if (typeof criterionIndex === 'number') {
+        rval = rval.push('searchParameters', criterionIndex);
+      }
+    }
+    return rval;
+  };
 
 /* Return Values */
 export const countFor = (objId: string|KeyPath) => (state): number =>
@@ -75,8 +80,8 @@ export const activeCriteriaType = (state): string =>
  * remove that collection and check its parent.
  */
 export const prunePath = (path: KeyPath, state) => (
-  !path.isEmpty() 
-  && isCollection(state.getIn(path)) 
+  !path.isEmpty()
+  && isCollection(state.getIn(path))
   && state.getIn(path).isEmpty()
     ? prunePath(path.butLast(), state.deleteIn(path))
     : state

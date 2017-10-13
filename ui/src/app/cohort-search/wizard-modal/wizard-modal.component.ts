@@ -32,12 +32,10 @@ export class WizardModalComponent {
               private actions: CohortSearchActions) {}
 
   close() {
-    this.wizard.close();
     this.actions.cancelWizard();
   }
 
   finish() {
-    this.wizard.finish();
     this.actions.finishWizard();
   }
 }

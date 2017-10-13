@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
+import {Map} from 'immutable';
 
 import {
   activeSearchGroupItemPath,
@@ -24,7 +25,7 @@ import {Criteria} from 'generated';
 })
 export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
 
-  @select(s => s.getIn(activeSearchGroupItemPath(s)))
+  @select(s => s.getIn(activeSearchGroupItemPath(s), Map()))
   readonly activeSearchGroupItem$;
 
   private subscription: Subscription;
