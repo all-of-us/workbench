@@ -23,25 +23,25 @@ def create_parser(command_name)
   end
 end
 
-def add_default_options(parser, options)
+def add_default_options(parser, opts)
   parser.on("--project [PROJECT]",
       "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-    options.project = project
+    opts.project = project
   end
   parser.on("--account [ACCOUNT]",
        "Account to use when creating credentials (your.name@pmi-ops.org); "\
        "use this or --creds_file") do |account|
-    options.account = account
+    opts.account = account
   end
   parser.on("--creds_file [CREDS_FILE]",
        "Path to a file containing credentials; use this or --account.") do |creds_file|
-    options.creds_file = creds_file
+    opts.creds_file = creds_file
   end
   parser
 end
 
-def validate_default_options(parser, options)
-  if options.project == nil || !((options.account == nil) ^ (options.creds_file == nil))
+def validate_default_options(parser, opts)
+  if opts.project == nil || !((opts.account == nil) ^ (opts.creds_file == nil))
     puts parser.help
     exit 1
   end
@@ -253,11 +253,11 @@ end
 
 def run_with_creds(args, command_name, proc)
   parser = create_parser(command_name)
-  options = Options.new
-  add_default_options parser, options
+  opts = Options.new
+  add_default_options parser, opts
   parser.parse args
-  validate_default_options parser, options
-  do_run_with_creds(options.project, options.account, options.creds_file, proc)
+  validate_default_options parser, opts
+  do_run_with_creds(opts.project, opts.account, opts.creds_file, proc)
 end
 
 def do_run_with_creds(project, account, creds_file, proc)
@@ -309,14 +309,13 @@ def run_with_cloud_sql_proxy(args, command_name, proc)
 end
 
 def register_service_account(*args)
-  run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
-    common = Common.new
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+  GcloudContext("register-service-account", args).run do |ctx|
     Dir.chdir("../firecloud-tools") do
-      common.run_inline("./run.sh " \
-        "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+      ctx.common.run_inline(
+          "./run.sh register_service_account/register_service_account.py" \
+          " -j #{cts.opts.creds_file} -o #{ctx.opts.account}")
     end
-  })
+  end
 end
 
 def drop_cloud_db(*args)
@@ -413,17 +412,92 @@ def get_test_service_account_creds(*args)
   })
 end
 
-def set_authority(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    ENV["DB_PORT"] = "3307"
-    common = Common.new
+# Run commands with various gcloud setup/teardown: authorization and,
+# optionally, a CloudSQL proxy.
+class GcloudContext
+  def initialize(command_name, args, use_cloudsql_proxy = false)
+    @common = Common.new
+    @args = args
+    @parser = create_parser(command_name)
+    # Clients may access options to get default options (project etc)
+    # as well as their own custom options.
+    @opts = Options.new
+    @use_cloudsql_proxy = use_cloudsql_proxy
+  end
 
-    gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
-    Dir.chdir("tools") do
-      common.run_inline %W{#{gradlew_path} --info setAuthority -PappArgs="['one','two','three']"}
+  # Clients may override add_options and validate_options to add flags.
+  def add_options
+    add_default_options @parser, @opts
+  end
+
+  def validate_options
+    validate_default_options @parser, @opts
+  end
+
+  def run
+    add_options
+    @parser.parse @args
+    validate_options
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @opts.creds_file
+    begin
+      if @use_cloudsql_proxy
+        cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
+        ENV["DB_PORT"] = "3307"
+      end
+
+      # FIXME add the wrapping for do_run_with_creds.
+      yield(self)
+    ensure
+      if @use_cloudsql_proxy
+        Process.kill("HUP", cloudsql_proxy_pid)
+      end
     end
-  })
+  end
+end
+
+# Command-line parsing and main "run" implementation for set-authority.
+class SetAuthority < GcloudContext
+  # Adds command-line flags specific to set-authority.
+  def add_options
+    super
+    @parser.on(
+        "--email [EMAIL,...]",
+        "Comma-separated list of user accounts to change. Required."
+        ) do |email|
+      @opts.email = email
+    end
+    @parser.on(
+        "--add_authority [AUTHORITY,...]",
+        "Comma-separated list of user authorities to add for the users. " \
+        "One of added or removed authorities is required.") do |authority|
+      @opts.add_authority = authority
+    end
+    @parser.on(
+        "--rm_authority [AUTHORITY,...]",
+        "Comma-separated list of user authorities to remove from the users."
+        ) do |authority|
+      @opts.rm_authority = authority
+    end
+  end
+
+  def validate_options
+    super
+    if @opts.email == nil || (@opts.add_authority == nil && @opts.rm_authority == nil)
+      puts @parser.help
+      exit 1
+    end
+  end
+
+  def run
+    super do
+      Dir.chdir("tools") do
+        gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
+        @common.run_inline %W{
+            #{gradlew_path} --info setAuthority
+            -PappArgs="['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}']"}
+      end
+    end
+  end
 end
 
 Common.register_command({
@@ -530,5 +604,5 @@ Common.register_command({
 Common.register_command({
   :invocation => "set-authority",
   :description => "Set user authorities (permissions). See set-authority --help.",
-  :fn => lambda { |*args| set_authority(*args) }
+  :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })
