@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import org.springframework.stereotype.Service;
 
 /**
- * CriteriaQueryBuilder is an object that builds {@link QueryRequest}
+ * CriteriaQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery for all of the cohort builder criteria trees.
  */
 @Service
@@ -26,8 +26,8 @@ public class CriteriaQueryBuilder extends AbstractQueryBuilder {
                     "order by id asc";
 
     @Override
-    public QueryRequest buildQueryRequest(QueryParameters parameters) {
-        return QueryRequest
+    public QueryJobConfiguration buildQueryRequest(QueryParameters parameters) {
+        return QueryJobConfiguration
                 .newBuilder(CRITERIA_QUERY.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
                 .addNamedParameter("parentId", QueryParameterValue.int64(parameters.getParentId()))
                 .setUseLegacySql(false)

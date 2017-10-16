@@ -1,122 +1,67 @@
-{
-  "fields":
-  [
-    {
-      "name":"procedure_occurrence_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"person_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"procedure_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"procedure_date",
-      "type":{
-        "value":{
-          "equivalent":"DATE",
-          "constant":"DATE"
-        }
-      }
-    },
-    {
-      "name":"procedure_datetime",
-      "type":{
-        "value":{
-          "equivalent":"TIMESTAMP",
-          "constant":"TIMESTAMP"
-        }
-      }
-    },
-    {
-      "name":"procedure_type_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"modifier_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"quantity",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"provider_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"visit_occurrence_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"procedure_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"procedure_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"qualifier_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    }
-  ]
-}
+[
+  {
+    "type": "integer",
+    "name": "procedure_occurrence_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "procedure_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "procedure_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "procedure_datetime",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "procedure_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "modifier_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "quantity",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "procedure_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "procedure_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "qualifier_source_value",
+    "mode": "nullable"
+  }
+]
