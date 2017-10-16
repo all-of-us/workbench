@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.springframework.web.method.HandlerMethod;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -44,10 +45,14 @@ class FakeController {
 
 public class AuthInterceptorTest {
 
+  private static final long USER_ID = 123L;
+
   @Mock
   private UserInfoService userInfoService;
   @Mock
   private Provider<User> userProvider;
+  @Mock
+  private UserDao userDao;
   @Mock
   private HttpServletRequest request;
   @Mock
@@ -59,10 +64,14 @@ public class AuthInterceptorTest {
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   private AuthInterceptor interceptor;
+  private User user;
+  private User userWithAuthorities;
 
   @Before
   public void setup() {
-    interceptor = new AuthInterceptor(userInfoService, userProvider);
+    this.interceptor = new AuthInterceptor(userInfoService, userProvider, userDao);
+    this.user = new User();
+    user.setUserId(USER_ID);
   }
 
   @Test
@@ -135,15 +144,17 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
-    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, new User())).isFalse();
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(user);
+    assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isFalse();
   }
 
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
-    User user = new User();
+    User userWithAuthorities = new User();
     Set<Authority> required = new HashSet<Authority>();
     required.add(Authority.REVIEW_RESEARCH_PURPOSE);
-    user.setAuthorities(required);
+    userWithAuthorities.setAuthorities(required);
+    when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
   }
