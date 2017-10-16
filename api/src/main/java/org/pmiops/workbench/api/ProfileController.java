@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -13,14 +14,19 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
+import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.CreateAccountResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,15 +39,18 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserDao userDao;
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
+  private final CloudStorageService cloudStorageService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
-        FireCloudService fireCloudService, DirectoryService directoryService) {
+        FireCloudService fireCloudService, DirectoryService directoryService,
+        CloudStorageService cloudStorageService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
+    this.cloudStorageService = cloudStorageService;
   }
 
   @Override
@@ -64,6 +73,31 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
     return ResponseEntity.ok(
         new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
+  }
+
+  @Override
+  public ResponseEntity<CreateAccountResponse> createAccount(CreateAccountRequest request) {
+    if (request.getInvitationKey() == null
+        || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
+      return ResponseEntity.badRequest()
+          .body(new CreateAccountResponse().message(
+              "Missing or incorrect invitationKey (this API is not yet publicly launched)"));
+    }
+    directoryService.createUser(
+        request.getGivenName(), request.getFamilyName(), request.getUsername(),
+        request.getPassword()
+    );
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteAccount() {
+    UserAuthentication userAuth =
+        (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
+    String email = userAuth.getPrincipal().getEmail();
+    String[] parts = email.split("@");
+    directoryService.deleteUser(parts[0]);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

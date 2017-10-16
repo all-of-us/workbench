@@ -91,6 +91,35 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
+  /api/v1/google-account:
+    post:
+      tags:
+        - profile
+      description: Creates an account in the researchallofus.org domain.
+      operationId: createAccount
+      security: []
+      parameters:
+        - in: body
+          name: createAccountRequest
+          schema:
+            $ref: "#/definitions/CreateAccountRequest"
+      responses:
+        "201":
+          description: Account created successfully.
+          schema:
+            $ref: "#/definitions/CreateAccountResponse"
+        "400":
+          schema:
+            $ref: "#/definitions/CreateAccountResponse"
+    delete:
+      tags:
+        - profile
+      description: Deletes your account in the researchallofus.org domain.
+      operationId: deleteAccount
+      responses:
+        "204":
+          description: Account deleted successfully.
+
   /api/v1/register:
     post:
       tags:
@@ -667,7 +696,7 @@ definitions:
         description: Milliseconds since the UNIX epoch.
       approved:
         type: boolean
-      timeReviewed: 
+      timeReviewed:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
@@ -714,6 +743,36 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+
+  CreateAccountRequest:
+    type: object
+    required:
+      - givenName
+      - familyName
+      - username
+      - password
+    properties:
+      givenName:
+        type: string
+      familyName:
+        type: string
+      username:
+        type: string
+      password:
+        type: string
+      invitationKey:
+        type: string
+        description: Invitation key. Necessary when creating account before public launch.
+    example:
+      givenName: "John"
+      familyName: "Doe"
+      username: "john.doe"
+      password: "correct horse battery staple"
+
+  CreateAccountResponse:
+    properties:
+      message:
+        type: string
 
   BugReport:
     type: object
@@ -1086,4 +1145,3 @@ definitions:
         type: boolean
     example:
       isTaken: false
-

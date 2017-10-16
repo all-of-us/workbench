@@ -167,6 +167,7 @@ dependencies {
   compile 'com.google.appengine:appengine-api-1.0-sdk:+'
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
   compile 'org.springframework.boot:spring-boot-starter-actuator:+'
   compile 'org.springframework.security:spring-security-web:+'
@@ -176,6 +177,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
+  compile 'com.google.cloud:google-cloud-storage:1.7.0'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
   compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
@@ -183,7 +185,7 @@ dependencies {
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
-  compile 'com.google.cloud:google-cloud-bigquery:+'
+  compile 'com.google.cloud:google-cloud-bigquery:0.25.0-beta'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
