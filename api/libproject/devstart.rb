@@ -185,6 +185,7 @@ def read_db_vars(creds_file, project)
   ensure
     db_creds_file.unlink
   end
+  ENV["DB_PORT"] = "3307"
 end
 
 def run_cloud_sql_proxy(project, creds_file)
@@ -274,7 +275,6 @@ end
 
 def drop_cloud_db(*args)
   GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
-    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     drop_db_file = Tempfile.new("#{ctx.opts.project}-drop-db.sql")
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
@@ -287,7 +287,6 @@ end
 
 def connect_to_cloud_db(*args)
   GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
-    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     pw = ENV["WORKBENCH_DB_PASSWORD"]
     # TODO Switch this to run_inline once Common supports redaction.
     run_with_redirects(
@@ -299,7 +298,6 @@ end
 
 def update_cloud_config(*args)
   GcloudContext.new("update-cloud-config", args, true).run do |ctx|
-    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     Dir.chdir("tools") do
       ctx.common.run_inline("../gradlew --info loadConfig")
     end
@@ -309,7 +307,6 @@ end
 def run_cloud_migrations(*args)
   GcloudContext.new("run-cloud-migrations", args, true).run do |ctx|
     puts "Running migrations..."
-    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     puts "Creating database if it does not exist..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
@@ -405,7 +402,7 @@ class GcloudContext
       begin
         if @use_cloudsql_proxy
           cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
-          ENV["DB_PORT"] = "3307"
+          read_db_vars(@opts.creds_file, @opts.project)
         end
 
         yield(self)
