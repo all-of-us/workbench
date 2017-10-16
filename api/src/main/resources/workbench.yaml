@@ -1047,27 +1047,6 @@ definitions:
       operator: "GTE >="
       operands: [ "Arg1", "Arg2" ]
 
-  SubjectListResponse:
-    type: array
-    items:
-      type: string
-    example:
-      [
-        "12345,1,5",
-        "67890,2,1"
-      ]
-
-  Subject:
-    type: object
-    required:
-      - val
-    properties:
-      val:
-        description: A String of Subject ID, Gender Code, Ethnicity Code
-        type: string
-    example:
-      val: "12345,1,5"
-
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
     description: ''
