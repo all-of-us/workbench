@@ -441,6 +441,10 @@ class SetAuthority < GcloudContext
         ) do |authority|
       @opts.rm_authority = authority
     end
+    @parser.on("--dry_run", "Make no changes.") do |dry_run|
+      @opts.dry_run = "true"
+    end
+    @opts.dry_run = "false"  # default
   end
 
   def validate_options
@@ -456,7 +460,7 @@ class SetAuthority < GcloudContext
       Dir.chdir("tools") do
         @common.run_inline %W{
             #{@gradlew_path} --info setAuthority
-            -PappArgs=['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}']}
+            -PappArgs=['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}',#{@opts.dry_run}]}
       end
     end
   end
