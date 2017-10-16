@@ -167,6 +167,7 @@ dependencies {
   compile 'com.google.appengine:appengine-api-1.0-sdk:+'
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
   compile 'org.springframework.boot:spring-boot-starter-actuator:+'
   compile 'org.springframework.security:spring-security-web:+'
