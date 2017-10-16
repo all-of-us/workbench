@@ -117,10 +117,6 @@ sourceSets {
   }
   test {
     resources {
-      srcDir "db"
-      include "changelog/*.xml"
-    }
-    resources {
       srcDir "test/resources"
       include "bigquery/**"
       //include "application.properties"
