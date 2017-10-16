@@ -24,8 +24,7 @@ def create_parser(command_name)
 end
 
 def add_default_options(parser, opts)
-  parser.on("--project [PROJECT]",
-      "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+  parser.on("--project [PROJECT]", "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
     opts.project = project
   end
   parser.on("--account [ACCOUNT]",
@@ -70,13 +69,13 @@ end
 def run_api(account)
   common = Common.new
   # TODO(dmohs): This can be simplified now that we are using a shared service account.
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
     at_exit { common.run_inline %W{docker-compose down} }
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
-  })
+  end
 end
 
 def clean()
@@ -105,9 +104,9 @@ def run_integration_tests(*args)
   common = Common.new
 
   account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
     common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
-  })
+  end
 end
 
 def run_gradle(*args)
@@ -169,6 +168,7 @@ def get_file_from_gcs(bucket, filename, target_path)
   common.run_inline %W{gsutil cp gs://#{bucket}/#{filename} #{target_path}}
 end
 
+# Downloads database credentials from GCS and parses them into ENV.
 def read_db_vars(creds_file, project)
   db_creds_file = Tempfile.new("#{project}-vars.env")
   begin
@@ -198,11 +198,13 @@ def run_cloud_sql_proxy(project, creds_file)
       cloud_sql_proxy}
     common.run_inline %W{chmod +x cloud_sql_proxy}
   end
-  puts "Running Cloud SQL Proxy..."
-  pid = spawn(*%W{./cloud_sql_proxy
+  cloud_sql_proxy_cmd = %W{./cloud_sql_proxy
       -instances #{project}:us-central1:workbenchmaindb=tcp:3307
-      -credential_file=#{creds_file} &})
-  common.run_inline %W{sleep 3}
+      -credential_file=#{creds_file} &}
+  puts "Running Cloud SQL Proxy with #{cloud_sql_proxy_cmd}. Note stdout/err not shown."
+  pid = spawn(*cloud_sql_proxy_cmd)
+  sleep 3.0  # Wait for the proxy to become active.
+  puts "Cloud SQL Proxy running (PID #{pid})."
   return pid
 end
 
@@ -257,10 +259,12 @@ def run_with_creds(args, command_name, proc)
   add_default_options parser, opts
   parser.parse args
   validate_default_options parser, opts
-  do_run_with_creds(opts.project, opts.account, opts.creds_file, proc)
+  do_run_with_creds(opts.project, opts.account, opts.creds_file) do |creds_file|
+    proc.call(opts.project, opts.account, creds_file)
+  end
 end
 
-def do_run_with_creds(project, account, creds_file, proc)
+def do_run_with_creds(project, account, creds_file)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     if project == "all-of-us-workbench-test"
@@ -282,18 +286,18 @@ def do_run_with_creds(project, account, creds_file, proc)
           delete_service_accounts_creds(project, account, service_account_creds_file)
         end
       end
-      proc.call(project, account, creds_filename)
+      yield(creds_filename)
     else
       # Create a creds file and use it; clean up when done.
       get_service_account_creds_file(project, account, service_account_creds_file)
       begin
-        proc.call(project, account, service_account_creds_file.path)
+        yield(service_account_creds_file.path)
       ensure
         delete_service_accounts_creds(project, account, service_account_creds_file)
       end
     end
   else
-    proc.call(project, account, creds_file)
+    yield(creds_file)
   end
 end
 
@@ -304,12 +308,13 @@ def run_with_cloud_sql_proxy(args, command_name, proc)
       proc.call(project, account, creds_file)
     ensure
       Process.kill("HUP", pid)
+      puts "Cleaned up CloudSQL proxy (PID #{pid})."
     end
   })
 end
 
 def register_service_account(*args)
-  GcloudContext("register-service-account", args).run do |ctx|
+  GcloudContext.new("register-service-account", args).run do |ctx|
     Dir.chdir("../firecloud-tools") do
       ctx.common.run_inline(
           "./run.sh register_service_account/register_service_account.py" \
@@ -325,16 +330,15 @@ def drop_cloud_db(*args)
 end
 
 def connect_to_cloud_db(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    common = Common.new
+  GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
+    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     pw = ENV["WORKBENCH_DB_PASSWORD"]
     # TODO Switch this to run_inline once Common supports redaction.
     run_with_redirects(
         "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
         "--port 3307 --database #{ENV["DB_NAME"]}",
         to_redact=pw)
-  })
+  end
 end
 
 def update_cloud_config(*args)
@@ -415,6 +419,8 @@ end
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
 class GcloudContext
+  attr_reader :common, :opts
+
   def initialize(command_name, args, use_cloudsql_proxy = false)
     @common = Common.new
     @args = args
@@ -439,17 +445,20 @@ class GcloudContext
     @parser.parse @args
     validate_options
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @opts.creds_file
-    begin
-      if @use_cloudsql_proxy
-        cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
-        ENV["DB_PORT"] = "3307"
-      end
+    do_run_with_creds(@opts.project, @opts.account, @opts.creds_file) do |creds_file|
+      @opts.creds_file = creds_file
+      begin
+        if @use_cloudsql_proxy
+          cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
+          ENV["DB_PORT"] = "3307"
+        end
 
-      # FIXME add the wrapping for do_run_with_creds.
-      yield(self)
-    ensure
-      if @use_cloudsql_proxy
-        Process.kill("HUP", cloudsql_proxy_pid)
+        yield(self)
+      ensure
+        if @use_cloudsql_proxy
+          puts "Cleaning up CloudSQL proxy (PID #{cloudsql_proxy_pid})."
+          Process.kill("HUP", cloudsql_proxy_pid)
+        end
       end
     end
   end
