@@ -10,9 +10,9 @@
 }
 
 .sign-in-inner-container {
-  margin-top: 30vh;
   background-color: #fcfcfc;
   border-radius: 0.3rem;
+  padding-bottom: 1.5rem;
 }
 
 .page-container {

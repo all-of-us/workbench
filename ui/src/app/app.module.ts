@@ -11,6 +11,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 
 /* Our Components */
+import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {AppComponent} from 'app/views/app/component';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
@@ -55,6 +56,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AppComponent,
+    AccountCreationComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
