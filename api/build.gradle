@@ -160,7 +160,6 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
-  compile 'org.springframework.boot:spring-boot-starter-data-jpa'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
@@ -169,7 +168,14 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile 'org.springframework.boot:spring-boot-starter-actuator:+'
+  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
   compile 'org.springframework.security:spring-security-web:+'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
