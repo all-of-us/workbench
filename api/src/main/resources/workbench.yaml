@@ -124,7 +124,7 @@ paths:
     post:
       tags:
         - profile
-      description: Registers a profile for the user in AllOfUs and Firecloud
+      description: Registers a profile for the user in AllOfUs and Firecloud; called after the user has consented to the terms of use
       operationId: register
       parameters:
         - in: body
@@ -751,6 +751,7 @@ definitions:
       - familyName
       - username
       - password
+      - contactEmail
     properties:
       givenName:
         type: string
@@ -763,11 +764,15 @@ definitions:
       invitationKey:
         type: string
         description: Invitation key. Necessary when creating account before public launch.
+      contactEmail:
+        description: email address that can be used to contact the user
+        type: string
     example:
       givenName: "John"
       familyName: "Doe"
       username: "john.doe"
       password: "correct horse battery staple"
+      contactEmail: "john.doe@example.com"
 
   CreateAccountResponse:
     properties:
@@ -834,24 +839,7 @@ definitions:
 
   RegistrationRequest:
     type: object
-    required:
-      - contactEmail
-      - fullName
-      - givenName
-      - familyName
     properties:
-      contactEmail:
-        description: email address that can be used to contact the user
-        type: string
-      fullName:
-        description: the user's full name
-        type: string
-      givenName:
-        description: the user's given name (e.g. Alice)
-        type: string
-      familyName:
-        description: the user's family  name (e.g. Jones)
-        type: string
       phoneNumber:
         description: the user's phone number
         type: string
