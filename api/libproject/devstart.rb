@@ -23,24 +23,25 @@ def create_parser(command_name)
   end
 end
 
-def add_default_options(parser, opts)
-  parser.on("--project [PROJECT]", "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-    opts.project = project
+def add_default_options(parser, options)
+  parser.on("--project [PROJECT]",
+      "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+    options.project = project
   end
   parser.on("--account [ACCOUNT]",
        "Account to use when creating credentials (your.name@pmi-ops.org); "\
        "use this or --creds_file") do |account|
-    opts.account = account
+    options.account = account
   end
   parser.on("--creds_file [CREDS_FILE]",
        "Path to a file containing credentials; use this or --account.") do |creds_file|
-    opts.creds_file = creds_file
+    options.creds_file = creds_file
   end
   parser
 end
 
-def validate_default_options(parser, opts)
-  if opts.project == nil || !((opts.account == nil) ^ (opts.creds_file == nil))
+def validate_default_options(parser, options)
+  if options.project == nil || !((options.account == nil) ^ (options.creds_file == nil))
     puts parser.help
     exit 1
   end
