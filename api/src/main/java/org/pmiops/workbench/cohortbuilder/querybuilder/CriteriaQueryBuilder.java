@@ -26,7 +26,7 @@ public class CriteriaQueryBuilder extends AbstractQueryBuilder {
                     "order by id asc";
 
     @Override
-    public QueryJobConfiguration buildQueryRequest(QueryParameters parameters) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
         return QueryJobConfiguration
                 .newBuilder(CRITERIA_QUERY.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
                 .addNamedParameter("parentId", QueryParameterValue.int64(parameters.getParentId()))

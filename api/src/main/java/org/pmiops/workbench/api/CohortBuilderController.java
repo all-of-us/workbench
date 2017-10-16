@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.api.services.bigquery.model.QueryRequest;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.Field;
@@ -58,7 +57,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
         QueryJobConfiguration queryRequest = QueryBuilderFactory
                 .getQueryBuilder(FactoryKey.CRITERIA)
-                .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
+                .buildQueryJobConfig(new QueryParameters().type(type).parentId(parentId));
 
         QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
         Map<String, Integer> rm = getResultMapper(result);
@@ -116,7 +115,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
                             QueryResult result = executeQuery(
                                     filterBigQueryConfig(
-                                            builder.buildQueryRequest(new QueryParameters()
+                                            builder.buildQueryJobConfig(new QueryParameters()
                                             .type(item.getType())
                                             .parameters(Arrays.asList(parameter)))));
 

@@ -53,7 +53,7 @@ public class SubjectCounter {
             for (SearchGroupItem includeItem : includeGroup.getItems()) {
                 QueryJobConfiguration queryRequest = QueryBuilderFactory
                         .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-                        .buildQueryRequest(new QueryParameters()
+                        .buildQueryJobConfig(new QueryParameters()
                                 .type(includeItem.getType())
                                 .parameters(includeItem.getSearchParameters()));
                 params.putAll(queryRequest.getNamedParameters());
@@ -68,7 +68,7 @@ public class SubjectCounter {
             for (SearchGroupItem excludeItem : excludeGroup.getItems()) {
                 QueryJobConfiguration queryRequest = QueryBuilderFactory
                         .getQueryBuilder(FactoryKey.getType(excludeItem.getType()))
-                        .buildQueryRequest(new QueryParameters()
+                        .buildQueryJobConfig(new QueryParameters()
                                 .type(excludeItem.getType())
                                 .parameters(excludeItem.getSearchParameters()));
                 params.putAll(queryRequest.getNamedParameters());

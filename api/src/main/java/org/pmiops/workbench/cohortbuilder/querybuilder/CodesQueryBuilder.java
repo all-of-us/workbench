@@ -60,7 +60,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                     "where person_id in (${innerSql})\n";
 
     @Override
-    public QueryJobConfiguration buildQueryRequest(QueryParameters params) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
         ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
         List<String> queryParts = new ArrayList<String>();
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
