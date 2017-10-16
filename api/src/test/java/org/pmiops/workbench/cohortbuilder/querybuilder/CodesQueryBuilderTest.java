@@ -28,7 +28,7 @@ public class CodesQueryBuilderTest {
     CodesQueryBuilder queryBuilder;
 
     @Test
-    public void buildQueryRequest() throws Exception {
+    public void buildQueryJobConfig() throws Exception {
         String measurementNamedParameter = "";
         String conditionNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
@@ -38,7 +38,7 @@ public class CodesQueryBuilderTest {
 
         /* Check the generated querybuilder */
         QueryJobConfiguration queryJobConfiguration = queryBuilder
-                .buildQueryRequest(new QueryParameters().type("ICD9").parameters(params));
+                .buildQueryJobConfig(new QueryParameters().type("ICD9").parameters(params));
 
         for (String key : queryJobConfiguration.getNamedParameters().keySet()) {
             if (key.startsWith("Condition")) {

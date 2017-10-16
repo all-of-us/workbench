@@ -17,7 +17,7 @@ public class CriteriaQueryBuilderTest {
     CriteriaQueryBuilder queryBuilder;
 
     @Test
-    public void buildQueryRequest() throws Exception {
+    public void buildQueryJobConfig() throws Exception {
 
         final String expected =
                 "select id,\n" +
@@ -34,7 +34,7 @@ public class CriteriaQueryBuilderTest {
                         "order by id asc";
 
         QueryJobConfiguration queryJobConfiguration = queryBuilder
-                .buildQueryRequest(new QueryParameters().type("ICD9").parentId(0L));
+                .buildQueryJobConfig(new QueryParameters().type("ICD9").parentId(0L));
 
         assertEquals(expected, queryJobConfiguration.getQuery());
 

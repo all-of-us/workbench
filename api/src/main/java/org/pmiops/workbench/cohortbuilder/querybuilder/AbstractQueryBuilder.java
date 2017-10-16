@@ -17,7 +17,7 @@ public abstract class AbstractQueryBuilder {
      * @param parameters
      * @return
      */
-    public abstract QueryJobConfiguration buildQueryRequest(QueryParameters parameters);
+    public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
 
     public abstract FactoryKey getType();
 

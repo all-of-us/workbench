@@ -25,7 +25,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
                     "and is_selectable = TRUE and is_group = FALSE order by code asc";
 
     @Override
-    public QueryJobConfiguration buildQueryRequest(QueryParameters parameters) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();

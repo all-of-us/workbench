@@ -37,7 +37,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     private static final String UNION_TEMPLATE = "union distinct\n";
 
     @Override
-    public QueryJobConfiguration buildQueryRequest(QueryParameters parameters) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
