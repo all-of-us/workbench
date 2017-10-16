@@ -298,7 +298,7 @@ def connect_to_cloud_db(*args)
 end
 
 def update_cloud_config(*args)
-  GcloudContext.new("update-cloud-config", args, true).new do |ctx|
+  GcloudContext.new("update-cloud-config", args, true).run do |ctx|
     read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     Dir.chdir("tools") do
       ctx.common.run_inline("../gradlew --info loadConfig")

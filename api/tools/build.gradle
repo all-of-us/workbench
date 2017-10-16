@@ -32,7 +32,11 @@ task setAuthority(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.SetAuthority"
   systemProperties = dbProperties
-  args Eval.me(appArgs)
+  // appArgs must always be defined for :setAuthority. Guard it with a
+  // conditional for the sake of other targets' evaluation.
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
 }
 
 buildscript {    // Configuration for building
