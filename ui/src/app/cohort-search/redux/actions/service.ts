@@ -57,13 +57,40 @@ export class CohortSearchActions {
    */
 
   removeGroup(role: keyof SearchRequest, groupIndex: number): void {
-    const path = pathTo(role, groupIndex);
-    this.remove(path);
+    const groupPath = pathTo(role, groupIndex);
+    const state = this.ngRedux.getState();
+
+    /* Cancel the Group Request Itself */
+    if (isRequesting('group', groupPath)(state)) {
+      this.cancelCountRequest('group', groupPath);
+    }
+
+    /* Cancel any item requests that may be out there */
+    state.getIn(groupPath.push('items')).forEach((item, key) => {
+      const itemPath = groupPath.push('items', key);
+      if (isRequesting('item', itemPath)(state)) {
+        this.cancelCountRequest('item', itemPath);
+      }
+    });
+
+    /* Refires the Totals request without the group */
+    this.remove(groupPath);
+    this.requestTotalCount();
   }
 
   removeGroupItem(role: keyof SearchRequest, groupIndex: number, groupItemIndex: number): void {
-    const path = pathTo(role, groupIndex, groupItemIndex);
-    this.remove(path);
+    const itemPath = pathTo(role, groupIndex, groupItemIndex);
+    const state = this.ngRedux.getState();
+
+    /* Cancel the item request itself */
+    if (isRequesting('item', itemPath)(state)) {
+      this.cancelCountRequest('item', itemPath);
+    }
+
+    /* Refire the group and total requests now without the item */
+    this.remove(itemPath);
+    this.requestGroupCount(pathTo(role, groupIndex));
+    this.requestTotalCount();
   }
 
   removeCriterion(
