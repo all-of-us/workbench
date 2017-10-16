@@ -227,6 +227,9 @@ def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
+# Fetches a credentials file. Passes the path of the credentials to a block.
+# For all-of-us-workbench-test only, it leaves the (lazy-fetched) creds on disk;
+# for any other project, it cleans them up after the block is run.
 def do_run_with_creds(project, account, creds_file)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
