@@ -221,47 +221,8 @@ def run_with_redirects(command_string, to_redact = "")
   end
 end
 
-def do_run_migrations(creds_file, project)
-  read_db_vars(creds_file, project)
-  common = Common.new
-  puts "Creating database if it does not exist..."
-  pw = ENV["MYSQL_ROOT_PASSWORD"]
-  run_with_redirects(
-      "cat db/create_db.sql | envsubst | " \
-      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-      to_redact=pw)
-  ENV["DB_PORT"] = "3307"
-  puts "Upgrading database..."
-  Dir.chdir("db") do
-    common.run_inline("../gradlew --info update")
-  end
-end
-
-def do_drop_db(creds_file, project)
-  read_db_vars(creds_file, project)
-  drop_db_file = Tempfile.new("#{project}-drop-db.sql")
-  common = Common.new
-  puts "Dropping database..."
-  pw = ENV["MYSQL_ROOT_PASSWORD"]
-  run_with_redirects(
-      "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
-      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-      to_redact=pw)
-end
-
 def get_auth_login_account()
   return `gcloud config get-value account`.strip()
-end
-
-def run_with_creds(args, command_name, proc)
-  parser = create_parser(command_name)
-  opts = Options.new
-  add_default_options parser, opts
-  parser.parse args
-  validate_default_options parser, opts
-  do_run_with_creds(opts.project, opts.account, opts.creds_file) do |creds_file|
-    proc.call(opts.project, opts.account, creds_file)
-  end
 end
 
 def do_run_with_creds(project, account, creds_file)
@@ -301,18 +262,6 @@ def do_run_with_creds(project, account, creds_file)
   end
 end
 
-def run_with_cloud_sql_proxy(args, command_name, proc)
-  run_with_creds(args, command_name, lambda { |project, account, creds_file|
-    pid = run_cloud_sql_proxy(project, creds_file)
-    begin
-      proc.call(project, account, creds_file)
-    ensure
-      Process.kill("HUP", pid)
-      puts "Cleaned up CloudSQL proxy (PID #{pid})."
-    end
-  })
-end
-
 def register_service_account(*args)
   GcloudContext.new("register-service-account", args).run do |ctx|
     Dir.chdir("../firecloud-tools") do
@@ -324,9 +273,16 @@ def register_service_account(*args)
 end
 
 def drop_cloud_db(*args)
-  run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
-    do_drop_db(creds_file, project)
-  })
+  GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
+    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
+    drop_db_file = Tempfile.new("#{ctx.opts.project}-drop-db.sql")
+    puts "Dropping database..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+  end
 end
 
 def connect_to_cloud_db(*args)
@@ -342,21 +298,29 @@ def connect_to_cloud_db(*args)
 end
 
 def update_cloud_config(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    ENV["DB_PORT"] = "3307"
-    common = Common.new
+  GcloudContext.new("update-cloud-config", args, true).new do |ctx|
+    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
     Dir.chdir("tools") do
-      common.run_inline("../gradlew --info loadConfig")
+      ctx.common.run_inline("../gradlew --info loadConfig")
     end
-  })
+  end
 end
 
 def run_cloud_migrations(*args)
-  run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
+  GcloudContext.new("run-cloud-migrations", args, true).run do |ctx|
     puts "Running migrations..."
-    do_run_migrations(creds_file, project)
-  })
+    read_db_vars(ctx.opts.creds_file, ctx.opts.project)
+    puts "Creating database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading database..."
+    Dir.chdir("db") do
+      ctx.common.run_inline("../gradlew --info update")
+    end
+  end
 end
 
 def do_create_db_creds(project, account, creds_file)
@@ -402,18 +366,18 @@ def do_create_db_creds(project, account, creds_file)
 end
 
 def create_db_creds(*args)
-  run_with_creds(args, "create-db-creds", lambda { |project, account, creds_file|
-    do_create_db_creds(project, account, creds_file)
-  })
+  GcloudContext.new("create-db-creds", args, true).run do |ctx|
+    do_create_db_creds(ctx.opts.project, ctx.opts.account, ctx.opts.creds_file)
+  end
 end
 
 def get_test_service_account_creds(*args)
-  run_with_creds(args, "get-service-creds", lambda { |project, account, creds_file|
-    if project != "all-of-us-workbench-test"
+  GcloudContext.new("get-service-creds", args).run do |ctx|
+    if ctx.opts.project != "all-of-us-workbench-test"
       raise("Only call this with all-of-us-workbench-test")
     end
-    puts "Creds file is now at: #{creds_file}"
-  })
+    puts "Creds file is now at: #{ctx.opts.creds_file}"
+  end
 end
 
 # Run commands with various gcloud setup/teardown: authorization and,
