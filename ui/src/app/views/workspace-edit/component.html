@@ -83,6 +83,14 @@
               [(ngModel)]="this.workspace.researchPurpose.additionalNotes">
           </textarea>
         </div>
+        <div class="checkbox-group">
+          <clr-checkbox
+              name="requestApproval"
+              id="requestApproval"
+              [(ngModel)]="this.workspace.researchPurpose.reviewRequested">
+            Review my workspace
+          </clr-checkbox>
+        </div>
       </div>
     </section>
   </div>

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,12 +22,12 @@ public class QueryBuilderFactory {
     @Autowired
     private List<AbstractQueryBuilder> queryBuilders;
 
-    private static final Map<String, AbstractQueryBuilder> queryBuilderCache = new HashMap<>();
+    private static final Map<FactoryKey, AbstractQueryBuilder> queryBuilderCache = new HashMap<>();
 
     @PostConstruct
     public void initQueryBuilderCache() {
         for(AbstractQueryBuilder queryBuilder : queryBuilders) {
-            queryBuilderCache.put(queryBuilder.getType().name(), queryBuilder);
+            queryBuilderCache.put(queryBuilder.getType(), queryBuilder);
         }
     }
 
@@ -34,12 +35,12 @@ public class QueryBuilderFactory {
      * Users of this method should use the following:
      * {@link org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey}
      *
-     * @param type
+     * @param key
      * @return
      */
-    public static AbstractQueryBuilder getQueryBuilder(String type) {
-        AbstractQueryBuilder queryBuilder = queryBuilderCache.get(type );
-        if(queryBuilder == null) throw new BadRequestException("Unknown queryBuilder type: {0}".format(type));
+    public static AbstractQueryBuilder getQueryBuilder(FactoryKey key) {
+        AbstractQueryBuilder queryBuilder = queryBuilderCache.get(key);
+        if(queryBuilder == null) throw new BadRequestException("Unknown queryBuilder type: {0}".format(key.name()));
         return queryBuilder;
     }
 }

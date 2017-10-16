@@ -37,7 +37,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
                 });
         String finalSql = GROUP_CODES_QUERY.replace("${codes}", String.join(" or ", queryParts));
 
-        return QueryRequest.newBuilder(filterBigQueryConfig(finalSql, parameters.getType().toLowerCase() + "_criteria"))
+        return QueryRequest.newBuilder(finalSql.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)     // required for queries that use named parameters
                 .build();
