@@ -299,7 +299,7 @@ end
 def update_cloud_config(*args)
   GcloudContext.new("update-cloud-config", args, true).run do |ctx|
     Dir.chdir("tools") do
-      ctx.common.run_inline("../gradlew --info loadConfig")
+      ctx.common.run_inline %W{#{ctx.gradlew_path} --info loadConfig}
     end
   end
 end
@@ -371,7 +371,7 @@ end
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
 class GcloudContext
-  attr_reader :common, :opts
+  attr_reader :common, :gradlew_path, :opts
 
   def initialize(command_name, args, use_cloudsql_proxy = false)
     @common = Common.new
@@ -381,6 +381,8 @@ class GcloudContext
     # as well as their own custom options.
     @opts = Options.new
     @use_cloudsql_proxy = use_cloudsql_proxy
+
+    @gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
   end
 
   # Clients may override add_options and validate_options to add flags.
@@ -452,9 +454,8 @@ class SetAuthority < GcloudContext
   def run
     super do
       Dir.chdir("tools") do
-        gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
         @common.run_inline %W{
-            #{gradlew_path} --info setAuthority
+            #{@gradlew_path} --info setAuthority
             -PappArgs="['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}']"}
       end
     end
