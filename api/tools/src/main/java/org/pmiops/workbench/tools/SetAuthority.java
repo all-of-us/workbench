@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -24,19 +25,37 @@ public class SetAuthority {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());
 
+  private Set<String> commaDelimitedStringToSet(String str) {
+    return new HashSet<String>(Arrays.asList(str.split(",")));
+  }
+
+  private Set<Authority> commaDelimitedStringToAuthoritySet(String str) {
+    Set<Authority> auths = new HashSet();
+    for (String value : commaDelimitedStringToSet(str)) {
+      String cleanedValue = value.trim().toUpperCase();
+      if (cleanedValue.isEmpty()) {
+        continue;
+      }
+      auths.add(Authority.valueOf(cleanedValue));
+    }
+    return auths;
+  }
+
   @Bean
   public CommandLineRunner run(UserDao userDao) {
     return (args) -> {
-      if (args.length != 3) {
+      // User-friendly command-line parsing is done in devstart.rb, so we do only simple positional
+      // argument parsing here.
+      if (args.length != 4) {
         throw new IllegalArgumentException(
-            "Expected email_list, authority_list_to_add, authority_list_to_rm. Got " + args);
+            "Expected 3 args (email_list, authorities_to_add, authorities_to_rm, dry_run). Got "
+            + Arrays.asList(args));
       }
-      Set<String> emails = new HashSet();
-      emails.add("mark.fickett@staging.pmi-ops.org");
-      Set<Authority> authoritiesToAdd = new HashSet();
-      authoritiesToAdd.add(Authority.REVIEW_RESEARCH_PURPOSE);
-      Set<Authority> authoritiesToRemove = new HashSet();
-      boolean dryRun = true;
+      Set<String> emails = commaDelimitedStringToSet(args[0]);
+      Set<Authority> authoritiesToAdd = commaDelimitedStringToAuthoritySet(args[1]);
+      Set<Authority> authoritiesToRemove = commaDelimitedStringToAuthoritySet(args[2]);
+      boolean dryRun = Boolean.valueOf(args[3]);
+      int numUsers = 0;
       int numErrors = 0;
       int numChanged = 0;
 
@@ -49,29 +68,37 @@ public class SetAuthority {
       }
 
       for (String email : emails) {
+        numUsers++;
         User user = userDao.findUserByEmail(email);
         if (user == null) {
-          log.log(Level.SEVERE, "No user for {1}.", email);
+          log.log(Level.SEVERE, "No user for {0}.", email);
           numErrors++;
           continue;
         }
         Set<Authority> granted = user.getAuthorities();
-        granted.addAll(authoritiesToAdd);
-        granted.removeAll(authoritiesToRemove);
-        if (!dryRun) {
-          user.setAuthorities(granted);
+        Set<Authority> updated = new HashSet(granted);
+        updated.addAll(authoritiesToAdd);
+        updated.removeAll(authoritiesToRemove);
+        if (!updated.equals(granted)) {
+          if (!dryRun) {
+            user.setAuthorities(updated);
+            userDao.save(user);
+          }
+          numChanged++;
+          log.log(Level.INFO, "{0} {1} => {2}.", new Object[] {email, granted, updated});
+        } else {
+          log.log(Level.INFO, "{0} unchanged.", email);
         }
-        numChanged++;
       }
 
       log.log(
           Level.INFO,
-          "{1}. {2} users changed, {3} errors.",
-          new Object[] {dryRun ? "Dry run done" : "Done", numChanged, numErrors});
+          "{0}. {1} of {2} users changed, {3} errors.",
+          new Object[] {dryRun ? "Dry run done" : "Done", numChanged, numUsers, numErrors});
     };
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(ConfigLoader.class).web(false).run(args);
+    new SpringApplicationBuilder(SetAuthority.class).web(false).run(args);
   }
 }
