@@ -7,11 +7,11 @@ export function retryApi(observable: Observable<any>,
   return observable.retryWhen((errors) => {
     return errors.do((e) => {
       numberRuns++;
-      if (numberRuns === toRun) {
-        throw e;
-      }
       if (e.status === 500) {
         window['handleFiveHundred']();
+      }
+      if (numberRuns === toRun) {
+        throw e;
       }
       if (e.status !== 503) {
         throw e;
