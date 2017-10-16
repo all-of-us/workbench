@@ -40,13 +40,6 @@ def add_default_options(parser, options)
   parser
 end
 
-def validate_default_options(parser, options)
-  if options.project == nil || !((options.account == nil) ^ (options.creds_file == nil))
-    puts parser.help
-    exit 1
-  end
-end
-
 def dev_up(*args)
   common = Common.new
 
@@ -395,7 +388,10 @@ class GcloudContext
   end
 
   def validate_options
-    validate_default_options @parser, @opts
+    if @opts.project == nil || !((@opts.account == nil) ^ (@opts.creds_file == nil))
+      puts @parser.help
+      exit 1
+    end
   end
 
   def run
