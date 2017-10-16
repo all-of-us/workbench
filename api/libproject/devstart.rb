@@ -23,23 +23,6 @@ def create_parser(command_name)
   end
 end
 
-def add_default_options(parser, options)
-  parser.on("--project [PROJECT]",
-      "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-    options.project = project
-  end
-  parser.on("--account [ACCOUNT]",
-       "Account to use when creating credentials (your.name@pmi-ops.org); "\
-       "use this or --creds_file") do |account|
-    options.account = account
-  end
-  parser.on("--creds_file [CREDS_FILE]",
-       "Path to a file containing credentials; use this or --account.") do |creds_file|
-    options.creds_file = creds_file
-  end
-  parser
-end
-
 def dev_up(*args)
   common = Common.new
 
@@ -384,7 +367,19 @@ class GcloudContext
 
   # Clients may override add_options and validate_options to add flags.
   def add_options
-    add_default_options @parser, @opts
+    @parser.on("--project [PROJECT]",
+        "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+      @opts.project = project
+    end
+    @parser.on("--account [ACCOUNT]",
+         "Account to use when creating credentials (your.name@pmi-ops.org); "\
+         "use this or --creds_file") do |account|
+      @opts.account = account
+    end
+    @parser.on("--creds_file [CREDS_FILE]",
+         "Path to a file containing credentials; use this or --account.") do |creds_file|
+      @opts.creds_file = creds_file
+    end
   end
 
   def validate_options
@@ -394,6 +389,8 @@ class GcloudContext
     end
   end
 
+  # Sets up credentials (and optionally CloudSQL proxy), yields to a provided
+  # block (passing the block itself / the GcloudContext), and then tears down.
   def run
     add_options
     @parser.parse @args
