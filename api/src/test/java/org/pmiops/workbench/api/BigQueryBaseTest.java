@@ -149,7 +149,7 @@ public abstract class BigQueryBaseTest {
         }
     }
 
-    class Column  {
+    private class Column  {
 
         // Start stepping through the array from the beginning
         private String type;
