@@ -34,13 +34,13 @@ public class SetAuthority {
       Set<String> emails = new HashSet();
       emails.add("mark.fickett@staging.pmi-ops.org");
       Set<Authority> authoritiesToAdd = new HashSet();
-      authoritiestoAdd.add(Authority.REVIEW_RESEARCH_PURPOSE);
+      authoritiesToAdd.add(Authority.REVIEW_RESEARCH_PURPOSE);
       Set<Authority> authoritiesToRemove = new HashSet();
       boolean dryRun = true;
       int numErrors = 0;
       int numChanged = 0;
 
-      Set<Authority> intersection = authoritiesToAdd.copy();
+      Set<Authority> intersection = new HashSet(authoritiesToAdd);
       intersection.retainAll(authoritiesToRemove);
       if (!intersection.isEmpty()) {
         throw new IllegalArgumentException(
@@ -67,9 +67,7 @@ public class SetAuthority {
       log.log(
           Level.INFO,
           "{1}. {2} users changed, {3} errors.",
-          dryRun ? "Dry run done" : "Done",
-          numChanged,
-          numErrors);
+          new Object[] {dryRun ? "Dry run done" : "Done", numChanged, numErrors});
     };
   }
 
