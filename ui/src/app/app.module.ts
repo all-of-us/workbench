@@ -26,7 +26,7 @@ import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 
 import {BugReportService, CohortsService, Configuration, ConfigurationParameters, ProfileService, WorkspacesService} from 'generated';
-import {ClusterService, ErrorTestingService} from 'generated';
+import {ClusterService} from 'generated';
 // tslint:enable:max-line-length
 
 
@@ -63,7 +63,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BugReportService,
     ClusterService,
     CohortsService,
-    ErrorTestingService,
     ProfileService,
     SignInService,
     {

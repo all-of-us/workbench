@@ -10,7 +10,7 @@ export function retryApi(observable: Observable<any>,
       if (numberRuns === 3) {
         throw e;
       }
-      if (e.status === 500 || e.status === 400) {
+      if (e.status !== 503) {
         throw e;
       }
     });

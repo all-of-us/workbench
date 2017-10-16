@@ -21,7 +21,7 @@ public class ErrorTestingController implements ErrorTestingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> failFiveHundredAndThree() {
+  public ResponseEntity<Void> failFiveHundredThree() {
     return new ResponseEntity<Void>(HttpStatus.SERVICE_UNAVAILABLE);
   }
 
