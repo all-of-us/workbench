@@ -4,7 +4,7 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -55,9 +55,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
-        QueryRequest queryRequest = QueryBuilderFactory
+        QueryJobConfiguration queryRequest = QueryBuilderFactory
                 .getQueryBuilder(FactoryKey.CRITERIA)
-                .buildQueryRequest(new QueryParameters().type(type).parentId(parentId));
+                .buildQueryJobConfig(new QueryParameters().type(type).parentId(parentId));
 
         QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
         Map<String, Integer> rm = getResultMapper(result);
@@ -115,7 +115,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
                             QueryResult result = executeQuery(
                                     filterBigQueryConfig(
-                                            builder.buildQueryRequest(new QueryParameters()
+                                            builder.buildQueryJobConfig(new QueryParameters()
                                             .type(item.getType())
                                             .parameters(Arrays.asList(parameter)))));
 
@@ -138,10 +138,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @param query
      * @return
      */
-    private QueryResult executeQuery(QueryRequest query) {
+    private QueryResult executeQuery(QueryJobConfiguration query) {
 
         // Execute the query
-        QueryResponse response = bigquery.query(query);
+        QueryResponse response = null;
+        try {
+            response = bigquery.query(query);
+        } catch (InterruptedException e) {
+            throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
+        }
 
         // Wait for the job to finish
         while (!response.jobCompleted()) {
@@ -164,10 +169,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
     }
 
-    protected QueryRequest filterBigQueryConfig(QueryRequest request) {
-        String returnSql = request.getQuery().replace("${projectId}", workbenchConfig.get().bigquery.projectId);
+    protected QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
+        String returnSql = queryJobConfiguration.getQuery().replace("${projectId}", workbenchConfig.get().bigquery.projectId);
         returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
-        return request.toBuilder()
+        return queryJobConfiguration
+                .toBuilder()
                 .setQuery(returnSql)
                 .build();
     }

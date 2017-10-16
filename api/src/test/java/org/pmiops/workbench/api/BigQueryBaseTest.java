@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.Dataset;
 import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.StandardTableDefinition;
 import com.google.cloud.bigquery.TableId;
@@ -72,9 +74,41 @@ public abstract class BigQueryBaseTest {
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();
-        Schema schema = gson.fromJson(newJson.toString(), Schema.class);
+        Schema schema = parseSchema(gson.fromJson(newJson.toString(), Column[].class));
         StandardTableDefinition tableDef = StandardTableDefinition.of(schema);
         bigquery.create(TableInfo.of(TableId.of(dataSetId, tableId), tableDef));
+    }
+
+    private Schema parseSchema(Column[] columns) {
+        List<Field> schemaFields = new ArrayList<>();
+        for (Column column : columns) {
+            String typeString = column.getType();
+            LegacySQLTypeName fieldType;
+            switch (column.getType()) {
+                case "string":
+                    fieldType = LegacySQLTypeName.STRING;
+                    break;
+                case "integer":
+                    fieldType = LegacySQLTypeName.INTEGER;
+                    break;
+                case "timestamp":
+                    fieldType = LegacySQLTypeName.TIMESTAMP;
+                    break;
+                case "float":
+                    fieldType = LegacySQLTypeName.FLOAT;
+                    break;
+                case "boolean":
+                    fieldType = LegacySQLTypeName.BOOLEAN;
+                    break;
+                case "date":
+                    fieldType = LegacySQLTypeName.DATE;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unrecognized field type '" + typeString + "'.");
+            }
+            schemaFields.add(Field.of(column.getName(), fieldType));
+        }
+        return Schema.of(schemaFields);
     }
 
     private void insertData(String dataSetId, String tableId) throws Exception {
@@ -112,6 +146,38 @@ public abstract class BigQueryBaseTest {
     private void deleteDataSet(String dataSetId) throws Exception {
         if (!bigquery.delete(dataSetId)) {
             throw new RuntimeException("Errors occurred while deleting dataset: " + dataSetId);
+        }
+    }
+
+    private class Column  {
+
+        // Start stepping through the array from the beginning
+        private String type;
+        private String name;
+        private String mode;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public void setMode(String mode) {
+            this.mode = mode;
         }
     }
 }

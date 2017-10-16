@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.model.SearchGroup;
@@ -43,7 +43,7 @@ public class SubjectCounter {
      * Provides counts of unique subjects
      * defined by the provided {@link SearchRequest}.
      */
-    public QueryRequest buildSubjectCounterQuery(SearchRequest request) {
+    public QueryJobConfiguration buildSubjectCounterQuery(SearchRequest request) {
         Map<String, QueryParameterValue> params = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
 
@@ -51,9 +51,9 @@ public class SubjectCounter {
         StringJoiner joiner = new StringJoiner("and ");
         for (SearchGroup includeGroup : request.getIncludes()) {
             for (SearchGroupItem includeItem : includeGroup.getItems()) {
-                QueryRequest queryRequest = QueryBuilderFactory
+                QueryJobConfiguration queryRequest = QueryBuilderFactory
                         .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-                        .buildQueryRequest(new QueryParameters()
+                        .buildQueryJobConfig(new QueryParameters()
                                 .type(includeItem.getType())
                                 .parameters(includeItem.getSearchParameters()));
                 params.putAll(queryRequest.getNamedParameters());
@@ -66,9 +66,9 @@ public class SubjectCounter {
         // build query for excluded search groups
         for (SearchGroup excludeGroup : request.getExcludes()) {
             for (SearchGroupItem excludeItem : excludeGroup.getItems()) {
-                QueryRequest queryRequest = QueryBuilderFactory
+                QueryJobConfiguration queryRequest = QueryBuilderFactory
                         .getQueryBuilder(FactoryKey.getType(excludeItem.getType()))
-                        .buildQueryRequest(new QueryParameters()
+                        .buildQueryJobConfig(new QueryParameters()
                                 .type(excludeItem.getType())
                                 .parameters(excludeItem.getSearchParameters()));
                 params.putAll(queryRequest.getNamedParameters());
@@ -80,7 +80,7 @@ public class SubjectCounter {
 
         String finalSql = COUNT_SQL_TEMPLATE + joiner.toString();
 
-        return QueryRequest
+        return QueryJobConfiguration
                         .newBuilder(finalSql)
                         .setNamedParameters(params)
                         .setUseLegacySql(false)

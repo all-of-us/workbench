@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchParameter;
@@ -21,17 +21,17 @@ public class DemoQueryBuilderTest {
     DemoQueryBuilder queryBuilder;
 
     @Test
-    public void buildQueryRequest() throws Exception {
+    public void buildQueryJobConfig() throws Exception {
         String genderNamedParameter = "";
         String ageNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
         params.add(new SearchParameter().domain("DEMO_GEN").conceptId(8507L));
         params.add(new SearchParameter().domain("DEMO_AGE").value("20"));
 
-        QueryRequest request = queryBuilder
-                .buildQueryRequest(new QueryParameters().type("DEMO").parameters(params));
+        QueryJobConfiguration queryJobConfiguration = queryBuilder
+                .buildQueryJobConfig(new QueryParameters().type("DEMO").parameters(params));
 
-        for (String key : request.getNamedParameters().keySet()) {
+        for (String key : queryJobConfiguration.getNamedParameters().keySet()) {
             if (key.startsWith("gender")) {
                 genderNamedParameter = key;
             } else {
@@ -47,13 +47,13 @@ public class DemoQueryBuilderTest {
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = @" + ageNamedParameter + "\n";
 
-        assertEquals(expected, request.getQuery());
+        assertEquals(expected, queryJobConfiguration.getQuery());
 
-        assertEquals("8507", request
+        assertEquals("8507", queryJobConfiguration
                 .getNamedParameters()
                 .get(genderNamedParameter)
                 .getValue());
-        assertEquals("20", request
+        assertEquals("20", queryJobConfiguration
                 .getNamedParameters()
                 .get(ageNamedParameter)
                 .getValue());

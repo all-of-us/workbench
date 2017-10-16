@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class CriteriaQueryBuilderTest {
     CriteriaQueryBuilder queryBuilder;
 
     @Test
-    public void buildQueryRequest() throws Exception {
+    public void buildQueryJobConfig() throws Exception {
 
         final String expected =
                 "select id,\n" +
@@ -33,12 +33,12 @@ public class CriteriaQueryBuilderTest {
                         "where parent_id = @parentId\n" +
                         "order by id asc";
 
-        QueryRequest request = queryBuilder
-                .buildQueryRequest(new QueryParameters().type("ICD9").parentId(0L));
+        QueryJobConfiguration queryJobConfiguration = queryBuilder
+                .buildQueryJobConfig(new QueryParameters().type("ICD9").parentId(0L));
 
-        assertEquals(expected, request.getQuery());
+        assertEquals(expected, queryJobConfiguration.getQuery());
 
-        assertEquals("0", request.getNamedParameters()
+        assertEquals("0", queryJobConfiguration.getNamedParameters()
                 .get("parentId")
                 .getValue());
     }

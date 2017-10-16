@@ -1,122 +1,67 @@
-{
-  "fields":
-  [
-    {
-      "name":"condition_occurrence_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"person_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"condition_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"condition_start_date",
-      "type":{
-        "value":{
-          "equivalent":"DATE",
-          "constant":"DATE"
-        }
-      }
-    },
-    {
-      "name":"condition_start_datetime",
-      "type":{
-        "value":{
-          "equivalent":"TIMESTAMP",
-          "constant":"TIMESTAMP"
-        }
-      }
-    },
-    {
-      "name":"condition_end_date",
-      "type":{
-        "value":{
-          "equivalent":"DATE",
-          "constant":"DATE"
-        }
-      }
-    },
-    {
-      "name":"condition_end_datetime",
-      "type":{
-        "value":{
-          "equivalent":"TIMESTAMP",
-          "constant":"TIMESTAMP"
-        }
-      }
-    },
-    {
-      "name":"condition_type_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"stop_reason",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"provider_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"visit_occurrence_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"condition_source_value",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"condition_source_concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    }
-  ]
-}
+[
+  {
+    "type": "integer",
+    "name": "condition_occurrence_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "condition_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "condition_start_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "condition_start_datetime",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "condition_end_date",
+    "mode": "nullable"
+  },
+  {
+    "type": "timestamp",
+    "name": "condition_end_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "condition_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "stop_reason",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "condition_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "condition_source_concept_id",
+    "mode": "nullable"
+  }
+]
