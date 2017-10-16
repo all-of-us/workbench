@@ -77,7 +77,6 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<CreateAccountResponse> createAccount(CreateAccountRequest request) {
-    // TODO(dmohs): Handle errors.
     if (request.getInvitationKey() == null
         || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
       return ResponseEntity.badRequest()
