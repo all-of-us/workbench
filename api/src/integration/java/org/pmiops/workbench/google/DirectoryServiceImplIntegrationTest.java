@@ -25,6 +25,14 @@ public class DirectoryServiceImplIntegrationTest {
     assertThat(service.isUsernameTaken("directory-service")).isTrue();
   }
 
+  @Test
+  public void testCreateAndDeleteTestUser() {
+    service.createUser("Integration", "Test", "integration.test", "notasecret");
+    assertThat(service.isUsernameTaken("integration.test")).isTrue();
+    service.deleteUser("integration.test");
+    assertThat(service.isUsernameTaken("integration.test")).isFalse();
+  }
+
   private static WorkbenchConfig createConfig() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();

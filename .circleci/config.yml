@@ -98,3 +98,9 @@ workflows:
       - build_and_test_and_deploy_api
       - build_and_test_and_deploy_ui
       - test_client
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
