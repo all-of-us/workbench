@@ -7,6 +7,9 @@
     "dataSetId": "synpuf",
     "projectId": "pmi-drc-api-test"
   },
+  "googleCloudStorageService": {
+    "credentialsBucketName": "all-of-us-workbench-test-credentials"
+  },
   "googleDirectoryService": {
     "gSuiteDomain": "fake-research-aou.org"
   }

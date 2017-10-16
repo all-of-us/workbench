@@ -19,6 +19,12 @@ public class WorkbenchConfig {
 
   public BigQueryConfig bigquery;
 
+  public static class GoogleCloudStorageServiceConfig {
+    public String credentialsBucketName;
+  }
+
+  public GoogleCloudStorageServiceConfig googleCloudStorageService;
+
   public static class GoogleDirectoryServiceConfig {
     public String gSuiteDomain;
   }

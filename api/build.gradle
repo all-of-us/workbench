@@ -176,6 +176,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
+  compile 'com.google.cloud:google-cloud-storage:1.7.0'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
   compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
