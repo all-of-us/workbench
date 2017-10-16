@@ -94,9 +94,11 @@
       </div>
     </section>
   </div>
-  <div style="display: inline-block" class="button">
-    <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
-    <button class="btn" routerLink="/../..">Cancel</button>
+  <div style="display: flex; flex: 0 0 0; padding: 0">
+    <div class="button">
+      <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
+      <button class="btn" routerLink="/../..">Cancel</button>
+    </div>
+    <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>
-  <p *ngIf="this.valueNotEntered;" style="display: inline-block">* is a required field</p>
 </div>

@@ -53,10 +53,7 @@ export class WorkspaceEditComponent implements OnInit {
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;
-        this.workspacesService
-            .createWorkspace(
-                this.workspace)
-            .retry(2)
+        this.workspacesService.createWorkspace(this.workspace).retry(2)
             .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
       }
     }
