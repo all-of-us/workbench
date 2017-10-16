@@ -19,7 +19,7 @@ export class ErrorHandlerComponent implements OnInit {
       setTimeout(() => {
         this.notifyFiveHundred = false;
       }, 10000);
-    }
+    };
   }
   closeError(): void {
     this.notifyFiveHundred = false;
