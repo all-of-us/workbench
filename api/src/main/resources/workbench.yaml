@@ -91,7 +91,7 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
-  /api/v1/create-account:
+  /api/v1/google-account:
     post:
       tags:
         - profile
@@ -111,9 +111,7 @@ paths:
         "400":
           schema:
             $ref: "#/definitions/CreateAccountResponse"
-
-  /api/v1/delete-account:
-    post:
+    delete:
       tags:
         - profile
       description: Deletes your account in the researchallofus.org domain.
