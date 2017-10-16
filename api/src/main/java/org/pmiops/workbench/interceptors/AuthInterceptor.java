@@ -17,6 +17,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -49,12 +50,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
   private final UserInfoService userInfoService;
   private final Provider<User> userProvider;
+  private final UserDao userDao;
 
   @Autowired
-  public AuthInterceptor(UserInfoService userInfoService, Provider<User> userProvider) {
+  public AuthInterceptor(UserInfoService userInfoService, Provider<User> userProvider,
+      UserDao userDao) {
     this.userInfoService = userInfoService;
     // Note that this provider isn't usable until after we publish the security context below.
     this.userProvider = userProvider;
+    this.userDao = userDao;
   }
 
   /**
@@ -170,6 +174,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
 
     if (req != null) {
+      // Fetch the user with authorities, since they aren't loaded during normal
+      user = userDao.findUserWithAuthorities(user.getUserId());
       Collection<Authority> granted = user.getAuthorities();
       if (granted.containsAll(Arrays.asList(req.value()))) {
         return true;

@@ -2,11 +2,10 @@ package org.pmiops.workbench.auth;
 
 import java.util.ArrayList;
 import javax.inject.Provider;
-
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,13 @@ public class ProfileService {
 
   private final FireCloudService fireCloudService;
   private final Provider<User> userProvider;
+  private final UserDao userDao;
 
   @Autowired
-  ProfileService(FireCloudService fireCloudService, Provider<User> userProvider) {
+  ProfileService(FireCloudService fireCloudService, Provider<User> userProvider, UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
+    this.userDao = userDao;
   }
 
   public Profile getProfile() throws ApiException {
@@ -28,6 +29,9 @@ public class ProfileService {
   }
 
   public Profile getProfile(User user) throws ApiException {
+    // Fetch the user's authorities, since they aren't loaded during normal request interception.
+    user = userDao.findUserWithAuthorities(user.getUserId());
+
     boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setEmail(user.getEmail());
