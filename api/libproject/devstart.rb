@@ -319,7 +319,7 @@ def run_cloud_migrations(*args)
         to_redact=pw)
     puts "Upgrading database..."
     Dir.chdir("db") do
-      ctx.common.run_inline("../gradlew --info update")
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update")
     end
   end
 end
