@@ -456,7 +456,7 @@ class SetAuthority < GcloudContext
       Dir.chdir("tools") do
         @common.run_inline %W{
             #{@gradlew_path} --info setAuthority
-            -PappArgs="['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}']"}
+            -PappArgs=['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}']}
       end
     end
   end
