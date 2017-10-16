@@ -2,6 +2,7 @@ import {ActionsObservable, Epic} from 'redux-observable';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
+<<<<<<< HEAD
 
 import {
   CANCEL_REQUEST,
@@ -21,6 +22,11 @@ import {
 } from './actions/creators';
 import {CohortSearchState} from './store';
 
+=======
+
+import {CohortSearchActions as Actions} from './actions';
+import {cancelListener, cleanupRequest} from './requests';
+>>>>>>> master
 import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
