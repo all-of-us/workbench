@@ -371,15 +371,6 @@ def create_db_creds(*args)
   end
 end
 
-def get_test_service_account_creds(*args)
-  GcloudContext.new("get-service-creds", args).run do |ctx|
-    if ctx.opts.project != "all-of-us-workbench-test"
-      raise("Only call this with all-of-us-workbench-test")
-    end
-    puts "Creds file is now at: #{ctx.opts.creds_file}"
-  end
-end
-
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
 class GcloudContext
@@ -473,6 +464,24 @@ class SetAuthority < GcloudContext
   end
 end
 
+# The test creds are always left in api/sa-key.json. This simply adds validation
+# that the command is only run for the test project, and logs the path of
+# the file written.
+class GetTestServiceAccountCreds < GcloudContext
+  def validate_options
+    super
+    if @opts.project != "all-of-us-workbench-test"
+      raise("Only call this with all-of-us-workbench-test")
+    end
+  end
+
+  def run
+    super do
+      puts "Creds file is now at: #{File.absolute_path(@opts.creds_file)}"
+    end
+  end
+end
+
 Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
@@ -494,8 +503,8 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "get-service-creds",
-  :description => "Creates sa-key.json locally (for use when running tests, etc.)",
-  :fn => lambda { |*args| get_test_service_account_creds(*args) }
+  :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
+  :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
 })
 
 Common.register_command({
