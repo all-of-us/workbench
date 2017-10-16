@@ -79,7 +79,6 @@ paths:
       operationId: failFiveHundred
       responses:
         500:
-          description: Expected 500 Error
 
   /api/v1/fail/fourHundred:
     get:
@@ -89,7 +88,6 @@ paths:
       operationId: failFourHundred
       responses:
         400:
-          description: Expected 400 Error
 
   /api/v1/fail/fiveHundredAndThree:
     get:
@@ -99,7 +97,6 @@ paths:
       operationId: failFiveHundredAndThree
       responses:
         503:
-          description: Expected 503 Error
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.

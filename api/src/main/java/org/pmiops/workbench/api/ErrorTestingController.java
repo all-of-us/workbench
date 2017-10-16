@@ -17,7 +17,7 @@ public class ErrorTestingController implements ErrorTestingApiDelegate {
 
   @Override
   public ResponseEntity<Void> failFiveHundred() {
-    return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+    throw new RuntimeException("Expected Server Error");
   }
 
   @Override

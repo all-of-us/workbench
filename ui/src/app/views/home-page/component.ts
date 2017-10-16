@@ -6,7 +6,6 @@ import {StringFilter, Comparator} from 'clarity-angular';
 import {retryApi} from 'app/utils';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
-import {ErrorTestingService} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 /*
@@ -48,7 +47,6 @@ export class HomePageComponent implements OnInit {
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
-      private errorTestingService: ErrorTestingService,
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {
