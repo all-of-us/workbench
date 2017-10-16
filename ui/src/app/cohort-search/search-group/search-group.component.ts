@@ -11,7 +11,7 @@ import {
 import {NgRedux} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchState, countFor, pathTo, isLoading} from '../redux';
+import {CohortSearchState, countFor, pathTo} from '../redux';
 import {SearchGroup, SearchRequest} from 'generated';
 
 

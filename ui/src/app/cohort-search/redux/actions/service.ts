@@ -1,16 +1,17 @@
 import {Injectable} from '@angular/core';
 import {NgRedux, dispatch} from '@angular-redux/store';
 import {AnyAction} from 'redux';
-import {List, Map} from 'immutable';
+import {List, Map, isCollection} from 'immutable';
 
 import {environment} from 'environments/environment';
 
 import {
   CohortSearchState,
+  activeSearchGroupPath,
   activeSearchGroupItemPath,
   criteriaPath,
   pathTo,
-  isLoading,
+  isRequesting,
 } from '../store';
 import {KeyPath} from './types';
 import * as ActionFuncs from './creators';
@@ -35,14 +36,11 @@ export class CohortSearchActions {
    * (A) provide a unified action dispatching interface to components and
    * (B) can easily perform multi-step, complex actions from this service
    */
-  @dispatch() startRequest = ActionFuncs.startRequest;
-  @dispatch() cancelRequest = ActionFuncs.cancelRequest;
-  @dispatch() cleanupRequest = ActionFuncs.cleanupRequest;
-
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
-  @dispatch() loadCriteriaRequestResults = ActionFuncs.loadCriteriaRequestResults;
+  @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
+
   @dispatch() requestCounts = ActionFuncs.requestCounts;
-  @dispatch() loadCountRequestResults = ActionFuncs.loadCountRequestResults;
+  @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
 
   @dispatch() initGroup = ActionFuncs.initGroup;
   @dispatch() initGroupItem = ActionFuncs.initGroupItem;
@@ -58,17 +56,13 @@ export class CohortSearchActions {
    * alternate interfaces for a simpler action.
    */
 
-  // TODO(jms)  removals affect in-flight count requests: implement that affect
   removeGroup(role: keyof SearchRequest, groupIndex: number): void {
-    this.remove(pathTo(role, groupIndex));
+    const path = pathTo(role, groupIndex);
+    this.remove(path);
   }
 
   removeGroupItem(role: keyof SearchRequest, groupIndex: number, groupItemIndex: number): void {
     const path = pathTo(role, groupIndex, groupItemIndex);
-    const state = this.ngRedux.getState();
-    if (isLoading(path)(state)) {
-      this.cancelRequest(path);
-    }
     this.remove(path);
   }
 
@@ -88,25 +82,16 @@ export class CohortSearchActions {
   }
 
   finishWizard(): void {
-    const path = activeSearchGroupItemPath(this.ngRedux.getState());
+    const state = this.ngRedux.getState();
+    const itemPath = activeSearchGroupItemPath(state);
+    const groupPath = activeSearchGroupPath(state);
 
-    this.getCounts(path, 'ITEM');
-    this.getCounts(path, 'GROUP');
-    this.getCounts(path, 'TOTAL');
+    this.requestItemCount(itemPath);
+    this.requestGroupCount(groupPath);
+    this.requestTotalCount();
 
     this.clearActiveContext();
     this.setWizardClosed();
-  }
-
-  getCounts = (path: KeyPath, scope: string) => {
-    const request = this.prepareSearchRequest(path, scope);
-    if (environment.debug) {
-      console.log('Created a new SearchRequest');
-      console.dir(request);
-      console.log(path);
-    }
-    this.startRequest(path.push(scope));
-    this.requestCounts(path.push(scope), request);
   }
 
   cancelWizard(): void {
@@ -122,39 +107,50 @@ export class CohortSearchActions {
     if (state.getIn(path)) {
       return;
     }
-    this.startRequest(path);
     this.requestCriteria(path);
   }
 
-  prepareSearchRequest(itemPath, scope): SearchRequest {
-    // itemPath should be ['search', role, index, 'items', itemIndex];
+  requestItemCount(itemPath): void {
     const state = this.ngRedux.getState();
-    const role = itemPath.get(1);
-
-    let searchRequest = Map({
-      includes: List(),
-      excludes: List(),
-    });
-
-    if (scope === 'TOTAL') {
-      searchRequest = mapAll(state);
-    } else if (scope === 'GROUP') {
-      const group = state.getIn(itemPath.skipLast(2));
-      searchRequest = searchRequest
-        .update(role, groups => groups.push(
-          mapGroup(group)
-        ));
-    } else if (scope === 'ITEM') {
-      const item = state.getIn(itemPath);
-      searchRequest = searchRequest
-        .update(role, groups => groups.push(
-          Map({ items: List([mapGroupItem(item)]) })
-        ));
-    } else {
-      console.log('Unknown scope! (this should be unreachable)');
-      return;
+    if (isRequesting('item', itemPath)(state)) {
+      this.cancelCountRequest('item', itemPath);
     }
-    return <SearchRequest>searchRequest.toJS();
+    const role = itemPath.get(1);
+    const item = state.getIn(itemPath);
+    const searchRequest = Map({
+        includes: List(),
+        excludes: List(),
+      })
+      .update(role, groups => groups.push(
+        Map({ items: List([mapGroupItem(item)]) })
+      ));
+    this.requestCounts('item', <SearchRequest>searchRequest.toJS(), itemPath);
+  }
+
+  requestGroupCount(groupPath): void {
+    const state = this.ngRedux.getState();
+    if (isRequesting('group', groupPath)(state)) {
+      this.cancelCountRequest('group', groupPath);
+    }
+    const role = groupPath.get(1);
+    const group = state.getIn(groupPath);
+    const searchRequest = Map({
+        includes: List(),
+        excludes: List(),
+      })
+      .update(role, groups => groups.push(
+        mapGroup(group)
+      ));
+    this.requestCounts('group', <SearchRequest>searchRequest.toJS(), groupPath);
+  }
+
+  requestTotalCount(): void {
+    const state = this.ngRedux.getState();
+    if (isRequesting('total')(state)) {
+      this.cancelCountRequest('total');
+    }
+    const searchRequest = mapAll(state);
+    this.requestCounts('total', <SearchRequest>searchRequest.toJS());
   }
 }
 

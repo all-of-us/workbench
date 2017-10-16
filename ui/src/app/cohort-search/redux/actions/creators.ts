@@ -1,13 +1,11 @@
 import {List} from 'immutable';
 import {
-  START_REQUEST,
-  CANCEL_REQUEST,
-  CLEANUP_REQUEST,
-  REQUEST_ERROR,
   BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  CANCEL_CRITERIA_REQUEST,
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
+  CANCEL_COUNT_REQUEST,
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
@@ -17,34 +15,11 @@ import {
   SET_ACTIVE_CONTEXT,
   CLEAR_ACTIVE_CONTEXT,
   ActionTypes,
+  CountRequestKind,
 } from './types';
 
 import {KeyPath} from './types';
 import {Criteria, SearchRequest} from 'generated';
-
-/**
- * Each Request is identified by a KeyPath to the resource being requested and
- * tracked in a table of in-flight requests.  These three functions manage
- * that request tracking by, respectively,
- *    - pushing a KeyPath into the requests set
- *    - notifying the request handling Epic to cancel a request
- *    - or removing a KeyPath from the requests set
- */
-export const startRequest =
-  (path: KeyPath): ActionTypes[typeof START_REQUEST] =>
-  ({type: START_REQUEST, path});
-
-export const cancelRequest =
-  (path: KeyPath): ActionTypes[typeof CANCEL_REQUEST] =>
-  ({type: CANCEL_REQUEST, path});
-
-export const cleanupRequest =
-  (path: KeyPath): ActionTypes[typeof CLEANUP_REQUEST] =>
-  ({type: CLEANUP_REQUEST, path});
-
-export const requestError =
-  (error: any, path: KeyPath): ActionTypes[typeof REQUEST_ERROR] =>
-  ({type: REQUEST_ERROR, error, cleanup: cleanupRequest(path)});
 
 /**
  * path is ['criteria', kind, parentID]
@@ -55,18 +30,28 @@ export const requestCriteria =
 
 export const loadCriteriaRequestResults =
   (path: KeyPath, results: Criteria[]): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
-  ({type: LOAD_CRITERIA_RESULTS, path, results, cleanup: cleanupRequest(path)});
+  ({type: LOAD_CRITERIA_RESULTS, path, results});
+
+export const cancelCriteriaRequest =
+  (path: KeyPath): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
+  ({type: CANCEL_CRITERIA_REQUEST, path});
 
 
 /**
  */
 export const requestCounts =
-  (path: KeyPath, request: SearchRequest): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
-  ({type: BEGIN_COUNT_REQUEST, path, request});
+  (kind: CountRequestKind, request:
+    SearchRequest, path?:
+    KeyPath): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
+  ({type: BEGIN_COUNT_REQUEST, kind, request, path});
 
 export const loadCountRequestResults =
-  (path: KeyPath, count: number): ActionTypes[typeof LOAD_COUNT_RESULTS] =>
-  ({type: LOAD_COUNT_RESULTS, path, count, cleanup: cleanupRequest(path)});
+  (kind: CountRequestKind, count: number, path?: KeyPath): ActionTypes[typeof LOAD_COUNT_RESULTS] =>
+  ({type: LOAD_COUNT_RESULTS, kind, count, path});
+
+export const cancelCountRequest =
+  (kind: CountRequestKind, path?: KeyPath): ActionTypes[typeof CANCEL_COUNT_REQUEST] =>
+  ({type: CANCEL_COUNT_REQUEST, kind, path});
 
 
 /**

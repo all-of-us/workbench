@@ -1,54 +1,26 @@
 import {ActionsObservable, Epic} from 'redux-observable';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {List} from 'immutable';
-<<<<<<< HEAD
-
+import {List, is} from 'immutable';
 import {
-  CANCEL_REQUEST,
   BEGIN_CRITERIA_REQUEST,
+  CANCEL_CRITERIA_REQUEST,
+  CRITERIA_REQUEST_ERROR,
   BEGIN_COUNT_REQUEST,
-  LOAD_COUNT_RESULTS,
-  LOAD_CRITERIA_RESULTS,
-  REQUEST_ERROR,
+  CANCEL_COUNT_REQUEST,
+  COUNT_REQUEST_ERROR,
   RootAction,
   ActionTypes,
 } from './actions/types';
 import {
   loadCriteriaRequestResults,
   loadCountRequestResults,
-  cleanupRequest,
-  requestError,
 } from './actions/creators';
 import {CohortSearchState} from './store';
 
-=======
-
-import {CohortSearchActions as Actions} from './actions';
-import {cancelListener, cleanupRequest} from './requests';
->>>>>>> master
 import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
-type NeedsCleanup =
-    ActionTypes[typeof LOAD_CRITERIA_RESULTS]
-  | ActionTypes[typeof LOAD_COUNT_RESULTS]
-  | ActionTypes[typeof REQUEST_ERROR]
-  ;
-
-const cancelListener =
-  (action$, path) =>
-  action$
-    .ofType(CANCEL_REQUEST)
-    .filter(action => action.path.equals(path))
-    .map(action => cleanupRequest(path))
-    .take(1);
-
-const countOrZero = (count) =>
-  typeof count === 'number'
-    ? count
-    : 0;
-
 /**
  * CohortSearchEpics
  *
@@ -71,11 +43,16 @@ export class CohortSearchEpics {
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
           .map(result => loadCriteriaRequestResults(path, result.items))
-          .race(cancelListener(action$, path))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(
+              (action: ActionTypes[typeof CANCEL_CRITERIA_REQUEST]) =>
+              action.path.equals(path))
+            .take(1)
+          )
           .catch(error => {
-            console.log('Caught an error: ');
-            console.dir(error);
-            return Observable.of(requestError(error, path));
+            console.log(`Request error: ${JSON.stringify(error, null, 2)}`);
+            return Observable.of({type: CRITERIA_REQUEST_ERROR, error, path});
           });
       }
     )
@@ -83,24 +60,21 @@ export class CohortSearchEpics {
 
   fetchCounts: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
-      ({path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
+      ({kind, path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
       this.service.countSubjects(request)
-        .map(response => countOrZero(response))
-        .map(count => loadCountRequestResults(path, count))
-        .race(cancelListener(action$, path))
+        .map(response => typeof response === 'number' ? response : 0)
+        .map(count => loadCountRequestResults(kind, count, path))
+        .race(action$
+          .ofType(CANCEL_COUNT_REQUEST)
+          .filter(
+            (action: ActionTypes[typeof CANCEL_COUNT_REQUEST]) =>
+            is(action.kind, kind) && is(action.path, path))
+          .take(1)
+        )
         .catch(error => {
-          console.log('Caught an error: ');
-          console.dir(error);
-            return Observable.of(requestError(error, path));
+          console.log(`Request error: ${JSON.stringify(error, null, 2)}`);
+          return Observable.of({type: COUNT_REQUEST_ERROR, error, path});
         })
     )
-  )
-
-  finalizeRequests: CSEpic = (action$) => (
-    action$.ofType(
-      LOAD_COUNT_RESULTS,
-      LOAD_CRITERIA_RESULTS,
-      REQUEST_ERROR,
-    ).map((action: NeedsCleanup) => action.cleanup)
   )
 }

@@ -10,10 +10,14 @@ import {
 } from './store';
 
 import {
-  START_REQUEST,
-  CLEANUP_REQUEST,
+  BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  CANCEL_CRITERIA_REQUEST,
+  CRITERIA_REQUEST_ERROR,
+  BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
+  CANCEL_COUNT_REQUEST,
+  COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
@@ -28,34 +32,60 @@ import {
 /**
  * The root Reducer.  Handles synchronous changes to application State
  */
-
 export const rootReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = initialState, action: RootAction): CohortSearchState => {
     switch (action.type) {
 
-      case START_REQUEST:
-        return state.setIn(action.path.unshift('requests'), true);
-
-      case CLEANUP_REQUEST:
+      case BEGIN_CRITERIA_REQUEST:
         return state
-          // First delete the Leaf value of True
-          .deleteIn(action.path.unshift('requests'))
-          // Then prune the tree of any empty collections
-          .update('requests', tree => prunePath(action.path.butLast(), tree));
+          .updateIn(
+            ['requests', 'criteria'],
+            // path.rest() : removes the redundant 'criteria' prefix
+            requestSet => requestSet.add(action.path.rest())
+          );
 
       case LOAD_CRITERIA_RESULTS:
-        return state.setIn(action.path, fromJS(action.results));
+        return state
+          .setIn(action.path, fromJS(action.results))
+          .updateIn(
+            ['requests', 'criteria'],
+            requestSet => requestSet.delete(action.path.rest())
+          );
 
-      case LOAD_COUNT_RESULTS: {
-        // action.path is ['search', role, groupIndex, 'items', groupItemIndex, scope]
-        const scope = action.path.last();
-        const pathKey = {
-          TOTAL: 'total',
-          GROUP: action.path.skipLast(3),
-          ITEM: action.path.skipLast(1),
-        }[scope];
-        return state.setIn(['counts', pathKey], action.count);
-      }
+      case CANCEL_CRITERIA_REQUEST:
+        return state
+          .updateIn(
+            ['requests', 'criteria'],
+            requestSet => requestSet.delete(action.path.rest())
+          );
+
+      case BEGIN_COUNT_REQUEST:
+        return action.kind === 'total'
+          ? state.setIn(['requests', 'total'], true)
+          : state.updateIn(
+            ['requests', action.kind],
+            requestSet => requestSet.add(action.path)
+          );
+
+      case LOAD_COUNT_RESULTS:
+        return action.kind === 'total'
+          ? state
+              .setIn(['counts', 'total'], action.count)
+              .setIn(['requests', 'total'], false)
+          : state
+            .setIn(['counts', action.path], action.count)
+            .updateIn(
+              ['requests', action.kind],
+              requestSet => requestSet.delete(action.path)
+            );
+
+      case CANCEL_COUNT_REQUEST:
+        return action.kind === 'total'
+          ? state.setIn(['requests', 'total'], false)
+          : state.updateIn(
+            ['requests', action.kind],
+            requestSet => requestSet.delete(action.path)
+          );
 
       case INIT_SEARCH_GROUP:
         return state.updateIn(

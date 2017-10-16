@@ -13,7 +13,7 @@ import {
   CohortSearchActions,
   CohortSearchState,
   criteriaPath,
-  isLoading,
+  isRequesting,
 } from '../redux';
 
 
@@ -58,7 +58,7 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
     const path = criteriaPath(this.critType, this.parentId);
     this.subscriptions = [
       this.ngRedux.select(
-        isLoading(path)
+        isRequesting('criteria', path.rest())
       ).subscribe(v => this.loading = v),
 
       this.ngRedux.select(

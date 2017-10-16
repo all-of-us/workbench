@@ -1,5 +1,5 @@
-import {Map, List, fromJS, isCollection} from 'immutable';
-import {KeyPath} from './actions/types';
+import {Map, List, Set, fromJS, isCollection, is} from 'immutable';
+import {KeyPath, CountRequestKind} from './actions/types';
 
 import {Criteria, SearchRequest} from 'generated';
 
@@ -24,7 +24,12 @@ export const initialState = fromJS({
     wizardOpen: false,
   },
   criteria: {},
-  requests: {},
+  requests: {
+    total: false,
+    group: Set(),
+    item: Set(),
+    criteria: Set(),
+  },
   counts: {},
 });
 
@@ -69,18 +74,27 @@ export const pathTo =
 export const countFor = (objId: string|KeyPath) => (state): number =>
   state.getIn(['counts', objId], objId === 'total' ? 0 : null);
 
-export const isLoading = (path: KeyPath) => (state): boolean =>
-  state.getIn(path.unshift('requests'), false);
+export const isRequesting =
+  (kind: 'criteria' | CountRequestKind, path?: KeyPath) =>
+  (state): boolean =>
+    kind === 'total'
+      ? state.getIn(['requests', 'total'], false)
+      : state.getIn(['requests', kind], Set()).has(path);
 
 export const activeCriteriaType = (state): string =>
   state.getIn(['context', 'active', 'criteriaType']);
 
 /**
- * If the path is non-empty and leads to an empty collection,
- * remove that collection and check its parent.
+ * State / Store Utilities
  */
-export const prunePath = (path: KeyPath, state) => (
+/**
+ * If the path is non-empty and leads to an empty collection,
+ * remove that collection and check its parent.  If `halt` is given
+ * and present in the KeyPath, do not prune beyond `halt`.
+ */
+export const prunePath = (path: KeyPath, state, halt?: any) => (
   !path.isEmpty()
+  && !is(path.last(), halt)
   && isCollection(state.getIn(path))
   && state.getIn(path).isEmpty()
     ? prunePath(path.butLast(), state.deleteIn(path))

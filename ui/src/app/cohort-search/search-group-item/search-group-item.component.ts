@@ -14,7 +14,7 @@ import {
   CohortSearchState,
   countFor,
   pathTo,
-  isLoading,
+  isRequesting,
 } from '../redux';
 
 import {SearchGroupItem} from 'generated';
@@ -41,9 +41,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const path = pathTo(this.role, this.index, this.itemIndex);
-    console.log(`SearchGroupItem at ${JSON.stringify(path, null, 2)}`);
     const countSelect = this.ngRedux.select(countFor(path));
-    const loadSelect = this.ngRedux.select(isLoading(path));
+    const loadSelect = this.ngRedux.select(isRequesting('item', path));
     const setAndMark = (name) => (value) => {
       this[name] = value;
       this.cd.markForCheck();
