@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchParameter;
@@ -26,7 +26,7 @@ public class GroupCodesQueryBuilderTest {
                 .parameters(Arrays.asList(new SearchParameter().value("11.1"),
                         new SearchParameter().value("11.2"),
                         new SearchParameter().value("11.3")));
-        QueryRequest result = queryBuilder.buildQueryRequest(parameters);
+        QueryJobConfiguration result = queryBuilder.buildQueryRequest(parameters);
         String expected =
                 "select code,\n" +
                         "domain_id as domainId\n" +

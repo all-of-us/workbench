@@ -1,8 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
       //org.pmiops.workbench.api.cohortbuilder.querybuilder
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CodesQueryBuilder is an object that builds {@link QueryRequest}
+ * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery for the following criteria types:
  * ICD9, ICD10 and CPT.
  */
@@ -60,7 +60,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                     "where person_id in (${innerSql})\n";
 
     @Override
-    public QueryRequest buildQueryRequest(QueryParameters params) {
+    public QueryJobConfiguration buildQueryRequest(QueryParameters params) {
         ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
         List<String> queryParts = new ArrayList<String>();
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -81,7 +81,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
         String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", String.join(UNION_TEMPLATE, queryParts));
 
-        return QueryRequest
+        return QueryJobConfiguration
                 .newBuilder(finalSql)
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)

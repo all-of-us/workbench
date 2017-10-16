@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -208,9 +208,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void filterBigQueryConfig_WithoutTableName() throws Exception {
         final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
-        QueryRequest request = QueryRequest.newBuilder(statement).setUseLegacySql(false).build();
+        QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
         final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(request).getQuery());
+        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(queryJobConfiguration).getQuery());
     }
 
     protected String getTablePrefix() {
