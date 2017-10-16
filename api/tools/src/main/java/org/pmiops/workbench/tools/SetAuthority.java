@@ -75,6 +75,9 @@ public class SetAuthority {
           numErrors++;
           continue;
         }
+        // JOIN authorities, not usually fetched.
+        user = userDao.findUserWithAuthorities(user.getUserId());
+
         Set<Authority> granted = user.getAuthorities();
         Set<Authority> updated = new HashSet(granted);
         updated.addAll(authoritiesToAdd);
