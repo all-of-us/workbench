@@ -1,16 +1,18 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.QueryRequest;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SubjectListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -26,12 +28,15 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, CohortBuilderController.class})
+@Import({QueryBuilderFactory.class, CohortBuilderController.class, SubjectCounter.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
     CohortBuilderController controller;
+
+    @Autowired
+    WorkbenchConfig workbenchConfig;
 
     @Override
     public List<String> getTableNames() {
@@ -75,103 +80,141 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
-    public void searchSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
+    public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
-                Arrays.asList("1,1,1"));
+                1);
     }
 
     @Test
-    public void searchSubjects_ICD9ConditionOccurrenceParent() throws Exception {
+    public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1")))),
-                Arrays.asList("1,1,1"));
+                1);
     }
 
     @Test
-    public void searchSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
+    public void countSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
-                Arrays.asList("2,2,2"));
+                1);
     }
 
     @Test
-    public void searchSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
+    public void countSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
-                        Arrays.asList("2,2,2"));
+                        1);
     }
 
     @Test
-    public void searchSubjects_ICD9MeasurementLeaf() throws Exception {
+    public void countSubjects_ICD9MeasurementLeaf() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
-                        Arrays.asList("3,3,3"));
+                        1);
     }
 
     @Test
-    public void searchSubjects_ICD9MeasurementParent() throws Exception {
+    public void countSubjects_ICD9MeasurementParent() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
-                        Arrays.asList("3,3,3"));
+                        1);
     }
 
     @Test
-    public void searchSubjects_DemoGender() throws Exception {
+    public void countSubjects_DemoGender() throws Exception {
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
-                        Arrays.asList("4,4,4"));
+                        2);
     }
 
     @Test
-    public void searchSubjects_DemoAge() throws Exception {
+    public void countSubjects_DemoAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE")))),
-                        Arrays.asList("5,5,5"));
+                        1);
     }
 
     @Test
-    public void searchSubjects_DemoGenderAndAge() throws Exception {
+    public void countSubjects_DemoGenderAndAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
         SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE");
         SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
         assertSubjects(
-                controller.searchSubjects(
+                controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        Arrays.asList("4,4,4", "5,5,5"));
+                        3);
     }
 
     @Test
-    public void filterSearchParametersWithoutDomainId() throws Exception {
-        final SearchParameter expectedParameter = new SearchParameter().value("001");
-        List<SearchParameter> parameterList = new ArrayList<>();
-        parameterList.add(expectedParameter);
-        parameterList.add(new SearchParameter().value("002").domain("Condition"));
-        assertThat(controller.filterSearchParametersWithoutDomain(parameterList))
-                .isEqualTo(Arrays.asList(expectedParameter));
+    public void countSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
+        LocalDate birthdate = LocalDate.of(1980, 8, 01);
+        LocalDate now = LocalDate.now();
+        int age = Period.between(birthdate, now).getYears();
+
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE");
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
+                .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
+        testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+
+        assertSubjects( controller.countSubjects(testSearchRequest), 3);
     }
 
     @Test
-    public void filterSearchParametersWithDomainId() throws Exception {
-        final SearchParameter expectedParameter = new SearchParameter().value("002").domain("Condition");
-        List<SearchParameter> parameterList = new ArrayList<>();
-        parameterList.add(new SearchParameter().value("001"));
-        parameterList.add(expectedParameter);
-        assertThat(controller.filterSearchParametersWithDomain(parameterList))
-                .isEqualTo(Arrays.asList(expectedParameter));
+    public void countSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
+                .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
+        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
+        testSearchRequest.getIncludes().add(anotherSearchGroup);
+
+        assertSubjects( controller.countSubjects(testSearchRequest), 1);
+    }
+
+    @Test
+    public void countSubjects_DemoExcluded() throws Exception {
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("DEMO")
+                .searchParameters(Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)));
+        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
+
+        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
+        testSearchRequest.getExcludes().add(anotherSearchGroup);
+
+        assertSubjects( controller.countSubjects(testSearchRequest), 0);
+    }
+
+    @Test
+    public void filterBigQueryConfig_WithoutTableName() throws Exception {
+        final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
+        QueryRequest request = QueryRequest.newBuilder(statement).setUseLegacySql(false).build();
+        final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
+        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(request).getQuery());
+    }
+
+    protected String getTablePrefix() {
+        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
@@ -186,16 +229,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
         final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
 
-        return new SearchRequest().includes(Arrays.asList(searchGroup));
+        List<SearchGroup> groups = new ArrayList<>();
+        groups.add(searchGroup);
+        return new SearchRequest().includes(groups);
     }
 
-    private void assertSubjects(ResponseEntity response, List<String> expectedSubjects) {
+    private void assertSubjects(ResponseEntity response, Integer expectedCount) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        SubjectListResponse listResponse = (SubjectListResponse) response.getBody();
-        assertThat(listResponse.size()).isEqualTo(expectedSubjects.size());
-        for (String subject : listResponse) {
-            assertThat(subject).isIn(expectedSubjects);
-        }
+        Long subjectCount = (Long) response.getBody();
+        assertThat(subjectCount).isEqualTo(expectedCount);
     }
 }

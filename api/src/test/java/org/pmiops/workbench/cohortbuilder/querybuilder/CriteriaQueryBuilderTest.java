@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @Import({CriteriaQueryBuilder.class})
-public class CriteriaQueryBuilderTest extends BaseQueryBuilderTest {
+public class CriteriaQueryBuilderTest {
 
     @Autowired
     CriteriaQueryBuilder queryBuilder;
@@ -29,7 +29,7 @@ public class CriteriaQueryBuilderTest extends BaseQueryBuilderTest {
                         "is_selectable,\n" +
                         "concept_id,\n" +
                         "domain_id\n" +
-                        "from `" + getTablePrefix() + ".icd9_criteria`\n" +
+                        "from `${projectId}.${dataSetId}.icd9_criteria`\n" +
                         "where parent_id = @parentId\n" +
                         "order by id asc";
 
@@ -46,20 +46,6 @@ public class CriteriaQueryBuilderTest extends BaseQueryBuilderTest {
     @Test
     public void getType() throws Exception {
         assertEquals(FactoryKey.CRITERIA, queryBuilder.getType());
-    }
-
-    @Test
-    public void filterBigQueryConfig_TableName() throws Exception {
-        final String statement = "my statement ${projectId}.${dataSetId}.${tableName}";
-        final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-        assertEquals(expectedResult, queryBuilder.filterBigQueryConfig(statement, "myTableName"));
-    }
-
-    @Test
-    public void filterBigQueryConfig_WithoutTableName() throws Exception {
-        final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
-        final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-        assertEquals(expectedResult, queryBuilder.filterBigQueryConfig(statement));
     }
 
 }

@@ -40,7 +40,7 @@ export class CohortSearchEpics {
   fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
     action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
       ({request, sgiPath}) =>
-      this.service.searchSubjects(request)
+      this.service.countSubjects(request)
         .map(results => ({
           type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath,
           cleanup: cleanupRequest(sgiPath)
