@@ -1,8 +1,8 @@
 import {Observable} from 'rxjs/Observable';
 
 export class ErrorHandlingServiceStub {
-  fiveHundred = false;
-  zero = false;
+  serverError = false;
+  noServerResponse = false;
   constructor() {}
 
   public retryApi(observable: Observable<any>): Observable<any> {
