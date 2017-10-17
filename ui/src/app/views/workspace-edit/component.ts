@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {isBlank} from 'app/utils';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -46,7 +47,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   addWorkspace(): void {
     if (!this.buttonClicked) {
-      if (this.workspace.name === '') {
+      if (isBlank(this.workspace.name)) {
         this.valueNotEntered = true;
         const nameArea = document.getElementsByClassName('name-area')[0];
         nameArea.classList.add('validation-error');
