@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {isBlank} from 'app/utils';
 
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -15,7 +16,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceId: string;
   adding = false;
   buttonClicked = false;
-
+  valueNotEntered = false;
 
   constructor(
       private router: Router,
@@ -46,12 +47,16 @@ export class WorkspaceEditComponent implements OnInit {
 
   addWorkspace(): void {
     if (!this.buttonClicked) {
-      this.buttonClicked = true;
-      this.workspacesService
-          .createWorkspace(
-              this.workspace)
-          .retry(2)
-          .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+      if (isBlank(this.workspace.name)) {
+        this.valueNotEntered = true;
+        const nameArea = document.getElementsByClassName('name-area')[0];
+        nameArea.classList.add('validation-error');
+      } else {
+        this.buttonClicked = true;
+        this.valueNotEntered = false;
+        this.workspacesService.createWorkspace(this.workspace).retry(2)
+            .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+      }
     }
   }
 }
