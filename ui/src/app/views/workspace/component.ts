@@ -4,6 +4,8 @@ import {StringFilter, Comparator} from 'clarity-angular';
 import {DOCUMENT} from '@angular/platform-browser';
 import {Observable} from 'rxjs/Observable';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+
 import {Cluster} from 'generated';
 import {ClusterService} from 'generated';
 import {Cohort} from 'generated';
@@ -100,6 +102,7 @@ export class WorkspaceComponent implements OnInit {
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
+      private errorHandlingService: ErrorHandlingService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {}
@@ -107,10 +110,8 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.url[1].path;
     this.wsId = this.route.snapshot.url[2].path;
-    this.cohortsService
-        .getCohortsInWorkspace(
-            this.wsNamespace, this.wsId)
-        .retry(2)
+    this.errorHandlingService.retryApi(this.cohortsService
+        .getCohortsInWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
             cohortsReceived => {
               for (const coho of cohortsReceived.items) {
@@ -122,10 +123,8 @@ export class WorkspaceComponent implements OnInit {
               this.cohortsLoading = false;
               this.cohortsError = true;
             });
-    this.workspacesService
-      .getWorkspace(
-        this.wsNamespace, this.wsId)
-        .retry(2)
+    this.errorHandlingService.retryApi(this.workspacesService
+      .getWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
           workspaceReceived => {
             this.workspace = workspaceReceived;
@@ -137,7 +136,7 @@ export class WorkspaceComponent implements OnInit {
   }
 
   launchNotebook(): void {
-    this.pollCluster().subscribe(cluster => {
+    this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
       this.cluster = cluster;
       this.clusterPulled = true;
     });
@@ -146,11 +145,11 @@ export class WorkspaceComponent implements OnInit {
   pollCluster(): Observable<Cluster> {
     // Polls for cluster startup every minute.
     const observable = new Observable(observer => {
-      this.clusterService.getCluster(this.workspace.namespace,
-          this.workspace.id).subscribe((cluster) => {
+      this.errorHandlingService.retryApi(this.clusterService.getCluster(
+          this.workspace.namespace, this.workspace.id)).subscribe((cluster) => {
         if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
           setTimeout(() => {
-              this.pollCluster().subscribe(newCluster => {
+              this.errorHandlingService.retryApi(this.pollCluster()).subscribe(newCluster => {
                 this.cluster = newCluster;
                 observer.next(newCluster);
                 observer.complete();
@@ -180,9 +179,9 @@ export class WorkspaceComponent implements OnInit {
 
   createAndLaunchNotebook(): void {
     this.clusterLoading = true;
-    this.clusterService
-        .createCluster(this.workspace.namespace, this.workspace.id).subscribe(() => {
-      this.pollCluster().subscribe(polledCluster => {
+    this.errorHandlingService.retryApi(this.clusterService
+        .createCluster(this.workspace.namespace, this.workspace.id)).subscribe(() => {
+      this.errorHandlingService.retryApi(this.pollCluster()).subscribe(polledCluster => {
         this.clusterLoading = false;
         this.cluster = polledCluster;
         this.clusterPulled = true;
@@ -191,7 +190,7 @@ export class WorkspaceComponent implements OnInit {
   }
 
   killNotebook(): void {
-    this.clusterService.deleteCluster(this.workspace.namespace,
-        this.workspace.id).subscribe(() => {});
+    this.errorHandlingService.retryApi(this.clusterService.deleteCluster(
+        this.workspace.namespace, this.workspace.id)).subscribe(() => {});
   }
 }

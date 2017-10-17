@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {isBlank} from 'app/utils';
 
@@ -19,6 +20,7 @@ export class WorkspaceEditComponent implements OnInit {
   valueNotEntered = false;
 
   constructor(
+      private errorHandlingService: ErrorHandlingService,
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
@@ -54,7 +56,7 @@ export class WorkspaceEditComponent implements OnInit {
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;
-        this.workspacesService.createWorkspace(this.workspace).retry(2)
+        this.errorHandlingService.retryApi(this.workspacesService.createWorkspace(this.workspace))
             .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
       }
     }
