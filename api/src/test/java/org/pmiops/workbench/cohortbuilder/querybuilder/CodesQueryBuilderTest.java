@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.collect.ListMultimap;
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class CodesQueryBuilderTest {
     CodesQueryBuilder queryBuilder;
 
     @Test
-    public void buildQueryRequest() throws Exception {
+    public void buildQueryJobConfig() throws Exception {
         String measurementNamedParameter = "";
         String conditionNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
@@ -37,10 +37,10 @@ public class CodesQueryBuilderTest {
         params.add(new SearchParameter().domain("Measurement").value("30.3"));
 
         /* Check the generated querybuilder */
-        QueryRequest request = queryBuilder
-                .buildQueryRequest(new QueryParameters().type("ICD9").parameters(params));
+        QueryJobConfiguration queryJobConfiguration = queryBuilder
+                .buildQueryJobConfig(new QueryParameters().type("ICD9").parameters(params));
 
-        for (String key : request.getNamedParameters().keySet()) {
+        for (String key : queryJobConfiguration.getNamedParameters().keySet()) {
             if (key.startsWith("Condition")) {
                 conditionNamedParameter = key;
             } else if (key.startsWith("Measurement")) {
@@ -64,10 +64,10 @@ public class CodesQueryBuilderTest {
                         "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +
                         ")\n";
 
-        assertEquals(expected, request.getQuery());
+        assertEquals(expected, queryJobConfiguration.getQuery());
 
         /* Check the querybuilder parameters */
-        List<QueryParameterValue> conditionCodes = request
+        List<QueryParameterValue> conditionCodes = queryJobConfiguration
                 .getNamedParameters()
                 .get(conditionNamedParameter)
                 .getArrayValues();
@@ -82,7 +82,7 @@ public class CodesQueryBuilderTest {
                 .setType(StandardSQLTypeName.STRING)
                 .build()));
 
-        List<QueryParameterValue> measurementCodes = request
+        List<QueryParameterValue> measurementCodes = queryJobConfiguration
                 .getNamedParameters()
                 .get(measurementNamedParameter)
                 .getArrayValues();
@@ -92,8 +92,8 @@ public class CodesQueryBuilderTest {
                 .setType(StandardSQLTypeName.STRING)
                 .build()));
 
-        assertEquals("ICD9CM", request.getNamedParameters().get("cm").getValue());
-        assertEquals("ICD9Proc", request.getNamedParameters().get("proc").getValue());
+        assertEquals("ICD9CM", queryJobConfiguration.getNamedParameters().get("cm").getValue());
+        assertEquals("ICD9Proc", queryJobConfiguration.getNamedParameters().get("proc").getValue());
     }
 
     @Test

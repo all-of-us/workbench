@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
                     "and is_selectable = TRUE and is_group = FALSE order by code asc";
 
     @Override
-    public QueryRequest buildQueryRequest(QueryParameters parameters) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
@@ -37,7 +37,8 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
                 });
         String finalSql = GROUP_CODES_QUERY.replace("${codes}", String.join(" or ", queryParts));
 
-        return QueryRequest.newBuilder(finalSql.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
+        return QueryJobConfiguration
+                .newBuilder(finalSql.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)     // required for queries that use named parameters
                 .build();

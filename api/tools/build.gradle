@@ -9,20 +9,35 @@ def db_port = System.getenv("DB_PORT")
 def workbench_db_user = System.getenv("WORKBENCH_DB_USER")
 def workbench_db_password = System.getenv("WORKBENCH_DB_PASSWORD")
 
+def dbProperties = [
+  'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+  'spring.datasource.url': 'jdbc:mysql://${db_host}:${db_port}/workbench',
+  'spring.datasource.username': '${workbench_db_user}',
+  'spring.datasource.password': '${workbench_db_password}'
+]
+
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
 task loadConfig(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ConfigLoader"
-  systemProperties = [
-    'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
-    'spring.datasource.url': 'jdbc:mysql://${db_host}:${db_port}/workbench',
-    'spring.datasource.username': '${workbench_db_user}',
-    'spring.datasource.password': '${workbench_db_password}'
-  ]
+  systemProperties = dbProperties
   args config_file
 }
 
+// See api/project.rb set-authority.
+// This evals the value of the -PappArgs flag given to Gradle and passes the
+// result to the Java main method.
+task setAuthority(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "org.pmiops.workbench.tools.SetAuthority"
+  systemProperties = dbProperties
+  // appArgs must always be defined for :setAuthority. Guard it with a
+  // conditional for the sake of other targets' evaluation.
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
 
 buildscript {    // Configuration for building
   repositories {

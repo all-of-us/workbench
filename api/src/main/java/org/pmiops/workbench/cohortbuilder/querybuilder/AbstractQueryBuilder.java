@@ -1,23 +1,23 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 
 import java.util.UUID;
 
 /**
- * AbstractQueryBuilder is an object that builds {@link QueryRequest}
+ * AbstractQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery.
  */
 public abstract class AbstractQueryBuilder {
 
     /**
-     * Build a {@link QueryRequest} from the specified
+     * Build a {@link QueryJobConfiguration} from the specified
      * {@link QueryParameters} provided.
      *
      * @param parameters
      * @return
      */
-    public abstract QueryRequest buildQueryRequest(QueryParameters parameters);
+    public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
 
     public abstract FactoryKey getType();
 

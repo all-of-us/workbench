@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryRequest;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DemoQueryBuilder is an object that builds {@link QueryRequest}
+ * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery for the following criteria types:
  * DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
  */
@@ -37,7 +37,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     private static final String UNION_TEMPLATE = "union distinct\n";
 
     @Override
-    public QueryRequest buildQueryRequest(QueryParameters parameters) {
+    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
 
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
@@ -57,7 +57,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
         String finalSql = String.join(UNION_TEMPLATE, queryParts);
 
-        return QueryRequest
+        return QueryJobConfiguration
                 .newBuilder(finalSql)
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)

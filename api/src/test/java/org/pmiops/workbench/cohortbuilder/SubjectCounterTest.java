@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import com.google.cloud.bigquery.QueryRequest;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchGroup;
@@ -61,7 +61,7 @@ public class SubjectCounterTest {
                 .addIncludesItem(searchGroup2)
                 .addExcludesItem(searchGroup3);
 
-        QueryRequest actualRequest = subjectCounter.buildSubjectCounterQuery(request);
+        QueryJobConfiguration actualRequest = subjectCounter.buildSubjectCounterQuery(request);
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gender")) {

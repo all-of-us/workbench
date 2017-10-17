@@ -23,30 +23,6 @@ def create_parser(command_name)
   end
 end
 
-def add_default_options(parser, options)
-  parser.on("--project [PROJECT]",
-      "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-    options.project = project
-  end
-  parser.on("--account [ACCOUNT]",
-       "Account to use when creating credentials (your.name@pmi-ops.org); "\
-       "use this or --creds_file") do |account|
-    options.account = account
-  end
-  parser.on("--creds_file [CREDS_FILE]",
-       "Path to a file containing credentials; use this or --account.") do |creds_file|
-    options.creds_file = creds_file
-  end
-  parser
-end
-
-def validate_default_options(parser, options)
-  if options.project == nil || !((options.account == nil) ^ (options.creds_file == nil))
-    puts parser.help
-    exit 1
-  end
-end
-
 def dev_up(*args)
   common = Common.new
 
@@ -70,13 +46,13 @@ end
 def run_api(account)
   common = Common.new
   # TODO(dmohs): This can be simplified now that we are using a shared service account.
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
     at_exit { common.run_inline %W{docker-compose down} }
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
-  })
+  end
 end
 
 def clean()
@@ -105,9 +81,9 @@ def run_integration_tests(*args)
   common = Common.new
 
   account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil, lambda { |project, account, creds_file|
+  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
     common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
-  })
+  end
 end
 
 def run_gradle(*args)
@@ -169,6 +145,7 @@ def get_file_from_gcs(bucket, filename, target_path)
   common.run_inline %W{gsutil cp gs://#{bucket}/#{filename} #{target_path}}
 end
 
+# Downloads database credentials from GCS and parses them into ENV.
 def read_db_vars(creds_file, project)
   db_creds_file = Tempfile.new("#{project}-vars.env")
   begin
@@ -185,6 +162,7 @@ def read_db_vars(creds_file, project)
   ensure
     db_creds_file.unlink
   end
+  ENV["DB_PORT"] = "3307"
 end
 
 def run_cloud_sql_proxy(project, creds_file)
@@ -198,11 +176,13 @@ def run_cloud_sql_proxy(project, creds_file)
       cloud_sql_proxy}
     common.run_inline %W{chmod +x cloud_sql_proxy}
   end
-  puts "Running Cloud SQL Proxy..."
-  pid = spawn(*%W{./cloud_sql_proxy
+  cloud_sql_proxy_cmd = %W{./cloud_sql_proxy
       -instances #{project}:us-central1:workbenchmaindb=tcp:3307
-      -credential_file=#{creds_file} &})
-  common.run_inline %W{sleep 3}
+      -credential_file=#{creds_file} &}
+  puts "Running Cloud SQL Proxy with #{cloud_sql_proxy_cmd}. Note stdout/err not shown."
+  pid = spawn(*cloud_sql_proxy_cmd)
+  sleep 3.0  # Wait for the proxy to become active.
+  puts "Cloud SQL Proxy running (PID #{pid})."
   return pid
 end
 
@@ -219,48 +199,14 @@ def run_with_redirects(command_string, to_redact = "")
   end
 end
 
-def do_run_migrations(creds_file, project)
-  read_db_vars(creds_file, project)
-  common = Common.new
-  puts "Creating database if it does not exist..."
-  pw = ENV["MYSQL_ROOT_PASSWORD"]
-  run_with_redirects(
-      "cat db/create_db.sql | envsubst | " \
-      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-      to_redact=pw)
-  ENV["DB_PORT"] = "3307"
-  puts "Upgrading database..."
-  Dir.chdir("db") do
-    common.run_inline("../gradlew --info update")
-  end
-end
-
-def do_drop_db(creds_file, project)
-  read_db_vars(creds_file, project)
-  drop_db_file = Tempfile.new("#{project}-drop-db.sql")
-  common = Common.new
-  puts "Dropping database..."
-  pw = ENV["MYSQL_ROOT_PASSWORD"]
-  run_with_redirects(
-      "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
-      "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-      to_redact=pw)
-end
-
 def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
-def run_with_creds(args, command_name, proc)
-  parser = create_parser(command_name)
-  options = Options.new
-  add_default_options parser, options
-  parser.parse args
-  validate_default_options parser, options
-  do_run_with_creds(options.project, options.account, options.creds_file, proc)
-end
-
-def do_run_with_creds(project, account, creds_file, proc)
+# Fetches a credentials file. Passes the path of the credentials to a block.
+# For all-of-us-workbench-test only, it leaves the (lazy-fetched) creds on disk;
+# for any other project, it cleans them up after the block is run.
+def do_run_with_creds(project, account, creds_file)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     if project == "all-of-us-workbench-test"
@@ -282,78 +228,76 @@ def do_run_with_creds(project, account, creds_file, proc)
           delete_service_accounts_creds(project, account, service_account_creds_file)
         end
       end
-      proc.call(project, account, creds_filename)
+      yield(creds_filename)
     else
       # Create a creds file and use it; clean up when done.
       get_service_account_creds_file(project, account, service_account_creds_file)
       begin
-        proc.call(project, account, service_account_creds_file.path)
+        yield(service_account_creds_file.path)
       ensure
         delete_service_accounts_creds(project, account, service_account_creds_file)
       end
     end
   else
-    proc.call(project, account, creds_file)
+    yield(creds_file)
   end
 end
 
-def run_with_cloud_sql_proxy(args, command_name, proc)
-  run_with_creds(args, command_name, lambda { |project, account, creds_file|
-    pid = run_cloud_sql_proxy(project, creds_file)
-    begin
-      proc.call(project, account, creds_file)
-    ensure
-      Process.kill("HUP", pid)
-    end
-  })
-end
-
 def register_service_account(*args)
-  run_with_creds(args, "register-service-account", lambda { |project, account, creds_file|
-    common = Common.new
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+  GcloudContext.new("register-service-account", args).run do |ctx|
     Dir.chdir("../firecloud-tools") do
-      common.run_inline("./run.sh " \
-        "register_service_account/register_service_account.py -j #{creds_file} -o #{account}")
+      ctx.common.run_inline(
+          "./run.sh register_service_account/register_service_account.py" \
+          " -j #{cts.opts.creds_file} -o #{ctx.opts.account}")
     end
-  })
+  end
 end
 
 def drop_cloud_db(*args)
-  run_with_cloud_sql_proxy(args, "drop-cloud-db", lambda { |project, account, creds_file|
-    do_drop_db(creds_file, project)
-  })
+  GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
+    drop_db_file = Tempfile.new("#{ctx.opts.project}-drop-db.sql")
+    puts "Dropping database..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+  end
 end
 
 def connect_to_cloud_db(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    common = Common.new
+  GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
     pw = ENV["WORKBENCH_DB_PASSWORD"]
     # TODO Switch this to run_inline once Common supports redaction.
     run_with_redirects(
         "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
         "--port 3307 --database #{ENV["DB_NAME"]}",
         to_redact=pw)
-  })
+  end
 end
 
 def update_cloud_config(*args)
-  run_with_cloud_sql_proxy(args, "connect-to-cloud-db", lambda { |project, account, creds_file|
-    read_db_vars(creds_file, project)
-    ENV["DB_PORT"] = "3307"
-    common = Common.new
+  GcloudContext.new("update-cloud-config", args, true).run do |ctx|
     Dir.chdir("tools") do
-      common.run_inline("../gradlew --info loadConfig")
+      ctx.common.run_inline %W{#{ctx.gradlew_path} --info loadConfig}
     end
-  })
+  end
 end
 
 def run_cloud_migrations(*args)
-  run_with_cloud_sql_proxy(args, "run-cloud-migrations", lambda { |project, account, creds_file|
+  GcloudContext.new("run-cloud-migrations", args, true).run do |ctx|
     puts "Running migrations..."
-    do_run_migrations(creds_file, project)
-  })
+    puts "Creating database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading database..."
+    Dir.chdir("db") do
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update")
+    end
+  end
 end
 
 def do_create_db_creds(project, account, creds_file)
@@ -399,18 +343,142 @@ def do_create_db_creds(project, account, creds_file)
 end
 
 def create_db_creds(*args)
-  run_with_creds(args, "create-db-creds", lambda { |project, account, creds_file|
-    do_create_db_creds(project, account, creds_file)
-  })
+  GcloudContext.new("create-db-creds", args, true).run do |ctx|
+    do_create_db_creds(ctx.opts.project, ctx.opts.account, ctx.opts.creds_file)
+  end
 end
 
-def get_test_service_account_creds(*args)
-  run_with_creds(args, "get-service-creds", lambda { |project, account, creds_file|
-    if project != "all-of-us-workbench-test"
+# Run commands with various gcloud setup/teardown: authorization and,
+# optionally, a CloudSQL proxy.
+class GcloudContext
+  attr_reader :common, :gradlew_path, :opts
+
+  def initialize(command_name, args, use_cloudsql_proxy = false)
+    @common = Common.new
+    @args = args
+    @parser = create_parser(command_name)
+    # Clients may access options to get default options (project etc)
+    # as well as their own custom options.
+    @opts = Options.new
+    @use_cloudsql_proxy = use_cloudsql_proxy
+
+    @gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
+  end
+
+  # Clients may override add_options and validate_options to add flags.
+  def add_options
+    @parser.on("--project [PROJECT]",
+        "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+      @opts.project = project
+    end
+    @parser.on("--account [ACCOUNT]",
+         "Account to use when creating credentials (your.name@pmi-ops.org); "\
+         "use this or --creds_file") do |account|
+      @opts.account = account
+    end
+    @parser.on("--creds_file [CREDS_FILE]",
+         "Path to a file containing credentials; use this or --account.") do |creds_file|
+      @opts.creds_file = creds_file
+    end
+  end
+
+  def validate_options
+    if @opts.project == nil || !((@opts.account == nil) ^ (@opts.creds_file == nil))
+      puts @parser.help
+      exit 1
+    end
+  end
+
+  # Sets up credentials (and optionally CloudSQL proxy), yields to a provided
+  # block (passing the block itself / the GcloudContext), and then tears down.
+  def run
+    add_options
+    @parser.parse @args
+    validate_options
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @opts.creds_file
+    do_run_with_creds(@opts.project, @opts.account, @opts.creds_file) do |creds_file|
+      @opts.creds_file = creds_file
+      begin
+        if @use_cloudsql_proxy
+          cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
+          read_db_vars(@opts.creds_file, @opts.project)
+        end
+
+        yield(self)
+      ensure
+        if @use_cloudsql_proxy
+          puts "Cleaning up CloudSQL proxy (PID #{cloudsql_proxy_pid})."
+          Process.kill("HUP", cloudsql_proxy_pid)
+        end
+      end
+    end
+  end
+end
+
+# Command-line parsing and main "run" implementation for set-authority.
+class SetAuthority < GcloudContext
+  # Adds command-line flags specific to set-authority.
+  def add_options
+    super
+    @parser.on(
+        "--email [EMAIL,...]",
+        "Comma-separated list of user accounts to change. Required."
+        ) do |email|
+      @opts.email = email
+    end
+    @parser.on(
+        "--add_authority [AUTHORITY,...]",
+        "Comma-separated list of user authorities to add for the users. " \
+        "One of added or removed authorities is required.") do |authority|
+      @opts.add_authority = authority
+    end
+    @parser.on(
+        "--rm_authority [AUTHORITY,...]",
+        "Comma-separated list of user authorities to remove from the users."
+        ) do |authority|
+      @opts.rm_authority = authority
+    end
+    @parser.on("--dry_run", "Make no changes.") do |dry_run|
+      @opts.dry_run = "true"
+    end
+    @opts.dry_run = "false"  # default
+  end
+
+  def validate_options
+    super
+    if @opts.email == nil || (@opts.add_authority == nil && @opts.rm_authority == nil)
+      puts @parser.help
+      exit 1
+    end
+  end
+
+  def run
+    super do
+      Dir.chdir("tools") do
+        @common.run_inline %W{
+            #{@gradlew_path} --info setAuthority
+            -PappArgs=['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}',#{@opts.dry_run}]}
+      end
+    end
+  end
+end
+
+# The test creds are always left in api/sa-key.json. This simply adds validation
+# that the command is only run for the test project, and logs the path of
+# the file written.
+class GetTestServiceAccountCreds < GcloudContext
+  def validate_options
+    super
+    if @opts.project != "all-of-us-workbench-test"
       raise("Only call this with all-of-us-workbench-test")
     end
-    puts "Creds file is now at: #{creds_file}"
-  })
+  end
+
+  def run
+    super do
+      puts "Creds file is now at: #{File.absolute_path(@opts.creds_file)}"
+    end
+  end
 end
 
 Common.register_command({
@@ -434,8 +502,8 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "get-service-creds",
-  :description => "Creates sa-key.json locally (for use when running tests, etc.)",
-  :fn => lambda { |*args| get_test_service_account_creds(*args) }
+  :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
+  :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
 })
 
 Common.register_command({
@@ -512,4 +580,10 @@ Common.register_command({
   :invocation => "update-cloud-config",
   :description => "Updates configuration in Cloud SQL database for the specified project.",
   :fn => lambda { |*args| update_cloud_config(*args) }
+})
+
+Common.register_command({
+  :invocation => "set-authority",
+  :description => "Set user authorities (permissions). See set-authority --help.",
+  :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })

@@ -274,7 +274,7 @@ public class Workspace {
   }
 
   public void setReviewRequested(Boolean reviewRequested) {
-    if (reviewRequested && this.timeRequested == null) {
+    if (reviewRequested != null && reviewRequested && this.timeRequested == null) {
       this.timeRequested = new Timestamp(System.currentTimeMillis());
     }
     this.reviewRequested = reviewRequested;

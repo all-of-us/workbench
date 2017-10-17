@@ -1,95 +1,52 @@
-{
-  "fields":
-  [
-    {
-      "name":"concept_id",
-      "type":{
-        "value":{
-          "equivalent":"INT64",
-          "constant":"INTEGER"
-        }
-      }
-    },
-    {
-      "name":"concept_name",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"domain_id",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"vocabulary_id",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"concept_class_id",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"standard_concept",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"concept_code",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"valid_start_date",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"valid_end_date",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    },
-    {
-      "name":"invalid_reason",
-      "type":{
-        "value":{
-          "equivalent":"STRING",
-          "constant":"STRING"
-        }
-      }
-    }
-  ]
-}
+[
+  {
+    "type": "integer",
+    "name": "concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "concept_name",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "domain_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "vocabulary_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "concept_class_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "standard_concept",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "concept_code",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "valid_start_date",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "valid_end_date",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "invalid_reason",
+    "mode": "nullable"
+  }
+]
