@@ -1,4 +1,8 @@
-<div *ngIf="this.notifyFiveHundred" class="error-handler">
-  Server Error(500)
-  <clr-icon shape="times" (click)="this.closeError()"></clr-icon>
+<div *ngIf="this.errorHandlingService.fiveHundred" class="error-handler">
+  Server Error (500)
+  <clr-icon shape="times" (click)="this.closeFiveHundred()"></clr-icon>
+</div>
+<div *ngIf="this.errorHandlingService.zero" class="error-handler">
+  Server not available (0)
+  <clr-icon shape="times" (click)="this.closeZero()"></clr-icon>
 </div>

@@ -3,25 +3,27 @@
 
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import 'clarity-icons';
+
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+
 @Component({
   selector: 'app-error-handler',
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
 export class ErrorHandlerComponent implements OnInit {
-  notifyFiveHundred = false;
 
-  constructor() {}
+  constructor(
+    private errorHandlingService: ErrorHandlingService,
+  ) {}
 
-  ngOnInit(): void {
-    window['handleFiveHundred'] = () => {
-      this.notifyFiveHundred = true;
-      setTimeout(() => {
-        this.notifyFiveHundred = false;
-      }, 10000);
-    };
+  ngOnInit(): void {}
+
+  closeFiveHundred(): void {
+    this.errorHandlingService.resolveFiveHundred();
   }
-  closeError(): void {
-    this.notifyFiveHundred = false;
+
+  closeZero(): void {
+    this.errorHandlingService.resolveZero();
   }
 }
