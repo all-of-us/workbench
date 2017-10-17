@@ -17,6 +17,9 @@ def deploy(args):
     targets = (
             _TargetChoices.ALL_TARGETS if args.target == _TargetChoices.ALL
             else (args.target,))
+    logging.warning(
+        'TODO(RW-39) Fix deploy from developer workstations. See ticket for'
+        ' workaround so your deployed API can access the db.')
     if not args.skip_confirmation:
         get_confirmation('Deploy to %r (%s)?' % (args.project, ', '.join(targets)))
 
