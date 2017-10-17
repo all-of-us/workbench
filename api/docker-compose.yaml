@@ -14,11 +14,13 @@ services:
     volumes:
       - .:/w:cached
       - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
     command: ./gradlew appengineRun
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
     env_file:
-      - db/vars.env
+      - db/vars.dev.env
     ports:
       - 8081:8081
       - 8001:8001

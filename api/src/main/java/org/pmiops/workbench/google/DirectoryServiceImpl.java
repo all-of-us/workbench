@@ -45,6 +45,11 @@ public class DirectoryServiceImpl implements DirectoryService {
   private GoogleCredential createCredentialWithImpersonation() {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     GoogleCredential credential = Utils.getDefaultGoogleCredential();
+    try {
+      credential.refreshToken();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
@@ -54,7 +59,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setServiceAccountScopes(SCOPES)
         .setServiceAccountPrivateKey(credential.getServiceAccountPrivateKey())
         .setServiceAccountPrivateKeyId(credential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl()).build();
+        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl())
+        .build();
   }
 
   private Directory getGoogleDirectoryService() {
