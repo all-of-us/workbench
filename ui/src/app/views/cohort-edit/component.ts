@@ -1,9 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {WorkspaceComponent} from 'app/views/workspace/component';
+
 import {Cohort} from 'generated';
 import {CohortsService} from 'generated';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -20,6 +22,7 @@ export class CohortEditComponent implements OnInit {
       private router: Router,
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
+      private errorHandlingService: ErrorHandlingService,
   ) {}
 
   ngOnInit(): void {
@@ -29,12 +32,11 @@ export class CohortEditComponent implements OnInit {
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     } else {
-      this.cohortsService
+      this.errorHandlingService.retryApi(this.cohortsService
           .getCohort(
               this.workspaceNamespace,
               this.workspaceId,
-              this.cohortId)
-          .retry(2)
+              this.cohortId))
           .subscribe(cohort => this.cohort = cohort);
     }
   }
@@ -42,13 +44,12 @@ export class CohortEditComponent implements OnInit {
   saveCohort(): void {
     if (!this.buttonClicked) {
       this.buttonClicked = true;
-      this.cohortsService
+      this.errorHandlingService.retryApi(this.cohortsService
           .updateCohort(
               this.workspaceNamespace,
               this.workspaceId,
               this.cohort.id,
-              this.cohort)
-          .retry(2)
+              this.cohort))
           .subscribe(cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
     }
   }
@@ -56,12 +57,11 @@ export class CohortEditComponent implements OnInit {
   addCohort(): void {
     if (!this.buttonClicked) {
       this.buttonClicked = true;
-      this.cohortsService
+      this.errorHandlingService.retryApi(this.cohortsService
           .createCohort(
               this.workspaceNamespace,
               this.workspaceId,
-              this.cohort)
-          .retry(2)
+              this.cohort))
           .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
     }
   }

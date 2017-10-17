@@ -1,17 +1,22 @@
 import {Component, DebugElement} from '@angular/core';
 import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
 import {Title, By} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {FormsModule} from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {updateAndTick, simulateInput} from 'testing/test-helpers';
-import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
-import {BugReportService} from 'generated';
-import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {ProfileService} from 'generated';
 import {ClarityModule} from 'clarity-angular';
+
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {updateAndTick, simulateInput} from 'testing/test-helpers';
+
+import {BugReportService} from 'generated';
+import {ProfileService} from 'generated';
+
 
 class BugReportPage {
   fixture: ComponentFixture<BugReportComponent>;
@@ -54,6 +59,7 @@ describe('BugReportComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
+        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
         bugReportPage = new BugReportPage(TestBed);
