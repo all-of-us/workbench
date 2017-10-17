@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -9,7 +11,6 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -18,7 +19,6 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.CreateAccountResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
@@ -37,17 +37,19 @@ public class ProfileController implements ProfileApiDelegate {
   private final ProfileService profileService;
   private final Provider<User> userProvider;
   private final UserDao userDao;
+  private final Clock clock;
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
-        FireCloudService fireCloudService, DirectoryService directoryService,
+        Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
         CloudStorageService cloudStorageService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
+    this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
@@ -59,56 +61,10 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.ok(new ArrayList<>());
   }
 
-  @Override
-  public ResponseEntity<Profile> getMe() {
+  private String createFirecloudUserAndBillingProject(User user) {
     try {
-      return ResponseEntity.ok(profileService.getProfile());
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
-  }
-
-  @Override
-  public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
-    return ResponseEntity.ok(
-        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
-  }
-
-  @Override
-  public ResponseEntity<CreateAccountResponse> createAccount(CreateAccountRequest request) {
-    if (request.getInvitationKey() == null
-        || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
-      return ResponseEntity.badRequest()
-          .body(new CreateAccountResponse().message(
-              "Missing or incorrect invitationKey (this API is not yet publicly launched)"));
-    }
-    directoryService.createUser(
-        request.getGivenName(), request.getFamilyName(), request.getUsername(),
-        request.getPassword()
-    );
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteAccount() {
-    UserAuthentication userAuth =
-        (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
-    String email = userAuth.getPrincipal().getEmail();
-    String[] parts = email.split("@");
-    directoryService.deleteUser(parts[0]);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  public ResponseEntity<Profile> register(RegistrationRequest registrationRequest) {
-    User user = userProvider.get();
-    if (user.getDataAccessLevel() != DataAccessLevel.UNREGISTERED) {
-      throw new BadRequestException("User {0} is already registered".format(user.getEmail()));
-    }
-    try {
-      fireCloudService.registerUser(registrationRequest.getContactEmail(),
-          registrationRequest.getGivenName(), registrationRequest.getFamilyName());
+      fireCloudService.registerUser(user.getContactEmail(),
+          user.getGivenName(), user.getFamilyName());
     } catch (ApiException e) {
       log.log(Level.SEVERE, "Error registering user: {0}".format(e.getResponseBody()), e);
       // We don't expect this to happen.
@@ -132,15 +88,81 @@ public class ProfileController implements ProfileApiDelegate {
       // TODO: figure out what happens if the user is already a member of this billing project.
       throw new ServerErrorException("Error adding user to billing project", e);
     }
-    // TODO: consider whether we want to store this here, or just use Google membership checks
-    user.setDataAccessLevel(DataAccessLevel.REGISTERED);
-    user.setContactEmail(registrationRequest.getContactEmail());
-    user.setFamilyName(registrationRequest.getFamilyName());
-    user.setFullName(registrationRequest.getFullName());
-    user.setGivenName(registrationRequest.getGivenName());
-    user.setPhoneNumber(registrationRequest.getPhoneNumber());
-    user.setFreeTierBillingProjectName(billingProjectName);
+    return billingProjectName;
+  }
 
+  @Override
+  public ResponseEntity<Profile> getMe() {
+    User user = userProvider.get();
+    // On first sign-in, create a FC user, billing project, and set the first sign in time.
+    if (user.getFirstSignInTime() == null) {
+      if (user.getFreeTierBillingProjectName() == null) {
+        String billingProjectName = createFirecloudUserAndBillingProject(user);
+        user.setFreeTierBillingProjectName(billingProjectName);
+      }
+      user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      userDao.save(user);
+    }
+    try {
+      return ResponseEntity.ok(profileService.getProfile(user));
+    } catch (ApiException e) {
+      log.log(Level.INFO, "Error calling FireCloud", e);
+      return ResponseEntity.status(e.getCode()).build();
+    }
+  }
+
+  @Override
+  public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
+    return ResponseEntity.ok(
+        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
+  }
+
+  @Override
+  public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
+    if (request.getInvitationKey() == null
+        || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
+      throw new BadRequestException(
+          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+    }
+    com.google.api.services.admin.directory.model.User googleUser = directoryService.createUser(
+        request.getGivenName(), request.getFamilyName(), request.getUsername(),
+        request.getPassword()
+    );
+    // Create a user that has no data access or FC user associated.
+    User user = new User();
+    user.setEmail(googleUser.getPrimaryEmail());
+    user.setContactEmail(request.getContactEmail());
+    user.setFamilyName(request.getFamilyName());
+    user.setGivenName(request.getGivenName());
+    userDao.save(user);
+
+    try {
+      return ResponseEntity.status(HttpStatus.CREATED).body(profileService.getProfile(user));
+    } catch (ApiException e) {
+      log.log(Level.SEVERE, "Error getting user profile: {0}".format(e.getResponseBody()), e);
+      return ResponseEntity.status(e.getCode()).build();
+    }
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteAccount() {
+    UserAuthentication userAuth =
+        (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
+    String email = userAuth.getPrincipal().getEmail();
+    String[] parts = email.split("@");
+    directoryService.deleteUser(parts[0]);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Profile> register(RegistrationRequest registrationRequest) {
+    User user = userProvider.get();
+    if (user.getDataAccessLevel() != DataAccessLevel.UNREGISTERED) {
+      throw new BadRequestException("User {0} is already registered".format(user.getEmail()));
+    }
+    // TODO: add user to authorization domain for registered access; add pet SA to
+    // Google group for CDR access
+    user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     userDao.save(user);
 
     try {

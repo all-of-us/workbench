@@ -10,5 +10,6 @@
         <constraints nullable="true"/>
       </column>
     </addColumn>
+    <dropColumn tableName="user" columnName="full_name"/>
   </changeSet>
 </databaseChangeLog>

@@ -80,7 +80,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
   }
 
-  public void createUser(String givenName, String familyName, String username, String password) {
+  public User createUser(String givenName, String familyName, String username, String password) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
@@ -88,6 +88,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
     try {
       getGoogleDirectoryService().users().insert(user).execute();
+      return user;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -36,7 +36,6 @@ public class ProfileService {
     Profile profile = new Profile();
     profile.setEmail(user.getEmail());
     profile.setFamilyName(user.getFamilyName());
-    profile.setFullName(user.getFullName());
     profile.setGivenName(user.getGivenName());
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
