@@ -4,29 +4,28 @@ import {Observable} from 'rxjs/Observable';
 @Injectable()
 export class ErrorHandlingService {
 
-  // Expose "current user details" as an Observable
-  public fiveHundred: boolean;
-  public zero: boolean;
+  public serverError: boolean;
+  public noServerResponse: boolean;
 
   constructor(private zone: NgZone) {
-    this.fiveHundred = false;
-    this.zero = false;
+    this.serverError = false;
+    this.noServerResponse = false;
   }
 
-  public publishFiveHundred(): void {
-    this.fiveHundred = true;
+  public setServerError(): void {
+    this.serverError = true;
   }
 
-  public resolveFiveHundred(): void {
-    this.fiveHundred = false;
+  public clearServerError(): void {
+    this.serverError = false;
   }
 
-  public publishZero(): void {
-    this.zero = true;
+  public setNoServerResponse(): void {
+    this.noServerResponse = true;
   }
 
-  public resolveZero(): void {
-    this.zero = false;
+  public clearNoServerResponse(): void {
+    this.noServerResponse = false;
   }
 
   // Don't retry API calls unless the status code is 503.
@@ -43,10 +42,10 @@ export class ErrorHandlingService {
           case 503:
             break;
           case 500:
-            this.publishFiveHundred();
+            this.setServerError();
             throw e;
           case 0:
-            this.publishZero();
+            this.setNoServerResponse();
             throw e;
           default:
             throw e;

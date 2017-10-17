@@ -54,7 +54,7 @@ export class HomePageComponent implements OnInit {
     this.workspacesLoading = true;
 
     this.errorHandlingService.retryApi(this.workspacesService
-        .getWorkspaces(), 3)
+        .getWorkspaces())
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;

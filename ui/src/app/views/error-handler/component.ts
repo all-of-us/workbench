@@ -1,6 +1,3 @@
-// UI Component framing the overall app (title and nav).
-// Content is in other Components.
-
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import 'clarity-icons';
 
@@ -19,11 +16,11 @@ export class ErrorHandlerComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  closeFiveHundred(): void {
-    this.errorHandlingService.resolveFiveHundred();
+  closeServerError(): void {
+    this.errorHandlingService.clearServerError();
   }
 
-  closeZero(): void {
-    this.errorHandlingService.resolveZero();
+  closeNoServerResponse(): void {
+    this.errorHandlingService.clearNoServerResponse();
   }
 }
