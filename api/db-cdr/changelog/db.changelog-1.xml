@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="brianfreeman" id="changelog-1">
+
+    <createTable tableName="user">
+      <column name="user_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="email" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="data_access_level" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createIndex
+        indexName="idx_user_email"
+        tableName="user"
+        unique="true">
+      <column name="email"/>
+    </createIndex>
+
+    <createTable tableName="cdr_version">
+      <column name="cdr_version_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="varchar(80)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <!-- Enum: CONTROLLED or REGISTERED -->
+      <column name="data_access_level" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <!-- Increases by one for each release of the CDR -->
+      <column name="release_number" type="smallint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="bigquery_project" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="bigquery_dataset" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="num_participants" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="workspace">
+      <column name="workspace_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="workspace_namespace" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="firecloud_name" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <!-- Enum: CONTROLLED or REGISTERED; mirrored in authorization domain in FireCloud -->
+      <column name="data_access_level" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="cdr_version_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="creator_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_modified_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="varchar(1024)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+    <createIndex
+        indexName="idx_workspace_workspace_namespace"
+        tableName="workspace">
+      <column name="workspace_namespace"/>
+    </createIndex>
+    <createIndex
+        indexName="idx_workspace_firecloud_name"
+        tableName="workspace"
+        unique="true">
+      <column name="workspace_namespace"/>
+      <column name="firecloud_name"/>
+    </createIndex>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+        baseTableName="workspace"
+        constraintName="fk_workspace_creator_id"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="cdr_version_id"
+        baseTableName="workspace"
+        constraintName="fk_workspace_cdr_version"
+        onDelete="SET NULL"
+        referencedColumnNames="cdr_version_id"
+        referencedTableName="cdr_version"/>
+
+    <createTable tableName="cohort">
+      <column name="cohort_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="clob">
+        <constraints nullable="false"/>
+      </column>
+      <column name="criteria" type="blob">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creator_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_modified_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+        baseTableName="cohort"
+        constraintName="fk_cohort_creator_id"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+        baseTableName="cohort"
+        constraintName="fk_cohort_workspace_id"
+        onDelete="CASCADE"
+        referencedColumnNames="workspace_id"
+        referencedTableName="workspace"/>
+
+  </changeSet>
+</databaseChangeLog>
