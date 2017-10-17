@@ -4,12 +4,16 @@ import {Title, By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {FormsModule} from '@angular/forms';
+import {ClarityModule} from 'clarity-angular';
+
 import {HomePageComponent} from 'app/views/home-page/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+
 import {WorkspacesService} from 'generated';
-import {ClarityModule} from 'clarity-angular';
 
 class HomePage {
   fixture: ComponentFixture<HomePageComponent>;
@@ -45,7 +49,8 @@ describe('HomePageComponent', () => {
         HomePageComponent
       ],
       providers: [
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() }
       ] }).compileComponents().then(() => {
         homePage = new HomePage(TestBed);
       });

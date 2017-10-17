@@ -1,0 +1,11 @@
+.error-handler {
+  position: fixed;
+  bottom: 1rem;
+  background: white;
+  padding: 1rem;
+  border: 1px solid black;
+}
+
+clr-icon:hover {
+  cursor: pointer;
+}
