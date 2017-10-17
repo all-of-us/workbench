@@ -1,18 +1,17 @@
 import {
   Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Subscription} from 'rxjs/Subscription';
-import {Map} from 'immutable';
 
 import {
-  activeSearchGroupItemPath,
   CohortSearchActions,
   CohortSearchState,
+  activeItemId,
+  activeGroupId,
+  activeRole,
+  activeCriteriaType,
+  activeCriteriaList,
 } from '../redux';
 
 import {Criteria} from 'generated';
@@ -23,43 +22,21 @@ import {Criteria} from 'generated';
   templateUrl: 'wizard-criteria-group.component.html',
   encapsulation: ViewEncapsulation.None
 })
-export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
+export class WizardCriteriaGroupComponent {
 
-  @select(s => s.getIn(activeSearchGroupItemPath(s), Map()))
-  readonly activeSearchGroupItem$;
-
-  private subscription: Subscription;
-  private criteriaType: string;
-  private criteriaList;
-
-  // TODO (jms) see below
-  // @ViewChild('groupDiv') groupDiv: any;
+  @select(activeCriteriaType) criteriaType$;
+  @select(activeCriteriaList) criteriaList$;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
-  ngOnInit() {
-    this.subscription = this.activeSearchGroupItem$.subscribe(
-      (sgi) => {
-        console.dir(sgi);
-        this.criteriaType = sgi.get('type');
-        this.criteriaList = sgi.get('searchParameters');
-        // TODO(jms) fix the scrolling bugs
-        // this.groupDiv.scrollTop = this.groupDiv.scrollHeight;
-    });
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
-  get selection(): string {
-    if (this.criteriaType === 'icd9'
-        || this.criteriaType === 'icd10'
-        || this.criteriaType === 'cpt') {
-      return `Selected ${this.criteriaType.toUpperCase()} Codes`;
-    } else if (this.criteriaType) {
-      return `Selected ${this.criteriaType}`;
+  selectionTitle(kind): string {
+    if (kind === 'icd9'
+        || kind === 'icd10'
+        || kind === 'cpt') {
+      return `Selected ${kind.toUpperCase()} Codes`;
+    } else if (kind) {
+      return `Selected ${kind}`;
     } else {
       return 'No Selection';
     }
@@ -84,9 +61,13 @@ export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
     }
   }
 
-  removeCriteria(index: number) {
-    const path = activeSearchGroupItemPath(this.ngRedux.getState())
-      .push('searchParameters', index);
-    this.actions.remove(path);
+  removeCriterion(criterionId: number) {
+    const state = this.ngRedux.getState();
+    this.actions.removeCriterion(
+      activeRole(state),
+      activeGroupId(state),
+      activeItemId(state),
+      criterionId
+    );
   }
 }

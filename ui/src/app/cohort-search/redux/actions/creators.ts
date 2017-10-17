@@ -3,97 +3,109 @@ import {
   BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
+  CRITERIA_REQUEST_ERROR,
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
+  COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
-  REMOVE,
+  REMOVE_ITEM,
+  REMOVE_GROUP,
+  REMOVE_CRITERION,
   SET_WIZARD_OPEN,
   SET_WIZARD_CLOSED,
   SET_ACTIVE_CONTEXT,
   CLEAR_ACTIVE_CONTEXT,
   ActionTypes,
-  CountRequestKind,
 } from './types';
 
-import {KeyPath} from './types';
 import {Criteria, SearchRequest} from 'generated';
 
 /**
- * path is ['criteria', kind, parentID]
+ * Criteria loading mgmt
  */
 export const requestCriteria =
-  (path: KeyPath): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
-  ({type: BEGIN_CRITERIA_REQUEST, path});
+  (kind: string, parentId: number
+  ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
+  ({type: BEGIN_CRITERIA_REQUEST, kind, parentId});
 
 export const loadCriteriaRequestResults =
-  (path: KeyPath, results: Criteria[]): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
-  ({type: LOAD_CRITERIA_RESULTS, path, results});
+  (kind: string, parentId: number, results: Criteria[]
+  ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
+  ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
 export const cancelCriteriaRequest =
-  (path: KeyPath): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
-  ({type: CANCEL_CRITERIA_REQUEST, path});
+  (kind: string, parentId: number
+  ): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
+  ({type: CANCEL_CRITERIA_REQUEST, kind, parentId});
+
+export const criteriaRequestError =
+  (kind: string, parentId: number, error?: any
+  ): ActionTypes[typeof CRITERIA_REQUEST_ERROR] =>
+  ({type: CRITERIA_REQUEST_ERROR, kind, parentId, error});
 
 
 /**
+ * Count loading mgmt
  */
 export const requestCounts =
-  (kind: CountRequestKind, request:
-    SearchRequest, path?:
-    KeyPath): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
-  ({type: BEGIN_COUNT_REQUEST, kind, request, path});
+  (entityType: string, entityId: string, request: SearchRequest
+  ): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
+  ({type: BEGIN_COUNT_REQUEST, entityType, entityId, request});
 
 export const loadCountRequestResults =
-  (kind: CountRequestKind, count: number, path?: KeyPath): ActionTypes[typeof LOAD_COUNT_RESULTS] =>
-  ({type: LOAD_COUNT_RESULTS, kind, count, path});
+  (entityType: string, entityId: string, count: number
+  ): ActionTypes[typeof LOAD_COUNT_RESULTS] =>
+  ({type: LOAD_COUNT_RESULTS, entityType, entityId, count});
 
 export const cancelCountRequest =
-  (kind: CountRequestKind, path?: KeyPath): ActionTypes[typeof CANCEL_COUNT_REQUEST] =>
-  ({type: CANCEL_COUNT_REQUEST, kind, path});
+  (entityType: string, entityId: string
+  ): ActionTypes[typeof CANCEL_COUNT_REQUEST] =>
+  ({type: CANCEL_COUNT_REQUEST, entityType, entityId});
+
+export const countRequestError =
+  (entityType: string, entityId: string, error?: any
+  ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
+  ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
 
 /**
- * Pushes a Map {items => []} onto the end of either the include or exclude list
- * of search groups
+ * Entity creation & deletion mgmt
  */
 export const initGroup =
-  (role: keyof SearchRequest): ActionTypes[typeof INIT_SEARCH_GROUP] =>
-  ({type: INIT_SEARCH_GROUP, role});
+  (role: keyof SearchRequest, groupId: string
+  ): ActionTypes[typeof INIT_SEARCH_GROUP] =>
+  ({type: INIT_SEARCH_GROUP, role, groupId});
 
-/**
- * Pushes a new SearchGroupItem onto the end of the specified search group
- */
 export const initGroupItem =
-  (role: keyof SearchRequest, groupIndex: number): ActionTypes[typeof INIT_GROUP_ITEM] =>
-  ({type: INIT_GROUP_ITEM, role, groupIndex});
+  (itemId: string, groupId: string
+  ): ActionTypes[typeof INIT_GROUP_ITEM] =>
+  ({type: INIT_GROUP_ITEM, itemId, groupId});
 
-/**
- * Copies a criterion from the criteria tree (where it is loaded) into the
- * active search group item's SearchParameters list
- */
 export const selectCriteria =
-  (criterion: Criteria): ActionTypes[typeof SELECT_CRITERIA] =>
-  ({type: SELECT_CRITERIA, criterion});
+  (itemId: string, criterion: Criteria
+  ): ActionTypes[typeof SELECT_CRITERIA] =>
+  ({type: SELECT_CRITERIA, itemId, criterion});
+
+export const removeGroup =
+  (role: keyof SearchRequest, groupId: string
+  ): ActionTypes[typeof REMOVE_GROUP] =>
+  ({type: REMOVE_GROUP, role, groupId});
+
+export const removeGroupItem =
+  (groupId: string, itemId: string
+  ): ActionTypes[typeof REMOVE_ITEM] =>
+  ({type: REMOVE_ITEM, groupId, itemId});
+
+export const removeCriterion =
+  (itemId: string, criterionId: number
+  ): ActionTypes[typeof REMOVE_CRITERION] =>
+  ({type: REMOVE_CRITERION, itemId, criterionId});
 
 /**
- * Removes the resource at `path`
- */
-export const remove =
-  (path: KeyPath): ActionTypes[typeof REMOVE] =>
-  ({type: REMOVE, path});
-
-/**
- * The next four all deal with wizard context.  Criteria selection is done via
- * wizards that are created in a given context, viz: is the wizard open?
- * The `context` object includes an `active` object that may have the following
- * keys:
- *    - criteriaType
- *    - role
- *    - groupIndex
- *    - groupItemIndex
- * Which collectively specify where to put the criteria once they're selected.
+ * Context mgmt
  */
 export const setWizardOpen =
   (): ActionTypes[typeof SET_WIZARD_OPEN] => ({type: SET_WIZARD_OPEN});

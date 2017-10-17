@@ -15,6 +15,8 @@ import {
 import {
   loadCriteriaRequestResults,
   loadCountRequestResults,
+  criteriaRequestError,
+  countRequestError,
 } from './actions/creators';
 import {CohortSearchState} from './store';
 
@@ -35,46 +37,38 @@ export class CohortSearchEpics {
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
-      // For the TypeScript compiler to allow the destructuring, we cast to the
-      // appropriate action type.  Path is of form ['criteria', kind, parentId]
-      ({path}: ActionTypes[typeof BEGIN_CRITERIA_REQUEST]) => {
-        const kind = <string>path.get(1);
-        const parentId = <number>path.get(2);
+      ({kind, parentId}: ActionTypes[typeof BEGIN_CRITERIA_REQUEST]) => {
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
-          .map(result => loadCriteriaRequestResults(path, result.items))
+          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(
               (action: ActionTypes[typeof CANCEL_CRITERIA_REQUEST]) =>
-              action.path.equals(path))
+              action.kind === kind && action.parentId === parentId
+            )
             .take(1)
           )
-          .catch(error => {
-            console.log(`Request error: ${JSON.stringify(error, null, 2)}`);
-            return Observable.of({type: CRITERIA_REQUEST_ERROR, error, path});
-          });
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
       }
     )
   )
 
   fetchCounts: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
-      ({kind, path, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
+      ({entityType, entityId, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
       this.service.countSubjects(request)
         .map(response => typeof response === 'number' ? response : 0)
-        .map(count => loadCountRequestResults(kind, count, path))
+        .map(count => loadCountRequestResults(entityType, entityId, count))
         .race(action$
           .ofType(CANCEL_COUNT_REQUEST)
           .filter(
             (action: ActionTypes[typeof CANCEL_COUNT_REQUEST]) =>
-            is(action.kind, kind) && is(action.path, path))
+            action.entityType === entityType && action.entityId === entityId
+          )
           .take(1)
         )
-        .catch(error => {
-          console.log(`Request error: ${JSON.stringify(error, null, 2)}`);
-          return Observable.of({type: COUNT_REQUEST_ERROR, error, path});
-        })
+        .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
     )
   )
 }

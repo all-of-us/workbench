@@ -5,15 +5,15 @@ import {
   Input,
   ViewEncapsulation,
 } from '@angular/core';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
-import {List} from 'immutable';
 
 import {
+  activeItemId,
   CohortSearchActions,
   CohortSearchState,
-  criteriaPath,
-  isRequesting,
+  isCriteriaLoading,
+  criteriaChildren,
 } from '../redux';
 
 
@@ -23,7 +23,10 @@ import {
     <ng-container [clrLoading]="loading">
       <clr-tree-node *ngFor="let node of children; trackBy: trackById">
 
-        <app-criteria-tree-node-info [node]="node">
+        <app-criteria-tree-node-info
+          [node]="node"
+          (onSelect)="handleSelection(node)"
+        >
         </app-criteria-tree-node-info>
 
         <span *ngIf="node.get('group')">
@@ -41,32 +44,32 @@ import {
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   @Input() node;
 
-  children;
-  loading;
-
-  subscriptions: Subscription[];
+  private children;
+  private loading;
+  private subscriptions: Subscription[];
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const critType = this.node.get('type').toLowerCase();
-    const parentId = this.node.get('id');
-    const path = criteriaPath(critType, parentId);
+    const _type = this.node.get('type').toLowerCase();
+    const _parentId = this.node.get('id');
+    const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
+    const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
     this.subscriptions = [
-      this.ngRedux.select(
-        isRequesting('criteria', path.rest())
-      ).subscribe(v => this.loading = v),
-
-      this.ngRedux.select(
-        path.toArray()
-      ).subscribe(n => this.children = n)
+      children$.subscribe(value => this.children = value),
+      loading$.subscribe(value => this.loading = value)
     ];
-    this.actions.fetchCriteria(critType, parentId);
+    this.actions.fetchCriteria(_type, _parentId);
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  handleSelection(node) {
+    const itemId = activeItemId(this.ngRedux.getState());
+    this.actions.selectCriteria(itemId, node);
   }
 
   trackById(index, node) {

@@ -1,64 +1,26 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Input,
-  OnInit,
-  OnDestroy,
-} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
-import {Subscription} from 'rxjs/Subscription';
 
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  countFor,
-  pathTo,
-  isRequesting,
-} from '../redux';
-
-import {SearchGroupItem} from 'generated';
-
+import {CohortSearchActions, CohortSearchState, getItem} from '../redux';
 
 @Component({
   selector: 'app-search-group-item',
   templateUrl: './search-group-item.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchGroupItemComponent implements OnInit, OnDestroy {
-  @Input() item;
+export class SearchGroupItemComponent {
+  @Input() itemId: string;
   @Input() role: string;
-  @Input() index: number;
-  @Input() itemIndex: number;
+  @Input() groupId: number;
 
-  private count = 0;
-  private loading = true;
-  private subscriptions: Subscription[];
-
-  constructor(private cd: ChangeDetectorRef,
-              private ngRedux: NgRedux<CohortSearchState>,
+  constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
-
-  ngOnInit() {
-    const path = pathTo(this.role, this.index, this.itemIndex);
-    const countSelect = this.ngRedux.select(countFor(path));
-    const loadSelect = this.ngRedux.select(isRequesting('item', path));
-    const setAndMark = (name) => (value) => {
-      this[name] = value;
-      this.cd.markForCheck();
-    };
-    this.subscriptions = [
-      countSelect.subscribe(setAndMark('count')),
-      loadSelect.subscribe(setAndMark('loading'))
-    ];
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-  }
 
   get description() {
     const _type = this.item.get('type');
     return this.item.get('description', `${_type} Codes`);
+  }
+
+  get item() {
+    return getItem(this.itemId)(this.ngRedux.getState());
   }
 }

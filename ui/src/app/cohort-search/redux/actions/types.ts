@@ -14,7 +14,9 @@ export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
 export const INIT_GROUP_ITEM = 'INIT_GROUP_ITEM';
 export const SELECT_CRITERIA = 'SELECT_CRITERIA';
-export const REMOVE = 'REMOVE';
+export const REMOVE_ITEM = 'REMOVE_ITEM';
+export const REMOVE_GROUP = 'REMOVE_GROUP';
+export const REMOVE_CRITERION = 'REMOVE_CRITERION';
 
 export const SET_WIZARD_OPEN = 'SET_WIZARD_OPEN';
 export const SET_WIZARD_CLOSED = 'SET_WIZARD_CLOSED';
@@ -24,72 +26,87 @@ export const CLEAR_ACTIVE_CONTEXT = 'CLEAR_ACTIVE_CONTEXT';
 interface ActiveContext {
   criteriaType?: string;
   role?: keyof SearchRequest;
-  groupIndex?: number;
-  groupItemIndex?: number;
+  groupId?: number;
+  itemId?: number;
 }
-
-export type KeyPath = List<number | string>;
-export type CountRequestKind = 'item' | 'group' | 'total';
 
 export interface ActionTypes {
   BEGIN_CRITERIA_REQUEST: {
     type: typeof BEGIN_CRITERIA_REQUEST;
-    path: KeyPath;
+    kind: string;
+    parentId: number;
   };
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
-    path: KeyPath;
+    kind: string;
+    parentId: number;
     results: Criteria[];
   };
   CANCEL_CRITERIA_REQUEST: {
     type: typeof CANCEL_CRITERIA_REQUEST;
-    path: KeyPath;
+    kind: string;
+    parentId: number;
   };
   CRITERIA_REQUEST_ERROR: {
     type: typeof CRITERIA_REQUEST_ERROR;
+    kind: string;
+    parentId: number;
     error?: any;
-    path?: KeyPath;
   };
 
   BEGIN_COUNT_REQUEST: {
     type: typeof BEGIN_COUNT_REQUEST;
-    kind: CountRequestKind;
-    path: KeyPath;
+    entityType: string;
+    entityId: string;
     request: SearchRequest;
   };
   LOAD_COUNT_RESULTS: {
     type: typeof LOAD_COUNT_RESULTS;
-    kind: CountRequestKind;
-    path: KeyPath;
+    entityType: string;
+    entityId: string;
     count: number;
   };
   CANCEL_COUNT_REQUEST: {
     type: typeof CANCEL_COUNT_REQUEST;
-    kind: CountRequestKind;
-    path?: KeyPath;
+    entityType: string;
+    entityId: string;
   };
   COUNT_REQUEST_ERROR: {
     type: typeof COUNT_REQUEST_ERROR;
+    entityType: string;
+    entityId: string;
     error?: any;
-    path?: KeyPath;
   };
 
   INIT_SEARCH_GROUP: {
     type: typeof INIT_SEARCH_GROUP;
     role: keyof SearchRequest;
+    groupId: string;
   };
   INIT_GROUP_ITEM: {
     type: typeof INIT_GROUP_ITEM;
-    role: keyof SearchRequest;
-    groupIndex: number;
+    groupId: string;
+    itemId: string;
   };
   SELECT_CRITERIA: {
     type: typeof SELECT_CRITERIA;
-    criterion: Criteria;
+    itemId: string;
+    criterion: any;
   };
-  REMOVE: {
-    type: typeof REMOVE;
-    path: KeyPath;
+  REMOVE_ITEM: {
+    type: typeof REMOVE_ITEM;
+    itemId: string;
+    groupId: string
+  };
+  REMOVE_GROUP: {
+    type: typeof REMOVE_GROUP;
+    groupId: string;
+    role: keyof SearchRequest;
+  };
+  REMOVE_CRITERION: {
+    type: typeof REMOVE_CRITERION;
+    itemId: string;
+    criterionId: number;
   };
 
   SET_WIZARD_OPEN: {
@@ -119,7 +136,9 @@ export type RootAction =
   | ActionTypes[typeof INIT_SEARCH_GROUP]
   | ActionTypes[typeof INIT_GROUP_ITEM]
   | ActionTypes[typeof SELECT_CRITERIA]
-  | ActionTypes[typeof REMOVE]
+  | ActionTypes[typeof REMOVE_ITEM]
+  | ActionTypes[typeof REMOVE_GROUP]
+  | ActionTypes[typeof REMOVE_CRITERION]
   | ActionTypes[typeof SET_WIZARD_OPEN]
   | ActionTypes[typeof SET_WIZARD_CLOSED]
   | ActionTypes[typeof SET_ACTIVE_CONTEXT]

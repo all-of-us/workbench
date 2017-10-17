@@ -3,10 +3,8 @@ import {Map, List, Set, fromJS} from 'immutable';
 
 import {
   initialState,
-  activeSearchGroupItemPath,
-  activeCriteriaType,
   CohortSearchState,
-  prunePath,
+  SR_ID,
 } from './store';
 
 import {
@@ -21,7 +19,9 @@ import {
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
-  REMOVE,
+  REMOVE_ITEM,
+  REMOVE_GROUP,
+  REMOVE_CRITERION,
   SET_WIZARD_OPEN,
   SET_WIZARD_CLOSED,
   SET_ACTIVE_CONTEXT,
@@ -37,87 +37,108 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case BEGIN_CRITERIA_REQUEST:
-        return state
-          .updateIn(
-            ['requests', 'criteria'],
-            // path.rest() : removes the redundant 'criteria' prefix
-            requestSet => requestSet.add(action.path.rest())
-          );
+        return state.setIn(['requests', action.kind, action.parentId], true);
 
       case LOAD_CRITERIA_RESULTS:
         return state
-          .setIn(action.path, fromJS(action.results))
-          .updateIn(
-            ['requests', 'criteria'],
-            requestSet => requestSet.delete(action.path.rest())
-          );
+          .setIn(['criteria', action.kind, action.parentId], fromJS(action.results))
+          .deleteIn(['requests', action.kind, action.parentId]);
 
       case CANCEL_CRITERIA_REQUEST:
+        return state.deleteIn(['requests', action.kind, action.parentId]);
+
+      case CRITERIA_REQUEST_ERROR:
         return state
-          .updateIn(
-            ['requests', 'criteria'],
-            requestSet => requestSet.delete(action.path.rest())
+          .setIn(
+            ['requests', action.kind, action.parentId],
+            fromJS({error: action.error})
           );
 
       case BEGIN_COUNT_REQUEST:
-        return action.kind === 'total'
-          ? state.setIn(['requests', 'total'], true)
-          : state.updateIn(
-            ['requests', action.kind],
-            requestSet => requestSet.add(action.path)
-          );
+        return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true);
 
       case LOAD_COUNT_RESULTS:
-        return action.kind === 'total'
-          ? state
-              .setIn(['counts', 'total'], action.count)
-              .setIn(['requests', 'total'], false)
-          : state
-            .setIn(['counts', action.path], action.count)
-            .updateIn(
-              ['requests', action.kind],
-              requestSet => requestSet.delete(action.path)
-            );
+        return state.mergeIn(
+          ['entities', action.entityType, action.entityId],
+          fromJS({count: action.count, isRequesting: false})
+        );
 
       case CANCEL_COUNT_REQUEST:
-        return action.kind === 'total'
-          ? state.setIn(['requests', 'total'], false)
-          : state.updateIn(
-            ['requests', action.kind],
-            requestSet => requestSet.delete(action.path)
+        return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false);
+
+      case COUNT_REQUEST_ERROR:
+        return state
+          .setIn(
+            ['entities', action.entityType, action.entityId, 'isRequesting'],
+            fromJS({error: action.error})
           );
 
       case INIT_SEARCH_GROUP:
-        return state.updateIn(
-          ['search', action.role],
-          List(),
-          list => list.push(Map({items: List()}))
-        );
-
-      case INIT_GROUP_ITEM: {
-        const itemPath = ['search', action.role, action.groupIndex, 'items'];
-        const newItem = fromJS({
-          type: activeCriteriaType(state),
-          searchParameters: [],
-          modifiers: [],
-        });
         return state
-          .updateIn(itemPath, List(), items => items.push(newItem))
           .setIn(
-            ['context', 'active', 'groupItemIndex'],
-            state.getIn(itemPath).size
+            ['entities', 'groups', action.groupId],
+            fromJS({
+              id: action.groupId,
+              items: [],
+              count: null,
+              isRequesting: false
+            })
+          )
+          .updateIn(
+            ['entities', 'searchRequests', SR_ID, action.role],
+            groupList => groupList.push(action.groupId)
           );
-      }
+
+      case INIT_GROUP_ITEM:
+        return state
+          .setIn(
+            ['entities', 'items', action.itemId],
+            fromJS({
+              id: action.itemId,
+              type: state.getIn(['context', 'active', 'criteriaType']),
+              searchParameters: [],
+              modifiers: [],
+              count: null,
+              isRequesting: false,
+            })
+          )
+          .updateIn(
+            ['entities', 'groups', action.groupId, 'items'],
+            itemList => itemList.push(action.itemId)
+          );
 
       case SELECT_CRITERIA:
-        return state.updateIn(
-          activeSearchGroupItemPath(state).push('searchParameters'),
-          List(),
-          criteria => criteria.push(action.criterion)
-        );
+        return state
+          .setIn(['entities', 'criteria', action.criterion.get('id')], action.criterion)
+          .updateIn(
+            ['entities', 'items', action.itemId, 'searchParameters'],
+            List(),
+            paramList => paramList.push(action.criterion.get('id'))
+          );
 
-      case REMOVE:
-        return state.deleteIn(action.path);
+      case REMOVE_ITEM:
+        return state
+          .updateIn(
+            ['entities', 'groups', action.groupId, 'items'],
+            itemList => itemList.filterNot(id => id === action.itemId)
+          )
+          .deleteIn(['entities', 'items', action.itemId]);
+
+      case REMOVE_GROUP:
+        return state
+          .updateIn(
+            ['entities', 'searchRequests', SR_ID, action.role],
+            groupList => groupList.filterNot(id => id === action.groupId)
+          )
+          .deleteIn(['entities', 'groups', action.groupId]);
+
+      case REMOVE_CRITERION:
+        return state
+          .updateIn(
+            ['entities', 'items', action.itemId, 'searchParameters'],
+            critList => critList.filterNot(id => action.criterionId)
+          )
+          .deleteIn(['entities', 'criteria', action.criterionId]);
 
       case SET_WIZARD_OPEN:
         return state.setIn(['context', 'wizardOpen'], true);

@@ -12,23 +12,22 @@
       </div>
     </div>
 
-    <div *ngFor="let item of group.get('items'); let i = index" class="pb-0">
+    <div *ngFor="let itemId of group.get('items', [])" class="pb-0">
       <app-search-group-item
         [role]="role"
-        [index]="index"
-        [itemIndex]="i"
-        [item]="item">
+        [groupId]="group.get('id')"
+        [itemId]="itemId">
       </app-search-group-item>
     </div>
 
     <app-add-criteria
-      [index]="index"
+      [groupId]="group.get('id')"
       [role]="role">
     </app-add-criteria>
   </div>
 
   <div class="card-footer font-weight-bold bg-count text-right">
-    Group Count: {{ count || 0 }}
+    Group Count: {{ group.get('count') || 0 }}
   </div>
 
 </div>

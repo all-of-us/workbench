@@ -1,14 +1,16 @@
 <div class="box pl-1 codes-height w-100">
-  <span class="font-weight-bold">{{ selection }}</span>
+  <span class="font-weight-bold">{{ selectionTitle(criteriaType$ | async) }}</span>
   <div class="criteria-group-height scrolling-criteria-group">
-    <div *ngFor="let criteria of criteriaList; let i = index">
+    <div *ngFor="let criteria of (criteriaList$ | async); let i = index">
       <div class="row">
 
         <span *ngIf="criteria.get('group'); then group else notGroup"></span>
 
         <ng-template #group>
           <div class="col-xs-12 text-truncate">
-            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(i)">
+            <button type="button" 
+              class="btn btn-link btn-sm text-danger mr-0" 
+              (click)="removeCriterion(criteria.get('id'))">
               <clr-icon shape="close" size="14"></clr-icon>
             </button>
             <span *ngIf="i > 0">
@@ -21,7 +23,9 @@
 
         <ng-template #notGroup>
           <div class="col-xs-12 text-truncate">
-            <button type="button" class="btn btn-link btn-sm text-danger mr-0" (click)="removeCriteria(i)">
+            <button type="button" 
+              class="btn btn-link btn-sm text-danger mr-0" 
+              (click)="removeCriterion(criteria.get('id'))">
               <clr-icon shape="close" size="14"></clr-icon>
             </button>
             <span *ngIf="i > 0">

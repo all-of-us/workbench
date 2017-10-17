@@ -2,10 +2,10 @@ import {
   Component,
   ChangeDetectionStrategy,
   Input,
+  EventEmitter,
+  Output,
   ViewEncapsulation
 } from '@angular/core';
-import {CohortSearchActions} from '../redux';
-
 
 @Component({
   selector: 'app-criteria-tree-node-info',
@@ -41,7 +41,7 @@ import {CohortSearchActions} from '../redux';
             <clr-icon shape="plus-circle" size="20"></clr-icon></button>
         </ng-template>
         <ng-template #selectable>
-          <button type="button" class="btn btn-link btn-sm" (click)="actions.selectCriteria(node)">
+          <button type="button" class="btn btn-link btn-sm" (click)="select($event)">
             <clr-icon shape="plus-circle" size="20"></clr-icon></button>
         </ng-template>
 
@@ -53,6 +53,7 @@ import {CohortSearchActions} from '../redux';
 })
 export class CriteriaTreeNodeInfoComponent {
   @Input() node;
+  @Output() onSelect = new EventEmitter<boolean>();
 
-  constructor(private actions: CohortSearchActions) {}
+  select(event) { this.onSelect.emit(true); }
 }

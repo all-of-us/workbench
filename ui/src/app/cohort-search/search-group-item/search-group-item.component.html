@@ -2,7 +2,7 @@
   <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
     <button type="button" 
       class="btn btn-link btn-sm text-danger text-right" 
-      (click)="actions.removeGroupItem(role, index, itemIndex)">
+      (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
       <clr-icon shape="close" size="14"></clr-icon>
     </button>
 
@@ -25,7 +25,7 @@
 
 
   <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
-    <span *ngIf="loading; then spinner else noSpinner "></span>
+    <span *ngIf="item.get('isRequesting', false); then spinner else noSpinner "></span>
     <ng-template #spinner>
       <span class="spinner spinner-inline">
         Loading...
@@ -33,7 +33,7 @@
     </ng-template>
     <ng-template #noSpinner>
       <small class="font-weight-bold">
-        {{ count || 0 }}
+        {{ item.get('count', 0) }}
       </small>
     </ng-template>
   </div>

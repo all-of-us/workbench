@@ -39,15 +39,14 @@
           </div>
           <div id="scrollable-groups" class="scrolling-groups">
             <div class="my-border">
-              <div *ngFor="let group of includeGroups; let i = index">
+              <div *ngFor="let group of includes; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
                 <app-search-group 
                   [group]="group" 
-                  [index]="i"
                   [role]="'includes'"
-                  (onRemove)="actions.removeGroup('includes', i)">
+                  (onRemove)="actions.removeGroup('includes', group.get('id'))">
                 </app-search-group>
               </div>
             </div>
@@ -64,15 +63,14 @@
           </div>
           <div id="scrollable-groups1" class="scrolling-groups">
             <div class="my-border">
-              <div *ngFor="let group of excludeGroups; let i = index">
+              <div *ngFor="let group of excludes; let i = index">
                 <span *ngIf="i > 0">
                   <div class="text-center font-weight-bold">AND</div>
                 </span>
                 <app-search-group 
                   [group]="group" 
-                  [index]="i"
                   [role]="'excludes'"
-                  (onRemove)="actions.removeGroup('excludes', i)">
+                  (onRemove)="actions.removeGroup('excludes', group.get('id'))">
                 </app-search-group>
               </div>
             </div>
@@ -89,7 +87,7 @@
             <div class="col-xs-8 text-right">
 
               <h3 class="mt-1">
-                Set Total: {{ total }}
+                Set Total: {{ total$ | async }}
               </h3>
 
             </div>
@@ -104,4 +102,4 @@
   </div>
 </div>
 
-<app-wizard-modal *ngIf="open"></app-wizard-modal>
+<app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>

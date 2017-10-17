@@ -1,12 +1,8 @@
 import {
   Component,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Inject,
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import {DOCUMENT} from '@angular/platform-browser';
 import {NgRedux, select} from '@angular-redux/store';
 import {Router, ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -16,48 +12,49 @@ import {List} from 'immutable';
 import {
   CohortSearchActions,
   CohortSearchState,
+  includeGroups,
+  excludeGroups,
+  wizardOpen,
+  totalCount
 } from '../redux';
 
 @Component({
   selector: 'app-cohort-builder',
   templateUrl: './cohort-builder.component.html',
   styleUrls: ['./cohort-builder.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   @select(s => s) state$;
-  private includeGroups;
-  private excludeGroups;
-  private open;
-  private total;
+  @select(includeGroups) includeGroups$;
+  @select(excludeGroups) excludeGroups$;
+  @select(wizardOpen) open$;
+  @select(totalCount) total$;
 
   private adding = false;
-  private subscription: Subscription;
+  private subscriptions: Subscription[];
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private cd: ChangeDetectorRef,
-              private actions: CohortSearchActions,
+  private includes;
+  private excludes;
+
+  constructor(private actions: CohortSearchActions,
               private router: Router,
               private route: ActivatedRoute,
-              @Inject(DOCUMENT) private document: any) {}
+              ) {}
 
   ngOnInit() {
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     }
-
-    this.subscription = this.state$.subscribe(state => {
-      this.includeGroups = state.getIn(['search', 'includes'], []);
-      this.excludeGroups = state.getIn(['search', 'excludes'], []);
-      this.open = state.getIn(['context', 'wizardOpen'], false);
-      this.total = state.getIn(['counts', 'total'], 0);
-      this.cd.markForCheck();
-    });
+    this.subscriptions = [
+      this.includeGroups$.subscribe(groups => this.includes = groups),
+      this.excludeGroups$.subscribe(groups => this.excludes = groups)
+    ];
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   save(): void {
@@ -70,9 +67,5 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   initGroup(role) {
     this.actions.initGroup(role);
-
-    // FIXME: this doesn't appear to actually do anything
-    const scrollableDiv = document.getElementById('scrollable-groups');
-    scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
   }
 }
