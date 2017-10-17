@@ -30,16 +30,16 @@ export class ErrorHandlingService {
   }
 
   // Don't retry API calls unless the status code is 503.
-  public retryApi(observable: Observable<any>,
+  public retryApi (observable: Observable<any>,
       toRun?: number): Observable<any> {
-    if(toRun === undefined){
+    if (toRun === undefined) {
       toRun = 3;
     }
     let numberRuns = 0;
     return observable.retryWhen((errors) => {
       return errors.do((e) => {
         numberRuns++;
-        switch(e.status){
+        switch (e.status) {
           case 503:
             break;
           case 500:
