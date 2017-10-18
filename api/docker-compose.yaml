@@ -18,7 +18,7 @@ services:
       - ~/.gsutil:/.gsutil:cached
     command: ./gradlew appengineRun
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
     env_file:
       - db/vars.dev.env
     ports:

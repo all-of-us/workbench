@@ -9,14 +9,18 @@ import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserName;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
+import javax.servlet.ServletContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
@@ -43,13 +47,17 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    GoogleCredential credential = Utils.getDefaultGoogleCredential();
+    ServletRequestAttributes attributes =
+      (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    ServletContext context = attributes.getRequest().getServletContext();
+    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
+    GoogleCredential credential = null;
     try {
-      credential.refreshToken();
+      credential = GoogleCredential.fromStream(saFileAsStream);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
