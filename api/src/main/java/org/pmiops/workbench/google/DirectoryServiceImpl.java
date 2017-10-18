@@ -19,8 +19,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
@@ -47,9 +45,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
-    ServletRequestAttributes attributes =
-      (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    ServletContext context = attributes.getRequest().getServletContext();
+    ServletContext context = Utils.getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
     GoogleCredential credential = null;
     try {
