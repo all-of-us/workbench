@@ -249,8 +249,6 @@ appengine {  // App Engine tasks configuration
     jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
   }
 
-
-
   deploy {   // deploy configuration
     stopPreviousVersion = true  // default - stop the current version
     promote = true              // default - & make this the current version
