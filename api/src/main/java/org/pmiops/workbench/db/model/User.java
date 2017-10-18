@@ -118,11 +118,7 @@ public class User {
     this.freeTierBillingProjectName = freeTierBillingProjectName;
   }
 
-  // Authorities (special permissions) are granted only through direct db edits, for example
-  // INSERT INTO authority VALUES(
-  //     (SELECT user_id FROM user WHERE email = 'me@staging.pmi-ops.org'),
-  //     0);
-  // TODO(RW-85) Tool to edit authorities.
+  // Authorities (special permissions) are granted using api/project.rb set-authority.
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "authority")
