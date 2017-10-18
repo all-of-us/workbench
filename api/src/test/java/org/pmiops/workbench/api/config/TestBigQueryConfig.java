@@ -22,7 +22,8 @@ public class TestBigQueryConfig {
 
     @Bean
     public BigQuery bigQueryService() throws Exception {
-        InputStream keyStream = new FileInputStream(new File("sa-key.json"));
+        InputStream keyStream =
+          new FileInputStream(new File("src/main/webapp/WEB-INF/sa-key.json"));
         GoogleCredentials credentials = ServiceAccountCredentials.fromStream(keyStream);
 
         return BigQueryOptions.newBuilder()
