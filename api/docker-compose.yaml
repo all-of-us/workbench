@@ -20,7 +20,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
     env_file:
-      - db/vars.dev.env
+      - db/vars.env
     ports:
       - 8081:8081
       - 8001:8001
