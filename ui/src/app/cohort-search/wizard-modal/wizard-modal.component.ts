@@ -9,8 +9,11 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Observable} from 'rxjs/Observable';
 import {Wizard} from 'clarity-angular';
 
-import {CohortSearchActions} from '../redux/actions';
-import {CohortSearchState, wizardOpen, activeCriteriaType} from '../redux/store';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  activeCriteriaType,
+} from '../redux';
 
 
 @Component({
@@ -21,7 +24,7 @@ import {CohortSearchState, wizardOpen, activeCriteriaType} from '../redux/store'
 })
 export class WizardModalComponent {
 
-  @select(wizardOpen) readonly open$: Observable<boolean>;
+  @select(['context', 'wizardOpen']) readonly open$: Observable<boolean>;
   @select(activeCriteriaType) critType$: Observable<string>;
   @ViewChild('wizard') wizard: Wizard;
 
@@ -29,12 +32,10 @@ export class WizardModalComponent {
               private actions: CohortSearchActions) {}
 
   close() {
-    this.wizard.close();
     this.actions.cancelWizard();
   }
 
   finish() {
-    this.wizard.finish();
     this.actions.finishWizard();
   }
 }

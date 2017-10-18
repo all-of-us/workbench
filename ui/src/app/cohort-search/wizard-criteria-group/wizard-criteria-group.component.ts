@@ -1,15 +1,18 @@
 import {
   Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../redux/actions';
-import {CohortSearchState, getActiveSGIPath} from '../redux/store';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  activeItemId,
+  activeGroupId,
+  activeRole,
+  activeCriteriaType,
+  activeCriteriaList,
+} from '../redux';
 
 import {Criteria} from 'generated';
 
@@ -19,51 +22,52 @@ import {Criteria} from 'generated';
   templateUrl: 'wizard-criteria-group.component.html',
   encapsulation: ViewEncapsulation.None
 })
-export class WizardCriteriaGroupComponent implements OnInit, OnDestroy {
+export class WizardCriteriaGroupComponent {
 
-  @select(s => s.getIn(getActiveSGIPath(s).unshift('search')))
-  readonly activeSearchgroup$;
-
-  private subscription: Subscription;
-  private criteriaType: string;
-  private criteriaList;
-
-  // TODO (jms) see below
-  // @ViewChild('groupDiv') groupDiv: any;
+  @select(activeCriteriaType) criteriaType$;
+  @select(activeCriteriaList) criteriaList$;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
-  ngOnInit() {
-    this.subscription = this.activeSearchgroup$.subscribe(
-      (sgi) => {
-        console.dir(sgi);
-        this.criteriaType = sgi.get('type');
-        this.criteriaList = sgi.get('searchParameters').toJS();
-        // TODO(jms) fix the scrolling bugs
-        // this.groupDiv.scrollTop = this.groupDiv.scrollHeight;
-    });
-  }
-
-  get selection(): string {
-    if (this.criteriaType === 'icd9'
-        || this.criteriaType === 'icd10'
-        || this.criteriaType === 'cpt') {
-      return `Selected ${this.criteriaType.toUpperCase()} Codes`;
-    } else if (this.criteriaType) {
-      return `Selected ${this.criteriaType}`;
+  selectionTitle(kind): string {
+    if (kind === 'icd9'
+        || kind === 'icd10'
+        || kind === 'cpt') {
+      return `Selected ${kind.toUpperCase()} Codes`;
+    } else if (kind) {
+      return `Selected ${kind}`;
     } else {
       return 'No Selection';
     }
   }
 
-  removeCriteria(index: number) {
-    const path = getActiveSGIPath(this.ngRedux.getState())
-      .push('searchParameters', index);
-    this.actions.removeCriteria(path);
+  typeDisplay(criteria): string {
+    const name = criteria.get('name');
+    const code = criteria.get('code');
+
+    switch (criteria.get('type')) {
+      case 'DEMO_GEN':
+        return `Gender-${name}`;
+
+      case 'DEMO_RACE':
+        return `Race/Ethnicity-${name}`;
+
+      case 'DEMO_AGE': case 'DEMO_DEC':
+        return name;
+
+      default:
+        return `${code}-${name}`;
+    }
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+  removeCriterion(criterionId: number) {
+    const state = this.ngRedux.getState();
+    this.actions.removeCriterion(
+      activeRole(state),
+      activeGroupId(state),
+      activeItemId(state),
+      criterionId
+    );
   }
 }
