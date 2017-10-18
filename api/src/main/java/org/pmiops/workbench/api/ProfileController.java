@@ -163,6 +163,11 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> getMe() {
+    // Record that the user signed in, and create the user's FireCloud user and free tier billing
+    // project if they haven't been created already.
+    // This means they can start using the NIH billing account in FireCloud (without access to
+    // the CDR); we will probably need a job that deactivates accounts after some period of
+    // not accepting the terms of use.
     User user = initializeUserIfNeeded();
     try {
       return ResponseEntity.ok(profileService.getProfile(user));
