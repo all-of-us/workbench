@@ -50,8 +50,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
         Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
-        CloudStorageService cloudStorageService,
-        Provider<WorkbenchConfig> workbenchConfigProvider,
+        CloudStorageService cloudStorageService, Provider<WorkbenchConfig> workbenchConfigProvider,
         WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
