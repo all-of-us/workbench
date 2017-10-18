@@ -180,7 +180,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
+  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev84-1.22.0'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev131-1.22.0'
   compile 'com.google.cloud:google-cloud-storage:1.7.0'
 
