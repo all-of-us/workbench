@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -72,12 +72,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   private String createFirecloudUserAndBillingProject(User user) {
     try {
+      // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(user.getContactEmail(),
           user.getGivenName(), user.getFamilyName());
     } catch (ApiException e) {
       log.log(Level.SEVERE, "Error registering user: {0}".format(e.getResponseBody()), e);
       // We don't expect this to happen.
-      // TODO: figure out what happens if you register after already registering
       throw new ServerErrorException("Error registering user", e);
     }
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
@@ -125,14 +125,24 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     try {
+      // If the user is already a member of the billing project, this will have no effect.
       fireCloudService.addUserToBillingProject(user.getEmail(), billingProjectName);
     } catch (ApiException e) {
-      // If we used an existing project above, it's possible this will fail. That should only
-      // happen in local development... hopefully it won't. :)
-      log.log(Level.SEVERE, "Error adding user to billing project: {0}".format(e.getResponseBody()),
-          e);
-      // TODO: figure out what happens if the user is already a member of this billing project.
-      throw new ServerErrorException("Error adding user to billing project", e);
+
+      if (e.getCode() == HttpStatus.FORBIDDEN.value()) {
+        // AofU is not the owner of the billing project. This should only happen in local
+        // environments (and hopefully never, given the prefix we're using.) If it happens,
+        // we may need to pick a different prefix.
+        log.log(Level.SEVERE, ("Unable to add user to billing project {0}: {0}; " +
+            "consider changing billing project prefix").format(billingProjectName,
+            e.getResponseBody()), e);
+        throw new ServerErrorException("Unable to add user to billing project", e);
+      } else {
+        log.log(Level.SEVERE,
+            "Error adding user to billing project: {0}".format(e.getResponseBody()),
+            e);
+        throw new ServerErrorException("Error adding user to billing project", e);
+      }
     }
     return billingProjectName;
   }
