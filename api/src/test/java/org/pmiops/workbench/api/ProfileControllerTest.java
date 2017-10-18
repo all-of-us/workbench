@@ -109,12 +109,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testCreateAccount_success() throws Exception {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
-        .thenReturn(googleUser);
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
-    Profile profile = profileController.createAccount(createAccountRequest).getBody();
-
+    Profile profile = createUser();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         null, null, null);
   }
@@ -141,6 +136,29 @@ public class ProfileControllerTest {
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+  }
+
+  @Test
+  public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
+    createUser();
+    when(userProvider.get()).thenReturn(userDao.findUserByEmail(PRIMARY_EMAIL));
+    Profile profile = profileController.getMe().getBody();
+    String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
+    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
+        null, TIMESTAMP, projectName);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+  }
+
+  private Profile createUser() throws Exception {
+    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
+        .thenReturn(googleUser);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
+    return profileController.createAccount(createAccountRequest).getBody();
+
   }
 
 
