@@ -9,6 +9,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {CohortsService, Configuration, ConfigurationParameters, ProfileService} from 'generated';
 
@@ -25,12 +26,13 @@ export class AppComponent implements OnInit {
   hasAdminPermissions = false;
 
   constructor(
-      private titleService: Title,
       private activatedRoute: ActivatedRoute,
+      private cohortsService: CohortsService,
+      private errorHandlingService: ErrorHandlingService,
+      private profileService: ProfileService,
       private router: Router,
       private signInService: SignInService,
-      private cohortsService: CohortsService,
-      private profileService: ProfileService
+      private titleService: Title
   ) {}
 
   ngOnInit(): void {
@@ -58,7 +60,7 @@ export class AppComponent implements OnInit {
       }
     });
     this.user = this.signInService.user;
-    this.profileService.getMe().subscribe(profile => {
+    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
       // TODO(RW-85) Real UI for research purpose review. This is a standin to demonstrate that
       // we can fetch permissions from the frontend code.
       this.hasAdminPermissions = profile.authorities.length > 0;

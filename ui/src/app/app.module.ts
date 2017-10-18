@@ -14,6 +14,8 @@ import {ClarityModule} from 'clarity-angular';
 import {AppComponent} from 'app/views/app/component';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
+import {ErrorHandlerComponent} from 'app/views/error-handler/component';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -55,6 +57,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     AppComponent,
     BugReportComponent,
     CohortEditComponent,
+    ErrorHandlerComponent,
     HomePageComponent,
     WorkspaceComponent,
     WorkspaceEditComponent
@@ -63,6 +66,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BugReportService,
     ClusterService,
     CohortsService,
+    ErrorHandlingService,
     ProfileService,
     SignInService,
     {
@@ -73,6 +77,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspacesService,
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, BugReportComponent]
+  bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
 })
 export class AppModule {}

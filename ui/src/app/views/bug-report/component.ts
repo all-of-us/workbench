@@ -1,4 +1,7 @@
 import {Component, OnInit} from '@angular/core';
+
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+
 import {BugReportService} from 'generated';
 import {BugReport} from 'generated';
 import {ProfileService} from 'generated';
@@ -18,6 +21,7 @@ export class BugReportComponent implements OnInit {
 
   constructor(
     private bugReportService: BugReportService,
+    private errorHandlingService: ErrorHandlingService,
     private profileService: ProfileService
   ) {}
 
@@ -28,7 +32,8 @@ export class BugReportComponent implements OnInit {
     this.reporting = true;
     this.shortDescription = '';
     this.reproSteps = '';
-    this.profileService.getMe().subscribe(profile => {
+    this.errorHandlingService.retryApi(
+        this.profileService.getMe()).subscribe(profile => {
       this.contactEmail = profile.contactEmail;
     });
   }
@@ -38,6 +43,7 @@ export class BugReportComponent implements OnInit {
     this.bugReport.shortDescription = this.shortDescription;
     this.bugReport.reproSteps = this.reproSteps;
     this.bugReport.contactEmail = this.contactEmail;
-    this.bugReportService.sendBugReport(this.bugReport).subscribe((bugReport: BugReport) => {});
+    this.errorHandlingService.retryApi(
+      this.bugReportService.sendBugReport(this.bugReport)).subscribe((bugReport: BugReport) => {});
   }
 }

@@ -6,8 +6,10 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 
@@ -72,9 +74,10 @@ describe('WorkspaceComponent', () => {
         WorkspaceComponent
       ],
       providers: [
-        { provide: CohortsService, useValue: new CohortsServiceStub() },
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ClusterService, useValue: ClusterService },
+        { provide: CohortsService, useValue: new CohortsServiceStub() },
+        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ] }).compileComponents().then(() => {
         workspacePage = new WorkspacePage(TestBed);
