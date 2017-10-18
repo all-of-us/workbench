@@ -1,8 +1,7 @@
 package org.pmiops.workbench.api;
 
-import com.mysql.fabric.Server;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
-import java.rmi.ServerError;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
+  private final Provider<Userinfoplus> userinfoplusProvider;
   private final UserDao userDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
@@ -51,12 +51,14 @@ public class ProfileController implements ProfileApiDelegate {
   private final WorkbenchEnvironment workbenchEnvironment;
 
   @Autowired
-  ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
-        Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
-        CloudStorageService cloudStorageService, Provider<WorkbenchConfig> workbenchConfigProvider,
-        WorkbenchEnvironment workbenchEnvironment) {
+  ProfileController(ProfileService profileService, Provider<User> userProvider,
+      Provider<Userinfoplus> userinfoplusProvider, UserDao userDao,
+      Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
+      CloudStorageService cloudStorageService, Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
+    this.userinfoplusProvider = userinfoplusProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -101,6 +103,7 @@ public class ProfileController implements ProfileApiDelegate {
     while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
       try {
         fireCloudService.createAllOfUsBillingProject(billingProjectName);
+        break;
       } catch (ApiException e) {
         if (e.getCode() == HttpStatus.CONFLICT.value()) {
           if (workbenchEnvironment.isDevelopment()) {
@@ -151,12 +154,30 @@ public class ProfileController implements ProfileApiDelegate {
 
   private User initializeUserIfNeeded() {
     User user = userProvider.get();
+    if (user == null) {
+      // For now, this will happen with any account that you sign in with (since we're not
+      // creating Google accounts yet.) Create a user record for the account.
+
+      // After we start requiring that user accounts are in our GSuite domain, this should only
+      // happen if a Google account was created but we failed to write to our
+      // database right after that.
+      // TODO: remove this logic when we start using Gsuite account info, or start storing the
+      // contact email in Google account info so we can use it here. (We don't want User records
+      // without contact emails.)
+      Userinfoplus userInfo = userinfoplusProvider.get();
+      user = new User();
+      user.setEmail(userInfo.getEmail());
+      user.setGivenName(userInfo.getGivenName());
+      user.setFamilyName(userInfo.getFamilyName());
+    }
+
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       if (user.getFreeTierBillingProjectName() == null) {
         String billingProjectName = createFirecloudUserAndBillingProject(user);
         user.setFreeTierBillingProjectName(billingProjectName);
       }
+
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       userDao.save(user);
     }
@@ -170,6 +191,7 @@ public class ProfileController implements ProfileApiDelegate {
     // This means they can start using the NIH billing account in FireCloud (without access to
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
+
     User user = initializeUserIfNeeded();
     try {
       return ResponseEntity.ok(profileService.getProfile(user));

@@ -10,6 +10,7 @@ import java.io.IOException;
  */
 public interface DirectoryService {
   public boolean isUsernameTaken(String username) throws IOException;
+  public User getUser(String email) throws IOException;
   public User createUser(String givenName, String familyName, String username, String password)
       throws IOException;
   public void deleteUser(String username) throws IOException;

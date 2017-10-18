@@ -15,6 +15,7 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,20 +64,25 @@ public class DirectoryServiceImpl implements DirectoryService {
         .build();
   }
 
-  public boolean isUsernameTaken(String username) throws IOException {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+  @Override
+  public User getUser(String email) throws IOException {
     try {
-      getGoogleDirectoryService().users().get(username+"@"+gSuiteDomain).execute();
-      return true; // successful call means user exists
+      return getGoogleDirectoryService().users().get(email).execute();
     } catch (GoogleJsonResponseException e) {
-      if (e.getDetails().getCode() == 404) {
-        return false;
-      } else {
-        throw e;
+      if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
+        return null;
       }
+      throw e;
     }
   }
 
+  @Override
+  public boolean isUsernameTaken(String username) throws IOException {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    return getUser(username + "@" + gSuiteDomain) != null;
+  }
+
+  @Override
   public User createUser(String givenName, String familyName, String username, String password)
       throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
@@ -88,12 +94,13 @@ public class DirectoryServiceImpl implements DirectoryService {
     return user;
   }
 
+  @Override
   public void deleteUser(String username) throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
       getGoogleDirectoryService().users().delete(username + "@" + gSuiteDomain).execute();
     } catch (GoogleJsonResponseException e) {
-      if (e.getDetails().getCode() == 404) {
+      if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
         return;
       }

@@ -2,9 +2,11 @@ package org.pmiops.workbench.api;
 
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -17,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
@@ -43,6 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ProfileControllerTest {
 
   private static final Instant NOW = Instant.now();
+  private static final Timestamp TIMESTAMP = new Timestamp(NOW.toEpochMilli());
   private static final String USERNAME = "bob";
   private static final String GIVEN_NAME = "Bob";
   private static final String FAMILY_NAME = "Bobberson";
@@ -50,6 +54,7 @@ public class ProfileControllerTest {
   private static final String INVITATION_KEY = "secretpassword";
   private static final String PASSWORD = "12345";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
+  private static final String BILLING_PROJECT_PREFIX = "all-of-us-free";
 
   @Mock
   private Provider<User> userProvider;
@@ -69,6 +74,9 @@ public class ProfileControllerTest {
   @Before
   public void setUp() {
     WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setContactEmail(CONTACT_EMAIL);
@@ -81,8 +89,14 @@ public class ProfileControllerTest {
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
 
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail(PRIMARY_EMAIL);
+    userInfo.setFamilyName(FAMILY_NAME);
+    userInfo.setGivenName(GIVEN_NAME);
+
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
-    this.profileController = new ProfileController(profileService, userProvider, userDao,
+    this.profileController = new ProfileController(profileService, userProvider,
+        Providers.of(userInfo), userDao,
         Clock.fixed(NOW, ZoneId.systemDefault()), fireCloudService, directoryService,
         cloudStorageService, Providers.of(config), environment);
   }
@@ -113,6 +127,22 @@ public class ProfileControllerTest {
         .thenThrow(new IOException());
     profileController.createAccount(createAccountRequest);
   }
+
+  @Test
+  public void testMe_noUserBeforeSuccess() throws Exception {
+    when(userProvider.get()).thenReturn(null);
+
+    Profile profile = profileController.getMe().getBody();
+
+    String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
+    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
+    null, TIMESTAMP, projectName);
+    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
+
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+  }
+
 
   private void assertProfile(Profile profile, String primaryEmail, String contactEmail,
       String familyName, String givenName, DataAccessLevel dataAccessLevel,
