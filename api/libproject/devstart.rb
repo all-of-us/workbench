@@ -418,7 +418,6 @@ end
 
 # Command-line parsing and main "run" implementation for deploy-api.
 class DeployApi < GcloudContext
-  # Adds command-line flags specific to set-authority.
   def add_options
     super
     @parser.on(
@@ -446,8 +445,10 @@ class DeployApi < GcloudContext
 
   def run
     super do
+      # Populate environment variables based on DB credentials
       read_db_vars(@opts.creds_file, @opts.project)
-      # This triggers logic in generate_appengine_web_xml.sh to use environment variables set above.
+      # This triggers logic in generate_appengine_web_xml.sh to use environment variables set above,
+      # rather than reading from vars.env.
       ENV["CIRCLECI"] = "true"
       @common.run_inline %W{#{@gradlew_path} :appengineStage}
       @common.run_inline %W{gcloud app deploy build/staged-app/app.yaml --project #{@opts.project} --account #{@opts.account}
@@ -633,7 +634,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "deploy-api",
   :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| DeployApi.new("deploy-api", args, false).run }
+  :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
 })
 
 
