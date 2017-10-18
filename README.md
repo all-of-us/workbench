@@ -105,7 +105,9 @@ Example:
 ./project.rb deploy-ui --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
 ```
 
-When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com.
+When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API 
+service (https://api-dot-PROJECT.appspot.com). (If there's a need, we may
+want to make this configurable in future.)
 
 ## git-secrets
 

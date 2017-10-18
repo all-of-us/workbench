@@ -121,15 +121,7 @@ def dev_up(*args)
 
   common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
-Common.register_command({
-  :invocation => "deploy-api",
-  :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
-})
-def deploy(*args)
-  common = Common.new
 
-end
 
 def rebuild_image()
   common = Common.new
