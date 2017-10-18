@@ -191,6 +191,17 @@ public class ProfileController implements ProfileApiDelegate {
     );
 
     // Create a user that has no data access or FC user associated.
+    // We create this account before they sign in so we can keep track of which users we have
+    // created Google accounts for. This can be used subsequently to delete orphaned accounts.
+
+    // We store this information in our own database so that:
+    // 1) we can support bring-your-own account in future (when we won't be using directory service)
+    // 2) we can easily generate lists of researchers for the storefront, without joining to Google
+
+    // It's possible for the profile information to become out of sync with the user's Google
+    // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
+    // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
+
     User user = new User();
     user.setEmail(googleUser.getPrimaryEmail());
     user.setContactEmail(request.getContactEmail());
