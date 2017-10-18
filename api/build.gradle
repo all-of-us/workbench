@@ -252,11 +252,12 @@ appengine {  // App Engine tasks configuration
     jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
   }
 
-  // dmohs: Saw this [1] message, so set this property.
+  // dmohs: You may see this message [1], but don't implement the suggested fix because it breaks
+  // Spring.
   // [1] https://github.com/GoogleCloudPlatform/app-gradle-plugin/issues/100
-  stage {
-     enableJarClasses = true
-  }
+  // stage {
+  //    enableJarClasses = true
+  // }
 
   deploy {   // deploy configuration
     stopPreviousVersion = true  // default - stop the current version
