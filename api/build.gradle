@@ -158,8 +158,11 @@ dependencies {
 
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
-  compile 'com.google.appengine:appengine:+'
-  compile 'com.google.appengine:appengine-api-1.0-sdk:+'
+  compile 'com.google.appengine:appengine:1.9.56'
+  compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.56'
+  compile 'com.google.api-client:google-api-client:1.22.0'
+  compile 'com.google.api-client:google-api-client-appengine:1.22.0'
+  compile 'com.google.api-client:google-api-client-servlet:1.22.0'
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
@@ -178,9 +181,9 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
-  compile 'com.google.apis:google-api-services-oauth2:+'
+  compile 'com.google.apis:google-api-services-oauth2:v2-rev131-1.22.0'
   compile 'com.google.cloud:google-cloud-storage:1.7.0'
-  compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
+
   compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
   compile 'com.google.code.gson:gson:+'

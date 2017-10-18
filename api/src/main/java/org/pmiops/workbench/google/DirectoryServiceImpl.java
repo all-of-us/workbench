@@ -12,7 +12,10 @@ import com.google.api.services.admin.directory.model.UserName;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.inject.Provider;
+
+import org.pmiops.workbench.api.WorkspacesController;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
+
+  private static final Logger log = Logger.getLogger(DirectoryServiceImpl.class.getName());
 
   static final String APPLICATION_NAME = "All of Us Researcher Workbench";
 
@@ -44,7 +49,21 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   private GoogleCredential createCredentialWithImpersonation() {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    log.info("A");
     GoogleCredential credential = Utils.getDefaultGoogleCredential();
+    log.info("B = " + credential.getServiceAccountId());
+    credential = credential.createScoped(SCOPES);
+    log.info("B2 = " + credential.getServiceAccountId());
+    try {
+      boolean refreshed = credential.refreshToken();
+      if (!refreshed) {
+        throw new RuntimeException("OMFG");
+      }
+      log.info("C = " + credential.getServiceAccountId());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    log.info("D = " + credential.getServiceAccountId());
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())

@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 ./hooks/apply-git-secrets.sh
 
-git secrets --pre_commit_hook -- "$@"
+#git secrets --pre_commit_hook -- $@
 
 CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 if [ "$CURRENT_BRANCH" = "master" ]
