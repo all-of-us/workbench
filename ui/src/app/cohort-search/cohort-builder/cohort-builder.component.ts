@@ -22,11 +22,9 @@ import {
   selector: 'app-cohort-builder',
   templateUrl: './cohort-builder.component.html',
   styleUrls: ['./cohort-builder.component.css'],
-  // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CohortBuilderComponent implements OnInit, OnDestroy {
 
-  @select(s => s) state$;
   @select(includeGroups) includeGroups$;
   @select(excludeGroups) excludeGroups$;
   @select(wizardOpen) open$;
@@ -40,8 +38,7 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   constructor(private actions: CohortSearchActions,
               private router: Router,
-              private route: ActivatedRoute,
-              ) {}
+              private route: ActivatedRoute) {}
 
   ngOnInit() {
     if (this.route.snapshot.url[5] === undefined) {
