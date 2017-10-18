@@ -1,5 +1,8 @@
 package org.pmiops.workbench.api;
 
+import com.mysql.fabric.Server;
+import java.io.IOException;
+import java.rmi.ServerError;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -178,8 +181,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
-    return ResponseEntity.ok(
-        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
+    try {
+      return ResponseEntity.ok(
+          new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
   }
 
   @Override
@@ -189,10 +196,13 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(
           "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
-    com.google.api.services.admin.directory.model.User googleUser = directoryService.createUser(
-        request.getGivenName(), request.getFamilyName(), request.getUsername(),
-        request.getPassword()
-    );
+    com.google.api.services.admin.directory.model.User googleUser;
+    try {
+      googleUser = directoryService.createUser(request.getGivenName(), request.getFamilyName(),
+          request.getUsername(), request.getPassword());
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
@@ -227,7 +237,11 @@ public class ProfileController implements ProfileApiDelegate {
         (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
     String email = userAuth.getPrincipal().getEmail();
     String[] parts = email.split("@");
-    directoryService.deleteUser(parts[0]);
+    try {
+      directoryService.deleteUser(parts[0]);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 

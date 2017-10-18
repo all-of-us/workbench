@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +63,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .build();
   }
 
-  public boolean isUsernameTaken(String username) {
+  public boolean isUsernameTaken(String username) throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
       getGoogleDirectoryService().users().get(username+"@"+gSuiteDomain).execute();
@@ -73,33 +72,32 @@ public class DirectoryServiceImpl implements DirectoryService {
       if (e.getDetails().getCode() == 404) {
         return false;
       } else {
-        throw new RuntimeException(e);
+        throw e;
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 
-  public User createUser(String givenName, String familyName, String username, String password) {
+  public User createUser(String givenName, String familyName, String username, String password)
+      throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    try {
-      getGoogleDirectoryService().users().insert(user).execute();
-      return user;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    getGoogleDirectoryService().users().insert(user).execute();
+    return user;
   }
 
-  public void deleteUser(String username) {
+  public void deleteUser(String username) throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      getGoogleDirectoryService().users().delete(username+"@"+gSuiteDomain).execute();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      getGoogleDirectoryService().users().delete(username + "@" + gSuiteDomain).execute();
+    } catch (GoogleJsonResponseException e) {
+      if (e.getDetails().getCode() == 404) {
+        // Deleting a user that doesn't exist will have no effect.
+        return;
+      }
+      throw e;
     }
   }
 }
