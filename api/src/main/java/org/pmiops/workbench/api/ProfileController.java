@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.config.Environment;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
@@ -45,13 +45,14 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final Environment environment;
+  private final WorkbenchEnvironment workbenchEnvironment;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider, UserDao userDao,
         Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
         CloudStorageService cloudStorageService,
-        Provider<WorkbenchConfig> workbenchConfigProvider, Environment environment) {
+        Provider<WorkbenchConfig> workbenchConfigProvider,
+        WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
@@ -60,7 +61,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.environment = environment;
+    this.workbenchEnvironment = workbenchEnvironment;
   }
 
   @Override
@@ -81,7 +82,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
-    if (environment.isDevelopment()) {
+    if (workbenchEnvironment.isDevelopment()) {
       // For local development, make one billing project per account based on a hash of the account
       // email, and reuse it across database resets. (Assume we won't have any collisions;
       // if we discover that somebody starts using our namespace, change it up.)
@@ -100,7 +101,7 @@ public class ProfileController implements ProfileApiDelegate {
         fireCloudService.createAllOfUsBillingProject(billingProjectName);
       } catch (ApiException e) {
         if (e.getCode() == HttpStatus.CONFLICT.value()) {
-          if (environment.isDevelopment()) {
+          if (workbenchEnvironment.isDevelopment()) {
             // In local development, just re-use existing projects for the account. (We don't
             // want to create a new billing project every time the database is reset.)
             log.log(Level.WARNING, "Project with name {0} already exists; using it."

@@ -67,8 +67,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   }
 
   @Bean
-  public Environment environment() {
-    return new Environment();
+  public WorkbenchEnvironment workbenchEnvironment() {
+    return new WorkbenchEnvironment();
   }
 
   @Override
