@@ -25,21 +25,17 @@ import {
 
         <app-criteria-tree-node-info
           [node]="node"
-          (onSelect)="handleSelection(node)"
-        >
+          (onSelect)="handleSelection(node)">
         </app-criteria-tree-node-info>
 
-        <span *ngIf="node.get('group')">
-          <ng-template clrIfExpanded>
-            <app-criteria-tree-node [node]="node">
-            </app-criteria-tree-node>
-          </ng-template>
-        </span>
+        <ng-template clrIfExpanded *ngIf="node.get('group')">
+          <app-criteria-tree-node [node]="node">
+          </app-criteria-tree-node>
+        </ng-template>
 
       </clr-tree-node>
     </ng-container>
   `,
-  encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   @Input() node;
