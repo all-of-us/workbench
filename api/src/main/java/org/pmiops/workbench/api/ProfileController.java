@@ -167,6 +167,7 @@ public class ProfileController implements ProfileApiDelegate {
       // without contact emails.)
       Userinfoplus userInfo = userinfoplusProvider.get();
       user = new User();
+      user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
       user.setEmail(userInfo.getEmail());
       user.setGivenName(userInfo.getGivenName());
       user.setFamilyName(userInfo.getFamilyName());
@@ -240,6 +241,7 @@ public class ProfileController implements ProfileApiDelegate {
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
     User user = new User();
+    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
     user.setEmail(googleUser.getPrimaryEmail());
     user.setContactEmail(request.getContactEmail());
     user.setFamilyName(request.getFamilyName());

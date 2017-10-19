@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -31,6 +32,8 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.RegistrationRequest;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -70,6 +73,7 @@ public class ProfileControllerTest {
   private ProfileController profileController;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
+  private FakeClock clock;
 
   @Before
   public void setUp() {
@@ -89,6 +93,8 @@ public class ProfileControllerTest {
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
 
+    clock = new FakeClock(NOW);
+
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail(PRIMARY_EMAIL);
     userInfo.setFamilyName(FAMILY_NAME);
@@ -96,8 +102,7 @@ public class ProfileControllerTest {
 
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
-        Providers.of(userInfo), userDao,
-        Clock.fixed(NOW, ZoneId.systemDefault()), fireCloudService, directoryService,
+        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
         cloudStorageService, Providers.of(config), environment);
   }
 
@@ -110,8 +115,9 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     Profile profile = createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        null, null, null);
+        DataAccessLevel.UNREGISTERED, null, null, false);
   }
 
   @Test(expected = ServerErrorException.class)
@@ -126,12 +132,13 @@ public class ProfileControllerTest {
   @Test
   public void testMe_noUserBeforeSuccess() throws Exception {
     when(userProvider.get()).thenReturn(null);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     Profile profile = profileController.getMe().getBody();
 
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
-    null, TIMESTAMP, projectName);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
@@ -142,15 +149,39 @@ public class ProfileControllerTest {
   public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
     createUser();
     when(userProvider.get()).thenReturn(userDao.findUserByEmail(PRIMARY_EMAIL));
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     Profile profile = profileController.getMe().getBody();
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        null, TIMESTAMP, projectName);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+
+
+    // An additional call to getMe() should have no effect.
+    clock.increment(1);
+    profile = profileController.getMe().getBody();
+    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
   }
+
+  @Test
+  public void testRegister_noUserBeforeSuccess() throws Exception {
+    when(userProvider.get()).thenReturn(null);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.register(new RegistrationRequest()).getBody();
+    String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
+    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
+        DataAccessLevel.REGISTERED, TIMESTAMP, projectName, true);
+    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
+
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+  }
+
 
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
@@ -158,19 +189,20 @@ public class ProfileControllerTest {
         .thenReturn(googleUser);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     return profileController.createAccount(createAccountRequest).getBody();
-
   }
 
 
   private void assertProfile(Profile profile, String primaryEmail, String contactEmail,
       String familyName, String givenName, DataAccessLevel dataAccessLevel,
-      Timestamp firstSignInTime, String freeTierBillingProject) {
+      Timestamp firstSignInTime, String freeTierBillingProject, boolean enabledInFirecloud) {
     assertThat(profile).isNotNull();
     assertThat(profile.getContactEmail()).isEqualTo(contactEmail);
     assertThat(profile.getFamilyName()).isEqualTo(familyName);
     assertThat(profile.getGivenName()).isEqualTo(givenName);
-    assertThat(profile.getDataAccessLevel()).isEqualTo(dataAccessLevel);
+    assertThat(profile.getDataAccessLevel()).isEqualTo(
+        Profile.DataAccessLevelEnum.fromValue(dataAccessLevel.toString().toLowerCase()));
     assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(freeTierBillingProject);
+    assertThat(profile.getEnabledInFireCloud()).isEqualTo(enabledInFirecloud);
 
     User user = userDao.findUserByEmail(primaryEmail);
     assertThat(user).isNotNull();
@@ -180,6 +212,7 @@ public class ProfileControllerTest {
     assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
     assertThat(user.getFreeTierBillingProjectName()).isEqualTo(freeTierBillingProject);
+    assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
   }
 
 }
