@@ -66,6 +66,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     return user;
   }
 
+  @Bean
+  public WorkbenchEnvironment workbenchEnvironment() {
+    return new WorkbenchEnvironment();
+  }
+
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")

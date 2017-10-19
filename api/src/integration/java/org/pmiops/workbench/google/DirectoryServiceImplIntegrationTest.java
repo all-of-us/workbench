@@ -1,6 +1,8 @@
 package org.pmiops.workbench.google;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -16,17 +18,17 @@ public class DirectoryServiceImplIntegrationTest {
   }
 
   @Test
-  public void testDummyUsernameIsNotTaken() {
+  public void testDummyUsernameIsNotTaken() throws IOException {
     assertThat(service.isUsernameTaken("username-that-should-not-exist")).isFalse();
   }
 
   @Test
-  public void testDirectoryServiceUsernameIsTaken() {
+  public void testDirectoryServiceUsernameIsTaken() throws IOException {
     assertThat(service.isUsernameTaken("directory-service")).isTrue();
   }
 
   @Test
-  public void testCreateAndDeleteTestUser() {
+  public void testCreateAndDeleteTestUser() throws IOException {
     service.createUser("Integration", "Test", "integration.test", "notasecret");
     assertThat(service.isUsernameTaken("integration.test")).isTrue();
     service.deleteUser("integration.test");
