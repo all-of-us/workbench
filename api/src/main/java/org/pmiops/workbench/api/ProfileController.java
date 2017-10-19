@@ -16,6 +16,7 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -207,7 +208,7 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.ok(
           new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
     } catch (IOException e) {
-      throw new ServerErrorException(e);
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
   }
 
@@ -223,7 +224,7 @@ public class ProfileController implements ProfileApiDelegate {
       googleUser = directoryService.createUser(request.getGivenName(), request.getFamilyName(),
           request.getUsername(), request.getPassword());
     } catch (IOException e) {
-      throw new ServerErrorException(e);
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
 
     // Create a user that has no data access or FC user associated.
@@ -262,7 +263,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       directoryService.deleteUser(parts[0]);
     } catch (IOException e) {
-      throw new ServerErrorException(e);
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

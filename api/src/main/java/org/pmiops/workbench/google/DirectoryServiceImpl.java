@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public User getUser(String email) throws IOException {
     try {
-      return getGoogleDirectoryService().users().get(email).execute();
+      return ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().get(email));
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
@@ -90,7 +91,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    getGoogleDirectoryService().users().insert(user).execute();
+    ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
     return user;
   }
 
@@ -98,7 +99,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      getGoogleDirectoryService().users().delete(username + "@" + gSuiteDomain).execute();
+      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users()
+          .delete(username + "@" + gSuiteDomain));
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
