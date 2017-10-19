@@ -4,9 +4,9 @@
   "license": "BSD",
   "scripts": {
     "ng": "ng",
-    "start": "npm run codegen && ng serve",
-    "build": "npm run codegen && ng build",
-    "test": "npm run codegen && ng test",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "codegen-clean": "rm -rf src/generated",
