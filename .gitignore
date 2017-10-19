@@ -14,6 +14,7 @@
 /api/api.iws
 /api/build/*
 /api/db/.gradle
+/api/db-cdr/.gradle
 /api/out/*
 /api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/generated
