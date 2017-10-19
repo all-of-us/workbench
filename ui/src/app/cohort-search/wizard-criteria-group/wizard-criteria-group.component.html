@@ -1,41 +1,24 @@
-<div class="box pl-1 codes-height w-100">
+<div
+  [style.border]="'2px solid #d7d7d7'"
+  [style.height]="'100%'"
+  [style.padding-left]="'1rem'"
+  [style.border-radius]="'5px'"
+  [style.overflow-y]="'auto'"
+  [style.overflow-x]="'hidden'"
+  >
   <span class="font-weight-bold">{{ selectionTitle(criteriaType$ | async) }}</span>
-  <div class="criteria-group-height scrolling-criteria-group">
-    <div *ngFor="let criteria of (criteriaList$ | async); let i = index">
-      <div class="row">
-
-        <span *ngIf="criteria.get('group'); then group else notGroup"></span>
-
-        <ng-template #group>
-          <div class="col-xs-12 text-truncate">
-            <button type="button" 
-              class="btn btn-link btn-sm text-danger mr-0" 
-              (click)="removeCriterion(criteria.get('id'))">
-              <clr-icon shape="close" size="14"></clr-icon>
-            </button>
-            <span *ngIf="i > 0">
-              <small class="font-weight-bold">OR</small>
-            </span>
-            <small class="text-muted">Group</small>
-            <small class="font-weight-bold">{{criteria.get('code')}}-{{criteria.get('name')}}</small>
-          </div>
-        </ng-template>
-
-        <ng-template #notGroup>
-          <div class="col-xs-12 text-truncate">
-            <button type="button" 
-              class="btn btn-link btn-sm text-danger mr-0" 
-              (click)="removeCriterion(criteria.get('id'))">
-              <clr-icon shape="close" size="14"></clr-icon>
-            </button>
-            <span *ngIf="i > 0">
-              <small class="font-weight-bold">OR</small>
-            </span>
-            <small class="font-weight-bold">{{ typeDisplay(criteria) }}</small>
-          </div>
-        </ng-template>
-
-      </div>
-    </div>
+  <div *ngFor="let criteria of (criteriaList$ | async); let i = index"
+    [style.overflow]="'hidden'"
+    [style.text-overflow]="'ellipsis'"
+    [style.white-space]="'nowrap'"
+    >
+    <button type="button"
+      class="btn btn-icon btn-link btn-sm text-danger"
+      (click)="removeCriterion(criteria.get('id'))">
+      <clr-icon shape="close"></clr-icon>
+    </button>
+    <small *ngIf="i > 0" class="font-weight-bold">OR</small>
+    <small *ngIf="criteria.get('group')" class="text-muted">Group</small>
+    <small class="font-weight-bold">{{ typeDisplay(criteria) }}</small>
   </div>
 </div>

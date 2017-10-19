@@ -15,10 +15,6 @@
   height: 100% !important;
 }
 
-.box {
-  border: 1px solid #d7d7d7;
-}
-
 .clr-treenode-link {
   display: -webkit-box;
 }
@@ -30,17 +26,4 @@
 
 .row-height {
   height: 100%;
-}
-
-.codes-height {
-  height: 100%
-}
-
-.criteria-group-height {
-  height: 100%;
-}
-
-.scrolling-criteria-group {
-  height: 95%;
-  overflow: auto;
 }

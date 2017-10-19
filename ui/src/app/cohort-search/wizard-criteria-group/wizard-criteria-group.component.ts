@@ -20,7 +20,6 @@ import {Criteria} from 'generated';
 @Component({
   selector: 'app-wizard-criteria-group',
   templateUrl: 'wizard-criteria-group.component.html',
-  encapsulation: ViewEncapsulation.None
 })
 export class WizardCriteriaGroupComponent {
 
@@ -48,16 +47,16 @@ export class WizardCriteriaGroupComponent {
 
     switch (criteria.get('type')) {
       case 'DEMO_GEN':
-        return `Gender-${name}`;
+        return `Gender ${name}`;
 
       case 'DEMO_RACE':
-        return `Race/Ethnicity-${name}`;
+        return `Race/Ethnicity ${name}`;
 
       case 'DEMO_AGE': case 'DEMO_DEC':
         return name;
 
       default:
-        return `${code}-${name}`;
+        return `${code} ${name}`;
     }
   }
 
