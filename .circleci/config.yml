@@ -64,7 +64,7 @@ jobs:
       - run:
           working_directory: ~/workbench/ui
           command: |
-            npm test  -- --no-watch
+            npm codegen && npm test  -- --no-watch
       - deploy:
           name: Deploy to gcloud test project
           command: |
