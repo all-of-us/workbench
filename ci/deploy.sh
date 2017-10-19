@@ -18,10 +18,11 @@ then
     --creds_file ~/gcloud-credentials.key)
   (cd ./api && ./project.rb update-cloud-config --project all-of-us-workbench-test \
     --creds_file ~/gcloud-credentials.key)
+  (cd ./api && ./project.rb deploy-api --project all-of-us-workbench-test \
+     --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \ 
+     --creds_file ~/gcloud-credentials.key --version $VERSION --promote)
+else
+  (cd ./ui && ./project.rb deploy-ui --project all-of-us-workbench-test \
+    --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+    --version $VERSION --promote)
 fi
-./tools/deploy.py \
-  --target $1 \
-  --skip-confirmation \
-  --project all-of-us-workbench-test \
-  --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-  --version $VERSION
