@@ -56,4 +56,4 @@ ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
 ADD with-uid.sh /usr/local/bin
 
-ENTRYPOINT with-uid.sh
+ENTRYPOINT ["with-uid.sh"]
