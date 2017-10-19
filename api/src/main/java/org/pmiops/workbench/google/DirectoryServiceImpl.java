@@ -9,10 +9,12 @@ import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserName;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
+import javax.servlet.ServletContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +45,15 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
+    ServletContext context = Utils.getRequestServletContext();
+    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
+    GoogleCredential credential = null;
+    try {
+      credential = GoogleCredential.fromStream(saFileAsStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    GoogleCredential credential = Utils.getDefaultGoogleCredential();
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
@@ -54,7 +63,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setServiceAccountScopes(SCOPES)
         .setServiceAccountPrivateKey(credential.getServiceAccountPrivateKey())
         .setServiceAccountPrivateKeyId(credential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl()).build();
+        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl())
+        .build();
   }
 
   private Directory getGoogleDirectoryService() {

@@ -210,7 +210,7 @@ def do_run_with_creds(project, account, creds_file)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     if project == "all-of-us-workbench-test"
-      creds_filename = "sa-key.json"
+      creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
       # For test, use a locally stored key file copied from GCS (which we leave hanging
       # around.)
       if !File.file?(creds_filename)
