@@ -5,7 +5,6 @@ import {SearchRequest} from 'generated';
 @Component({
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
-  styleUrls: ['search-group.component.css'],
 })
 export class SearchGroupComponent {
   @Input() group;
