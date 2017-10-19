@@ -1,15 +1,17 @@
 package org.pmiops.workbench.exceptions;
 
-import com.google.api.Http;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import java.io.IOException;
-import org.springframework.http.HttpStatus;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility methods related to exceptions.
  */
 public class ExceptionUtils {
+
+  private static final Logger log = Logger.getLogger(ExceptionUtils.class.getName());
 
   private static final int MAX_ATTEMPTS = 3;
 
@@ -40,6 +42,9 @@ public class ExceptionUtils {
         numAttempts++;
         if (isGoogleServiceUnavailableException(e)) {
           if (numAttempts > 1 && numAttempts < MAX_ATTEMPTS) {
+            log.log(Level.SEVERE,
+                "Service unavailable, attempt #{0}; retrying..."
+                    .format(String.valueOf(numAttempts)), e);
             try {
               // Sleep with some backoff.
               Thread.sleep(2000 * numAttempts );
