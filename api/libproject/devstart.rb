@@ -436,8 +436,7 @@ class DeployApi < GcloudContext
   end
 
   def validate_options
-    super
-    if @opts.version == nil
+    if @opts.project == nil || @opts.account == nil ||@opts.version == nil
       puts @parser.help
       exit 1
     end
