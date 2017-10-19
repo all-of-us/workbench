@@ -5,14 +5,11 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,25 +42,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public User user(Userinfoplus userInfo, UserDao userDao) {
-    User user = userDao.findUserByEmail(userInfo.getEmail());
-    // If the user record doesn't exist, automatically create one.
-    if (user == null) {
-      // create workspaces, etc.
-      user = new User();
-      user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-      user.setEmail(userInfo.getEmail());
-      try {
-        userDao.save(user);
-      } catch (DataIntegrityViolationException e) {
-        // Handle the race condition by re-fetching the user here.
-        user = userDao.findUserByEmail(userInfo.getEmail());
-        // If the user is still missing, throw an error.
-        if (user == null) {
-          throw new ServerErrorException("Error initializing user", e);
-        }
-      }
-    }
-    return user;
+    return userDao.findUserByEmail(userInfo.getEmail());
   }
 
   @Bean

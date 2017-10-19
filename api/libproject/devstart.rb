@@ -255,11 +255,10 @@ end
 
 def drop_cloud_db(*args)
   GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
-    drop_db_file = Tempfile.new("#{ctx.opts.project}-drop-db.sql")
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
-        "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+        "cat db/drop_db.sql | envsubst | " \
         "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
         to_redact=pw)
   end

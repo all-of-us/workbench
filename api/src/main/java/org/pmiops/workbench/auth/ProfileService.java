@@ -25,10 +25,6 @@ public class ProfileService {
     this.userDao = userDao;
   }
 
-  public Profile getProfile() throws ApiException {
-    return getProfile(userProvider.get());
-  }
-
   public Profile getProfile(User user) throws ApiException {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
     User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());

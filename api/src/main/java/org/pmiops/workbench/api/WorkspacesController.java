@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -177,6 +178,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (workspace.getName().equals("")) {
       throw new BadRequestException("Cannot create a workspace with no name.");
     }
+    User user = userProvider.get();
+    if (user == null) {
+      // You won't be able to create workspaces prior to creating a user record once our
+      // registration flow is done, so this should never happen.
+      throw new BadRequestException("User is not initialized yet; please register");
+    }
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
     org.pmiops.workbench.db.model.Workspace existingWorkspace =
@@ -200,7 +207,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(userProvider.get());
+    dbWorkspace.setCreator(user);
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     setCdrVersionId(workspace, dbWorkspace);
@@ -227,8 +234,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceListResponse> getWorkspaces() {
     // TODO: use FireCloud to determine what workspaces to return, instead of just returning
     // workspaces created by this user.
-    List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        workspaceDao.findByCreatorOrderByNameAsc(userProvider.get());
+    User user = userProvider.get();
+    List<org.pmiops.workbench.db.model.Workspace> workspaces;
+    if (user == null) {
+      workspaces = new ArrayList<>();
+    } else {
+      workspaces = workspaceDao.findByCreatorOrderByNameAsc(userProvider.get());
+    }
     WorkspaceListResponse response = new WorkspaceListResponse();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
