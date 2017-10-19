@@ -22,8 +22,8 @@ jobs:
       - run:
           working_directory: ~/workbench
           command: |
-            gsutil cp
-              gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-9b5c623a838e.json
+            gsutil cp \
+              gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-9b5c623a838e.json \
               api/src/main/webapp/WEB-INF/sa-key.json
       - run:
           working_directory: ~/workbench/api
