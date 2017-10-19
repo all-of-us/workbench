@@ -171,6 +171,7 @@ public class ProfileController implements ProfileApiDelegate {
       user.setEmail(userInfo.getEmail());
       user.setGivenName(userInfo.getGivenName());
       user.setFamilyName(userInfo.getFamilyName());
+      userDao.save(user);
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.

@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -26,7 +26,8 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.*;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -40,6 +41,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -57,7 +59,7 @@ public class ProfileControllerTest {
   private static final String INVITATION_KEY = "secretpassword";
   private static final String PASSWORD = "12345";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
-  private static final String BILLING_PROJECT_PREFIX = "all-of-us-free";
+  private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
 
   @Mock
   private Provider<User> userProvider;
@@ -71,6 +73,7 @@ public class ProfileControllerTest {
   private CloudStorageService cloudStorageService;
 
   private ProfileController profileController;
+  private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
@@ -82,6 +85,7 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
+    WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setContactEmail(CONTACT_EMAIL);
     createAccountRequest.setFamilyName(FAMILY_NAME);
@@ -104,7 +108,12 @@ public class ProfileControllerTest {
     this.profileController = new ProfileController(profileService, userProvider,
         Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
         cloudStorageService, Providers.of(config), environment);
+    this.cloudProfileController = new ProfileController(profileService, userProvider,
+        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
+        cloudStorageService, Providers.of(config), cloudEnvironment);
   }
+
+
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
@@ -144,6 +153,52 @@ public class ProfileControllerTest {
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
   }
+
+  @Test
+  public void testMe_noUserBeforeSuccessDevProjectConflict() throws Exception {
+    when(userProvider.get()).thenReturn(null);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+
+    String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
+
+    // When a conflict occurs in dev, log the exception but continue.
+    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
+    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
+  }
+
+  @Test
+  public void testMe_userBeforeSuccessCloudProjectConflict() throws Exception {
+    createUser();
+    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    when(userProvider.get()).thenReturn(user);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+
+    Profile profile = cloudProfileController.getMe().getBody();
+
+    // When a conflict occurs in dev, log the exception but continue.
+    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName + "-2",
+        true);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
+    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName + "-2");
+  }
+
 
   @Test
   public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
