@@ -65,12 +65,11 @@ class DeployUI
 
   def add_options
     @parser.on("--project [PROJECT]",
-        "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
+        "Project to create credentials for (e.g. all-of-us-workbench-test). Required.") do |project|
       @opts.project = project
     end
     @parser.on("--account [ACCOUNT]",
-         "Account to use when creating credentials (your.name@pmi-ops.org); "\
-         "use this or --creds_file") do |account|
+         "Account to use when creating credentials (your.name@pmi-ops.org). Required.") do |account|
       @opts.account = account
     end
     @parser.on("--version [VERSION]",
