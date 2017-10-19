@@ -18,7 +18,13 @@ jobs:
           - api-cache-
       - run:
           working_directory: ~/workbench
-          command: ci/activate_creds.sh api/src/main/webapp/WEB-INF/sa-key.json
+          command: ci/activate_creds.sh circle-sa-key.json
+      - run:
+          working_directory: ~/workbench
+          command: |
+            gsutil cp
+              gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-9b5c623a838e.json
+              api/src/main/webapp/WEB-INF/sa-key.json
       - run:
           working_directory: ~/workbench/api
           command: gradle test --project-prop verboseTestLogging=yes
