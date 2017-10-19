@@ -1,6 +1,7 @@
 version: "3"
 services:
   db:
+    # This service must not have user: ${UID}, but still requires `export UID`.
     image: mysql:5.7
     env_file:
       - db/vars.env
