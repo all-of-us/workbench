@@ -2,12 +2,14 @@ package org.pmiops.workbench.api;
 
 
 import static com.google.common.truth.Truth.assertThat;
+import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.mysql.fabric.Server;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -199,6 +201,44 @@ public class ProfileControllerTest {
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName + "-2");
   }
 
+  @Test
+  public void testMe_userBeforeSuccessCloudProjectTooManyConflicts() throws Exception {
+    createUser();
+    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    when(userProvider.get()).thenReturn(user);
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
+    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
+
+    try {
+      cloudProfileController.getMe();
+      fail("ServerErrorException expected");
+    } catch (ServerErrorException e) {
+      // expected
+    }
+
+    // When too many conflicts occur, the user doesn't have their project name set or first
+    // sign in time.
+    assertUser(PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
+        DataAccessLevel.UNREGISTERED, null, null);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(fireCloudService).createAllOfUsBillingProject(projectName);
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
+    verify(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
+    
+  }
 
   @Test
   public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
@@ -258,7 +298,13 @@ public class ProfileControllerTest {
         Profile.DataAccessLevelEnum.fromValue(dataAccessLevel.toString().toLowerCase()));
     assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(freeTierBillingProject);
     assertThat(profile.getEnabledInFireCloud()).isEqualTo(enabledInFirecloud);
+    assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime,
+        freeTierBillingProject);
+  }
 
+  private void assertUser(String primaryEmail, String contactEmail,
+      String familyName, String givenName, DataAccessLevel dataAccessLevel,
+      Timestamp firstSignInTime, String freeTierBillingProject) {
     User user = userDao.findUserByEmail(primaryEmail);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
