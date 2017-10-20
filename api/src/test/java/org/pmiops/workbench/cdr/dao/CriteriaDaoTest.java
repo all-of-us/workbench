@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestCdrJpaConfig.class})
 @ActiveProfiles("test-cdr")
@@ -19,26 +21,37 @@ public class CriteriaDaoTest {
 
     @Autowired
     CriteriaDao criteriaDao;
-    private Criteria icd9Criteria;
-    private Criteria demoCriteria;
+    private Criteria icd9Criteria1;
+    private Criteria icd9Criteria2;
+    private Criteria demoCriteria1;
+    private Criteria demoCriteria2;
 
     @Before
     public void setUp() {
-        icd9Criteria = createCriteria("ICD9");
-        demoCriteria = createCriteria("DEMO");
-        criteriaDao.save(icd9Criteria);
-        criteriaDao.save(demoCriteria);
+        icd9Criteria1 = createCriteria("ICD9", 2);
+        icd9Criteria2 = createCriteria("ICD9", 1);
+        demoCriteria1 = createCriteria("DEMO", 2);
+        demoCriteria2 = createCriteria("DEMO", 1);
+        criteriaDao.save(icd9Criteria1);
+        criteriaDao.save(icd9Criteria2);
+        criteriaDao.save(demoCriteria1);
+        criteriaDao.save(demoCriteria2);
     }
 
     @Test
     public void findCriteriaByParentId() throws Exception {
-        assertEquals(icd9Criteria, criteriaDao.findCriteriaByTypeLikeAndParentId(icd9Criteria.getType(),0L).get(0));
-        assertEquals(demoCriteria, criteriaDao.findCriteriaByTypeLikeAndParentId(demoCriteria.getType(),0L).get(0));
+        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(icd9Criteria1.getType(), 0L);
+        assertEquals(icd9Criteria2, icd9List.get(0));
+        assertEquals(icd9Criteria1, icd9List.get(1));
+
+        final List<Criteria> demoList = criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(demoCriteria1.getType(), 0L);
+        assertEquals(demoCriteria2, demoList.get(0));
+        assertEquals(demoCriteria1, demoList.get(1));
     }
 
-    private Criteria createCriteria(String type) {
+    private Criteria createCriteria(String type, long order) {
         return new Criteria()
-                .sortOrder(1)
+                .sortOrder(order)
                 .code("002")
                 .count("10")
                 .conceptId("1000")

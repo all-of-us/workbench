@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-    List<Criteria> findCriteriaByTypeLikeAndParentId(String type, Long parentId);
+    List<Criteria> findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(String type, Long parentId);
 }

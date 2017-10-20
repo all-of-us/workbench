@@ -7,8 +7,6 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -42,41 +40,11 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public List<String> getTableNames() {
         return Arrays.asList(
                 "icd9_criteria",
-                "demo_criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
                 "procedure_occurrence",
                 "measurement");
-    }
-
-    @Test
-    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId("ICD9", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("ICD9")
-                        .code("001-139.99")
-                        .name("Infectious and parasitic diseases")
-                        .group(false)
-                        .selectable(false)
-                        .count(0L)
-                        .conceptId(0L));
-    }
-
-    @Test
-    public void getCriteriaByTypeAndParentId_demo() throws Exception {
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId("DEMO", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("DEMO_AGE")
-                        .name("Age")
-                        .group(false)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(12L));
     }
 
     @Test
@@ -215,13 +183,6 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     protected String getTablePrefix() {
         return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
-    }
-
-    private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
-        assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
     }
 
     private SearchRequest createSearchRequests(String type, List<SearchParameter> parameters) {

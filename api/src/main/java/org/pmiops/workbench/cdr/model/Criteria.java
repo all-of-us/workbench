@@ -214,4 +214,22 @@ public class Criteria {
         result = 31 * result + (domainId != null ? domainId.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Criteria{");
+        sb.append("id=").append(id);
+        sb.append(", sortOrder=").append(sortOrder);
+        sb.append(", parentId=").append(parentId);
+        sb.append(", type='").append(type).append('\'');
+        sb.append(", code='").append(code).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", group=").append(group);
+        sb.append(", selectable=").append(selectable);
+        sb.append(", count='").append(count).append('\'');
+        sb.append(", conceptId='").append(conceptId).append('\'');
+        sb.append(", domainId='").append(domainId).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
