@@ -13,7 +13,7 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.cdr.dao.Icd9CriteriaDao;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -43,6 +43,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
 
+    @Autowired
+    Icd9CriteriaDao icd9CriteriaDao;
+
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     /**
@@ -55,26 +58,27 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
-        QueryJobConfiguration queryRequest = QueryBuilderFactory
-                .getQueryBuilder(FactoryKey.CRITERIA)
-                .buildQueryJobConfig(new QueryParameters().type(type).parentId(parentId));
-
-        QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
-        Map<String, Integer> rm = getResultMapper(result);
+//        QueryJobConfiguration queryRequest = QueryBuilderFactory
+//                .getQueryBuilder(FactoryKey.CRITERIA)
+//                .buildQueryJobConfig(new QueryParameters().type(type).parentId(parentId));
+//
+//        QueryResult result = executeQuery(filterBigQueryConfig(queryRequest));
+//        Map<String, Integer> rm = getResultMapper(result);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-        for (List<FieldValue> row : result.iterateAll()) {
-            criteriaResponse.addItemsItem(new Criteria()
-                    .id(getLong(row, rm.get("id")))
-                    .type(getString(row, rm.get("type")))
-                    .code(getString(row, rm.get("code")))
-                    .name(getString(row, rm.get("name")))
-                    .count(getLong(row, rm.get("est_count")))
-                    .group(getBoolean(row, rm.get("is_group")))
-                    .selectable(getBoolean(row, rm.get("is_selectable")))
-                    .conceptId(getLong(row, rm.get("concept_id")))
-                    .domainId(getString(row, rm.get("domain_id"))));
-        }
+        icd9CriteriaDao.findIcd9CriteriaByParentId(parentId);
+//        for (List<FieldValue> row : result.iterateAll()) {
+//            criteriaResponse.addItemsItem(new Criteria()
+//                    .id(getLong(row, rm.get("id")))
+//                    .type(getString(row, rm.get("type")))
+//                    .code(getString(row, rm.get("code")))
+//                    .name(getString(row, rm.get("name")))
+//                    .count(getLong(row, rm.get("est_count")))
+//                    .group(getBoolean(row, rm.get("is_group")))
+//                    .selectable(getBoolean(row, rm.get("is_selectable")))
+//                    .conceptId(getLong(row, rm.get("concept_id")))
+//                    .domainId(getString(row, rm.get("domain_id"))));
+//        }
 
         return ResponseEntity.ok(criteriaResponse);
     }
