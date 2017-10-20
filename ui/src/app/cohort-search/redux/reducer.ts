@@ -113,7 +113,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .updateIn(
             ['entities', 'items', action.itemId, 'searchParameters'],
             List(),
-            paramList => paramList.push(action.criterion.get('id'))
+            paramList => paramList.includes(action.criterion.get('id'))
+              ? paramList
+              : paramList.push(action.criterion.get('id'))
           );
 
       case REMOVE_ITEM:
@@ -136,7 +138,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .updateIn(
             ['entities', 'items', action.itemId, 'searchParameters'],
-            critList => critList.filterNot(id => action.criterionId)
+            critList => critList.filterNot(id => id === action.criterionId)
           )
           .deleteIn(['entities', 'criteria', action.criterionId]);
 

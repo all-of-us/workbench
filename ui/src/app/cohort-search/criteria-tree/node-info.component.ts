@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  HostBinding,
   Input,
   EventEmitter,
   Output,
@@ -10,50 +11,41 @@ import {
 @Component({
   selector: 'app-criteria-tree-node-info',
   template: `
-    <div class="row clr-treenode-link">
+    <div class="col-lg-8 col-md-8 col-sm-6 text-truncate">
+      <small class="font-weight-bold">
+        {{ displayName }}
+      </small>
+      <small *ngIf="node.get('code')" class="text-muted">
+        {{ node.get('name') }}
+      </small>
+    </div>
 
-      <!-- Code/Name -->
-      <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 text-truncate">
-        <span *ngIf="node.get('code'); then showCode else noCode"></span>
-        <ng-template #showCode>
-          <small class="font-weight-bold">{{ node.get('code') }}</small>
-          <small class="text-muted">{{ node.get('name') }}</small>
-        </ng-template>
-        <ng-template #noCode>
-          <small class="font-weight-bold">{{ node.get('name') }}</small>
-        </ng-template>
-      </div>
+    <div class="col-lg col-md col-sm text-right">
+      <span *ngIf="nonZeroCount" class="badge badge-light-blue">
+        {{ node.get('count') }}
+      </span>
+    </div>
 
-      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
-        <!-- Count -->
-        <span *ngIf="node.get('count') === 0; then noCount else count"></span>
-        <ng-template #count>
-          <span class="badge badge-light-blue">{{ node.get('count') }}&nbsp;&nbsp;</span>
-        </ng-template>
-        <ng-template #noCount>
-          <span class="badge badge-light-blue invisible">{{ node.get('count') }}&nbsp;&nbsp;</span>
-        </ng-template>
-
-        <!-- Selectable -->
-        <span *ngIf="node.get('selectable'); then selectable else notSelectable"></span>
-        <ng-template #notSelectable>
-          <button type="button" class="btn btn-link btn-sm invisible">
-            <clr-icon shape="plus-circle" size="20"></clr-icon></button>
-        </ng-template>
-        <ng-template #selectable>
-          <button type="button" class="btn btn-link btn-sm" (click)="select($event)">
-            <clr-icon shape="plus-circle" size="20"></clr-icon></button>
-        </ng-template>
-
-      </div>
+    <div class="col-lg-1 col-md-1 col-sm-1">
+      <button
+        *ngIf="selectable"
+        type="button"
+        class="btn btn-sm btn-link"
+        style="margin: 0 0 0 0;"
+        (click)="select($event)">
+        <clr-icon shape="plus-circle"></clr-icon>
+      </button>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeNodeInfoComponent {
   @Input() node;
   @Output() onSelect = new EventEmitter<boolean>();
 
+  @HostBinding('class.clr-treenode-link') clrTreenodeLink = true;
+
   select(event) { this.onSelect.emit(true); }
+  get nonZeroCount() { return this.node.get('count', 0) > 0; }
+  get selectable() { return this.node.get('selectable', false); }
+  get displayName() { return this.node.get('code') || this.node.get('name'); }
 }
