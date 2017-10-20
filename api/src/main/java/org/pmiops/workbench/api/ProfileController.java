@@ -4,10 +4,11 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -23,6 +24,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
+import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
@@ -36,6 +38,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
+
+  private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
+      BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
+      new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
+        @Override
+        public BillingProjectMembership apply(
+            org.pmiops.workbench.firecloud.model.BillingProjectMembership billingProjectMembership) {
+          BillingProjectMembership result = new BillingProjectMembership();
+          result.setMessage(billingProjectMembership.getMessage());
+          result.setProjectName(billingProjectMembership.getProjectName());
+          result.setRole(billingProjectMembership.getRole());
+          result.setStatus(StatusEnum.fromValue(billingProjectMembership.getStatus().toString()));
+          return result;
+        }
+      };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
@@ -71,8 +88,16 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
-    // TODO: retrieve billing projects
-    return ResponseEntity.ok(new ArrayList<>());
+    try {
+      List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
+          fireCloudService.getBillingProjectMemberships();
+      return ResponseEntity.ok(memberships.stream().map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
+          .collect(Collectors.toList()));
+    } catch (ApiException e) {
+      log.log(Level.SEVERE, "Error fetching billing project memberships: {0}"
+          .format(e.getResponseBody()), e);
+      throw new ServerErrorException("Error fetching billing project memberships", e);
+    }
   }
 
   private String createFirecloudUserAndBillingProject(User user) {

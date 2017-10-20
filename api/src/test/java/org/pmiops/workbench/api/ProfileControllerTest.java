@@ -7,14 +7,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.google.api.Billing;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.common.collect.ImmutableList;
 import com.mysql.fabric.Server;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +33,10 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.*;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
@@ -277,6 +282,32 @@ public class ProfileControllerTest {
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
   }
 
+  @Test
+  public void testGetBillingProjects_empty() throws Exception {
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(
+        ImmutableList.<org.pmiops.workbench.firecloud.model.BillingProjectMembership>of());
+    assertThat(profileController.getBillingProjects().getBody()).isEmpty();
+  }
+
+  @Test
+  public void testGetBillingProjects_notEmpty() throws Exception {
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setProjectName("a");
+    membership.setMessage("b");
+    membership.setRole("c");
+    membership.setStatus(StatusEnum.CREATING);
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(
+        ImmutableList.of(membership));
+    List<BillingProjectMembership> memberships =
+        profileController.getBillingProjects().getBody();
+    assertThat(memberships.size()).isEqualTo(1);
+    BillingProjectMembership result = memberships.get(0);
+    assertThat(result.getProjectName()).isEqualTo("a");
+    assertThat(result.getMessage()).isEqualTo("b");
+    assertThat(result.getRole()).isEqualTo("c");
+    assertThat(result.getStatus()).isEqualTo(BillingProjectMembership.StatusEnum.CREATING);
+  }
 
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);

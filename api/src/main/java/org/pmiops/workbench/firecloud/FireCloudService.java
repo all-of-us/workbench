@@ -1,5 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
+import java.util.List;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+
 /**
  * Encapsulate Firecloud API interaction details and provide a simple/mockable interface
  * for internal use.
@@ -33,4 +36,9 @@ public interface FireCloudService {
    * Creates a new FC workspace.
    */
   void createWorkspace(String projectName, String workspaceName) throws ApiException;
+
+  /**
+   * Retrieves all billing project memberships for the user from FireCloud.
+   */
+  List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;
 }
