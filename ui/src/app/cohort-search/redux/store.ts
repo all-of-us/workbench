@@ -100,6 +100,12 @@ export const countFor = (kind, id) => state =>
 export const totalCount = state =>
   countFor('searchRequests', SR_ID)(state);
 
+export const isRequesting = (kind, id) => state =>
+  state.getIn(['entities', kind, id, 'isRequesting'], false);
+
+export const isRequstingTotal = state =>
+  isRequesting('searchRequests', SR_ID)(state);
+
 
 /**
  * Get Context

@@ -23,4 +23,8 @@ export class SearchGroupItemComponent {
   get item() {
     return getItem(this.itemId)(this.ngRedux.getState());
   }
+
+  get isRequesting() {
+    return this.item.get('isRequesting', false);
+  }
 }
