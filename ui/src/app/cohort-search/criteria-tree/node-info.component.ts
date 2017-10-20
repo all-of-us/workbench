@@ -37,7 +37,7 @@ import {
     </div>
   `,
   host: {
-    '[class.clr-treenode-link]': "'true'",
+    '[class.clr-treenode-link]': '"true"',
   }
 })
 export class CriteriaTreeNodeInfoComponent {
