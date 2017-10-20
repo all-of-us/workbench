@@ -1,14 +1,20 @@
 package org.pmiops.workbench.config;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.google.Utils;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,6 +54,19 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   public WorkbenchEnvironment workbenchEnvironment() {
     return new WorkbenchEnvironment();
+  }
+
+  @Lazy
+  @Bean
+  public GoogleCredential serviceAccountCredential() {
+    ServletContext context = Utils.getRequestServletContext();
+    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
+    GoogleCredential credential = null;
+    try {
+      return GoogleCredential.fromStream(saFileAsStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
