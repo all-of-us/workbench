@@ -38,33 +38,29 @@ public class DirectoryServiceImpl implements DirectoryService {
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
+  final Provider<GoogleCredential> googleCredentialProvider;
   final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
-  public DirectoryServiceImpl(Provider<WorkbenchConfig> configProvider) {
+  public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
+      Provider<WorkbenchConfig> configProvider) {
+    this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
-    ServletContext context = Utils.getRequestServletContext();
-    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
-    GoogleCredential credential = null;
-    try {
-      credential = GoogleCredential.fromStream(saFileAsStream);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    GoogleCredential googleCredential = googleCredentialProvider.get();
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
         .setServiceAccountUser("directory-service@"+gSuiteDomain)
-        .setServiceAccountId(credential.getServiceAccountId())
+        .setServiceAccountId(googleCredential.getServiceAccountId())
         .setServiceAccountScopes(SCOPES)
-        .setServiceAccountPrivateKey(credential.getServiceAccountPrivateKey())
-        .setServiceAccountPrivateKeyId(credential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl())
+        .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
+        .setServiceAccountPrivateKeyId(googleCredential.getServiceAccountPrivateKeyId())
+        .setTokenServerEncodedUrl(googleCredential.getTokenServerEncodedUrl())
         .build();
   }
 
