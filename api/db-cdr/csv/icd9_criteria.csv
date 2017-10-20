@@ -1,4 +1,4 @@
-id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_id
+sort_order,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_id
 1,0,ICD9,001-999.99,DISEASES AND INJURIES,true,false,,,
 2,0,ICD9,00-99.99,PROCEDURES,true,false,,,
 4,0,ICD9,E000-E999.9,EXTERNAL CAUSES OF INJURY AND POISONING,true,false,,,
@@ -3992,7 +3992,7 @@ id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_i
 2132,43,ICD9,041.02,"Streptococcus infection in conditions classified elsewhere and of unspecified site, streptococcus, group B",false,true,1989,44820548,Condition
 2140,43,ICD9,041.12,Methicillin resistant Staphylococcus aureus in conditions classified elsewhere and of unspecified site,false,true,6583,44823971,Condition
 2145,43,ICD9,041.41,Shiga toxin-producing Escherichia coli [E. coli] (STEC) O157,false,true,23,44836772,Condition
-2143,43,ICD9,041.3,Friedländer's bacillus infection in conditions classified elsewhere and of unspecified site,false,true,4117,44836771,Condition
+2143,43,ICD9,041.3,Friedl??nder's bacillus infection in conditions classified elsewhere and of unspecified site,false,true,4117,44836771,Condition
 2129,43,ICD9,041.0,Streptococcus infection in conditions classified elsewhere and of unspecified site,false,true,95,44829735,Condition
 2128,43,ICD9,041,Bacterial infection in conditions classified elsewhere and of unspecified site,false,true,15,44828676,Condition
 2135,43,ICD9,041.05,"Streptococcus infection in conditions classified elsewhere and of unspecified site, streptococcus, group G",false,true,132,44834423,Condition
@@ -4353,7 +4353,7 @@ id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_i
 2205,48,ICD9,046.79,Other and unspecified prion disease of central nervous system,false,true,4,44830924,Condition
 2202,48,ICD9,046.7,Other specified prion diseases of central nervous system,false,true,1,44823973,Condition
 2200,48,ICD9,046.2,Subacute sclerosing panencephalitis,false,true,4,44835613,Condition
-2203,48,ICD9,046.71,Gerstmann-Sträussler-Scheinker syndrome,false,true,2,44827493,Condition
+2203,48,ICD9,046.71,Gerstmann-Str??ussler-Scheinker syndrome,false,true,2,44827493,Condition
 5239,304,ICD9,317,Mild intellectual disabilities,false,true,1695,44828852,Condition
 8806,560,ICD9,599.7,Hematuria,false,true,24648,44824352,Condition
 8800,560,ICD9,599.3,Urethral caruncle,false,true,239,44830182,Condition
@@ -8439,7 +8439,7 @@ id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_i
 6873,372,ICD9,386.31,Serous labyrinthitis,false,true,21,44827772,Condition
 6885,372,ICD9,386.50,"Labyrinthine dysfunction, unspecified",false,true,526,44833545,Condition
 6859,372,ICD9,386.0,Meniere's disease,false,true,108,44825419,Condition
-6861,372,ICD9,386.01,"Active Ménière's disease, cochleovestibular",false,true,1976,44821939,Condition
+6861,372,ICD9,386.01,"Active M??ni??re's disease, cochleovestibular",false,true,1976,44821939,Condition
 6879,372,ICD9,386.40,"Labyrinthine fistula, unspecified",false,true,128,44825420,Condition
 6894,372,ICD9,386.9,Unspecified vertiginous syndromes and labyrinthine disorders,false,true,8373,44830069,Condition
 6883,372,ICD9,386.48,Labyrinthine fistula of combined sites,false,true,6,44835915,Condition
@@ -8450,19 +8450,19 @@ id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_i
 6865,372,ICD9,386.1,Other and unspecified peripheral vertigo,false,true,47,44837085,Condition
 6893,372,ICD9,386.8,Other disorders of labyrinth,false,true,476,44825421,Condition
 6889,372,ICD9,386.54,"Hypoactive labyrinth, bilateral",false,true,38,44824226,Condition
-6863,372,ICD9,386.03,"Active Ménière's disease, vestibular",false,true,394,44834710,Condition
+6863,372,ICD9,386.03,"Active M??ni??re's disease, vestibular",false,true,394,44834710,Condition
 6871,372,ICD9,386.3,Labyrinthitis,false,true,9,44823093,Condition
-6860,372,ICD9,386.00,"Ménière's disease, unspecified",false,true,3307,44833544,Condition
+6860,372,ICD9,386.00,"M??ni??re's disease, unspecified",false,true,3307,44833544,Condition
 6881,372,ICD9,386.42,Oval window fistula,false,true,21,44821942,Condition
 6875,372,ICD9,386.33,Suppurative labyrinthitis,false,true,5,44824225,Condition
-6864,372,ICD9,386.04,Inactive Ménière's disease,false,true,240,44828965,Condition
+6864,372,ICD9,386.04,Inactive M??ni??re's disease,false,true,240,44828965,Condition
 6858,372,ICD9,386,Vertiginous syndromes and other disorders of vestibular system,false,true,947,44819685,Condition
 6892,372,ICD9,386.58,Other forms and combinations of labyrinthine dysfunction,false,true,26,44823096,Condition
 6870,372,ICD9,386.2,Vertigo of central origin,false,true,3173,44837086,Condition
 6874,372,ICD9,386.32,Circumscribed labyrinthitis,false,true,6,44824224,Condition
 6876,372,ICD9,386.34,Toxic labyrinthitis,false,true,27,44819686,Condition
 6866,372,ICD9,386.10,"Peripheral vertigo, unspecified",false,true,5665,44832358,Condition
-6862,372,ICD9,386.02,"Active Ménière's disease, cochlear",false,true,363,44830067,Condition
+6862,372,ICD9,386.02,"Active M??ni??re's disease, cochlear",false,true,363,44830067,Condition
 6872,372,ICD9,386.30,"Labyrinthitis, unspecified",false,true,1200,44837087,Condition
 6887,372,ICD9,386.52,"Hyperactive labyrinth, bilateral",false,true,4,44837088,Condition
 6878,372,ICD9,386.4,Labyrinthine fistula,false,true,5,44819687,Condition

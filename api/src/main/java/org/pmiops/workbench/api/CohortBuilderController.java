@@ -13,7 +13,7 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.cdr.dao.Icd9CriteriaDao;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -44,7 +44,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     private Provider<WorkbenchConfig> workbenchConfig;
 
     @Autowired
-    Icd9CriteriaDao icd9CriteriaDao;
+    CriteriaDao criteriaDao;
 
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -66,7 +66,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 //        Map<String, Integer> rm = getResultMapper(result);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-        icd9CriteriaDao.findIcd9CriteriaByParentId(parentId);
+        criteriaDao.findCriteriaByTypeLikeAndParentId(type, parentId);
 //        for (List<FieldValue> row : result.iterateAll()) {
 //            criteriaResponse.addItemsItem(new Criteria()
 //                    .id(getLong(row, rm.get("id")))

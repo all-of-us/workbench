@@ -8,10 +8,10 @@
   <changeSet author="brianfreeman" id="changelog-1" runAlways="true">
 
     <preConditions onFail="MARK_RAN">
-        <tableExists tableName="icd9_criteria"/>
+        <tableExists tableName="criteria"/>
     </preConditions>
 
-    <dropTable tableName="icd9_criteria"/>
+    <dropTable tableName="criteria"/>
 
   </changeSet>
 </databaseChangeLog>
