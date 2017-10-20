@@ -28,7 +28,15 @@
   <div 
     class="card-footer font-weight-bold bg-count text-right"
     [style.background-color]="'#d7d7d7'">
-    Group Count: {{ group.get('count') || 0 }}
+    Group Count:
+    <span *ngIf="isRequesting"
+      class="spinner spinner-inline"
+      [style.vertical-align]="'middle'">
+      Loading...
+    </span>
+    <span *ngIf="!isRequesting">
+     {{ group.get('count') || 0 }}
+    </span>
   </div>
 
 </div>

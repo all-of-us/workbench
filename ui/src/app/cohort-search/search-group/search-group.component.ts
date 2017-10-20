@@ -12,4 +12,8 @@ export class SearchGroupComponent {
   @Output() onRemove = new EventEmitter<boolean>();
 
   remove(event) { this.onRemove.emit(true); }
+
+  get isRequesting() {
+    return this.group.get('isRequesting', false);
+  }
 }
