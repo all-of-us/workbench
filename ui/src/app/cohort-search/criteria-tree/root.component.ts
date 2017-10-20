@@ -1,17 +1,20 @@
 import {
   Component,
+  Input,
   OnDestroy,
   OnInit,
-  Input,
   ViewEncapsulation,
 } from '@angular/core';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
-import {List} from 'immutable';
 
-import {CohortSearchActions} from '../redux/actions';
-import {CohortSearchState} from '../redux/store';
-import {isRequesting} from '../redux/requests';
+import {
+  activeItemId,
+  CohortSearchActions,
+  CohortSearchState,
+  isCriteriaLoading,
+  criteriaChildren,
+} from '../redux';
 
 
 @Component({
@@ -26,7 +29,10 @@ import {isRequesting} from '../redux/requests';
 
     <ng-template #nodesLoaded>
       <clr-tree-node *ngFor="let node of children; trackBy: trackById">
-        <app-criteria-tree-node-info [node]="node">
+        <app-criteria-tree-node-info
+          [node]="node"
+          (onSelect)="handleSelection(node)"
+        >
         </app-criteria-tree-node-info>
 
         <ng-template clrIfExpanded>
@@ -43,23 +49,20 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
   @Input() critType: string;
   @Input() parentId: number;
 
-  children;
-  loading;
-
-  subscriptions: Subscription[];
+  private children;
+  private loading;
+  private subscriptions: Subscription[];
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    const path = List().push(this.critType, this.parentId);
-    const nodePath = ['criteriaTree', this.critType, this.parentId];
-
+    const children$ = this.ngRedux.select(criteriaChildren(this.critType, this.parentId));
+    const loading$ = this.ngRedux.select(isCriteriaLoading(this.critType, this.parentId));
     this.subscriptions = [
-      this.ngRedux.select(isRequesting(path)).subscribe(v => this.loading = v),
-      this.ngRedux.select(nodePath).subscribe(n => this.children = n)
+      children$.subscribe(value => this.children = value),
+      loading$.subscribe(value => this.loading = value)
     ];
-
     this.actions.fetchCriteria(this.critType, this.parentId);
   }
 
@@ -67,7 +70,12 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
+  handleSelection(node) {
+    const itemId = activeItemId(this.ngRedux.getState());
+    this.actions.selectCriteria(itemId, node);
+  }
+
   trackById(index, node) {
-    return node ? node.id : undefined;
+    return node ? node.get('id') : undefined;
   }
 }

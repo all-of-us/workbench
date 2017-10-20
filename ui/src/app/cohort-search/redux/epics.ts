@@ -1,13 +1,28 @@
-import {ActionsObservable} from 'redux-observable';
-import {AnyAction} from 'redux';
+import {ActionsObservable, Epic} from 'redux-observable';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {List} from 'immutable';
+import {List, is} from 'immutable';
+import {
+  BEGIN_CRITERIA_REQUEST,
+  CANCEL_CRITERIA_REQUEST,
+  CRITERIA_REQUEST_ERROR,
+  BEGIN_COUNT_REQUEST,
+  CANCEL_COUNT_REQUEST,
+  COUNT_REQUEST_ERROR,
+  RootAction,
+  ActionTypes,
+} from './actions/types';
+import {
+  loadCriteriaRequestResults,
+  loadCountRequestResults,
+  criteriaRequestError,
+  countRequestError,
+} from './actions/creators';
+import {CohortSearchState} from './store';
 
-import {CohortSearchActions as Actions} from './actions';
-import {cancelListener, cleanupRequest} from './requests';
 import {CohortBuilderService} from 'generated';
 
+type CSEpic = Epic<RootAction, CohortSearchState>;
 /**
  * CohortSearchEpics
  *
@@ -20,49 +35,40 @@ import {CohortBuilderService} from 'generated';
 export class CohortSearchEpics {
   constructor(private service: CohortBuilderService) {}
 
-  fetchCriteria = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(Actions.FETCH_CRITERIA).mergeMap(
-      ({critType, parentId}) => {
-        const _type = critType.match(/^DEMO.*/i) ? 'DEMO' : critType;
+  fetchCriteria: CSEpic = (action$) => (
+    action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
+      ({kind, parentId}: ActionTypes[typeof BEGIN_CRITERIA_REQUEST]) => {
+        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(_type, parentId)
-          .map(result => ({
-            type: Actions.LOAD_CRITERIA, children: result.items, critType, parentId,
-            cleanup: cleanupRequest(List([critType, parentId]))
-          }))
-          .race(cancelListener(action$, List([critType, parentId])))
-          .catch(error =>
-            Observable.of({type: Actions.ERROR, error, critType, parentId})
-          );
+          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(
+              (action: ActionTypes[typeof CANCEL_CRITERIA_REQUEST]) =>
+              action.kind === kind && action.parentId === parentId
+            )
+            .take(1)
+          )
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
       }
     )
   )
 
-  fetchSearchResults = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(Actions.FETCH_SEARCH_RESULTS).mergeMap(
-      ({request, sgiPath}) =>
+  fetchCounts: CSEpic = (action$) => (
+    action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
+      ({entityType, entityId, request}: ActionTypes[typeof BEGIN_COUNT_REQUEST]) =>
       this.service.countSubjects(request)
-        .map(results => ({
-          type: Actions.LOAD_SEARCH_RESULTS, results, sgiPath,
-          cleanup: cleanupRequest(sgiPath)
-        }))
-        .race(cancelListener(action$, sgiPath))
-        .catch(error => Observable.of({type: Actions.ERROR, error, sgiPath}))
+        .map(response => typeof response === 'number' ? response : 0)
+        .map(count => loadCountRequestResults(entityType, entityId, count))
+        .race(action$
+          .ofType(CANCEL_COUNT_REQUEST)
+          .filter(
+            (action: ActionTypes[typeof CANCEL_COUNT_REQUEST]) =>
+            action.entityType === entityType && action.entityId === entityId
+          )
+          .take(1)
+        )
+        .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
     )
-  )
-
-  recalculateCounts = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(
-      Actions.LOAD_SEARCH_RESULTS,
-      Actions.REMOVE_SEARCH_GROUP,
-      Actions.REMOVE_GROUP_ITEM,
-      Actions.REMOVE_CRITERIA,
-    ).map(() => ({type: Actions.RECALCULATE_COUNTS}))
-  )
-
-  finalizeRequests = (action$: ActionsObservable<AnyAction>) => (
-    action$.ofType(
-      Actions.LOAD_CRITERIA,
-      Actions.LOAD_SEARCH_RESULTS
-    ).map(action => action.cleanup)
   )
 }

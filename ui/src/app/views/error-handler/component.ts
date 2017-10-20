@@ -23,4 +23,8 @@ export class ErrorHandlerComponent implements OnInit {
   closeNoServerResponse(): void {
     this.errorHandlingService.clearNoServerResponse();
   }
+
+  closeServerBusy(): void {
+    this.errorHandlingService.clearServerBusy();
+  }
 }

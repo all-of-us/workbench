@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CollectionTable;
@@ -28,11 +29,11 @@ public class User {
   // The email address that can be used to contact the user.
   private String contactEmail;
   private DataAccessLevel dataAccessLevel;
-  private String fullName;
   private String givenName;
   private String familyName;
   private String phoneNumber;
   private String freeTierBillingProjectName;
+  private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
 
   @Id
@@ -73,15 +74,6 @@ public class User {
     this.dataAccessLevel = dataAccessLevel;
   }
 
-  @Column(name = "full_name")
-  public String getFullName() {
-    return fullName;
-  }
-
-  public void setFullName(String fullName) {
-    this.fullName = fullName;
-  }
-
   @Column(name = "given_name")
   public String getGivenName() {
     return givenName;
@@ -100,6 +92,7 @@ public class User {
     this.familyName = familyName;
   }
 
+  // TODO: consider dropping this (do we want researcher phone numbers?)
   @Column(name = "phone_number")
   public String getPhoneNumber() {
     return phoneNumber;
@@ -118,11 +111,16 @@ public class User {
     this.freeTierBillingProjectName = freeTierBillingProjectName;
   }
 
-  // Authorities (special permissions) are granted only through direct db edits, for example
-  // INSERT INTO authority VALUES(
-  //     (SELECT user_id FROM user WHERE email = 'me@staging.pmi-ops.org'),
-  //     0);
-  // TODO(RW-85) Tool to edit authorities.
+  @Column(name = "first_sign_in_time")
+  public Timestamp getFirstSignInTime() {
+    return firstSignInTime;
+  }
+
+  public void setFirstSignInTime(Timestamp firstSignInTime) {
+    this.firstSignInTime = firstSignInTime;
+  }
+
+  // Authorities (special permissions) are granted using api/project.rb set-authority.
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "authority")

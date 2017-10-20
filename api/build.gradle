@@ -154,8 +154,12 @@ repositories {   // repositories for Jar's you access in your code
 }
 
 dependencies {
+
+  // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
+
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
+  compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
@@ -177,17 +181,17 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev53-1.20.0'
+  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
-  compile 'com.google.cloud:google-cloud-storage:1.7.0'
-  compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
+  compile 'com.google.cloud:google-cloud-bigquery:+'
+  compile 'com.google.cloud:google-cloud-storage:1.8.0'
+  compile 'com.google.code.gson:gson:+'
+  compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
   compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
-  compile 'com.google.code.gson:gson:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
-  compile 'com.google.cloud:google-cloud-bigquery:+'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
@@ -246,7 +250,12 @@ appengine {  // App Engine tasks configuration
     jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
   }
 
-
+  // dmohs: You may see this message [1], but don't implement the suggested fix because it breaks
+  // Spring.
+  // [1] https://github.com/GoogleCloudPlatform/app-gradle-plugin/issues/100
+  // stage {
+  //    enableJarClasses = true
+  // }
 
   deploy {   // deploy configuration
     stopPreviousVersion = true  // default - stop the current version

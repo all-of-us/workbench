@@ -6,3 +6,7 @@
   Server not available (0)
   <clr-icon shape="times" (click)="this.closeNoServerResponse()"></clr-icon>
 </div>
+<div *ngIf="this.errorHandlingService.serverBusy" class="error-handler">
+  Server is currently busy (503)
+  <clr-icon shape="times" (click)="this.closeServerBusy()"></clr-icon>
+</div>

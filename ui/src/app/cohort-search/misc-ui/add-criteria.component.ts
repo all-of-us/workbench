@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 
-import {CohortSearchActions} from '../redux/actions';
+import {CohortSearchActions} from '../redux';
 import {SearchRequest} from 'generated';
 
 
@@ -29,14 +29,14 @@ const CRITERIA_TYPES = [
           class="dropdown-item"
           *ngFor="let criteria of criteriaTypes"
           type="button"
-          (click)="actions.openWizard(criteria.type, role, index)"
+          (click)="actions.openWizard(criteria.type, role, groupId)"
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
   `
 })
 export class AddCriteriaComponent {
-  @Input() index: number;
+  @Input() groupId: string;
   @Input() role: keyof SearchRequest;
 
   readonly criteriaTypes = CRITERIA_TYPES;

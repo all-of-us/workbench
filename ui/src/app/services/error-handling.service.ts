@@ -6,6 +6,7 @@ export class ErrorHandlingService {
 
   public serverError: boolean;
   public noServerResponse: boolean;
+  public serverBusy: boolean;
 
   constructor(private zone: NgZone) {
     this.serverError = false;
@@ -28,6 +29,14 @@ export class ErrorHandlingService {
     this.noServerResponse = false;
   }
 
+  public setServerBusy(): void {
+    this.serverBusy = true;
+  }
+
+  public clearServerBusy(): void {
+    this.serverBusy = false;
+  }
+
   // Don't retry API calls unless the status code is 503.
   public retryApi (observable: Observable<any>,
       toRun?: number): Observable<any> {
@@ -38,6 +47,10 @@ export class ErrorHandlingService {
     return observable.retryWhen((errors) => {
       return errors.do((e) => {
         numberRuns++;
+        if (numberRuns === toRun) {
+          this.setServerBusy();
+          throw e;
+        }
         switch (e.status) {
           case 503:
             break;

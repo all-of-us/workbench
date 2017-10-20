@@ -17,6 +17,7 @@
 /api/db-cdr/.gradle
 /api/out/*
 /api/src/main/webapp/WEB-INF/appengine-web.xml
+/api/src/main/webapp/WEB-INF/sa-key.json
 /api/src/generated
 /api/tools/build/*
 /api/tools/.gradle/*
@@ -33,5 +34,4 @@ node_modules
 npm-debug.log
 tools/*.jar
 tools/cloud_sql_proxy
-/api/sa-key.json
 .DS_Store
