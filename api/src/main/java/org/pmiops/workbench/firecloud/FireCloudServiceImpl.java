@@ -2,10 +2,12 @@ package org.pmiops.workbench.firecloud;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.Profile;
@@ -94,6 +96,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     workspaceIngest.setNamespace(projectName);
     // TODO: set authorization domain here
     workspacesApi.createWorkspace(workspaceIngest);
+  }
+
+  @Override
+  public List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException {
+    return profileApiProvider.get().billing();
   }
 
   private boolean isTrue(Boolean b) {
