@@ -42,11 +42,11 @@ public class FireCloudConfig {
 
   @Bean(name=ALL_OF_US_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
+  public ApiClient allOfUsApiClient(GoogleCredential googleCredential,
+      WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
-      GoogleCredential credential = Utils.getDefaultGoogleCredential()
-          .createScoped(Arrays.asList(BILLING_SCOPES));
+      GoogleCredential credential = googleCredential.createScoped(Arrays.asList(BILLING_SCOPES));
       credential.refreshToken();
       String accessToken = credential.getAccessToken();
       apiClient.setAccessToken(accessToken);

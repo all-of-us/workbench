@@ -5,7 +5,6 @@ import {SearchRequest} from 'generated';
 @Component({
   selector: 'app-search-group',
   templateUrl: 'search-group.component.html',
-  styleUrls: ['search-group.component.css'],
 })
 export class SearchGroupComponent {
   @Input() group;
@@ -13,4 +12,8 @@ export class SearchGroupComponent {
   @Output() onRemove = new EventEmitter<boolean>();
 
   remove(event) { this.onRemove.emit(true); }
+
+  get isRequesting() {
+    return this.group.get('isRequesting', false);
+  }
 }

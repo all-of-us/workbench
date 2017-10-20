@@ -112,6 +112,7 @@ public class ProfileController implements ProfileApiDelegate {
             // want to create a new billing project every time the database is reset.)
             log.log(Level.WARNING, "Project with name {0} already exists; using it."
                 .format(billingProjectName));
+            break;
           } else {
             numAttempts++;
             // In cloud environments, keep trying billing project names until we find one
