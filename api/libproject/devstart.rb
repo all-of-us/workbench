@@ -210,7 +210,7 @@ def do_run_with_creds(project, account, creds_file)
   if creds_file == nil
     service_account_creds_file = Tempfile.new("#{project}-creds.json")
     if project == "all-of-us-workbench-test"
-      creds_filename = "sa-key.json"
+      creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
       # For test, use a locally stored key file copied from GCS (which we leave hanging
       # around.)
       if !File.file?(creds_filename)
@@ -255,11 +255,10 @@ end
 
 def drop_cloud_db(*args)
   GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
-    drop_db_file = Tempfile.new("#{ctx.opts.project}-drop-db.sql")
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
-        "cat db/drop_db.sql | envsubst > #{drop_db_file.path} | " \
+        "cat db/drop_db.sql | envsubst | " \
         "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
         to_redact=pw)
   end
@@ -414,6 +413,48 @@ class GcloudContext
     end
   end
 end
+
+
+# Command-line parsing and main "run" implementation for deploy-api.
+class DeployApi < GcloudContext
+  def add_options
+    super
+    @parser.on(
+        "--version [VERSION]",
+        "The name of the version to deploy. Required."
+        ) do |version|
+      @opts.version = version
+    end
+    @parser.on(
+        "--promote",
+        "Use this if you want to promote this version so it receives traffic. By default, it won't."
+        ) do |promote|
+      @opts.promote = "promote"
+    end
+    @opts.promote = "no-promote" # default
+  end
+
+  def validate_options
+    if @opts.project == nil || @opts.account == nil ||@opts.version == nil
+      puts @parser.help
+      exit 1
+    end
+  end
+
+  def run
+    super do
+      # Populate environment variables based on DB credentials
+      read_db_vars(@opts.creds_file, @opts.project)
+      # This triggers logic in generate_appengine_web_xml.sh to use environment variables set above,
+      # rather than reading from vars.env.
+      ENV["CIRCLECI"] = "true"
+      @common.run_inline %W{#{@gradlew_path} :appengineStage}
+      @common.run_inline %W{gcloud app deploy build/staged-app/app.yaml --project #{@opts.project} --account #{@opts.account}
+          --version #{@opts.version} --#{@opts.promote}}
+    end
+  end
+end
+
 
 # Command-line parsing and main "run" implementation for set-authority.
 class SetAuthority < GcloudContext
@@ -587,3 +628,11 @@ Common.register_command({
   :description => "Set user authorities (permissions). See set-authority --help.",
   :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })
+
+Common.register_command({
+  :invocation => "deploy-api",
+  :description => "Deploys the API server to the specified cloud project.",
+  :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
+})
+
+

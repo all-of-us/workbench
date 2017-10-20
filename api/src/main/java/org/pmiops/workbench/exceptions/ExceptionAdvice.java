@@ -2,6 +2,7 @@ package org.pmiops.workbench.exceptions;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,8 +13,6 @@ public class ExceptionAdvice {
 
   private static final Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
 
-  private static final String DEFAULT_ERROR_VIEW = "error";
-
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
     int statusCode = 500;
@@ -21,10 +20,15 @@ public class ExceptionAdvice {
         ExceptionAdvice.class.getPackage().getName())) {
       ResponseStatus responseStatus = e.getClass().getAnnotation(ResponseStatus.class);
       if (responseStatus != null) {
-        statusCode = responseStatus.code().value();
+        statusCode = responseStatus.value().value();
         log.log(Level.WARNING, "[{0}] {1}: {2}",
             new Object[]{statusCode, e.getClass().getSimpleName(), e.getMessage()});
-        if (responseStatus.code().value() < 500) {
+        if (statusCode < 500) {
+          if (e instanceof BadRequestException) {
+            ErrorResponse errorResponse = ((BadRequestException) e).getErrorResponse();
+            return ResponseEntity.status(statusCode).body(
+                ((BadRequestException) e).getErrorResponse());
+          }
           return ResponseEntity.status(statusCode).body(e.getMessage());
         }
       }

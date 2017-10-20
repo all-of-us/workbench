@@ -18,6 +18,7 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -174,6 +175,9 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
 
     if (req != null) {
+      if (user == null) {
+        throw new BadRequestException("User is not initialized; please register");
+      }
       // Fetch the user with authorities, since they aren't loaded during normal
       user = userDao.findUserWithAuthorities(user.getUserId());
       Collection<Authority> granted = user.getAuthorities();

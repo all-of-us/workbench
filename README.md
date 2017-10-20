@@ -76,32 +76,38 @@ Other available operations may be discovered by running:
 
 ## Deploying
 
-To deploy your local code to a given AppEngine project, run:
+To deploy your local API code to a given AppEngine project, in the api 
+directory run:
 
 ```
-./deploy.py --project PROJECT --account ACCOUNT@pmi-ops.org
+./project.rb deploy-api --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
 ```
 
 Example:
 
 ```
-./deploy.py -p all-of-us-workbench-test -a dan.rodney@pmi-ops.org
+./project.rb deploy-api --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
 ```
 
-You will be prompted to confirm the deployment. When it finishes, you will be able to access the
-UI under http://PROJECT.appspot.com and the API under http://api.PROJECT.appspot.com.
+When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
+served out of https://api-dot-PROJECT.appspot.com.
 
-### Versioned UI deploy
+To deploy your local UI code to a given AppEngine project, in the ui 
+directory run:
 
-To avoid overriding the currently deployed test version it is useful to add versioning to your deploys.
-To just deploy the UI, add the following flag: `-t ui`.
-To version your deploy, add the flag: `--version VERSION`.
-To enable access to the version, go to cloud console and add the version URL to the `AoU Web Client (Test)` OAuth client ID.
-(See https://console.cloud.google.com/apis/credentials/oauthclient/602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com?project=all-of-us-workbench-test to add Authorized JS origin to the OAuth key.)
+```
+./project.rb deploy-ui --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
+```
 
-#### Example Call
+Example:
 
-`python tools/deploy.py --project MY_PROJECT --account MY_ACCOUNT -t ui --version brubenst---pr`
+```
+./project.rb deploy-ui --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
+```
+
+When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API 
+service (https://api-dot-PROJECT.appspot.com). (If there's a need, we may
+want to make this configurable in future.)
 
 ## git-secrets
 
