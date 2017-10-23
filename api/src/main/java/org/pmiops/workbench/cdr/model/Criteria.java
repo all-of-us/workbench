@@ -1,13 +1,18 @@
 package org.pmiops.workbench.cdr.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 
 
 @Entity
+//TODO need to add a way to dynamically switch between database versions
+//this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "criteria", catalog="cdr")
 public class Criteria {
 
@@ -183,53 +188,27 @@ public class Criteria {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Criteria criteria = (Criteria) o;
-
-        if (id != criteria.id) return false;
-        if (sortOrder != criteria.sortOrder) return false;
-        if (parentId != criteria.parentId) return false;
-        if (group != criteria.group) return false;
-        if (selectable != criteria.selectable) return false;
-        if (type != null ? !type.equals(criteria.type) : criteria.type != null) return false;
-        if (code != null ? !code.equals(criteria.code) : criteria.code != null) return false;
-        if (name != null ? !name.equals(criteria.name) : criteria.name != null) return false;
-        if (count != null ? !count.equals(criteria.count) : criteria.count != null) return false;
-        if (conceptId != null ? !conceptId.equals(criteria.conceptId) : criteria.conceptId != null) return false;
-        return domainId != null ? domainId.equals(criteria.domainId) : criteria.domainId == null;
+        return id == criteria.id &&
+                sortOrder == criteria.sortOrder &&
+                parentId == criteria.parentId &&
+                group == criteria.group &&
+                selectable == criteria.selectable &&
+                Objects.equals(type, criteria.type) &&
+                Objects.equals(code, criteria.code) &&
+                Objects.equals(name, criteria.name) &&
+                Objects.equals(count, criteria.count) &&
+                Objects.equals(conceptId, criteria.conceptId) &&
+                Objects.equals(domainId, criteria.domainId);
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + (int) (sortOrder ^ (sortOrder >>> 32));
-        result = 31 * result + (int) (parentId ^ (parentId >>> 32));
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (code != null ? code.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (group ? 1 : 0);
-        result = 31 * result + (selectable ? 1 : 0);
-        result = 31 * result + (count != null ? count.hashCode() : 0);
-        result = 31 * result + (conceptId != null ? conceptId.hashCode() : 0);
-        result = 31 * result + (domainId != null ? domainId.hashCode() : 0);
-        return result;
+        return Objects.hash(id, sortOrder, parentId, type, code, name, group, selectable, count, conceptId, domainId);
     }
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Criteria{");
-        sb.append("id=").append(id);
-        sb.append(", sortOrder=").append(sortOrder);
-        sb.append(", parentId=").append(parentId);
-        sb.append(", type='").append(type).append('\'');
-        sb.append(", code='").append(code).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", group=").append(group);
-        sb.append(", selectable=").append(selectable);
-        sb.append(", count='").append(count).append('\'');
-        sb.append(", conceptId='").append(conceptId).append('\'');
-        sb.append(", domainId='").append(domainId).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this);
     }
 }

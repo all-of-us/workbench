@@ -265,6 +265,17 @@ def drop_cloud_db(*args)
   end
 end
 
+def drop_cloud_cdr(*args)
+  GcloudContext.new("drop-cloud-cdr", args, true).run do |ctx|
+    puts "Dropping cdr database..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db-cdr/drop_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+  end
+end
+
 def connect_to_cloud_db(*args)
   GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
     pw = ENV["WORKBENCH_DB_PASSWORD"]
@@ -295,6 +306,22 @@ def run_cloud_migrations(*args)
         to_redact=pw)
     puts "Upgrading database..."
     Dir.chdir("db") do
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update")
+    end
+  end
+end
+
+def run_cloud_cdr_migrations(*args)
+  GcloudContext.new("run-cloud-cdr-migrations", args, true).run do |ctx|
+    puts "Running cdr migrations..."
+    puts "Creating cdr database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db-cdr/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading cdr database..."
+    Dir.chdir("db-cdr") do
       ctx.common.run_inline("#{ctx.gradlew_path} --info update")
     end
   end
@@ -601,9 +628,21 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "drop-cloud-cdr",
+  :description => "Drops the cdr schema of Cloud SQL database for the specified project",
+  :fn => lambda { |*args| drop_cloud_cdr(*args) }
+})
+
+Common.register_command({
   :invocation => "run-cloud-migrations",
   :description => "Runs database migrations on the Cloud SQL database for the specified project.",
   :fn => lambda { |*args| run_cloud_migrations(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-cdr-migrations",
+  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_cdr_migrations(*args) }
 })
 
 Common.register_command({

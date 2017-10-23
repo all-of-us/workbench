@@ -30,8 +30,8 @@ public class CriteriaDaoTest {
     public void setUp() {
         icd9Criteria1 = createCriteria("ICD9", 2);
         icd9Criteria2 = createCriteria("ICD9", 1);
-        demoCriteria1 = createCriteria("DEMO", 2);
-        demoCriteria2 = createCriteria("DEMO", 1);
+        demoCriteria1 = createCriteria("DEMO_AGE", 2);
+        demoCriteria2 = createCriteria("DEMO_RACE", 1);
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
         criteriaDao.save(demoCriteria1);
@@ -40,11 +40,11 @@ public class CriteriaDaoTest {
 
     @Test
     public void findCriteriaByParentId() throws Exception {
-        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(icd9Criteria1.getType(), 0L);
+        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeAndParentId(icd9Criteria1.getType(), 0L);
         assertEquals(icd9Criteria2, icd9List.get(0));
         assertEquals(icd9Criteria1, icd9List.get(1));
 
-        final List<Criteria> demoList = criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(demoCriteria1.getType(), 0L);
+        final List<Criteria> demoList = criteriaDao.findCriteriaByTypeAndParentId("DEMO", 0L);
         assertEquals(demoCriteria2, demoList.get(0));
         assertEquals(demoCriteria1, demoList.get(1));
     }
