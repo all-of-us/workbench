@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-    @Query("select c from Criteria c where c.type like :type% and c.parentId = :parentId order by c.sortOrder asc")
+    @Query("select c from Criteria c where c.type like :type% and c.parentId = :parentId order by c.id asc")
     List<Criteria> findCriteriaByTypeAndParentId(@Param("type") String type, @Param("parentId") Long parentId);
 }

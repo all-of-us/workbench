@@ -28,14 +28,14 @@ public class CriteriaDaoTest {
 
     @Before
     public void setUp() {
-        icd9Criteria1 = createCriteria("ICD9", 2);
-        icd9Criteria2 = createCriteria("ICD9", 1);
-        demoCriteria1 = createCriteria("DEMO_AGE", 2);
-        demoCriteria2 = createCriteria("DEMO_RACE", 1);
-        criteriaDao.save(icd9Criteria1);
+        icd9Criteria1 = createCriteria("ICD9");
+        icd9Criteria2 = createCriteria("ICD9");
+        demoCriteria1 = createCriteria("DEMO_AGE");
+        demoCriteria2 = createCriteria("DEMO_RACE");
         criteriaDao.save(icd9Criteria2);
-        criteriaDao.save(demoCriteria1);
+        criteriaDao.save(icd9Criteria1);
         criteriaDao.save(demoCriteria2);
+        criteriaDao.save(demoCriteria1);
     }
 
     @Test
@@ -49,9 +49,8 @@ public class CriteriaDaoTest {
         assertEquals(demoCriteria1, demoList.get(1));
     }
 
-    private Criteria createCriteria(String type, long order) {
+    private Criteria createCriteria(String type) {
         return new Criteria()
-                .sortOrder(order)
                 .code("002")
                 .count("10")
                 .conceptId("1000")

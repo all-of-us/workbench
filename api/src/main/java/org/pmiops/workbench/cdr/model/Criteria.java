@@ -17,7 +17,6 @@ import java.util.Objects;
 public class Criteria {
 
     private long id;
-    private long sortOrder;
     private long parentId;
     private String type;
     private String code;
@@ -41,20 +40,6 @@ public class Criteria {
 
     public Criteria id(long id) {
         this.id = id;
-        return this;
-    }
-
-    @Column(name = "sort_order")
-    public long getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(long sortOrder) {
-        this.sortOrder = sortOrder;
-    }
-
-    public Criteria sortOrder(long sortOrder) {
-        this.sortOrder = sortOrder;
         return this;
     }
 
@@ -190,7 +175,6 @@ public class Criteria {
         if (o == null || getClass() != o.getClass()) return false;
         Criteria criteria = (Criteria) o;
         return id == criteria.id &&
-                sortOrder == criteria.sortOrder &&
                 parentId == criteria.parentId &&
                 group == criteria.group &&
                 selectable == criteria.selectable &&
@@ -204,7 +188,7 @@ public class Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sortOrder, parentId, type, code, name, group, selectable, count, conceptId, domainId);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId);
     }
 
     @Override

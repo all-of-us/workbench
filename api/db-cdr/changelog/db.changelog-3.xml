@@ -8,7 +8,7 @@
   <changeSet author="brianfreeman" id="changelog-3" runAlways="true">
 
     <loadData tableName="criteria" file="csv/icd9_criteria.csv" encoding="UTF-8" quotchar='"'>
-      <column name="sort_order" type="NUMERIC"/>
+      <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
       <column name="type" type="STRING"/>
       <column name="code" type="STRING"/>
