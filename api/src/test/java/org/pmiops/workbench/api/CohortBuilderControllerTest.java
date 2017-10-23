@@ -24,10 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import javax.inject.Provider;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
