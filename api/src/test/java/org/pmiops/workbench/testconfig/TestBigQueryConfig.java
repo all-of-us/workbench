@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api.config;
+package org.pmiops.workbench.testconfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
