@@ -11,7 +11,6 @@ import java.util.Map;
  * factory implementation.
  */
 public enum FactoryKey {
-    CRITERIA,
     CODES,
     /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
     GROUP_CODES,
