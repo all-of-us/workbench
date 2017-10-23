@@ -13,13 +13,37 @@
         </small>
       </span>
 
+      <!--
       <small class="text-muted">
         Contains
       </small>
+      <clr-tooltip>
+        <small
+          class="btn-link font-weight-bold"
+          clrTooltipTrigger>
+          {{ description }}
+        </small>
+        <clr-tooltip-content *clrIfOpen>
+          <h4 [style.margin-top]="0" [style.color]="'#FFF'">Codes</h4>
+          {{ codes }}
+        </clr-tooltip-content>
+      </clr-tooltip>
+      -->
 
-      <small class="font-weight-bold">
-        {{ description }}
-      </small>
+      <clr-signpost>
+        <small
+          class="btn-link font-weight-bold"
+          clrSignpostTrigger>
+          {{ description }}
+        </small>
+        <clr-signpost-content *clrIfOpen>
+          <div id='codes-tooltip-well'>
+            <h4 [style.margin-top]="0">Codes</h4>
+            {{ codes }}
+          </div>
+        </clr-signpost-content>
+      </clr-signpost>
+
     </span>
   </div>
 
