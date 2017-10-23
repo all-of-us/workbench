@@ -45,7 +45,7 @@ public abstract class BigQueryBaseTest {
     public static final String BASE_PATH = "src/test/resources/bigquery/";
 
     @BeforeAllMethods
-    public void setUp() throws Exception {
+    public void beforeAllMethodsSetUp() throws Exception {
         createDataSet(workbenchConfig.bigquery.dataSetId);
         for (String tableName: getTableNames()) {
             createTable(workbenchConfig.bigquery.dataSetId, tableName);
@@ -54,7 +54,7 @@ public abstract class BigQueryBaseTest {
     }
 
     @AfterAllMethods
-    public void tearDown() throws Exception {
+    public void beforeAllMethodsTearDown() throws Exception {
         for (String tableName: getTableNames()) {
             deleteTable(workbenchConfig.bigquery.dataSetId, tableName);
         }

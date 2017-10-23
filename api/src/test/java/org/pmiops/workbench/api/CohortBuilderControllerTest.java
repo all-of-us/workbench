@@ -1,12 +1,18 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -17,24 +23,38 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, CohortBuilderController.class, SubjectCounter.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
-    @Autowired
-    CohortBuilderController controller;
+    private CohortBuilderController controller;
 
     @Autowired
-    WorkbenchConfig workbenchConfig;
+    private BigQuery bigquery;
+
+    @Autowired
+    private SubjectCounter subjectCounter;
+
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfig;
+
+    @Mock
+    private CriteriaDao mockCriteriaDao;
 
     @Override
     public List<String> getTableNames() {
@@ -45,6 +65,76 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "condition_occurrence",
                 "procedure_occurrence",
                 "measurement");
+    }
+
+    @Before
+    public void setUp() {
+        this.controller = new CohortBuilderController(bigquery, subjectCounter,
+                workbenchConfig, mockCriteriaDao);
+    }
+
+    @Test
+    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("ICD9")
+                        .code("001-139.99")
+                        .name("Infectious and parasitic diseases")
+                        .group(false)
+                        .selectable(false)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc("ICD9", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("ICD9", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("ICD9")
+                        .code("001-139.99")
+                        .name("Infectious and parasitic diseases")
+                        .group(false)
+                        .selectable(false)
+                        .count(0L)
+                        .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc("ICD9", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
+    }
+
+    @Test
+    public void getCriteriaByTypeAndParentId_demo() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("DEMO_AGE")
+                        .name("Age")
+                        .group(false)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("12");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc("DEMO", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("DEMO", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("DEMO_AGE")
+                        .name("Age")
+                        .group(false)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(12L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc("DEMO", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
     }
 
     @Test
@@ -182,7 +272,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     protected String getTablePrefix() {
-        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
+        return workbenchConfig.get().bigquery.projectId + "." + workbenchConfig.get().bigquery.dataSetId;
+    }
+
+    private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
+        assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
     }
 
     private SearchRequest createSearchRequests(String type, List<SearchParameter> parameters) {

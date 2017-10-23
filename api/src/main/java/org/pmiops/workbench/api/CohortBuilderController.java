@@ -37,18 +37,10 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
-    @Autowired
     private BigQuery bigquery;
-
-    @Autowired
     private SubjectCounter subjectCounter;
-
-    @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
-
-    @Autowired
-    CriteriaDao criteriaDao;
-
+    private CriteriaDao criteriaDao;
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     /**
@@ -78,6 +70,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 }
             };
 
+    @Autowired
+    CohortBuilderController(BigQuery bigquery, SubjectCounter subjectCounter,
+                            Provider<WorkbenchConfig> workbenchConfig, CriteriaDao criteriaDao) {
+        this.bigquery = bigquery;
+        this.subjectCounter = subjectCounter;
+        this.workbenchConfig = workbenchConfig;
+        this.criteriaDao = criteriaDao;
+    }
+
     /**
      * This method list any of the criteria trees.
      *
@@ -88,8 +89,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
+        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(type, parentId);
+
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-        criteriaResponse.setItems(TO_CLIENT_CRITERIA.apply(criteriaDao.findCriteriaByTypeLikeAndParentIdOrderBySortOrderAsc(type, parentId)));
+        criteriaResponse.setItems(TO_CLIENT_CRITERIA.apply(criteriaList));
 
         return ResponseEntity.ok(criteriaResponse);
     }
