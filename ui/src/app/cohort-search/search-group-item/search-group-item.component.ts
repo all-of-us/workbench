@@ -28,4 +28,8 @@ export class SearchGroupItemComponent {
   get isRequesting() {
     return this.item.get('isRequesting', false);
   }
+
+  launchWizard() {
+    console.log('Edit the item!');
+  }
 }

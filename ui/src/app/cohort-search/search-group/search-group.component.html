@@ -4,10 +4,19 @@
   [style.margin-bottom]="'1rem'">
 
   <div class="card-header">
-    <app-add-criteria
-      [groupId]="group.get('id')"
-      [role]="role">
-    </app-add-criteria>
+    <clr-dropdown>
+      <button type="button" class="btn btn-link" clrDropdownTrigger>
+        Add Criteria <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <button
+          class="dropdown-item"
+          *ngFor="let criteria of criteriaTypes"
+          type="button"
+          (click)="launchWizard(criteria.type)"
+          clrDropdownItem>{{criteria.name}}</button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
     <button
       type="button"
       class="btn btn-icon btn-link close"
@@ -20,7 +29,7 @@
     <app-search-group-item
       *ngFor="let itemId of group.get('items', []); let itemIndex = index;"
       [role]="role"
-      [groupId]="group.get('id')"
+      [groupId]="groupId"
       [itemId]="itemId"
       [itemIndex]="itemIndex">
     </app-search-group-item>

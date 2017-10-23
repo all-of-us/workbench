@@ -173,12 +173,6 @@ export class CohortSearchActions {
     this._removeCriterion(itemId, criterionId);
   }
 
-  openWizard(criteriaType: string, role: keyof SearchRequest, groupId: string): void {
-    this.setActiveContext({criteriaType, role, groupId});
-    this.setWizardOpen();
-    this.initGroupItem(groupId);
-  }
-
   finishWizard(): void {
     this.requestItemCount(activeRole(this.state), activeItemId(this.state));
     this.requestGroupCount(activeRole(this.state), activeGroupId(this.state));
