@@ -8,9 +8,10 @@ import {CohortSearchActions, CohortSearchState, getItem} from '../redux';
   templateUrl: './search-group-item.component.html',
 })
 export class SearchGroupItemComponent {
-  @Input() itemId: string;
   @Input() role: string;
-  @Input() groupId: number;
+  @Input() groupId: string;
+  @Input() itemId: string;
+  @Input() itemIndex: number;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}

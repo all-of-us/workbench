@@ -1,9 +1,16 @@
 <div class="row">
   <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+
     <button type="button"
-      class="btn btn-link btn-sm text-danger text-right"
+      class="btn btn-link btn-sm text-danger"
       (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
-      <clr-icon shape="close" size="14"></clr-icon>
+      <clr-icon shape="close"></clr-icon>
+    </button>
+
+    <button
+      class="btn btn-link btn-sm"
+      (click)="alert('edit the item!')">
+      <clr-icon shape="pencil"></clr-icon>
     </button>
 
     <span>

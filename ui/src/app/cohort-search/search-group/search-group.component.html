@@ -18,14 +18,15 @@
 
   <div class="card-block">
     <app-search-group-item
-      *ngFor="let itemId of group.get('items', [])" 
+      *ngFor="let itemId of group.get('items', []); let itemIndex = index;"
       [role]="role"
       [groupId]="group.get('id')"
-      [itemId]="itemId">
+      [itemId]="itemId"
+      [itemIndex]="itemIndex">
     </app-search-group-item>
   </div>
 
-  <div 
+  <div
     class="card-footer font-weight-bold bg-count text-right"
     [style.background-color]="'#d7d7d7'">
     Group Count:
