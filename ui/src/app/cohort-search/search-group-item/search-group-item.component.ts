@@ -30,6 +30,13 @@ export class SearchGroupItemComponent {
   }
 
   launchWizard() {
-    console.log('Edit the item!');
+    this.actions.setActiveContext({
+      criteriaType: this.item.get('type'),
+      role: this.role,
+      groupId: this.groupId,
+      itemId: this.itemId,
+    });
+
+    this.actions.setWizardOpen();
   }
 }
