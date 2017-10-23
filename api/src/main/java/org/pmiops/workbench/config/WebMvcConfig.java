@@ -1,18 +1,21 @@
 package org.pmiops.workbench.config;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.google.Utils;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,25 +48,33 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public User user(Userinfoplus userInfo, UserDao userDao) {
-    User user = userDao.findUserByEmail(userInfo.getEmail());
-    // If the user record doesn't exist, automatically create one.
-    if (user == null) {
-      // create workspaces, etc.
-      user = new User();
-      user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-      user.setEmail(userInfo.getEmail());
-      try {
-        userDao.save(user);
-      } catch (DataIntegrityViolationException e) {
-        // Handle the race condition by re-fetching the user here.
-        user = userDao.findUserByEmail(userInfo.getEmail());
-        // If the user is still missing, throw an error.
-        if (user == null) {
-          throw new ServerErrorException("Error initializing user", e);
-        }
-      }
+    return userDao.findUserByEmail(userInfo.getEmail());
+  }
+
+  @Bean
+  public WorkbenchEnvironment workbenchEnvironment() {
+    return new WorkbenchEnvironment();
+  }
+
+  /**
+   * Service account credentials for the AofU server. These are derived from a key JSON file
+   * copied from GCS deployed to /WEB-INF/sa-key.json during the build step. They can be used
+   * to make API calls on behalf of AofU (as opposed to using end user credentials.)
+   *
+   * We may in future rotate key files in production, but will be sure to keep the ones currently
+   * in use in cloud environments working when that happens.
+   */
+  @Lazy
+  @Bean
+  public GoogleCredential serviceAccountCredential() {
+    ServletContext context = Utils.getRequestServletContext();
+    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
+    GoogleCredential credential = null;
+    try {
+      return GoogleCredential.fromStream(saFileAsStream);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    return user;
   }
 
   @Override

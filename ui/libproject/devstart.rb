@@ -5,6 +5,18 @@ require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require_relative "../../libproject/swagger"
 
+class Options < OpenStruct
+end
+
+# Creates a default command-line argument parser.
+# command_name: For help text.
+def create_parser(command_name)
+  OptionParser.new do |parser|
+    parser.banner = "Usage: ./project.rb #{command_name} [options]"
+    parser
+  end
+end
+
 def install_dependencies()
   common = Common.new
 
@@ -40,6 +52,56 @@ class DevUpOptions
   end
 end
 
+# Command line parsing and run logic for deploy-ui command
+class DeployUI
+  attr_reader :common, :opts
+
+  def initialize(command_name, args)
+    @common = Common.new
+    @args = args
+    @parser = create_parser(command_name)
+    @opts = Options.new
+  end
+
+  def add_options
+    @parser.on("--project [PROJECT]",
+        "Project to create credentials for (e.g. all-of-us-workbench-test). Required.") do |project|
+      @opts.project = project
+    end
+    @parser.on("--account [ACCOUNT]",
+         "Account to use when creating credentials (your.name@pmi-ops.org). Required.") do |account|
+      @opts.account = account
+    end
+    @parser.on("--version [VERSION]",
+          "The name of the version to deploy. Required.") do |version|
+       @opts.version = version
+    end
+    @parser.on("--promote",
+          "Use this if you want to promote this version so it receives traffic. By default, it won't."
+          ) do |promote|
+       @opts.promote = "promote"
+    end
+    @opts.promote = "no-promote" # default
+  end
+
+  def validate_options
+    if @opts.project == nil || @opts.account == nil || @opts.version == nil
+      puts @parser.help
+      exit 1
+    end
+  end
+
+  def run
+    add_options
+    @parser.parse @args
+    validate_options
+    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=test}
+    common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
+                         --version #{@opts.version} --#{@opts.promote}}
+  end
+end
+
+
 def dev_up(*args)
   common = Common.new
 
@@ -58,6 +120,7 @@ def dev_up(*args)
 
   common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
+
 
 def rebuild_image()
   common = Common.new
@@ -93,4 +156,10 @@ Common.register_command({
   :invocation => "clean-git-hooks",
   :description => "Removes symlinks created by shared-git-hooks. Necessary before re-installing.",
   :fn => Proc.new { |*args| clean-git-hooks(*args) }
+})
+
+Common.register_command({
+  :invocation => "deploy-ui",
+  :description => "Deploys the UI to the specified cloud project.",
+  :fn => lambda { |*args| DeployUI.new("deploy-ui", args).run }
 })

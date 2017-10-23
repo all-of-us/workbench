@@ -15,7 +15,8 @@ import {
   includeGroups,
   excludeGroups,
   wizardOpen,
-  totalCount
+  totalCount,
+  isRequstingTotal
 } from '../redux';
 
 @Component({
@@ -29,12 +30,14 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   @select(excludeGroups) excludeGroups$;
   @select(wizardOpen) open$;
   @select(totalCount) total$;
+  @select(isRequstingTotal) isRequesting$;
 
   private adding = false;
   private subscriptions: Subscription[];
 
   private includes;
   private excludes;
+  private isRequesting = false;
 
   constructor(private actions: CohortSearchActions,
               private router: Router,
@@ -46,7 +49,8 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     }
     this.subscriptions = [
       this.includeGroups$.subscribe(groups => this.includes = groups),
-      this.excludeGroups$.subscribe(groups => this.excludes = groups)
+      this.excludeGroups$.subscribe(groups => this.excludes = groups),
+      this.isRequesting$.subscribe(val => this.isRequesting = val),
     ];
   }
 

@@ -16,8 +16,9 @@ import java.util.List;
 import javax.inject.Provider;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.Utils;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,33 +38,29 @@ public class DirectoryServiceImpl implements DirectoryService {
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
+  final Provider<GoogleCredential> googleCredentialProvider;
   final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
-  public DirectoryServiceImpl(Provider<WorkbenchConfig> configProvider) {
+  public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
+      Provider<WorkbenchConfig> configProvider) {
+    this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
-    ServletContext context = Utils.getRequestServletContext();
-    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
-    GoogleCredential credential = null;
-    try {
-      credential = GoogleCredential.fromStream(saFileAsStream);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    GoogleCredential googleCredential = googleCredentialProvider.get();
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return new GoogleCredential.Builder()
         .setTransport(getDefaultTransport())
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
         .setServiceAccountUser("directory-service@"+gSuiteDomain)
-        .setServiceAccountId(credential.getServiceAccountId())
+        .setServiceAccountId(googleCredential.getServiceAccountId())
         .setServiceAccountScopes(SCOPES)
-        .setServiceAccountPrivateKey(credential.getServiceAccountPrivateKey())
-        .setServiceAccountPrivateKeyId(credential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(credential.getTokenServerEncodedUrl())
+        .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
+        .setServiceAccountPrivateKeyId(googleCredential.getServiceAccountPrivateKeyId())
+        .setTokenServerEncodedUrl(googleCredential.getTokenServerEncodedUrl())
         .build();
   }
 
@@ -74,41 +71,48 @@ public class DirectoryServiceImpl implements DirectoryService {
         .build();
   }
 
-  public boolean isUsernameTaken(String username) {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+  @Override
+  public User getUser(String email) throws IOException {
     try {
-      getGoogleDirectoryService().users().get(username+"@"+gSuiteDomain).execute();
-      return true; // successful call means user exists
+      return ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().get(email));
     } catch (GoogleJsonResponseException e) {
-      if (e.getDetails().getCode() == 404) {
-        return false;
-      } else {
-        throw new RuntimeException(e);
+      if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
+        return null;
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw e;
     }
   }
 
-  public void createUser(String givenName, String familyName, String username, String password) {
+  @Override
+  public boolean isUsernameTaken(String username) throws IOException {
+    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    return getUser(username + "@" + gSuiteDomain) != null;
+  }
+
+  @Override
+  public User createUser(String givenName, String familyName, String username, String password)
+      throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    try {
-      getGoogleDirectoryService().users().insert(user).execute();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
+    return user;
   }
 
-  public void deleteUser(String username) {
+  @Override
+  public void deleteUser(String username) throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      getGoogleDirectoryService().users().delete(username+"@"+gSuiteDomain).execute();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users()
+          .delete(username + "@" + gSuiteDomain));
+    } catch (GoogleJsonResponseException e) {
+      if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
+        // Deleting a user that doesn't exist will have no effect.
+        return;
+      }
+      throw e;
     }
   }
 }

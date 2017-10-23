@@ -1,7 +1,8 @@
 // Configuration for the all-of-us-workbench-test and local development environments.
 {
   "firecloud": {
-    "debugEndpoints": false
+    "debugEndpoints": false,
+    "billingProjectPrefix": "all-of-us-free-test-"
   },
   "bigquery": {
     "dataSetId": "synpuf",

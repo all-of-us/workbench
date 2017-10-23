@@ -42,7 +42,6 @@ import {
       </clr-tree-node>
     </ng-template>
   `,
-  encapsulation: ViewEncapsulation.None,
 })
 export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
 
