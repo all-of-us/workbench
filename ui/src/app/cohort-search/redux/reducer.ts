@@ -122,6 +122,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .updateIn(
             ['entities', 'groups', action.groupId, 'items'],
+            List(),
             itemList => itemList.filterNot(id => id === action.itemId)
           )
           .deleteIn(['entities', 'items', action.itemId]);
@@ -130,6 +131,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .updateIn(
             ['entities', 'searchRequests', SR_ID, action.role],
+            List(),
             groupList => groupList.filterNot(id => id === action.groupId)
           )
           .deleteIn(['entities', 'groups', action.groupId]);
@@ -138,6 +140,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .updateIn(
             ['entities', 'items', action.itemId, 'searchParameters'],
+            List(),
             critList => critList.filterNot(id => id === action.criterionId)
           )
           .deleteIn(['entities', 'criteria', action.criterionId]);

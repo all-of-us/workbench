@@ -19,7 +19,17 @@ export class WorkspacesServiceStub {
       description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
       cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime()
+      lastModifiedTime: new Date().getTime(),
+      researchPurpose: {
+        diseaseFocusedResearch: false,
+        methodsDevelopment: false,
+        controlSet: false,
+        aggregateAnalysis: false,
+        ancestry: false,
+        commercialPurpose: false,
+        population: false,
+        reviewRequested: false
+      }
     };
 
 
