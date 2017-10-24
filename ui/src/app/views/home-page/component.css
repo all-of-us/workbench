@@ -14,3 +14,13 @@
 h3 {
   display: inline-block;
 }
+
+.warning {
+  background-color: #bbae00;
+  color: white;
+}
+
+.rejected {
+  background-color: red;
+  color: white
+}
