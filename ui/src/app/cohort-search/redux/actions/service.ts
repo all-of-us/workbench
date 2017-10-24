@@ -7,9 +7,6 @@ import {environment} from 'environments/environment';
 
 import {
   CohortSearchState,
-  activeItemId,
-  activeGroupId,
-  activeRole,
   isCriteriaLoading,
   isRequesting,
   getItem,
@@ -49,14 +46,16 @@ export class CohortSearchActions {
   @dispatch() _initGroup = ActionFuncs.initGroup;
   @dispatch() initGroupItem = ActionFuncs.initGroupItem;
   @dispatch() selectCriteria = ActionFuncs.selectCriteria;
+  @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
   @dispatch() _removeCriterion = ActionFuncs.removeCriterion;
 
-  @dispatch() setWizardOpen = ActionFuncs.setWizardOpen;
-  @dispatch() setWizardClosed = ActionFuncs.setWizardClosed;
-  @dispatch() setActiveContext = ActionFuncs.setActiveContext;
-  @dispatch() clearActiveContext = ActionFuncs.clearActiveContext;
+  @dispatch() openWizard = ActionFuncs.openWizard;
+  @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
+  @dispatch() finishWizard = ActionFuncs.finishWizard;
+  @dispatch() cancelWizard = ActionFuncs.cancelWizard;
+  @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   /** Internal tooling */
   _idsInUse = Set<string>();

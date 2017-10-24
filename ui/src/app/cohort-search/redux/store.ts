@@ -37,6 +37,7 @@ export const initialState = fromJS({
   wizard: {
     open: false,
     item: {},
+    selections: {},
   },
 
   criteria: {
@@ -49,10 +50,7 @@ export const initialState = fromJS({
 export type CohortSearchState = Map<any, any>;
 
 /**
- * Selectors: Used to query information from the state
- */
-
-/**
+ * Entities
  * Resolve a list of ID's (or the id of a thing with a list of ids) to a list
  * of things
  */
@@ -80,24 +78,6 @@ export const getGroup = groupId => state =>
 export const getSearchRequest = searchRequestId => state =>
   state.getIn(['entities', 'searchRequests', searchRequestId], Map());
 
-/**
- * Criteria
- */
-export const activeCriteriaList = (state): List<any> =>
-  parameterList(activeItemId(state))(state);
-
-export const criteriaChildren = (kind, parentId) => state =>
-  state.getIn(['criteria', 'tree', kind, parentId], List());
-
-export const isCriteriaLoading =
-  (kind: string, parentId: number) =>
-  (state): boolean =>
-  state.getIn(['criteria', 'requests', kind, parentId]) === true;
-
-
-/**
- * Generic information
- */
 export const countFor = (kind, id) => state =>
   state.getIn(['entities', kind, id, 'count'], null);
 
@@ -111,20 +91,36 @@ export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
 
-/**
- * Get Context
+/** 
+ * Wizard
  */
-export const wizardOpen = state =>
+export const wizardOpen = (state): boolean =>
   state.getIn(['wizard', 'open'], false);
 
-export const activeItemId = (state): string =>
-  state.getIn(['wizard', 'active', 'itemId']);
-
-export const activeGroupId = (state): string =>
-  state.getIn(['wizard', 'active', 'groupId']);
+export const activeCriteriaType = (state): string =>
+  state.getIn(['wizard', 'criteriaType']);
 
 export const activeRole = (state): keyof SearchRequest =>
-  state.getIn(['wizard', 'active', 'role']);
+  state.getIn(['wizard', 'role']);
 
-export const activeCriteriaType = (state): string =>
-  state.getIn(['wizard', 'active', 'criteriaType']);
+export const activeGroupId = (state): string =>
+  state.getIn(['wizard', 'groupId']);
+
+export const activeCriteriaList = (state): List<any> =>
+  state
+    .getIn(['wizard', 'item', 'searchParameters'], List())
+    .map(id => state.getIn(['wizard', 'selections', id]));
+
+export const activeItem = (state) =>
+  state.getIn(['wizard', 'item'], Map());
+
+/**
+ * Criteria
+ */
+export const criteriaChildren = (kind, parentId) => state =>
+  state.getIn(['criteria', 'tree', kind, parentId], List());
+
+export const isCriteriaLoading =
+  (kind: string, parentId: number) =>
+  (state): boolean =>
+  state.getIn(['criteria', 'requests', kind, parentId]) === true;

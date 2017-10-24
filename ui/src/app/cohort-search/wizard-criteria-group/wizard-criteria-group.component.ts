@@ -7,7 +7,6 @@ import {NgRedux, select} from '@angular-redux/store';
 import {
   CohortSearchActions,
   CohortSearchState,
-  activeItemId,
   activeGroupId,
   activeRole,
   activeCriteriaType,
@@ -61,12 +60,6 @@ export class WizardCriteriaGroupComponent {
   }
 
   removeCriterion(criterionId: number) {
-    const state = this.ngRedux.getState();
-    this.actions.removeCriterion(
-      activeRole(state),
-      activeGroupId(state),
-      activeItemId(state),
-      criterionId
-    );
+    this.actions.unselectCriteria(criterionId);
   }
 }

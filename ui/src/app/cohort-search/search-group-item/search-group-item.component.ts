@@ -32,14 +32,8 @@ export class SearchGroupItemComponent {
   launchWizard() {
     const criteriaType = this.item.get('type');
     const {role, groupId, itemId} = this;
-
-    this.actions.setActiveContext({
-      criteriaType,
-      role,
-      groupId,
-      itemId,
-    });
-
-    this.actions.setWizardOpen();
+    const context = {criteriaType, role, groupId, itemId};
+    const item = this.item;
+    this.actions.reOpenWizard(item, context);
   }
 }

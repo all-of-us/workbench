@@ -11,13 +11,15 @@ import {
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
+  UNSELECT_CRITERIA,
   REMOVE_ITEM,
   REMOVE_GROUP,
   REMOVE_CRITERION,
-  SET_WIZARD_OPEN,
-  SET_WIZARD_CLOSED,
-  SET_ACTIVE_CONTEXT,
-  CLEAR_ACTIVE_CONTEXT,
+  OPEN_WIZARD,
+  REOPEN_WIZARD,
+  WIZARD_FINISH,
+  WIZARD_CANCEL,
+  SET_WIZARD_CONTEXT,
   ActionTypes,
 } from './types';
 
@@ -85,9 +87,14 @@ export const initGroupItem =
   ({type: INIT_GROUP_ITEM, itemId, groupId});
 
 export const selectCriteria =
-  (itemId: string, criterion: Criteria
+  (criterion: Criteria
   ): ActionTypes[typeof SELECT_CRITERIA] =>
-  ({type: SELECT_CRITERIA, itemId, criterion});
+  ({type: SELECT_CRITERIA, criterion});
+
+export const unselectCriteria =
+  (criterionId?: number, criterion?: Criteria
+  ): ActionTypes[typeof UNSELECT_CRITERIA] =>
+  ({type: UNSELECT_CRITERIA, criterion, criterionId});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string
@@ -107,15 +114,22 @@ export const removeCriterion =
 /**
  * Context mgmt
  */
-export const setWizardOpen =
-  (): ActionTypes[typeof SET_WIZARD_OPEN] => ({type: SET_WIZARD_OPEN});
+export const openWizard =
+  (itemId: string, context: object
+  ): ActionTypes[typeof OPEN_WIZARD] =>
+  ({type: OPEN_WIZARD, itemId, context});
 
-export const setWizardClosed =
-  (): ActionTypes[typeof SET_WIZARD_CLOSED] => ({type: SET_WIZARD_CLOSED});
+export const reOpenWizard =
+  (item: any, context: object
+  ): ActionTypes[typeof REOPEN_WIZARD] =>
+  ({type: REOPEN_WIZARD, item, context});
 
-export const setActiveContext =
-  (context: object): ActionTypes[typeof SET_ACTIVE_CONTEXT] =>
-  ({type: SET_ACTIVE_CONTEXT, context});
+export const finishWizard =
+  (): ActionTypes[typeof WIZARD_FINISH] => ({type: WIZARD_FINISH});
 
-export const clearActiveContext =
-  (): ActionTypes[typeof CLEAR_ACTIVE_CONTEXT] => ({type: CLEAR_ACTIVE_CONTEXT});
+export const cancelWizard =
+  (): ActionTypes[typeof WIZARD_CANCEL] => ({type: WIZARD_CANCEL});
+
+export const setWizardContext =
+  (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
+  ({type: SET_WIZARD_CONTEXT, context});

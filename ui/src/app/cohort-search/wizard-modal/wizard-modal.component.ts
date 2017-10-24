@@ -13,10 +13,10 @@ import {
   CohortSearchActions,
   CohortSearchState,
   activeCriteriaType,
+  activeCriteriaList,
   activeRole,
-  activeItemId,
   activeGroupId,
-  getItem,
+  activeItem,
   wizardOpen,
 } from '../redux';
 
@@ -27,9 +27,8 @@ import {
   styleUrls: ['./wizard-modal.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class WizardModalComponent implements OnInit {
+export class WizardModalComponent {
 
-  private priorState;
   @select(wizardOpen) readonly open$: Observable<boolean>;
   @select(activeCriteriaType) readonly critType$: Observable<string>;
   @ViewChild('wizard') wizard: Wizard;
@@ -37,30 +36,22 @@ export class WizardModalComponent implements OnInit {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
-  ngOnInit() {
-    this.priorState = this.ngRedux.getState();
-    const itemId = activeItemId(this.priorState);
-    const groupId = activeGroupId(this.priorState);
-
-    const item = getItem(itemId)(this.priorState);
-    if (item.isEmpty()) {
-      this.actions.initGroupItem(itemId, groupId);
-    }
-  }
-
   close() {
-    this.actions.setWizardClosed();
-    this.actions.clearActiveContext();
+    this.actions.cancelWizard();
   }
 
   finish() {
     const state = this.ngRedux.getState();
+    const role = activeRole(state);
+    const groupId = activeGroupId(state);
+    const itemId = activeItem(state).get('id');
+    const selections = activeCriteriaList(state);
 
-    this.actions.requestItemCount(activeRole(state), activeItemId(state));
-    this.actions.requestGroupCount(activeRole(state), activeGroupId(state));
-    this.actions.requestTotalCount();
-
-    this.actions.setWizardClosed();
-    this.actions.clearActiveContext();
+    this.actions.finishWizard();
+    if (!selections.isEmpty()) {
+      this.actions.requestItemCount(role, itemId);
+      this.actions.requestGroupCount(role, groupId);
+      this.actions.requestTotalCount();
+    }
   }
 }
