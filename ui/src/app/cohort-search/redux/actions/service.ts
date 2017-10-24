@@ -61,7 +61,7 @@ export class CohortSearchActions {
   /** Internal tooling */
   _idsInUse = Set<string>();
 
-  _generateId(prefix?: string) {
+  generateId(prefix?: string) {
     prefix = prefix || 'id';
     let newId = `${prefix}${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
@@ -75,7 +75,7 @@ export class CohortSearchActions {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  _removeId(id: string) {
+  removeId(id: string) {
     this._idsInUse = this._idsInUse.delete(id);
   }
 
@@ -90,14 +90,8 @@ export class CohortSearchActions {
    * alternate interfaces for a simpler action.
    */
   initGroup(role: keyof SearchRequest) {
-    const newId = this._generateId(role);
+    const newId = this.generateId(role);
     this._initGroup(role, newId);
-  }
-
-  initGroupItem(groupId: string) {
-    const itemId = this._generateId('item');
-    this._initGroupItem(itemId, groupId);
-    this.setActiveContext({itemId});
   }
 
   cancelIfRequesting(kind, id) {
@@ -114,12 +108,12 @@ export class CohortSearchActions {
     this.cancelIfRequesting('groups', groupId);
 
     this._removeGroup(role, groupId);
-    this._removeId(groupId);
+    this.removeId(groupId);
 
     group.get('items', List()).forEach(itemId => {
       this.cancelIfRequesting('items', itemId);
       this._removeGroupItem(groupId, itemId);
-      this._removeId(itemId);
+      this.removeId(itemId);
     });
 
     const hasItems = !group.get('items', List()).isEmpty();
@@ -147,7 +141,7 @@ export class CohortSearchActions {
 
     this.cancelIfRequesting('items', itemId);
     this._removeGroupItem(groupId, itemId);
-    this._removeId(itemId);
+    this.removeId(itemId);
 
     item.get('searchParameters', List()).forEach(id => {
       this._removeCriterion(itemId, id);

@@ -13,6 +13,7 @@ import {
   CohortSearchActions,
   CohortSearchState,
   activeCriteriaType,
+  wizardOpen,
 } from '../redux';
 
 
@@ -24,8 +25,8 @@ import {
 })
 export class WizardModalComponent {
 
-  @select(['context', 'wizardOpen']) readonly open$: Observable<boolean>;
-  @select(activeCriteriaType) critType$: Observable<string>;
+  @select(wizardOpen) readonly open$: Observable<boolean>;
+  @select(activeCriteriaType) readonly critType$: Observable<string>;
   @ViewChild('wizard') wizard: Wizard;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,

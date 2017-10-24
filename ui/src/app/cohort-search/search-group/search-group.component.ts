@@ -41,13 +41,17 @@ export class SearchGroupComponent {
   }
 
   launchWizard(criteriaType: string) {
+    const itemId = this.actions.generateId('items');
+    const {role, groupId} = this;
+
     this.actions.setActiveContext({
       criteriaType,
-      role: this.role,
-      groupId: this.groupId
+      role,
+      groupId,
+      itemId,
     });
 
     this.actions.setWizardOpen();
-    this.actions.initGroupItem(this.groupId);
+    this.actions._initGroupItem(itemId, groupId);
   }
 }
