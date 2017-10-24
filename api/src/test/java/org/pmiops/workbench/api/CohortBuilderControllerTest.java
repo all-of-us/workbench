@@ -1,9 +1,13 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -19,6 +23,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -26,23 +31,33 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, CohortBuilderController.class, SubjectCounter.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
-    @Autowired
-    CohortBuilderController controller;
+    private CohortBuilderController controller;
 
     @Autowired
-    WorkbenchConfig workbenchConfig;
+    private BigQuery bigquery;
+
+    @Autowired
+    private SubjectCounter subjectCounter;
+
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfig;
+
+    @Mock
+    private CriteriaDao mockCriteriaDao;
 
     @Override
     public List<String> getTableNames() {
         return Arrays.asList(
                 "icd9_criteria",
-                "demo_criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
@@ -50,8 +65,29 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "measurement");
     }
 
+    @Before
+    public void setUp() {
+        this.controller = new CohortBuilderController(bigquery, subjectCounter,
+                workbenchConfig, mockCriteriaDao);
+    }
+
     @Test
     public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("ICD9")
+                        .code("001-139.99")
+                        .name("Infectious and parasitic diseases")
+                        .group(false)
+                        .selectable(false)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndParentId("ICD9", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId("ICD9", 0L),
                 new Criteria()
@@ -63,10 +99,27 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .selectable(false)
                         .count(0L)
                         .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("ICD9", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
     }
 
     @Test
     public void getCriteriaByTypeAndParentId_demo() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("DEMO_AGE")
+                        .name("Age")
+                        .group(false)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("12");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndParentId("DEMO", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId("DEMO", 0L),
                 new Criteria()
@@ -77,6 +130,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .selectable(true)
                         .count(0L)
                         .conceptId(12L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("DEMO", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
     }
 
     @Test
@@ -214,7 +270,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     protected String getTablePrefix() {
-        return workbenchConfig.bigquery.projectId + "." + workbenchConfig.bigquery.dataSetId;
+        return workbenchConfig.get().bigquery.projectId + "." + workbenchConfig.get().bigquery.dataSetId;
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
