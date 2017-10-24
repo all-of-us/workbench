@@ -6,18 +6,32 @@
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="workspacesLoading">
-      <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator">
+      <clr-dg-column [style.width.%]="5">Status</clr-dg-column>
+      <clr-dg-column [clrDgField]="'workspace.name'" [clrDgSortBy]="workspaceNameComparator" [style.width.%]="35">
         Name
         <clr-dg-string-filter [clrDgStringFilter]="workspaceNameFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column>URL</clr-dg-column>
-      <clr-dg-column>Last Modified</clr-dg-column>
+      <clr-dg-column [style.width.%]="15">Last Modified</clr-dg-column>
+      <clr-dg-column>Research Purpose</clr-dg-column>
       <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
       <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
+        <clr-dg-cell>
+          <div *ngIf="(workspace.researchPurpose.reviewRequested === true && workspace.researchPurpose.approved === null) else rejected">
+            <clr-icon shape="warning-standard" class="warning"></clr-icon>
+          </div>
+          <ng-template #rejected>
+            <div *ngIf="(workspace.researchPurpose.reviewRequested === true && workspace.researchPurpose.approved === false) else owner">
+              <clr-icon shape="ban" class="rejected"></clr-icon>
+            </div>
+          </ng-template>
+          <ng-template #owner>
+            <clr-icon shape="success-standard" class="is-solid"></clr-icon>
+          </ng-template>
+          <!-- TODO: Add reader and writer display to notebook status. -->
+        </clr-dg-cell>
         <clr-dg-cell><a routerLink="/workspace/{{workspace.namespace}}/{{workspace.id}}">{{workspace.name}}</a></clr-dg-cell>
-        <clr-dg-cell>{{this.document.location.href}}workspace/{{workspace.namespace}}/{{workspace.id}}</clr-dg-cell>
         <clr-dg-cell>{{workspace.lastModifiedTime | date:'medium'}}</clr-dg-cell>
-        <!-- TODO: Research purpose -->
+        <clr-dg-cell>{{workspace.researchPurpose.additionalNotes}}</clr-dg-cell>
       </clr-dg-row>
     </clr-datagrid>
   </div>
