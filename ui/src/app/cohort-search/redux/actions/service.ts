@@ -47,7 +47,7 @@ export class CohortSearchActions {
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
 
   @dispatch() _initGroup = ActionFuncs.initGroup;
-  @dispatch() _initGroupItem = ActionFuncs.initGroupItem;
+  @dispatch() initGroupItem = ActionFuncs.initGroupItem;
   @dispatch() selectCriteria = ActionFuncs.selectCriteria;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
@@ -57,6 +57,8 @@ export class CohortSearchActions {
   @dispatch() setWizardClosed = ActionFuncs.setWizardClosed;
   @dispatch() setActiveContext = ActionFuncs.setActiveContext;
   @dispatch() clearActiveContext = ActionFuncs.clearActiveContext;
+
+  @dispatch() resetState = ActionFuncs.resetState;
 
   /** Internal tooling */
   _idsInUse = Set<string>();
@@ -165,25 +167,6 @@ export class CohortSearchActions {
       this.requestTotalCount();
     }
     this._removeCriterion(itemId, criterionId);
-  }
-
-  finishWizard(): void {
-    this.requestItemCount(activeRole(this.state), activeItemId(this.state));
-    this.requestGroupCount(activeRole(this.state), activeGroupId(this.state));
-    this.requestTotalCount();
-
-    this.clearActiveContext();
-    this.setWizardClosed();
-  }
-
-  cancelWizard(): void {
-    this.setWizardClosed();
-    this.removeGroupItem(
-      activeRole(this.state),
-      activeGroupId(this.state),
-      activeItemId(this.state)
-    );
-    this.clearActiveContext();
   }
 
   fetchCriteria(kind: string, parentId: number): void {

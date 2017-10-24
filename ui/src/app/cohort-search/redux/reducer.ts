@@ -26,6 +26,7 @@ import {
   SET_WIZARD_CLOSED,
   SET_ACTIVE_CONTEXT,
   CLEAR_ACTIVE_CONTEXT,
+  RESET_STATE,
   RootAction,
 } from './actions/types';
 
@@ -156,6 +157,9 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case CLEAR_ACTIVE_CONTEXT:
         return state.setIn(['context', 'active'], Map());
+
+      case RESET_STATE:
+        return action.state;
 
       default: return state;
     }

@@ -52,6 +52,5 @@ export class SearchGroupComponent {
     });
 
     this.actions.setWizardOpen();
-    this.actions._initGroupItem(itemId, groupId);
   }
 }
