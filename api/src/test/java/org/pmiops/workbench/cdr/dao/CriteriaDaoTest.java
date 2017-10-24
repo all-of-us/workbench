@@ -30,8 +30,8 @@ public class CriteriaDaoTest {
     public void setUp() {
         icd9Criteria1 = createCriteria("ICD9", "002");
         icd9Criteria2 = createCriteria("ICD9", "001");
-        demoCriteria1 = createCriteria("DEMO_AGE", "");
-        demoCriteria2 = createCriteria("DEMO_RACE", "");
+        demoCriteria1 = createCriteria("DEMO_RACE", "Race/Ethnicity");
+        demoCriteria2 = createCriteria("DEMO_AGE", "Age");
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
         criteriaDao.save(demoCriteria1);

@@ -7,6 +7,8 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="brianfreeman" id="changelog-3" runAlways="true">
 
+    <validCheckSum>ANY</validCheckSum>
+
     <loadData tableName="criteria" file="csv/icd9_criteria.csv" encoding="UTF-8" quotchar='"'>
       <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
