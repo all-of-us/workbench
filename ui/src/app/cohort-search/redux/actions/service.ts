@@ -12,6 +12,7 @@ import {
   activeRole,
   isCriteriaLoading,
   isRequesting,
+  includeGroups,
   getItem,
   getGroup,
   getSearchRequest,
@@ -45,6 +46,7 @@ export class CohortSearchActions {
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
+  @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
   @dispatch() _initGroup = ActionFuncs.initGroup;
   @dispatch() _initGroupItem = ActionFuncs.initGroupItem;
@@ -154,8 +156,15 @@ export class CohortSearchActions {
     });
 
     if (hasItems && (countIsNonZero || isOnlyChild)) {
-      this.requestGroupCount(role, groupId);
       this.requestTotalCount();
+
+      /* If this was the only item in the group, the group no longer has a
+       * count, not really. */
+      if (isOnlyChild) {
+        this.setCount('groups', groupId, null);
+      } else {
+        this.requestGroupCount(role, groupId);
+      }
     }
   }
 
@@ -240,9 +249,22 @@ export class CohortSearchActions {
     if (searchRequest.get('isRequesting', false)) {
       this.cancelCountRequest('searchRequests', SR_ID);
     }
+
+    const included = includeGroups(this.state);
+    /* If there are no members of an intersection, the intersection is the null
+     * set */
+    const emptyIntersection = included.size === 0;
+    /* If any member of an intersection is the null set, the intersection is
+     * the null set */
+    const nullIntersection = included.some(group => group.get('count') === 0);
+    /* In either case the total count is provably zero without needing to ask
+     * the API */
+    if (nullIntersection || emptyIntersection) {
+      this.setCount('searchRequests', SR_ID, 0);
+      return ;
+    }
+
     const request = this.mapAll();
-    // TODO(jms) if the request is completely empty, the total count will be
-    // zero: just set it to zero
     this.requestCounts('searchRequests', SR_ID, request);
   }
 
