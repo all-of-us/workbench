@@ -15,7 +15,7 @@ import {
       <small class="font-weight-bold">
         {{ displayName }}
       </small>
-      <small *ngIf="node.get('code')" class="text-muted">
+      <small *ngIf="node.get('code') && node.get('code') !== node.get('name')" class="text-muted">
         {{ node.get('name') }}
       </small>
     </div>
