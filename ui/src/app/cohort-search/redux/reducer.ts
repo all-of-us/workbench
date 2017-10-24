@@ -131,10 +131,10 @@ export const rootReducer: Reducer<CohortSearchState> =
         const critsInUse = state
           .getIn(['entities', 'items'], Map())
           .reduce(
-            (ids, item) => ids.union(item.get('searchParameters', List())), 
+            (ids, item) => ids.union(item.get('searchParameters', List())),
             Set()
           );
-        
+
         return state.updateIn(
           ['entities', 'criteria'], Map(),
           critMap => critMap.filter((_, key) => critsInUse.has(key))
@@ -183,7 +183,7 @@ export const rootReducer: Reducer<CohortSearchState> =
 
         if (item.get('searchParameters', List()).isEmpty()) {
           return state
-            .updateIn(groupItems, List(), 
+            .updateIn(groupItems, List(),
               items => items.filterNot(
                 id => id === itemId)
             )

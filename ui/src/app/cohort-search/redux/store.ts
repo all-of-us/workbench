@@ -91,7 +91,7 @@ export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
 
-/** 
+/**
  * Wizard
  */
 export const wizardOpen = (state): boolean =>
