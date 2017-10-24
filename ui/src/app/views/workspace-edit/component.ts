@@ -18,6 +18,7 @@ export class WorkspaceEditComponent implements OnInit {
   adding = false;
   buttonClicked = false;
   valueNotEntered = false;
+  workspaceCreationError = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -56,9 +57,25 @@ export class WorkspaceEditComponent implements OnInit {
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;
-        this.errorHandlingService.retryApi(this.workspacesService.createWorkspace(this.workspace))
-            .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+        this.errorHandlingService.retryApi(
+          this.workspacesService.createWorkspace(this.workspace))
+            .subscribe(
+              (workspace) => {
+                this.navigateBack();
+              },
+              (error) => {
+                this.workspaceCreationError = true;
+              });
       }
     }
+  }
+
+  navigateBack(): void {
+    this.router.navigate(['../..'], {relativeTo : this.route});
+  }
+
+  resetWorkspaceCreation(): void {
+    this.workspaceCreationError = false;
+    this.buttonClicked = false;
   }
 }

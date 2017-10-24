@@ -110,3 +110,11 @@
     <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>
 </div>
+<clr-modal [(clrModalOpen)]="workspaceCreationError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not create workspace.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Creation</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceCreation()">Try Again</button>
+  </div>
+</clr-modal>
