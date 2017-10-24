@@ -11,6 +11,8 @@ import {
   activeGroupId,
   activeRole,
   isCriteriaLoading,
+  isRequesting,
+  includeGroups,
   getItem,
   getGroup,
   getSearchRequest,
@@ -44,6 +46,7 @@ export class CohortSearchActions {
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
+  @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
   @dispatch() _initGroup = ActionFuncs.initGroup;
   @dispatch() _initGroupItem = ActionFuncs.initGroupItem;
@@ -82,6 +85,9 @@ export class CohortSearchActions {
     return this.ngRedux.getState();
   }
 
+  debugDir(obj) {if (environment.debug) { console.dir(obj); }}
+  debugLog(msg) {if (environment.debug) { console.log(msg); }}
+
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
    */
@@ -96,43 +102,70 @@ export class CohortSearchActions {
     this.setActiveContext({itemId});
   }
 
-  removeGroup(role: keyof SearchRequest, groupId: string): void {
-    console.log(`Removing Group ${groupId} in ${role}`);
-    const group = getGroup(groupId)(this.state);
-
-    /* Cancel the Group Request Itself */
-    if (group.get('isRequesting', false)) {
-      this.cancelCountRequest('group', groupId);
+  cancelIfRequesting(kind, id) {
+    if (isRequesting(kind, id)(this.state)) {
+      this.cancelCountRequest(kind, id);
     }
+  }
 
-    /* If there are any child items, cancel their requests and delete them */
-    group.get('items', List()).forEach(itemId => {
-      this.removeGroupItem(role, groupId, itemId);
-    });
+  removeGroup(role: keyof SearchRequest, groupId: string): void {
+    const group = getGroup(groupId)(this.state);
+    this.debugLog(`Removing ${groupId} of ${role}:`);
+    this.debugDir(group);
 
-    /* Refires the Totals request without the group */
+    this.cancelIfRequesting('groups', groupId);
+
     this._removeGroup(role, groupId);
     this._removeId(groupId);
-    this.requestTotalCount();
+
+    group.get('items', List()).forEach(itemId => {
+      this.cancelIfRequesting('items', itemId);
+      this._removeGroupItem(groupId, itemId);
+      this._removeId(itemId);
+    });
+
+    const hasItems = !group.get('items', List()).isEmpty();
+    if (hasItems) {
+      this.requestTotalCount();
+    }
   }
 
   removeGroupItem(role: keyof SearchRequest, groupId: string, itemId: string): void {
     const item = getItem(itemId)(this.state);
-    /* Cancel the item request itself */
-    if (item.get('isRequesting', false)) {
-      this.cancelCountRequest('item', itemId);
-    }
+    const hasItems = !item.get('searchParameters', List()).isEmpty();
+    const countIsNonZero = item.get('count') !== 0;
+    // The optimization wherein we only fire the request if the item
+    // has a non-zero count (i.e. it affects its group and hence the total
+    // counts) ONLY WORKS if the item is NOT an only child.
+    const isOnlyChild = (getGroup(groupId)(this.state))
+      .get('items', List())
+      .equals(List([itemId]));
 
-    /* Remove any criterion associated with the item */
+    this.debugLog(`Removing ${itemId} of ${groupId}:`);
+    this.debugDir(item);
+    this.debugLog(
+      `hasItems: ${hasItems}, countIsNonZero: ${countIsNonZero}, isOnlyChild: ${isOnlyChild}`
+    );
+
+    this.cancelIfRequesting('items', itemId);
+    this._removeGroupItem(groupId, itemId);
+    this._removeId(itemId);
+
     item.get('searchParameters', List()).forEach(id => {
       this._removeCriterion(itemId, id);
     });
 
-    /* Refire the group and total requests now without the item */
-    this._removeGroupItem(groupId, itemId);
-    this._removeId(itemId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount();
+    if (hasItems && (countIsNonZero || isOnlyChild)) {
+      this.requestTotalCount();
+
+      /* If this was the only item in the group, the group no longer has a
+       * count, not really. */
+      if (isOnlyChild) {
+        this.setCount('groups', groupId, null);
+      } else {
+        this.requestGroupCount(role, groupId);
+      }
+    }
   }
 
   removeCriterion(
@@ -216,6 +249,21 @@ export class CohortSearchActions {
     if (searchRequest.get('isRequesting', false)) {
       this.cancelCountRequest('searchRequests', SR_ID);
     }
+
+    const included = includeGroups(this.state);
+    /* If there are no members of an intersection, the intersection is the null
+     * set */
+    const emptyIntersection = included.size === 0;
+    /* If any member of an intersection is the null set, the intersection is
+     * the null set */
+    const nullIntersection = included.some(group => group.get('count') === 0);
+    /* In either case the total count is provably zero without needing to ask
+     * the API */
+    if (nullIntersection || emptyIntersection) {
+      this.setCount('searchRequests', SR_ID, 0);
+      return ;
+    }
+
     const request = this.mapAll();
     this.requestCounts('searchRequests', SR_ID, request);
   }

@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.liquibase:liquibase-gradle-plugin:1.2.4'
+        classpath 'mysql:mysql-connector-java:5.1.37'
+    }
+}
+apply plugin: 'org.liquibase.gradle'
+
+def db_host = System.getenv("DB_HOST") ?: "db"
+def db_port = System.getenv("DB_PORT") ?: "3306"
+def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
+
+liquibase {
+    activities {
+        main {
+            changeLogFile "changelog/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+    }
+}
