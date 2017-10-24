@@ -31,7 +31,7 @@
         </clr-dg-cell>
         <clr-dg-cell><a routerLink="/workspace/{{workspace.namespace}}/{{workspace.id}}">{{workspace.name}}</a></clr-dg-cell>
         <clr-dg-cell>{{workspace.lastModifiedTime | date:'medium'}}</clr-dg-cell>
-        <clr-dg-cell>{{workspace.researchPurpose.additionalNotes}}</clr-dg-cell>
+        <clr-dg-cell>{{workspace.description}}</clr-dg-cell>
       </clr-dg-row>
     </clr-datagrid>
   </div>
