@@ -17,7 +17,6 @@ export const SELECT_CRITERIA = 'SELECT_CRITERIA';
 export const UNSELECT_CRITERIA = 'UNSELECT_CRITERIA';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
-export const REMOVE_CRITERION = 'REMOVE_CRITERION';
 
 export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
@@ -111,11 +110,6 @@ export interface ActionTypes {
     groupId: string;
     role: keyof SearchRequest;
   };
-  REMOVE_CRITERION: {
-    type: typeof REMOVE_CRITERION;
-    itemId: string;
-    criterionId: number;
-  };
 
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
@@ -154,7 +148,6 @@ export type RootAction =
   | ActionTypes[typeof UNSELECT_CRITERIA]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
-  | ActionTypes[typeof REMOVE_CRITERION]
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]

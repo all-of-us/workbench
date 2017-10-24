@@ -49,7 +49,6 @@ export class CohortSearchActions {
   @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() _removeCriterion = ActionFuncs.removeCriterion;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
@@ -142,28 +141,10 @@ export class CohortSearchActions {
     this._removeGroupItem(groupId, itemId);
     this.removeId(itemId);
 
-    item.get('searchParameters', List()).forEach(id => {
-      this._removeCriterion(itemId, id);
-    });
-
     if (hasItems && (countIsNonZero || isOnlyChild)) {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount();
     }
-  }
-
-  removeCriterion(
-    role: keyof SearchRequest, groupId: string, itemId: string, criterionId: number
-  ): void {
-    /* If we're not in a wizard context, then we need to update all the counts.
-     * Otherwise, finishing the wizard will effectively do that for us
-     */
-    if (!this.state.getIn(['context', 'wizardOpen'], false)) {
-      this.requestGroupCount(role, groupId);
-      this.requestItemCount(role, itemId);
-      this.requestTotalCount();
-    }
-    this._removeCriterion(itemId, criterionId);
   }
 
   fetchCriteria(kind: string, parentId: number): void {

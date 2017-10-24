@@ -26,7 +26,6 @@ import {
   UNSELECT_CRITERIA,
   REMOVE_ITEM,
   REMOVE_GROUP,
-  REMOVE_CRITERION,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -120,14 +119,27 @@ export const rootReducer: Reducer<CohortSearchState> =
             )
           );
 
-      case REMOVE_ITEM:
-        return state
+      case REMOVE_ITEM: {
+        state = state
           .updateIn(
             ['entities', 'groups', action.groupId, 'items'],
             List(),
             itemList => itemList.filterNot(id => id === action.itemId)
           )
           .deleteIn(['entities', 'items', action.itemId]);
+
+        const critsInUse = state
+          .getIn(['entities', 'items'], Map())
+          .reduce(
+            (ids, item) => ids.union(item.get('searchParameters', List())), 
+            Set()
+          );
+        
+        return state.updateIn(
+          ['entities', 'criteria'], Map(),
+          critMap => critMap.filter((_, key) => critsInUse.has(key))
+        );
+      }
 
       case REMOVE_GROUP:
         return state
@@ -137,15 +149,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             groupList => groupList.filterNot(id => id === action.groupId)
           )
           .deleteIn(['entities', 'groups', action.groupId]);
-
-      case REMOVE_CRITERION:
-        return state
-          .updateIn(
-            ['entities', 'items', action.itemId, 'searchParameters'],
-            List(),
-            critList => critList.filterNot(id => id === action.criterionId)
-          )
-          .deleteIn(['entities', 'criteria', action.criterionId]);
 
       case OPEN_WIZARD:
         return state.mergeIn(['wizard'], fromJS({

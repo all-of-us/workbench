@@ -14,7 +14,6 @@ import {
   UNSELECT_CRITERIA,
   REMOVE_ITEM,
   REMOVE_GROUP,
-  REMOVE_CRITERION,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -105,11 +104,6 @@ export const removeGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
-
-export const removeCriterion =
-  (itemId: string, criterionId: number
-  ): ActionTypes[typeof REMOVE_CRITERION] =>
-  ({type: REMOVE_CRITERION, itemId, criterionId});
 
 /**
  * Context mgmt

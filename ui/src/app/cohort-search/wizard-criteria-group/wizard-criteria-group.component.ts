@@ -58,8 +58,4 @@ export class WizardCriteriaGroupComponent {
         return `${code} ${name}`;
     }
   }
-
-  removeCriterion(criterionId: number) {
-    this.actions.unselectCriteria(criterionId);
-  }
 }
