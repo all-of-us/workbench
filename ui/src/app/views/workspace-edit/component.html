@@ -6,17 +6,19 @@
     <input type="text" class="input name" name="workspace-name" autofocus
         [(ngModel)]="workspace.name">
   </div>
-  <div>
-    <label class="text-label">Description:</label>
-    <textarea class="input description" name="workspace-description"
-        [(ngModel)]="workspace.description">
-    </textarea>
-  </div>
+
   <div>
     <h3>Research Purpose</h3>
     <!-- TODO: Real description of workspace purpose -->
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+    <div>
+      <label class="text-label">Describe your research purpose:</label>
+      <textarea class="input description" name="workspace-description"
+          [(ngModel)]="this.workspace.description">
+      </textarea>
+    </div>
     <section class="form-block">
+      <h4>Please select all that apply</h4>
       <div class="form-group">
         <div class="checkbox-group">
           <clr-checkbox
@@ -77,12 +79,10 @@
           </clr-checkbox>
           <!-- TODO: Dropdown for population-->
         </div>
-        <div>
-          <label class="text-label">Additional Research Purpose Notes:</label>
-          <textarea class="input description" name="research-purpose-notes"
-              [(ngModel)]="this.workspace.researchPurpose.additionalNotes">
-          </textarea>
-        </div>
+        <!-- TODO: Add includes an underserved population -->
+        <h4>Request a Review of Your Research Purpose</h4>
+        <!-- TODO: Replace with real request approval check mark. -->
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
         <div class="checkbox-group">
           <clr-checkbox
               name="requestApproval"
