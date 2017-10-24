@@ -7,6 +7,7 @@ import {
 import {NgRedux, select} from '@angular-redux/store';
 import {Observable} from 'rxjs/Observable';
 import {Wizard} from 'clarity-angular';
+import {Map} from 'immutable';
 
 import {
   CohortSearchActions,
@@ -48,7 +49,6 @@ export class WizardModalComponent implements OnInit {
   }
 
   close() {
-    this.actions.resetState(this.priorState);
     this.actions.setWizardClosed();
     this.actions.clearActiveContext();
   }

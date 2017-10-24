@@ -18,7 +18,6 @@ import {
   SET_WIZARD_CLOSED,
   SET_ACTIVE_CONTEXT,
   CLEAR_ACTIVE_CONTEXT,
-  RESET_STATE,
   ActionTypes,
 } from './types';
 
@@ -120,10 +119,3 @@ export const setActiveContext =
 
 export const clearActiveContext =
   (): ActionTypes[typeof CLEAR_ACTIVE_CONTEXT] => ({type: CLEAR_ACTIVE_CONTEXT});
-
-/*
- * The Nuclear Option: resets the whole state to a known value (given by state)
- */
-export const resetState =
-  (state): ActionTypes[typeof RESET_STATE] =>
-  ({type: RESET_STATE, state});

@@ -34,12 +34,15 @@ export const initialState = fromJS({
     criteria: {},
   },
 
-  context: {
-    wizardOpen: false,
+  wizard: {
+    open: false,
+    item: {},
   },
 
-  criteria: {},
-  requests: {},
+  criteria: {
+    tree: {},
+    requests: {},
+  },
 });
 
 
@@ -84,11 +87,12 @@ export const activeCriteriaList = (state): List<any> =>
   parameterList(activeItemId(state))(state);
 
 export const criteriaChildren = (kind, parentId) => state =>
-  state.getIn(['criteria', kind, parentId], List());
+  state.getIn(['criteria', 'tree', kind, parentId], List());
 
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
-  (state): boolean => state.getIn(['requests', kind, parentId]) === true;
+  (state): boolean =>
+  state.getIn(['criteria', 'requests', kind, parentId]) === true;
 
 
 /**
@@ -111,16 +115,16 @@ export const isRequstingTotal = state =>
  * Get Context
  */
 export const wizardOpen = state =>
-  state.getIn(['context', 'wizardOpen'], false);
+  state.getIn(['wizard', 'open'], false);
 
 export const activeItemId = (state): string =>
-  state.getIn(['context', 'active', 'itemId']);
+  state.getIn(['wizard', 'active', 'itemId']);
 
 export const activeGroupId = (state): string =>
-  state.getIn(['context', 'active', 'groupId']);
+  state.getIn(['wizard', 'active', 'groupId']);
 
 export const activeRole = (state): keyof SearchRequest =>
-  state.getIn(['context', 'active', 'role']);
+  state.getIn(['wizard', 'active', 'role']);
 
 export const activeCriteriaType = (state): string =>
-  state.getIn(['context', 'active', 'criteriaType']);
+  state.getIn(['wizard', 'active', 'criteriaType']);

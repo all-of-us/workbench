@@ -23,8 +23,6 @@ export const SET_WIZARD_CLOSED = 'SET_WIZARD_CLOSED';
 export const SET_ACTIVE_CONTEXT = 'SET_ACTIVE_CONTEXT';
 export const CLEAR_ACTIVE_CONTEXT = 'CLEAR_ACTIVE_CONTEXT';
 
-export const RESET_STATE = 'RESET_STATE';
-
 interface ActiveContext {
   criteriaType?: string;
   role?: keyof SearchRequest;
@@ -124,11 +122,6 @@ export interface ActionTypes {
   CLEAR_ACTIVE_CONTEXT: {
     type: typeof CLEAR_ACTIVE_CONTEXT;
   };
-
-  RESET_STATE: {
-    type: typeof RESET_STATE;
-    state: Map<any, any>;
-  };
 }
 
 export type RootAction =
@@ -150,5 +143,4 @@ export type RootAction =
   | ActionTypes[typeof SET_WIZARD_CLOSED]
   | ActionTypes[typeof SET_ACTIVE_CONTEXT]
   | ActionTypes[typeof CLEAR_ACTIVE_CONTEXT]
-  | ActionTypes[typeof RESET_STATE]
   ;

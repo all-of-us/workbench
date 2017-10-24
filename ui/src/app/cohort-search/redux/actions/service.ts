@@ -58,8 +58,6 @@ export class CohortSearchActions {
   @dispatch() setActiveContext = ActionFuncs.setActiveContext;
   @dispatch() clearActiveContext = ActionFuncs.clearActiveContext;
 
-  @dispatch() resetState = ActionFuncs.resetState;
-
   /** Internal tooling */
   _idsInUse = Set<string>();
 
