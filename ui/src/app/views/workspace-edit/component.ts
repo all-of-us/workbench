@@ -16,6 +16,8 @@ import {WorkspacesService} from 'generated';
 export class WorkspaceEditComponent implements OnInit {
   workspace: Workspace;
   workspaceId: string;
+  oldWorkspaceName: string;
+  oldWorkspaceNamespace: string;
   adding = false;
   buttonClicked = false;
   valueNotEntered = false;
@@ -48,6 +50,19 @@ export class WorkspaceEditComponent implements OnInit {
         population: false,
         reviewRequested: false
       }};
+    if (this.route.routeConfig.data.title == 'Create Workspace') {
+      this.adding = true;
+    } else {
+      this.oldWorkspaceNamespace = this.route.snapshot.url[1].path
+      this.oldWorkspaceName = this.route.snapshot.url[2].path;
+      this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
+          this.oldWorkspaceName)
+        .subscribe((workspace) => {
+          this.workspace = workspace;
+        }
+      )
+    }
+
   }
 
   addWorkspace(): void {
@@ -71,7 +86,6 @@ export class WorkspaceEditComponent implements OnInit {
       }
     }
   }
-
   navigateBack(): void {
     this.locationService.back();
   }
@@ -79,5 +93,24 @@ export class WorkspaceEditComponent implements OnInit {
   resetWorkspaceCreation(): void {
     this.workspaceCreationError = false;
     this.buttonClicked = false;
+  }
+  
+  updateWorkspace(): void {
+    if (!this.buttonClicked) {
+      if (isBlank(this.workspace.name)) {
+        this.valueNotEntered = true;
+        const nameArea = document.getElementsByClassName('name-area')[0];
+        nameArea.classList.add('validation-error');
+      } else {
+        this.buttonClicked = true;
+        this.valueNotEntered = false;
+        console.log(this.workspace);
+        this.errorHandlingService.retryApi(this.workspacesService.updateWorkspace(
+            this.oldWorkspaceNamespace,
+            this.oldWorkspaceName,
+            this.workspace))
+            .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+      }
+    }
   }
 }
