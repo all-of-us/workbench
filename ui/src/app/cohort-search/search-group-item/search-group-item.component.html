@@ -1,57 +1,31 @@
-<div class="row">
-  <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-    <button type="button"
-      class="btn btn-link btn-sm text-danger text-right"
-      (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
-      <clr-icon shape="close" size="14"></clr-icon>
-    </button>
+<div class="flex-container">
+  <clr-tooltip>
+    <div class="line-item">
+      <button 
+        type="button"
+        class="btn btn-link btn-sm text-danger text-right"
+        (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
+        <clr-icon shape="close" size="14"></clr-icon>
+      </button>
 
-    <span>
-      <span *ngIf="itemIndex > 0">
-        <small class="font-weight-bold">
-          OR
-        </small>
-      </span>
-
-      <!--
-      <small class="text-muted">
-        Contains
+      <small clrTooltipTrigger>
+        <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
+        <span class="text-muted">Contains</span>
+        <span class="font-weight-bold">{{ codeType }}</span>
+        <span class="text-muted">{{ codes }}</span>
       </small>
-      <clr-tooltip>
-        <small
-          class="btn-link font-weight-bold"
-          clrTooltipTrigger>
-          {{ description }}
-        </small>
-        <clr-tooltip-content *clrIfOpen>
-          <h4 [style.margin-top]="0" [style.color]="'#FFF'">Codes</h4>
-          {{ codes }}
-        </clr-tooltip-content>
-      </clr-tooltip>
-      -->
-
-      <clr-signpost>
-        <small
-          class="btn-link font-weight-bold"
-          clrSignpostTrigger>
-          {{ description }}
-        </small>
-        <clr-signpost-content *clrIfOpen>
-          <div id='codes-tooltip-well'>
-            <h4 [style.margin-top]="0">Codes</h4>
-            {{ codes }}
-          </div>
-        </clr-signpost-content>
-      </clr-signpost>
-
-    </span>
-  </div>
+    </div>
+    <clr-tooltip-content *clrIfOpen clrPosition="bottom-left">
+      <h4 [style.margin-top]="0" [style.color]="'#FFF'">Codes</h4>
+      {{ codes }}
+    </clr-tooltip-content>
+  </clr-tooltip>
 
 
-  <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
+  <div class="count">
     <span *ngIf="isRequesting"
-      class="spinner spinner-inline"
-      [style.vertical-align]="'middle'">
+       class="spinner spinner-inline"
+       [style.vertical-align]="'middle'">
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="font-weight-bold">
