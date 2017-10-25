@@ -25,6 +25,10 @@ Docker must be installed to build and run code (For Google workstations, see
 go/installdocker.). Ruby is required to run our development scripts, which
 document common operations and provide a convenient way to perform them.
 
+Add `export UID` to your `.bashrc`. All our Docker commands run as your user,
+not root. Exporting `UID` ensures one-off commands will provide `UID` (which is
+a shell var not an env var by default) to our containers.
+
 ### UI
 
 * Direct your editor to write swap files outside the source tree, so Webpack
@@ -181,3 +185,47 @@ Finally, write a new changelog file in `api/db/changelog/` and include it in
 `db.changelog-master.xml`.
 
 `liquibase` does not roll back partially failed changes.
+
+## Docker Troubleshooting
+
+### Permissions errors
+
+Always `export UID` (or place that in your `.bashrc`) before running
+`docker-compose` commands outside of `project.rb` (which takes care of setting
+`UID`).
+
+If you get permissions errors like
+`Exception in thread "main" java.io.FileNotFoundException: /.gradle/wrapper/dists/gradle-4.0-all/ac27o8rbd0ic8ih41or9l32mv/gradle-4.0-all.zip.lck (Permission denied)` or from MySQL like
+`ERROR 1130 (HY000): Host '172.18.0.3' is not allowed to connect to this MySQL server`
+it may be because you ran a `docker` command as root (the default) whereas
+our `project.rb` scripts run as you. To clear permissions in Docker volumes,
+remove the volumes:
+
+```
+docker volume rm $(docker volume ls -q)
+```
+
+### Timeout connecting to database
+
+```
+api$ ./project.rb dev-up
+...
+Running database migrations...
++ docker-compose run db-migration
+Starting api_db_1 ... done
+Operation timed out
+```
+
+Workaround: Ready your `db` container separately before running the API.
+
+```
+$ cd workbench/api
+$ docker volume rm $(docker volume ls -q)
+$ export UID
+$ docker-compose run -d db  # prints name of container
+$ docker logs api_db_run_N --follow
+# until you see "mysqld: ready for connections" then ^C
+$ docker kill api_db_run_N
+# Now normal statup should work.
+$ ./project dev-up
+```
