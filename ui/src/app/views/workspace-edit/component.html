@@ -24,17 +24,19 @@
           <clr-checkbox
               name="disease-focused-research"
               id="disease-focused-research"
-              [(ngModel)]="this.workspace.researchPurpose.diseaseFocusedResearch">
+              [(ngModel)]="this.workspace.researchPurpose.diseaseFocusedResearch"
+              [clrDisabled]="!this.adding">
             Disease focused research
           </clr-checkbox>
           <input type="text" class="input" name="disease-specification"
-              [(ngModel)]="this.workspace.researchPurpose.diseaseOfFocus">
+              [(ngModel)]="this.workspace.researchPurpose.diseaseOfFocus" [disabled]="!this.adding">
         </div>
         <div class="checkbox-group">
           <clr-checkbox
               name="methods-development"
               id="methods-development"
-              [(ngModel)]="this.workspace.researchPurpose.methodsDevelopment">
+              [(ngModel)]="this.workspace.researchPurpose.methodsDevelopment"
+              [clrDisabled]="!this.adding">
             Methods development/validation study
           </clr-checkbox>
         </div>
@@ -42,7 +44,8 @@
           <clr-checkbox
               name="control-set"
               id="control-set"
-              [(ngModel)]="this.workspace.researchPurpose.controlSet">
+              [(ngModel)]="this.workspace.researchPurpose.controlSet"
+              [clrDisabled]="!this.adding">
             Control set
           </clr-checkbox>
         </div>
@@ -50,7 +53,8 @@
           <clr-checkbox
               name="aggregate-analysis"
               id="aggregate-analysis"
-              [(ngModel)]="this.workspace.researchPurpose.aggregateAnalysis">
+              [(ngModel)]="this.workspace.researchPurpose.aggregateAnalysis"
+              [clrDisabled]="!this.adding">
             Aggregate analysis to understand variation in general population
           </clr-checkbox>
         </div>
@@ -58,7 +62,8 @@
           <clr-checkbox
               name="ancestry"
               id="ancestry"
-              [(ngModel)]="this.workspace.researchPurpose.ancestry">
+              [(ngModel)]="this.workspace.researchPurpose.ancestry"
+              [clrDisabled]="!this.adding">
             Population origins or ancestry
           </clr-checkbox>
         </div>
@@ -66,7 +71,8 @@
           <clr-checkbox
               name="commercial-purpose"
               id="commercial-purpose"
-              [(ngModel)]="this.workspace.researchPurpose.commercialPurpose">
+              [(ngModel)]="this.workspace.researchPurpose.commercialPurpose"
+              [clrDisabled]="!this.adding">
             Commercial purpose/entity
           </clr-checkbox>
         </div>
@@ -74,7 +80,8 @@
           <clr-checkbox
               name="population"
               id="population"
-              [(ngModel)]="this.workspace.researchPurpose.population">
+              [(ngModel)]="this.workspace.researchPurpose.population"
+              [clrDisabled]="!this.adding">
             Restricted to a specific population
           </clr-checkbox>
           <!-- TODO: Dropdown for population-->
@@ -87,7 +94,8 @@
           <clr-checkbox
               name="requestApproval"
               id="requestApproval"
-              [(ngModel)]="this.workspace.researchPurpose.reviewRequested">
+              [(ngModel)]="this.workspace.researchPurpose.reviewRequested"
+              [clrDisabled]="!this.adding">
             Review my workspace
           </clr-checkbox>
         </div>
@@ -96,8 +104,15 @@
   </div>
   <div style="display: flex; flex: 0 0 0; padding: 0">
     <div class="button">
+<<<<<<< HEAD
       <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
       <button class="btn" (click)="navigateBack()">Cancel</button>
+=======
+      <button *ngIf="this.adding else editing" class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
+      <ng-template #editing>
+        <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="updateWorkspace()">Update Workspace</button>
+      </ng-template> <button class="btn" routerLink="/../..">Cancel</button>
+>>>>>>> Initial work on editing workspaces.
     </div>
     <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>
