@@ -9,7 +9,6 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-  activeItemId,
   CohortSearchActions,
   CohortSearchState,
   isCriteriaLoading,
@@ -70,8 +69,7 @@ export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
   }
 
   handleSelection(node) {
-    const itemId = activeItemId(this.ngRedux.getState());
-    this.actions.selectCriteria(itemId, node);
+    this.actions.selectCriteria(node);
   }
 
   trackById(index, node) {
