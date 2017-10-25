@@ -81,7 +81,7 @@
         </div>
         <!-- TODO: Add includes an underserved population -->
         <h4>Request a Review of Your Research Purpose</h4>
-        <!-- TODO: Replace with real request approval check mark. -->
+        <!-- TODO: Replace with real request approval text. -->
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
         <div class="checkbox-group">
           <clr-checkbox
@@ -97,8 +97,16 @@
   <div style="display: flex; flex: 0 0 0; padding: 0">
     <div class="button">
       <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
-      <button class="btn" routerLink="/../..">Cancel</button>
+      <button class="btn" (click)="navigateBack()">Cancel</button>
     </div>
     <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>
 </div>
+<clr-modal [(clrModalOpen)]="workspaceCreationError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not create workspace.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Creation</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceCreation()">Keep Editing</button>
+  </div>
+</clr-modal>
