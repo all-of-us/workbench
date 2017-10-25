@@ -3,9 +3,15 @@
     <div class="line-item">
       <button 
         type="button"
-        class="btn btn-link btn-sm text-danger text-right"
+        class="btn btn-link btn-sm text-danger"
         (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
-        <clr-icon shape="close" size="14"></clr-icon>
+        <clr-icon shape="close"></clr-icon>
+      </button>
+
+      <button
+        class="btn btn-link btn-sm"
+        (click)="launchWizard()">
+        <clr-icon shape="pencil"></clr-icon>
       </button>
 
       <small clrTooltipTrigger class="trigger">

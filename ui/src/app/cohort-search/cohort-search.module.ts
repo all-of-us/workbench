@@ -6,7 +6,6 @@ import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
 import {createEpicMiddleware, combineEpics} from 'redux-observable';
 
 /* Components */
-import {AddCriteriaComponent} from './misc-ui/add-criteria.component';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
@@ -48,7 +47,6 @@ import {CohortBuilderService} from 'generated';
     NgReduxModule,
   ],
   declarations: [
-    AddCriteriaComponent,
     CohortBuilderComponent,
 
     CriteriaTreeRootComponent,

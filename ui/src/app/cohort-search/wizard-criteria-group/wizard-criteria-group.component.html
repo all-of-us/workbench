@@ -14,7 +14,7 @@
     >
     <button type="button"
       class="btn btn-icon btn-link btn-sm text-danger"
-      (click)="removeCriterion(criteria.get('id'))">
+      (click)="this.actions.unselectCriteria(criteria.get('id'))">
       <clr-icon shape="close"></clr-icon>
     </button>
     <small *ngIf="i > 0" class="font-weight-bold">OR</small>

@@ -34,9 +34,10 @@ import {
   `]
 })
 export class SearchGroupItemComponent {
-  @Input() itemId: string;
   @Input() role: string;
-  @Input() groupId: number;
+  @Input() groupId: string;
+  @Input() itemId: string;
+  @Input() itemIndex: number;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
@@ -58,5 +59,13 @@ export class SearchGroupItemComponent {
     return parameterList(this.itemId)(this.ngRedux.getState())
       .map(param => param.get('code', 'n/a'))
       .join(', ');
+  }
+
+  launchWizard() {
+    const criteriaType = this.item.get('type');
+    const {role, groupId, itemId} = this;
+    const context = {criteriaType, role, groupId, itemId};
+    const item = this.item;
+    this.actions.reOpenWizard(item, context);
   }
 }

@@ -5,6 +5,10 @@ import {
   initialState,
   CohortSearchState,
   SR_ID,
+  activeCriteriaType,
+  activeGroupId,
+  activeItem,
+  activeCriteriaList,
 } from './store';
 
 import {
@@ -19,13 +23,14 @@ import {
   INIT_SEARCH_GROUP,
   INIT_GROUP_ITEM,
   SELECT_CRITERIA,
+  UNSELECT_CRITERIA,
   REMOVE_ITEM,
   REMOVE_GROUP,
-  REMOVE_CRITERION,
-  SET_WIZARD_OPEN,
-  SET_WIZARD_CLOSED,
-  SET_ACTIVE_CONTEXT,
-  CLEAR_ACTIVE_CONTEXT,
+  OPEN_WIZARD,
+  REOPEN_WIZARD,
+  WIZARD_FINISH,
+  WIZARD_CANCEL,
+  SET_WIZARD_CONTEXT,
   RootAction,
 } from './actions/types';
 
@@ -37,20 +42,20 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case BEGIN_CRITERIA_REQUEST:
-        return state.setIn(['requests', action.kind, action.parentId], true);
+        return state.setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
       case LOAD_CRITERIA_RESULTS:
         return state
-          .setIn(['criteria', action.kind, action.parentId], fromJS(action.results))
-          .deleteIn(['requests', action.kind, action.parentId]);
+          .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
+          .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case CANCEL_CRITERIA_REQUEST:
-        return state.deleteIn(['requests', action.kind, action.parentId]);
+        return state.deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case CRITERIA_REQUEST_ERROR:
         return state
           .setIn(
-            ['requests', action.kind, action.parentId],
+            ['criteria', 'requests', action.kind, action.parentId],
             fromJS({error: action.error})
           );
 
@@ -89,43 +94,52 @@ export const rootReducer: Reducer<CohortSearchState> =
             groupList => groupList.push(action.groupId)
           );
 
-      case INIT_GROUP_ITEM:
-        return state
-          .setIn(
-            ['entities', 'items', action.itemId],
-            fromJS({
-              id: action.itemId,
-              type: state.getIn(['context', 'active', 'criteriaType']),
-              searchParameters: [],
-              modifiers: [],
-              count: null,
-              isRequesting: false,
-            })
-          )
-          .updateIn(
-            ['entities', 'groups', action.groupId, 'items'],
-            itemList => itemList.push(action.itemId)
-          );
-
       case SELECT_CRITERIA:
         return state
-          .setIn(['entities', 'criteria', action.criterion.get('id')], action.criterion)
+          .setIn(
+            ['wizard', 'selections', action.criterion.get('id')],
+            action.criterion
+          )
           .updateIn(
-            ['entities', 'items', action.itemId, 'searchParameters'],
+            ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.includes(action.criterion.get('id'))
               ? paramList
               : paramList.push(action.criterion.get('id'))
           );
 
-      case REMOVE_ITEM:
+      case UNSELECT_CRITERIA:
         return state
+          .deleteIn(['wizard', 'selections', action.criterionId || action.criterion.get('id')])
+          .updateIn(
+            ['wizard', 'item', 'searchParameters'],
+            List(),
+            paramList => paramList.filterNot(id =>
+              id === (action.criterionId || action.criterion.get('id'))
+            )
+          );
+
+      case REMOVE_ITEM: {
+        state = state
           .updateIn(
             ['entities', 'groups', action.groupId, 'items'],
             List(),
             itemList => itemList.filterNot(id => id === action.itemId)
           )
           .deleteIn(['entities', 'items', action.itemId]);
+
+        const critsInUse = state
+          .getIn(['entities', 'items'], Map())
+          .reduce(
+            (ids, item) => ids.union(item.get('searchParameters', List())),
+            Set()
+          );
+
+        return state.updateIn(
+          ['entities', 'criteria'], Map(),
+          critMap => critMap.filter((_, key) => critsInUse.has(key))
+        );
+      }
 
       case REMOVE_GROUP:
         return state
@@ -136,26 +150,68 @@ export const rootReducer: Reducer<CohortSearchState> =
           )
           .deleteIn(['entities', 'groups', action.groupId]);
 
-      case REMOVE_CRITERION:
+      case OPEN_WIZARD:
+        return state.mergeIn(['wizard'], fromJS({
+          open: true,
+          item: {
+            id: action.itemId,
+            type: action.context.criteriaType,
+            searchParameters: [],
+            modifiers: [],
+            count: null,
+            isRequesting: false,
+          },
+          selections: {},
+          ...action.context
+        }));
+
+      case REOPEN_WIZARD:
+        return state.mergeIn(['wizard'], Map({
+          open: true,
+          item: action.item,
+          selections: state.getIn(['entities', 'criteria'], Map()).filter(
+            (_, key) => action.item.get('searchParameters', List()).includes(key)
+          ),
+          ...action.context
+        }));
+
+      case WIZARD_FINISH: {
+        const item = activeItem(state);
+        const itemId = item.get('id');
+        const groupId = activeGroupId(state);
+        const groupItems = ['entities', 'groups', groupId, 'items'];
+
+        if (item.get('searchParameters', List()).isEmpty()) {
+          return state
+            .updateIn(groupItems, List(),
+              items => items.filterNot(
+                id => id === itemId)
+            )
+            .deleteIn(['entities', 'items', itemId])
+            .set('wizard', Map({open: false}));
+        }
+
+        const setUnique = element => list =>
+          list.includes(element) ? list : list.push(element);
+
+        const mergeCriteria = (criteria) =>
+          activeCriteriaList(state).reduce(
+            (critset, crit) => critset.set(crit.get('id'), crit),
+            criteria
+          );
+
         return state
-          .updateIn(
-            ['entities', 'items', action.itemId, 'searchParameters'],
-            List(),
-            critList => critList.filterNot(id => id === action.criterionId)
-          )
-          .deleteIn(['entities', 'criteria', action.criterionId]);
+          .updateIn(groupItems, List(), setUnique(itemId))
+          .setIn(['entities', 'items', itemId], item)
+          .updateIn(['entities', 'criteria'], Map(), mergeCriteria)
+          .set('wizard', Map({open: false}));
+      }
 
-      case SET_WIZARD_OPEN:
-        return state.setIn(['context', 'wizardOpen'], true);
+      case WIZARD_CANCEL:
+        return state.set('wizard', Map({open: false}));
 
-      case SET_WIZARD_CLOSED:
-        return state.setIn(['context', 'wizardOpen'], false);
-
-      case SET_ACTIVE_CONTEXT:
-        return state.mergeIn(['context', 'active'], action.context);
-
-      case CLEAR_ACTIVE_CONTEXT:
-        return state.setIn(['context', 'active'], Map());
+      case SET_WIZARD_CONTEXT:
+        return state.mergeDeepIn(['wizard'], action.context);
 
       default: return state;
     }
