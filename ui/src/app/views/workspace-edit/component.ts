@@ -23,7 +23,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
-      private _location: Location,
+      private locationService: Location,
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
@@ -73,7 +73,7 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   navigateBack(): void {
-    this._location.back();
+    this.locationService.back();
   }
 
   resetWorkspaceCreation(): void {
