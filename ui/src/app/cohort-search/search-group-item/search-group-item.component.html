@@ -1,7 +1,7 @@
 <div class="flex-container">
   <clr-tooltip>
     <div class="line-item">
-      <button 
+      <button
         type="button"
         class="btn btn-link btn-sm text-danger"
         (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
@@ -21,8 +21,11 @@
         <span class="text-muted">{{ codes }}</span>
       </small>
     </div>
-    <clr-tooltip-content *clrIfOpen clrPosition="bottom-left">
-      <h4 [style.margin-top]="0" [style.color]="'#FFF'">Codes</h4>
+    <clr-tooltip-content
+      *clrIfOpen
+      clrPosition="bottom-left"
+      clrSize="md">
+      <h4 [style.margin-top]="0" [style.color]="'#FFF'">{{ pluralizedCode }}</h4>
       {{ codes }}
     </clr-tooltip-content>
   </clr-tooltip>

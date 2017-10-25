@@ -8,6 +8,11 @@ import {
   parameterList
 } from '../redux';
 
+const getDisplayName = (criteria) =>
+  criteria.get('type').match(/^DEMO.*/i)
+    ?  criteria.get('name')
+    : criteria.get('code');
+
 @Component({
   selector: 'app-search-group-item',
   templateUrl: './search-group-item.component.html',
@@ -44,7 +49,11 @@ export class SearchGroupItemComponent {
 
   get codeType() {
     const _type = this.item.get('type').toUpperCase();
-    return this.item.get('description', `${_type} Codes`);
+    return this.item.get('description', `${_type} ${this.pluralizedCode}`);
+  }
+
+  get pluralizedCode() {
+    return this._rawCodes.count() > 1 ? 'Codes' : 'Code';
   }
 
   get item() {
@@ -55,10 +64,12 @@ export class SearchGroupItemComponent {
     return this.item.get('isRequesting', false);
   }
 
+  get _rawCodes() {
+    return parameterList(this.itemId)(this.ngRedux.getState());
+  }
+
   get codes() {
-    return parameterList(this.itemId)(this.ngRedux.getState())
-      .map(param => param.get('code', 'n/a'))
-      .join(', ');
+    return this._rawCodes.map(getDisplayName).join(', ');
   }
 
   launchWizard() {
