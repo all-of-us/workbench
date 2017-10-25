@@ -2,9 +2,9 @@ import {Component, Input} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 
 import {
-  CohortSearchActions, 
-  CohortSearchState, 
-  getItem, 
+  CohortSearchActions,
+  CohortSearchState,
+  getItem,
   parameterList
 } from '../redux';
 
@@ -27,6 +27,9 @@ import {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+    }
+    .trigger:hover > span {
+      color: rgb(0, 124, 187)!important;
     }
   `]
 })
