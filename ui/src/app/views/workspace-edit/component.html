@@ -97,7 +97,7 @@
   <div style="display: flex; flex: 0 0 0; padding: 0">
     <div class="button">
       <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
-      <button class="btn" routerLink="/../..">Cancel</button>
+      <button class="btn" (click)="navigateBack()">Cancel</button>
     </div>
     <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>
@@ -107,6 +107,6 @@
   <div class="modal-body">Could not create workspace.</div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Creation</button>
-    <button type="button" class="btn btn-primary" (click)="resetWorkspaceCreation()">Try Again</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceCreation()">Keep Editing</button>
   </div>
 </clr-modal>
