@@ -8,9 +8,10 @@ import {CohortSearchActions, CohortSearchState, getItem} from '../redux';
   templateUrl: './search-group-item.component.html',
 })
 export class SearchGroupItemComponent {
-  @Input() itemId: string;
   @Input() role: string;
-  @Input() groupId: number;
+  @Input() groupId: string;
+  @Input() itemId: string;
+  @Input() itemIndex: number;
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
@@ -26,5 +27,13 @@ export class SearchGroupItemComponent {
 
   get isRequesting() {
     return this.item.get('isRequesting', false);
+  }
+
+  launchWizard() {
+    const criteriaType = this.item.get('type');
+    const {role, groupId, itemId} = this;
+    const context = {criteriaType, role, groupId, itemId};
+    const item = this.item;
+    this.actions.reOpenWizard(item, context);
   }
 }

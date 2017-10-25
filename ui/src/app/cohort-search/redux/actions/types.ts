@@ -14,14 +14,15 @@ export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
 export const INIT_GROUP_ITEM = 'INIT_GROUP_ITEM';
 export const SELECT_CRITERIA = 'SELECT_CRITERIA';
+export const UNSELECT_CRITERIA = 'UNSELECT_CRITERIA';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
-export const REMOVE_CRITERION = 'REMOVE_CRITERION';
 
-export const SET_WIZARD_OPEN = 'SET_WIZARD_OPEN';
-export const SET_WIZARD_CLOSED = 'SET_WIZARD_CLOSED';
-export const SET_ACTIVE_CONTEXT = 'SET_ACTIVE_CONTEXT';
-export const CLEAR_ACTIVE_CONTEXT = 'CLEAR_ACTIVE_CONTEXT';
+export const OPEN_WIZARD = 'OPEN_WIZARD';
+export const REOPEN_WIZARD = 'REOPEN_WIZARD';
+export const WIZARD_FINISH = 'WIZARD_FINISH';
+export const WIZARD_CANCEL = 'WIZARD_CANCEL';
+export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
 interface ActiveContext {
   criteriaType?: string;
@@ -88,11 +89,17 @@ export interface ActionTypes {
     groupId: string;
     itemId: string;
   };
+
   SELECT_CRITERIA: {
     type: typeof SELECT_CRITERIA;
-    itemId: string;
     criterion: any;
   };
+  UNSELECT_CRITERIA: {
+    type: typeof UNSELECT_CRITERIA;
+    criterion?: any;
+    criterionId?: number;
+  };
+
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
     itemId: string;
@@ -103,24 +110,26 @@ export interface ActionTypes {
     groupId: string;
     role: keyof SearchRequest;
   };
-  REMOVE_CRITERION: {
-    type: typeof REMOVE_CRITERION;
-    itemId: string;
-    criterionId: number;
-  };
 
-  SET_WIZARD_OPEN: {
-    type: typeof SET_WIZARD_OPEN;
+  OPEN_WIZARD: {
+    type: typeof OPEN_WIZARD;
+    itemId: string;
+    context?: ActiveContext;
   };
-  SET_WIZARD_CLOSED: {
-    type: typeof SET_WIZARD_CLOSED;
+  REOPEN_WIZARD: {
+    type: typeof REOPEN_WIZARD;
+    item: any;
+    context?: ActiveContext;
   };
-  SET_ACTIVE_CONTEXT: {
-    type: typeof SET_ACTIVE_CONTEXT;
+  WIZARD_FINISH: {
+    type: typeof WIZARD_FINISH;
+  };
+  WIZARD_CANCEL: {
+    type: typeof WIZARD_CANCEL;
+  };
+  SET_WIZARD_CONTEXT: {
+    type: typeof SET_WIZARD_CONTEXT;
     context: ActiveContext;
-  };
-  CLEAR_ACTIVE_CONTEXT: {
-    type: typeof CLEAR_ACTIVE_CONTEXT;
   };
 }
 
@@ -136,11 +145,12 @@ export type RootAction =
   | ActionTypes[typeof INIT_SEARCH_GROUP]
   | ActionTypes[typeof INIT_GROUP_ITEM]
   | ActionTypes[typeof SELECT_CRITERIA]
+  | ActionTypes[typeof UNSELECT_CRITERIA]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
-  | ActionTypes[typeof REMOVE_CRITERION]
-  | ActionTypes[typeof SET_WIZARD_OPEN]
-  | ActionTypes[typeof SET_WIZARD_CLOSED]
-  | ActionTypes[typeof SET_ACTIVE_CONTEXT]
-  | ActionTypes[typeof CLEAR_ACTIVE_CONTEXT]
+  | ActionTypes[typeof OPEN_WIZARD]
+  | ActionTypes[typeof REOPEN_WIZARD]
+  | ActionTypes[typeof WIZARD_FINISH]
+  | ActionTypes[typeof WIZARD_CANCEL]
+  | ActionTypes[typeof SET_WIZARD_CONTEXT]
   ;
