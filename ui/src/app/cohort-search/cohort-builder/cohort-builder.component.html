@@ -1,6 +1,4 @@
-<div class="main-container">
-  <div class="alert alert-app-level"></div>
-
+<clr-main-container>
   <clr-header class="header-6">
     <div class="branding">
       <span class="title">AoU Discover</span>
@@ -110,6 +108,5 @@
       </div>
     </div>
   </div>
-</div>
-
-<app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>
+  <app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>
+</clr-main-container>
