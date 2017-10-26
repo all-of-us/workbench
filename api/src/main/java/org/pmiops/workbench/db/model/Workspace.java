@@ -292,20 +292,6 @@ public class Workspace {
     this.approved = approved;
   }
 
-  /**
-   * Record research purpose approval. Throw if already approved/denied.
-   * Use setApproved(boolean) for access with minimal validation (ex: backfill scripts).
-   */
-  public void setApprovedUnique(boolean approved) {
-    if (getReviewRequested() == null || getReviewRequested()) {
-      throw new IllegalStateException("No review requsted for research purpose.");
-    }
-    if (dbWorkspace.getApproved() != null) {
-      throw new IllegalStateException("Research purpose approval already recorded.");
-    }
-    setApproved(approved);
-  }
-
   @Column(name = "rp_time_requested")
   public Timestamp getTimeRequested() {
     return this.timeRequested;
