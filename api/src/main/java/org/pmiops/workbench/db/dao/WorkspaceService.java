@@ -26,7 +26,7 @@ public class WorkspaceService {
   public final WorkspaceDao dao;
 
   @Autowired
-  WorkspaceService(WorkspaceDao workspaceDao) {
+  public WorkspaceService(WorkspaceDao workspaceDao) {
     this.dao = workspaceDao;
   }
 
