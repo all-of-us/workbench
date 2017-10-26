@@ -262,10 +262,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    if (workspace.getDataAccessLevel() != null) {
-      dbWorkspace.setDataAccessLevel(
-          DataAccessLevel.fromValue(workspace.getDataAccessLevel().name()));
-    }
     if (workspace.getDescription() != null) {
       dbWorkspace.setDescription(workspace.getDescription());
     }

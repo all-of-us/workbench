@@ -104,15 +104,11 @@
   </div>
   <div style="display: flex; flex: 0 0 0; padding: 0">
     <div class="button">
-<<<<<<< HEAD
-      <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
-      <button class="btn" (click)="navigateBack()">Cancel</button>
-=======
       <button *ngIf="this.adding else editing" class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="addWorkspace()">Create Workspace</button>
       <ng-template #editing>
         <button class="btn add-button btn-primary" [clrLoading]="buttonClicked" (click)="updateWorkspace()">Update Workspace</button>
-      </ng-template> <button class="btn" routerLink="/../..">Cancel</button>
->>>>>>> Initial work on editing workspaces.
+      </ng-template>
+      <button class="btn" (click)="navigateBack()">Cancel</button>
     </div>
     <p *ngIf="this.valueNotEntered;">* is a required field</p>
   </div>

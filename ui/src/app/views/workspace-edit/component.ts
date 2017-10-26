@@ -94,7 +94,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.workspaceCreationError = false;
     this.buttonClicked = false;
   }
-  
+
   updateWorkspace(): void {
     if (!this.buttonClicked) {
       if (isBlank(this.workspace.name)) {
@@ -104,12 +104,17 @@ export class WorkspaceEditComponent implements OnInit {
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;
-        console.log(this.workspace);
         this.errorHandlingService.retryApi(this.workspacesService.updateWorkspace(
             this.oldWorkspaceNamespace,
             this.oldWorkspaceName,
             this.workspace))
-            .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+          .subscribe(
+            () => {
+              this.navigateBack()
+            },
+            (error) => {
+              this.workspaceCreationError = true;
+            });
       }
     }
   }
