@@ -11,8 +11,10 @@ import org.springframework.data.repository.CrudRepository;
  * automatically interpreted by Spring Data (see README).
  */
 public interface WorkspaceDao extends CrudRepository<Workspace, Long>, WorkspaceDaoCustom {
+  @Query("SELECT w FROM Workspace w WHERE w.workspaceNamespace = ?1 AND w.firecloudName = ?2")
+  Workspace get(String workspaceNamespace, String firecloudName);
+
   List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);
-  Workspace findByWorkspaceNamespaceAndFirecloudName(String workspaceNamespace,
-      String firecloudName);
+
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
 }
