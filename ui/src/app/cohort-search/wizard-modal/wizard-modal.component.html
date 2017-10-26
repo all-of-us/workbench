@@ -15,10 +15,7 @@
 
     <div *ngIf="!criteriaRootsLoading" id="criteria-page">
       <div class="criteria-tree-container">
-        <app-criteria-tree-node 
-          *ngFor="let node of children"
-          [node]="node">
-        </app-criteria-tree-node>
+        <app-criteria-tree-node [node]="rootNode" (isLoading)="rootsAreLoading"></app-criteria-tree-node>
       </div>
       <app-wizard-criteria-group></app-wizard-criteria-group>
     </div>

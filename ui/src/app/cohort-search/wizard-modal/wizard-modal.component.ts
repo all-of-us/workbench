@@ -19,7 +19,6 @@ import {
   activeRole,
   activeGroupId,
   activeItem,
-  wizardOpen,
 } from '../redux';
 
 
@@ -29,13 +28,11 @@ import {
   styleUrls: ['./wizard-modal.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class WizardModalComponent implements OnInit, OnDestroy {
+export class WizardModalComponent {
   @Input() open: boolean;
   @Input() criteriaType: string;
-  @select(['wizard']) wizardState$: Observable<Map<any, any>>;
-  @select(['criteria']) criteriaState$: Observable<Map<any, any>>;
-  private wizardState: Map<any, any> = Map();
-  private criteriaState: Map<any, any> = Map();
+
+  private rootsAreLoading = true;
   // Zero is default parent ID for criteria tree roots
   private readonly parentId = 0;
   private _subscriptions: Subscription[];
@@ -44,30 +41,8 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
-  ngOnInit() {
-    this._subscriptions = [
-      this.wizardState$.subscribe(s => this.wizardState = s),
-      this.criteriaState$.subscribe(s => this.criteriaState = s),
-    ];
-    this.actions.fetchCriteria(this.criteriaType, this.parentId);
-  }
-
-  ngOnDestroy() {
-    this._subscriptions.forEach(sub => sub.unsubscribe());
-  }
-
-  get criteriaRootsLoading() {
-    const path = ['requests', this.criteriaType, this.parentId];
-    return this.criteriaState.getIn(path, false);
-  }
-
-  get selectedCriteria() {
-    return this.wizardState.get('selections', Map());
-  }
-
-  get children() {
-    const path = ['tree', this.criteriaType, this.parentId];
-    return this.criteriaState.getIn(path, List());
+  get rootNode() {
+    return Map({type: this.criteriaType, id: this.parentId});
   }
 
   cancel() {
@@ -75,12 +50,14 @@ export class WizardModalComponent implements OnInit, OnDestroy {
   }
 
   finish() {
-    const role = this.wizardState.get('role');
-    const groupId = this.wizardState.get('groupId');
-    const itemId = this.wizardState.get('itemId');
+    const state = this.ngRedux.getState();
+    const role = activeRole(state);
+    const groupId = activeGroupId(state);
+    const itemId = activeItem(state).get('id');
+    const selections = activeCriteriaList(state);
 
     this.actions.finishWizard();
-    if (!this.selectedCriteria.isEmpty()) {
+    if (!selections.isEmpty()) {
       this.actions.requestItemCount(role, itemId);
       this.actions.requestGroupCount(role, groupId);
       this.actions.requestTotalCount();
