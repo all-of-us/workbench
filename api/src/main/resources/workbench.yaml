@@ -751,8 +751,8 @@ definitions:
       - givenName
       - familyName
       - username
-      - password
       - contactEmail
+      - password
     properties:
       givenName:
         type: string
@@ -760,14 +760,14 @@ definitions:
         type: string
       username:
         type: string
+      contactEmail:
+        type: string
+        description: email address that can be used to contact the user
       password:
         type: string
       invitationKey:
         type: string
         description: Invitation key. Necessary when creating account before public launch.
-      contactEmail:
-        type: string
-        description: email address that can be used to contact the user
     example:
       givenName: "John"
       familyName: "Doe"
