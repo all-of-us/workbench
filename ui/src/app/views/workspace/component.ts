@@ -195,6 +195,6 @@ export class WorkspaceComponent implements OnInit {
   }
 
   edit(): void {
-    this.router.navigate(['edit'], {relativeTo : this.route})
+    this.router.navigate(['edit'], {relativeTo : this.route});
   }
 }
