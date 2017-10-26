@@ -742,9 +742,9 @@ definitions:
   ResearchPurposeReviewRequest:
     description: Approve or reject a workspace's research purpose.
     type: object
-    required: approve
+    required: approved
     properties:
-      approve:
+      approved:
         type: boolean
 
   CohortListResponse:
