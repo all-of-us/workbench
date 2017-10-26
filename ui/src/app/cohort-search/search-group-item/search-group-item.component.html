@@ -1,33 +1,41 @@
-<div class="row">
-  <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-    <button type="button"
-      class="btn btn-link btn-sm text-danger text-right"
-      (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
-      <clr-icon shape="close" size="14"></clr-icon>
-    </button>
+<div class="flex-container">
+  <clr-tooltip>
+    <div class="line-item">
+      <button
+        type="button"
+        class="btn btn-link btn-sm text-danger"
+        (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
+        <clr-icon shape="close"></clr-icon>
+      </button>
 
-    <span>
-      <span *ngIf="itemIndex > 0">
-        <small class="font-weight-bold">
-          OR
-        </small>
-      </span>
+      <button
+        type="button"
+        class="btn btn-link btn-sm"
+        (click)="launchWizard()">
+        <clr-icon shape="pencil"></clr-icon>
+      </button>
 
-      <small class="text-muted">
-        Contains
+      <small clrTooltipTrigger class="trigger">
+        <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
+        <span class="text-muted">Contains</span>
+        <span class="font-weight-bold">{{ codeType }}</span>
+        <span class="text-muted">{{ codes }}</span>
       </small>
+    </div>
+    <clr-tooltip-content
+      *clrIfOpen
+      clrPosition="bottom-left"
+      clrSize="md">
+      <h4 [style.margin-top]="0" [style.color]="'#FFF'">{{ pluralizedCode }}</h4>
+      {{ codes }}
+    </clr-tooltip-content>
+  </clr-tooltip>
 
-      <small class="font-weight-bold">
-        {{ description }}
-      </small>
-    </span>
-  </div>
 
-
-  <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-right">
+  <div class="count">
     <span *ngIf="isRequesting"
-      class="spinner spinner-inline"
-      [style.vertical-align]="'middle'">
+       class="spinner spinner-inline"
+       [style.vertical-align]="'middle'">
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="font-weight-bold">

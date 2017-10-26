@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
@@ -18,9 +19,11 @@ export class WorkspaceEditComponent implements OnInit {
   adding = false;
   buttonClicked = false;
   valueNotEntered = false;
+  workspaceCreationError = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
+      private locationService: Location,
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
@@ -56,9 +59,25 @@ export class WorkspaceEditComponent implements OnInit {
       } else {
         this.buttonClicked = true;
         this.valueNotEntered = false;
-        this.errorHandlingService.retryApi(this.workspacesService.createWorkspace(this.workspace))
-            .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
+        this.errorHandlingService.retryApi(
+          this.workspacesService.createWorkspace(this.workspace))
+            .subscribe(
+              () => {
+                this.navigateBack();
+              },
+              (error) => {
+                this.workspaceCreationError = true;
+              });
       }
     }
+  }
+
+  navigateBack(): void {
+    this.locationService.back();
+  }
+
+  resetWorkspaceCreation(): void {
+    this.workspaceCreationError = false;
+    this.buttonClicked = false;
   }
 }

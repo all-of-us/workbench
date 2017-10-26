@@ -7,9 +7,6 @@ import {environment} from 'environments/environment';
 
 import {
   CohortSearchState,
-  activeItemId,
-  activeGroupId,
-  activeRole,
   isCriteriaLoading,
   isRequesting,
   includeGroups,
@@ -49,21 +46,22 @@ export class CohortSearchActions {
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
   @dispatch() _initGroup = ActionFuncs.initGroup;
-  @dispatch() _initGroupItem = ActionFuncs.initGroupItem;
+  @dispatch() initGroupItem = ActionFuncs.initGroupItem;
   @dispatch() selectCriteria = ActionFuncs.selectCriteria;
+  @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() _removeCriterion = ActionFuncs.removeCriterion;
 
-  @dispatch() setWizardOpen = ActionFuncs.setWizardOpen;
-  @dispatch() setWizardClosed = ActionFuncs.setWizardClosed;
-  @dispatch() setActiveContext = ActionFuncs.setActiveContext;
-  @dispatch() clearActiveContext = ActionFuncs.clearActiveContext;
+  @dispatch() openWizard = ActionFuncs.openWizard;
+  @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
+  @dispatch() finishWizard = ActionFuncs.finishWizard;
+  @dispatch() cancelWizard = ActionFuncs.cancelWizard;
+  @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   /** Internal tooling */
   _idsInUse = Set<string>();
 
-  _generateId(prefix?: string) {
+  generateId(prefix?: string) {
     prefix = prefix || 'id';
     let newId = `${prefix}${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
@@ -77,7 +75,7 @@ export class CohortSearchActions {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  _removeId(id: string) {
+  removeId(id: string) {
     this._idsInUse = this._idsInUse.delete(id);
   }
 
@@ -92,14 +90,8 @@ export class CohortSearchActions {
    * alternate interfaces for a simpler action.
    */
   initGroup(role: keyof SearchRequest) {
-    const newId = this._generateId(role);
+    const newId = this.generateId(role);
     this._initGroup(role, newId);
-  }
-
-  initGroupItem(groupId: string) {
-    const itemId = this._generateId('item');
-    this._initGroupItem(itemId, groupId);
-    this.setActiveContext({itemId});
   }
 
   cancelIfRequesting(kind, id) {
@@ -116,12 +108,12 @@ export class CohortSearchActions {
     this.cancelIfRequesting('groups', groupId);
 
     this._removeGroup(role, groupId);
-    this._removeId(groupId);
+    this.removeId(groupId);
 
     group.get('items', List()).forEach(itemId => {
       this.cancelIfRequesting('items', itemId);
       this._removeGroupItem(groupId, itemId);
-      this._removeId(itemId);
+      this.removeId(itemId);
     });
 
     const hasItems = !group.get('items', List()).isEmpty();
@@ -149,11 +141,7 @@ export class CohortSearchActions {
 
     this.cancelIfRequesting('items', itemId);
     this._removeGroupItem(groupId, itemId);
-    this._removeId(itemId);
-
-    item.get('searchParameters', List()).forEach(id => {
-      this._removeCriterion(itemId, id);
-    });
+    this.removeId(itemId);
 
     if (hasItems && (countIsNonZero || isOnlyChild)) {
       this.requestTotalCount();
@@ -166,45 +154,6 @@ export class CohortSearchActions {
         this.requestGroupCount(role, groupId);
       }
     }
-  }
-
-  removeCriterion(
-    role: keyof SearchRequest, groupId: string, itemId: string, criterionId: number
-  ): void {
-    /* If we're not in a wizard context, then we need to update all the counts.
-     * Otherwise, finishing the wizard will effectively do that for us
-     */
-    if (!this.state.getIn(['context', 'wizardOpen'], false)) {
-      this.requestGroupCount(role, groupId);
-      this.requestItemCount(role, itemId);
-      this.requestTotalCount();
-    }
-    this._removeCriterion(itemId, criterionId);
-  }
-
-  openWizard(criteriaType: string, role: keyof SearchRequest, groupId: string): void {
-    this.setActiveContext({criteriaType, role, groupId});
-    this.setWizardOpen();
-    this.initGroupItem(groupId);
-  }
-
-  finishWizard(): void {
-    this.requestItemCount(activeRole(this.state), activeItemId(this.state));
-    this.requestGroupCount(activeRole(this.state), activeGroupId(this.state));
-    this.requestTotalCount();
-
-    this.clearActiveContext();
-    this.setWizardClosed();
-  }
-
-  cancelWizard(): void {
-    this.setWizardClosed();
-    this.removeGroupItem(
-      activeRole(this.state),
-      activeGroupId(this.state),
-      activeItemId(this.state)
-    );
-    this.clearActiveContext();
   }
 
   fetchCriteria(kind: string, parentId: number): void {
