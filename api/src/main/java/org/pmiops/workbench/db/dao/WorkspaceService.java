@@ -1,7 +1,6 @@
-package org.pmiops.workbench.api;
+package org.pmiops.workbench.db.dao;
 
 import java.util.logging.Logger;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
