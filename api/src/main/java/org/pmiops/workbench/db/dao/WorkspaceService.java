@@ -5,6 +5,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * TODO(RW-215) Add versioning to detect/prevent concurrent edits.
  */
+@Service
 public class WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
