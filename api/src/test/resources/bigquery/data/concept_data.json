@@ -34,5 +34,53 @@
     "valid_start_date":"2009-12-03",
     "valid_end_date":"2009-12-03",
     "invalid_reason":"ir"
+  },
+  {
+    "concept_id":6,
+    "concept_name":"name",
+    "domain_id":"Condition",
+    "vocabulary_id":"ICD10CM",
+    "concept_class_id":"6",
+    "standard_concept":"sc",
+    "concept_code":"A09",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":7,
+    "concept_name":"name",
+    "domain_id":"Condition",
+    "vocabulary_id":"ICD10CM",
+    "concept_class_id":"7",
+    "standard_concept":"sc",
+    "concept_code":"C00.5",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":8,
+    "concept_name":"name",
+    "domain_id":"Procedure",
+    "vocabulary_id":"ICD10PCS",
+    "concept_class_id":"8",
+    "standard_concept":"sc",
+    "concept_code":"16070",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":9,
+    "concept_name":"name",
+    "domain_id":"Measurement",
+    "vocabulary_id":"ICD10CM",
+    "concept_class_id":"9",
+    "standard_concept":"sc",
+    "concept_code":"R92.2",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
   }
 ]

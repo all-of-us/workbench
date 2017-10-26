@@ -57,7 +57,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Override
     public List<String> getTableNames() {
         return Arrays.asList(
-                "icd9_criteria",
+                "criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
@@ -132,6 +132,37 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId(12L));
 
         verify(mockCriteriaDao).findCriteriaByTypeAndParentId("DEMO", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
+    }
+
+    @Test
+    public void getCriteriaByTypeAndParentId_icd10() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("ICD10")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndParentId("ICD10", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("ICD10", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("ICD10")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("ICD10", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -259,6 +290,38 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         testSearchRequest.getExcludes().add(anotherSearchGroup);
 
         assertSubjects( controller.countSubjects(testSearchRequest), 0);
+    }
+
+    @Test
+    public void countSubjects_ICD10ConditionOccurrenceLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("A09").domain("Condition")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_ICD10ConditionOccurrenceParent() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("C00")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_ICD10ProcedureOccurrenceLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("16070").domain("Procedure")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_ICD10MeasurementLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("R92.2").domain("Measurement")))),
+                1);
     }
 
     @Test
