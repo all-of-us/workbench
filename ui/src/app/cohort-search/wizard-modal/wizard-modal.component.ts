@@ -36,7 +36,7 @@ export class WizardModalComponent {
   constructor(private ngRedux: NgRedux<CohortSearchState>,
               private actions: CohortSearchActions) {}
 
-  close() {
+  cancel() {
     this.actions.cancelWizard();
   }
 
