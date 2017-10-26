@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -34,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspacesControllerTest {
 
   @Autowired
-  WorkspaceDao workspaceDao;
+  WorkspaceService workspaceService;
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Autowired
@@ -57,7 +57,7 @@ public class WorkspacesControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
-    this.workspacesController = new WorkspacesController(workspaceDao, cdrVersionDao,
+    this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
