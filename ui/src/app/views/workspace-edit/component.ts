@@ -50,17 +50,17 @@ export class WorkspaceEditComponent implements OnInit {
         population: false,
         reviewRequested: false
       }};
-    if (this.route.routeConfig.data.title == 'Create Workspace') {
+    if (this.route.routeConfig.data.title === 'Create Workspace') {
       this.adding = true;
     } else {
-      this.oldWorkspaceNamespace = this.route.snapshot.url[1].path
+      this.oldWorkspaceNamespace = this.route.snapshot.url[1].path;
       this.oldWorkspaceName = this.route.snapshot.url[2].path;
       this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
           this.oldWorkspaceName)
         .subscribe((workspace) => {
           this.workspace = workspace;
         }
-      )
+      );
     }
 
   }
@@ -110,7 +110,7 @@ export class WorkspaceEditComponent implements OnInit {
             this.workspace))
           .subscribe(
             () => {
-              this.navigateBack()
+              this.navigateBack();
             },
             (error) => {
               this.workspaceCreationError = true;
