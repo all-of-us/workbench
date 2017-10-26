@@ -43,7 +43,7 @@ public class WorkspaceService {
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException("No review requested for workspace {0}/{1}.".format(ns, id));
     }
-    if (workspace.getApproved != null) {
+    if (workspace.getApproved() != null) {
       throw new BadRequestException("Workspace {0}/{1} already {3}.".format(
           ns, id, workspace.getApproved() ? "approved" : "rejected"));
     }

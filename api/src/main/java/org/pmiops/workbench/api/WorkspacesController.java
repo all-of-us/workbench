@@ -18,7 +18,9 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.Workspace.DataAccessLevelEnum;
 import org.pmiops.workbench.model.WorkspaceListResponse;
@@ -189,8 +191,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
-    org.pmiops.workbench.db.model.Workspace existingWorkspace =
-        workspaceService.get(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.dao.get(
+        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
     if (existingWorkspace != null) {
       throw new BadRequestException("Workspace {0}/{1} already exists".format(
           workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
@@ -273,9 +275,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
+  /** Record approval or rejection of research purpose. */
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
+    WorkspaceListResponse response = new WorkspaceListResponse();
+    // FIXME
+    //response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
   }
 }
