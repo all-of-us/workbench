@@ -1,10 +1,32 @@
+<style>
+.flex-container {
+  display: flex;
+}
+.flex-container > clr-tooltip {
+  min-width: 0;
+  flex: 4;
+}
+.flex-container > div.count {
+  flex: 1;
+  text-align: right;
+}
+.line-item {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.trigger:hover > span {
+  color: rgb(0, 124, 187)!important;
+}
+</style>
+
 <div class="flex-container">
   <clr-tooltip>
     <div class="line-item">
       <button
-        type="button"
-        class="btn btn-link btn-sm text-danger"
-        (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
+         type="button"
+         class="btn btn-link btn-sm text-danger"
+         (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
         <clr-icon shape="close"></clr-icon>
       </button>
 
@@ -30,7 +52,6 @@
       {{ codes }}
     </clr-tooltip-content>
   </clr-tooltip>
-
 
   <div class="count">
     <span *ngIf="isRequesting"

@@ -41,6 +41,12 @@ import {
       </clr-tree-node>
     </ng-template>
   `,
+  encapsulation: ViewEncapsulation.None,
+  styles: [`
+    .clr-treenode-children {
+      overflow: hidden!important;
+    }
+  `]
 })
 export class CriteriaTreeRootComponent implements OnInit, OnDestroy {
 

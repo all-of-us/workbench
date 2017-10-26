@@ -1,6 +1,6 @@
-<clr-wizard 
-  #wizard 
-  [clrWizardOpen]="open$ | async" 
+<clr-wizard
+  #wizard
+  [clrWizardOpen]="open$ | async"
   (clrWizardOnCancel)="close()"
   >
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
@@ -26,9 +26,9 @@
       <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
       <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
       <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-      <button 
-        class="btn clr-wizard-btn btn-primary clr-wizard-btn--primary btn-success" 
-        type="button" 
+      <button
+        class="btn clr-wizard-btn btn-primary clr-wizard-btn--primary btn-success"
+        type="button"
         (click)="finish()">Finish</button>
     </ng-template>
 

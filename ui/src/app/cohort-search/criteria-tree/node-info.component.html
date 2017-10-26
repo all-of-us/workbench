@@ -1,0 +1,49 @@
+<style>
+.flex-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+.flex-container > div.item-info {
+  min-width: 0%;
+  flex: 10;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.flex-container > div.count {
+  flex: 1;
+  text-align: right;
+}
+.flex-container > div.select-button {
+  flex: 1;
+}
+</style>
+
+<div class="flex-container">
+  <div class="item-info">
+    <small class="font-weight-bold">
+      {{ displayCode }}
+    </small>
+    <small class="text-muted">
+      {{ displayName }}
+    </small>
+  </div>
+
+  <div class="count">
+    <span *ngIf="nonZeroCount" class="badge badge-light-blue">
+      {{ node.get('count') }}
+    </span>
+  </div>
+
+  <div class="select-button">
+    <button
+      *ngIf="selectable"
+      type="button"
+      class="btn btn-sm btn-link"
+      [style.margin]="'0 0 0 0'"
+      (click)="select($event)">
+      <clr-icon shape="plus-circle" size="20"></clr-icon>
+    </button>
+  </div>
+</div>

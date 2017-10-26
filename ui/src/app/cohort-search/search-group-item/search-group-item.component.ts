@@ -16,27 +16,6 @@ const getDisplayName = (criteria) =>
 @Component({
   selector: 'app-search-group-item',
   templateUrl: './search-group-item.component.html',
-  styles: [`
-    .flex-container {
-      display: flex;
-    }
-    .flex-container > clr-tooltip {
-      min-width: 0;
-      flex: 4;
-    }
-    .flex-container > div.count {
-      flex: 1;
-      text-align: right;
-    }
-    .line-item {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-    .trigger:hover > span {
-      color: rgb(0, 124, 187)!important;
-    }
-  `]
 })
 export class SearchGroupItemComponent {
   @Input() role: string;
