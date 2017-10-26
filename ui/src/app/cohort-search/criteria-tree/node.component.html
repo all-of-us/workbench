@@ -9,16 +9,16 @@
 .item-info {
   min-width: 0;
   flex: 8;
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.count {
-  flex: 1;
+.item-meta {
+  flex: 2;
+  width: 100%;
   text-align: right;
-}
-.select-button {
-  flex: 1;
+  white-space: nowrap;
 }
 </style>
 
@@ -34,14 +34,14 @@
         </small>
       </div>
 
-      <div *ngIf="nonZeroCount(child)" class="count">
-        <span class="badge badge-light-blue">
+      <div class="item-meta">
+        <span
+          *ngIf="nonZeroCount(child)"
+          class="badge badge-light-blue">
           {{ child.get('count') }}
         </span>
-      </div>
-
-      <div *ngIf="selectable(child)" class="select-button">
         <button
+          *ngIf="selectable(child)"
           type="button"
           class="btn btn-sm btn-link"
           [disabled]="isSelected(child)"
