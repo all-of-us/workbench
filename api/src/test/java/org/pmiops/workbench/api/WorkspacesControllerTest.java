@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -33,8 +34,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 public class WorkspacesControllerTest {
 
-  @Autowired
   WorkspaceService workspaceService;
+  @Autowired
+  WorkspaceDao workspaceDao;
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Autowired
@@ -56,6 +58,10 @@ public class WorkspacesControllerTest {
     user.setUserId(123L);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+
+    // Injecting WorkspaceService fails in the test environment. Work around it by injecting the
+    // DAO and creating the service directly.
+    workspaceService = new WorkspaceService(workspaceDao);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
