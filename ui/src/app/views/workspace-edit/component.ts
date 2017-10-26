@@ -19,8 +19,8 @@ export class WorkspaceEditComponent implements OnInit {
   oldWorkspaceName: string;
   oldWorkspaceNamespace: string;
   adding = false;
-  buttonClicked = false;
-  valueNotEntered = false;
+  savingWorkspace = false;
+  nameNotEntered = false;
   workspaceCreationError = false;
 
   constructor(
@@ -66,14 +66,12 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    if (!this.buttonClicked) {
+    if (!this.savingWorkspace) {
       if (isBlank(this.workspace.name)) {
-        this.valueNotEntered = true;
-        const nameArea = document.getElementsByClassName('name-area')[0];
-        nameArea.classList.add('validation-error');
+        this.nameNotEntered = true;
       } else {
-        this.buttonClicked = true;
-        this.valueNotEntered = false;
+        this.savingWorkspace = true;
+        this.nameNotEntered = false;
         this.errorHandlingService.retryApi(
           this.workspacesService.createWorkspace(this.workspace))
             .subscribe(
@@ -92,18 +90,16 @@ export class WorkspaceEditComponent implements OnInit {
 
   resetWorkspaceCreation(): void {
     this.workspaceCreationError = false;
-    this.buttonClicked = false;
+    this.savingWorkspace = false;
   }
 
   updateWorkspace(): void {
-    if (!this.buttonClicked) {
+    if (!this.savingWorkspace) {
       if (isBlank(this.workspace.name)) {
-        this.valueNotEntered = true;
-        const nameArea = document.getElementsByClassName('name-area')[0];
-        nameArea.classList.add('validation-error');
+        this.nameNotEntered = true;
       } else {
-        this.buttonClicked = true;
-        this.valueNotEntered = false;
+        this.savingWorkspace = true;
+        this.nameNotEntered = false;
         this.errorHandlingService.retryApi(this.workspacesService.updateWorkspace(
             this.oldWorkspaceNamespace,
             this.oldWorkspaceName,
