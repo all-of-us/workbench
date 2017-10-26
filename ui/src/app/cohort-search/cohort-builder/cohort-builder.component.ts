@@ -12,6 +12,7 @@ import {List} from 'immutable';
 import {
   CohortSearchActions,
   CohortSearchState,
+  activeCriteriaType,
   includeGroups,
   excludeGroups,
   wizardOpen,
@@ -26,17 +27,18 @@ import {
 })
 export class CohortBuilderComponent implements OnInit, OnDestroy {
 
-  @select(includeGroups) includeGroups$;
-  @select(excludeGroups) excludeGroups$;
-  @select(wizardOpen) open$;
-  @select(totalCount) total$;
-  @select(isRequstingTotal) isRequesting$;
+  @select(includeGroups) includeGroups$: Observable<List<any>>;
+  @select(excludeGroups) excludeGroups$: Observable<List<any>>;
+  @select(wizardOpen) open$: Observable<boolean>;
+  @select(totalCount) total$: Observable<number>;
+  @select(isRequstingTotal) isRequesting$: Observable<boolean>;
+  @select(activeCriteriaType) criteriaType$: Observable<string>;
 
   private adding = false;
   private subscriptions: Subscription[];
 
-  private includes;
-  private excludes;
+  private includes: List<any>;
+  private excludes: List<any>;
   private isRequesting = false;
 
   constructor(private actions: CohortSearchActions,

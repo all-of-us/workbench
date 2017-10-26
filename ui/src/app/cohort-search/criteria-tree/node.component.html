@@ -1,0 +1,63 @@
+<style>
+.flex-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+.item-info {
+  min-width: 0;
+  flex: 8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.count {
+  flex: 1;
+  text-align: right;
+}
+.select-button {
+  flex: 1;
+}
+</style>
+
+<ng-container [clrLoading]="loading">
+  <clr-tree-node>
+    <div class="clr-treenode-link flex-container">
+      <div class="item-info">
+        <small class="font-weight-bold">
+          {{ displayCode }}
+        </small>
+        <small class="text-muted">
+          {{ displayName }}
+        </small>
+      </div>
+
+      <div *ngIf="nonZeroCount" class="count">
+        <span class="badge badge-light-blue">
+          {{ node.get('count') }}
+        </span>
+      </div>
+
+      <div *ngIf="selectable" class="select-button">
+        <button
+          type="button"
+          class="btn btn-sm btn-link"
+          [disabled]="isSelected"
+          [style.margin]="'0 0 0 0'"
+          [style.color]="'rgb(98, 164, 32)'"
+          (click)="select($event)">
+          <clr-icon *ngIf="isSelected" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20"></clr-icon>
+        </button>
+      </div>
+    </div>
+    <ng-template clrIfExpanded *ngIf="node.get('group')">
+      <app-criteria-tree-node 
+        *ngFor="let child of children"
+        [node]="child">
+      </app-criteria-tree-node>
+    </ng-template>
+  </clr-tree-node>
+</ng-container>

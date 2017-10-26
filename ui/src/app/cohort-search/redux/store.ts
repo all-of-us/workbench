@@ -124,3 +124,8 @@ export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
   state.getIn(['criteria', 'requests', kind, parentId]) === true;
+
+export const isCriteriaSelected =
+  (id: number) =>
+  (state): boolean =>
+  state.getIn(['wizard', 'item', 'searchParameters'], List()).includes(id);

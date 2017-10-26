@@ -11,11 +11,7 @@ import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
-import {
-  CriteriaTreeNodeComponent,
-  CriteriaTreeRootComponent,
-  CriteriaTreeNodeInfoComponent,
-} from './criteria-tree';
+import {CriteriaTreeNodeComponent} from './criteria-tree/node.component';
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -48,10 +44,7 @@ import {CohortBuilderService} from 'generated';
   ],
   declarations: [
     CohortBuilderComponent,
-
-    CriteriaTreeRootComponent,
     CriteriaTreeNodeComponent,
-    CriteriaTreeNodeInfoComponent,
 
     SearchGroupComponent,
     SearchGroupItemComponent,

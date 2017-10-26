@@ -108,5 +108,9 @@
       </div>
     </div>
   </div>
-  <app-wizard-modal *ngIf="open$ | async"></app-wizard-modal>
+  <app-wizard-modal
+    *ngIf="open$ | async"
+    [open]="open$ | async"
+    [criteriaType]="criteriaType$ | async">
+  </app-wizard-modal>
 </clr-main-container>

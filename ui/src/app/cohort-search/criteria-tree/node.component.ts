@@ -7,46 +7,27 @@ import {
 } from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
+import {List} from 'immutable';
 
 import {
   CohortSearchActions,
   CohortSearchState,
   isCriteriaLoading,
+  isCriteriaSelected,
   criteriaChildren,
 } from '../redux';
 
 
 @Component({
   selector: 'app-criteria-tree-node',
-  template: `
-    <ng-container [clrLoading]="loading">
-      <clr-tree-node *ngFor="let node of children; trackBy: trackById">
-
-        <app-criteria-tree-node-info
-          [node]="node"
-          (onSelect)="handleSelection(node)">
-        </app-criteria-tree-node-info>
-
-        <ng-template clrIfExpanded *ngIf="node.get('group')">
-          <app-criteria-tree-node [node]="node">
-          </app-criteria-tree-node>
-        </ng-template>
-
-      </clr-tree-node>
-    </ng-container>
-  `,
-  encapsulation: ViewEncapsulation.None,
-  styles: [`
-    .clr-treenode-children {
-      overflow: hidden!important;
-    }
-  `]
+  templateUrl: './node.component.html',
 })
 export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   @Input() node;
 
-  private children;
-  private loading;
+  private children: List<any>;
+  private loading: boolean;
+  private isSelected: boolean;
   private subscriptions: Subscription[];
 
   constructor(private ngRedux: NgRedux<CohortSearchState>,
@@ -55,11 +36,15 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const _type = this.node.get('type').toLowerCase();
     const _parentId = this.node.get('id');
+
     const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
     const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
+    const selected$ = this.ngRedux.select(isCriteriaSelected(this.node.get('id')));
+
     this.subscriptions = [
       children$.subscribe(value => this.children = value),
-      loading$.subscribe(value => this.loading = value)
+      loading$.subscribe(value => this.loading = value),
+      selected$.subscribe(value => this.isSelected = value),
     ];
     this.actions.fetchCriteria(_type, _parentId);
   }
@@ -68,11 +53,33 @@ export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
-  handleSelection(node) {
-    this.actions.selectCriteria(node);
+  select(event) {
+    this.actions.selectCriteria(this.node);
   }
 
   trackById(index, node) {
     return node ? node.get('id') : undefined;
+  }
+
+  get nonZeroCount() {
+    return this.node.get('count', 0) > 0;
+  }
+
+  get selectable() {
+    return this.node.get('selectable', false);
+  }
+
+  get displayName() {
+    const isDemo = this.node.get('type', '').match(/^DEMO.*/i);
+    const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
+    return nameIsCode || isDemo
+      ? ''
+      : this.node.get('name', '');
+  }
+
+  get displayCode() {
+    return this.node.get('type', '').match(/^DEMO.*/i)
+      ? this.node.get('name', '')
+      : this.node.get('code', '');
   }
 }

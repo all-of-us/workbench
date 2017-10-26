@@ -19,13 +19,17 @@
   display: -webkit-box;
 }
 
+.clr-treenode-children {
+  overflow: hidden!important;
+}
+
 #criteria-page {
   height: 100%;
   display: flex;
   flex-flow: column;
 }
 
-#criteria-page > app-criteria-tree-root {
+#criteria-page > .criteria-tree-container {
   width: 100%;
   height: 70%%;
   overflow-y: auto;
@@ -43,7 +47,7 @@
   #criteria-page {
     flex-flow: row;
   }
-  #criteria-page > app-criteria-tree-root {
+  #criteria-page > .criteria-tree-container {
     width: 70%;
     height: 100%;
   }

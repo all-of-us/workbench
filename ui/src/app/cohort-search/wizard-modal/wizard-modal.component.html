@@ -1,6 +1,6 @@
 <clr-wizard
   #wizard
-  [clrWizardOpen]="open$ | async"
+  [clrWizardOpen]="open"
   (clrWizardOnCancel)="cancel()"
   (clrWizardOnFinish)="finish()">
 
@@ -8,11 +8,18 @@
 
   <clr-wizard-page><!-- Criteria Selection Page -->
     <ng-template clrPageTitle>Choose {{(critType$ | async)?.toUpperCase()}} Codes</ng-template>
-    <div id="criteria-page">
-      <app-criteria-tree-root
-        [critType]="(critType$ | async)?.toLowerCase()"
-        [parentId]="0">
-      </app-criteria-tree-root>
+
+    <div *ngIf="criteriaRootsLoading" class="spinner">
+      Loading...
+    </div>
+
+    <div *ngIf="!criteriaRootsLoading" id="criteria-page">
+      <div class="criteria-tree-container">
+        <app-criteria-tree-node 
+          *ngFor="let node of children"
+          [node]="node">
+        </app-criteria-tree-node>
+      </div>
       <app-wizard-criteria-group></app-wizard-criteria-group>
     </div>
   </clr-wizard-page>
