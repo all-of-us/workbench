@@ -38,7 +38,8 @@ public class WorkspaceService {
     return workspace;
   }
 
-  @Transactional
+  // FIXME @Version instead? Bean instantiation v. @Transactional?
+  //@Transactional
   public void setResearchPurposeApproved(String ns, String id, boolean approved) {
     Workspace workspace = getRequired(ns, id);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
