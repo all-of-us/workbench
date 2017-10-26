@@ -10,7 +10,7 @@ h2, h3 {
   font-weight: lighter;
 }
 body {
-  margin: 1rem 2rem;
+  margin: 0.6rem 1.2rem;
 }
 body, input[text], button {
   color: #888;
@@ -24,7 +24,7 @@ a {
 textarea {
   height: 10em;
   resize: none;
-  padding: 0.2rem 0.4rem;
+  padding: 0.1rem 0.2rem;
 }
 
 input[type=text] {
@@ -39,8 +39,8 @@ button {
   font-family: Arial;
   background-color: #eee;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.3rem;
   cursor: pointer;
   cursor: hand;
 }
@@ -54,12 +54,12 @@ button:disabled {
 }
 
 .loading-text {
-  padding-left: 0.5rem;
+  padding-left: 0.3rem;
   color: #888;
 }
 
 .loading-area {
-  padding-top: 0.5rem;
+  padding-top: 0.3rem;
 }
 
 /* everywhere else */
