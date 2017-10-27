@@ -293,7 +293,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        = workspaceService.dao.findForReview();
+        workspaceService.dao.findForReview();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
