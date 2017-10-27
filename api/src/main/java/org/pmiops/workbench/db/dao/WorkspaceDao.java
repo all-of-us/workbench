@@ -10,15 +10,13 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * Declaration of automatic query methods for Workspaces. The methods declared here are
  * automatically interpreted by Spring Data (see README).
+ *
+ * Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
-  @Query("SELECT w FROM Workspace w WHERE w.workspaceNamespace = ?1 AND w.firecloudName = ?2")
-  Workspace get(String workspaceNamespace, String firecloudName);
-
+  Workspace findByWorkspaceNamespaceAndFirecloudName(
+      String workspaceNamespace, String firecloudName);
   List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);
-
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
-
-  @Query("SELECT w FROM Workspace w WHERE w.approved IS NULL AND w.reviewRequested = true")
-  List<Workspace> findForReview();
+  List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
 }

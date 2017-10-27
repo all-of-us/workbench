@@ -1,17 +1,20 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.List;
 import java.util.logging.Logger;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+
 
 /**
  * Workspace manipulation and shared business logic which can't be represented by automatic query
- * generation in WorkspaceDao or @Query annotations.
+ * generation in WorkspaceDao, or convenience aliases.
  *
  * TODO(RW-215) Add versioning to detect/prevent concurrent edits.
  */
@@ -30,12 +33,20 @@ public class WorkspaceService {
     this.dao = workspaceDao;
   }
 
+  public Workspace get(String ns, String id) {
+    return dao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
+  }
+
   public Workspace getRequired(String ns, String id) {
-    Workspace workspace = dao.get(ns, id);
+    Workspace workspace = get(ns, id);
     if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, id));
     }
     return workspace;
+  }
+
+  public List<Workspace> findForReview() {
+    return dao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   // FIXME @Version instead? Bean instantiation v. @Transactional?

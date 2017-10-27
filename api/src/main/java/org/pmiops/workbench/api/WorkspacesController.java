@@ -196,7 +196,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
-    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.dao.get(
+    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.get(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
     if (existingWorkspace != null) {
       throw new BadRequestException(String.format(
@@ -292,8 +292,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
-    List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        workspaceService.dao.findForReview();
+    List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
