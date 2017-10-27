@@ -1,3 +1,4 @@
+id,parent_id,type,code,name,is_group,is_selectable,est_count,concept_id,domain_id
 301620,0,CPT,Level 1: 0001F-9007F,Category II Codes,1,0,,,
 301621,0,CPT,Level 1: 0001M-0010M,Administrative Codes for Multianalyte Assays with Algorithmic Analyses (MAAA),1,0,,,
 301622,0,CPT,Level 1: 0001T-0478T,Category III Codes,1,0,,,

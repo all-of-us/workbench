@@ -1,7 +1,7 @@
 [
   {
     "measurement_id":3,
-    "person_id":3,
+    "person_id":1,
     "measurement_concept_id":3,
     "measurement_date":"2009-12-03",
     "measurement_datetime":"2009-12-03 05:00:00 UTC",
@@ -21,7 +21,7 @@
   },
   {
     "measurement_id":9,
-    "person_id":9,
+    "person_id":1,
     "measurement_concept_id":9,
     "measurement_date":"2009-12-03",
     "measurement_datetime":"2009-12-03 05:00:00 UTC",

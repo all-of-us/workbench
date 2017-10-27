@@ -36,6 +36,30 @@
     "invalid_reason":"ir"
   },
   {
+    "concept_id":4,
+    "concept_name":"name",
+    "domain_id":"Procedure",
+    "vocabulary_id":"CPT4",
+    "concept_class_id":"4",
+    "standard_concept":"sc",
+    "concept_code":"0001T",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
+    "concept_id":5,
+    "concept_name":"name",
+    "domain_id":"Observation",
+    "vocabulary_id":"CPT4",
+    "concept_class_id":"5",
+    "standard_concept":"sc",
+    "concept_code":"0001Z",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
     "concept_id":6,
     "concept_name":"name",
     "domain_id":"Condition",
