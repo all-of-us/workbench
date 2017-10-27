@@ -10,6 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -18,6 +24,7 @@ import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -25,9 +32,6 @@ import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.Workspace.DataAccessLevelEnum;
 import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -278,14 +282,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /** Record approval or rejection of research purpose. */
-  // Auth
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  // Auth
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces =
