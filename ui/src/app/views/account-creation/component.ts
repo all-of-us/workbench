@@ -22,7 +22,7 @@ export class AccountCreationComponent {
   contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
-  showSpinner: boolean;
+  creatingAcccount: boolean;
   accountCreated: boolean;
 
   constructor(
@@ -49,12 +49,12 @@ export class AccountCreationComponent {
       givenName: this.givenName, familyName: this.familyName, username: this.username,
       password: this.password, invitationKey: this.invitationKey, contactEmail: this.contactEmail,
     };
-    this.showSpinner = true;
+    this.creatingAcccount = true;
     this.profileService.createAccount(request).subscribe(() => {
-      this.showSpinner = false;
+      this.creatingAcccount = false;
       this.accountCreated = true;
     }, () => {
-      this.showSpinner = false;
+      this.creatingAcccount = false;
     });
   }
 
