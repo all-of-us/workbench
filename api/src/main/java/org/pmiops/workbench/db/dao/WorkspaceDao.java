@@ -18,4 +18,7 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);
 
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
+
+  @Query("SELECT w FROM Workspace w WHERE w.approved IS NULL AND w.reviewRequested = true");
+  List<Workspace> findForReview();
 }
