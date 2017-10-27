@@ -18,8 +18,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -126,5 +128,38 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getTimeReviewed()).isEqualTo(new Long(1500));
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(new Long(1000));
 
+  }
+
+  @Test
+  public void testApproveWorkspace() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ResearchPurpose researchPurpose = ws.getResearchPurpose();
+    researchPurpose.setApproved(null);
+    researchPurpose.setTimeReviewed(null);
+    workspacesController.createWorkspace(ws);
+
+    // TODO(RW-216) Inject Clock and verify timestamps.
+    ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
+    request.setApproved(true);
+    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
+
+    ws = workspacesController.getWorkspace(ws.getNamespace(), ws.getName()).getBody();
+    researchPurpose = ws.getResearchPurpose();
+
+    assertThat(researchPurpose.getApproved()).isTrue();
+    assertThat(researchPurpose.getTimeReviewed()).isNotNull();
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testRejectAfterApproveThrows() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ResearchPurpose researchPurpose = ws.getResearchPurpose();
+    researchPurpose.setApproved(true);
+    workspacesController.createWorkspace(ws);
+
+    ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
+    request.setApproved(false);
+
+    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
   }
 }
