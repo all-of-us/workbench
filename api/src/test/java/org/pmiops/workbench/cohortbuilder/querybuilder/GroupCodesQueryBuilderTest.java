@@ -21,8 +21,13 @@ public class GroupCodesQueryBuilderTest {
 
     @Test
     public void buildQueryJobConfig() throws Exception {
+        assertQueryConfigJob("ICD9");
+        assertQueryConfigJob("ICD10");
+    }
+
+    private void assertQueryConfigJob(String type) {
         QueryParameters parameters = new QueryParameters()
-                .type("ICD9")
+                .type(type)
                 .parameters(Arrays.asList(new SearchParameter().value("11.1"),
                         new SearchParameter().value("11.2"),
                         new SearchParameter().value("11.3")));
@@ -30,7 +35,7 @@ public class GroupCodesQueryBuilderTest {
         String expected =
                 "select code,\n" +
                         "domain_id as domainId\n" +
-                        "from `${projectId}.${dataSetId}.icd9_criteria`\n" +
+                        "from `${projectId}.${dataSetId}.criteria`\n" +
                         "where (code like @code0 or code like @code1 or code like @code2)\n" +
                         "and is_selectable = TRUE and is_group = FALSE order by code asc";
         String actual = result.getQuery();
