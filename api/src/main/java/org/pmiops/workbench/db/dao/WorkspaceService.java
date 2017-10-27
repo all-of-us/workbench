@@ -33,7 +33,7 @@ public class WorkspaceService {
   public Workspace getRequired(String ns, String id) {
     Workspace workspace = dao.get(ns, id);
     if (workspace == null) {
-      throw new NotFoundException("Workspace {0}/{1} not found".format(ns, id));
+      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, id));
     }
     return workspace;
   }
@@ -43,10 +43,12 @@ public class WorkspaceService {
   public void setResearchPurposeApproved(String ns, String id, boolean approved) {
     Workspace workspace = getRequired(ns, id);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
-      throw new BadRequestException("No review requested for workspace {0}/{1}.".format(ns, id));
+      throw new BadRequestException(String.format(
+          "No review requested for workspace %s/%s.", ns, id));
     }
     if (workspace.getApproved() != null) {
-      throw new BadRequestException("Workspace {0}/{1} already {3}.".format(
+      throw new BadRequestException(String.format(
+          "Workspace %s/%s already %s.",
           ns, id, workspace.getApproved() ? "approved" : "rejected"));
     }
     workspace.setApproved(approved);
