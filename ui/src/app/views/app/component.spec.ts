@@ -1,10 +1,12 @@
 import {TestBed, async} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
 import {Title} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ClarityModule} from 'clarity-angular';
 
+import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {AppComponent} from 'app/views/app/component';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -20,10 +22,12 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
+        FormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
-        AppComponent
+        AccountCreationComponent,
+        AppComponent,
       ],
       providers: [
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
