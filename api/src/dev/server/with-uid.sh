@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [[ "$UID" == 0 ]]; then
   echo 'UID is not set. Exiting.';

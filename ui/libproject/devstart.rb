@@ -121,6 +121,9 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
 
+def run_linter()
+  Common.new.run_inline %W{docker-compose run --rm ui npm run ng lint}
+end
 
 def rebuild_image()
   common = Common.new
@@ -144,6 +147,12 @@ Common.register_command({
   :invocation => "swagger-regen",
   :description => "Regenerates API client libraries from Swagger definitions.",
   :fn => Proc.new { |*args| swagger_regen(*args) }
+})
+
+Common.register_command({
+  :invocation => "lint",
+  :description => "Runs linter.",
+  :fn => Proc.new { |*args| run_linter(*args) }
 })
 
 Common.register_command({
