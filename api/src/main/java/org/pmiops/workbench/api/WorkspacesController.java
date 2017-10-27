@@ -158,13 +158,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(workspace.getCdrVersionId()));
         if (cdrVersion == null) {
-          throw new BadRequestException("CDR version with ID {0} not found"
-              .format(workspace.getCdrVersionId()));
+          throw new BadRequestException(
+              String.format("CDR version with ID %s not found", workspace.getCdrVersionId()));
         }
         dbWorkspace.setCdrVersion(cdrVersion);
       } catch (NumberFormatException e) {
-        throw new BadRequestException("Invalid cdr version ID: {0}"
-            .format(workspace.getCdrVersionId()));
+        throw new BadRequestException(String.format(
+            "Invalid cdr version ID: %s", workspace.getCdrVersionId()));
       }
     }
   }
@@ -195,7 +195,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.dao.get(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
     if (existingWorkspace != null) {
-      throw new BadRequestException("Workspace {0}/{1} already exists".format(
+      throw new BadRequestException(String.format(
+          "Workspace %s/%s already exists",
           workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
     }
     try {
