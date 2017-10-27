@@ -1,0 +1,17 @@
+.input {
+  width: 100%;
+}
+
+.error {
+  background-color: #ffeeee;
+  padding: 0 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.form-section {
+  margin-top: 1rem;
+}
+
+.form-section:first-child {
+  margin-top: 0;
+}
