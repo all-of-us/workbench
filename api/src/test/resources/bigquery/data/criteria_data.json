@@ -279,5 +279,90 @@
     "is_selectable": "true",
     "est_count": "3",
     "domain_id": "Condition"
+  },
+  {
+    "id": "23684",
+    "parent_id": "0",
+    "type": "ICD10",
+    "code": "ICD10CM",
+    "name": "DIAGNOSIS CODES",
+    "is_group": "true",
+    "is_selectable": "false"
+  },
+  {
+    "id": "23685",
+    "parent_id": "23684",
+    "type": "ICD10",
+    "code": "A00-B99",
+    "name": "Certain infectious and parasitic diseases (A00-B99)",
+    "is_group": "true",
+    "is_selectable": "false"
+  },
+  {
+    "id": "23686",
+    "parent_id": "23684",
+    "type": "ICD10",
+    "code": "C00-D49",
+    "name": "Neoplasms (C00-D49)",
+    "is_group": "true",
+    "is_selectable": "false"
+  },
+  {
+    "id": "23797",
+    "parent_id": "23685",
+    "type": "ICD10",
+    "code": "A09",
+    "name": "Infectious gastroenteritis and colitis, unspecified",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "3502",
+    "concept_id": "35205450",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "24999",
+    "parent_id": "23686",
+    "type": "ICD10",
+    "code": "C00",
+    "name": "Malignant neoplasm of lip",
+    "is_group": "true",
+    "is_selectable": "true",
+    "est_count": "105"
+  },
+  {
+    "id": "25005",
+    "parent_id": "24999",
+    "type": "ICD10",
+    "code": "C00.5",
+    "name": "Malignant neoplasm of lip, unspecified, inner aspect",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "1",
+    "concept_id": "35206052",
+    "domain_id": "Condition"
+  },
+  {
+    "id": "117755",
+    "parent_id": "117754",
+    "type": "ICD10",
+    "code": "16070",
+    "name": "Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Open Approach",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "0",
+    "concept_id": "2722480",
+    "domain_id": "Procedure"
+  },
+  {
+    "id": "52758",
+    "parent_id": "52755",
+    "type": "ICD10",
+    "code": "R92.2",
+    "name": "Inconclusive mammogram",
+    "is_group": "false",
+    "is_selectable": "true",
+    "est_count": "0",
+    "concept_id": "45563331",
+    "domain_id": "Measurement"
   }
 ]

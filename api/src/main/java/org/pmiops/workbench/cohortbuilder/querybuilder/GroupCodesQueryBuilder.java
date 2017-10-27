@@ -20,7 +20,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
     private static final String GROUP_CODES_QUERY =
             "select code,\n" +
                     "domain_id as domainId\n" +
-                    "from `${projectId}.${dataSetId}.${tableName}`\n" +
+                    "from `${projectId}.${dataSetId}.criteria`\n" +
                     "where (${codes})\n" +
                     "and is_selectable = TRUE and is_group = FALSE order by code asc";
 
@@ -38,7 +38,7 @@ public class GroupCodesQueryBuilder extends AbstractQueryBuilder {
         String finalSql = GROUP_CODES_QUERY.replace("${codes}", String.join(" or ", queryParts));
 
         return QueryJobConfiguration
-                .newBuilder(finalSql.replace("${tableName}", parameters.getType().toLowerCase() + "_criteria"))
+                .newBuilder(finalSql)
                 .setNamedParameters(queryParams)
                 .setUseLegacySql(false)     // required for queries that use named parameters
                 .build();
