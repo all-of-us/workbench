@@ -289,6 +289,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+
+  // Note we do not paginate the workspaces list, since we expect few workspaces
+  // to require review.
+  //
+  // We can add pagination in the DAO by returning Slice<Workspace> if we want the method to return
+  // pagination information (e.g. are there more workspaces to get), and Page<Workspace> if we
+  // want the method to return both pagination information and a total count.
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
