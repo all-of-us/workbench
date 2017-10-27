@@ -278,16 +278,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /** Record approval or rejection of research purpose. */
+  // Auth
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+  // Auth
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
-    // FIXME
-    //response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
+    List<org.pmiops.workbench.db.model.Workspace> workspaces =
+        = workspaceService.dao.findForReview();
+    response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 }
