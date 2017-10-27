@@ -181,3 +181,39 @@ Finally, write a new changelog file in `api/db/changelog/` and include it in
 `db.changelog-master.xml`.
 
 `liquibase` does not roll back partially failed changes.
+
+Workbench schema lives in `api/db` --> all workbench related activities access/persist data here
+
+CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities access/persist data here
+
+CDR Schema - We now have 2 activities in `api/db-cdr/build.gradle` file:
+```
+liquibase {
+    activities {
+        main {
+            changeLogFile "changelog/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        local {
+            changeLogFile "changelog-local/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        runList = project.ext.runList
+    }
+}
+```
+
+CDR Schema - In the `api/db-cdr/run-migrations.sh` for **local deployments** we call the liquibase update task with the specific activity name like so:
+```
+echo "Upgrading database..."
+../gradlew update -PrunList=local
+```
+
+CDR Schema - In the `api/libproject/devstart.rb` for **test deployment** we call the liquibase update task with the specific activity name like so:
+```
+ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=main")
+```
