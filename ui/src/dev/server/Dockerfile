@@ -4,3 +4,7 @@ FROM node:alpine
 RUN apk --no-cache add openjdk8-jre
 
 RUN mkdir /.config &&  mkdir /.npm && chmod a+rwx /.config /.npm
+
+ADD with-uid.sh /usr/local/bin
+
+ENTRYPOINT ["with-uid.sh"]
