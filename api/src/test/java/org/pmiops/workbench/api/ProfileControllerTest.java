@@ -130,10 +130,9 @@ public class ProfileControllerTest {
 
   @Test
   public void testCreateAccount_success() throws Exception {
-    Profile profile = createUser();
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
-    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, null, null, false);
+    createUser();
+    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    assertThat(user).isNotNull();
   }
 
   @Test(expected = ServerErrorException.class)

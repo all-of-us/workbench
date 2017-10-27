@@ -275,12 +275,9 @@ public class ProfileController implements ProfileApiDelegate {
     user.setGivenName(request.getGivenName());
     userDao.save(user);
 
-    try {
-      return ResponseEntity.status(HttpStatus.CREATED).body(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(Level.SEVERE, "Error getting user profile: {0}".format(e.getResponseBody()), e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
+    // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
+    // doesn't allow this. Fix.
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
@@ -294,6 +291,9 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
+
+    userDao.delete(userDao.findUserByEmail(email));
+
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
