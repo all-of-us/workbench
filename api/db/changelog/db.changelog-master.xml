@@ -15,4 +15,5 @@
   <include file="changelog/db.changelog-5-authority.xml"/>
   <include file="changelog/db.changelog-6.xml"/>
   <include file="changelog/db.changelog-7.xml"/>
+  <include file="changelog/db.changelog-8-ws-index.xml"/>
 </databaseChangeLog>

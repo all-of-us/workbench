@@ -17,9 +17,15 @@ import javax.persistence.Transient;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
-@Table(name = "workspace",
-  indexes = {  @Index(name = "idx_workspace_fc_name", columnList = "firecloud_name",
-      unique = true)})
+@Table(
+    name = "workspace",
+    indexes = {
+        @Index(name = "idx_workspace_fc_name", columnList = "firecloud_name", unique = true),
+        @Index(
+            name = "idx_workspace_rp",
+            columnList = "rp_review_requested,rp_approved",
+            unique = true)
+    })
 public class Workspace {
 
   public static class FirecloudWorkspaceId {
