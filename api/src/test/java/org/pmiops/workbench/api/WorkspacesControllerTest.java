@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
@@ -90,7 +91,7 @@ public class WorkspacesControllerTest {
     workspace.setName("name");
     workspace.setNamespace("namespace");
     workspace.setDescription("description");
-    workspace.setDataAccessLevel(Workspace.DataAccessLevelEnum.PROTECTED);
+    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
 
     return workspace;
@@ -109,7 +110,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isNull();
     assertThat(workspace2.getCreator()).isEqualTo("bob@gmail.com");
-    assertThat(workspace2.getDataAccessLevel()).isEqualTo(Workspace.DataAccessLevelEnum.PROTECTED);
+    assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
     assertThat(workspace2.getDescription()).isEqualTo("description");
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
