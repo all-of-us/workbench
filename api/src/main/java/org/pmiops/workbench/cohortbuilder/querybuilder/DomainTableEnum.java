@@ -7,7 +7,8 @@ public enum DomainTableEnum {
     CONDITION("Condition", "condition_occurrence", "condition_source_concept_id"),
     PROCEDURE("Procedure", "procedure_occurrence", "procedure_source_concept_id"),
     OBSERVATION("Observation", "observation", "observation_source_concept_id"),
-    MEASUREMENT("Measurement", "measurement", "measurement_source_concept_id");
+    MEASUREMENT("Measurement", "measurement", "measurement_source_concept_id"),
+    DRUG("Drug", "drug_exposure", "drug_source_concept_id");
 
     private String domainId;
     private String tableName;
