@@ -1,4 +1,7 @@
-<h2 *ngIf="!workspaceLoading; else workspacePageLoading">{{workspace.name}}</h2>
+<div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
+  <h2>{{workspace.name}}</h2>
+  <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
+</div>
 <ng-template #workspacePageLoading>
   <div class="loading-area">
     <span class="spinner spinner-md" style="padding-top: 1rem"></span>

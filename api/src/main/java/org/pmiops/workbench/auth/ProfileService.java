@@ -43,8 +43,7 @@ public class ProfileService {
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setEnabledInFireCloud(enabledInFireCloud);
     if (user.getDataAccessLevel() != null) {
-      profile.setDataAccessLevel(Profile.DataAccessLevelEnum.fromValue(
-          user.getDataAccessLevel().toString().toLowerCase()));
+      profile.setDataAccessLevel(user.getDataAccessLevel());
     }
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));

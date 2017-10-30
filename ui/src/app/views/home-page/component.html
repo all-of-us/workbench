@@ -2,7 +2,7 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Workspaces</h3>
-    <a class="btn btn-link" routerLink="/workspace/build">Add a Workspace</a>
+    <a class="btn btn-link" (click)="addWorkspace()">Add a Workspace</a>
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="workspacesLoading">

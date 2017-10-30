@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.Workspace.DataAccessLevelEnum;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 
 
@@ -77,8 +76,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           Workspace result = new Workspace()
               .lastModifiedTime(workspace.getLastModifiedTime().getTime())
               .creationTime(workspace.getCreationTime().getTime())
-              .dataAccessLevel(DataAccessLevelEnum.fromValue(
-                  workspace.getDataAccessLevel().toString()))
+              .dataAccessLevel(workspace.getDataAccessLevel())
               .name(workspace.getName())
               .id(workspaceId.getWorkspaceName())
               .namespace(workspaceId.getWorkspaceNamespace())
@@ -262,9 +260,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    if (workspace.getDataAccessLevel() != null) {
-      dbWorkspace.setDataAccessLevel(
-          DataAccessLevel.fromValue(workspace.getDataAccessLevel().name()));
+    if(!dbWorkspace.getDataAccessLevel().equals(workspace.getDataAccessLevel())){
+      throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getDescription() != null) {
       dbWorkspace.setDescription(workspace.getDescription());
