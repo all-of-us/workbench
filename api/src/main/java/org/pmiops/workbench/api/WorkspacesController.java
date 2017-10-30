@@ -10,23 +10,29 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.Workspace.DataAccessLevelEnum;
 import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
@@ -121,16 +127,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       };
 
 
-  private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
   private final Clock clock;
 
   @Autowired
-  WorkspacesController(WorkspaceDao workspaceDao, CdrVersionDao cdrVersionDao,
-      Provider<User> userProvider, FireCloudService fireCloudService, Clock clock) {
-    this.workspaceDao = workspaceDao;
+  WorkspacesController(
+      WorkspaceService workspaceService,
+      CdrVersionDao cdrVersionDao,
+      Provider<User> userProvider,
+      FireCloudService fireCloudService,
+      Clock clock) {
+    this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -152,13 +162,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(workspace.getCdrVersionId()));
         if (cdrVersion == null) {
-          throw new BadRequestException("CDR version with ID {0} not found"
-              .format(workspace.getCdrVersionId()));
+          throw new BadRequestException(
+              String.format("CDR version with ID %s not found", workspace.getCdrVersionId()));
         }
         dbWorkspace.setCdrVersion(cdrVersion);
       } catch (NumberFormatException e) {
-        throw new BadRequestException("Invalid cdr version ID: {0}"
-            .format(workspace.getCdrVersionId()));
+        throw new BadRequestException(String.format(
+            "Invalid cdr version ID: %s", workspace.getCdrVersionId()));
       }
     }
   }
@@ -186,10 +196,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
-    org.pmiops.workbench.db.model.Workspace existingWorkspace =
-        getDbWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.get(
+        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
     if (existingWorkspace != null) {
-      throw new BadRequestException("Workspace {0}/{1} already exists".format(
+      throw new BadRequestException(String.format(
+          "Workspace %s/%s already exists",
           workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
     }
     try {
@@ -211,21 +222,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     setCdrVersionId(workspace, dbWorkspace);
-    dbWorkspace = workspaceDao.save(dbWorkspace);
+    dbWorkspace = workspaceService.dao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
   @Override
   public ResponseEntity<Void> deleteWorkspace(String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = getDbWorkspaceCheckExists(
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    workspaceDao.delete(dbWorkspace);
+    workspaceService.dao.delete(dbWorkspace);
     return ResponseEntity.ok(null);
   }
 
   @Override
   public ResponseEntity<Workspace> getWorkspace(String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = getDbWorkspaceCheckExists(
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
@@ -239,7 +250,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (user == null) {
       workspaces = new ArrayList<>();
     } else {
-      workspaces = workspaceDao.findByCreatorOrderByNameAsc(userProvider.get());
+      workspaces = workspaceService.dao.findByCreatorOrderByNameAsc(userProvider.get());
     }
     WorkspaceListResponse response = new WorkspaceListResponse();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
@@ -249,7 +260,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<Workspace> updateWorkspace(String workspaceNamespace, String workspaceId,
       Workspace workspace) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = getDbWorkspaceCheckExists(
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     if (workspace.getDataAccessLevel() != null) {
       dbWorkspace.setDataAccessLevel(
@@ -266,23 +277,30 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbWorkspace.setLastModifiedTime(now);
     // TODO: add version, check it here
-    dbWorkspace = workspaceDao.save(dbWorkspace);
+    dbWorkspace = workspaceService.dao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
-  private org.pmiops.workbench.db.model.Workspace getDbWorkspace(String workspaceNamespace,
-      String firecloudName) {
-    return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(workspaceNamespace, firecloudName);
+  /** Record approval or rejection of research purpose. */
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+  public ResponseEntity<EmptyResponse> reviewWorkspace(
+      String ns, String id, ResearchPurposeReviewRequest review) {
+    workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private org.pmiops.workbench.db.model.Workspace getDbWorkspaceCheckExists(
-      String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace workspace = getDbWorkspace(workspaceNamespace,
-        workspaceId);
-    if (workspace == null) {
-      throw new NotFoundException("Workspace {0}/{1} not found".format(workspaceNamespace,
-          workspaceId));
-    }
-    return workspace;
+
+  // Note we do not paginate the workspaces list, since we expect few workspaces
+  // to require review.
+  //
+  // We can add pagination in the DAO by returning Slice<Workspace> if we want the method to return
+  // pagination information (e.g. are there more workspaces to get), and Page<Workspace> if we
+  // want the method to return both pagination information and a total count.
+  @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
+  public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
+    WorkspaceListResponse response = new WorkspaceListResponse();
+    List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
+    response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
   }
 }
