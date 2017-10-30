@@ -377,7 +377,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_CPTMeasurementLeaf() throws Exception {
         assertSubjects(
                 controller.countSubjects(
-                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Z").domain("Observation")))),
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Q").domain("Measurement")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_CPTDrugExposureLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("90703").domain("Drug")))),
                 1);
     }
 
