@@ -1,7 +1,7 @@
 [
   {
     "procedure_occurrence_id":2,
-    "person_id":2,
+    "person_id":1,
     "procedure_concept_id":2,
     "procedure_date":"2009-12-03",
     "procedure_datetime":"2009-12-03 05:00:00 UTC",
@@ -15,8 +15,23 @@
     "qualifier_source_value":"val"
   },
   {
+    "procedure_occurrence_id":4,
+    "person_id":1,
+    "procedure_concept_id":4,
+    "procedure_date":"2009-12-03",
+    "procedure_datetime":"2009-12-03 05:00:00 UTC",
+    "procedure_type_concept_id":4,
+    "modifier_concept_id":4,
+    "quantity":4,
+    "provider_id":4,
+    "visit_occurrence_id":4,
+    "procedure_source_value":"val",
+    "procedure_source_concept_id":4,
+    "qualifier_source_value":"val"
+  },
+  {
     "procedure_occurrence_id":8,
-    "person_id":8,
+    "person_id":1,
     "procedure_concept_id":8,
     "procedure_date":"2009-12-03",
     "procedure_datetime":"2009-12-03 05:00:00 UTC",

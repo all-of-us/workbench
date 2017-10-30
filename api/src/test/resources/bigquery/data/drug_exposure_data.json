@@ -1,0 +1,27 @@
+[
+  {
+    "drug_exposure_id":11,
+    "person_id":1,
+    "drug_concept_id":11,
+    "drug_exposure_start_date":"2009-12-03",
+    "drug_exposure_start_datetime":"2009-12-03 05:00:00 UTC",
+    "drug_exposure_end_date":"2009-12-03",
+    "drug_exposure_end_datetime":"2009-12-03 05:00:00 UTC",
+    "drug_type_concept_id":11,
+    "stop_reason":"11",
+    "refills":11,
+    "quantity":1.0,
+    "days_supply":11,
+    "sig":"1",
+    "route_concept_id":11,
+    "effective_drug_dose":1.0,
+    "dose_unit_concept_id":11,
+    "lot_number":"1",
+    "provider_id":11,
+    "visit_occurrence_id":11,
+    "drug_source_value":"11",
+    "drug_source_concept_id":11,
+    "route_source_value":"11",
+    "dose_unit_source_value":"11"
+  }
+]
