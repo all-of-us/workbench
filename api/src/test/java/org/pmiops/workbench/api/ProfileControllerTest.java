@@ -94,12 +94,14 @@ public class ProfileControllerTest {
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
-    createAccountRequest.setContactEmail(CONTACT_EMAIL);
-    createAccountRequest.setFamilyName(FAMILY_NAME);
-    createAccountRequest.setGivenName(GIVEN_NAME);
+    Profile profile = new Profile();
+    profile.setContactEmail(CONTACT_EMAIL);
+    profile.setFamilyName(FAMILY_NAME);
+    profile.setGivenName(GIVEN_NAME);
+    profile.setUsername(USERNAME);
+    createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
     createAccountRequest.setPassword(PASSWORD);
-    createAccountRequest.setUsername(USERNAME);
 
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
@@ -241,7 +243,7 @@ public class ProfileControllerTest {
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
-    
+
   }
 
   @Test
@@ -347,5 +349,3 @@ public class ProfileControllerTest {
   }
 
 }
-
-
