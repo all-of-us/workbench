@@ -7,11 +7,14 @@ import {
   getItem,
   parameterList
 } from '../redux';
+import {SearchRequest} from 'generated';
+
 
 const getDisplayName = (criteria) =>
   criteria.get('type').match(/^DEMO.*/i)
     ?  criteria.get('name')
     : criteria.get('code');
+
 
 @Component({
   selector: 'app-search-group-item',
@@ -19,7 +22,7 @@ const getDisplayName = (criteria) =>
   styleUrls: ['./search-group-item.component.css'],
 })
 export class SearchGroupItemComponent {
-  @Input() role: string;
+  @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() itemId: string;
   @Input() itemIndex: number;
