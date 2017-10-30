@@ -326,8 +326,7 @@ public class ProfileControllerTest {
     assertThat(profile.getContactEmail()).isEqualTo(contactEmail);
     assertThat(profile.getFamilyName()).isEqualTo(familyName);
     assertThat(profile.getGivenName()).isEqualTo(givenName);
-    assertThat(profile.getDataAccessLevel()).isEqualTo(
-        Profile.DataAccessLevelEnum.fromValue(dataAccessLevel.toString().toLowerCase()));
+    assertThat(profile.getDataAccessLevel()).isEqualTo(dataAccessLevel);
     assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(freeTierBillingProject);
     assertThat(profile.getEnabledInFireCloud()).isEqualTo(enabledInFirecloud);
     assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime,
