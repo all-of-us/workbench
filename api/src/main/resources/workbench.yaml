@@ -783,7 +783,7 @@ definitions:
       - dataAccessLevel
     properties:
       username:
-        description: @researchallofus username
+        description: researchallofus username
         type: string
       contactEmail:
         description: email address that can be used to contact the user

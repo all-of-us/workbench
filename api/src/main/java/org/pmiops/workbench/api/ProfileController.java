@@ -249,8 +249,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
     com.google.api.services.admin.directory.model.User googleUser;
     try {
-      googleUser = directoryService.createUser(request.getGivenName(), request.getFamilyName(),
-          request.getUsername(), request.getPassword());
+      googleUser = directoryService.createUser(request.getProfile().getGivenName(),
+          request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+          request.getPassword());
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
@@ -270,9 +271,9 @@ public class ProfileController implements ProfileApiDelegate {
     User user = new User();
     user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
     user.setEmail(googleUser.getPrimaryEmail());
-    user.setContactEmail(request.getContactEmail());
-    user.setFamilyName(request.getFamilyName());
-    user.setGivenName(request.getGivenName());
+    user.setContactEmail(request.getProfile().getContactEmail());
+    user.setFamilyName(request.getProfile().getFamilyName());
+    user.setGivenName(request.getProfile().getGivenName());
     userDao.save(user);
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
