@@ -16,6 +16,7 @@ const getDisplayName = (criteria) =>
 @Component({
   selector: 'app-search-group-item',
   templateUrl: './search-group-item.component.html',
+  styleUrls: ['./search-group-item.component.css'],
 })
 export class SearchGroupItemComponent {
   @Input() role: string;

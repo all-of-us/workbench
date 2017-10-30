@@ -1,0 +1,23 @@
+.flex-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.item-info {
+  min-width: 0;
+  flex: 8;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.item-meta {
+  flex: 2;
+  width: 100%;
+  text-align: right;
+  white-space: nowrap;
+}

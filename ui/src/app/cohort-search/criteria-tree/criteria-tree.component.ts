@@ -21,10 +21,11 @@ import {
 
 
 @Component({
-  selector: 'app-criteria-tree-node',
-  templateUrl: './node.component.html',
+  selector: 'app-criteria-tree',
+  templateUrl: './criteria-tree.component.html',
+  styleUrls: ['./criteria-tree.component.css'],
 })
-export class CriteriaTreeNodeComponent implements OnInit, OnDestroy {
+export class CriteriaTreeComponent implements OnInit, OnDestroy {
   @Input() node;
   @Output() isLoading = new EventEmitter<boolean>();
   private _loading: boolean;

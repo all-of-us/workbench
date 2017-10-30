@@ -1,0 +1,23 @@
+.flex-container {
+  display: flex;
+}
+
+.flex-container > clr-tooltip {
+  min-width: 0;
+  flex: 4;
+}
+
+.flex-container > div.count {
+  flex: 1;
+  text-align: right;
+}
+
+.line-item {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.trigger:hover > span {
+  color: rgb(0, 124, 187)!important;
+}

@@ -12,7 +12,7 @@
 
     <div id="criteria-page">
       <div class="criteria-tree-container">
-        <app-criteria-tree-node [node]="rootNode" (isLoading)="setLoading($event)"></app-criteria-tree-node>
+        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)"></app-criteria-tree>
       </div>
       <app-wizard-criteria-group></app-wizard-criteria-group>
     </div>
