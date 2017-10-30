@@ -21,26 +21,6 @@
     "domain_id": "Condition"
   },
   {
-    "id": "1",
-    "parent_id": "0",
-    "type": "ICD9",
-    "code": "001-139.99",
-    "name": "Infectious and parasitic diseases",
-    "is_group": "false",
-    "is_selectable": "false"
-  },
-  {
-    "id": "1411",
-    "parent_id": "2",
-    "type": "ICD9",
-    "code": "001.0",
-    "name": "Cholera due to vibrio cholerae",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "2",
-    "domain_id": "Condition"
-  },
-  {
     "id": "1412",
     "parent_id": "2",
     "type": "ICD9",
@@ -49,17 +29,6 @@
     "is_group": "false",
     "is_selectable": "true",
     "est_count": "2",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1413",
-    "parent_id": "2",
-    "type": "ICD9",
-    "code": "001.9",
-    "name": "Cholera, unspecified",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "7",
     "domain_id": "Condition"
   },
   {
@@ -84,17 +53,6 @@
     "domain_id": "Condition"
   },
   {
-    "id": "1415",
-    "parent_id": "3",
-    "type": "ICD9",
-    "code": "002.0",
-    "name": "Typhoid fever",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "12",
-    "domain_id": "Condition"
-  },
-  {
     "id": "1416",
     "parent_id": "3",
     "type": "ICD9",
@@ -104,39 +62,6 @@
     "is_selectable": "true",
     "est_count": "4",
     "domain_id": "Procedure"
-  },
-  {
-    "id": "1417",
-    "parent_id": "3",
-    "type": "ICD9",
-    "code": "002.2",
-    "name": "Paratyphoid fever B",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "0",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1418",
-    "parent_id": "3",
-    "type": "ICD9",
-    "code": "002.3",
-    "name": "Paratyphoid fever C",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "0",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1419",
-    "parent_id": "3",
-    "type": "ICD9",
-    "code": "002.9",
-    "name": "Paratyphoid fever, unspecified",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "10",
-    "domain_id": "Condition"
   },
   {
     "id": "4",
@@ -160,17 +85,6 @@
     "domain_id": "Condition"
   },
   {
-    "id": "1421",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.0",
-    "name": "Salmonella gastroenteritis",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "224",
-    "domain_id": "Condition"
-  },
-  {
     "id": "1422",
     "parent_id": "4",
     "type": "ICD9",
@@ -180,105 +94,6 @@
     "is_selectable": "true",
     "est_count": "42",
     "domain_id": "Measurement"
-  },
-  {
-    "id": "1423",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.2",
-    "name": "Localized salmonella infections",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "0",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1430",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.8",
-    "name": "Other specified salmonella infections",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "23",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1431",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.9",
-    "name": "Salmonella infection, unspecified",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "81",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1424",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.20",
-    "name": "Localized salmonella infection, unspecified",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "3",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1425",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.21",
-    "name": "Salmonella meningitis",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "9",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1426",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.22",
-    "name": "Salmonella pneumonia",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "2",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1427",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.23",
-    "name": "Salmonella arthritis",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "3",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1428",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.24",
-    "name": "Salmonella osteomyelitis",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "5",
-    "domain_id": "Condition"
-  },
-  {
-    "id": "1429",
-    "parent_id": "4",
-    "type": "ICD9",
-    "code": "003.29",
-    "name": "Other localized salmonella infections",
-    "is_group": "false",
-    "is_selectable": "true",
-    "est_count": "3",
-    "domain_id": "Condition"
   },
   {
     "id": "23684",

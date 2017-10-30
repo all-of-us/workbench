@@ -7,6 +7,8 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="brianfreeman" id="changelog-2" runAlways="true">
 
+    <validCheckSum>ANY</validCheckSum>
+
     <createTable tableName="criteria">
       <column name="id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
@@ -20,7 +22,7 @@
       <column name="code" type="VARCHAR(80)">
         <constraints nullable="true"/>
       </column>
-      <column name="name" type="VARCHAR(255)">
+      <column name="name" type="VARCHAR(4000)">
         <constraints nullable="true"/>
       </column>
       <column name="is_group" type="BOOL">

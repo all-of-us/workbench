@@ -62,7 +62,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "concept",
                 "condition_occurrence",
                 "procedure_occurrence",
-                "measurement");
+                "measurement",
+                "observation",
+                "drug_exposure");
     }
 
     @Before
@@ -167,6 +169,37 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
+    public void getCriteriaByTypeAndParentId_CPT() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndParentId("CPT", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("CPT", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("CPT", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
+    }
+
+    @Test
     public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
         assertSubjects(
                 controller.countSubjects(
@@ -178,7 +211,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
         assertSubjects(
                 controller.countSubjects(
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1")))),
+                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001")))),
                 1);
     }
 
@@ -219,7 +252,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
-                        2);
+                        1);
     }
 
     @Test
@@ -243,7 +276,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        3);
+                        1);
     }
 
     @Test
@@ -261,7 +294,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
         testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-        assertSubjects( controller.countSubjects(testSearchRequest), 3);
+        assertSubjects( controller.countSubjects(testSearchRequest), 1);
     }
 
     @Test
@@ -321,6 +354,38 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("R92.2").domain("Measurement")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_CPTProcedureOccurrenceLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001T").domain("Procedure")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_CPTObservationLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Z").domain("Observation")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_CPTMeasurementLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Q").domain("Measurement")))),
+                1);
+    }
+
+    @Test
+    public void countSubjects_CPTDrugExposureLeaf() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("90703").domain("Drug")))),
                 1);
     }
 

@@ -268,7 +268,7 @@ export class CohortSearchActions {
         domain: param.get('type'),
         conceptId: param.get('conceptId'),
       };
-    } else if (_type.match(/^ICD.*/i)) {
+    } else if (_type.match(/^ICD|CPT.*/i)) {
       return <SearchParameter>{
         value: param.get('code'),
         domain: param.get('domainId'),
