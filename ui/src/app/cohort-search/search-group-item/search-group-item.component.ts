@@ -31,7 +31,7 @@ export class SearchGroupItemComponent {
               private actions: CohortSearchActions) {}
 
   get codeType() {
-    const _type = this.item.get('type').toUpperCase();
+    const _type = this.item.get('type', '').toUpperCase();
     return this.item.get('description', `${_type} ${this.pluralizedCode}`);
   }
 
