@@ -1,20 +1,17 @@
 import {
   Component,
   Input,
-  OnInit,
-  OnDestroy,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import {NgRedux, select} from '@angular-redux/store';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
+import {NgRedux} from '@angular-redux/store';
 import {Wizard} from 'clarity-angular';
-import {List, Map} from 'immutable';
+import {Map} from 'immutable';
 
 import {
   CohortSearchActions,
   CohortSearchState,
+  isCriteriaLoading,
   activeCriteriaList,
   activeRole,
   activeGroupId,
@@ -35,11 +32,16 @@ export class WizardModalComponent {
   private rootsAreLoading = true;
   // Zero is default parent ID for criteria tree roots
   private readonly parentId = 0;
-  private _subscriptions: Subscription[];
   @ViewChild('wizard') wizard: Wizard;
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  constructor(
+    private ngRedux: NgRedux<CohortSearchState>,
+    private actions: CohortSearchActions
+  ) {}
+
+  setLoading(value: boolean) {
+    this.rootsAreLoading = value;
+  }
 
   get rootNode() {
     return Map({type: this.criteriaType, id: this.parentId});
