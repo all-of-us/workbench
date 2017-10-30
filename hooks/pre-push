@@ -4,4 +4,4 @@ IFS=$'\n\t'
 
 # Checks to run before pushing to a remote git repo for review/merging.
 cd ui
-docker-compose run --rm ui npm run ng lint
+./project.rb lint

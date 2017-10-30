@@ -21,5 +21,12 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
+        local {
+            changeLogFile "changelog-local/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        runList = project.ext.runList
     }
 }

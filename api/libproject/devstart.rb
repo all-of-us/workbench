@@ -322,7 +322,7 @@ def run_cloud_cdr_migrations(*args)
         to_redact=pw)
     puts "Upgrading cdr database..."
     Dir.chdir("db-cdr") do
-      ctx.common.run_inline("#{ctx.gradlew_path} --info update")
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=main")
     end
   end
 end

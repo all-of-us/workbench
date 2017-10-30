@@ -24,6 +24,7 @@ export class AppComponent implements OnInit {
   private baseTitle: string;
   user: Observable<SignInDetails>;
   hasAdminPermissions = false;
+  private _showCreateAccount = false;
 
   constructor(
       private activatedRoute: ActivatedRoute,
@@ -73,5 +74,19 @@ export class AppComponent implements OnInit {
 
   signOut(e: Event): void {
     this.signInService.signOut();
+  }
+
+  showCreateAccount(): void {
+    this._showCreateAccount = true;
+  }
+
+  getTopMargin(): string {
+    return this._showCreateAccount ? '10vh' : '30vh';
+  }
+
+  deleteAccount(): void {
+    this.profileService.deleteAccount().subscribe(() => {
+      this.signInService.signOut();
+    });
   }
 }
