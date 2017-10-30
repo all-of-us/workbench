@@ -51,11 +51,11 @@ export class WorkspaceEditComponent implements OnInit {
         population: false,
         reviewRequested: false
       }};
-    if (this.route.routeConfig.data.title === 'Create Workspace') {
+    if (this.route.routeConfig.data.adding) {
       this.adding = true;
     } else {
-      this.oldWorkspaceNamespace = this.route.snapshot.url[1].path;
-      this.oldWorkspaceName = this.route.snapshot.url[2].path;
+      this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
+      this.oldWorkspaceName = this.route.snapshot.params['wsid'];
       this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
           this.oldWorkspaceName)
         .subscribe((workspace) => {

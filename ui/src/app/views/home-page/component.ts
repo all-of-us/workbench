@@ -64,4 +64,8 @@ export class HomePageComponent implements OnInit {
               this.workspacesLoading = false;
             });
   }
+
+  addWorkspace(): void {
+    this.router.navigate(['workspace/build'], {relativeTo : this.route});
+  }
 }
