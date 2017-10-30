@@ -26,10 +26,10 @@ export class CohortEditComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cohortId = this.route.snapshot.url[4].path;
-    this.workspaceId = this.route.snapshot.url[2].path;
-    this.workspaceNamespace = this.route.snapshot.url[1].path;
-    if (this.route.snapshot.url[5] === undefined) {
+    this.cohortId = this.route.snapshot.params['cid'];
+    this.workspaceId = this.route.snapshot.params['wsid'];
+    this.workspaceNamespace = this.route.snapshot.params['ns'];
+    if (this.route.routeConfig.data.adding) {
       this.adding = true;
     } else {
       this.errorHandlingService.retryApi(this.cohortsService

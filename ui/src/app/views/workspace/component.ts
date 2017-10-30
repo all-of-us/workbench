@@ -108,8 +108,8 @@ export class WorkspaceComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     this.workspaceLoading = true;
-    this.wsNamespace = this.route.snapshot.url[1].path;
-    this.wsId = this.route.snapshot.url[2].path;
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
     this.errorHandlingService.retryApi(this.cohortsService
         .getCohortsInWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
