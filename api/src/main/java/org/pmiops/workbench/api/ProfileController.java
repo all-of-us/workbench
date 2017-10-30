@@ -302,7 +302,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> register(RegistrationRequest registrationRequest) {
     User user = initializeUserIfNeeded();
     if (user.getDataAccessLevel() != DataAccessLevel.UNREGISTERED) {
-      throw new BadRequestException("User {0} is already registered".format(user.getEmail()));
+      throw new BadRequestException(String.format(
+          "User %s is already registered", user.getEmail()));
     }
     // TODO: add user to authorization domain for registered access; add pet SA to
     // Google group for CDR access
