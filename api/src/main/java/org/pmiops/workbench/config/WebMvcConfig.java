@@ -9,7 +9,6 @@ import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.google.Utils;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +19,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -67,7 +68,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Lazy
   @Bean
   public GoogleCredential serviceAccountCredential() {
-    ServletContext context = Utils.getRequestServletContext();
+    ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/sa-key.json");
     GoogleCredential credential = null;
     try {
@@ -97,5 +98,10 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     configurer.defaultContentType(MediaType.APPLICATION_JSON);
+  }
+
+  static ServletContext getRequestServletContext() {
+    return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+      .getRequest().getServletContext();
   }
 }
