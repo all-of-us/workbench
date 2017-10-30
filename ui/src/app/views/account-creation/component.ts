@@ -18,7 +18,7 @@ export class AccountCreationComponent {
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
-    dataAccessLevel: Profile.DataAccessLevelEnum.Unregistered,
+    dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
     familyName: '',
     contactEmail: ''
