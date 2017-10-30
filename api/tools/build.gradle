@@ -55,8 +55,12 @@ sourceSets {
        srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java']
        includes = ['org/pmiops/workbench/tools/**/*.java',
                    'org/pmiops/workbench/db/**/*.java',
+                   // In general, command-line tools won't need access to
+                   // org.pmiops.workbench.model (Swagger-generated classes),
+                   // so we selectively whitelist as needed.
                    'org/pmiops/workbench/model/Authority.java',
-                   'org/pmiops/workbench/model/DataAccessLevel.java' ]
+                   'org/pmiops/workbench/model/DataAccessLevel.java',
+                   'org/pmiops/workbench/model/ErrorResponse.java' ]
     }
   }
 }

@@ -27,6 +27,8 @@ public class CriteriaDaoTest {
     private Criteria demoCriteria2;
     private Criteria icd10Criteria1;
     private Criteria icd10Criteria2;
+    private Criteria cptCriteria1;
+    private Criteria cptCriteria2;
 
     @Before
     public void setUp() {
@@ -36,6 +38,8 @@ public class CriteriaDaoTest {
         demoCriteria2 = createCriteria("DEMO_AGE", "Age");
         icd10Criteria1 = createCriteria("ICD10", "002");
         icd10Criteria2 = createCriteria("ICD10", "001");
+        cptCriteria1 = createCriteria("CPT", "0039T");
+        cptCriteria2 = createCriteria("CPT", "0001T");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -43,6 +47,8 @@ public class CriteriaDaoTest {
         criteriaDao.save(demoCriteria2);
         criteriaDao.save(icd10Criteria1);
         criteriaDao.save(icd10Criteria2);
+        criteriaDao.save(cptCriteria1);
+        criteriaDao.save(cptCriteria2);
     }
 
     @Test
@@ -58,6 +64,10 @@ public class CriteriaDaoTest {
         final List<Criteria> icd10List = criteriaDao.findCriteriaByTypeAndParentId("ICD10", 0L);
         assertEquals(icd10Criteria2, icd10List.get(0));
         assertEquals(icd10Criteria1, icd10List.get(1));
+
+        final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentId("CPT", 0L);
+        assertEquals(cptCriteria2, cptList.get(0));
+        assertEquals(cptCriteria1, cptList.get(1));
     }
 
     private Criteria createCriteria(String type, String code) {

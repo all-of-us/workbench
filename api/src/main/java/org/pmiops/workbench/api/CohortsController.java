@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -61,15 +61,18 @@ public class CohortsController implements CohortsApiDelegate {
         }
       };
 
-  private final WorkspaceDao workspaceDao;
+  private final WorkspaceService workspaceService;
   private final CohortDao cohortDao;
   private final Provider<User> userProvider;
   private final Clock clock;
 
   @Autowired
-  CohortsController(WorkspaceDao workspaceDao, CohortDao cohortDao, Provider<User> userProvider,
+  CohortsController(
+      WorkspaceService workspaceService,
+      CohortDao cohortDao,
+      Provider<User> userProvider,
       Clock clock) {
-    this.workspaceDao = workspaceDao;
+    this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -78,7 +81,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
-    Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
     dbCohort.setCreator(userProvider.get());
@@ -91,9 +94,9 @@ public class CohortsController implements CohortsApiDelegate {
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
-      throw new BadRequestException(
-          "Cohort \"/%s/%s/%s\" already exists.".format(
-              workspaceNamespace, workspaceId, dbCohort.getCohortId()));
+      throw new BadRequestException(String.format(
+          "Cohort \"/%s/%s/%s\" already exists.",
+          workspaceNamespace, workspaceId, dbCohort.getCohortId()));
     }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
@@ -118,7 +121,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    Workspace workspace = getDbWorkspace(workspaceNamespace, workspaceId);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     List<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
@@ -151,29 +154,15 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
-  /**
-   * Gets or creates a workspace with the given namespace and ID.
-   * (In future it will throw NotFoundException if the workspace wasn't created previously.)
-   */
-  private Workspace getDbWorkspace(String workspaceNamespace, String workspaceId) {
-    Workspace workspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudName(workspaceNamespace,
-        workspaceId);
-    if (workspace == null) {
-      throw new NotFoundException("No workspace with name {0}/{1}"
-          .format(workspaceNamespace, workspaceId));
-    }
-    return workspace;
-  }
-
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,
       String workspaceId, String cohortId) {
-    Workspace workspace = getDbWorkspace(workspaceName, workspaceId);
+    Workspace workspace = workspaceService.getRequired(workspaceName, workspaceId);
 
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(convertCohortId(cohortId));
     if (cohort == null) {
-      throw new NotFoundException("No cohort with name {0} in workspace {0}".format(cohortId,
-          workspace.getFirecloudName()));
+      throw new NotFoundException(String.format(
+          "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }
     return cohort;
   }
@@ -182,7 +171,7 @@ public class CohortsController implements CohortsApiDelegate {
     try {
       return Long.parseLong(cohortId);
     } catch (NumberFormatException e) {
-      throw new BadRequestException("Invalid cohort ID: {0}".format(cohortId));
+      throw new BadRequestException(String.format("Invalid cohort ID: %s", cohortId));
     }
   }
 }

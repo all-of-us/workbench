@@ -380,7 +380,42 @@ paths:
           type: string
           required: true
           description: ID of the workspace containing the cohort definition
-
+  /api/v1/workspaces/review:
+    get:
+      tags:
+        - workspaces
+      description: >
+          Returns workspaces that need research purpose review. Requires
+          REVIEW_RESEARCH_PURPOSE authority.
+      operationId: getWorkspacesForReview
+      responses:
+        "200":
+          schema:
+            $ref: "#/definitions/WorkspaceListResponse"
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
+    post:
+      tags:
+        - workspaces
+      description: Sets a research purpose review result.
+      operationId: reviewWorkspace
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+        - in: body
+          name: review
+          description: result of the research purpose review
+          schema:
+            $ref: "#/definitions/ResearchPurposeReviewRequest"
+      responses:
+        "200":
+          schema:
+            $ref: "#/definitions/EmptyResponse"
 
   # Cohorts ##############################################################################
 
@@ -638,8 +673,7 @@ definitions:
       creator:
         type: string
       dataAccessLevel:
-        type: string
-        enum: *DATA_ACCESS_LEVEL
+        $ref: "#/definitions/DataAccessLevel"
       researchPurpose:
         $ref: "#/definitions/ResearchPurpose"
       creationTime:
@@ -704,6 +738,14 @@ definitions:
       additionalNotes:
         type: string
 
+  ResearchPurposeReviewRequest:
+    description: Approve or reject a workspace's research purpose.
+    type: object
+    required: approved
+    properties:
+      approved:
+        type: boolean
+
   CohortListResponse:
     type: object
     required:
@@ -748,32 +790,15 @@ definitions:
   CreateAccountRequest:
     type: object
     required:
-      - givenName
-      - familyName
-      - username
-      - contactEmail
       - password
     properties:
-      givenName:
-        type: string
-      familyName:
-        type: string
-      username:
-        type: string
-      contactEmail:
-        type: string
-        description: email address that can be used to contact the user
+      profile:
+        $ref: '#/definitions/Profile'
       password:
         type: string
       invitationKey:
         type: string
         description: Invitation key. Necessary when creating account before public launch.
-    example:
-      givenName: "John"
-      familyName: "Doe"
-      username: "john.doe"
-      password: "correct horse battery staple"
-      contactEmail: "john.doe@example.com"
 
   BugReport:
     type: object
@@ -795,12 +820,12 @@ definitions:
   Profile:
     type: object
     required:
-      - email
+      - username
       - enabledInFireCloud
       - dataAccessLevel
     properties:
-      email:
-        description: Google email address that the user signs in with
+      username:
+        description: researchallofus username
         type: string
       contactEmail:
         description: email address that can be used to contact the user
@@ -813,8 +838,7 @@ definitions:
         type: string
       dataAccessLevel:
         description: what level of data access the user has
-        type: string
-        enum: *DATA_ACCESS_LEVEL
+        $ref: "#/definitions/DataAccessLevel"
       givenName:
         description: the user's given name (e.g. Alice)
         type: string
@@ -1063,6 +1087,7 @@ definitions:
         description: stack trace
         items:
           $ref: '#/definitions/StackTraceElement'
+
   StackTraceElement:
     description: ''
     required:
@@ -1083,6 +1108,7 @@ definitions:
       lineNumber:
         type: integer
         description: line number
+
   # TODO: Clean up the client representation of the cluster
   Cluster:
     description: ''
@@ -1111,6 +1137,7 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+
   ClusterListResponse:
     type: object
     required:
@@ -1120,6 +1147,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Cluster"
+
   UsernameTakenResponse:
     type: object
     required:

@@ -2,19 +2,19 @@
   <div *ngIf="!accountCreated" class="form-area">
     <div class="form-section">
       <label>Given Name:</label>
-      <input type="text" class="input" autofocus [(ngModel)]="givenName">
+      <input type="text" class="input" autofocus [(ngModel)]="profile.givenName">
     </div>
     <div class="form-section">
       <label>Family Name:</label>
-      <input type="text" class="input" [(ngModel)]="familyName">
+      <input type="text" class="input" [(ngModel)]="profile.familyName">
     </div>
     <div class="form-section">
       <label>Username:</label>
-      <input type="text" class="input" [(ngModel)]="username">
+      <input type="text" class="input" [(ngModel)]="profile.username">
     </div>
     <div class="form-section">
       <label>Contact Email:</label>
-      <input type="text" class="input" [(ngModel)]="contactEmail">
+      <input type="text" class="input" [(ngModel)]="profile.contactEmail">
     </div>
     <div class="form-section">
       <label>Password:</label>

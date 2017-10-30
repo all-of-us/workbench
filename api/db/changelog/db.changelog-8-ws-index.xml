@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="markfickett" id="changelog-8-ws-index">
+    <createIndex
+        indexName="idx_workspace_rp"
+        tableName="workspace"
+        unique="true">
+      <column name="rp_review_requested"/>
+      <column name="rp_approved"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

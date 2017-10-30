@@ -1,7 +1,7 @@
 [
   {
     "measurement_id":3,
-    "person_id":3,
+    "person_id":1,
     "measurement_concept_id":3,
     "measurement_date":"2009-12-03",
     "measurement_datetime":"2009-12-03 05:00:00 UTC",
@@ -21,7 +21,7 @@
   },
   {
     "measurement_id":9,
-    "person_id":9,
+    "person_id":1,
     "measurement_concept_id":9,
     "measurement_date":"2009-12-03",
     "measurement_datetime":"2009-12-03 05:00:00 UTC",
@@ -36,6 +36,26 @@
     "visit_occurrence_id":9,
     "measurement_source_value":"val",
     "measurement_source_concept_id":9,
+    "unit_source_value":"val",
+    "value_source_value":"val"
+  },
+  {
+    "measurement_id":10,
+    "person_id":1,
+    "measurement_concept_id":10,
+    "measurement_date":"2009-12-03",
+    "measurement_datetime":"2009-12-03 05:00:00 UTC",
+    "measurement_type_concept_id":10,
+    "operator_concept_id":10,
+    "value_as_number":1.0,
+    "value_as_concept_id":10,
+    "unit_concept_id":10,
+    "range_low":1.0,
+    "range_high":10.0,
+    "provider_id":10,
+    "visit_occurrence_id":10,
+    "measurement_source_value":"val",
+    "measurement_source_concept_id":10,
     "unit_source_value":"val",
     "value_source_value":"val"
   }

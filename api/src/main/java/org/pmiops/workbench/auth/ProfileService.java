@@ -35,7 +35,7 @@ public class ProfileService {
 
     boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
-    profile.setEmail(user.getEmail());
+    profile.setUsername(user.getEmail());
     profile.setFamilyName(user.getFamilyName());
     profile.setGivenName(user.getGivenName());
     profile.setContactEmail(user.getContactEmail());
@@ -43,8 +43,7 @@ public class ProfileService {
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setEnabledInFireCloud(enabledInFireCloud);
     if (user.getDataAccessLevel() != null) {
-      profile.setDataAccessLevel(Profile.DataAccessLevelEnum.fromValue(
-          user.getDataAccessLevel().toString().toLowerCase()));
+      profile.setDataAccessLevel(user.getDataAccessLevel());
     }
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));

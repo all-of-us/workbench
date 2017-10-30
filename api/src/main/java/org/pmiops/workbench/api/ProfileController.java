@@ -106,7 +106,7 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.registerUser(user.getContactEmail(),
           user.getGivenName(), user.getFamilyName());
     } catch (ApiException e) {
-      log.log(Level.SEVERE, "Error registering user: {0}".format(e.getResponseBody()), e);
+      log.log(Level.SEVERE, String.format("Error registering user: %s", e.getResponseBody()), e);
       // We don't expect this to happen.
       throw new ServerErrorException("Error registering user", e);
     }
@@ -145,7 +145,9 @@ public class ProfileController implements ProfileApiDelegate {
             billingProjectName = billingProjectNamePrefix + "-" + numAttempts;
           }
         } else {
-          log.log(Level.SEVERE, "Error creating billing project: {0}".format(e.getResponseBody()),
+          log.log(
+              Level.SEVERE,
+              String.format("Error creating billing project: %s", e.getResponseBody()),
               e);
           throw new ServerErrorException("Error creating billing project", e);
         }
@@ -171,7 +173,7 @@ public class ProfileController implements ProfileApiDelegate {
         throw new ServerErrorException("Unable to add user to billing project", e);
       } else {
         log.log(Level.SEVERE,
-            "Error adding user to billing project: {0}".format(e.getResponseBody()),
+            String.format("Error adding user to billing project: %s", e.getResponseBody()),
             e);
         throw new ServerErrorException("Error adding user to billing project", e);
       }
@@ -249,8 +251,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
     com.google.api.services.admin.directory.model.User googleUser;
     try {
-      googleUser = directoryService.createUser(request.getGivenName(), request.getFamilyName(),
-          request.getUsername(), request.getPassword());
+      googleUser = directoryService.createUser(request.getProfile().getGivenName(),
+          request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+          request.getPassword());
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
@@ -270,9 +273,9 @@ public class ProfileController implements ProfileApiDelegate {
     User user = new User();
     user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
     user.setEmail(googleUser.getPrimaryEmail());
-    user.setContactEmail(request.getContactEmail());
-    user.setFamilyName(request.getFamilyName());
-    user.setGivenName(request.getGivenName());
+    user.setContactEmail(request.getProfile().getContactEmail());
+    user.setFamilyName(request.getProfile().getFamilyName());
+    user.setGivenName(request.getProfile().getGivenName());
     userDao.save(user);
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
@@ -301,7 +304,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> register(RegistrationRequest registrationRequest) {
     User user = initializeUserIfNeeded();
     if (user.getDataAccessLevel() != DataAccessLevel.UNREGISTERED) {
-      throw new BadRequestException("User {0} is already registered".format(user.getEmail()));
+      throw new BadRequestException(String.format(
+          "User %s is already registered", user.getEmail()));
     }
     // TODO: add user to authorization domain for registered access; add pet SA to
     // Google group for CDR access
@@ -311,7 +315,8 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       return ResponseEntity.ok(profileService.getProfile(user));
     } catch (ApiException e) {
-      log.log(Level.SEVERE, "Error getting user profile: {0}".format(e.getResponseBody()), e);
+      log.log(
+          Level.SEVERE, String.format("Error getting user profile: %s", e.getResponseBody()), e);
       return ResponseEntity.status(e.getCode()).build();
     }
   }
