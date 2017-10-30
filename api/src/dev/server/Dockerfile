@@ -53,3 +53,7 @@ ENV GRADLE_USER_HOME /.gradle
 
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
+
+ADD with-uid.sh /usr/local/bin
+
+ENTRYPOINT ["with-uid.sh"]
