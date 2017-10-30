@@ -673,8 +673,7 @@ definitions:
       creator:
         type: string
       dataAccessLevel:
-        type: string
-        enum: *DATA_ACCESS_LEVEL
+        $ref: "#/definitions/DataAccessLevel"
       researchPurpose:
         $ref: "#/definitions/ResearchPurpose"
       creationTime:
@@ -839,8 +838,7 @@ definitions:
         type: string
       dataAccessLevel:
         description: what level of data access the user has
-        type: string
-        enum: *DATA_ACCESS_LEVEL
+        $ref: "#/definitions/DataAccessLevel"
       givenName:
         description: the user's given name (e.g. Alice)
         type: string

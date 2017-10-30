@@ -193,4 +193,8 @@ export class WorkspaceComponent implements OnInit {
     this.errorHandlingService.retryApi(this.clusterService.deleteCluster(
         this.workspace.namespace, this.workspace.id)).subscribe(() => {});
   }
+
+  edit(): void {
+    this.router.navigate(['edit'], {relativeTo : this.route});
+  }
 }

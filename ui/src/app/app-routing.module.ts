@@ -29,7 +29,10 @@ const routes: Routes = [
           data: {title: 'Create Cohort'}},
   {path: 'workspace/build',
           component: WorkspaceEditComponent,
-          data: {title: 'Create Workspace'}}
+          data: {title: 'Create Workspace', adding: true}},
+  {path: 'workspace/:ns/:wsid/edit',
+          component: WorkspaceEditComponent,
+          data: {title: 'Edit Workspace', adding: false}}
 ];
 
 @NgModule({
