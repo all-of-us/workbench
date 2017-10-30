@@ -6,6 +6,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {isBlank} from 'app/utils';
 
+import {DataAccessLevel} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 
@@ -35,7 +36,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.workspace = {
       name: '',
       description: '',
-      dataAccessLevel: Workspace.DataAccessLevelEnum.Registered,
+      dataAccessLevel: DataAccessLevel.Registered,
       /**
        * TODO: use the free billing project created for the user once registration work is done
        */
