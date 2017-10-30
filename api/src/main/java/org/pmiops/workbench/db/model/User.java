@@ -19,8 +19,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
-@Table(name = "user",
-    indexes = {  @Index(name = "idx_user_email", columnList = "email", unique = true)})
+@Table(name = "user")
 public class User {
 
   private long userId;
