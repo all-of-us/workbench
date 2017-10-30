@@ -94,9 +94,9 @@ public class CohortsController implements CohortsApiDelegate {
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
-      throw new BadRequestException(
-          "Cohort \"/%s/%s/%s\" already exists.".format(
-              workspaceNamespace, workspaceId, dbCohort.getCohortId()));
+      throw new BadRequestException(String.format(
+          "Cohort \"/%s/%s/%s\" already exists.",
+          workspaceNamespace, workspaceId, dbCohort.getCohortId()));
     }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
@@ -161,8 +161,8 @@ public class CohortsController implements CohortsApiDelegate {
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(convertCohortId(cohortId));
     if (cohort == null) {
-      throw new NotFoundException("No cohort with name {0} in workspace {0}".format(cohortId,
-          workspace.getFirecloudName()));
+      throw new NotFoundException(String.format(
+          "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }
     return cohort;
   }
@@ -171,7 +171,7 @@ public class CohortsController implements CohortsApiDelegate {
     try {
       return Long.parseLong(cohortId);
     } catch (NumberFormatException e) {
-      throw new BadRequestException("Invalid cohort ID: {0}".format(cohortId));
+      throw new BadRequestException(String.format("Invalid cohort ID: %s", cohortId));
     }
   }
 }
