@@ -748,32 +748,15 @@ definitions:
   CreateAccountRequest:
     type: object
     required:
-      - givenName
-      - familyName
-      - username
-      - contactEmail
       - password
     properties:
-      givenName:
-        type: string
-      familyName:
-        type: string
-      username:
-        type: string
-      contactEmail:
-        type: string
-        description: email address that can be used to contact the user
+      profile:
+        $ref: '#/definitions/Profile'
       password:
         type: string
       invitationKey:
         type: string
         description: Invitation key. Necessary when creating account before public launch.
-    example:
-      givenName: "John"
-      familyName: "Doe"
-      username: "john.doe"
-      password: "correct horse battery staple"
-      contactEmail: "john.doe@example.com"
 
   BugReport:
     type: object
@@ -795,12 +778,12 @@ definitions:
   Profile:
     type: object
     required:
-      - email
+      - username
       - enabledInFireCloud
       - dataAccessLevel
     properties:
-      email:
-        description: Google email address that the user signs in with
+      username:
+        description: researchallofus username
         type: string
       contactEmail:
         description: email address that can be used to contact the user
