@@ -205,8 +205,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
           workspaceId.getWorkspaceName());
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      log.log(Level.SEVERE, "Error creating FC workspace {0}/{1}: {2} ".format(
-          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName(), e.getResponseBody()),
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Error creating FC workspace %s/%s: %s",
+              workspaceId.getWorkspaceNamespace(),
+              workspaceId.getWorkspaceName(),
+              e.getResponseBody()),
           e);
       // TODO: figure out what happens if the workspace already exists
       throw new ServerErrorException("Error creating FC workspace", e);
