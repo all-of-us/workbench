@@ -200,15 +200,23 @@ export class CohortSearchActions {
     }
 
     const included = includeGroups(this.state);
+    this.debugLog('Making a request for Total with included groups: ');
+    this.debugDir(included);
+
     /* If there are no members of an intersection, the intersection is the null
      * set */
-    const emptyIntersection = included.size === 0;
+    const noGroups = included.size === 0;
+    const noGroupsWithItems = included.every(group => group.get('items').size === 0);
+    const emptyIntersection = noGroups || noGroupsWithItems;
+
     /* If any member of an intersection is the null set, the intersection is
      * the null set */
     const nullIntersection = included.some(group => group.get('count') === 0);
+
     /* In either case the total count is provably zero without needing to ask
      * the API */
     if (nullIntersection || emptyIntersection) {
+      this.debugLog('Not making request');
       this.setCount('searchRequests', SR_ID, 0);
       return ;
     }
