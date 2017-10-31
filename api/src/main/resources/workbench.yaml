@@ -1077,10 +1077,15 @@ definitions:
         type: "array"
         items:
           type: string
-    example:
-      name: "age_at_event"
-      operator: "GTE"
-      operands: [ "Arg1", "Arg2" ]
+    examples:
+      singleValued:
+        name: "age_at_event"
+        operator: "GTE"
+        value: "20"
+      multiValued:
+        name: "age_at_event"
+        operator: "BETWEEN"
+        operands: ["18", "35"]
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
