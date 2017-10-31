@@ -118,9 +118,6 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
-    resources {
-      //include "application.properties"
-    }
 
     compileClasspath += generated.output
     runtimeClasspath += generated.output
@@ -230,6 +227,12 @@ task integration(type: Test) {
   classpath = sourceSets.integration.runtimeClasspath
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
+}
+
+task bigquerytest(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.bigquerytest.output.classesDirs
+  classpath = sourceSets.bigquerytest.runtimeClasspath
 }
 
 tasks.withType(Test) {

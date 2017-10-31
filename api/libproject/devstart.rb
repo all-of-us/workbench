@@ -87,6 +87,15 @@ def run_integration_tests(*args)
   end
 end
 
+def run_bigquery_tests(*args)
+  common = Common.new
+
+  account = get_auth_login_account()
+  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
+    common.run_inline %W{docker-compose run --rm api ./gradlew bigquerytest} + args
+  end
+end
+
 def run_gradle(*args)
   common = Common.new
   common.run_inline %W{docker-compose run --rm api ./gradlew} + args
@@ -586,6 +595,12 @@ Common.register_command({
   :invocation => "integration",
   :description => "Runs integration tests.",
   :fn => lambda { |*args| run_integration_tests(*args) }
+})
+
+Common.register_command({
+  :invocation => "bigquerytest",
+  :description => "Runs bigquerytest tests.",
+  :fn => lambda { |*args| run_bigquery_tests(*args) }
 })
 
 Common.register_command({
