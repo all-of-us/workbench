@@ -11,6 +11,7 @@ import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -387,6 +389,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 controller.countSubjects(
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("90703").domain("Drug")))),
                 1);
+    }
+
+    @Test
+    public void countSubjects_EmptyIcludesAndExcludes() throws Exception {
+        try {
+            controller.countSubjects(new SearchRequest());
+        } catch (BadRequestException e) {
+            assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
+        }
     }
 
     @Test

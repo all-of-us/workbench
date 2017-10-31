@@ -10,7 +10,7 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {DEFAULT_COHORT_ID, CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {updateAndTick, simulateInput} from 'testing/test-helpers';
 
@@ -18,14 +18,14 @@ import {CohortsService} from 'generated';
 
 class CohortEditPage {
   fixture: ComponentFixture<CohortEditComponent>;
-  route: UrlSegment[];
+  route: ActivatedRoute;
   cohortsService: CohortsService;
   nameField: DebugElement;
   descriptionField: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(CohortEditComponent);
-    this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
+    this.route = this.fixture.debugElement.injector.get(ActivatedRoute);
     this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
     this.nameField = this.fixture.debugElement.query(By.css('.name'));
     this.descriptionField = this.fixture.debugElement.query(By.css('.description'));
@@ -40,7 +40,18 @@ const activatedRouteStub  = {
       {path: WorkspaceComponent.DEFAULT_WORKSPACE_ID},
       {path: 'cohorts'},
       {path: 'create'}
-    ]
+    ],
+    params: {
+      'ns': WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+      'wsid': WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+      'cid': DEFAULT_COHORT_ID
+    },
+  },
+  routeConfig: {
+    data: {
+      title: 'Create Cohort',
+      adding: true
+    }
   }
 };
 
@@ -77,8 +88,9 @@ describe('CohortEditComponent', () => {
 
   it('fetches and displays an existing cohort in the edit pane',
   fakeAsync(() => {
-    cohortEditPage.route[4].path = '1';
-    cohortEditPage.route.push(new UrlSegment('edit', {}));
+    cohortEditPage.route.snapshot.url[4].path = '1';
+    cohortEditPage.route.snapshot.url.push(new UrlSegment('edit', {}));
+    cohortEditPage.route.routeConfig.data.adding = false;
     updateAndTick(cohortEditPage.fixture);
     updateAndTick(cohortEditPage.fixture);
     expect(cohortEditPage.nameField.nativeElement.value).toMatch('sample name');
@@ -86,7 +98,8 @@ describe('CohortEditComponent', () => {
   }));
 
   it('adds a new cohort with given name and description', fakeAsync(() => {
-    cohortEditPage.route[4].path = 'create';
+    cohortEditPage.route.snapshot.url[4].path = 'create';
+    cohortEditPage.route.routeConfig.data.adding = true;
     updateAndTick(cohortEditPage.fixture);
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'New Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'New Description');
@@ -105,8 +118,9 @@ describe('CohortEditComponent', () => {
 
   it('edits an existing cohort with given name and description',
   fakeAsync(() => {
-    cohortEditPage.route[4].path = '1';
-    cohortEditPage.route.push(new UrlSegment('edit', {}));
+    cohortEditPage.route.snapshot.url[4].path = '1';
+    cohortEditPage.route.snapshot.url.push(new UrlSegment('edit', {}));
+    cohortEditPage.route.routeConfig.data.adding = false;
     updateAndTick(cohortEditPage.fixture);
     const saveButton = cohortEditPage.fixture.debugElement.query(By.css('.save-button'));
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'Edited Cohort');

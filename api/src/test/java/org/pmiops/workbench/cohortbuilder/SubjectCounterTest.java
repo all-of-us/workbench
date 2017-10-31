@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -21,6 +22,59 @@ public class SubjectCounterTest {
 
     @Autowired
     SubjectCounter subjectCounter;
+
+    @Test
+    public void buildSubjectCounterQuery_BothIncludesAndExcludesEmpty() throws Exception {
+
+        try {
+            subjectCounter.buildSubjectCounterQuery(new SearchRequest());
+        } catch (BadRequestException e) {
+            assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
+        }
+    }
+
+    @Test
+    public void buildSubjectCounterQuery_ExcludesWithoutIncludes() throws Exception {
+
+        String genderNamedParameter = "";
+        SearchParameter parameter1 = new SearchParameter()
+                .domain("DEMO_GEN")
+                .conceptId(8507L);
+
+        SearchGroupItem searchGroupItem1 = new SearchGroupItem()
+                .type("DEMO")
+                .addSearchParametersItem(parameter1);
+
+        SearchGroup searchGroup1 = new SearchGroup()
+                .addItemsItem(searchGroupItem1);
+
+        SearchRequest request = new SearchRequest()
+                .addExcludesItem(searchGroup1);
+
+        QueryJobConfiguration actualRequest = subjectCounter.buildSubjectCounterQuery(request);
+
+        for (String key : actualRequest.getNamedParameters().keySet()) {
+            if (key.startsWith("gender")) {
+                genderNamedParameter = key;
+            }
+        }
+
+        final String expectedSql = "select count(distinct person_id) as count\n" +
+                "from `${projectId}.${dataSetId}.person` person\n" +
+                "where\n" +
+                "person.person_id in (select distinct person_id\n" +
+                "from `${projectId}.${dataSetId}.person` p\n" +
+                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
+                ")\n";
+
+        assertEquals(expectedSql, actualRequest.getQuery());
+
+        assertEquals("8507",
+                actualRequest
+                        .getNamedParameters()
+                        .get(genderNamedParameter)
+                        .getValue());
+    }
 
     @Test
     public void buildSubjectCounterQuery() throws Exception {

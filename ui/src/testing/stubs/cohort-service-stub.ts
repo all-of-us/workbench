@@ -5,6 +5,9 @@ import {Cohort, CohortListResponse, Workspace} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
 
+export let DEFAULT_COHORT_ID = '1';
+
+
 class CohortStub implements Cohort {
   id?: string;
 
@@ -49,7 +52,7 @@ export class CohortsServiceStub {
     const exampleCohort: CohortStub = {id: '',
       name: '', description: '', criteria: '', type: '',
       workspaceId: WorkspaceComponent.DEFAULT_WORKSPACE_ID};
-    exampleCohort.id = '1';
+    exampleCohort.id = DEFAULT_COHORT_ID;
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';
     exampleCohort.creationTime = new Date().getTime();
