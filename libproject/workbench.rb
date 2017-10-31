@@ -24,6 +24,7 @@ module Workbench
   end
   module_function :ensure_git_hooks
 
+  # Runs a command (typically project.rb) from the main file's directory.
   def handle_argv_or_die(main_filename)
     ENV["PROJECTRB_DEBUG"] = "true"  # Use spawn() instead of system() so stderr shows up.
     common = Common.new
