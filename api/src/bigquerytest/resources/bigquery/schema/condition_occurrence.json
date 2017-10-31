@@ -1,0 +1,67 @@
+[
+  {
+    "type": "integer",
+    "name": "condition_occurrence_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "condition_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "condition_start_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "condition_start_datetime",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "condition_end_date",
+    "mode": "nullable"
+  },
+  {
+    "type": "timestamp",
+    "name": "condition_end_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "condition_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "stop_reason",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "condition_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "condition_source_concept_id",
+    "mode": "nullable"
+  }
+]

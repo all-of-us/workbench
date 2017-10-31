@@ -105,6 +105,8 @@ apply plugin: 'org.springframework.boot'
 configurations {
   integrationCompile.extendsFrom testCompile
   integrationRuntime.extendsFrom testRuntime
+  bigquerytestCompile.extendsFrom testCompile
+  bigquerytestRuntime.extendsFrom testRuntime
 }
 
 sourceSets {
@@ -130,6 +132,17 @@ sourceSets {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
       srcDir file('src/integration/java')
+    }
+  }
+  bigquerytest {
+    resources {
+      srcDir "bqtest/resources"
+      include "bigquery/**"
+    }
+    java {
+      compileClasspath += main.output + test.output + generated.output
+      runtimeClasspath += main.output + test.output + generated.output
+      srcDir file('src/bqtest/java')
     }
   }
 }

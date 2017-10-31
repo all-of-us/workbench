@@ -1,0 +1,87 @@
+[
+  {
+    "type": "integer",
+    "name": "observation_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "observation_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "observation_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "observation_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "observation_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "float",
+    "name": "value_as_number",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "value_as_string",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "value_as_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "qualifier_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "unit_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "observation_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "observation_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "unit_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "qualifier_source_value",
+    "mode": "nullable"
+  }
+]
