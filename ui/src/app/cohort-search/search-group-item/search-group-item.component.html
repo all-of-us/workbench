@@ -2,9 +2,9 @@
   <clr-tooltip>
     <div class="line-item">
       <button
-        type="button"
-        class="btn btn-link btn-sm text-danger"
-        (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
+         type="button"
+         class="btn btn-link btn-sm text-danger"
+         (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
         <clr-icon shape="close"></clr-icon>
       </button>
 
@@ -30,7 +30,6 @@
       {{ codes }}
     </clr-tooltip-content>
   </clr-tooltip>
-
 
   <div class="count">
     <span *ngIf="isRequesting"

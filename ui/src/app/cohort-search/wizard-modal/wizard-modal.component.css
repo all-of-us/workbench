@@ -19,11 +19,40 @@
   display: -webkit-box;
 }
 
-.scrolling-tree {
-  overflow: auto;
-  height: 100%;
+.clr-treenode-children {
+  overflow: hidden!important;
 }
 
-.row-height {
+#criteria-page {
   height: 100%;
+  display: flex;
+  flex-flow: column;
+}
+
+#criteria-page > .criteria-tree-container {
+  width: 100%;
+  height: 70%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 7;
+}
+
+#criteria-page > app-wizard-criteria-group {
+  width: 100%;
+  height: 30%;
+  flex: 3;
+}
+
+@media all and (min-width: 1300px) {
+  #criteria-page {
+    flex-flow: row;
+  }
+  #criteria-page > .criteria-tree-container {
+    width: 70%;
+    height: 100%;
+  }
+  #criteria-page > app-wizard-criteria-group {
+    width: 30%;
+    height: 100%;
+  }
 }

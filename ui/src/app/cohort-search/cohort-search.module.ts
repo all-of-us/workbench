@@ -2,8 +2,7 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
-import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
-import {createEpicMiddleware, combineEpics} from 'redux-observable';
+import {NgReduxModule} from '@angular-redux/store';
 
 /* Components */
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
@@ -11,11 +10,7 @@ import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
 import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
-import {
-  CriteriaTreeNodeComponent,
-  CriteriaTreeRootComponent,
-  CriteriaTreeNodeInfoComponent,
-} from './criteria-tree';
+import {CriteriaTreeComponent} from './criteria-tree/criteria-tree.component';
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -25,16 +20,11 @@ import {
 
 /* Other Objects */
 import {CohortSearchRouter} from './router.module';
-import {environment} from 'environments/environment';
-
 import {
   CohortSearchActions,
   CohortSearchEpics,
-  CohortSearchState,
-  initialState,
-  rootReducer
+  ConfigureStore,
 } from './redux';
-
 import {CohortBuilderService} from 'generated';
 
 // tslint:enable:max-line-length
@@ -48,10 +38,7 @@ import {CohortBuilderService} from 'generated';
   ],
   declarations: [
     CohortBuilderComponent,
-
-    CriteriaTreeRootComponent,
-    CriteriaTreeNodeComponent,
-    CriteriaTreeNodeInfoComponent,
+    CriteriaTreeComponent,
 
     SearchGroupComponent,
     SearchGroupItemComponent,
@@ -68,32 +55,9 @@ import {CohortBuilderService} from 'generated';
     CohortBuilderService,
     CohortSearchActions,
     CohortSearchEpics,
+    ConfigureStore,
   ]
 })
 export class CohortSearchModule {
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private epics: CohortSearchEpics,
-              private devTools: DevToolsExtension) {
-
-    let storeEnhancers = [];
-    if (environment.debug && devTools.isEnabled()) {
-      storeEnhancers = [...storeEnhancers, devTools.enhancer()];
-    }
-
-    const middleware = [
-      createEpicMiddleware(
-        combineEpics(
-          this.epics.fetchCriteria,
-          this.epics.fetchCounts,
-        )
-      )
-    ];
-
-    ngRedux.configureStore(
-      rootReducer,
-      initialState,
-      middleware,
-      storeEnhancers
-    );
-  }
+  constructor(store: ConfigureStore) {}
 }

@@ -1,0 +1,36 @@
+<ng-container [clrLoading]="loading">
+  <clr-tree-node *ngFor="let child of children">
+    <div class="clr-treenode-link flex-container">
+      <div class="item-info">
+        <small class="font-weight-bold">
+          {{ displayCode(child) }}
+        </small>
+        <small class="text-muted">
+          {{ displayName(child) }}
+        </small>
+      </div>
+
+      <div class="item-meta">
+        <span
+           *ngIf="nonZeroCount(child)"
+           class="badge badge-light-blue">
+          {{ child.get('count') }}
+        </span>
+        <button
+           *ngIf="selectable(child)"
+           type="button"
+           class="btn btn-sm btn-link"
+           [disabled]="isSelected(child)"
+           [style.margin]="'0 0 0 0'"
+           [style.color]="'rgb(98, 164, 32)'"
+           (click)="select(child)">
+          <clr-icon *ngIf="isSelected(child)" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected(child)" shape="plus-circle" size="20"></clr-icon>
+        </button>
+      </div>
+    </div>
+    <ng-template clrIfExpanded *ngIf="child.get('group')">
+      <app-criteria-tree [node]="child"></app-criteria-tree>
+    </ng-template>
+  </clr-tree-node>
+</ng-container>
