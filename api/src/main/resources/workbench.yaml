@@ -1045,23 +1045,28 @@ definitions:
     type: object
     required:
       - operator
+      - operands
     properties:
       operator:
         type: string
-      value:
-        description: Unary operators use value
-        type: string
       operands:
-        description: N-ary operators use operands
         type: "array"
         items:
           type: string
+    examples:
+      singleValued:
+        operator: "GTE"
+        operands: ["20"]
+      multiValued:
+        operator: "BETWEEN"
+        operands: ["18", "35"]
 
   Modifier:
     type: object
     required:
       - name
       - operator
+      - operands
     properties:
       name:
         description: Semantic name of the operator
@@ -1069,11 +1074,7 @@ definitions:
       operator:
         description: Machine name of the operator
         type: string
-      value:
-        description: Unary operators use value
-        type: string
       operands:
-        description: N-ary operators use operands
         type: "array"
         items:
           type: string
@@ -1081,7 +1082,7 @@ definitions:
       singleValued:
         name: "age_at_event"
         operator: "GTE"
-        value: "20"
+        operands: ["20"]
       multiValued:
         name: "age_at_event"
         operator: "BETWEEN"
