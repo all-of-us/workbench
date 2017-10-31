@@ -115,7 +115,7 @@ describe('SearchGroupItemComponent', () => {
     expect(comp.pluralizedCode).toBe('Codes');
   });
 
-  it('Should launch a wizard on edit', () => {
+  it('Should dispatch REOPEN_WIZARD on edit', () => {
     /*
      * More specifically, when the edit icon is clicked, it should dispatch an
      * action like {type: REOPEN_WIZARD, item, context}
@@ -141,4 +141,6 @@ describe('SearchGroupItemComponent', () => {
       context: expectedContext,
     });
   });
+
+  it('Should render an \'OR\' if it isn\'t the first item');
 });
