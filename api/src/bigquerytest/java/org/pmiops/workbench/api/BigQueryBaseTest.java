@@ -42,7 +42,7 @@ public abstract class BigQueryBaseTest {
     @Autowired
     WorkbenchConfig workbenchConfig;
 
-    public static final String BASE_PATH = "src/test/resources/bigquery/";
+    public static final String BASE_PATH = "src/bigquerytest/resources/bigquery/";
 
     @BeforeAllMethods
     public void beforeAllMethodsSetUp() throws Exception {

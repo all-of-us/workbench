@@ -217,3 +217,9 @@ CDR Schema - In the `api/libproject/devstart.rb` for **test deployment** we call
 ```
 ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=main")
 ```
+
+## Running Big Query test cases
+
+```
+./project.rb bigquerytest
+```
