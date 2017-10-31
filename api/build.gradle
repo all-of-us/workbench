@@ -105,6 +105,8 @@ apply plugin: 'org.springframework.boot'
 configurations {
   integrationCompile.extendsFrom testCompile
   integrationRuntime.extendsFrom testRuntime
+  bigquerytestCompile.extendsFrom testCompile
+  bigquerytestRuntime.extendsFrom testRuntime
 }
 
 sourceSets {
@@ -116,11 +118,6 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   test {
-    resources {
-      srcDir "test/resources"
-      include "bigquery/**"
-      //include "application.properties"
-    }
 
     compileClasspath += generated.output
     runtimeClasspath += generated.output
@@ -130,6 +127,17 @@ sourceSets {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
       srcDir file('src/integration/java')
+    }
+  }
+  bigquerytest {
+    resources {
+      srcDir "bigquerytest/resources"
+      include "bigquery/**"
+    }
+    java {
+      compileClasspath += main.output + test.output + generated.output
+      runtimeClasspath += main.output + test.output + generated.output
+      srcDir file('src/bigquerytest/java')
     }
   }
 }
@@ -219,6 +227,12 @@ task integration(type: Test) {
   classpath = sourceSets.integration.runtimeClasspath
   // Option to control size of stack trace:
   // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
+}
+
+task bigquerytest(type: Test) {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
+  testClassesDirs = sourceSets.bigquerytest.output.classesDirs
+  classpath = sourceSets.bigquerytest.runtimeClasspath
 }
 
 tasks.withType(Test) {
