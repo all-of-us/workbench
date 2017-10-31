@@ -142,5 +142,17 @@ describe('SearchGroupItemComponent', () => {
     });
   });
 
-  it('Should render an \'OR\' if it isn\'t the first item');
+  it('Should render an \'OR\' if it isn\'t the first item', () => {
+    comp.itemIndex = 1;
+    itemStub.next(baseItem);
+    codeStub.next(List([zeroCrit, oneCrit]));
+    fixture.detectChanges();
+
+    const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
+    expect(display.childElementCount).toBe(4);
+
+    const trimmedText = display.textContent.replace(/\s+/g, ' ').trim();
+    expect(trimmedText).toEqual('OR Contains ICD9 Codes CodeA, CodeB');
+  });
+
 });
