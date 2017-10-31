@@ -57,7 +57,11 @@ const activatedRouteStub  = {
       {path: 'workspace'},
       {path: WorkspaceComponent.DEFAULT_WORKSPACE_NS},
       {path: WorkspaceComponent.DEFAULT_WORKSPACE_ID}
-    ]
+    ],
+    params: {
+      'ns': WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+      'wsid': WorkspaceComponent.DEFAULT_WORKSPACE_ID
+    }
   }
 };
 
