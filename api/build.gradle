@@ -119,8 +119,6 @@ sourceSets {
   }
   test {
     resources {
-      srcDir "test/resources"
-      include "bigquery/**"
       //include "application.properties"
     }
 
@@ -136,13 +134,13 @@ sourceSets {
   }
   bigquerytest {
     resources {
-      srcDir "bqtest/resources"
+      srcDir "bigquerytest/resources"
       include "bigquery/**"
     }
     java {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
-      srcDir file('src/bqtest/java')
+      srcDir file('src/bigquerytest/java')
     }
   }
 }
