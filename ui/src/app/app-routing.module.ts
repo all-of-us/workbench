@@ -12,6 +12,7 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 // tslint:enable:max-line-length
 
@@ -32,7 +33,10 @@ const routes: Routes = [
           data: {title: 'Create Workspace', adding: true}},
   {path: 'workspace/:ns/:wsid/edit',
           component: WorkspaceEditComponent,
-          data: {title: 'Edit Workspace', adding: false}}
+          data: {title: 'Edit Workspace', adding: false}},
+  {path: 'workspace/:ns/:wsid/share',
+          component: WorkspaceShareComponent,
+          data: {title: 'Share Workspace'}}
 ];
 
 @NgModule({

@@ -31,3 +31,10 @@ h3 {
   border: 1px solid grey;
   align-items: center;
 }
+
+.sharing-icon {
+  margin-top: 1.5rem;
+  margin-left: 0.3rem;
+  border: 1px solid grey;
+  align-items: center;
+}

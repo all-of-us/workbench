@@ -197,4 +197,8 @@ export class WorkspaceComponent implements OnInit {
   edit(): void {
     this.router.navigate(['edit'], {relativeTo : this.route});
   }
+
+  share(): void {
+    this.router.navigate(['share'], {relativeTo : this.route});
+  }
 }
