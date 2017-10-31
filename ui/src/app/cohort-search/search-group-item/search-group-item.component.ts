@@ -1,5 +1,7 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
+import {Subscription} from 'rxjs/Subscription';
+import {List, Map} from 'immutable';
 
 import {
   CohortSearchActions,
@@ -7,69 +9,62 @@ import {
   getItem,
   parameterList
 } from '../redux';
+import {SearchRequest} from 'generated';
 
-const getDisplayName = (criteria) =>
+
+const getDisplayName = (criteria: Map<any, any>): string =>
   criteria.get('type').match(/^DEMO.*/i)
-    ?  criteria.get('name')
-    : criteria.get('code');
+    ?  criteria.get('name', 'N/A')
+    : criteria.get('code', 'N/A');
+
 
 @Component({
   selector: 'app-search-group-item',
   templateUrl: './search-group-item.component.html',
-  styles: [`
-    .flex-container {
-      display: flex;
-    }
-    .flex-container > clr-tooltip {
-      min-width: 0;
-      flex: 4;
-    }
-    .flex-container > div.count {
-      flex: 1;
-      text-align: right;
-    }
-    .line-item {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-    .trigger:hover > span {
-      color: rgb(0, 124, 187)!important;
-    }
-  `]
+  styleUrls: ['./search-group-item.component.css'],
 })
-export class SearchGroupItemComponent {
-  @Input() role: string;
+export class SearchGroupItemComponent implements OnInit, OnDestroy {
+  @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() itemId: string;
   @Input() itemIndex: number;
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  private item: Map<any, any> = Map();
+  private rawCodes: List<any> = List();
+  private _subscriptions: Subscription[];
+
+  constructor(
+    private ngRedux: NgRedux<CohortSearchState>,
+    private actions: CohortSearchActions
+  ) {}
+
+  ngOnInit() {
+    const select = this.ngRedux.select;
+    this._subscriptions = [
+      select(getItem(this.itemId)).subscribe(item => this.item = item),
+      select(parameterList(this.itemId)).subscribe(rawCodes => this.rawCodes = rawCodes),
+    ];
+  }
+
+  ngOnDestroy() {
+    this._subscriptions.forEach(sub => sub.unsubscribe());
+  }
 
   get codeType() {
-    const _type = this.item.get('type').toUpperCase();
+    const _type = this.item.get('type', '').toUpperCase();
     return this.item.get('description', `${_type} ${this.pluralizedCode}`);
   }
 
   get pluralizedCode() {
-    return this._rawCodes.count() > 1 ? 'Codes' : 'Code';
-  }
-
-  get item() {
-    return getItem(this.itemId)(this.ngRedux.getState());
+    return this.rawCodes.count() > 1 ? 'Codes' : 'Code';
   }
 
   get isRequesting() {
     return this.item.get('isRequesting', false);
   }
 
-  get _rawCodes() {
-    return parameterList(this.itemId)(this.ngRedux.getState());
-  }
-
   get codes() {
-    return this._rawCodes.map(getDisplayName).join(', ');
+    return this.rawCodes.map(getDisplayName).join(', ');
   }
 
   launchWizard() {

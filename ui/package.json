@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": "ng test --sourcemaps=false",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "codegen-clean": "rm -rf src/generated",

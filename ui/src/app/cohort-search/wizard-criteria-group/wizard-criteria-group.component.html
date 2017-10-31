@@ -1,18 +1,21 @@
 <div
+  id="wizard-criteria-container"
   [style.border]="'2px solid #d7d7d7'"
   [style.height]="'100%'"
-  [style.padding-left]="'1rem'"
+  [style.padding-left]="'0.4rem'"
   [style.border-radius]="'5px'"
   [style.overflow-y]="'auto'"
   [style.overflow-x]="'hidden'"
   >
-  <span class="font-weight-bold">{{ selectionTitle(criteriaType$ | async) }}</span>
+  <span class="font-weight-bold title">{{ selectionTitle(criteriaType$ | async) }}</span>
   <div *ngFor="let criteria of (criteriaList$ | async); let i = index"
     [style.overflow]="'hidden'"
     [style.text-overflow]="'ellipsis'"
     [style.white-space]="'nowrap'"
     >
     <button type="button"
+      [style.margin]="'0 0 0 0 '"
+      [style.padding]="'0 0.25rem'"
       class="btn btn-icon btn-link btn-sm text-danger"
       (click)="this.actions.unselectCriteria(criteria.get('id'))">
       <clr-icon shape="close"></clr-icon>
@@ -20,5 +23,6 @@
     <small *ngIf="i > 0" class="font-weight-bold">OR</small>
     <small *ngIf="criteria.get('group')" class="text-muted">Group</small>
     <small class="font-weight-bold">{{ typeDisplay(criteria) }}</small>
+    <small class="text-muted">{{ nameDisplay(criteria) }}</small>
   </div>
 </div>

@@ -10,8 +10,9 @@
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <button
-          class="dropdown-item"
           *ngFor="let criteria of criteriaTypes"
+          id="criteria.type"
+          class="dropdown-item"
           type="button"
           (click)="launchWizard(criteria.type)"
           clrDropdownItem>{{criteria.name}}</button>

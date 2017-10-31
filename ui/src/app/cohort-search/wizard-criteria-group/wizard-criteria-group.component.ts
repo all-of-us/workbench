@@ -1,12 +1,10 @@
 import {
   Component,
-  ViewEncapsulation
 } from '@angular/core';
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 
 import {
   CohortSearchActions,
-  CohortSearchState,
   activeGroupId,
   activeRole,
   activeCriteriaType,
@@ -18,15 +16,14 @@ import {Criteria} from 'generated';
 
 @Component({
   selector: 'app-wizard-criteria-group',
-  templateUrl: 'wizard-criteria-group.component.html',
+  templateUrl: './wizard-criteria-group.component.html',
 })
 export class WizardCriteriaGroupComponent {
 
   @select(activeCriteriaType) criteriaType$;
   @select(activeCriteriaList) criteriaList$;
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions) {}
 
   selectionTitle(kind): string {
     if (kind === 'icd9'
@@ -46,16 +43,20 @@ export class WizardCriteriaGroupComponent {
 
     switch (criteria.get('type')) {
       case 'DEMO_GEN':
-        return `Gender ${name}`;
+        return 'Gender';
 
       case 'DEMO_RACE':
-        return `Race/Ethnicity ${name}`;
+        return 'Race/Ethnicity';
 
       case 'DEMO_AGE': case 'DEMO_DEC':
-        return name;
+        return 'Demographic';
 
       default:
-        return `${code} ${name}`;
+        return code;
     }
+  }
+
+  nameDisplay(criteria): string {
+    return criteria.get('name');
   }
 }

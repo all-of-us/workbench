@@ -1,36 +1,26 @@
-<clr-wizard 
-  #wizard 
-  [clrWizardOpen]="open$ | async" 
-  (clrWizardOnCancel)="close()"
-  >
+<clr-wizard
+  #wizard
+  [clrWizardOpen]="open"
+  (clrWizardOnCancel)="cancel()"
+  (clrWizardOnFinish)="finish()">
+
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
 
   <clr-wizard-page><!-- Criteria Selection Page -->
-    <ng-template clrPageTitle>Choose {{(critType$ | async)?.toUpperCase()}} Codes</ng-template>
+    <ng-template clrPageTitle>Choose {{criteriaType.toUpperCase()}} Codes</ng-template>
+    <div *ngIf="rootsAreLoading" class="spinner">Loading...</div>
 
-    <div class="row row-height">
-      <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 scrolling-tree">
-        <app-criteria-tree-root
-          [critType]="(critType$ | async)?.toLowerCase()"
-          [parentId]="0">
-        </app-criteria-tree-root>
+    <div id="criteria-page">
+      <div class="criteria-tree-container">
+        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)"></app-criteria-tree>
       </div>
-
-      <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-        <app-wizard-criteria-group>
-        </app-wizard-criteria-group>
-      </div>
+      <app-wizard-criteria-group></app-wizard-criteria-group>
     </div>
-
-    <ng-template clrPageButtons>
-      <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
-      <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
-      <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-      <button 
-        class="btn clr-wizard-btn btn-primary clr-wizard-btn--primary btn-success" 
-        type="button" 
-        (click)="finish()">Finish</button>
-    </ng-template>
-
   </clr-wizard-page>
+
+  <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
+  <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
+
 </clr-wizard>
