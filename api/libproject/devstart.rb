@@ -295,10 +295,10 @@ end
 def connect_to_cloud_db(*args)
   Credentials.new.maybe_download_db_vars :dev
   start_cloud_sql_proxy
+  sleep 1 # TODO(dmohs): Detect running better.
 
   env = Hash[File.read("db/vars.dev.env").split(/\n/).map {|l| l.split(/=/)}]
   password = env["WORKBENCH_DB_PASSWORD"]
-  sleep 1 # TODO(dmohs): Detect running better.
   run_with_redirects(
     "docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}"\
     " --database=#{env["DB_NAME"]} --password=#{password}",

@@ -26,13 +26,13 @@ class Credentials
 
   def maybe_download(bucket_file_name, destination_path)
     common = Common.new
-    awk_command = "{if($2 == \"True\") print}"
-    common.status "Active gcloud account:"
-    common.pipe(
-      %W{docker-compose run --rm api gcloud config configurations list},
-      %W{awk #{awk_command}}
-    )
     if File.empty?(destination_path)
+      awk_command = "{if($2 == \"True\") print}"
+      common.status "Active gcloud account:"
+      common.pipe(
+        %W{docker-compose run --rm api gcloud config configurations list},
+        %W{awk #{awk_command}}
+      )
       Common.new.run_inline %W{
         docker-compose run --rm api
           gsutil cp gs://#{CREDENTIALS_BUCKET_NAME}/#{bucket_file_name} #{destination_path}
