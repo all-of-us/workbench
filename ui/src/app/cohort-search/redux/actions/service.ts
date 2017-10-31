@@ -158,7 +158,7 @@ export class CohortSearchActions {
 
   fetchCriteria(kind: string, parentId: number): void {
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
-    const isLoaded = this.state.getIn(['criteria', kind, parentId]);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
     if (isLoaded || isLoading) {
       return;
     }

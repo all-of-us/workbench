@@ -2,9 +2,8 @@ import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing'
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from 'clarity-angular';
-import {DebugElement} from '@angular/core';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, List, fromJS} from 'immutable';
+import {Map, fromJS} from 'immutable';
 import {NgRedux} from '@angular-redux/store';
 
 import {
@@ -12,11 +11,13 @@ import {
   WIZARD_CANCEL,
   WIZARD_FINISH,
 } from '../redux';
+
 import {CriteriaTreeComponent} from '../criteria-tree/criteria-tree.component';
 import {WizardModalComponent} from './wizard-modal.component';
 import {
   WizardCriteriaGroupComponent
 } from '../wizard-criteria-group/wizard-criteria-group.component';
+
 import {CohortBuilderService} from 'generated';
 
 

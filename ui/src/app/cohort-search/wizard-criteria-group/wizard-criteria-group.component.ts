@@ -1,11 +1,10 @@
 import {
   Component,
 } from '@angular/core';
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 
 import {
   CohortSearchActions,
-  CohortSearchState,
   activeGroupId,
   activeRole,
   activeCriteriaType,
@@ -24,8 +23,7 @@ export class WizardCriteriaGroupComponent {
   @select(activeCriteriaType) criteriaType$;
   @select(activeCriteriaList) criteriaList$;
 
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions) {}
 
   selectionTitle(kind): string {
     if (kind === 'icd9'
