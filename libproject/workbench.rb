@@ -37,6 +37,16 @@ module Workbench
       common.docker.requires_docker
     end
 
+    if File.exist?("db")
+      # docker-compose will not run any container if api/db/vars.dev.env doesn't exist (including
+      # the container that generates this file), so create an empty one if necessary.
+      # TODO(dmohs): This needs to be run before any docker-compose command, but it doesn't belong
+      # here.
+      unless File.exist?("db/vars.dev.env")
+        common.run_inline %W{touch db/vars.dev.env}
+      end
+    end
+
     if ARGV.length == 0 or ARGV[0] == "--help"
       common.print_usage
       exit 0

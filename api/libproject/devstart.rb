@@ -4,12 +4,13 @@
 
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
+require_relative "credentials"
+require "fileutils"
 require "io/console"
 require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
-require "fileutils"
 
 class Options < OpenStruct
 end
@@ -285,15 +286,24 @@ def drop_cloud_cdr(*args)
   end
 end
 
+def start_cloud_sql_proxy()
+  common = Common.new
+  Common.new.run_inline %W{docker-compose up -d cloud-sql-proxy}
+  at_exit { common.run_inline %W{docker-compose down} }
+end
+
 def connect_to_cloud_db(*args)
-  GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
-    pw = ENV["WORKBENCH_DB_PASSWORD"]
-    # TODO Switch this to run_inline once Common supports redaction.
-    run_with_redirects(
-        "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
-        "--port 3307 --database #{ENV["DB_NAME"]}",
-        to_redact=pw)
-  end
+  Credentials.new.maybe_download_db_vars :dev
+  start_cloud_sql_proxy
+
+  env = Hash[File.read("db/vars.dev.env").split(/\n/).map {|l| l.split(/=/)}]
+  password = env["WORKBENCH_DB_PASSWORD"]
+  sleep 1 # TODO(dmohs): Detect running better.
+  run_with_redirects(
+    "docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}"\
+    " --database=#{env["DB_NAME"]} --password=#{password}",
+    to_redact=password
+  )
 end
 
 def update_cloud_config(*args)
@@ -735,5 +745,3 @@ Common.register_command({
   :description => "Deploys the API server to the specified cloud project.",
   :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
 })
-
-
