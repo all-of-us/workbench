@@ -30,6 +30,11 @@
               <span class="alert-text">
                 Failed to load children of {{ error.kind }} with ID {{ error.parentId }}.
               </span>
+              <div class="alert-actions">
+                <a (click)="closeAlert(error)">
+                  <clr-icon shape="close"></clr-icon>
+                </a>
+              </div>
             </div>
           </clr-alert>
         </div>

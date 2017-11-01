@@ -31,9 +31,9 @@ export class WizardModalComponent {
   private rootsAreLoading = true;
   // Zero is default parent ID for criteria tree roots
   private readonly parentId = 0;
+
   @select() criteriaErrors$;
 
-  // for testing
   criteriaErrors = [
     {kind: 'icd9', parentId: 0},
     {kind: 'icd9', parentId: 1},
@@ -48,9 +48,15 @@ export class WizardModalComponent {
     this.rootsAreLoading = value;
   }
 
+  /* TODO(jms) hook all this up to actually listen for errors */
   get hasErrors() {
     return this.criteriaErrors.length > 0;
   }
+
+  closeAlert(error) {
+    this.criteriaErrors = this.criteriaErrors.filter(err => err !== error);
+  }
+  /* end todo */
 
   get rootNode() {
     return Map({type: this.criteriaType, id: this.parentId});
