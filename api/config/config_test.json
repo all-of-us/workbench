@@ -2,8 +2,7 @@
 {
   "firecloud": {
     "debugEndpoints": false,
-    "billingProjectPrefix": "aou-free-test-",
-    "#": "GCP billing project names must be <= 30 characters. Per-user hash is <= 10 chars."
+    "billingProjectPrefix": "all-of-us-free-test-"
   },
   "bigquery": {
     "dataSetId": "synpuf",
