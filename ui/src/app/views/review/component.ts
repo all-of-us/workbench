@@ -35,14 +35,14 @@ export class ReviewComponent implements OnInit {
   }
 
   approve(workspace: Workspace, approved: boolean): void {
-    var request = <ResearchPurposeReviewRequest>{
+    const request = <ResearchPurposeReviewRequest>{
       approved: approved,
     };
     this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
         workspace.namespace, workspace.id, request))
         .subscribe(
             resp => {
-              var i = this.workspaces.indexOf(workspace, 0);
+              const i = this.workspaces.indexOf(workspace, 0);
               if (i >= 0) {
                 this.workspaces.splice(i, 1);
               }
