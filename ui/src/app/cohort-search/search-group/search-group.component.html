@@ -38,8 +38,9 @@
 
   <div
     class="card-footer font-weight-bold bg-count text-right"
+    [style.padding]="'3px 12px 0px 3px'"
     [style.background-color]="'#d7d7d7'">
-    Group Count:
+    Group Total:
     <span *ngIf="isRequesting"
       class="spinner spinner-inline"
       [style.vertical-align]="'middle'">

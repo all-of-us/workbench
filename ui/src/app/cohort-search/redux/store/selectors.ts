@@ -79,3 +79,10 @@ export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
   state.getIn(['criteria', 'requests', kind, parentId]) === true;
+
+export const criteriaError =
+  (kind: string, parentId: number) =>
+  (state): any =>
+  state.getIn(['criteria', 'requests', kind, parentId]) === true
+    ? null
+    : state.getIn(['criteria', 'requests', kind, parentId]);
