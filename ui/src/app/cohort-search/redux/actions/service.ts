@@ -193,7 +193,10 @@ export class CohortSearchActions {
     this.requestCounts('groups', groupId, request);
   }
 
-  requestTotalCount(): void {
+  /**
+   * @param outdatedGroup: string
+   */
+  requestTotalCount(outdatedGroupId?: string): void {
     const searchRequest = getSearchRequest(SR_ID)(this.state);
     if (searchRequest.get('isRequesting', false)) {
       this.cancelCountRequest('searchRequests', SR_ID);
@@ -204,17 +207,24 @@ export class CohortSearchActions {
     this.debugDir(included);
 
     /* If there are no members of an intersection, the intersection is the null
-     * set */
+     * set
+     */
     const noGroups = included.size === 0;
     const noGroupsWithItems = included.every(group => group.get('items').size === 0);
     const emptyIntersection = noGroups || noGroupsWithItems;
 
     /* If any member of an intersection is the null set, the intersection is
-     * the null set */
-    const nullIntersection = included.some(group => group.get('count') === 0);
+     * the null set - unless the member in question is itself outdated (i.e.
+     * the group with a zero count is itself being updated concurrently with
+     * the totals, so the ocunt may not actually be zero anymore)
+     */
+    const nullIntersection = included
+      .filterNot(group => group.get('id') === outdatedGroupId)
+      .some(group => group.get('count') === 0);
 
     /* In either case the total count is provably zero without needing to ask
-     * the API */
+     * the API
+     */
     if (nullIntersection || emptyIntersection) {
       this.debugLog('Not making request');
       this.setCount('searchRequests', SR_ID, 0);
