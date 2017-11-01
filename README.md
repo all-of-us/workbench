@@ -2,28 +2,53 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
-## Getting the code
+## Setup for Development
 
-* Run `git clone https://github.com/all-of-us/workbench`
+System requirements:
+
+  * [Docker CE](https://www.docker.com/community-edition)
+  * [Ruby](https://www.ruby-lang.org/en/downloads/)
+  * [Python](https://www.python.org/downloads/) >= 2.7.9
+  * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
+
+Docker must be installed to build and run code (For Google workstations, see
+go/installdocker.). Ruby is required to run our development scripts, which
+document common operations and provide a convenient way to perform them.
+Python is required by some scripts and the Google Cloud Tools.
+
+After you've installed `gcloud`, login using your `pmi-ops` account:
+
+```shell
+gcloud auth login
+```
+
+To initialize the project, run the following:
+
+```shell
+git clone https://github.com/all-of-us/workbench
+cd workbench
+git submodule init
+git submodule update
+```
+
+Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
+
+## Development Process
 
 To make changes, do:
 
-* git checkout master
-* git pull
-* git checkout -b USERNAME/BRANCH_NAME
-* (make changes and git add / commit them)
-* git push -u origin USERNAME/BRANCH_NAME
+```shell
+git checkout master
+git pull
+git checkout -b <USERNAME>/<BRANCH_NAME>
+# (make changes and git add / commit them)
+git push -u origin <USERNAME>/<BRANCH_NAME>
+```
 
 And make a pull request in your browser at
 https://github.com/all-of-us/workbench based on your upload.
 
 After responding to changes, merge in GitHub.
-
-## Setup
-
-Docker must be installed to build and run code (For Google workstations, see
-go/installdocker.). Ruby is required to run our development scripts, which
-document common operations and provide a convenient way to perform them.
 
 ### UI
 
@@ -155,7 +180,7 @@ Cloud Storage and generate the XML, which is then deployed with the Java binary.
 
 Server behavior configuration is stored in the database. It may be changed
 without restarting the server, but is usually set only at deployment time. It's
-based on config_$ENV.json files (which are converted into `WorkbenchConfig`
+based on config\_$ENV.json files (which are converted into `WorkbenchConfig`
 objects) and loaded into the database by `workbench.tools.ConfigLoader`.
 
 `CacheSpringConfiguration`, a Spring `@Configuration`, provides
