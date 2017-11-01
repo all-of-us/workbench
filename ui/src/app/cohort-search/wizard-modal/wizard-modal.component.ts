@@ -1,10 +1,9 @@
 import {
   Component,
   Input,
-  ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Wizard} from 'clarity-angular';
 import {Map} from 'immutable';
 
@@ -32,7 +31,13 @@ export class WizardModalComponent {
   private rootsAreLoading = true;
   // Zero is default parent ID for criteria tree roots
   private readonly parentId = 0;
-  @ViewChild('wizard') wizard: Wizard;
+  @select() criteriaErrors$;
+
+  // for testing
+  criteriaErrors = [
+    {kind: 'icd9', parentId: 0},
+    {kind: 'icd9', parentId: 1},
+  ];
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -41,6 +46,10 @@ export class WizardModalComponent {
 
   setLoading(value: boolean) {
     this.rootsAreLoading = value;
+  }
+
+  get hasErrors() {
+    return this.criteriaErrors.length > 0;
   }
 
   get rootNode() {

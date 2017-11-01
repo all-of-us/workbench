@@ -1,5 +1,4 @@
 <clr-wizard
-  #wizard
   [clrWizardOpen]="open"
   (clrWizardOnCancel)="cancel()"
   (clrWizardOnFinish)="finish()">
@@ -8,11 +7,36 @@
 
   <clr-wizard-page><!-- Criteria Selection Page -->
     <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
-    <div *ngIf="rootsAreLoading" class="spinner">Loading...</div>
-
     <div id="criteria-page">
       <div class="criteria-tree-container">
-        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)"></app-criteria-tree>
+
+        <!-- 
+          TODO (jms) Push this into its own component? There's some silly race
+          condition by having the modal read whether or not the child is
+          loading directly from the child that using a dedicated component
+          could avoid.
+        -->
+        <div *ngIf="rootsAreLoading" class="spinner">
+          Loading...
+        </div>
+
+        <!-- TODO(jms) Push this into its own component? -->
+        <div *ngIf="hasErrors" class="error-box">
+          <clr-alert
+            [clrAlertClosable]="false"
+            [clrAlertType]="'alert-danger'">
+            <div clr-alert-item class="alert-item"
+              *ngFor="let error of criteriaErrors">
+              <span class="alert-text">
+                Failed to load children of {{ error.kind }} with ID {{ error.parentId }}.
+              </span>
+            </div>
+          </clr-alert>
+        </div>
+
+        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)">
+        </app-criteria-tree>
+
       </div>
       <app-wizard-criteria-group></app-wizard-criteria-group>
     </div>

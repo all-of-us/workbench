@@ -86,3 +86,9 @@ export const criteriaError =
   state.getIn(['criteria', 'requests', kind, parentId]) === true
     ? null
     : state.getIn(['criteria', 'requests', kind, parentId]);
+
+export const allCriteriaLoadErrors =
+  (state): List<any> =>
+  state.getIn(['criteria', 'requests'], Map());
+// TODO(jms): transform the request set such into a list of objects:
+// { kind, parentId, whatever else }

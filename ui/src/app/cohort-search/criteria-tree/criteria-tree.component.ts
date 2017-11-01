@@ -17,6 +17,7 @@ import {
   activeCriteriaList,
   isCriteriaLoading,
   criteriaChildren,
+  criteriaError,
 } from '../redux';
 
 
@@ -28,6 +29,7 @@ import {
 export class CriteriaTreeComponent implements OnInit, OnDestroy {
   @Input() node;
   @Output() isLoading = new EventEmitter<boolean>();
+  private _error: any;
   private _loading: boolean;
   private children: List<any>;
   private selections: List<any>;
@@ -40,11 +42,13 @@ export class CriteriaTreeComponent implements OnInit, OnDestroy {
     const _type = this.node.get('type').toLowerCase();
     const _parentId = this.node.get('id');
 
+    const error$ = this.ngRedux.select(criteriaError(_type, _parentId));
     const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
     const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
     const selections$ = this.ngRedux.select(activeCriteriaList);
 
     this.subscriptions = [
+      error$.subscribe(value => this._error = value),
       loading$.subscribe(value => this.loading = value),
       children$.subscribe(value => this.children = value),
       selections$.subscribe(value => this.selections = value),
@@ -63,6 +67,10 @@ export class CriteriaTreeComponent implements OnInit, OnDestroy {
   set loading(value: boolean) {
     this._loading = value;
     this.isLoading.emit(value);
+  }
+
+  get hasError() {
+    return !!this._error;
   }
 
   /** Functions of the node's child nodes */
