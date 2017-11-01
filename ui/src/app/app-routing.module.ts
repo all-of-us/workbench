@@ -10,6 +10,7 @@ import {RouterModule, Routes} from '@angular/router';
 
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
+import {ReviewComponent} from 'app/views/review/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 
@@ -32,7 +33,10 @@ const routes: Routes = [
           data: {title: 'Create Workspace', adding: true}},
   {path: 'workspace/:ns/:wsid/edit',
           component: WorkspaceEditComponent,
-          data: {title: 'Edit Workspace', adding: false}}
+          data: {title: 'Edit Workspace', adding: false}},
+  {path: 'review',
+          component: ReviewComponent,
+          data: {title: 'Review Research Purposes'}}
 ];
 
 @NgModule({

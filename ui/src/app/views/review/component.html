@@ -1,0 +1,17 @@
+<div *ngIf="!contentLoaded; else contentLoading">
+  <h2>Review Research Purposes</h2>
+  <ul>
+    <li *ngFor="let ws of workspaces">
+      <p><strong>{{ws.name}}</strong> by {{ws.creator}}</p>
+      <p>{{ws.researchPurpose.additionalNotes}}</p>
+      <button (click)="approve(ws, true)">Approve</button>
+      <button (click)="approve(ws, false)">Reject</button>
+    </li>
+  </ul>
+</div>
+<ng-template #contentLoading>
+  <div class="loading-area">
+    <span class="spinner spinner-md" style="padding-top: 1rem"></span>
+    <span class="loading-text">Loading workspaces for review...</span>
+  </div>
+</ng-template>
