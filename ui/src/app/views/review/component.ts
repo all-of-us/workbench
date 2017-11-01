@@ -39,7 +39,7 @@ export class ReviewComponent implements OnInit {
       approved: approved,
     };
     this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
-        workspace.namespace, workspace.name, request))
+        workspace.namespace, workspace.id, request))
         .subscribe(
             resp => {
               var i = this.workspaces.indexOf(workspace, 0);

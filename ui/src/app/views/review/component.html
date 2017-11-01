@@ -1,5 +1,5 @@
-<div *ngIf="!contentLoaded; else contentLoading">
-  <h2>Review Research Purposes</h2>
+<h2>Review Research Purposes</h2>
+<div *ngIf="contentLoaded; else contentLoading">
   <ul>
     <li *ngFor="let ws of workspaces">
       <p><strong>{{ws.name}}</strong> by {{ws.creator}}</p>
