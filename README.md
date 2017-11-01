@@ -2,9 +2,7 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
-## Getting the code
-
-## Setup
+## Setup for Development
 
 System requirements:
 
@@ -35,7 +33,7 @@ git submodule update
 
 Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
 
-## Development
+## Development Process
 
 To make changes, do:
 
