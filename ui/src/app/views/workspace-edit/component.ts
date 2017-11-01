@@ -8,7 +8,7 @@ import {isBlank} from 'app/utils';
 
 import {DataAccessLevel} from 'generated';
 import {Workspace} from 'generated';
-import {WorkspacesService} from 'generated';
+import {ProfileService, WorkspacesService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -30,6 +30,7 @@ export class WorkspaceEditComponent implements OnInit {
       private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
+      private profileService: ProfileService,
   ) {}
 
   ngOnInit(): void {
@@ -37,10 +38,6 @@ export class WorkspaceEditComponent implements OnInit {
       name: '',
       description: '',
       dataAccessLevel: DataAccessLevel.Registered,
-      /**
-       * TODO: use the free billing project created for the user once registration work is done
-       */
-      namespace: 'all-of-us-broad',
       researchPurpose: {
         diseaseFocusedResearch: false,
         methodsDevelopment: false,
@@ -53,6 +50,9 @@ export class WorkspaceEditComponent implements OnInit {
       }};
     if (this.route.routeConfig.data.adding) {
       this.adding = true;
+      this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
+        this.workspace.namespace = profile.freeTierBillingProjectName;
+      });
     } else {
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
