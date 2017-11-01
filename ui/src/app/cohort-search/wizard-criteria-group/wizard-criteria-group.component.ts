@@ -26,12 +26,10 @@ export class WizardCriteriaGroupComponent {
   constructor(private actions: CohortSearchActions) {}
 
   selectionTitle(kind): string {
-    if (kind === 'icd9'
-        || kind === 'icd10'
-        || kind === 'cpt') {
+    if (kind.match(/^(ICD|CPT).*/i)) {
       return `Selected ${kind.toUpperCase()} Codes`;
-    } else if (kind) {
-      return `Selected ${kind}`;
+    } else if (kind.match(/^DEMO.*/i)) {
+      return 'Selected Demographics Codes';
     } else {
       return 'No Selection';
     }

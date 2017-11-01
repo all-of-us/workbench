@@ -7,7 +7,7 @@
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
 
   <clr-wizard-page><!-- Criteria Selection Page -->
-    <ng-template clrPageTitle>Choose {{criteriaType.toUpperCase()}} Codes</ng-template>
+    <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
     <div *ngIf="rootsAreLoading" class="spinner">Loading...</div>
 
     <div id="criteria-page">

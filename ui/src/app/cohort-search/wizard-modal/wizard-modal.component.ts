@@ -47,6 +47,16 @@ export class WizardModalComponent {
     return Map({type: this.criteriaType, id: this.parentId});
   }
 
+  get critPageTitle() {
+    let _type = this.criteriaType;
+    if (_type.match(/^DEMO.*/i)) {
+      _type = 'Demographics';
+    } else if (_type.match(/^(ICD|CPT).*/i)) {
+      _type = _type.toUpperCase();
+    }
+    return `Choose ${_type} Codes`;
+  }
+
   cancel() {
     this.actions.cancelWizard();
   }
