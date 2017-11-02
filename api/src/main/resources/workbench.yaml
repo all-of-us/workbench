@@ -892,6 +892,9 @@ definitions:
       type:
         description: type of criteria
         type: string
+      subtype:
+        description: subtype of this criteria
+        type: string
       code:
         description: >
           code that identifies this criteria, ex: icd9, icd10 or cpt all
@@ -1021,6 +1024,9 @@ definitions:
       value:
         description: The Value of the Criteria within its Category Tree
         type: string
+      subtype:
+        description: The subtype of SearchParameter
+        type: string
       domain:
         description: clue to determine which tables to search
         type: string
@@ -1036,9 +1042,11 @@ definitions:
     examples:
       leafExample:
         value: "E9293"
+        subtype: "AGE"
         domainId: "Condition"
       parentExample:
         value: "E979-E979.9"
+        subtype: "BP_EHR"
         domainId: null
 
   Attribute:

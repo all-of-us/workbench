@@ -19,6 +19,9 @@
       <column name="type" type="VARCHAR(20)">
         <constraints nullable="true"/>
       </column>
+      <column name="subtype" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
       <column name="code" type="VARCHAR(80)">
         <constraints nullable="true"/>
       </column>

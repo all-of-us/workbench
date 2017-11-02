@@ -32,14 +32,14 @@ public class CriteriaDaoTest {
 
     @Before
     public void setUp() {
-        icd9Criteria1 = createCriteria("ICD9", "002");
-        icd9Criteria2 = createCriteria("ICD9", "001");
-        demoCriteria1 = createCriteria("DEMO_RACE", "Race/Ethnicity");
-        demoCriteria2 = createCriteria("DEMO_AGE", "Age");
-        icd10Criteria1 = createCriteria("ICD10", "002");
-        icd10Criteria2 = createCriteria("ICD10", "001");
-        cptCriteria1 = createCriteria("CPT", "0039T");
-        cptCriteria2 = createCriteria("CPT", "0001T");
+        icd9Criteria1 = createCriteria("ICD9", null, "002");
+        icd9Criteria2 = createCriteria("ICD9", null, "001");
+        demoCriteria1 = createCriteria("DEMO", "RACE", "Race/Ethnicity");
+        demoCriteria2 = createCriteria("DEMO", "AGE", "Age");
+        icd10Criteria1 = createCriteria("ICD10", null, "002");
+        icd10Criteria2 = createCriteria("ICD10", null, "001");
+        cptCriteria1 = createCriteria("CPT", null, "0039T");
+        cptCriteria2 = createCriteria("CPT", null, "0001T");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -70,7 +70,7 @@ public class CriteriaDaoTest {
         assertEquals(cptCriteria1, cptList.get(1));
     }
 
-    private Criteria createCriteria(String type, String code) {
+    private Criteria createCriteria(String type, String subtype, String code) {
         return new Criteria()
                 .code(code)
                 .count("10")
@@ -80,7 +80,8 @@ public class CriteriaDaoTest {
                 .selectable(false)
                 .name("name")
                 .parentId(0)
-                .type(type);
+                .type(type)
+                .subtype(subtype);
     }
 
 }

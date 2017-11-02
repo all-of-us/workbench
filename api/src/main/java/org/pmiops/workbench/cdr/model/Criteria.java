@@ -19,6 +19,7 @@ public class Criteria {
     private long id;
     private long parentId;
     private String type;
+    private String subtype;
     private String code;
     private String name;
     private boolean group;
@@ -54,6 +55,20 @@ public class Criteria {
 
     public Criteria parentId(long parentId) {
         this.parentId = parentId;
+        return this;
+    }
+
+    @Column(name = "subtype")
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
+    }
+
+    public Criteria subtype(String subtype) {
+        this.subtype = subtype;
         return this;
     }
 

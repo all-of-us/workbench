@@ -34,7 +34,8 @@ const oneCrit = fromJS({
 });
 
 const DEMO_crit = fromJS({
-  type: 'DEMO_GEN',
+  type: 'DEMO',
+  subtype: 'GEN',
   code: 'F',
   name: 'Female',
   conceptId: 12345,
@@ -231,7 +232,7 @@ describe('CohortSearchActions', () => {
     const demoParam = actions.mapParameter(DEMO_crit);
     expect(demoParam).toEqual({
       value: 'F',
-      domain: 'DEMO_GEN',
+      subtype: 'GEN',
       conceptId: 12345,
     });
   });

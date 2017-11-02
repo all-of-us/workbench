@@ -18,6 +18,7 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {ErrorHandlerComponent} from 'app/views/error-handler/component';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {HomePageComponent} from 'app/views/home-page/component';
+import {ReviewComponent} from 'app/views/review/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
@@ -61,6 +62,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortEditComponent,
     ErrorHandlerComponent,
     HomePageComponent,
+    ReviewComponent,
     WorkspaceComponent,
     WorkspaceEditComponent
   ],

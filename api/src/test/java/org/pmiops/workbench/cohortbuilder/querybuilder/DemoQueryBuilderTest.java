@@ -25,14 +25,14 @@ public class DemoQueryBuilderTest {
         String genderNamedParameter = "";
         String ageNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
-        params.add(new SearchParameter().domain("DEMO_GEN").conceptId(8507L));
-        params.add(new SearchParameter().domain("DEMO_AGE").value("20"));
+        params.add(new SearchParameter().domain("DEMO").subtype("GEN").conceptId(8507L));
+        params.add(new SearchParameter().domain("DEMO").subtype("AGE").value("20"));
 
         QueryJobConfiguration queryJobConfiguration = queryBuilder
                 .buildQueryJobConfig(new QueryParameters().type("DEMO").parameters(params));
 
         for (String key : queryJobConfiguration.getNamedParameters().keySet()) {
-            if (key.startsWith("gender")) {
+            if (key.startsWith("gen")) {
                 genderNamedParameter = key;
             } else {
                 ageNamedParameter = key;
