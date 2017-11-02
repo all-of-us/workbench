@@ -2,10 +2,16 @@
 <div *ngIf="contentLoaded; else contentLoading">
   <ul>
     <li *ngFor="let ws of workspaces">
-      <p><strong>{{ws.name}}</strong> by {{ws.creator}}</p>
-      <p>{{ws.researchPurpose.additionalNotes}}</p>
-      <button (click)="approve(ws, true)">Approve</button>
-      <button (click)="approve(ws, false)">Reject</button>
+      <div class="purpose">
+        <h3>{{ws.name}}</h3>
+        <p>by {{ws.creator}}</p>
+        <p *ngIf="ws.description">{{ws.description}}</p>
+        <p *ngIf="ws.researchPurpose.additionalNotes">{{ws.researchPurpose.additionalNotes}}</p>
+      </div>
+      <div class="review-buttons">
+        <button (click)="approve(ws, true)">Approve</button>
+        <button (click)="approve(ws, false)">Reject</button>
+      </div>
     </li>
   </ul>
 </div>

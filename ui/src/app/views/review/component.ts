@@ -10,8 +10,15 @@ import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 import {ResearchPurposeReviewRequest} from 'generated';
 
+
+/**
+ * Review Workspace research purposes. Users with the REVIEW_RESEARCH_PURPOSE permission use this
+ * to view other users' workspaces for which a review has been requested, and approve/reject them.
+ */
+// TODO(RW-85) Design this UI. Current implementation is a rough sketch.
 @Component({
   templateUrl: './component.html',
+  styleUrls: ['./component.css']
 })
 export class ReviewComponent implements OnInit {
   workspaces: Workspace[] = [];
