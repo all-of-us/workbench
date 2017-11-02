@@ -1025,7 +1025,7 @@ definitions:
         description: The Value of the Criteria within its Category Tree
         type: string
       subtype:
-        description: The subtype of SearchGroupItem
+        description: The subtype of SearchParameter
         type: string
       domain:
         description: clue to determine which tables to search
