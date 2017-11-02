@@ -1,8 +1,10 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -80,6 +82,8 @@ public class Workspace {
   private Boolean approved;
   private Timestamp timeRequested;
   private Timestamp timeReviewed;
+
+  private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
 
   @Id
   @GeneratedValue
@@ -321,5 +325,14 @@ public class Workspace {
   @Transient
   public FirecloudWorkspaceId getFirecloudWorkspaceId() {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
+  }
+
+  @OneToMany(mappedBy = "workspace")
+  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
+    return usersWithAccess;
+  }
+
+  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
+    this.usersWithAccess = userRoles;
   }
 }
