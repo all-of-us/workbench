@@ -28,9 +28,8 @@ import {
 })
 export class TreeComponent implements OnInit, OnDestroy {
   @Input() node;
-  @Output() isLoading = new EventEmitter<boolean>();
   private _error: any;
-  private _loading: boolean;
+  loading: boolean;
   private children: List<any>;
   private selections: List<any>;
   private subscriptions: Subscription[];
@@ -58,15 +57,6 @@ export class TreeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
-  }
-
-  get loading() {
-    return this._loading;
-  }
-
-  set loading(value: boolean) {
-    this._loading = value;
-    this.isLoading.emit(value);
   }
 
   get hasError() {

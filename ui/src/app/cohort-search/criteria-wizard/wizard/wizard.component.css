@@ -39,6 +39,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex: 7;
+  position: relative;
 }
 
 #criteria-page > .criteria-selection-container {

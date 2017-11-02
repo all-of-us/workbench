@@ -5,6 +5,7 @@ import {ClarityModule} from 'clarity-angular';
 import {WizardComponent} from './wizard/wizard.component';
 import {TreeComponent} from './tree/tree.component';
 import {SelectionComponent} from './selection/selection.component';
+import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import {SelectionComponent} from './selection/selection.component';
     SelectionComponent,
     TreeComponent,
     WizardComponent,
+    RootSpinnerComponent,
   ],
 })
 export class CriteriaWizardModule { }

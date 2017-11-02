@@ -10,15 +10,8 @@
     <div id="criteria-page">
 
       <div class="criteria-tree-container">
-        <!-- 
-          TODO (jms) Push this into its own component? There's some silly race
-          condition by having the modal read whether or not the child is
-          loading directly from the child that using a dedicated component
-          could avoid.
-        -->
-        <div *ngIf="rootsAreLoading" class="spinner">
-          Loading...
-        </div>
+        <app-criteria-wizard-root-spinner [node]="rootNode">
+        </app-criteria-wizard-root-spinner>
 
         <!-- TODO(jms) Push this into its own component? -->
         <div *ngIf="hasErrors" class="error-box">
@@ -38,7 +31,7 @@
             </div>
           </clr-alert>
         </div>
-        <app-criteria-wizard-tree [node]="rootNode" (isLoading)="setLoading($event)">
+        <app-criteria-wizard-tree [node]="rootNode">
         </app-criteria-wizard-tree>
       </div>
 

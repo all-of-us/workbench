@@ -1,16 +1,10 @@
-import {
-  Component,
-  Input,
-  ViewEncapsulation
-} from '@angular/core';
+import {Component, Input, ViewEncapsulation} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Wizard} from 'clarity-angular';
 import {Map} from 'immutable';
 
 import {
   CohortSearchActions,
   CohortSearchState,
-  isCriteriaLoading,
   activeCriteriaList,
   activeRole,
   activeGroupId,
@@ -27,12 +21,7 @@ import {
 export class WizardComponent {
   @Input() open: boolean;
   @Input() criteriaType: string;
-
-  private rootsAreLoading = true;
-  // Zero is default parent ID for criteria tree roots
-  private readonly parentId = 0;
-
-  @select() criteriaErrors$;
+  private readonly parentId = 0;  /* Root parent ID is always zero */
 
   criteriaErrors = [
     {kind: 'icd9', parentId: 0},
@@ -41,12 +30,8 @@ export class WizardComponent {
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions
+    private actions: CohortSearchActions,
   ) {}
-
-  setLoading(value: boolean) {
-    this.rootsAreLoading = value;
-  }
 
   /* TODO(jms) hook all this up to actually listen for errors */
   get hasErrors() {
