@@ -31,6 +31,8 @@ public class CodesQueryBuilderTest {
     public void buildQueryJobConfig() throws Exception {
         String measurementNamedParameter = "";
         String conditionNamedParameter = "";
+        String cmNamedParameter = "";
+        String procNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
         params.add(new SearchParameter().domain("Condition").value("10.1"));
         params.add(new SearchParameter().domain("Condition").value("20.2"));
@@ -45,6 +47,10 @@ public class CodesQueryBuilderTest {
                 conditionNamedParameter = key;
             } else if (key.startsWith("Measurement")) {
                 measurementNamedParameter = key;
+            } else if (key.startsWith("cmICD9")) {
+                cmNamedParameter = key;
+            } else if (key.startsWith("procICD9")) {
+                procNamedParameter = key;
             }
         }
 
@@ -54,13 +60,13 @@ public class CodesQueryBuilderTest {
                         "where person_id in (select distinct person_id\n" +
                         "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.condition_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@cm,@proc)\n" +
+                        "and b.vocabulary_id in (@" + cmNamedParameter + ",@" + procNamedParameter + ")\n" +
                         "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                         " union distinct\n" +
                         "select distinct person_id\n" +
                         "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.measurement_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@cm,@proc)\n" +
+                        "and b.vocabulary_id in (@" + cmNamedParameter + ",@" + procNamedParameter + ")\n" +
                         "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +
                         ")\n";
 
@@ -92,8 +98,8 @@ public class CodesQueryBuilderTest {
                 .setType(StandardSQLTypeName.STRING)
                 .build()));
 
-        assertEquals("ICD9CM", queryJobConfiguration.getNamedParameters().get("cm").getValue());
-        assertEquals("ICD9Proc", queryJobConfiguration.getNamedParameters().get("proc").getValue());
+        assertEquals("ICD9CM", queryJobConfiguration.getNamedParameters().get(cmNamedParameter).getValue());
+        assertEquals("ICD9Proc", queryJobConfiguration.getNamedParameters().get(procNamedParameter).getValue());
     }
 
     @Test

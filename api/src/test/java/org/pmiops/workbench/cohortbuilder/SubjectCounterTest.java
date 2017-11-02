@@ -38,7 +38,7 @@ public class SubjectCounterTest {
 
         String genderNamedParameter = "";
         SearchParameter parameter1 = new SearchParameter()
-                .domain("DEMO_GEN")
+                .subtype("GEN")
                 .conceptId(8507L);
 
         SearchGroupItem searchGroupItem1 = new SearchGroupItem()
@@ -54,7 +54,7 @@ public class SubjectCounterTest {
         QueryJobConfiguration actualRequest = subjectCounter.buildSubjectCounterQuery(request);
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
-            if (key.startsWith("gender")) {
+            if (key.startsWith("gen")) {
                 genderNamedParameter = key;
             }
         }
@@ -82,12 +82,16 @@ public class SubjectCounterTest {
         String genderNamedParameter = "";
         String conditionNamedParameter = "";
         String procedureNamedParameter = "";
+        String cmICD9NamedParameter = "";
+        String procICD9NamedParameter = "";
+        String cmCPTNamedParameter = "";
+        String procCPTNamedParameter = "";
 
         SearchParameter parameter1 = new SearchParameter()
                 .domain("Condition")
                 .value("001.1");
         SearchParameter parameter2 = new SearchParameter()
-                .domain("DEMO_GEN")
+                .subtype("GEN")
                 .conceptId(8507L);
         SearchParameter parameter3 = new SearchParameter()
                 .domain("Procedure")
@@ -118,12 +122,20 @@ public class SubjectCounterTest {
         QueryJobConfiguration actualRequest = subjectCounter.buildSubjectCounterQuery(request);
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
-            if (key.startsWith("gender")) {
+            if (key.startsWith("gen")) {
                 genderNamedParameter = key;
             } else if (key.startsWith("Condition")){
                 conditionNamedParameter = key;
             } else if (key.startsWith("Procedure")) {
                 procedureNamedParameter = key;
+            } else if (key.startsWith("cmICD9")) {
+                cmICD9NamedParameter = key;
+            } else if (key.startsWith("procICD9")) {
+                procICD9NamedParameter = key;
+            } else if (key.startsWith("cmCPT")) {
+                cmCPTNamedParameter = key;
+            } else if (key.startsWith("procCPT")) {
+                procCPTNamedParameter = key;
             }
         }
 
@@ -135,7 +147,7 @@ public class SubjectCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@cm,@proc)\n" +
+                "and b.vocabulary_id in (@" + cmICD9NamedParameter + ",@" + procICD9NamedParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -150,7 +162,7 @@ public class SubjectCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@cm,@proc)\n" +
+                "and b.vocabulary_id in (@" + cmCPTNamedParameter + ",@" + procCPTNamedParameter + ")\n" +
                 "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +

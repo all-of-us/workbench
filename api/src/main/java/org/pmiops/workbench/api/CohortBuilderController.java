@@ -55,6 +55,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     return new org.pmiops.workbench.model.Criteria()
                                 .id(criteria.getId())
                                 .type(criteria.getType())
+                                .subtype(criteria.getSubtype())
                                 .code(criteria.getCode())
                                 .name(criteria.getName())
                                 .count(StringUtils.isEmpty(criteria.getCount()) ? null : new Long(criteria.getCount()))
