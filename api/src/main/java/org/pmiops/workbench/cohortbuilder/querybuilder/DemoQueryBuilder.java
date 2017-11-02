@@ -18,16 +18,10 @@ import java.util.Map;
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
-    private static final Map<String, String> DemoParamMap = new HashMap<>();
-    static {
-        DemoParamMap.put("DEMO_GEN", "gender");
-        DemoParamMap.put("DEMO_AGE", "age");
-    }
-
     private static final String DEMO_GEN =
             "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.person` p\n" +
-                    "where p.gender_concept_id = ${gender}\n";
+                    "where p.gender_concept_id = ${gen}\n";
 
     private static final String DEMO_AGE =
             "select distinct person_id\n" +
@@ -43,14 +37,14 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         List<String> queryParts = new ArrayList<>();
 
         for (SearchParameter parameter : parameters.getParameters()) {
-            final String demoType = DemoParamMap.get(parameter.getDomain());
+            final String demoType = parameter.getSubtype().toLowerCase();
             final String parameterToReplace = "${" + demoType + "}";
             final String namedParameter = getUniqueNamedParameter(demoType);
-            queryParts.add(getDemoSqlStatement(parameter.getDomain())
+            queryParts.add(getDemoSqlStatement(parameter.getSubtype())
                     .replace(parameterToReplace, "@" + namedParameter));
 
             queryParams.put(namedParameter,
-                    parameter.getDomain().equals("DEMO_GEN") ?
+                    parameter.getSubtype().equals("GEN") ?
                             QueryParameterValue.int64(parameter.getConceptId()) :
                             QueryParameterValue.int64(new Long(parameter.getValue())));
         }
@@ -69,10 +63,10 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         return FactoryKey.DEMO;
     }
 
-    private String getDemoSqlStatement(String domain) {
-        if (domain.equals("DEMO_GEN")) {
+    private String getDemoSqlStatement(String subtype) {
+        if (subtype.equals("GEN")) {
             return DEMO_GEN;
-        } else if(domain.equals("DEMO_AGE")) {
+        } else if(subtype.equals("AGE")) {
             return DEMO_AGE;
         }
         return null;

@@ -49,7 +49,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n"+
                     "where a.${tableId} = b.concept_id\n"+
-                    "and b.vocabulary_id in (@cm,@proc)\n" +
+                    "and b.vocabulary_id in (${cm},${proc})\n" +
                     "and b.concept_code in unnest(${conceptCodes})\n";
 
     private static final String UNION_TEMPLATE = " union distinct\n";
@@ -65,8 +65,10 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         List<String> queryParts = new ArrayList<String>();
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-        queryParams.put("cm", QueryParameterValue.string(typeCM.get(params.getType())));
-        queryParams.put("proc", QueryParameterValue.string(typeProc.get(params.getType())));
+        final String cmUniqueParam = getUniqueNamedParameter("cm" + params.getType());
+        final String procUniqueParam = getUniqueNamedParameter("proc" + params.getType());
+        queryParams.put(cmUniqueParam, QueryParameterValue.string(typeCM.get(params.getType())));
+        queryParams.put(procUniqueParam, QueryParameterValue.string(typeProc.get(params.getType())));
 
         for (String key : paramMap.keySet()) {
             String namedParameter = getUniqueNamedParameter(key);
@@ -75,7 +77,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             queryParts.add(filterSql(INNER_SQL_TEMPLATE,
                     ImmutableMap.of("${tableName}", DomainTableEnum.getTableName(key),
                             "${tableId}", DomainTableEnum.getSourceConceptId(key),
-                            "${conceptCodes}", "@" + namedParameter)));
+                            "${conceptCodes}", "@" + namedParameter,
+                            "${cm}", "@" + cmUniqueParam,
+                            "${proc}", "@" + procUniqueParam)));
         }
 
 

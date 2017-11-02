@@ -1,0 +1,14 @@
+ul {
+  list-style-item: none;
+}
+li {
+  display: flex;
+  align-items: flex-end;
+  margin: 0.5rem;
+}
+h3 {
+  margin-top: 0;
+}
+.purpose, .review-buttons {
+  flex: 1;
+}

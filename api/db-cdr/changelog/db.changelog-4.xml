@@ -13,6 +13,7 @@
       <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
       <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
       <column name="code" type="STRING"/>
       <column name="name" type="STRING"/>
       <column name="is_group" type="BOOLEAN"/>

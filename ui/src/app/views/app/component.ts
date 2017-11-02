@@ -11,6 +11,7 @@ import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
+import {Authority} from 'generated';
 import {CohortsService, Configuration, ConfigurationParameters, ProfileService} from 'generated';
 
 declare const gapi: any;
@@ -23,7 +24,7 @@ declare const gapi: any;
 export class AppComponent implements OnInit {
   private baseTitle: string;
   user: Observable<SignInDetails>;
-  hasAdminPermissions = false;
+  hasReviewResearchPurpose = false;
   private _showCreateAccount = false;
 
   constructor(
@@ -62,9 +63,7 @@ export class AppComponent implements OnInit {
     });
     this.user = this.signInService.user;
     this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
-      // TODO(RW-85) Real UI for research purpose review. This is a standin to demonstrate that
-      // we can fetch permissions from the frontend code.
-      this.hasAdminPermissions = profile.authorities.length > 0;
+      this.hasReviewResearchPurpose = profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
     });
   }
 
