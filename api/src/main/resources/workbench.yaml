@@ -380,6 +380,7 @@ paths:
           type: string
           required: true
           description: ID of the workspace containing the cohort definition
+
   /api/v1/workspaces/review:
     get:
       tags:
@@ -684,6 +685,29 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      UserRoles:
+        $ref: "#/definitions/UserRoleList"
+
+  UserRole:
+    type: object
+    required:
+      - user
+      - role
+    properties:
+      user:
+        type: string
+      role:
+        type: string
+
+  UserRoleList:
+    type: object
+    required:
+     - items
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/UserRole"
 
   ResearchPurpose:
     type: object
