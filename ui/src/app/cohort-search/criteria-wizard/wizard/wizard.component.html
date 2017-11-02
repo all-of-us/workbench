@@ -10,8 +10,7 @@
     <div id="criteria-page">
 
       <div class="criteria-tree-container">
-        <app-criteria-wizard-root-spinner [node]="rootNode">
-        </app-criteria-wizard-root-spinner>
+        <crit-root-spinner [node]="rootNode"></crit-root-spinner>
 
         <!-- TODO(jms) Push this into its own component? -->
         <div *ngIf="hasErrors" class="error-box">
@@ -31,12 +30,11 @@
             </div>
           </clr-alert>
         </div>
-        <app-criteria-wizard-tree [node]="rootNode">
-        </app-criteria-wizard-tree>
+        <crit-tree [node]="rootNode"></crit-tree>
       </div>
 
       <div class="criteria-selection-container">
-        <app-criteria-wizard-selection></app-criteria-wizard-selection>
+        <crit-selection></crit-selection>
       </div>
 
     </div>

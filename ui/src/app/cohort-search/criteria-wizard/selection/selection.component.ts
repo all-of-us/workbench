@@ -15,7 +15,7 @@ import {Criteria} from 'generated';
 
 
 @Component({
-  selector: 'app-criteria-wizard-selection',
+  selector: 'crit-selection',
   templateUrl: './selection.component.html',
 })
 export class SelectionComponent {

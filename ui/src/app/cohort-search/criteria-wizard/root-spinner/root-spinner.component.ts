@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {CohortSearchState, isCriteriaLoading} from '../../redux';
 
 @Component({
-  selector: 'app-criteria-wizard-root-spinner',
+  selector: 'crit-root-spinner',
   template: `
     <div *ngIf="loading" id="spinner-container">
       <div class="spinner" [style.left]="'50%'">Loading...</div>

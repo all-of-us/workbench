@@ -22,7 +22,7 @@ import {
 
 
 @Component({
-  selector: 'app-criteria-wizard-tree',
+  selector: 'crit-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css'],
 })
