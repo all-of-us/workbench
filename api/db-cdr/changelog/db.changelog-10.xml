@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+
+  <changeSet author="biopete" id="changelog-10.0" runOnChange="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="concept" schemaName="cdr"></tableExists>
+      </not>
+    </preConditions>
+
+    <createTable tableName="concept">
+      <column name="concept_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="vocabulary_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_class_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="standard_concept" type="CHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_code" type="VARCHAR(50)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_start_date" type="TIMESTAMP">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_end_date" type="TIMESTAMP">
+        <constraints nullable="true"/>
+      </column>
+      <column name="invalid_reason" type="CHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" type="DECIMAL(4,2)">
+        <constraints nullable="true"/>
+      </column>
+
+    </createTable>
+
+  </changeSet>
+  <changeSet author="biopete" id="changelog-10.1"  runOnChange="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="concept_relationship" schemaName="cdr"></tableExists>
+      </not>
+    </preConditions>
+    <createTable tableName="concept_relationship">
+      <column name="concept_id_1" type="BIGINT">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="BIGINT">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="relationship_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_start_date" type="varchar(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_end_date" type="varchar(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="invalid_reason" type="CHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+
+    </createTable>
+
+    <addPrimaryKey
+            columnNames="concept_id_1, concept_id_2, relationship_id"
+            constraintName="pk_concept_rel"
+            schemaName="cdr"
+            tableName="concept_relationship"
+            tablespace="A String"/>
+
+  </changeSet>
+
+  <changeSet author="biopete" id="changelog-10.2"  runOnChange="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="vocabulary" schemaName="cdr"></tableExists>
+      </not>
+    </preConditions>
+    <createTable tableName="vocabulary">
+      <column name="vocabulary_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="BIGINT">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="relationship_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_start_date" type="varchar(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_end_date" type="varchar(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="invalid_reason" type="CHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>
