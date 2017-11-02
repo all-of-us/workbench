@@ -12,9 +12,11 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
-import {TreeComponent} from '../tree/tree.component';
+import {AlertsComponent} from '../alerts/alerts.component';
+import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
-import {WizardComponent} from './wizard-modal.component';
+import {TreeComponent} from '../tree/tree.component';
+import {WizardComponent} from './wizard.component';
 
 import {CohortBuilderService} from 'generated';
 
@@ -34,9 +36,11 @@ describe('WizardComponent', () => {
     TestBed
       .configureTestingModule({
         declarations: [
-          CriteriaTreeComponent,
-          WizardComponent,
+          AlertsComponent,
+          RootSpinnerComponent,
           SelectionComponent,
+          TreeComponent,
+          WizardComponent,
         ],
         imports: [
           BrowserAnimationsModule,
@@ -77,8 +81,8 @@ describe('WizardComponent', () => {
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
   });
 
-  it('Should render app-criteria-tree with the correct root node', () => {
-    const roots = fixture.debugElement.query(By.css('app-criteria-tree')).componentInstance;
+  it('Should render the criteria tree with the correct root node', () => {
+    const roots = fixture.debugElement.query(By.css('crit-tree')).componentInstance;
     // These should all three be equal
     expect(roots.node).toEqual(Map({type: 'icd9', id: 0}));
     expect(roots.node).toEqual(comp.rootNode);

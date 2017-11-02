@@ -12,7 +12,7 @@ import {
   CohortSearchState,
   UNSELECT_CRITERIA,
 } from '../../redux';
-import {SelectionComponent} from './wizard-criteria-group.component';
+import {SelectionComponent} from './selection.component';
 import {CohortBuilderService} from 'generated';
 
 const TYPE_ICD9 = 'icd9';
@@ -32,20 +32,24 @@ const SELECTION_ICD9 = fromJS([
 
 const SELECTION_DEMO = fromJS([
   {
-    type: 'DEMO_GEN',
+    type: 'DEMO',
+    subtype: 'GEN',
     name: 'Female',
     code: 'F',
     id: 0,
   }, {
-    type: 'DEMO_RACE',
+    type: 'DEMO',
+    subtype: 'RACE',
     name: 'African American',
     code: 'A',
     id: 1,
   }, {
-    type: 'DEMO_AGE',
+    type: 'DEMO',
+    subtype: 'AGE',
     id: 2,
   }, {
-    type: 'DEMO_DEC',
+    type: 'DEMO',
+    subtype: 'DEC',
     id: 3,
   }
 ]);
@@ -115,7 +119,7 @@ describe('SelectionComponent', () => {
 
     typeStub.next(TYPE_DEMO);
     fixture.detectChanges();
-    expect(title.nativeElement.textContent).toBe('Selected demo');
+    expect(title.nativeElement.textContent).toBe('Selected Demographics Codes');
 
     typeStub.next(null);
     fixture.detectChanges();
