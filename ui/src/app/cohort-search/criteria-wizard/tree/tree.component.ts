@@ -28,8 +28,9 @@ import {
 })
 export class TreeComponent implements OnInit, OnDestroy {
   @Input() node;
-  private _error: any;
-  loading: boolean;
+
+  private loading: boolean;
+  private error: any;
   private children: List<any>;
   private selections: List<any>;
   private subscriptions: Subscription[];
@@ -47,7 +48,7 @@ export class TreeComponent implements OnInit, OnDestroy {
     const selections$ = this.ngRedux.select(activeCriteriaList);
 
     this.subscriptions = [
-      error$.subscribe(value => this._error = value),
+      error$.subscribe(value => this.error = value),
       loading$.subscribe(value => this.loading = value),
       children$.subscribe(value => this.children = value),
       selections$.subscribe(value => this.selections = value),
@@ -60,7 +61,7 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   get hasError() {
-    return !!this._error;
+    return !(this.error === null || this.error === undefined);
   }
 
   /** Functions of the node's child nodes */

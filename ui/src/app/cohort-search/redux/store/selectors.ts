@@ -78,17 +78,13 @@ export const criteriaChildren = (kind, parentId) => state =>
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
-  state.getIn(['criteria', 'requests', kind, parentId]) === true;
+  state.getIn(['criteria', 'requests', kind, parentId], false);
 
 export const criteriaError =
   (kind: string, parentId: number) =>
   (state): any =>
-  state.getIn(['criteria', 'requests', kind, parentId]) === true
-    ? null
-    : state.getIn(['criteria', 'requests', kind, parentId]);
+  state.getIn(['criteria', 'errors', List([kind, parentId])]);
 
-export const allCriteriaLoadErrors =
-  (state): List<any> =>
-  state.getIn(['criteria', 'requests'], Map());
-// TODO(jms): transform the request set such into a list of objects:
-// { kind, parentId, whatever else }
+export const criteriaLoadErrors =
+  (state): any =>
+  state.getIn(['criteria', 'errors'], Map());

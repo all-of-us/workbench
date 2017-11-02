@@ -1,5 +1,6 @@
-import {Component, Input, ViewEncapsulation} from '@angular/core';
-import {NgRedux, select} from '@angular-redux/store';
+import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {Observable} from 'rxjs/Observable';
 import {Map} from 'immutable';
 
 import {
@@ -9,6 +10,8 @@ import {
   activeRole,
   activeGroupId,
   activeItem,
+  isCriteriaLoading,
+  criteriaLoadErrors,
 } from '../../redux';
 
 
@@ -18,15 +21,34 @@ import {
   styleUrls: ['./wizard.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class WizardComponent {
+export class WizardComponent implements OnInit {
   @Input() open: boolean;
   @Input() criteriaType: string;
   private readonly parentId = 0;  /* Root parent ID is always zero */
+
+  private loading$: Observable<boolean>;
+  private errors$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
   ) {}
+
+  ngOnInit() {
+    const _type = <string>this.rootNode.get('type');
+    const _id = <number>this.rootNode.get('id');
+
+    this.loading$ = this.ngRedux.select(isCriteriaLoading(_type, _id));
+    this.errors$ = this.ngRedux.select(criteriaLoadErrors).map(errSet =>
+      errSet
+        .filter((_, key) => key.first() === this.criteriaType)
+        .map((val, key) => ({
+          kind: key.first(),
+          id: key.last(),
+          error: val
+        })).valueSeq().toJS()
+    );
+  }
 
   get rootNode() {
     return Map({type: this.criteriaType, id: this.parentId});

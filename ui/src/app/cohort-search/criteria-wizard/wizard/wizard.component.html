@@ -10,13 +10,22 @@
     <div id="criteria-page">
 
       <div class="criteria-tree-container">
-        <crit-root-spinner [node]="rootNode"></crit-root-spinner>
-        <crit-alerts></crit-alerts>
-        <crit-tree [node]="rootNode"></crit-tree>
+        <crit-root-spinner
+          [loading$]="loading$">
+        </crit-root-spinner>
+
+        <crit-alerts
+          [errors$]="errors$">
+        </crit-alerts>
+
+        <crit-tree
+          [node]="rootNode">
+        </crit-tree>
       </div>
 
       <div class="criteria-selection-container">
-        <crit-selection></crit-selection>
+        <crit-selection>
+        </crit-selection>
       </div>
 
     </div>
