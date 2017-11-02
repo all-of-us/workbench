@@ -23,25 +23,10 @@ export class WizardComponent {
   @Input() criteriaType: string;
   private readonly parentId = 0;  /* Root parent ID is always zero */
 
-  criteriaErrors = [
-    {kind: 'icd9', parentId: 0},
-    {kind: 'icd9', parentId: 1},
-  ];
-
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
   ) {}
-
-  /* TODO(jms) hook all this up to actually listen for errors */
-  get hasErrors() {
-    return this.criteriaErrors.length > 0;
-  }
-
-  closeAlert(error) {
-    this.criteriaErrors = this.criteriaErrors.filter(err => err !== error);
-  }
-  /* end todo */
 
   get rootNode() {
     return Map({type: this.criteriaType, id: this.parentId});

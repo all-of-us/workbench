@@ -6,6 +6,7 @@ import {WizardComponent} from './wizard/wizard.component';
 import {TreeComponent} from './tree/tree.component';
 import {SelectionComponent} from './selection/selection.component';
 import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
+import {AlertsComponent} from './alerts/alerts.component';
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
     TreeComponent,
     WizardComponent,
     RootSpinnerComponent,
+    AlertsComponent,
   ],
 })
 export class CriteriaWizardModule { }

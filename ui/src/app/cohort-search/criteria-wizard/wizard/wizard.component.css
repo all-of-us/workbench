@@ -23,10 +23,6 @@
   overflow: hidden!important;
 }
 
-.error-box {
-  padding-right: 1rem;
-}
-
 #criteria-page {
   height: 100%;
   display: flex;

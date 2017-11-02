@@ -11,25 +11,7 @@
 
       <div class="criteria-tree-container">
         <crit-root-spinner [node]="rootNode"></crit-root-spinner>
-
-        <!-- TODO(jms) Push this into its own component? -->
-        <div *ngIf="hasErrors" class="error-box">
-          <clr-alert
-            [clrAlertClosable]="false"
-            [clrAlertType]="'alert-danger'">
-            <div clr-alert-item class="alert-item"
-              *ngFor="let error of criteriaErrors">
-              <span class="alert-text">
-                Failed to load children of {{ error.kind }} with ID {{ error.parentId }}.
-              </span>
-              <div class="alert-actions">
-                <a (click)="closeAlert(error)">
-                  <clr-icon shape="close"></clr-icon>
-                </a>
-              </div>
-            </div>
-          </clr-alert>
-        </div>
+        <crit-alerts></crit-alerts>
         <crit-tree [node]="rootNode"></crit-tree>
       </div>
 
