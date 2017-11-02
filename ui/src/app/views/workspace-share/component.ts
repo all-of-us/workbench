@@ -17,7 +17,7 @@ export class WorkspaceShareComponent implements OnInit {
   workspace: Workspace;
   loadingWorkspace = true;
   toShare = '';
-  selectedPermission='Select Permission';
+  selectedPermission = 'Select Permission';
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
