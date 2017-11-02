@@ -127,4 +127,24 @@
     </createTable>
   </changeSet>
 
+  <changeSet author="biopete" id="changelog-10.3"  runOnChange="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="domain" schemaName="cdr"></tableExists>
+      </not>
+    </preConditions>
+    <createTable tableName="domain">
+      <column name="domain_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_name" type="VARCHAR(255)">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="domain_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
 </databaseChangeLog>
