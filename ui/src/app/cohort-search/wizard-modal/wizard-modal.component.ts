@@ -57,12 +57,12 @@ export class WizardModalComponent {
     const groupId = activeGroupId(state);
     const itemId = activeItem(state).get('id');
     const selections = activeCriteriaList(state);
-
     this.actions.finishWizard();
+
     if (!selections.isEmpty()) {
       this.actions.requestItemCount(role, itemId);
       this.actions.requestGroupCount(role, groupId);
-      this.actions.requestTotalCount();
+      this.actions.requestTotalCount(groupId);
     }
   }
 }

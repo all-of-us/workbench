@@ -1028,6 +1028,11 @@ definitions:
         description: The concept id that maps to concept table.
         type: integer
         format: int64
+      attributes:
+        description: Any applicable arguments that complete the sense of the parameter
+        type: "array"
+        items:
+          $ref: "#/definitions/Attribute"
     examples:
       leafExample:
         value: "E9293"
@@ -1036,25 +1041,52 @@ definitions:
         value: "E979-E979.9"
         domainId: null
 
-  Modifier:
+  Attribute:
     type: object
     required:
-      - name
       - operator
-      - values
+      - operands
     properties:
-      name:
-        type: string
       operator:
         type: string
       operands:
         type: "array"
         items:
           type: string
-    example:
-      name: "age_at_event"
-      operator: "GTE >="
-      operands: [ "Arg1", "Arg2" ]
+    examples:
+      singleValued:
+        operator: "GTE"
+        operands: ["20"]
+      multiValued:
+        operator: "BETWEEN"
+        operands: ["18", "35"]
+
+  Modifier:
+    type: object
+    required:
+      - name
+      - operator
+      - operands
+    properties:
+      name:
+        description: Semantic name of the operator
+        type: string
+      operator:
+        description: Machine name of the operator
+        type: string
+      operands:
+        type: "array"
+        items:
+          type: string
+    examples:
+      singleValued:
+        name: "age_at_event"
+        operator: "GTE"
+        operands: ["20"]
+      multiValued:
+        name: "age_at_event"
+        operator: "BETWEEN"
+        operands: ["18", "35"]
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
