@@ -32,14 +32,14 @@ public class CriteriaDaoTest {
 
     @Before
     public void setUp() {
-        icd9Criteria1 = createCriteria("ICD9",null,"002");
-        icd9Criteria2 = createCriteria("ICD9",null,"001");
-        demoCriteria1 = createCriteria("DEMO","RACE","Race/Ethnicity");
-        demoCriteria2 = createCriteria("DEMO","AGE","Age");
-        icd10Criteria1 = createCriteria("ICD10",null,"002");
-        icd10Criteria2 = createCriteria("ICD10",null,"001");
-        cptCriteria1 = createCriteria("CPT",null,"0039T");
-        cptCriteria2 = createCriteria("CPT",null,"0001T");
+        icd9Criteria1 = createCriteria("ICD9", null, "002");
+        icd9Criteria2 = createCriteria("ICD9", null, "001");
+        demoCriteria1 = createCriteria("DEMO", "RACE", "Race/Ethnicity");
+        demoCriteria2 = createCriteria("DEMO", "AGE", "Age");
+        icd10Criteria1 = createCriteria("ICD10", null, "002");
+        icd10Criteria2 = createCriteria("ICD10", null, "001");
+        cptCriteria1 = createCriteria("CPT", null, "0039T");
+        cptCriteria2 = createCriteria("CPT", null, "0001T");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
