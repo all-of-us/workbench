@@ -1,0 +1,20 @@
+input {
+  width: 15rem;
+}
+
+.sharing-area {
+  padding-top: 1rem;
+}
+
+.sharing-buttons {
+  height: 1rem;
+  line-height: 0rem;
+}
+
+clr-dropdown {
+  width: 8rem;
+}
+
+clr-dropdown > button {
+  width: 100%;
+}

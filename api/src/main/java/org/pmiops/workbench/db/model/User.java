@@ -34,6 +34,7 @@ public class User {
   private String freeTierBillingProjectName;
   private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
+  private Set<WorkspaceUserRole> workspaces = new HashSet<WorkspaceUserRole>();
 
   @Id
   @GeneratedValue
@@ -129,5 +130,14 @@ public class User {
 
   public void setAuthorities(Set<Authority> newAuthorities) {
     this.authorities = newAuthorities;
+  }
+
+  @OneToMany(mappedBy = "user")
+  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
+    return workspaces;
+  }
+
+  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
+    this.workspaces = userRoles;
   }
 }
