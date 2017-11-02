@@ -11,8 +11,8 @@ import {
   CohortSearchActions,
   CohortSearchState,
   UNSELECT_CRITERIA,
-} from '../redux';
-import {WizardCriteriaGroupComponent} from './wizard-criteria-group.component';
+} from '../../redux';
+import {SelectionComponent} from './wizard-criteria-group.component';
 import {CohortBuilderService} from 'generated';
 
 const TYPE_ICD9 = 'icd9';
@@ -50,9 +50,9 @@ const SELECTION_DEMO = fromJS([
   }
 ]);
 
-describe('WizardCriteriaGroupComponent', () => {
-  let fixture: ComponentFixture<WizardCriteriaGroupComponent>;
-  let comp: WizardCriteriaGroupComponent;
+describe('SelectionComponent', () => {
+  let fixture: ComponentFixture<SelectionComponent>;
+  let comp: SelectionComponent;
 
   let dispatchSpy;
   let mockReduxInst;
@@ -67,7 +67,7 @@ describe('WizardCriteriaGroupComponent', () => {
 
     TestBed
       .configureTestingModule({
-        declarations: [WizardCriteriaGroupComponent],
+        declarations: [SelectionComponent],
         imports: [ClarityModule],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
@@ -81,7 +81,7 @@ describe('WizardCriteriaGroupComponent', () => {
   beforeEach(() => {
     MockNgRedux.reset();
     dispatchSpy = spyOn(mockReduxInst, 'dispatch');
-    fixture = TestBed.createComponent(WizardCriteriaGroupComponent);
+    fixture = TestBed.createComponent(SelectionComponent);
     comp = fixture.componentInstance;
 
     typeStub = MockNgRedux

@@ -10,20 +10,18 @@ import {
   CohortSearchActions,
   WIZARD_CANCEL,
   WIZARD_FINISH,
-} from '../redux';
+} from '../../redux';
 
-import {CriteriaTreeComponent} from '../criteria-tree/criteria-tree.component';
-import {WizardModalComponent} from './wizard-modal.component';
-import {
-  WizardCriteriaGroupComponent
-} from '../wizard-criteria-group/wizard-criteria-group.component';
+import {TreeComponent} from '../tree/tree.component';
+import {SelectionComponent} from '../selection/selection.component';
+import {WizardComponent} from './wizard-modal.component';
 
 import {CohortBuilderService} from 'generated';
 
 
-describe('WizardModalComponent', () => {
-  let fixture: ComponentFixture<WizardModalComponent>;
-  let comp: WizardModalComponent;
+describe('WizardComponent', () => {
+  let fixture: ComponentFixture<WizardComponent>;
+  let comp: WizardComponent;
 
   let mockReduxInst;
 
@@ -37,8 +35,8 @@ describe('WizardModalComponent', () => {
       .configureTestingModule({
         declarations: [
           CriteriaTreeComponent,
-          WizardModalComponent,
-          WizardCriteriaGroupComponent,
+          WizardComponent,
+          SelectionComponent,
         ],
         imports: [
           BrowserAnimationsModule,
@@ -56,7 +54,7 @@ describe('WizardModalComponent', () => {
   beforeEach(() => {
     MockNgRedux.reset();
 
-    fixture = TestBed.createComponent(WizardModalComponent);
+    fixture = TestBed.createComponent(WizardComponent);
     comp = fixture.componentInstance;
     comp.open = true;
     comp.criteriaType = 'icd9';

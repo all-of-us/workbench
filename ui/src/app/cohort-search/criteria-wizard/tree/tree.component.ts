@@ -18,15 +18,15 @@ import {
   isCriteriaLoading,
   criteriaChildren,
   criteriaError,
-} from '../redux';
+} from '../../redux';
 
 
 @Component({
-  selector: 'app-criteria-tree',
-  templateUrl: './criteria-tree.component.html',
-  styleUrls: ['./criteria-tree.component.css'],
+  selector: 'app-criteria-wizard-tree',
+  templateUrl: './tree.component.html',
+  styleUrls: ['./tree.component.css'],
 })
-export class CriteriaTreeComponent implements OnInit, OnDestroy {
+export class TreeComponent implements OnInit, OnDestroy {
   @Input() node;
   @Output() isLoading = new EventEmitter<boolean>();
   private _error: any;

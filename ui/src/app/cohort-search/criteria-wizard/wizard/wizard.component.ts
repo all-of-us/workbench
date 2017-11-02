@@ -15,16 +15,16 @@ import {
   activeRole,
   activeGroupId,
   activeItem,
-} from '../redux';
+} from '../../redux';
 
 
 @Component({
-  selector: 'app-wizard-modal',
-  templateUrl: './wizard-modal.component.html',
-  styleUrls: ['./wizard-modal.component.css'],
+  selector: 'app-criteria-wizard',
+  templateUrl: './wizard.component.html',
+  styleUrls: ['./wizard.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class WizardModalComponent {
+export class WizardComponent {
   @Input() open: boolean;
   @Input() criteriaType: string;
 

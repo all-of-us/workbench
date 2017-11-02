@@ -8,8 +8,8 @@
   <clr-wizard-page><!-- Criteria Selection Page -->
     <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
     <div id="criteria-page">
-      <div class="criteria-tree-container">
 
+      <div class="criteria-tree-container">
         <!-- 
           TODO (jms) Push this into its own component? There's some silly race
           condition by having the modal read whether or not the child is
@@ -38,12 +38,14 @@
             </div>
           </clr-alert>
         </div>
-
-        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)">
-        </app-criteria-tree>
-
+        <app-criteria-wizard-tree [node]="rootNode" (isLoading)="setLoading($event)">
+        </app-criteria-wizard-tree>
       </div>
-      <app-wizard-criteria-group></app-wizard-criteria-group>
+
+      <div class="criteria-selection-container">
+        <app-criteria-wizard-selection></app-criteria-wizard-selection>
+      </div>
+
     </div>
   </clr-wizard-page>
 

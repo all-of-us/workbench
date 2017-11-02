@@ -9,16 +9,16 @@ import {
   activeRole,
   activeCriteriaType,
   activeCriteriaList,
-} from '../redux';
+} from '../../redux';
 
 import {Criteria} from 'generated';
 
 
 @Component({
-  selector: 'app-wizard-criteria-group',
-  templateUrl: './wizard-criteria-group.component.html',
+  selector: 'app-criteria-wizard-selection',
+  templateUrl: './selection.component.html',
 })
-export class WizardCriteriaGroupComponent {
+export class SelectionComponent {
 
   @select(activeCriteriaType) criteriaType$;
   @select(activeCriteriaList) criteriaList$;
