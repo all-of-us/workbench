@@ -283,7 +283,7 @@ export class CohortSearchActions {
     if (_type.match(/^DEMO.*/i)) {
       return <SearchParameter>{
         value: param.get('code'),
-        domain: param.get('type'),
+        subtype: param.get('subtype'),
         conceptId: param.get('conceptId'),
       };
     } else if (_type.match(/^ICD|CPT.*/i)) {
