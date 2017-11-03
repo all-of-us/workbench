@@ -17,18 +17,20 @@ import {
   activeCriteriaList,
   isCriteriaLoading,
   criteriaChildren,
-} from '../redux';
+  criteriaError,
+} from '../../redux';
 
 
 @Component({
-  selector: 'app-criteria-tree',
-  templateUrl: './criteria-tree.component.html',
-  styleUrls: ['./criteria-tree.component.css'],
+  selector: 'crit-tree',
+  templateUrl: './tree.component.html',
+  styleUrls: ['./tree.component.css'],
 })
-export class CriteriaTreeComponent implements OnInit, OnDestroy {
+export class TreeComponent implements OnInit, OnDestroy {
   @Input() node;
-  @Output() isLoading = new EventEmitter<boolean>();
-  private _loading: boolean;
+
+  private loading: boolean;
+  private error: any;
   private children: List<any>;
   private selections: List<any>;
   private subscriptions: Subscription[];
@@ -40,11 +42,13 @@ export class CriteriaTreeComponent implements OnInit, OnDestroy {
     const _type = this.node.get('type').toLowerCase();
     const _parentId = this.node.get('id');
 
+    const error$ = this.ngRedux.select(criteriaError(_type, _parentId));
     const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
     const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
     const selections$ = this.ngRedux.select(activeCriteriaList);
 
     this.subscriptions = [
+      error$.subscribe(value => this.error = value),
       loading$.subscribe(value => this.loading = value),
       children$.subscribe(value => this.children = value),
       selections$.subscribe(value => this.selections = value),
@@ -56,13 +60,8 @@ export class CriteriaTreeComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
-  get loading() {
-    return this._loading;
-  }
-
-  set loading(value: boolean) {
-    this._loading = value;
-    this.isLoading.emit(value);
+  get hasError() {
+    return !(this.error === null || this.error === undefined);
   }
 
   /** Functions of the node's child nodes */

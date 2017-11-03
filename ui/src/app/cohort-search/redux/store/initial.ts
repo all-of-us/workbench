@@ -42,5 +42,6 @@ export const initialState = fromJS({
   criteria: {
     tree: {},
     requests: {},
+    errors: {},
   },
 });

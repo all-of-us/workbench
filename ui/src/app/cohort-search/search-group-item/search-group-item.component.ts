@@ -51,7 +51,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   get codeType() {
-    const _type = this.item.get('type', '').toUpperCase();
+    let _type = this.item.get('type', '');
+    if (_type.match(/^DEMO.*/i)) {
+      _type = 'Demographics';
+    } else if (_type.match(/^(ICD|CPT).*/i)) {
+      _type = _type.toUpperCase();
+    }
     return this.item.get('description', `${_type} ${this.pluralizedCode}`);
   }
 

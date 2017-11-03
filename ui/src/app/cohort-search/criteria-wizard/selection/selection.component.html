@@ -7,7 +7,7 @@
   [style.overflow-y]="'auto'"
   [style.overflow-x]="'hidden'"
   >
-  <span class="font-weight-bold title">{{ selectionTitle(criteriaType$ | async) }}</span>
+  <span class="font-weight-bold title">{{ (selectionTitle$ | async) }}</span>
   <div *ngFor="let criteria of (criteriaList$ | async); let i = index"
     [style.overflow]="'hidden'"
     [style.text-overflow]="'ellipsis'"

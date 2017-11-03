@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {List} from 'immutable';
 
 import {CohortSearchActions} from '../redux';
 import {SearchRequest} from 'generated';
@@ -33,6 +34,10 @@ export class SearchGroupComponent {
 
   get groupId() {
     return this.group.get('id');
+  }
+
+  get items() {
+    return this.group.get('items', List());
   }
 
   remove(event) {
