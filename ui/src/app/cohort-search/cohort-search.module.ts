@@ -8,9 +8,6 @@ import {NgReduxModule} from '@angular-redux/store';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
-import {WizardCriteriaGroupComponent} from './wizard-criteria-group/wizard-criteria-group.component';
-import {WizardModalComponent} from './wizard-modal/wizard-modal.component';
-import {CriteriaTreeComponent} from './criteria-tree/criteria-tree.component';
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -19,6 +16,7 @@ import {
 } from './charts';
 
 /* Other Objects */
+import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
 import {CohortSearchRouter} from './router.module';
 import {
   CohortSearchActions,
@@ -31,26 +29,24 @@ import {CohortBuilderService} from 'generated';
 
 @NgModule({
   imports: [
-    ClarityModule,
-    CohortSearchRouter,
+    // Angular
     CommonModule,
+    // 3rd Party
+    ClarityModule,
     NgReduxModule,
+    // Ours
+    CohortSearchRouter,
+    CriteriaWizardModule,
   ],
   declarations: [
     CohortBuilderComponent,
-    CriteriaTreeComponent,
-
     SearchGroupComponent,
     SearchGroupItemComponent,
-    WizardModalComponent,
-    WizardCriteriaGroupComponent,
-
     ChartsComponent,
     GenderChartComponent,
     RaceChartComponent,
     GoogleChartComponent,
   ],
-  entryComponents: [WizardModalComponent],
   providers: [
     CohortBuilderService,
     CohortSearchActions,

@@ -78,4 +78,13 @@ export const criteriaChildren = (kind, parentId) => state =>
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
-  state.getIn(['criteria', 'requests', kind, parentId]) === true;
+  state.getIn(['criteria', 'requests', kind, parentId], false);
+
+export const criteriaError =
+  (kind: string, parentId: number) =>
+  (state): any =>
+  state.getIn(['criteria', 'errors', List([kind, parentId])]);
+
+export const criteriaLoadErrors =
+  (state): any =>
+  state.getIn(['criteria', 'errors'], Map());

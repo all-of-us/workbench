@@ -22,22 +22,27 @@
       type="button"
       class="btn btn-icon btn-link close"
       (click)="remove($event)">
-      <clr-icon shape="close" size="24"></clr-icon>
+      <clr-icon shape="close" size="24" [style.fill]="'rgb(217, 83, 79)'">
+      </clr-icon>
     </button>
   </div>
 
   <div class="card-block">
     <app-search-group-item
-      *ngFor="let itemId of group.get('items', []); let itemIndex = index;"
+      *ngFor="let itemId of items; let itemIndex = index;"
       [role]="role"
       [groupId]="groupId"
       [itemId]="itemId"
       [itemIndex]="itemIndex">
     </app-search-group-item>
+    <div *ngIf="items.size === 0">
+      <em>Nothing to see here yet. Choose some criteria from the dropdown!</em>
+    </div>
   </div>
 
   <div
     class="card-footer font-weight-bold bg-count text-right"
+    [style.padding]="'0.125rem 0.75rem 0 0.75rem'"
     [style.background-color]="'#d7d7d7'">
     Group Count:
     <span *ngIf="isRequesting"
