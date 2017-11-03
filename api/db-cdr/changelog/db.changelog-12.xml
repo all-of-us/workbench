@@ -7,7 +7,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
 
-  <changeSet author="biopete" id="changelog-12.0">
+  <changeSet author="biopete" id="changelog-12.0" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
       <tableExists tableName="concept" schemaName="cdr"></tableExists>
@@ -36,7 +36,7 @@
     </createView>
   </changeSet>
 
-  <changeSet author="biopete" id="changelog-12.1">
+  <changeSet author="biopete" id="changelog-12.1" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions>
       <tableExists tableName="concept" schemaName="cdr"></tableExists>

@@ -26,7 +26,7 @@
       <column name="analysis_id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="analysis_name" type="varchar(300)">
+      <column name="analysis_name" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
       <column name="stratum_1_name" type="VARCHAR(255)">
@@ -71,7 +71,7 @@
 
   </changeSet>
 
-  <changeSet author="biopete" id="changelog-11.3" runAlways="true" runOnChange="true">
+  <changeSet author="biopete" id="changelog-11.3" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
       <not>
@@ -105,7 +105,7 @@
 
   </changeSet>
 
-  <changeSet author="biopete" id="changelog-11.4" runAlways="true" runOnChange="true">
+  <changeSet author="biopete" id="changelog-11.4" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
       <not>
