@@ -1,19 +1,19 @@
 <div class="row">
-  <div class="col-lg-4" id="include-groups">
+  <div class="col-xl-4 col-lg-6" id="include-groups">
     <app-search-group-list
        [role]="'includes'"
        [groups$]="includeGroups$">
     </app-search-group-list>
   </div>
 
-  <div class="col-lg-4" id="exclude-groups">
+  <div class="col-xl-4 col-lg-6" id="exclude-groups">
     <app-search-group-list
        [role]="'excludes'"
        [groups$]="excludeGroups$">
     </app-search-group-list>
   </div>
 
-  <div class="col-lg-4" id="charts">
+  <div class="col-xl-4 col-lg-12" id="charts">
     <div class="row">
       <div class="col-xs-4 text-left">
         <button type="button" class="btn btn-success" (click)="save()">
