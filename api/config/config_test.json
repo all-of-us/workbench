@@ -2,7 +2,7 @@
 {
   "firecloud": {
     "debugEndpoints": false,
-    "billingProjectPrefix": "all-of-us-free-test-"
+    "billingProjectPrefix": "aou-free-test-"
   },
   "bigquery": {
     "dataSetId": "synpuf",

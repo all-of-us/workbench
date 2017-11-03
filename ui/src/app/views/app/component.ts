@@ -62,8 +62,13 @@ export class AppComponent implements OnInit {
       }
     });
     this.user = this.signInService.user;
-    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
-      this.hasReviewResearchPurpose = profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+    this.user.subscribe(user => {
+      if (user.isSignedIn) {
+        this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
+          this.hasReviewResearchPurpose =
+            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+        });
+      }
     });
   }
 
