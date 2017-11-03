@@ -111,7 +111,7 @@ describe('SelectionComponent', () => {
   });
 
   it('Should generate the correct title', () => {
-    const title = fixture.debugElement.query(By.css('span.title'));
+    const title = fixture.debugElement.query(By.css('h5'));
 
     typeStub.next(TYPE_ICD9);
     fixture.detectChanges();
