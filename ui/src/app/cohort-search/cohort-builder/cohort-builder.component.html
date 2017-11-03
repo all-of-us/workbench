@@ -1,53 +1,19 @@
 <div class="row">
-
-  <div class="col-xs-4">
-    <div class="row">
-      <div class="col-xl-8 col-lg-12">
-        <h3 class="mt-1">Include Participants</h3>
-      </div>
-      <div class="col-xl-4 col-lg-12 text-right">
-        <button
-          type="button"
-          class="btn btn-success-outline"
-          [style.margin-right]="'0'"
-          (click)="initGroup('includes')">
-          <clr-icon shape="plus"></clr-icon> Add Group</button>
-      </div>
-    </div>
-
-    <div class="my-border">
-      <div *ngFor="let group of includes; let i = index">
-        <div *ngIf="i > 0" class="text-center font-weight-bold">AND</div>
-        <app-search-group [group]="group" [role]="'includes'">
-        </app-search-group>
-      </div>
-    </div>
+  <div class="col-lg-4" id="include-groups">
+    <app-search-group-list
+       [role]="'includes'"
+       [groups$]="includeGroups$">
+    </app-search-group-list>
   </div>
 
-  <div class="col-xs-4">
-    <div class="row">
-      <div class="col-lg-8 col-md-12">
-        <h3 class="mt-1">Exclude Participants</h3>
-      </div>
-      <div class="col-lg-4 col-md-12 text-right">
-        <button
-          type="button"
-          class="btn btn-success-outline"
-          [style.margin-right]="'0'"
-          (click)="initGroup('excludes')">
-          <clr-icon shape="plus"></clr-icon> Add Group</button>
-      </div>
-    </div>
-    <div class="my-border">
-      <div *ngFor="let group of excludes; let i = index">
-        <div *ngIf="i > 0" class="text-center font-weight-bold">AND</div>
-        <app-search-group [group]="group" [role]="'excludes'">
-        </app-search-group>
-      </div>
-    </div>
+  <div class="col-lg-4" id="exclude-groups">
+    <app-search-group-list
+       [role]="'excludes'"
+       [groups$]="excludeGroups$">
+    </app-search-group-list>
   </div>
 
-  <div class="col-xs-4">
+  <div class="col-lg-4" id="charts">
     <div class="row">
       <div class="col-xs-4 text-left">
         <button type="button" class="btn btn-success" (click)="save()">
@@ -72,8 +38,8 @@
 
     <!-- FIXME -->
     <app-charts [subjects]="[]"></app-charts>
-
   </div>
+
 </div>
 <app-criteria-wizard
   *ngIf="open$ | async"

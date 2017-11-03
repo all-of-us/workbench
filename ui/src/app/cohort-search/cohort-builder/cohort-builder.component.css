@@ -1,7 +1,9 @@
-.my-border {
-    border-radius: 0.2rem;
-    border: 1px solid #d7d7d7;
-    padding-right: 0.6rem;
-    padding-left: 0.6rem;
-    background-color: #e9f0f1;
+#charts {
+  order: -1;
+}
+
+@media all and (min-width: 992px) {
+  #charts {
+    order: unset;
+  }
 }

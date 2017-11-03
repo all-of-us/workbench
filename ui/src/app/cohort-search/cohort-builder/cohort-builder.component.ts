@@ -36,9 +36,6 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
 
   private adding = false;
   private subscriptions: Subscription[];
-
-  private includes: List<any>;
-  private excludes: List<any>;
   private isRequesting = false;
 
   constructor(private actions: CohortSearchActions,
@@ -50,8 +47,6 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
       this.adding = true;
     }
     this.subscriptions = [
-      this.includeGroups$.subscribe(groups => this.includes = groups),
-      this.excludeGroups$.subscribe(groups => this.excludes = groups),
       this.isRequesting$.subscribe(val => this.isRequesting = val),
     ];
   }
@@ -66,9 +61,5 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['../edit'], {relativeTo : this.route});
     }
-  }
-
-  initGroup(role) {
-    this.actions.initGroup(role);
   }
 }

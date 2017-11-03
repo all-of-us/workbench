@@ -8,6 +8,7 @@ import {NgReduxModule} from '@angular-redux/store';
 import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
+import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {
   ChartsComponent,
   GenderChartComponent,
@@ -40,8 +41,11 @@ import {CohortBuilderService} from 'generated';
   ],
   declarations: [
     CohortBuilderComponent,
+
     SearchGroupComponent,
     SearchGroupItemComponent,
+    SearchGroupListComponent,
+
     ChartsComponent,
     GenderChartComponent,
     RaceChartComponent,
