@@ -10,20 +10,20 @@ import {
   CohortSearchActions,
   WIZARD_CANCEL,
   WIZARD_FINISH,
-} from '../redux';
+} from '../../redux';
 
-import {CriteriaTreeComponent} from '../criteria-tree/criteria-tree.component';
-import {WizardModalComponent} from './wizard-modal.component';
-import {
-  WizardCriteriaGroupComponent
-} from '../wizard-criteria-group/wizard-criteria-group.component';
+import {AlertsComponent} from '../alerts/alerts.component';
+import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
+import {SelectionComponent} from '../selection/selection.component';
+import {TreeComponent} from '../tree/tree.component';
+import {WizardComponent} from './wizard.component';
 
 import {CohortBuilderService} from 'generated';
 
 
-describe('WizardModalComponent', () => {
-  let fixture: ComponentFixture<WizardModalComponent>;
-  let comp: WizardModalComponent;
+describe('WizardComponent', () => {
+  let fixture: ComponentFixture<WizardComponent>;
+  let comp: WizardComponent;
 
   let mockReduxInst;
 
@@ -36,9 +36,11 @@ describe('WizardModalComponent', () => {
     TestBed
       .configureTestingModule({
         declarations: [
-          CriteriaTreeComponent,
-          WizardModalComponent,
-          WizardCriteriaGroupComponent,
+          AlertsComponent,
+          RootSpinnerComponent,
+          SelectionComponent,
+          TreeComponent,
+          WizardComponent,
         ],
         imports: [
           BrowserAnimationsModule,
@@ -56,7 +58,7 @@ describe('WizardModalComponent', () => {
   beforeEach(() => {
     MockNgRedux.reset();
 
-    fixture = TestBed.createComponent(WizardModalComponent);
+    fixture = TestBed.createComponent(WizardComponent);
     comp = fixture.componentInstance;
     comp.open = true;
     comp.criteriaType = 'icd9';
@@ -79,8 +81,8 @@ describe('WizardModalComponent', () => {
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
   });
 
-  it('Should render app-criteria-tree with the correct root node', () => {
-    const roots = fixture.debugElement.query(By.css('app-criteria-tree')).componentInstance;
+  it('Should render the criteria tree with the correct root node', () => {
+    const roots = fixture.debugElement.query(By.css('crit-tree')).componentInstance;
     // These should all three be equal
     expect(roots.node).toEqual(Map({type: 'icd9', id: 0}));
     expect(roots.node).toEqual(comp.rootNode);
