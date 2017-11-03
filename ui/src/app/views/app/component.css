@@ -19,8 +19,8 @@
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid #ccc;
-  margin: 0rem -2rem;
-  padding: 1rem 2rem 0.5rem 2rem;
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
 }
 
 .nav-bar {
