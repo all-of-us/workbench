@@ -21,7 +21,7 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
-        cohortbuilder-data {
+        cohortbuilderdata {
             changeLogFile "changelog-cohortbuilder-data/db.changelog-master.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"

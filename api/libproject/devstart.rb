@@ -320,6 +320,12 @@ def run_cloud_migrations(*args)
   end
 end
 
+def run_cohortbuilder_data_migrations(*args)
+  common = Common.new
+
+  common.run_inline %W{docker-compose run db-cohortbuilder-data-migration}
+end
+
 def run_cloud_cdr_migrations(*args)
   GcloudContext.new("run-cloud-cdr-migrations", args, true).run do |ctx|
     puts "Running cdr migrations..."
@@ -332,6 +338,38 @@ def run_cloud_cdr_migrations(*args)
     puts "Upgrading cdr database..."
     Dir.chdir("db-cdr") do
       ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
+    end
+  end
+end
+
+def run_cloud_cohortbuilder_data_migrations(*args)
+  GcloudContext.new("run-cloud-cohortbuilder-data-migrations", args, true).run do |ctx|
+    puts "Running cdr cohortbuilder data migrations..."
+    puts "Creating cdr database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db-cdr/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading cdr database..."
+    Dir.chdir("db-cdr") do
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=cohortbuilder-data")
+    end
+  end
+end
+
+def run_cloud_databrowser_data_migrations(*args)
+  GcloudContext.new("run-cloud-databrowser-data-migrations", args, true).run do |ctx|
+    puts "Running cdr databrowser data migrations..."
+    puts "Creating cdr database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db-cdr/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading cdr database..."
+    Dir.chdir("db-cdr") do
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=databrowser-data")
     end
   end
 end
@@ -655,9 +693,27 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "run-cohortbuilder-data-migrations",
+  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cohortbuilder_data_migrations(*args) }
+})
+
+Common.register_command({
   :invocation => "run-cloud-cdr-migrations",
   :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
   :fn => lambda { |*args| run_cloud_cdr_migrations(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-cohortbuilder-data-migrations",
+  :description => "Runs database migrations for cohortbuilder data in the cdr schema on the Cloud SQL database.",
+  :fn => lambda { |*args| run_cloud_cohortbuilder_data_migrations(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-databrowser-data-migrations",
+  :description => "Runs database migrations for databrowser data in the cdr schema on the Cloud SQL database.",
+  :fn => lambda { |*args| run_cloud_databrowser_data_migrations(*args) }
 })
 
 Common.register_command({
