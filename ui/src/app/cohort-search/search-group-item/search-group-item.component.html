@@ -22,10 +22,7 @@
         <span class="text-muted">{{ codes }}</span>
       </small>
     </div>
-    <clr-tooltip-content
-      *clrIfOpen
-      clrPosition="bottom-left"
-      clrSize="md">
+    <clr-tooltip-content *clrIfOpen>
       <h4 [style.margin-top]="0" [style.color]="'#FFF'">{{ pluralizedCode }}</h4>
       {{ codes }}
     </clr-tooltip-content>
