@@ -40,6 +40,7 @@ public enum FactoryKey {
         tMap.put("ICD9", FactoryKey.CODES);
         tMap.put("ICD10", FactoryKey.CODES);
         tMap.put("CPT", FactoryKey.CODES);
+        tMap.put("PHECODE", FactoryKey.CODES);
         tMap.put("DEMO", FactoryKey.DEMO);
         return tMap;
     }
