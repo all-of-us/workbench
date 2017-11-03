@@ -15,14 +15,20 @@ def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecre
 
 liquibase {
     activities {
-        main {
-            changeLogFile "changelog/db.changelog-master.xml"
+        schema {
+            changeLogFile "changelog-schema/db.changelog-master.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"
             password "${liquibase_password}"
         }
-        local {
-            changeLogFile "changelog-local/db.changelog-master.xml"
+        cohortbuilder-data {
+            changeLogFile "changelog-cohortbuilder-data/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        databrowser-data {
+            changeLogFile "changelog-databrowser-data/db.changelog-master.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"
             password "${liquibase_password}"

@@ -17,4 +17,4 @@ echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Upgrading database..."
-../gradlew update -PrunList=local
+../gradlew update -PrunList=schema
