@@ -17,6 +17,7 @@ import {Criteria} from 'generated';
 @Component({
   selector: 'crit-selection',
   templateUrl: './selection.component.html',
+  styleUrls: ['./selection.component.css'],
 })
 export class SelectionComponent {
 
