@@ -34,7 +34,11 @@ _token_expiration = 0  # Epoch seconds when the token is expired. Default to som
 
 
 def get_authenticated_swagger_client(force=False):
-    """Caches returned value and lazily re-authenticates as tokens expire."""
+    """Returns a Swagger ApiClient set up to make authenticated calls to the Workbench API.
+
+    This function caches the client until its OAuth token expires, so prefer calling this function
+    frequently to get a refreshed client, rather than keeping a reference to the client locally.
+    """
     global _cached_client
     global _token_expiration
     if _cached_client is None:
