@@ -37,6 +37,7 @@ export const initialState = fromJS({
     open: false,
     item: {},
     selections: {},
+    focused: {},
   },
 
   criteria: {

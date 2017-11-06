@@ -12,6 +12,7 @@ import {
   activeItem,
   isCriteriaLoading,
   criteriaLoadErrors,
+  focusedCriterion,
 } from '../../redux';
 
 
@@ -25,9 +26,10 @@ export class WizardComponent implements OnInit {
   @Input() open: boolean;
   @Input() criteriaType: string;
   private readonly parentId = 0;  /* Root parent ID is always zero */
-
   private loading$: Observable<boolean>;
   private errors$: Observable<any>;
+  private nodeInFocus$: Observable<Map<any, any>>;
+  private settingAttributes$: Observable<boolean>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -48,6 +50,8 @@ export class WizardComponent implements OnInit {
           error: val
         })).valueSeq().toJS()
     );
+    this.nodeInFocus$ = this.ngRedux.select(focusedCriterion);
+    this.settingAttributes$ = this.nodeInFocus$.map(node => !node.isEmpty());
   }
 
   get rootNode() {

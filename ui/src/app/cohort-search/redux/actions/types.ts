@@ -14,6 +14,8 @@ export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
 export const ADD_PARAMETER = 'ADD_PARAMETER';
 export const REMOVE_PARAMETER = 'REMOVE_PARAMETER';
+export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
+export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
 
@@ -93,6 +95,13 @@ export interface ActionTypes {
     criterion?: any;
     criterionId?: number;
   };
+  SET_WIZARD_FOCUS: {
+    type: typeof SET_WIZARD_FOCUS;
+    criterion: any;
+  };
+  CLEAR_WIZARD_FOCUS: {
+    type: typeof CLEAR_WIZARD_FOCUS;
+  };
 
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
@@ -139,6 +148,8 @@ export type RootAction =
   | ActionTypes[typeof INIT_SEARCH_GROUP]
   | ActionTypes[typeof ADD_PARAMETER]
   | ActionTypes[typeof REMOVE_PARAMETER]
+  | ActionTypes[typeof SET_WIZARD_FOCUS]
+  | ActionTypes[typeof CLEAR_WIZARD_FOCUS]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
   | ActionTypes[typeof OPEN_WIZARD]

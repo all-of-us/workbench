@@ -11,6 +11,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 import {List} from 'immutable';
 
+import {needsAttributes} from '../utils';
 import {
   CohortSearchActions,
   CohortSearchState,
@@ -71,7 +72,11 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   select(node) {
-    this.actions.addParameter(node);
+    if (needsAttributes(node)) {
+      this.actions.setWizardFocus(node);
+    } else {
+      this.actions.addParameter(node);
+    }
   }
 
   isSelected(node) {

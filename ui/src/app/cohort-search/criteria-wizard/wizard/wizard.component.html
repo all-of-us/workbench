@@ -19,8 +19,17 @@
         </crit-alerts>
 
         <crit-tree
+          [style.display]="(settingAttributes$ | async) ? 'none' : 'initial'"
           [node]="rootNode">
         </crit-tree>
+
+        <div
+          *ngIf="(settingAttributes$ | async)">
+          Hello attribute world.
+          <button class="btn" (click)="this.actions.clearWizardFocus()">
+            Cancel
+          </button>
+        </div>
       </div>
 
       <div class="criteria-selection-container">

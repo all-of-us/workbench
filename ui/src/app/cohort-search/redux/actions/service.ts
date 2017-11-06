@@ -48,6 +48,8 @@ export class CohortSearchActions {
   @dispatch() initGroup = ActionFuncs.initGroup;
   @dispatch() addParameter = ActionFuncs.addParameter;
   @dispatch() removeParameter = ActionFuncs.removeParameter;
+  @dispatch() setWizardFocus = ActionFuncs.setWizardFocus;
+  @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
 

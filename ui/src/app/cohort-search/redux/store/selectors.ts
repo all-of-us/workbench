@@ -69,6 +69,9 @@ export const activeCriteriaList = (state): List<any> =>
 export const activeItem = (state) =>
   state.getIn(['wizard', 'item'], Map());
 
+export const focusedCriterion = (state) =>
+  state.getIn(['wizard', 'focused'], Map());
+
 /**
  * Criteria
  */

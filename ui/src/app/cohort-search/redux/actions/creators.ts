@@ -11,6 +11,8 @@ import {
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
+  SET_WIZARD_FOCUS,
+  CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -88,6 +90,15 @@ export const removeParameter =
   (criterionId?: number, criterion?: Criteria
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
   ({type: REMOVE_PARAMETER, criterion, criterionId});
+
+export const setWizardFocus =
+  (criterion: any
+  ): ActionTypes[typeof SET_WIZARD_FOCUS] =>
+  ({type: SET_WIZARD_FOCUS, criterion});
+
+export const clearWizardFocus =
+  (): ActionTypes[typeof CLEAR_WIZARD_FOCUS] =>
+  ({type: CLEAR_WIZARD_FOCUS});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string

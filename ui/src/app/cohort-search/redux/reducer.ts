@@ -23,6 +23,8 @@ import {
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
+  SET_WIZARD_FOCUS,
+  CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -123,6 +125,12 @@ export const rootReducer: Reducer<CohortSearchState> =
               id === (action.criterionId || action.criterion.get('id'))
             )
           );
+
+      case SET_WIZARD_FOCUS:
+        return state.setIn(['wizard', 'focused'], action.criterion);
+
+      case CLEAR_WIZARD_FOCUS:
+        return state.setIn(['wizard', 'focused'], Map());
 
       case REMOVE_ITEM: {
         state = state
