@@ -79,16 +79,23 @@ export class TreeComponent implements OnInit, OnDestroy {
     }
   }
 
-  isSelected(node) {
-    return this.selections.includes(node);
-  }
-
   nonZeroCount(node) {
     return node.get('count', 0) > 0;
   }
 
   selectable(node) {
     return node.get('selectable', false);
+  }
+
+  selectability(node) {
+    // attrs, basic, disabled
+    if (needsAttributes(node)) {
+      return 'attrs';
+    } else if (this.selections.includes(node)) {
+      return 'disabled';
+    } else {
+      return 'basic';
+    }
   }
 
   displayName(node) {

@@ -2,6 +2,7 @@ import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {Observable} from 'rxjs/Observable';
 import {Map} from 'immutable';
+import {trigger, state, style, animate, transition} from '@angular/animations';
 
 import {
   CohortSearchActions,
@@ -20,7 +21,10 @@ import {
   selector: 'app-criteria-wizard',
   templateUrl: './wizard.component.html',
   styleUrls: ['./wizard.component.css'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  animations: [
+    // TODO (jms) animate the thingy
+  ],
 })
 export class WizardComponent implements OnInit {
   @Input() open: boolean;
