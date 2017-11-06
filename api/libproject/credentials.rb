@@ -10,33 +10,9 @@ class Credentials
     :prod=>nil,
   }
 
-  def maybe_download_sa(env_key)
-    maybe_download SA_FILE_NAMES.fetch(env_key), "sa-key.json"
-  end
-
   DB_VARS_FILE_NAMES = {
     :dev=>"vars.env",
     # TODO(dmohs): production
     :prod=>nil,
   }
-
-  def maybe_download_db_vars(env_key)
-    maybe_download DB_VARS_FILE_NAMES.fetch(env_key), "db/vars.#{env_key.to_s}.env"
-  end
-
-  def maybe_download(bucket_file_name, destination_path)
-    common = Common.new
-    if File.empty?(destination_path)
-      awk_command = "{if($2 == \"True\") print}"
-      common.status "Active gcloud account:"
-      common.pipe(
-        %W{docker-compose run --rm api gcloud config configurations list},
-        %W{awk #{awk_command}}
-      )
-      Common.new.run_inline %W{
-        docker-compose run --rm api
-          gsutil cp gs://#{CREDENTIALS_BUCKET_NAME}/#{bucket_file_name} #{destination_path}
-      }
-    end
-  end
 end
