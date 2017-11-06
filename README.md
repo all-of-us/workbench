@@ -211,17 +211,27 @@ Workbench schema lives in `api/db` --> all workbench related activities access/p
 
 CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities access/persist data here
 
+## Cohort Builder
+
+During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema. 
+
+Loading of local data for the criteria trees happens in a manual goal(deletes and inserts tree data into the criteria table):
+```./project.rb run-cdr-data-migrations```
+
+Loading of cloud data for the criteria trees happens in a manual goal(deletes and inserts tree data into the criteria table):
+```./project.rb run-cloud-cdr-data-migrations```
+
 CDR Schema - We now have 2 activities in `api/db-cdr/build.gradle` file:
 ```
 liquibase {
     activities {
-        main {
+        schema {
             changeLogFile "changelog/db.changelog-master.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"
             password "${liquibase_password}"
         }
-        local {
+        data {
             changeLogFile "changelog-local/db.changelog-master.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"
@@ -235,12 +245,12 @@ liquibase {
 CDR Schema - In the `api/db-cdr/run-migrations.sh` for **local deployments** we call the liquibase update task with the specific activity name like so:
 ```
 echo "Upgrading database..."
-../gradlew update -PrunList=local
+../gradlew update -PrunList=schema
 ```
 
 CDR Schema - In the `api/libproject/devstart.rb` for **test deployment** we call the liquibase update task with the specific activity name like so:
 ```
-ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=main")
+ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
 ```
 
 ## Running Big Query test cases

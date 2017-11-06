@@ -3,7 +3,12 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 activity="-PrunList=$1"
-context="-Pcontexts=$2"
+if [ -z ${2+x} ]
+then
+    context=""
+else
+    context="-Pcontexts=$2"
+fi
 
 # Ruby is not installed in our dev container and this script is short, so bash is fine.
 
