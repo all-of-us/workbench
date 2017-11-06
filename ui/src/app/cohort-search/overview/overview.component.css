@@ -1,0 +1,20 @@
+.overview-header {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.125rem 0;
+}
+
+h3 {
+  text-align: right;
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.save-cohort {
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+}

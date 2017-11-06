@@ -45,8 +45,7 @@ export class CohortSearchActions {
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
-  @dispatch() _initGroup = ActionFuncs.initGroup;
-  @dispatch() initGroupItem = ActionFuncs.initGroupItem;
+  @dispatch() initGroup = ActionFuncs.initGroup;
   @dispatch() selectCriteria = ActionFuncs.selectCriteria;
   @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
@@ -89,11 +88,6 @@ export class CohortSearchActions {
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
    */
-  initGroup(role: keyof SearchRequest) {
-    const newId = this.generateId(role);
-    this._initGroup(role, newId);
-  }
-
   cancelIfRequesting(kind, id) {
     if (isRequesting(kind, id)(this.state)) {
       this.cancelCountRequest(kind, id);
