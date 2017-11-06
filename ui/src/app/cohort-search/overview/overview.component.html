@@ -1,0 +1,23 @@
+<div class="overview-header">
+  <div class="save-cohort">
+    <button
+      type="button"
+      class="btn btn-success"
+      [style.margin-left]="'0'"
+      (click)="save()">
+      <clr-icon shape="floppy"></clr-icon>
+      Save Cohort
+    </button>
+  </div>
+  <h3>
+    Total Count:
+    <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
+      Loading...
+    </span>
+    <span *ngIf="!(isRequesting$ | async)">
+      {{ total$ | async }}
+    </span>
+  </h3>
+</div>
+
+<app-charts [subjects]="[]"></app-charts>

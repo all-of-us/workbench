@@ -36,19 +36,17 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   private adding = false;
   private subscriptions: Subscription[];
-  private isRequesting = false;
 
-  constructor(private actions: CohortSearchActions,
-              private router: Router,
-              private route: ActivatedRoute) {}
+  constructor(
+    private actions: CohortSearchActions,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     }
-    this.subscriptions = [
-      this.isRequesting$.subscribe(val => this.isRequesting = val),
-    ];
   }
 
   ngOnDestroy() {

@@ -1,45 +1,26 @@
-<div class="row">
-  <div class="col-xl-4 col-lg-6" id="include-groups">
-    <app-search-group-list
-       [role]="'includes'"
-       [groups$]="includeGroups$">
-    </app-search-group-list>
-  </div>
-
-  <div class="col-xl-4 col-lg-6" id="exclude-groups">
-    <app-search-group-list
-       [role]="'excludes'"
-       [groups$]="excludeGroups$">
-    </app-search-group-list>
-  </div>
-
-  <div class="col-xl-4 col-lg-12" id="charts">
-    <div class="row">
-      <div class="col-xs-4 text-left">
-        <button type="button" class="btn btn-success" (click)="save()">
-          <clr-icon shape="floppy"></clr-icon> 
-          Save Cohort
-        </button>
-      </div>
-      <div class="col-xs-8 text-right">
-
-        <h3 class="mt-1">
-          Total Count:
-          <span *ngIf="isRequesting" class="spinner spinner-sm">
-            Loading...
-          </span>
-          <span *ngIf="!isRequesting">
-            {{ total$ | async }}
-          </span>
-        </h3>
-
-      </div>
+<div class="cohort-search-wrapper">
+  <div class="row">
+    <div class="col-xl-4 col-lg-6" id="include-groups">
+      <app-search-group-list
+        [role]="'includes'"
+        [groups$]="includeGroups$">
+      </app-search-group-list>
     </div>
 
-    <!-- FIXME -->
-    <app-charts [subjects]="[]"></app-charts>
-  </div>
+    <div class="col-xl-4 col-lg-6" id="exclude-groups">
+      <app-search-group-list
+        [role]="'excludes'"
+        [groups$]="excludeGroups$">
+      </app-search-group-list>
+    </div>
 
+    <div class="col-xl-4 col-lg-12" id="charts">
+      <app-overview
+        [total$]="total$"
+        [isRequesting$]="isRequesting$">
+      </app-overview>
+    </div>
+  </div>
 </div>
 <app-criteria-wizard
   *ngIf="open$ | async"
