@@ -9,10 +9,9 @@ For local development using a private key file:
   GOOGLE_APPLICATION_CREDENTIALS=`pwd`/api/sa-key.json python client/py/aou_workbench_client/auth.py
 """
 
-import logging
 import time
 
-from oauth2client.client import GoogleCredentials, ApplicationDefaultCredentialsError
+from oauth2client.client import GoogleCredentials
 
 from swagger_client.api_client import ApiClient
 
