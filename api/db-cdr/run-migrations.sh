@@ -2,7 +2,8 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-ACTIVITY=$1
+activity="-PrunList=$1"
+context="-Pcontexts=$2"
 
 # Ruby is not installed in our dev container and this script is short, so bash is fine.
 
@@ -19,4 +20,4 @@ echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Upgrading database..."
-../gradlew update -PrunList=$ACTIVITY
+../gradlew update $activity $context

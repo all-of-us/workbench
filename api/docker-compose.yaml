@@ -50,7 +50,7 @@ services:
     command: wait-for db:3306 -- ./run-migrations.sh schema
     env_file:
       - db-cdr/vars.env
-  db-cohortbuilder-data-migration:
+  db-cdr-data-migration:
       depends_on:
         - db
       build:
@@ -60,7 +60,7 @@ services:
       volumes:
         - gradle-cache:/.gradle
         - .:/w:cached
-      command: wait-for db:3306 -- ./run-migrations.sh cohortbuilderdata
+      command: wait-for db:3306 -- ./run-migrations.sh data local
       env_file:
         - db-cdr/vars.env
   update-config:
