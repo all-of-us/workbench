@@ -36,7 +36,6 @@ export class WorkspaceShareComponent implements OnInit {
       .subscribe((workspace) => {
         this.loadingWorkspace = false;
         this.workspace = workspace;
-        console.log(workspace);
       }
     );
   }
@@ -50,7 +49,6 @@ export class WorkspaceShareComponent implements OnInit {
     this.workspacesService.shareWorkspace(this.workspace.namespace,
         this.workspace.id, this.workspace.userRoles).subscribe(
       () => {
-        console.log('Successfully Shared.');
       }
     );
   }
