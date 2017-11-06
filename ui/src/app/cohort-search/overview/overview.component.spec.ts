@@ -10,7 +10,7 @@ import {Observable} from 'rxjs/Observable';
 import {CohortSearchActions} from '../redux';
 import {OverviewComponent} from './overview.component';
 import {
-  ChartsComponent, 
+  ChartsComponent,
   GenderChartComponent,
   RaceChartComponent,
   GoogleChartComponent,

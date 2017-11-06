@@ -17,7 +17,8 @@ export class SearchGroupListComponent {
   constructor(private actions: CohortSearchActions) {}
 
   initGroup() {
-    this.actions.initGroup(this.role);
+    const newId = this.actions.generateId(this.role);
+    this.actions.initGroup(this.role, newId);
   }
 
   get title() {

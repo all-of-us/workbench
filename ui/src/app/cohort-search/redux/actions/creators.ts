@@ -9,7 +9,6 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  INIT_GROUP_ITEM,
   SELECT_CRITERIA,
   UNSELECT_CRITERIA,
   REMOVE_ITEM,
@@ -79,11 +78,6 @@ export const initGroup =
   (role: keyof SearchRequest, groupId: string
   ): ActionTypes[typeof INIT_SEARCH_GROUP] =>
   ({type: INIT_SEARCH_GROUP, role, groupId});
-
-export const initGroupItem =
-  (itemId: string, groupId: string
-  ): ActionTypes[typeof INIT_GROUP_ITEM] =>
-  ({type: INIT_GROUP_ITEM, itemId, groupId});
 
 export const selectCriteria =
   (criterion: Criteria
