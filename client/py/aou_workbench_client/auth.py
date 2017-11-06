@@ -19,7 +19,6 @@ from swagger_client.api_client import ApiClient
 CLIENT_OAUTH_SCOPES = (
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/cloud-billing',
 )
 
 
