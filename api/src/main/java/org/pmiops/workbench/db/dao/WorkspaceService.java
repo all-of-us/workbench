@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.UserRoleList;
 
 
 /**
@@ -27,10 +31,12 @@ public class WorkspaceService {
    * it here.
    */
   public final WorkspaceDao dao;
+  private final UserDao userDao;
 
   @Autowired
-  public WorkspaceService(WorkspaceDao workspaceDao) {
+  public WorkspaceService(WorkspaceDao workspaceDao, UserDao userDao) {
     this.dao = workspaceDao;
+    this.userDao = userDao;
   }
 
   public Workspace get(String ns, String id) {
@@ -64,5 +70,35 @@ public class WorkspaceService {
     }
     workspace.setApproved(approved);
     dao.save(workspace);
+  }
+
+  @Transactional
+  public void updateUserRoles(String ns, String id, UserRoleList userRoleList) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(
+        ns, id);
+    Iterator<WorkspaceUserRole> dbUserRoles = dbWorkspace.getWorkspaceUserRoles().iterator();
+    while(dbUserRoles.hasNext()) {
+      boolean resolved = false;
+      WorkspaceUserRole currentUserRole = dbUserRoles.next();
+      for (UserRole user : userRoleList.getItems()) {
+        if (currentUserRole.getUser().getEmail().equals(user.getUser())) {
+          currentUserRole.setRole(user.getRole());
+          resolved = true;
+          userRoleList.getItems().remove(user);
+          break;
+        }
+      }
+      if (!resolved) {
+        dbWorkspace.getWorkspaceUserRoles().remove(currentUserRole);
+      }
+    }
+
+    for (UserRole user : userRoleList.getItems()) {
+      WorkspaceUserRole newUser = new WorkspaceUserRole();
+      newUser.setUser(userDao.findUserByEmail(user.getUser()));
+      newUser.setWorkspace(dbWorkspace);
+      newUser.setRole(user.getRole());
+      dbWorkspace.getWorkspaceUserRoles().add(newUser);
+    }
   }
 }

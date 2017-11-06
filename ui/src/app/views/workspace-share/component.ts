@@ -6,6 +6,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {isBlank} from 'app/utils';
 
 import {DataAccessLevel} from 'generated';
+import {UserRole} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspacesService} from 'generated';
 
@@ -35,6 +36,7 @@ export class WorkspaceShareComponent implements OnInit {
       .subscribe((workspace) => {
         this.loadingWorkspace = false;
         this.workspace = workspace;
+        console.log(workspace);
       }
     );
   }
@@ -44,5 +46,23 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   addCollaborator(): void {
+    this.workspace.userRoles.items.push({user: this.toShare, role: this.selectedPermission});
+    this.workspacesService.shareWorkspace(this.workspace.namespace,
+        this.workspace.id, this.workspace.userRoles).subscribe(
+      () => {
+        console.log('Successfully Shared.');
+      }
+    );
+  }
+
+  removeCollaborator(user: UserRole): void {
+    const position = this.workspace.userRoles.items.findIndex((userRole) => {
+      if (user.user === userRole.user) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    this.workspace.userRoles.items.splice(position, 1);
   }
 }

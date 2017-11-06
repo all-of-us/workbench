@@ -132,7 +132,7 @@ public class User {
     this.authorities = newAuthorities;
   }
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
   public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
     return workspaces;
   }
