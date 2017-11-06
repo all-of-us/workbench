@@ -12,7 +12,6 @@ export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
-export const INIT_GROUP_ITEM = 'INIT_GROUP_ITEM';
 export const SELECT_CRITERIA = 'SELECT_CRITERIA';
 export const UNSELECT_CRITERIA = 'UNSELECT_CRITERIA';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
@@ -84,11 +83,6 @@ export interface ActionTypes {
     role: keyof SearchRequest;
     groupId: string;
   };
-  INIT_GROUP_ITEM: {
-    type: typeof INIT_GROUP_ITEM;
-    groupId: string;
-    itemId: string;
-  };
 
   SELECT_CRITERIA: {
     type: typeof SELECT_CRITERIA;
@@ -143,7 +137,6 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
   | ActionTypes[typeof INIT_SEARCH_GROUP]
-  | ActionTypes[typeof INIT_GROUP_ITEM]
   | ActionTypes[typeof SELECT_CRITERIA]
   | ActionTypes[typeof UNSELECT_CRITERIA]
   | ActionTypes[typeof REMOVE_ITEM]

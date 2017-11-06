@@ -1,0 +1,21 @@
+.search-groups-header {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.125rem 0;
+}
+
+h3 {
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.search-groups {
+  border-radius: 0.2rem;
+  border: 1px solid #d7d7d7;
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  background-color: #e9f0f1;
+}

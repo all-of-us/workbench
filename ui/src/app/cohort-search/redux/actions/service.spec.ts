@@ -91,7 +91,6 @@ describe('CohortSearchActions', () => {
     expect(actions.state).toEqual(dummyState);
   });
 
-  it('initGroup');
   it('cancelIfRequesting');
   it('removeGroup');
   it('removeGroupItem');

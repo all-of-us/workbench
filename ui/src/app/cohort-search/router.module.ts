@@ -1,18 +1,18 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CohortBuilderComponent} from './cohort-builder/cohort-builder.component';
+import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 
 @NgModule({
   imports: [RouterModule.forChild([
     /* Define routes here */
     {
       path: 'cohort/:id',
-      component: CohortBuilderComponent,
+      component: CohortSearchComponent,
       data: {title: 'Build Cohort'}
     }, {
       path: 'workspace/:ns/:wsid/cohorts/build',
-      component: CohortBuilderComponent,
+      component: CohortSearchComponent,
       data: {title: 'Build Cohort Criteria'}
     }
   ])],
