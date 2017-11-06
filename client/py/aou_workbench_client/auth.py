@@ -1,24 +1,34 @@
-"""OAuth against the AoU Workbench API using bearer tokens provided by gcloud."""
+"""OAuth against the AoU Workbench API using bearer tokens.
 
-import json
+The credentials are obtained by oauth2client, from one of:
+*   Google application default credentials (expected case, from notebook servers).
+*   A private key file, path specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
+
+For local development using a private key file:
+  api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
+  GOOGLE_APPLICATION_CREDENTIALS=`pwd`/api/sa-key.json python client/py/aou_workbench_client/auth.py
+"""
+
 import logging
-import subprocess
 import time
-import urllib2
+
+from oauth2client.client import GoogleCredentials, ApplicationDefaultCredentialsError
 
 from swagger_client.api_client import ApiClient
 
 
-_METADATA_URL = (
-        'http://metadata.google.internal/computeMetadata/v1/'
-        'instance/service-accounts/default/token')
-_METADATA_HEADER = {'Metadata-Flavor': 'Google'}
-_TOKEN_INFO_URL_T = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+CLIENT_OAUTH_SCOPES = (
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/cloud-billing',
+)
+
+
 # TODO(markfickett) Get workbench host dynamically based on environment.
 _WORKBENCH_API_HOST = 'https://api-dot-all-of-us-workbench-test.appspot.com/'
 
 
-# Note that we use custom cache management because cachetools.TTLCache (for example) uses a
+# We use custom cache management because cachetools.TTLCache (for example) uses a
 # constant / whole-cache TTL, whereas we want a varying expiration time.
 _cached_client = None
 _token_expiration = 0  # Epoch seconds when the token is expired. Default to some time in the past.
@@ -39,32 +49,17 @@ def get_authenticated_swagger_client(force=False):
 
 def _get_bearer_token_and_expiration():
     """Fetches a new token. Returns (token string, expiration time epoch seconds)."""
-    try:
-        return _query_metadata_api()
-    except urllib2.URLError as e:
-        logging.warning('Metadata API query failed: %s', e)
-        return _run_print_access_token()
-
-
-def _query_metadata_api():
     # Conservatively estimate token expiration time by recording token fetch time before initiating
     # the request.
     t = int(time.time())
 
-    response = urllib2.urlopen(urllib2.Request(url=_METADATA_URL, headers=_METADATA_HEADER))
-    response_json = json.loads(response.read())
-    return response_json['access_token'], t + response_json['expires_in']
+    # The default, unscoped credentials provide an access token.
+    creds = GoogleCredentials.get_application_default()
+    # Scoped credentials provide the bearer token we need.
+    scoped_creds = creds.create_scoped(CLIENT_OAUTH_SCOPES)
+    token_info = scoped_creds.get_access_token()
 
-
-def _run_print_access_token():
-    logging.warning('Falling back to print-access-token (should be used for debugging only).')
-    token = subprocess.check_output(['gcloud', 'auth', 'print-access-token']).strip()
-
-    # Get details about the token, including expiration time.
-    t = time.time()
-    response = urllib2.urlopen(_TOKEN_INFO_URL_T % token)
-    token_info_json = json.loads(response.read())
-    return token, t + token_info_json['expires_in']
+    return token_info.access_token, t + token_info.expires_in
 
 
 def clear_cache():
@@ -74,18 +69,8 @@ def clear_cache():
     _token_expiration = 0
 
 
-# Self-test / simple example.
+# Self-test / simple example: Make a simple authenticated API call.
 if __name__ == '__main__':
-    # Print tokens from each source.
-    print 'Trying to get token via Metadata API (works only in VM).'
-    try:
-        print _query_metadata_api()
-    except urllib2.URLError as e:
-        print 'unavailable:', e
-    print 'Trying print-access-token (works when `gcloud auth login` is done previously).'
-    print _run_print_access_token()
-
-    # Make an example API call.
     print 'Listing workspaces via authenticated API:'
     from swagger_client.apis.workspaces_api import WorkspacesApi
     client = WorkspacesApi(api_client=get_authenticated_swagger_client())
