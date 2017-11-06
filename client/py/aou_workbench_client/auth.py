@@ -6,7 +6,10 @@ The credentials are obtained by oauth2client, from one of:
 
 For local development using a private key file:
   api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
-  GOOGLE_APPLICATION_CREDENTIALS=`pwd`/api/sa-key.json python client/py/aou_workbench_client/auth.py
+  GOOGLE_APPLICATION_CREDENTIALS=`pwd`/api/sa-key.json
+  python client/py/aou_workbench_client/auth.py
+TODO(RW-32) Once available, switch to fetching the user's pet service account key (as will be used
+in notebooks), instead of the application service account key.
 """
 
 import time
