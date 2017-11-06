@@ -47,7 +47,7 @@
   box-sizing: border-box;
 }
 
-@media all and (min-width: 1300px) {
+@media all and (min-width: 1200px) {
   #criteria-page {
     flex-flow: row;
   }

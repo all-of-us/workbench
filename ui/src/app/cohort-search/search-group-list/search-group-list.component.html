@@ -1,0 +1,22 @@
+<div class="search-groups-header">
+  <h3>{{ title }}</h3>
+  <div class="add-group">
+    <button
+      type="button"
+      class="btn btn-success-outline"
+      [style.margin-right]="'0'"
+      (click)="initGroup()">
+      <clr-icon shape="plus"></clr-icon> 
+      Add Group
+    </button>
+  </div>
+</div>
+
+<!-- .size, not .length => this is an immutable.js list -->
+<div *ngIf="(groups$ | async)?.size > 0" class="search-groups">
+  <div *ngFor="let group of (groups$ | async); let i = index">
+    <div *ngIf="i > 0" class="text-center font-weight-bold">AND</div>
+    <app-search-group [group]="group" [role]="role">
+    </app-search-group>
+  </div>
+</div>

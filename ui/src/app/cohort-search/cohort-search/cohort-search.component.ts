@@ -21,11 +21,11 @@ import {
 } from '../redux';
 
 @Component({
-  selector: 'app-cohort-builder',
-  templateUrl: './cohort-builder.component.html',
-  styleUrls: ['./cohort-builder.component.css'],
+  selector: 'app-cohort-search',
+  templateUrl: './cohort-search.component.html',
+  styleUrls: ['./cohort-search.component.css'],
 })
-export class CohortBuilderComponent implements OnInit, OnDestroy {
+export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @select(includeGroups) includeGroups$: Observable<List<any>>;
   @select(excludeGroups) excludeGroups$: Observable<List<any>>;
@@ -37,23 +37,16 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
   private adding = false;
   private subscriptions: Subscription[];
 
-  private includes: List<any>;
-  private excludes: List<any>;
-  private isRequesting = false;
-
-  constructor(private actions: CohortSearchActions,
-              private router: Router,
-              private route: ActivatedRoute) {}
+  constructor(
+    private actions: CohortSearchActions,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     if (this.route.snapshot.url[5] === undefined) {
       this.adding = true;
     }
-    this.subscriptions = [
-      this.includeGroups$.subscribe(groups => this.includes = groups),
-      this.excludeGroups$.subscribe(groups => this.excludes = groups),
-      this.isRequesting$.subscribe(val => this.isRequesting = val),
-    ];
   }
 
   ngOnDestroy() {
@@ -66,9 +59,5 @@ export class CohortBuilderComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['../edit'], {relativeTo : this.route});
     }
-  }
-
-  initGroup(role) {
-    this.actions.initGroup(role);
   }
 }

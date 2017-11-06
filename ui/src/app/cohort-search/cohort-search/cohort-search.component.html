@@ -1,0 +1,29 @@
+<div class="cohort-search-wrapper">
+  <div class="row">
+    <div class="col-xl-4 col-lg-6" id="include-groups">
+      <app-search-group-list
+        [role]="'includes'"
+        [groups$]="includeGroups$">
+      </app-search-group-list>
+    </div>
+
+    <div class="col-xl-4 col-lg-6" id="exclude-groups">
+      <app-search-group-list
+        [role]="'excludes'"
+        [groups$]="excludeGroups$">
+      </app-search-group-list>
+    </div>
+
+    <div class="col-xl-4 col-lg-12" id="charts">
+      <app-overview
+        [total$]="total$"
+        [isRequesting$]="isRequesting$">
+      </app-overview>
+    </div>
+  </div>
+</div>
+<app-criteria-wizard
+  *ngIf="open$ | async"
+  [open]="open$ | async"
+  [criteriaType]="criteriaType$ | async">
+</app-criteria-wizard>
