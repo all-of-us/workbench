@@ -1,40 +1,8 @@
-<div class="main-container">
-  <!--<div class="alert alert-app-level"></div>-->
-  <clr-header class="header-6">
-    <div class="branding">
-      <span class="title">AoU Discover</span>
-    </div>
-    <div class="header-nav">
-      <a routerLink="../../../cohorts/build" class="nav-link nav-text">Search</a>
-      <a routerLink="../../../cohorts/1/build" class="active nav-link nav-text">Review</a>
-    </div>
-    <div class="header-actions">
-      <clr-dropdown>
-        <button class="nav-icon" clrDropdownTrigger>
-          <clr-icon shape="cog"></clr-icon>
-          <clr-icon shape="caret down"></clr-icon>
-        </button>
-        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
-          <a href="" clrDropdownItem>Help</a>
-          <a href="" clrDropdownItem>Preferences</a>
-          <a href="" clrDropdownItem>Close Review</a>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-    </div>
-  </clr-header>
-
-  <div class="content-container">
-    <div class="content-area pt-1">
-
-      <div class="row">
-        <div class="col-xs-2">
-          <app-subject-list></app-subject-list>
-        </div>
-        <div class="col-xs-10">
-          <app-subject-detail></app-subject-detail>
-        </div>
-      </div>
-
-    </div>
+<div class="row">
+  <div class="col-xs-2">
+    <app-subject-list></app-subject-list>
+  </div>
+  <div class="col-xs-10">
+    <app-subject-detail></app-subject-detail>
   </div>
 </div>

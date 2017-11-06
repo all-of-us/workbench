@@ -1,5 +1,4 @@
 <clr-wizard
-  #wizard
   [clrWizardOpen]="open"
   (clrWizardOnCancel)="cancel()"
   (clrWizardOnFinish)="finish()">
@@ -7,14 +6,28 @@
   <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
 
   <clr-wizard-page><!-- Criteria Selection Page -->
-    <ng-template clrPageTitle>Choose {{criteriaType.toUpperCase()}} Codes</ng-template>
-    <div *ngIf="rootsAreLoading" class="spinner">Loading...</div>
-
+    <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
     <div id="criteria-page">
+
       <div class="criteria-tree-container">
-        <app-criteria-tree [node]="rootNode" (isLoading)="setLoading($event)"></app-criteria-tree>
+        <crit-root-spinner
+          [loading$]="loading$">
+        </crit-root-spinner>
+
+        <crit-alerts
+          [errors$]="errors$">
+        </crit-alerts>
+
+        <crit-tree
+          [node]="rootNode">
+        </crit-tree>
       </div>
-      <app-wizard-criteria-group></app-wizard-criteria-group>
+
+      <div class="criteria-selection-container">
+        <crit-selection>
+        </crit-selection>
+      </div>
+
     </div>
   </clr-wizard-page>
 

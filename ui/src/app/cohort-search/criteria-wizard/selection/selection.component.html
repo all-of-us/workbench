@@ -1,0 +1,20 @@
+<div id="wizard-criteria-container">
+  <h5>{{ (selectionTitle$ | async) }}</h5>
+  <div *ngFor="let criteria of (criteriaList$ | async); let i = index">
+    <button type="button"
+      [style.margin]="'0 0 0 0 '"
+      [style.padding]="'0 0.25rem'"
+      class="btn btn-icon btn-link btn-sm text-danger"
+      (click)="this.actions.unselectCriteria(criteria.get('id'))">
+      <clr-icon shape="close"></clr-icon>
+    </button>
+    <span class="item-info">
+      <small *ngIf="i > 0" class="font-weight-bold">OR</small>
+      <small *ngIf="criteria.get('group')" class="text-muted">Group</small>
+      <small class="name">
+        <strong>{{ typeDisplay(criteria) }}</strong>
+        <span class="text-muted">{{ nameDisplay(criteria) }}</span>
+      </small>
+    </span>
+  </div>
+</div>

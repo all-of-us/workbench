@@ -21,7 +21,6 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  INIT_GROUP_ITEM,
   SELECT_CRITERIA,
   UNSELECT_CRITERIA,
   REMOVE_ITEM,
@@ -42,7 +41,9 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case BEGIN_CRITERIA_REQUEST:
-        return state.setIn(['criteria', 'requests', action.kind, action.parentId], true);
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
+          .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
       case LOAD_CRITERIA_RESULTS:
         return state
@@ -54,13 +55,16 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case CRITERIA_REQUEST_ERROR:
         return state
+          .deleteIn(['criteria', 'requests', action.kind, action.parentId])
           .setIn(
-            ['criteria', 'requests', action.kind, action.parentId],
+            ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
 
       case BEGIN_COUNT_REQUEST:
-        return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true);
+        return state
+          .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+          .deleteIn(['entities', action.entityType, action.entityId, 'error']);
 
       case LOAD_COUNT_RESULTS:
         return state.mergeIn(
@@ -73,8 +77,9 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case COUNT_REQUEST_ERROR:
         return state
+          .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false)
           .setIn(
-            ['entities', action.entityType, action.entityId, 'isRequesting'],
+            ['entities', action.entityType, action.entityId, 'error'],
             fromJS({error: action.error})
           );
 

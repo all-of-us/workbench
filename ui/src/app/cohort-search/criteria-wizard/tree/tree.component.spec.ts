@@ -8,14 +8,13 @@ import {NgRedux} from '@angular-redux/store';
 import {
   CohortSearchActions,
   BEGIN_CRITERIA_REQUEST,
-} from '../redux';
-import {CriteriaTreeComponent} from './criteria-tree.component';
+} from '../../redux';
+import {TreeComponent} from './tree.component';
 import {CohortBuilderService} from 'generated';
 
-
-describe('CriteriaTreeComponent', () => {
-  let fixture: ComponentFixture<CriteriaTreeComponent>;
-  let comp: CriteriaTreeComponent;
+describe('TreeComponent', () => {
+  let fixture: ComponentFixture<TreeComponent>;
+  let comp: TreeComponent;
 
   let dispatchSpy;
   let mockReduxInst;
@@ -28,7 +27,7 @@ describe('CriteriaTreeComponent', () => {
 
     TestBed
       .configureTestingModule({
-        declarations: [CriteriaTreeComponent],
+        declarations: [TreeComponent],
         imports: [ClarityModule],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
@@ -42,7 +41,7 @@ describe('CriteriaTreeComponent', () => {
   beforeEach(() => {
     MockNgRedux.reset();
     dispatchSpy = spyOn(mockReduxInst, 'dispatch');
-    fixture = TestBed.createComponent(CriteriaTreeComponent);
+    fixture = TestBed.createComponent(TreeComponent);
     comp = fixture.componentInstance;
     comp.node = Map({type: 'icd9', id: 0});
     fixture.detectChanges();
