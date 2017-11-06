@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 
 /**
- * Declaration of automatic query methods for Workspaces. The methods declared here are
+ * Declaration of automatic query methods for WorkspaceUserRoles. The methods declared here are
  * automatically interpreted by Spring Data (see README).
  *
  * Use of @Query is discouraged; if desired, define aliases in WorkspaceService.

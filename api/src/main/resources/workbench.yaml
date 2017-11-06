@@ -418,6 +418,31 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+    post:
+      tags:
+        - workspaces
+      description: Shares a workspace with users
+      operationId: shareWorkspace
+      parameters:
+          - in: path
+            name: workspaceNamespace
+            type: string
+            required: true
+          - in: path
+            name: workspaceId
+            type: string
+            required: true
+          - in: body
+            name: users
+            description: users to share the workspace with
+            schema:
+              $ref: "#/definitions/UserRoleList"
+      responses:
+        "200":
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
   # Cohorts ##############################################################################
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -685,7 +710,7 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
-      UserRoles:
+      userRoles:
         $ref: "#/definitions/UserRoleList"
 
   UserRole:

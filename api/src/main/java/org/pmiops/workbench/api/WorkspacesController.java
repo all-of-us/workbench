@@ -3,9 +3,11 @@ package org.pmiops.workbench.api;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,8 +22,10 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceUserRoleDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -157,6 +161,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final WorkspaceUserRoleDao workspaceUserRoleDao;
+  private final UserDao userDao;
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
   private final Clock clock;
@@ -166,12 +171,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       WorkspaceUserRoleDao workspaceUserRoleDao,
+      UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.workspaceUserRoleDao = workspaceUserRoleDao;
+    this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.clock = clock;
@@ -294,7 +301,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (user == null) {
       workspaces = new ArrayList<>();
     } else {
-      workspaces = workspaceService.dao.findByCreatorOrderByNameAsc(userProvider.get());
+      Set<org.pmiops.workbench.db.model.WorkspaceUserRole> usersWorkspaces;
+      usersWorkspaces = user.getWorkspaceUserRoles();
+      Iterator<org.pmiops.workbench.db.model.WorkspaceUserRole> workspacesIterator = usersWorkspaces.iterator();
+      workspaces = new ArrayList<org.pmiops.workbench.db.model.Workspace>();
+      while(workspacesIterator.hasNext()) {
+        workspaces.add(workspacesIterator.next().getWorkspace());
+      }
     }
     WorkspaceListResponse response = new WorkspaceListResponse();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
@@ -322,6 +335,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: add version, check it here
     dbWorkspace = workspaceService.dao.save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
+      UserRoleList userRoleList) {
+    workspaceService.updateUserRoles(workspaceNamespace, workspaceId, userRoleList.getItems());
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   /** Record approval or rejection of research purpose. */
