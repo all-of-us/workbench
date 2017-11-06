@@ -9,8 +9,8 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  SELECT_CRITERIA,
-  UNSELECT_CRITERIA,
+  ADD_PARAMETER,
+  REMOVE_PARAMETER,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -79,15 +79,15 @@ export const initGroup =
   ): ActionTypes[typeof INIT_SEARCH_GROUP] =>
   ({type: INIT_SEARCH_GROUP, role, groupId});
 
-export const selectCriteria =
+export const addParameter =
   (criterion: Criteria
-  ): ActionTypes[typeof SELECT_CRITERIA] =>
-  ({type: SELECT_CRITERIA, criterion});
+  ): ActionTypes[typeof ADD_PARAMETER] =>
+  ({type: ADD_PARAMETER, criterion});
 
-export const unselectCriteria =
+export const removeParameter =
   (criterionId?: number, criterion?: Criteria
-  ): ActionTypes[typeof UNSELECT_CRITERIA] =>
-  ({type: UNSELECT_CRITERIA, criterion, criterionId});
+  ): ActionTypes[typeof REMOVE_PARAMETER] =>
+  ({type: REMOVE_PARAMETER, criterion, criterionId});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string

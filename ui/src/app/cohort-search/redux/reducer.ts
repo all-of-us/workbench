@@ -21,8 +21,8 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  SELECT_CRITERIA,
-  UNSELECT_CRITERIA,
+  ADD_PARAMETER,
+  REMOVE_PARAMETER,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -99,7 +99,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             groupList => groupList.push(action.groupId)
           );
 
-      case SELECT_CRITERIA:
+      case ADD_PARAMETER:
         return state
           .setIn(
             ['wizard', 'selections', action.criterion.get('id')],
@@ -113,7 +113,7 @@ export const rootReducer: Reducer<CohortSearchState> =
               : paramList.push(action.criterion.get('id'))
           );
 
-      case UNSELECT_CRITERIA:
+      case REMOVE_PARAMETER:
         return state
           .deleteIn(['wizard', 'selections', action.criterionId || action.criterion.get('id')])
           .updateIn(

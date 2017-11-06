@@ -71,7 +71,7 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   select(node) {
-    this.actions.selectCriteria(node);
+    this.actions.addParameter(node);
   }
 
   isSelected(node) {

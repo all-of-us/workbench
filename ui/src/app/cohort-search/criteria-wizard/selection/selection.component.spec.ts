@@ -10,7 +10,7 @@ import {
   activeCriteriaList,
   CohortSearchActions,
   CohortSearchState,
-  UNSELECT_CRITERIA,
+  REMOVE_PARAMETER,
 } from '../../redux';
 import {SelectionComponent} from './selection.component';
 import {CohortBuilderService} from 'generated';
@@ -126,7 +126,7 @@ describe('SelectionComponent', () => {
     expect(title.nativeElement.textContent).toBe('No Selection');
   });
 
-  it('should dispatch UNSELECT_CRITERIA on removal click', () => {
+  it('should dispatch REMOVE_PARAMETER on removal click', () => {
     typeStub.next(TYPE_ICD9);
     listStub.next(SELECTION_ICD9);
     fixture.detectChanges();
@@ -136,7 +136,7 @@ describe('SelectionComponent', () => {
     button.triggerEventHandler('click', null);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
-      type: UNSELECT_CRITERIA,
+      type: REMOVE_PARAMETER,
       criterionId: 'CodeA',
       criterion: undefined,
     });

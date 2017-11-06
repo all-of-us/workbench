@@ -46,8 +46,8 @@ export class CohortSearchActions {
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
   @dispatch() initGroup = ActionFuncs.initGroup;
-  @dispatch() selectCriteria = ActionFuncs.selectCriteria;
-  @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
+  @dispatch() addParameter = ActionFuncs.addParameter;
+  @dispatch() removeParameter = ActionFuncs.removeParameter;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
 
