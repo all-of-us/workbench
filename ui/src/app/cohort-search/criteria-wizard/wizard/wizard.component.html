@@ -23,13 +23,10 @@
           [node]="rootNode">
         </crit-tree>
 
-        <div
-          *ngIf="(settingAttributes$ | async)">
-          Hello attribute world.
-          <button class="btn" (click)="this.actions.clearWizardFocus()">
-            Cancel
-          </button>
-        </div>
+        <crit-attributes
+          *ngIf="(settingAttributes$ | async)"
+          [node]="(nodeInFocus$ | async)">
+        </crit-attributes>
       </div>
 
       <div class="criteria-selection-container">

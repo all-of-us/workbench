@@ -2,11 +2,12 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
 
-import {WizardComponent} from './wizard/wizard.component';
-import {TreeComponent} from './tree/tree.component';
-import {SelectionComponent} from './selection/selection.component';
-import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
 import {AlertsComponent} from './alerts/alerts.component';
+import {AttributesComponent} from './attributes/attributes.component';
+import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
+import {SelectionComponent} from './selection/selection.component';
+import {TreeComponent} from './tree/tree.component';
+import {WizardComponent} from './wizard/wizard.component';
 
 
 @NgModule({
@@ -16,11 +17,12 @@ import {AlertsComponent} from './alerts/alerts.component';
   ],
   exports: [WizardComponent],
   declarations: [
+    AlertsComponent,
+    AttributesComponent,
+    RootSpinnerComponent,
     SelectionComponent,
     TreeComponent,
     WizardComponent,
-    RootSpinnerComponent,
-    AlertsComponent,
   ],
 })
 export class CriteriaWizardModule { }

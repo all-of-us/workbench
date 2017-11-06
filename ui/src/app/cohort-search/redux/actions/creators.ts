@@ -82,12 +82,12 @@ export const initGroup =
   ({type: INIT_SEARCH_GROUP, role, groupId});
 
 export const addParameter =
-  (criterion: Criteria
+  (criterion: any
   ): ActionTypes[typeof ADD_PARAMETER] =>
   ({type: ADD_PARAMETER, criterion});
 
 export const removeParameter =
-  (criterionId?: number, criterion?: Criteria
+  (criterionId?: number, criterion?: any
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
   ({type: REMOVE_PARAMETER, criterion, criterionId});
 
