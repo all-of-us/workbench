@@ -21,11 +21,11 @@ import {
 } from '../redux';
 
 @Component({
-  selector: 'app-cohort-builder',
-  templateUrl: './cohort-builder.component.html',
-  styleUrls: ['./cohort-builder.component.css'],
+  selector: 'app-cohort-search',
+  templateUrl: './cohort-search.component.html',
+  styleUrls: ['./cohort-search.component.css'],
 })
-export class CohortBuilderComponent implements OnInit, OnDestroy {
+export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @select(includeGroups) includeGroups$: Observable<List<any>>;
   @select(excludeGroups) excludeGroups$: Observable<List<any>>;
