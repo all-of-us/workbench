@@ -265,7 +265,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     setCdrVersionId(workspace, dbWorkspace);
 
-    dbWorkspace = workspaceService.dao.save(dbWorkspace);
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
     permissions.setRole("Owner");
@@ -281,7 +281,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Void> deleteWorkspace(String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    workspaceService.dao.delete(dbWorkspace);
+    workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(null);
   }
 
@@ -333,14 +333,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbWorkspace.setLastModifiedTime(now);
     // TODO: add version, check it here
-    dbWorkspace = workspaceService.dao.save(dbWorkspace);
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
       UserRoleList userRoleList) {
-    workspaceService.updateUserRoles(workspaceNamespace, workspaceId, userRoleList.getItems());
+    Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
+    for (UserRole user : userRoleList.getItems()) {
+      WorkspaceUserRole newUser = new WorkspaceUserRole();
+      newUser.setUser(userDao.findUserByEmail(user.getUser()));
+      newUser.setWorkspace(null);
+      newUser.setRole(user.getRole());
+      dbUserRoles.add(newUser);
+    }
+    workspaceService.updateUserRoles(workspaceNamespace, workspaceId, dbUserRoles);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
