@@ -72,6 +72,7 @@ public class WorkspacesControllerTest {
     // Injecting WorkspaceService fails in the test environment. Work around it by injecting the
     // DAO and creating the service directly.
     workspaceService = new WorkspaceServiceImpl();
+    workspaceService.setDao(workspaceDao);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         workspaceUserRoleDao, userDao, userProvider, fireCloudService,

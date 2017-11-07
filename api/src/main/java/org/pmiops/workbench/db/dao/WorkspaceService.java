@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.WorkspaceUserRole;
 
 public interface WorkspaceService {
   public WorkspaceDao getDao();
+  public void setDao(WorkspaceDao workspaceDao);
   public Workspace get(String ns, String id);
   public Workspace getRequired(String ns, String id);
   public List<Workspace> findForReview();
