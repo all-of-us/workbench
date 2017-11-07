@@ -38,6 +38,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceDao;
   }
 
+  public void setDao(WorkspaceDao workspaceDao) {
+    this.workspaceDao = workspaceDao;
+  }
+
   public Workspace get(String ns, String id) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
   }
