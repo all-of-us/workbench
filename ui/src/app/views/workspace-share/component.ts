@@ -20,7 +20,7 @@ export class WorkspaceShareComponent implements OnInit {
   workspace: Workspace;
   loadingWorkspace = true;
   toShare = '';
-  selectedPermission = "Select Permission";
+  selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
   constructor(
       private errorHandlingService: ErrorHandlingService,
