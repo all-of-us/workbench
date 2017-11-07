@@ -64,9 +64,9 @@ export class CohortSearchActions {
 
   generateId(prefix?: string) {
     prefix = prefix || 'id';
-    let newId = `${prefix}${this._genSuffix()}`;
+    let newId = `${prefix}_${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
-      newId = `${prefix}${this._genSuffix()}`;
+      newId = `${prefix}_${this._genSuffix()}`;
     }
     this._idsInUse = this._idsInUse.add(newId);
     return newId;

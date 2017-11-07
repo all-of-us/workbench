@@ -75,7 +75,9 @@ export class TreeComponent implements OnInit, OnDestroy {
     if (needsAttributes(node)) {
       this.actions.setWizardFocus(node);
     } else {
-      this.actions.addParameter(node);
+      const newId = this.actions.generateId('parameter');
+      const param = node.set('parameterId', newId);
+      this.actions.addParameter(param);
     }
   }
 

@@ -88,12 +88,11 @@ export interface ActionTypes {
 
   ADD_PARAMETER: {
     type: typeof ADD_PARAMETER;
-    criterion: any;
+    parameter: any;
   };
   REMOVE_PARAMETER: {
     type: typeof REMOVE_PARAMETER;
-    criterion?: any;
-    criterionId?: number;
+    parameterId: string;
   };
   SET_WIZARD_FOCUS: {
     type: typeof SET_WIZARD_FOCUS;

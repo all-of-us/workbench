@@ -82,14 +82,14 @@ export const initGroup =
   ({type: INIT_SEARCH_GROUP, role, groupId});
 
 export const addParameter =
-  (criterion: any
+  (parameter: any
   ): ActionTypes[typeof ADD_PARAMETER] =>
-  ({type: ADD_PARAMETER, criterion});
+  ({type: ADD_PARAMETER, parameter});
 
 export const removeParameter =
-  (criterionId?: number, criterion?: any
+  (parameterId: string
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
-  ({type: REMOVE_PARAMETER, criterion, criterionId});
+  ({type: REMOVE_PARAMETER, parameterId});
 
 export const setWizardFocus =
   (criterion: any

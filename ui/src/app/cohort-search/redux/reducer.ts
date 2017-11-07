@@ -104,26 +104,24 @@ export const rootReducer: Reducer<CohortSearchState> =
       case ADD_PARAMETER:
         return state
           .setIn(
-            ['wizard', 'selections', action.criterion.get('id')],
-            action.criterion
+            ['wizard', 'selections', action.parameter.get('parameterId')],
+            action.parameter
           )
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
             List(),
-            paramList => paramList.includes(action.criterion.get('id'))
+            paramList => paramList.includes(action.parameter.get('parameterId'))
               ? paramList
-              : paramList.push(action.criterion.get('id'))
+              : paramList.push(action.parameter.get('parameterId'))
           );
 
       case REMOVE_PARAMETER:
         return state
-          .deleteIn(['wizard', 'selections', action.criterionId || action.criterion.get('id')])
+          .deleteIn(['wizard', 'selections', action.parameterId])
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
             List(),
-            paramList => paramList.filterNot(id =>
-              id === (action.criterionId || action.criterion.get('id'))
-            )
+            paramList => paramList.filterNot(id => id === action.parameterId)
           );
 
       case SET_WIZARD_FOCUS:
