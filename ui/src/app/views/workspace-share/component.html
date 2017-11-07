@@ -20,9 +20,9 @@
             <clr-icon shape="caret down"></clr-icon>
           </button>
           <clr-dropdown-menu *clrIfOpen>
-            <button type="button" clrDropdownItem (click)="selectedPermission = 'Reader'">Reader</button>
-            <button type="button" clrDropdownItem (click)="selectedPermission = 'Writer'">Writer</button>
-            <button type="button" clrDropdownItem (click)="selectedPermission = 'Owner'">Owner</button>
+            <button type="button" clrDropdownItem (click)="setAccess('reader')">Reader</button>
+            <button type="button" clrDropdownItem (click)="setAccess('writer')">Writer</button>
+            <button type="button" clrDropdownItem (click)="setAccess('owner')">Owner</button>
           </clr-dropdown-menu>
         </clr-dropdown>
         <button type="button" class="btn btn-primary sharing-buttons" (click)="addCollaborator()">Add Collaborator</button>
@@ -30,7 +30,7 @@
     </div>
     <div style="padding-left: 1rem">
       <ul>
-        <div *ngFor="let user of workspace.userRoles.items">
+        <div *ngFor="let user of workspace.userRoles">
           <h5>
             <clr-icon shape="minus-circle" class="is-solid" (click)="removeCollaborator(user)"></clr-icon>
             {{user.user}}

@@ -711,7 +711,9 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
       userRoles:
-        $ref: "#/definitions/UserRoleList"
+        type: "array"
+        items:
+           $ref: "#/definitions/UserRole"
 
   UserRole:
     type: object
@@ -722,7 +724,7 @@ definitions:
       user:
         type: string
       role:
-        type: string
+        $ref: "#/definitions/WorkspaceAccessLevel"
 
   UserRoleList:
     type: object
@@ -733,6 +735,11 @@ definitions:
         type: "array"
         items:
            $ref: "#/definitions/UserRole"
+
+  WorkspaceAccessLevel:
+    type: string
+    description: levels of access to workspace
+    enum: &WORKSPACE_ACCESS_LEVEL [reader, writer, owner]
 
   ResearchPurpose:
     type: object

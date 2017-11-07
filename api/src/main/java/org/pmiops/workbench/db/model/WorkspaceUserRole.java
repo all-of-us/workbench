@@ -8,6 +8,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 @Entity
 @Table(name = "user_workspace")
@@ -15,7 +16,7 @@ public class WorkspaceUserRole {
   private long userWorkspaceId;
   private User user;
   private Workspace workspace;
-  private String role;
+  private WorkspaceAccessLevel role;
 
 
 
@@ -52,11 +53,11 @@ public class WorkspaceUserRole {
 
 
   @Column(name="role")
-  public String getRole() {
+  public WorkspaceAccessLevel getRole() {
     return this.role;
   }
 
-  public void setRole(String role) {
+  public void setRole(WorkspaceAccessLevel role) {
     this.role = role;
   }
 }
