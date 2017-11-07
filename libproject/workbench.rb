@@ -1,5 +1,7 @@
 require_relative "utils/common"
 
+Common.unregister_upgrade_self_command
+
 ENV["UID"] = "#{Process.euid}"
 
 module Workbench
@@ -26,7 +28,6 @@ module Workbench
 
   # Runs a command (typically project.rb) from the main file's directory.
   def handle_argv_or_die(main_filename)
-    ENV["PROJECTRB_DEBUG"] = "true"  # Use spawn() instead of system() so stderr shows up.
     common = Common.new
     Dir.chdir(File.dirname(main_filename))
 

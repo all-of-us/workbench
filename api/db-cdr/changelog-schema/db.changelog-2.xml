@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="changelog-2">
+
+    <createTable tableName="concept" schemaName="cdr">
+      <column name="concept_id" type="INTEGER">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="vocabulary_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_class_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="standard_concept" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_code" type="VARCHAR(50)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_start_date" type="DATE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_end_date" type="DATE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="invalid_reason" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="concept_relationship" schemaName="cdr">
+      <column name="concept_id_1" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="relationship_id" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="valid_start_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="valid_end_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invalid_reason" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <addPrimaryKey
+            columnNames="concept_id_1, concept_id_2, relationship_id"
+            constraintName="pk_concept_rel"
+            schemaName="cdr"
+            tableName="concept_relationship"/>
+
+    <createTable tableName="vocabulary" schemaName="cdr">
+      <column name="vocabulary_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="vocabulary_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_reference" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_version" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="domain">
+      <column name="domain_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_name" type="VARCHAR(255)">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="domain_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="relationship">
+      <column name="relationship_id" type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="relationship_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_hierarchical" type="VARCHAR(1)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="defines_ancestry" type="VARCHAR(1)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="reverse_relationship_id" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="relationship_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="ACHILLES_analysis">
+      <column name="analysis_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="analysis_name" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="stratum_1_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="chartType" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="dataType" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="ACHILLES_results">
+      <column name="analysis_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="stratum_1" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="ACHILLES_results_dist">
+      <column name="analysis_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="stratum_1" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="min_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="max_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="avg_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stdev_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="median_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="p10_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="p25_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="p75_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="p90_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createView replaceIfExists="true" schemaName="cdr" viewName="ACHILLES_results_view">
+      SELECT
+      `a`.`analysis_id` AS `analysis_id`,
+      `a`.`count_value` AS `count_value`,
+      `a`.`stratum_1` AS `stratum_1`,
+      `c1`.`concept_name` AS `stratum_1_name`,
+      `a`.`stratum_2` AS `stratum_2`,
+      `c2`.`concept_name` AS `stratum_2_name`,
+      `a`.`stratum_3` AS `stratum_3`,
+      `c3`.`concept_name` AS `stratum_3_name`,
+      `a`.`stratum_4` AS `stratum_4`,
+      `c4`.`concept_name` AS `stratum_4_name`,
+      `a`.`stratum_5` AS `stratum_5`,
+      `c5`.`concept_name` AS `stratum_5_name`
+      FROM (((((`ACHILLES_results` `a`
+      left join `concept` `c1` on((`a`.`stratum_1` = `c1`.`concept_id`)))
+      left join `concept` `c2` on((`a`.`stratum_2` = `c2`.`concept_id`)))
+      left join `concept` `c3` on((`a`.`stratum_3` = `c3`.`concept_id`)))
+      left join `concept` `c4` on((`a`.`stratum_4` = `c4`.`concept_id`)))
+      left join `concept` `c5` on((`a`.`stratum_5` = `c5`.`concept_id`)))
+    </createView>
+
+    <createView replaceIfExists="true" schemaName="cdr" viewName="ACHILLES_results_dist_view">
+      SELECT
+      `a`.`analysis_id` AS `analysis_id`,
+      `a`.`count_value` AS `count_value`,
+      `a`.`stratum_1` AS `stratum_1`,
+      `c1`.`concept_name` AS `stratum_1_name`,
+      `a`.`stratum_2` AS `stratum_2`,
+      `c2`.`concept_name` AS `stratum_2_name`,
+      `a`.`stratum_3` AS `stratum_3`,
+      `c3`.`concept_name` AS `stratum_3_name`,
+      `a`.`stratum_4` AS `stratum_4`,
+      `c4`.`concept_name` AS `stratum_4_name`,
+      `a`.`stratum_5` AS `stratum_5`,
+      `c5`.`concept_name` AS `stratum_5_name`,
+      `a`.`min_value` AS `min_value`,
+      `a`.`max_value` AS `max_value`,
+      `a`.`avg_value` AS `avg_value`,
+      `a`.`stdev_value` AS `stdev_value`,
+      `a`.`median_value` AS `median_value`,
+      `a`.`p10_value` AS `p10_value`,
+      `a`.`p25_value` AS `p25_value`,
+      `a`.`p75_value` AS `p75_value`,
+      `a`.`p90_value` AS `p90_value`
+      FROM (((((`ACHILLES_results_dist` `a`
+      left join `concept` `c1` on((`a`.`stratum_1` = `c1`.`concept_id`)))
+      left join `concept` `c2` on((`a`.`stratum_2` = `c2`.`concept_id`)))
+      left join `concept` `c3` on((`a`.`stratum_3` = `c3`.`concept_id`)))
+      left join `concept` `c4` on((`a`.`stratum_4` = `c4`.`concept_id`)))
+      left join `concept` `c5` on((`a`.`stratum_5` = `c5`.`concept_id`)))
+    </createView>
+
+  </changeSet>
+</databaseChangeLog>
