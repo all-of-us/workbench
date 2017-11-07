@@ -5,13 +5,9 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="brianfreeman" id="changelog-1" runAlways="true">
+  <changeSet author="brianfreeman" id="changelog-1" runAlways="true" context="local or cloud">
 
-    <preConditions onFail="MARK_RAN">
-        <tableExists tableName="criteria"/>
-    </preConditions>
-
-    <dropTable tableName="criteria"/>
+    <delete tableName="criteria"/>
 
   </changeSet>
 </databaseChangeLog>

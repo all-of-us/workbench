@@ -8,13 +8,10 @@
   <preConditions>
     <runningAs username="liquibase"/>
   </preConditions>
-  <include file="changelog/db.changelog-1.xml"/>
-  <include file="changelog/db.changelog-2.xml"/>
-  <include file="changelog/db.changelog-3.xml"/>
-  <include file="changelog/db.changelog-4.xml"/>
-  <include file="changelog-local/db.changelog-5.xml"/>
-  <include file="changelog/db.changelog-6.xml"/>
-  <include file="changelog/db.changelog-10.xml"/>
-  <include file="changelog/db.changelog-11.xml"/>
-  <include file="changelog/db.changelog-12.xml"/>
+  <include file="changelog-data/db.changelog-1.xml"/>
+  <include file="changelog-data/db.changelog-2.xml"/>
+  <include file="changelog-data/db.changelog-3.xml"/>
+  <include file="changelog-data/db.changelog-4.xml"/>
+  <include file="changelog-data/db.changelog-5.xml"/>
+  <include file="changelog-data/db.changelog-6.xml"/>
 </databaseChangeLog>

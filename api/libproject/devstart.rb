@@ -320,6 +320,18 @@ def run_cloud_migrations(*args)
   end
 end
 
+def run_cdr_data_migrations(*args)
+  common = Common.new
+
+  common.run_inline %W{docker-compose run db-cdr-data-migration}
+end
+
+def run_drop_cdr_db(*args)
+  common = Common.new
+
+  common.run_inline %W{docker-compose run drop-cdr-db}
+end
+
 def run_cloud_cdr_migrations(*args)
   GcloudContext.new("run-cloud-cdr-migrations", args, true).run do |ctx|
     puts "Running cdr migrations..."
@@ -331,7 +343,23 @@ def run_cloud_cdr_migrations(*args)
         to_redact=pw)
     puts "Upgrading cdr database..."
     Dir.chdir("db-cdr") do
-      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=main")
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
+    end
+  end
+end
+
+def run_cloud_cdr_data_migrations(*args)
+  GcloudContext.new("run-cloud-cdr-data-migrations", args, true).run do |ctx|
+    puts "Running cdr data migrations..."
+    puts "Creating cdr database if it does not exist..."
+    pw = ENV["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+        "cat db-cdr/create_db.sql | envsubst | " \
+        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
+        to_redact=pw)
+    puts "Upgrading cdr database..."
+    Dir.chdir("db-cdr") do
+      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=data -Pcontexts=cloud")
     end
   end
 end
@@ -655,9 +683,27 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "run-cdr-data-migrations",
+  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cdr_data_migrations(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-drop-cdr-db",
+  :description => "Drops the cdr schema of SQL database for the specified project.",
+  :fn => lambda { |*args| run_drop_cdr_db(*args) }
+})
+
+Common.register_command({
   :invocation => "run-cloud-cdr-migrations",
   :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
   :fn => lambda { |*args| run_cloud_cdr_migrations(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-cdr-data-migrations",
+  :description => "Runs data migrations in the cdr schema on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_cdr_data_migrations(*args) }
 })
 
 Common.register_command({
