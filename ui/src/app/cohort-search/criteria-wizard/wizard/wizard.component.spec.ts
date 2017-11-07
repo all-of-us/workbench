@@ -12,8 +12,8 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
+import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
-import {AttributesComponent} from '../attributes/attributes.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
 import {TreeComponent} from '../tree/tree.component';
@@ -38,13 +38,13 @@ describe('WizardComponent', () => {
       .configureTestingModule({
         declarations: [
           AlertsComponent,
-          AttributesComponent,
           RootSpinnerComponent,
           SelectionComponent,
           TreeComponent,
           WizardComponent,
         ],
         imports: [
+          AttributesModule,
           BrowserAnimationsModule,
           ClarityModule,
         ],

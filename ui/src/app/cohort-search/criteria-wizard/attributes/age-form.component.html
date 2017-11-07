@@ -1,0 +1,43 @@
+<form [formGroup]="ageForm" (ngSubmit)="onSubmit()">
+  <section class="form-block">
+    <label>Filter Participants By Age</label>
+
+    <!-- Choose the Operator -->
+    <div class="form-group">
+      <label for="operator">Choose a Filter</label>
+      <div class="select">
+        <select id="operator" formControlName="operator">
+          <option value="EQUAL">Equal To</option>
+          <option value="RANGE">In Range</option>
+        </select>
+      </div>
+    </div>
+
+    <ng-container [ngSwitch]="ageForm.value.operator"> 
+      <ng-container *ngSwitchCase="'EQUAL'">
+        <div class="form-group">
+          <label for="age">Select an Age</label>
+          <input id="age" formControlName="age" type="number" min="0" max="100">
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'RANGE'"> 
+        <div class="form-group">
+          <label for="rangeOpen">Start Age</label>
+          <input id="rangeOpen" formControlName="rangeOpen" type="number" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label for="rangeClose">Stop Age</label>
+          <input id="rangeClose" formControlName="rangeClose" type="number" min="0" max="100">
+        </div>
+      </ng-container>
+    </ng-container>
+
+  </section>
+</form>
+
+<div *ngIf="debug">
+  <span>{{ ageForm.value | json }}</span>
+  <br />
+  <span>{{ ageForm.status | json }}</span>
+</div>
