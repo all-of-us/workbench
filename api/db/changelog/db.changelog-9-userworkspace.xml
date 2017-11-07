@@ -15,7 +15,7 @@
       <column name="workspace_id" type="bigint">
         <constraints nullable="false"/>
       </column>
-      <column name="role" type="varchar(30)">
+      <column name="role" type="tinyint">
         <constraints nullable="false"/>
       </column>
     </createTable>

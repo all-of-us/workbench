@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.UserRoleList;
@@ -102,10 +103,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           while(iter.hasNext()) {
             usersOnWorkspace.add(iter.next());
           }
-          UserRoleList userRoles = new UserRoleList();
-          userRoles.setItems(usersOnWorkspace.stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
-
-          result.setUserRoles(userRoles);
+          result.setUserRoles(usersOnWorkspace.stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
 
           return result;
         }
@@ -268,7 +266,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
-    permissions.setRole("Owner");
+    permissions.setRole(WorkspaceAccessLevel.fromValue("owner"));
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 

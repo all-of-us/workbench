@@ -60,7 +60,8 @@ sourceSets {
                    // so we selectively whitelist as needed.
                    'org/pmiops/workbench/model/Authority.java',
                    'org/pmiops/workbench/model/DataAccessLevel.java',
-                   'org/pmiops/workbench/model/ErrorResponse.java' ]
+                   'org/pmiops/workbench/model/ErrorResponse.java',
+                   'org/pmiops/workbench/model/WorkspaceAccessLevel.java' ]
     }
   }
 }

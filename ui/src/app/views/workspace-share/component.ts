@@ -7,7 +7,9 @@ import {isBlank} from 'app/utils';
 
 import {DataAccessLevel} from 'generated';
 import {UserRole} from 'generated';
+import {UserRoleList} from 'generated';
 import {Workspace} from 'generated';
+import {WorkspaceAccessLevel} from 'generated';
 import {WorkspacesService} from 'generated';
 
 @Component({
@@ -18,8 +20,8 @@ export class WorkspaceShareComponent implements OnInit {
   workspace: Workspace;
   loadingWorkspace = true;
   toShare = '';
-  selectedPermission = 'Select Permission';
-
+  selectedPermission = "Select Permission";
+  accessLevel: WorkspaceAccessLevel;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
@@ -44,23 +46,35 @@ export class WorkspaceShareComponent implements OnInit {
     this.locationService.back();
   }
 
+  setAccess(dropdownSelected: string): void {
+    this.selectedPermission = dropdownSelected;
+    if(dropdownSelected === "Owner") {
+      this.accessLevel = WorkspaceAccessLevel.Owner;
+    } else if (dropdownSelected === "Writer") {
+      this.accessLevel = WorkspaceAccessLevel.Writer;
+    } else {
+      this.accessLevel = WorkspaceAccessLevel.Reader;
+    }
+  }
+
   addCollaborator(): void {
-    this.workspace.userRoles.items.push({user: this.toShare, role: this.selectedPermission});
+    this.workspace.userRoles.push({user: this.toShare, role: this.accessLevel});
+    const userRoleList: UserRoleList = {items: this.workspace.userRoles};
     this.workspacesService.shareWorkspace(this.workspace.namespace,
-        this.workspace.id, this.workspace.userRoles).subscribe(
+        this.workspace.id, userRoleList).subscribe(
       () => {
       }
     );
   }
 
   removeCollaborator(user: UserRole): void {
-    const position = this.workspace.userRoles.items.findIndex((userRole) => {
+    const position = this.workspace.userRoles.findIndex((userRole) => {
       if (user.user === userRole.user) {
         return true;
       } else {
         return false;
       }
     });
-    this.workspace.userRoles.items.splice(position, 1);
+    this.workspace.userRoles.splice(position, 1);
   }
 }
