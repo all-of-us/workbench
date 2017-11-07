@@ -18,34 +18,33 @@ import org.pmiops.workbench.exceptions.NotFoundException;
  * Workspace manipulation and shared business logic which can't be represented by automatic query
  * generation in WorkspaceDao, or convenience aliases.
  *
+ * This needs to implement an interface to support Transactional
+ *
  * TODO(RW-215) Add versioning to detect/prevent concurrent edits.
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  @Autowired private WorkspaceDao workspaceDao;
+
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
    * it here.
    */
-  @Autowired private WorkspaceDao workspaceDao;
-
-  public WorkspaceServiceImpl() {
-
-  }
-
+  @Override
   public WorkspaceDao getDao() {
     return workspaceDao;
   }
-
+  @Override
   public void setDao(WorkspaceDao workspaceDao) {
     this.workspaceDao = workspaceDao;
   }
-
+  @Override
   public Workspace get(String ns, String id) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
   }
-
+  @Override
   public Workspace getRequired(String ns, String id) {
     Workspace workspace = get(ns, id);
     if (workspace == null) {
@@ -53,13 +52,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return workspace;
   }
-
+  @Override
   public List<Workspace> findForReview() {
     return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   // FIXME @Version instead? Bean instantiation v. @Transactional?
   //@Transactional
+  @Override
   public void setResearchPurposeApproved(String ns, String id, boolean approved) {
     Workspace workspace = getRequired(ns, id);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
@@ -75,6 +75,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     workspaceDao.save(workspace);
   }
 
+  @Override
   @Transactional
   public void updateUserRoles(String ns, String id, Set<WorkspaceUserRole> userRoleSet) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(
@@ -90,13 +91,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         if(currentUserRole.getUser().getEmail().equals(newUserRole.getUser().getEmail())){
           currentUserRole.setRole(newUserRole.getRole());
           resolved = true;
-          userRoleSet.remove(newUserRole);
+          newUserRoles.remove();
           break;
         }
       }
 
       if (!resolved) {
-        dbWorkspace.getWorkspaceUserRoles().remove(currentUserRole);
+        dbUserRoles.remove();
       }
     }
 

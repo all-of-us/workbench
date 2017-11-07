@@ -20,6 +20,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 
 @Entity
 @Table(name = "workspace")
@@ -335,7 +336,12 @@ public class Workspace {
     return usersWithAccess;
   }
 
+  // Necessary for Spring initialization of the object.
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.usersWithAccess = userRoles;
+  }
+
+  public void addWorkspaceUserRole(WorkspaceUserRole userRole) {
+    this.usersWithAccess.add(userRole);
   }
 }

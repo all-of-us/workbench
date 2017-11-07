@@ -58,7 +58,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   addCollaborator(): void {
-    this.workspace.userRoles.push({user: this.toShare, role: this.accessLevel});
+    this.workspace.userRoles.push({email: this.toShare, role: this.accessLevel});
     const userRoleList: UserRoleList = {items: this.workspace.userRoles};
     this.workspacesService.shareWorkspace(this.workspace.namespace,
         this.workspace.id, userRoleList).subscribe(
@@ -69,7 +69,7 @@ export class WorkspaceShareComponent implements OnInit {
 
   removeCollaborator(user: UserRole): void {
     const position = this.workspace.userRoles.findIndex((userRole) => {
-      if (user.user === userRole.user) {
+      if (user.email === userRole.email) {
         return true;
       } else {
         return false;

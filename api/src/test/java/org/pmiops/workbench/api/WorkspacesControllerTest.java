@@ -20,7 +20,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
-import org.pmiops.workbench.db.dao.WorkspaceUserRoleDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -45,8 +44,6 @@ public class WorkspacesControllerTest {
   WorkspaceService workspaceService;
   @Autowired
   WorkspaceDao workspaceDao;
-  @Autowired
-  WorkspaceUserRoleDao workspaceUserRoleDao;
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Autowired
@@ -75,7 +72,7 @@ public class WorkspacesControllerTest {
     workspaceService.setDao(workspaceDao);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        workspaceUserRoleDao, userDao, userProvider, fireCloudService,
+        userDao, userProvider, fireCloudService,
         Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 

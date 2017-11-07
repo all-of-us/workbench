@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.dao.WorkspaceUserRoleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -148,7 +147,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             @Override
             public UserRole apply(org.pmiops.workbench.db.model.WorkspaceUserRole workspaceUserRole) {
               UserRole result = new UserRole();
-              result.setUser(workspaceUserRole.getUser().getEmail());
+              result.setEmail(workspaceUserRole.getUser().getEmail());
               result.setRole(workspaceUserRole.getRole());
 
               return result;
@@ -158,7 +157,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
-  private final WorkspaceUserRoleDao workspaceUserRoleDao;
   private final UserDao userDao;
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -168,14 +166,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   WorkspacesController(
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
-      WorkspaceUserRoleDao workspaceUserRoleDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
-    this.workspaceUserRoleDao = workspaceUserRoleDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -263,14 +259,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     setCdrVersionId(workspace, dbWorkspace);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
-    permissions.setRole(WorkspaceAccessLevel.fromValue("owner"));
+    permissions.setRole(WorkspaceAccessLevel.OWNER);
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
-    workspaceUserRoleDao.save(permissions);
+    dbWorkspace.addWorkspaceUserRole(permissions);
+
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+
+
 
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
@@ -295,16 +293,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: use FireCloud to determine what workspaces to return, instead of just returning
     // workspaces created by this user.
     User user = userProvider.get();
-    List<org.pmiops.workbench.db.model.Workspace> workspaces;
-    if (user == null) {
-      workspaces = new ArrayList<>();
-    } else {
-      Set<org.pmiops.workbench.db.model.WorkspaceUserRole> usersWorkspaces;
-      usersWorkspaces = user.getWorkspaceUserRoles();
-      Iterator<org.pmiops.workbench.db.model.WorkspaceUserRole> workspacesIterator = usersWorkspaces.iterator();
-      workspaces = new ArrayList<org.pmiops.workbench.db.model.Workspace>();
-      while(workspacesIterator.hasNext()) {
-        workspaces.add(workspacesIterator.next().getWorkspace());
+    List<org.pmiops.workbench.db.model.Workspace> workspaces =
+        new ArrayList<org.pmiops.workbench.db.model.Workspace>();
+    if (user != null) {
+      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
+        workspaces.add(userRole.getWorkspace());
       }
     }
     WorkspaceListResponse response = new WorkspaceListResponse();
@@ -340,11 +333,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserRoleList userRoleList) {
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : userRoleList.getItems()) {
-      WorkspaceUserRole newUser = new WorkspaceUserRole();
-      newUser.setUser(userDao.findUserByEmail(user.getUser()));
-      newUser.setWorkspace(null);
-      newUser.setRole(user.getRole());
-      dbUserRoles.add(newUser);
+      WorkspaceUserRole newUserRole = new WorkspaceUserRole();
+      User newUser = userDao.findUserByEmail(user.getEmail());
+      if (newUser == null) {
+        throw new BadRequestException(String.format(
+            "User %s doesn't exist",
+            user.getEmail()));
+      }
+      newUserRole.setUser(newUser);
+      newUserRole.setRole(user.getRole());
+      dbUserRoles.add(newUserRole);
     }
     workspaceService.updateUserRoles(workspaceNamespace, workspaceId, dbUserRoles);
     return ResponseEntity.ok(new EmptyResponse());

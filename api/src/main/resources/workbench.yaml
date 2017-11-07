@@ -434,7 +434,7 @@ paths:
             type: string
             required: true
           - in: body
-            name: users
+            name: usersAndRoles
             description: users to share the workspace with
             schema:
               $ref: "#/definitions/UserRoleList"
@@ -718,10 +718,10 @@ definitions:
   UserRole:
     type: object
     required:
-      - user
+      - email
       - role
     properties:
-      user:
+      email:
         type: string
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
@@ -739,7 +739,7 @@ definitions:
   WorkspaceAccessLevel:
     type: string
     description: levels of access to workspace
-    enum: &WORKSPACE_ACCESS_LEVEL [reader, writer, owner]
+    enum: [reader, writer, owner]
 
   ResearchPurpose:
     type: object
