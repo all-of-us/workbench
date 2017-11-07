@@ -1,4 +1,4 @@
-<form [formGroup]="ageForm" (ngSubmit)="onSubmit()">
+<form class="compact" [formGroup]="ageForm" (ngSubmit)="submit()">
   <section class="form-block">
     <label>Filter Participants By Age</label>
 
@@ -33,11 +33,17 @@
       </ng-container>
     </ng-container>
 
+    <button 
+      class="btn btn-danger-outline" 
+      (click)="cancel()">
+      Cancel
+    </button>
+
+    <button 
+      type="submit" 
+      class="btn btn-success-outline">
+      Finish
+    </button>
+
   </section>
 </form>
-
-<div *ngIf="debug">
-  <span>{{ ageForm.value | json }}</span>
-  <br />
-  <span>{{ ageForm.status | json }}</span>
-</div>

@@ -3,10 +3,12 @@ import {
   Component,
   ComponentFactoryResolver,
   Input,
-  ViewChild
+  OnDestroy,
+  ViewChild,
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {List, Map} from 'immutable';
+import {List, Map, fromJS} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions} from '../../redux';
 import {AttributesDirective} from './attributes.directive';
@@ -14,14 +16,15 @@ import {AgeFormComponent} from './age-form.component';
 
 @Component({
   selector: 'crit-attributes',
-  templateUrl: './attributes.component.html',
-  styleUrls: ['./attributes.component.css']
+  template: '<ng-template critAttrFormHost></ng-template>'
 })
-export class AttributesComponent implements AfterViewInit {
+export class AttributesComponent implements AfterViewInit, OnDestroy {
   @Input() node: Map<any, any>;
-
   @ViewChild(AttributesDirective) attrFormHost: AttributesDirective;
-  private attrs: List<Map<any, any>> = List();
+
+  private _attrs: List<Map<any, any>> = List();
+  private _subs: Subscription[];
+  private _form: any;
 
   constructor(
     private actions: CohortSearchActions,
@@ -34,6 +37,11 @@ export class AttributesComponent implements AfterViewInit {
     setTimeout(_ => this.createForm());
   }
 
+  ngOnDestroy() {
+    this._form.destroy();
+    this._subs.forEach(s => s.unsubscribe());
+  }
+
   createForm() {
     // TODO(jms) selection logic for instantiating the form
     const component = AgeFormComponent;
@@ -41,16 +49,24 @@ export class AttributesComponent implements AfterViewInit {
     const container = this.attrFormHost.container;
 
     container.clear();
-    const instance = container.createComponent(factory);
+    this._form = container.createComponent(factory);
+    this._subs = [
+      this._form.instance.attribute.subscribe(
+        value => this._attrs = this._attrs.push(fromJS(value))
+      ),
+      this._form.instance.submitted.subscribe(this.submit),
+      this._form.instance.cancelled.subscribe(this.cancel),
+    ];
   }
 
-  cancel() {
+  cancel = (doIt?: boolean): void => {
+    if (!doIt) { return; }
     this.actions.clearWizardFocus();
   }
 
-  finish() {
-    // TODO(jms) transform formData into attributes
-    const param = this.node.set('attributes', this.attrs);
+  submit = (doIt?: boolean): void => {
+    if (!doIt) { return; }
+    const param = this.node.set('attributes', this._attrs);
     this.actions.addParameter(param);
     this.actions.clearWizardFocus();
   }
