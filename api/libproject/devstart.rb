@@ -5,7 +5,6 @@
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require_relative "cloudsqlproxycontext"
-require_relative "credentials"
 require_relative "gcloudcontext"
 require "fileutils"
 require "io/console"
@@ -289,15 +288,14 @@ def drop_cloud_cdr(*args)
 end
 
 def connect_to_cloud_db(*args)
-  CloudSqlProxyContext.new.run(GcloudContextV2.new(:dev)) do
+  CloudSqlProxyContext.new(:dev, GcloudContextV2.new(:dev)).run do |env_file_path|
     sleep 1 # TODO(dmohs): Detect running better.
-    env = Hash[File.read("db/vars.dev.env").split(/\n/).map {|l| l.split(/=/)}]
+    env = Hash[File.read(env_file_path).split(/\n/).map {|l| l.split(/=/)}]
     password = env["WORKBENCH_DB_PASSWORD"]
-    run_with_redirects(
-      "docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}"\
-      " --database=#{env["DB_NAME"]} --password=#{password}",
-      to_redact=password
-    )
+    Common.new.run_inline %W{
+      docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}
+      --database=#{env["DB_NAME"]} --password=#{password}},
+      redact=password
   end
 end
 

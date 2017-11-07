@@ -1,22 +1,26 @@
 require_relative "../../libproject/utils/common"
-require_relative "credentials"
-require_relative "gcloudcontext"
+require_relative "environments"
 
 class CloudSqlProxyContext
   attr_reader :env_file_path
 
-  def run(gcloud_context)
+  def initialize(env_key, gcloud_context)
+    raise ArgumentError("Invalid GcloudContext") unless gcloud_context.account
+    @bucket_name = Environments::CREDENTIALS_BUCKET_NAMES.fetch(env_key)
+    @bucket_file_name = Environments::DB_VARS_FILE_NAMES.fetch(env_key)
+    @env_file_path = "db/vars.#{env_key}.env"
+  end
+
+  def run()
     common = Common.new
-    bucket_file_name = Credentials::DB_VARS_FILE_NAMES.fetch(gcloud_context.env_key)
-    @env_file_path = "db/vars.#{gcloud_context.env_key.to_s}.env"
     common.run_inline %W{
       docker-compose run --rm api
-        gsutil cp gs://#{Credentials::CREDENTIALS_BUCKET_NAME}/#{bucket_file_name} #{@env_file_path}
+        gsutil cp gs://#{@bucket_name}/#{@bucket_file_name} #{@env_file_path}
     }
     begin
       common.run_inline %W{docker-compose up -d cloud-sql-proxy}
       begin
-        yield(self)
+        yield(@env_file_path)
       ensure
         common.run_inline %W{docker-compose down}
       end
