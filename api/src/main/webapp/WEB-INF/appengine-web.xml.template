@@ -14,8 +14,8 @@
     <env-var name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
     <env-var name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
     <!-- NOTE(RW-235) Keep the db connection alive. -->
-    <env-var name="spring.datasource.dbcp.test-on-borrow=true" />
-    <env-var name="spring.datasource.dbcp.validationQuery=SELECT 1" />
+    <env-var name="spring.datasource.dbcp.test-on-borrow" value="true" />
+    <env-var name="spring.datasource.dbcp.validationQuery" value="SELECT 1" />
   </env-variables>
 
   <resource-files>
