@@ -117,4 +117,9 @@ public class CodesQueryBuilderTest {
         assertEquals(Arrays.asList("001"), mappedParemeters.get("Condition"));
         assertEquals(Arrays.asList("002", "003"), mappedParemeters.get("Procedure"));
     }
+
+    @Test
+    public void getType() throws Exception {
+        assertEquals(FactoryKey.CODES, queryBuilder.getType());
+    }
 }
