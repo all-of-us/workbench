@@ -48,9 +48,9 @@ export class WorkspaceShareComponent implements OnInit {
 
   setAccess(dropdownSelected: string): void {
     this.selectedPermission = dropdownSelected;
-    if(dropdownSelected === "Owner") {
+    if (dropdownSelected === 'Owner') {
       this.accessLevel = WorkspaceAccessLevel.Owner;
-    } else if (dropdownSelected === "Writer") {
+    } else if (dropdownSelected === 'Writer') {
       this.accessLevel = WorkspaceAccessLevel.Writer;
     } else {
       this.accessLevel = WorkspaceAccessLevel.Reader;
@@ -76,5 +76,11 @@ export class WorkspaceShareComponent implements OnInit {
       }
     });
     this.workspace.userRoles.splice(position, 1);
+    const userRoleList: UserRoleList = {items: this.workspace.userRoles};
+    this.workspacesService.shareWorkspace(this.workspace.namespace,
+        this.workspace.id, userRoleList).subscribe(
+      () => {
+      }
+    );
   }
 }
