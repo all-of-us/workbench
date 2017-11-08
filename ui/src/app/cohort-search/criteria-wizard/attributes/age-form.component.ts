@@ -7,14 +7,33 @@ import {environment} from 'environments/environment';
 import {AttributeFormComponent} from './attributes.interface';
 import {Attribute} from 'generated';
 
+const OPERATORS = {
+  'RANGE': 'In Range',
+  'EQ': 'Equal To',
+  'GT': 'Greater Than',
+  'LT': 'Less Than',
+  'GTE': 'Greater Than or Equal To',
+  'LTE': 'Less Than or Equal To',
+};
 
-function validInterval(group) {
+const MAX_AGE = 120;
+const MIN_AGE = 0;
+const _operatorIsRange = (op: string): boolean => (op === 'RANGE');
+const _operatorIsValid = (op: string): boolean => (Object.keys(OPERATORS).includes(op));
+
+const validInterval = (group: FormGroup): null|object => {
   const start = group.get('rangeOpen').value;
   const close = group.get('rangeClose').value;
-  return start <= close
-    ? null
-    : {'invalidRange': 'Open must precede close value'};
-}
+  return start && close && start >= close
+    ? {'invalidRange': 'The Range Open value must precede the Close value'}
+    : null;
+};
+
+const requiredAgeValidator = Validators.compose([
+  Validators.min(MIN_AGE),
+  Validators.max(MAX_AGE),
+  Validators.required,
+]);
 
 @Component({
   selector: 'crit-age-form',
@@ -31,46 +50,42 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   });
   private sub: Subscription;
 
+  private readonly operators = OPERATORS;
+  private readonly opCodes = Object.keys(OPERATORS);
+  private readonly maxAge = MAX_AGE;
+  private readonly minAge = MIN_AGE;
+
   @Output() attribute = new EventEmitter<Attribute>();
   @Output() submitted = new EventEmitter<boolean>();
   @Output() cancelled = new EventEmitter<boolean>();
 
   ngOnInit() {
-    const requiredAge = Validators.compose([
-      Validators.min(0),
-      Validators.max(120),
-      Validators.required,
-    ]);
-
-    this.sub = this.ageForm.get('operator').valueChanges.subscribe(
+    this.sub = this.operator.valueChanges.subscribe(
       (operator: string) => {
-        const group = this.ageForm;
-        const age = group.get('age');
-        const open = group.get('rangeOpen');
-        const close = group.get('rangeClose');
+        if (_operatorIsValid(operator)) {
+          console.log(this);
+          if (_operatorIsRange(operator)) {
+            this.age.clearValidators();
+            this.age.updateValueAndValidity();
 
-        if (operator === 'EQUAL') {
-          open.clearValidators();
-          open.updateValueAndValidity();
+            this.rangeOpen.setValidators(requiredAgeValidator);
+            this.rangeOpen.updateValueAndValidity();
 
-          close.clearValidators();
-          close.updateValueAndValidity();
+            this.rangeClose.setValidators(requiredAgeValidator);
+            this.rangeClose.updateValueAndValidity();
 
-          age.setValidators(requiredAge);
-          age.updateValueAndValidity();
+            this.ageForm.setValidators(validInterval);
+            this.ageForm.updateValueAndValidity();
+          } else {
+            this.rangeOpen.clearValidators();
+            this.rangeOpen.updateValueAndValidity();
 
-        } else if (operator === 'RANGE') {
-          age.clearValidators();
-          age.updateValueAndValidity();
+            this.rangeClose.clearValidators();
+            this.rangeClose.updateValueAndValidity();
 
-          open.setValidators(requiredAge);
-          open.updateValueAndValidity();
-
-          close.setValidators(requiredAge);
-          close.updateValueAndValidity();
-
-          group.setValidators(validInterval);
-          group.updateValueAndValidity();
+            this.age.setValidators(requiredAgeValidator);
+            this.age.updateValueAndValidity();
+          }
         }
       }
     );
@@ -80,19 +95,26 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
     this.sub.unsubscribe();
   }
 
+  get operator() { return this.ageForm.get('operator'); }
   get age() { return this.ageForm.get('age'); }
   get rangeOpen() { return this.ageForm.get('rangeOpen'); }
   get rangeClose() { return this.ageForm.get('rangeClose'); }
 
-  submit(): void {
-    const operator = this.ageForm.get('operator').value;
-    const operands = [];
-    if (operator === 'EQUAL') {
-      operands.push(this.ageForm.get('age').value);
-    } else {
-      operands.push(this.ageForm.get('rangeOpen').value);
-      operands.push(this.ageForm.get('rangeClose').value);
+  get operatorIsRange() { return _operatorIsRange(this.operator.value); }
+  get operatorIsValid() { return _operatorIsValid(this.operator.value); }
+
+  get errorList() {
+    const _errors = this.ageForm.errors;
+    if (_errors) {
+      return Object.keys(_errors).map(key => _errors[key]);
     }
+  }
+
+  submit(): void {
+    const operator = this.operator.value;
+    const operands = this.operatorIsRange
+      ? [this.rangeOpen.value, this.rangeClose.value]
+      : [this.age.value];
     const attr: Attribute = {operator, operands};
     this.attribute.emit(attr);
     this.submitted.emit(true);
