@@ -130,5 +130,15 @@
     "valid_start_date":"2009-12-03",
     "valid_end_date":"2009-12-03",
     "invalid_reason":"ir"
+  },
+  {
+    "concept_id": "44829697",
+    "concept_name": "Typhoid and paratyphoid fevers",
+    "domain_id": "Condition",
+    "vocabulary_id": "ICD9CM",
+    "concept_class_id": "3-dig nonbill code",
+    "concept_code": "002",
+    "valid_start_date": "2009-12-03",
+    "valid_end_date": "2009-12-03"
   }
 ]

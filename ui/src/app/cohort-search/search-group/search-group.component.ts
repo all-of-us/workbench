@@ -8,7 +8,7 @@ const CRITERIA_TYPES = [
   { name: 'Demographics', type: 'demo' },
   { name: 'ICD9 Codes',   type: 'icd9' },
   { name: 'ICD10 Codes',  type: 'icd10' },
-  { name: 'PheCodes',     type: 'phecodes' },
+  { name: 'PheCodes',     type: 'phecode' },
   { name: 'CPT Codes',    type: 'cpt' },
   { name: 'Medications',  type: 'meds' },
   { name: 'Labs',         type: 'labs' },

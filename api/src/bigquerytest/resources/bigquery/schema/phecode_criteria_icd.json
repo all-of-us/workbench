@@ -1,0 +1,12 @@
+[
+  {
+    "type": "string",
+    "name": "phecode",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "icd9",
+    "mode": "required"
+  }
+]

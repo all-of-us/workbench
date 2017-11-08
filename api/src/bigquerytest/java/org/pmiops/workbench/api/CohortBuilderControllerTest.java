@@ -66,7 +66,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "procedure_occurrence",
                 "measurement",
                 "observation",
-                "drug_exposure");
+                "drug_exposure",
+                "phecode_criteria_icd",
+                "concept_relationship");
     }
 
     @Before
@@ -198,6 +200,37 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId(0L));
 
         verify(mockCriteriaDao).findCriteriaByTypeAndParentId("CPT", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
+    }
+
+    @Test
+    public void getCriteriaByTypeAndParentId_Phecodes() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("PHECODE")
+                        .name("Intestinal infection")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndParentId("PHECODE", 0L))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByTypeAndParentId("PHECODE", 0L),
+                new Criteria()
+                        .id(1L)
+                        .type("PHECODE")
+                        .name("Intestinal infection")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("PHECODE", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -398,6 +431,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         } catch (BadRequestException e) {
             assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
         }
+    }
+
+    @Test
+    public void countSubjects_PheCodes() throws Exception {
+        assertSubjects(
+                controller.countSubjects(
+                        createSearchRequests("PHECODE", Arrays.asList(new SearchParameter().value("008")))),
+                1);
     }
 
     @Test
