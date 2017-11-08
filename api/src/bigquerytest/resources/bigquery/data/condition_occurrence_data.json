@@ -43,5 +43,19 @@
     "provider_id":7,
     "visit_occurrence_id":7,
     "condition_source_value":"val"
+  },
+  {
+    "condition_occurrence_id": "12751439",
+    "person_id": "102246",
+    "condition_concept_id": "192819",
+    "condition_start_date": "2008-07-22",
+    "condition_start_datetime": "2008-07-22 05:00:00 UTC",
+    "condition_end_date": "2008-07-22",
+    "condition_end_datetime": "2008-07-22 05:00:00 UTC",
+    "condition_type_concept_id": "38000230",
+    "provider_id": "10714",
+    "visit_occurrence_id": "4904319",
+    "condition_source_value": "0020",
+    "condition_source_concept_id": "44825090"
   }
 ]
