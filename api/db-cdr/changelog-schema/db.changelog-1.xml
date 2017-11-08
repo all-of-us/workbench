@@ -5,9 +5,7 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="brianfreeman" id="changelog-2" runAlways="true">
-
-    <validCheckSum>ANY</validCheckSum>
+  <changeSet author="brianfreeman" id="changelog-1">
 
     <createTable tableName="criteria">
       <column name="id" type="BIGINT">

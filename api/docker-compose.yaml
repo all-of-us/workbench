@@ -47,7 +47,33 @@ services:
     volumes:
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./run-migrations.sh
+    command: wait-for db:3306 -- ./run-migrations.sh schema
+    env_file:
+      - db-cdr/vars.env
+  db-cdr-data-migration:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./run-migrations.sh data local
+    env_file:
+      - db-cdr/vars.env
+  drop-cdr-db:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./run-drop-db.sh
     env_file:
       - db-cdr/vars.env
   update-config:

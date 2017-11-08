@@ -5,11 +5,11 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="brianfreeman" id="changelog-4" runAlways="true">
+  <changeSet author="brianfreeman" id="changelog-5" runAlways="true" context="cloud">
 
     <validCheckSum>ANY</validCheckSum>
 
-    <loadData tableName="criteria" file="csv/demo_criteria.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="criteria" file="csv/icd10_criteria.csv" encoding="UTF-8" quotchar='"'>
       <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
       <column name="type" type="STRING"/>
