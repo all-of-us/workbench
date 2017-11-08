@@ -14,7 +14,7 @@
 /api/api.iws
 /api/build/*
 /api/db/.gradle
-/api/db/vars.dev.env
+/api/db/vars.*.env
 /api/db-cdr/.gradle
 /api/out/*
 /api/sa-key.json

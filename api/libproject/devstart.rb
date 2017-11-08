@@ -6,6 +6,7 @@ require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
 require_relative "cloudsqlproxycontext"
 require_relative "gcloudcontext"
+require_relative "wboptionsparser"
 require "fileutils"
 require "io/console"
 require "json"
@@ -288,7 +289,8 @@ def drop_cloud_cdr(*args)
 end
 
 def connect_to_cloud_db(*args)
-  CloudSqlProxyContext.new(:dev, GcloudContextV2.new(:dev)).run do |env_file_path|
+  op = WbOptionsParser.new("connect-to-cloud-db", args)
+  CloudSqlProxyContext.new(GcloudContextV2.new(op)).run do |env_file_path|
     sleep 1 # TODO(dmohs): Detect running better.
     env = Hash[File.read(env_file_path).split(/\n/).map {|l| l.split(/=/)}]
     password = env["WORKBENCH_DB_PASSWORD"]

@@ -1,35 +1,37 @@
 require_relative "../../libproject/utils/common"
-require_relative "environments"
 require "json"
 
 class GcloudContextV2
   attr_reader :account, :project
 
-  def initialize(env_key)
+  def initialize(options_parser)
     # We use both gcloud and gsutil commands for various tasks. While gcloud can take arguments,
-    # gsutil uses the current gcloud config, so we just ensure a reasonable config is present here
-    # rather than allowing arguments.
+    # gsutil uses the current gcloud config, so we want to grab and verify the account from there.
+    # We do NOT grab the project from gcloud config since that can easily be set to something
+    # dangerous, like a production project. Instead, we always require that parameter explicitly.
     common = Common.new
+    options_parser.add_option(
+      "--project [GOOGLE_PROJECT]",
+      lambda {|opts, v| opts.project = v},
+      "Google project to act on (e.g. all-of-us-workbench-test)"
+    )
+    options_parser.add_validator lambda {|opts| raise ArgumentError unless opts.project}
+    options_parser.parse.validate
+    @project = options_parser.opts.project
     common.status "Reading glcoud configuration..."
     configs = common.capture_stdout \
         %W{docker-compose run --rm api gcloud --format=json config configurations list}
     active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
     common.status "Using '#{active_config["name"]}' gcloud configuration"
     @account = active_config["properties"]["core"]["account"]
-    @project = active_config["properties"]["core"]["project"]
     common.status "  account: #{@account}"
-    common.status "  project: #{@project}"
-    unless @account && @project
-      common.error "Account and project required for gcloud config." \
+    unless @account
+      common.error "Account must be set in gcloud config." \
           " See gcloud config configurations --help."
       exit 1
     end
     unless @account.end_with?("@pmi-ops.org")
       common.error "Account is not a pmi-ops.org account: #{@account}"
-      exit 1
-    end
-    unless @project == Environments::PROJECT_NAMES[env_key]
-      common.error "Project '#{@project}' does not match current environment key #{env_key}"
       exit 1
     end
   end
