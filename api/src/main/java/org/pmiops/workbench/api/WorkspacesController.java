@@ -97,12 +97,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
           }
 
-          ArrayList<org.pmiops.workbench.db.model.WorkspaceUserRole> usersOnWorkspace = new ArrayList<org.pmiops.workbench.db.model.WorkspaceUserRole>();
-          Iterator<org.pmiops.workbench.db.model.WorkspaceUserRole> iter = workspace.getWorkspaceUserRoles().iterator();
-          while(iter.hasNext()) {
-            usersOnWorkspace.add(iter.next());
-          }
-          result.setUserRoles(usersOnWorkspace.stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
+          
+          result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
 
           return result;
         }
