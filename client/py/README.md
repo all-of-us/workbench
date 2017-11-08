@@ -21,18 +21,19 @@ pip install -e 'git+https://github.com/all-of-us/workbench.git@generated-py-clie
 For local development, you can specify a local key file instead of using
 application default credentials.
 
-TODO(RW-32) Once available, switch to fetching the user's pet service account
-key (as will be used in notebooks), instead of the application service account
-key.
+TODO(RW-32) Once available, switch the below to fetching the user's pet service
+account key (as will be used in notebooks), instead of the application service
+account key.
 
 ```Shell
-api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
+api/project.rb get-service-creds --project all-of-us-workbench-test \
+    --account $USER@pmi-ops.org
 export GOOGLE_APPLICATION_CREDENTIALS=.../path/to/sa-key.json
 ```
 
 ### Run examples
 
-Authenticate as above, then run (example.py)[example.py]:
+Authenticate as above, then run [example.py](example.py):
 
 ```Shell
 workbench/client$ ./project.rb swagger-regen
@@ -47,7 +48,7 @@ To publish a new version:
     `generated-py-client` for this).
 *   Tag them as `pyclient-vN-N-rcN`, and push the tag.
 
-Also, edit (setup.py)[setup.py] and update `version=` (or else pip will not
+Also, edit [setup.py](setup.py) and update `version=` (or else pip will not
 overwrite old installed versions).
 
 ```Shell
