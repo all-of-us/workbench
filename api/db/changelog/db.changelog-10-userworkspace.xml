@@ -6,14 +6,11 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="brubenst" id="changelog-9-userworkspace">
     <createTable tableName="user_workspace">
-      <column name="user_workspace_id" type="bigint" autoIncrement="true">
+      <column name="user_id" type="bigint">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="user_id" type="bigint">
-        <constraints nullable="false"/>
-      </column>
       <column name="workspace_id" type="bigint">
-        <constraints nullable="false"/>
+        <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="role" type="tinyint">
         <constraints nullable="false"/>

@@ -13,26 +13,13 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 @Entity
 @Table(name = "user_workspace")
 public class WorkspaceUserRole {
-  private long userWorkspaceId;
   private User user;
   private Workspace workspace;
   private WorkspaceAccessLevel role;
 
 
-
-  @Id
-  @GeneratedValue
-  @Column(name = "user_workspace_id")
-  public long getUserWorkspaceId() {
-    return userWorkspaceId;
-  }
-
-  public void setUserWorkspaceId(long userWorkspaceId) {
-    this.userWorkspaceId = userWorkspaceId;
-  }
-
   @ManyToOne
-  @JoinColumn(name="user_id")
+  @PrimaryKeyJoinColumn(name="user_id", referencedColumnName="user_id")
   public User getUser() {
     return user;
   }
@@ -42,7 +29,7 @@ public class WorkspaceUserRole {
   }
 
   @ManyToOne
-  @JoinColumn(name="workspace_id")
+  @PrimaryKeyJoinColumn(name="workspace_id", referencedColumnName="workspace_id")
   public Workspace getWorkspace() {
     return workspace;
   }
