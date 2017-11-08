@@ -1,28 +1,55 @@
 # Python client for All of Us Workbench Jupyter Notebooks
 
-Usage for local testing:
+The client uses `python3`, to match Jupyter environments.
+
+## Local testing
+
+### Install
 
 ```Shell
 virtualenv venv
 . venv/bin/activate
-# Install HEAD from a branch:
+# Install a tagged version (preferred; also avoids downloading all history):
+export PYCLIENT_VERSION=pyclient-v0-N-rcN  # your version here
+pip install 'https://github.com/all-of-us/workbench/archive/${PYCLIENT_VERSION}.zip#egg=aou_workbench_client&subdirectory=client/py'
+# Or install HEAD from a branch:
 pip install -e 'git+https://github.com/all-of-us/workbench.git@generated-py-client#egg=aou_workbench_client&subdirectory=client/py'
-# or install a tagged version (which also avoids downloading all history):
-pip install 'https://github.com/all-of-us/workbench/archive/pyclient-v0-1-rc1.zip#egg=aou_workbench_client&subdirectory=client/py'
 ```
 
-then
+### Authenticate
 
-```Python
-import aou_workbench_client
-from aou_workbench_client import swagger_client
+For local development, you can specify a local key file instead of using
+application default credentials.
+
+TODO(RW-32) Once available, switch to fetching the user's pet service account
+key (as will be used in notebooks), instead of the application service account
+key.
+
+```Shell
+api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
+export GOOGLE_APPLICATION_CREDENTIALS=.../path/to/sa-key.json
+python3 client/py/aou_workbench_client/auth.py
 ```
+
+### Run examples
+
+Authenticate as above, then run (example.py)[example.py]:
+
+```Shell
+workbench/client$ ./project.rb swagger-regen
+workbench/client$ py/example.py
+```
+
+## Releases
 
 To publish a new version:
 *   Regenerate Python Swagger client files.
 *   Check them in on an arbitrary working branch (you can reuse
     `generated-py-client` for this).
 *   Tag them as `pyclient-vN-N-rcN`, and push the tag.
+
+Also, edit (setup.py)[setup.py] and update `version=` (or else pip will not
+overwrite old installed versions).
 
 ```Shell
 PYCLIENT_VERSION=pyclient-v0-N-rcN  # your version here
