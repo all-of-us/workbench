@@ -3,20 +3,13 @@
 The credentials are obtained by oauth2client, from one of:
 *   Google application default credentials (expected case, from notebook servers).
 *   A private key file, path specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
-
-For local development using a private key file:
-  api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
-  export GOOGLE_APPLICATION_CREDENTIALS=.../path/to/sa-key.json
-  python3 client/py/aou_workbench_client/auth.py
-TODO(RW-32) Once available, switch to fetching the user's pet service account key (as will be used
-in notebooks), instead of the application service account key.
 """
 
 import time
 
 from oauth2client.client import GoogleCredentials
 
-from swagger_client.api_client import ApiClient
+from .swagger_client.api_client import ApiClient
 
 
 CLIENT_OAUTH_SCOPES = (
@@ -72,13 +65,3 @@ def clear_cache():
     global _token_expiration
     _cached_client = None
     _token_expiration = 0
-
-
-# Self-test / simple example: Make a simple authenticated API call.
-if __name__ == '__main__':
-    print('Listing workspaces via authenticated API:')
-    from swagger_client.apis.workspaces_api import WorkspacesApi
-    client = WorkspacesApi(api_client=get_authenticated_swagger_client())
-    workspace_list = client.get_workspaces()
-    for ws in workspace_list.items:
-        print('%s/%s\t%s\t%s' % (ws.namespace, ws.id, ws.name, ws.description))
