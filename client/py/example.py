@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Self-test / simple example: Make a simple authenticated API call."""
 
+from __future__ import print_function
 
 from aou_workbench_client.auth import get_authenticated_swagger_client
 from aou_workbench_client.swagger_client.apis.workspaces_api import WorkspacesApi

@@ -8,9 +8,11 @@ GoogleCredentials.create_scoped() is a noop for application-default credentials.
 used when GOOGLE_APPLICATION_CREDENTIALS is defined and they key is read from a file.) For
 application default credentials, the service account's scopes are set ahead of time, like:
 
+  SCOPES="https://www.googleapis.com/auth/userinfo.profile"
+  SCOPES+=",https://www.googleapis.com/auth/userinfo.email"
   gcloud compute instances set-service-account $INSTANCE_ID --zone us-west1-b \
       --service-account $PET_SA_NAME@$PROJECT.iam.gserviceaccount.com \
-      --scopes "https://www.googleapis.com/auth/userinfo.profile","https://www.googleapis.com/auth/userinfo.email"
+      --scopes "$SCOPES"
 
 See https://www.googleapis.com/oauth2/v3/tokeninfo?access_token= for debugging.
 """
