@@ -3,6 +3,16 @@
 The credentials are obtained by oauth2client, from one of:
 *   Google application default credentials (expected case, from notebook servers).
 *   A private key file, path specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
+
+GoogleCredentials.create_scoped() is a noop for application-default credentials. (However, it is
+used when GOOGLE_APPLICATION_CREDENTIALS is defined and they key is read from a file.) For
+application default credentials, the service account's scopes are set ahead of time, like:
+
+  gcloud compute instances set-service-account $INSTANCE_ID --zone us-west1-b \
+      --service-account $PET_SA_NAME@$PROJECT.iam.gserviceaccount.com \
+      --scopes "https://www.googleapis.com/auth/userinfo.profile","https://www.googleapis.com/auth/userinfo.email"
+
+See https://www.googleapis.com/oauth2/v3/tokeninfo?access_token= for debugging.
 """
 
 import time
@@ -12,6 +22,7 @@ from oauth2client.client import GoogleCredentials
 from .swagger_client.api_client import ApiClient
 
 
+# These are sometimes ignored, see module doc.
 CLIENT_OAUTH_SCOPES = (
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
@@ -53,7 +64,8 @@ def _get_bearer_token_and_expiration():
 
     # The default, unscoped credentials provide an access token.
     creds = GoogleCredentials.get_application_default()
-    # Scoped credentials provide the bearer token we need.
+    # Scoped credentials provide the bearer token we need. However, create_scoped is sometimes
+    # ignored, see the module doc.
     scoped_creds = creds.create_scoped(CLIENT_OAUTH_SCOPES)
     token_info = scoped_creds.get_access_token()
 
