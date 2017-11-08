@@ -1,4 +1,4 @@
-<form class="compact" [formGroup]="ageForm" (ngSubmit)="submit()">
+<form [formGroup]="ageForm" (ngSubmit)="submit()">
   <section class="form-block">
     <label>Filter Participants By Age</label>
 
@@ -7,43 +7,124 @@
       <label for="operator">Choose a Filter</label>
       <div class="select">
         <select id="operator" formControlName="operator">
+          <option value="">Select Age Filter...</option>
           <option value="EQUAL">Equal To</option>
           <option value="RANGE">In Range</option>
         </select>
       </div>
     </div>
 
-    <ng-container [ngSwitch]="ageForm.value.operator"> 
+    <ng-container [ngSwitch]="ageForm.value.operator">
       <ng-container *ngSwitchCase="'EQUAL'">
         <div class="form-group">
           <label for="age">Select an Age</label>
-          <input id="age" formControlName="age" type="number" min="0" max="100">
+          <label
+            role="tooltip"
+            class="tooltip tooltip-validation tooltip-sm"
+            [class.invalid]="age.invalid && (age.dirty || age.touched)">
+            <input
+              id="age"
+              formControlName="age"
+              type="number"
+              min="0" max="120">
+            <span
+              *ngIf="age.errors?.required"
+              class="tooltip-content">
+              An age value is required.
+            </span>
+            <span
+              *ngIf="age.errors?.min"
+              class="tooltip-content">
+              The value must be positive.
+            </span>
+            <span
+              *ngIf="age.errors?.max"
+              class="tooltip-content">
+              The value must not exceed 120.
+            </span>
+          </label>
         </div>
       </ng-container>
 
-      <ng-container *ngSwitchCase="'RANGE'"> 
+      <ng-container *ngSwitchCase="'RANGE'">
         <div class="form-group">
           <label for="rangeOpen">Start Age</label>
-          <input id="rangeOpen" formControlName="rangeOpen" type="number" min="0" max="100">
+          <label
+            role="tooltip"
+            class="tooltip tooltip-validation tooltip-sm"
+            [class.invalid]="rangeOpen.invalid && (rangeOpen.dirty || rangeOpen.touched)">
+            <input
+              id="rangeOpen"
+              formControlName="rangeOpen"
+              type="number"
+              min="0" max="120">
+            <span
+              *ngIf="rangeOpen.errors?.required"
+              class="tooltip-content">
+              A range opening value is required.
+            </span>
+            <span
+              *ngIf="rangeOpen.errors?.min"
+              class="tooltip-content">
+              The value must be positive.
+            </span>
+            <span
+              *ngIf="rangeOpen.errors?.max"
+              class="tooltip-content">
+              The value must not exceed 120.
+            </span>
+          </label>
         </div>
         <div class="form-group">
           <label for="rangeClose">Stop Age</label>
-          <input id="rangeClose" formControlName="rangeClose" type="number" min="0" max="100">
+          <label
+            role="tooltip"
+            class="tooltip tooltip-validation tooltip-sm"
+            [class.invalid]="rangeClose.invalid && (rangeClose.dirty || rangeClose.touched)">
+            <input
+              id="rangeClose"
+              formControlName="rangeClose"
+              type="number"
+              min="0" max="120">
+            <span
+              *ngIf="rangeClose.errors?.required"
+              class="tooltip-content">
+              A range closing value is required.
+            </span>
+            <span
+              *ngIf="rangeClose.errors?.min"
+              class="tooltip-content">
+              The value must be positive.
+            </span>
+            <span
+              *ngIf="rangeClose.errors?.max"
+              class="tooltip-content">
+              The value must not exceed 120.
+            </span>
+          </label>
         </div>
       </ng-container>
     </ng-container>
 
-    <button 
-      class="btn btn-danger-outline" 
+    <button
+      type="submit"
+      class="btn btn-submit-outline"
+      [disabled]="ageForm.invalid">
+      Submit
+    </button>
+
+    <button
+      class="btn btn-danger-outline"
       (click)="cancel()">
       Cancel
     </button>
 
-    <button 
-      type="submit" 
-      class="btn btn-success-outline">
-      Finish
-    </button>
-
   </section>
 </form>
+
+<!--
+<div *ngIf="debug">
+  <p>{{ ageForm.value  | json }}</p>
+  <p>{{ ageForm.status | json }}</p>
+</div>
+-->

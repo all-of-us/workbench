@@ -66,38 +66,38 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   /** Functions of the node's child nodes */
-
-  trackById(index, node) {
-    return node ? node.get('id') : undefined;
+  paramId(node) {
+    return `param${node.get('id')}`;
   }
 
   select(node) {
     if (needsAttributes(node)) {
       this.actions.setWizardFocus(node);
     } else {
-      const newId = this.actions.generateId('parameter');
-      const param = node.set('parameterId', newId);
+      /*
+       * Here we set the parameter ID to `param<criterion ID>` - this is
+       * deterministic and avoids duplicate parameters for criterion which do
+       * not require attributes.  Criterion which require attributes in order
+       * to have a complete sense are given a unique ID based on the attribute
+       */
+      const param = node.set('parameterId', this.paramId(node));
       this.actions.addParameter(param);
     }
-  }
-
-  nonZeroCount(node) {
-    return node.get('count', 0) > 0;
   }
 
   selectable(node) {
     return node.get('selectable', false);
   }
 
-  selectability(node) {
-    // attrs, basic, disabled
-    if (needsAttributes(node)) {
-      return 'attrs';
-    } else if (this.selections.includes(node)) {
-      return 'disabled';
-    } else {
-      return 'basic';
-    }
+  isSelected(node) {
+    const noAttr = !needsAttributes(node);
+    const selectedIDs = this.selections.map(n => n.get('parameterId'));
+    const selected = selectedIDs.includes(this.paramId(node));
+    return noAttr && selected;
+  }
+
+  nonZeroCount(node) {
+    return node.get('count', 0) > 0;
   }
 
   displayName(node) {

@@ -50,8 +50,8 @@ export class SelectionComponent {
       return {
         'GEN': 'Gender',
         'RACE': 'Race/Ethnicity',
-        'AGE': 'Demographic',
-        'DEC': 'Demographic'
+        'AGE': 'Age',
+        'DEC': 'Deceased'
       }[subtype];
     } else {
       return parameter.get('code');
@@ -59,6 +59,11 @@ export class SelectionComponent {
   }
 
   nameDisplay(parameter): string {
+    const subtype = parameter.get('subtype', '');
+    const _type = parameter.get('type', '');
+    if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
+      return '';
+    }
     return parameter.get('name');
   }
 

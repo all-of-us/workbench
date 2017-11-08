@@ -66,10 +66,11 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
 
   submit = (doIt?: boolean): void => {
     if (!doIt) { return; }
-    const newId = this.actions.generateId('parameter');
+
+    const parameterId = `param${this._attrs.hashCode()}`;
     const param = this.node
       .set('attributes', this._attrs)
-      .set('parameterId', newId);
+      .set('parameterId', parameterId);
     this.actions.addParameter(param);
     this.actions.clearWizardFocus();
   }
