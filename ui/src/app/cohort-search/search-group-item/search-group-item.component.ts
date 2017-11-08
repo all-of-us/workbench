@@ -13,7 +13,7 @@ import {SearchRequest} from 'generated';
 
 
 const getDisplayName = (criteria: Map<any, any>): string =>
-  criteria.get('type').match(/^DEMO.*/i)
+  criteria.get('type', '').match(/^DEMO.*/i)
     ?  criteria.get('name', 'N/A')
     : criteria.get('code', 'N/A');
 

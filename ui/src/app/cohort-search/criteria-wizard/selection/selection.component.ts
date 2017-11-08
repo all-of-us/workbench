@@ -7,7 +7,7 @@ import {
   activeGroupId,
   activeRole,
   activeCriteriaType,
-  activeCriteriaList,
+  activeParameterList,
 } from '../../redux';
 
 import {Criteria} from 'generated';
@@ -21,7 +21,7 @@ import {Criteria} from 'generated';
 export class SelectionComponent {
 
   @select(activeCriteriaType) criteriaType$;
-  @select(activeCriteriaList) criteriaList$;
+  @select(activeParameterList) criteriaList$;
 
   constructor(private actions: CohortSearchActions) {}
 

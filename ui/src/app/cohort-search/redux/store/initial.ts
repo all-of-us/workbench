@@ -30,7 +30,7 @@ export const initialState = fromJS({
       },
     },
     items: {},
-    criteria: {},
+    parameters: {},
   },
 
   wizard: {

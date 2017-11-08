@@ -260,7 +260,7 @@ export class CohortSearchActions {
     const critIds = item.get('searchParameters', List());
 
     const params = this.state
-      .getIn(['entities', 'criteria'], Map())
+      .getIn(['entities', 'parameters'], Map())
       .filter((_, key) => critIds.includes(key))
       .valueSeq()
       .map(this.mapParameter)

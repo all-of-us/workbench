@@ -15,7 +15,7 @@ import {needsAttributes} from '../utils';
 import {
   CohortSearchActions,
   CohortSearchState,
-  activeCriteriaList,
+  activeParameterList,
   isCriteriaLoading,
   criteriaChildren,
   criteriaError,
@@ -46,7 +46,7 @@ export class TreeComponent implements OnInit, OnDestroy {
     const error$ = this.ngRedux.select(criteriaError(_type, _parentId));
     const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
     const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
-    const selections$ = this.ngRedux.select(activeCriteriaList);
+    const selections$ = this.ngRedux.select(activeParameterList);
 
     this.subscriptions = [
       error$.subscribe(value => this.error = value),

@@ -7,7 +7,7 @@ import {NgRedux, dispatch} from '@angular-redux/store';
 
 import {
   activeCriteriaType,
-  activeCriteriaList,
+  activeParameterList,
   CohortSearchActions,
   CohortSearchState,
   REMOVE_PARAMETER,
@@ -105,7 +105,7 @@ describe('SelectionComponent', () => {
 
     listStub = MockNgRedux
       .getSelectorStub<CohortSearchState, List<any>>(
-        activeCriteriaList);
+        activeParameterList);
 
     fixture.detectChanges();
   });

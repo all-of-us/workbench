@@ -7,7 +7,7 @@ import {trigger, state, style, animate, transition} from '@angular/animations';
 import {
   CohortSearchActions,
   CohortSearchState,
-  activeCriteriaList,
+  activeParameterList,
   activeRole,
   activeGroupId,
   activeItem,
@@ -81,7 +81,7 @@ export class WizardComponent implements OnInit {
     const role = activeRole(state);
     const groupId = activeGroupId(state);
     const itemId = activeItem(state).get('id');
-    const selections = activeCriteriaList(state);
+    const selections = activeParameterList(state);
     this.actions.finishWizard();
 
     if (!selections.isEmpty()) {
