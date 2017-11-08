@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Self-test / simple example: Make a simple authenticated API call."""
 
 

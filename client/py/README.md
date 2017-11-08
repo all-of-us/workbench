@@ -1,6 +1,6 @@
 # Python client for All of Us Workbench Jupyter Notebooks
 
-The client uses `python3`, to match Jupyter environments.
+The client uses Python 2.7, to match FireCloud Jupyter environments.
 
 ## Local testing
 
@@ -28,7 +28,6 @@ key.
 ```Shell
 api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
 export GOOGLE_APPLICATION_CREDENTIALS=.../path/to/sa-key.json
-python3 client/py/aou_workbench_client/auth.py
 ```
 
 ### Run examples
