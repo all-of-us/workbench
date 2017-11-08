@@ -66,7 +66,7 @@ public class PhecodesQueryBuilderTest {
                         "union distinct\n" +
                         "select distinct person_id\n" +
                         "from `${projectId}.${dataSetId}.measurement` m\n" +
-                        "where m.a.measurement_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
+                        "where m.measurement_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
                         "from `${projectId}.${dataSetId}.concept` c\n" +
                         "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
                         "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
@@ -77,7 +77,7 @@ public class PhecodesQueryBuilderTest {
                         "union distinct\n" +
                         "select distinct person_id\n" +
                         "from `${projectId}.${dataSetId}.observation` o\n" +
-                        "where o.a.observation_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
+                        "where o.observation_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
                         "from `${projectId}.${dataSetId}.concept` c\n" +
                         "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
                         "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
