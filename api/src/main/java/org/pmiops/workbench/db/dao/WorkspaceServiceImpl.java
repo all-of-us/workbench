@@ -88,7 +88,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Iterator<WorkspaceUserRole> newUserRoles = userRoleSet.iterator();
       while (newUserRoles.hasNext()) {
         WorkspaceUserRole newUserRole = newUserRoles.next();
-        if(currentUserRole.getUser().getEmail().equals(newUserRole.getUser().getEmail())){
+        if (currentUserRole.getUser().getUserId() == newUserRole.getUser().getUserId()) {
           currentUserRole.setRole(newUserRole.getRole());
           resolved = true;
           newUserRoles.remove();

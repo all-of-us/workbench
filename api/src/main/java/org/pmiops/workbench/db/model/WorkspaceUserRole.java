@@ -30,7 +30,7 @@ public class WorkspaceUserRole {
   public void setUserWorkspaceId(long userWorkspaceId) {
     this.userWorkspaceId = userWorkspaceId;
   }
-
+  
   @ManyToOne
   @JoinColumn(name="user_id")
   public User getUser() {
