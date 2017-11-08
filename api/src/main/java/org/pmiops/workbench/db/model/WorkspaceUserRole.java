@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -13,10 +14,22 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 @Entity
 @Table(name = "user_workspace")
 public class WorkspaceUserRole {
+  @Id
+  private long userId;
   private User user;
+  @Id
+  private long workspaceId;
   private Workspace workspace;
   private WorkspaceAccessLevel role;
 
+  @Column(name="user_id")
+  public long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(long userId) {
+    this.userId = userId;
+  }
 
   @ManyToOne
   @PrimaryKeyJoinColumn(name="user_id", referencedColumnName="user_id")
@@ -26,6 +39,15 @@ public class WorkspaceUserRole {
 
   public void setUser(User user) {
     this.user = user;
+  }
+
+  @Column(name="workspace_id")
+  public long getWorkspaceId() {
+    return workspaceId;
+  }
+
+  public void setWorkspaceId(long workspaceId) {
+    this.workspaceId = workspaceId;
   }
 
   @ManyToOne
