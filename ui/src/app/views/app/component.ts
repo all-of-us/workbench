@@ -37,9 +37,17 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    window["setAllOfUsApiUrl"] = (url: string) => {
+      if (url) {
+        localStorage.setItem('allOfUsApiUrlOverride', url);
+      } else {
+        localStorage.removeItem('allOfUsApiUrlOverride');
+      }
+      window.location.reload();
+    }
+
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
-
     this.baseTitle = this.titleService.getTitle();
     if (environment.displayTag) {
       this.baseTitle = `[${environment.displayTag}] ${this.baseTitle}`;
@@ -60,6 +68,7 @@ export class AppComponent implements OnInit {
         }
       }
     });
+
     this.user = this.signInService.user;
     this.user.subscribe(user => {
       if (user.isSignedIn) {

@@ -37,8 +37,9 @@ import {
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
+    const basePath = localStorage.getItem('allOfUsApiUrlOverride') || environment.allOfUsApiUrl;
     return new Configuration({
-      basePath: environment.allOfUsApiUrl,
+      basePath: basePath,
       accessToken: () => signInService.currentAccessToken
     });
 }
