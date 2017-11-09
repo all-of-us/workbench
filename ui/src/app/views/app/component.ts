@@ -37,14 +37,14 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    window["setAllOfUsApiUrl"] = (url: string) => {
+    window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
         localStorage.setItem('allOfUsApiUrlOverride', url);
       } else {
         localStorage.removeItem('allOfUsApiUrlOverride');
       }
       window.location.reload();
-    }
+    };
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
