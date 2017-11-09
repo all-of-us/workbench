@@ -976,7 +976,8 @@ definitions:
         type: string
       count:
         description: number of subjects
-        type: string
+        type: integer
+        format: int64
 
   SearchRequest:
     description: >
