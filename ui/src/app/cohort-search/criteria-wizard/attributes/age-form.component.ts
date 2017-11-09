@@ -1,9 +1,11 @@
 import {Component, OnInit, OnDestroy, Output, EventEmitter} from '@angular/core';
 import {FormGroup, FormControl, Validators} from '@angular/forms';
+import {select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
-import {Map} from 'immutable';
+import {List, Map, fromJS} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {activeParameterList} from '../../redux';
 import {AttributeFormComponent} from './attributes.interface';
 import {Attribute} from 'generated';
 
@@ -21,25 +23,46 @@ const MIN_AGE = 0;
 const _operatorIsRange = (op: string): boolean => (op === 'RANGE');
 const _operatorIsValid = (op: string): boolean => (Object.keys(OPERATORS).includes(op));
 
-const validInterval = (group: FormGroup): null|object => {
-  const start = group.get('rangeOpen').value;
-  const close = group.get('rangeClose').value;
-  return start && close && start >= close
-    ? {'invalidRange': 'The Range Open value must precede the Close value'}
-    : null;
+const _asAttribute = (ageForm: FormGroup): Attribute => {
+  const operator = ageForm.get('operator').value;
+  const operands = _operatorIsRange(operator)
+    ? [ageForm.get('rangeOpen').value, ageForm.get('rangeClose').value]
+    : [ageForm.get('age').value];
+  return <Attribute>{operator, operands};
 };
 
-const requiredAgeValidator = Validators.compose([
-  Validators.min(MIN_AGE),
-  Validators.max(MAX_AGE),
-  Validators.required,
-]);
+const _validate = {
+  interval: (group: FormGroup): null|object => {
+    const start = group.get('rangeOpen').value;
+    const close = group.get('rangeClose').value;
+    return start && close && start >= close
+      ? {invalidRange: 'The Range Open value must precede the Close value'}
+      : null;
+  },
+  uniqueness: (existent: List<string>) =>
+    (ageForm: FormGroup): null|object => {
+      const wrapped = List([fromJS(_asAttribute(ageForm))]);
+      const hash = wrapped.hashCode();
+      const paramId = `param${hash}`;
+      return existent.includes(paramId)
+        ? {duplicateAttribute: 'This Criterion has already been selected'}
+        : null;
+  },
+  age: Validators.compose([
+    Validators.min(MIN_AGE),
+    Validators.max(MAX_AGE),
+    Validators.required,
+  ]),
+};
 
 @Component({
   selector: 'crit-age-form',
   templateUrl: './age-form.component.html',
 })
 export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestroy {
+  @select(activeParameterList) parameterSelection$;
+  private selected: List<string>;
+
   ageForm = new FormGroup({
     operator: new FormControl('', [
       Validators.required,
@@ -48,7 +71,7 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
     rangeOpen: new FormControl(),
     rangeClose: new FormControl(),
   });
-  private sub: Subscription;
+  private subscription: Subscription;
 
   private readonly operators = OPERATORS;
   private readonly opCodes = Object.keys(OPERATORS);
@@ -60,39 +83,50 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   @Output() cancelled = new EventEmitter<boolean>();
 
   ngOnInit() {
-    this.sub = this.operator.valueChanges.subscribe(
-      (operator: string) => {
-        if (_operatorIsValid(operator)) {
-          console.log(this);
-          if (_operatorIsRange(operator)) {
-            this.age.clearValidators();
-            this.age.updateValueAndValidity();
+    this.subscription = this.parameterSelection$
+      .map(params => params.map(n => n.get('parameterId')))
+      .subscribe(ids => this.selected = ids);
 
-            this.rangeOpen.setValidators(requiredAgeValidator);
-            this.rangeOpen.updateValueAndValidity();
+    const [isRange, isNotRange] = this.operator.valueChanges
+      .filter(_operatorIsValid)
+      .partition(_operatorIsRange);
 
-            this.rangeClose.setValidators(requiredAgeValidator);
-            this.rangeClose.updateValueAndValidity();
+    this.subscription.add(isRange.subscribe(op => {
+      this.age.clearValidators();
+      this.age.updateValueAndValidity();
 
-            this.ageForm.setValidators(validInterval);
-            this.ageForm.updateValueAndValidity();
-          } else {
-            this.rangeOpen.clearValidators();
-            this.rangeOpen.updateValueAndValidity();
+      this.rangeOpen.setValidators(_validate.age);
+      this.rangeOpen.updateValueAndValidity();
 
-            this.rangeClose.clearValidators();
-            this.rangeClose.updateValueAndValidity();
+      this.rangeClose.setValidators(_validate.age);
+      this.rangeClose.updateValueAndValidity();
 
-            this.age.setValidators(requiredAgeValidator);
-            this.age.updateValueAndValidity();
-          }
-        }
-      }
-    );
+      this.ageForm.setValidators([
+        _validate.interval,
+        _validate.uniqueness(this.selected),
+      ]);
+      this.ageForm.updateValueAndValidity();
+    }));
+
+    this.subscription.add(isNotRange.subscribe(op => {
+      this.rangeOpen.clearValidators();
+      this.rangeOpen.updateValueAndValidity();
+
+      this.rangeClose.clearValidators();
+      this.rangeClose.updateValueAndValidity();
+
+      this.age.setValidators(_validate.age);
+      this.age.updateValueAndValidity();
+
+      this.ageForm.setValidators([
+        _validate.uniqueness(this.selected),
+      ]);
+      this.ageForm.updateValueAndValidity();
+    }));
   }
 
   ngOnDestroy() {
-    this.sub.unsubscribe();
+    this.subscription.unsubscribe();
   }
 
   get operator() { return this.ageForm.get('operator'); }
@@ -111,12 +145,7 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   }
 
   submit(): void {
-    const operator = this.operator.value;
-    const operands = this.operatorIsRange
-      ? [this.rangeOpen.value, this.rangeClose.value]
-      : [this.age.value];
-    const attr: Attribute = {operator, operands};
-    this.attribute.emit(attr);
+    this.attribute.emit(_asAttribute(this.ageForm));
     this.submitted.emit(true);
   }
 

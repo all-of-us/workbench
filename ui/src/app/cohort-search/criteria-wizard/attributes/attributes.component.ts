@@ -14,9 +14,14 @@ import {CohortSearchActions} from '../../redux';
 import {AttributesDirective} from './attributes.directive';
 import {AgeFormComponent} from './age-form.component';
 
+
 @Component({
   selector: 'crit-attributes',
-  template: '<ng-template critAttrFormHost></ng-template>'
+  template: `
+    <div [style.padding]="'1rem'">
+      <ng-template critAttrFormHost></ng-template>
+    </div>
+  `
 })
 export class AttributesComponent implements AfterViewInit, OnDestroy {
   @Input() node: Map<any, any>;
@@ -50,23 +55,21 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
 
     container.clear();
     this._form = container.createComponent(factory);
+
     this._subs = [
       this._form.instance.attribute.subscribe(
         value => this._attrs = this._attrs.push(fromJS(value))
       ),
-      this._form.instance.submitted.subscribe(this.submit),
-      this._form.instance.cancelled.subscribe(this.cancel),
+      this._form.instance.submitted.filter(v => v).subscribe(this.submit),
+      this._form.instance.cancelled.filter(v => v).subscribe(this.cancel),
     ];
   }
 
-  cancel = (doIt?: boolean): void => {
-    if (!doIt) { return; }
+  cancel = (): void => {
     this.actions.clearWizardFocus();
   }
 
-  submit = (doIt?: boolean): void => {
-    if (!doIt) { return; }
-
+  submit = (): void => {
     const parameterId = `param${this._attrs.hashCode()}`;
     const param = this.node
       .set('attributes', this._attrs)
