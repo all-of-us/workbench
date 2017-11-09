@@ -4,21 +4,27 @@ The credentials are obtained by oauth2client, from one of:
 *   Google application default credentials (expected case, from notebook servers).
 *   A private key file, path specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
 
-For local development using a private key file:
-  api/project.rb get-service-creds --project all-of-us-workbench-test --account $USER@pmi-ops.org
-  GOOGLE_APPLICATION_CREDENTIALS=`pwd`/api/sa-key.json
-  python client/py/aou_workbench_client/auth.py
-TODO(RW-32) Once available, switch to fetching the user's pet service account key (as will be used
-in notebooks), instead of the application service account key.
+GoogleCredentials.create_scoped() is a noop for application-default credentials. (However, it is
+used when GOOGLE_APPLICATION_CREDENTIALS is defined and they key is read from a file.) For
+application default credentials, the service account's scopes are set ahead of time, like:
+
+  SCOPES="https://www.googleapis.com/auth/userinfo.profile"
+  SCOPES+=",https://www.googleapis.com/auth/userinfo.email"
+  gcloud compute instances set-service-account $INSTANCE_ID --zone us-west1-b \
+      --service-account $PET_SA_NAME@$PROJECT.iam.gserviceaccount.com \
+      --scopes "$SCOPES"
+
+See https://www.googleapis.com/oauth2/v3/tokeninfo?access_token= for debugging.
 """
 
 import time
 
 from oauth2client.client import GoogleCredentials
 
-from swagger_client.api_client import ApiClient
+from .swagger_client.api_client import ApiClient
 
 
+# These are sometimes ignored, see module doc.
 CLIENT_OAUTH_SCOPES = (
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
@@ -60,7 +66,8 @@ def _get_bearer_token_and_expiration():
 
     # The default, unscoped credentials provide an access token.
     creds = GoogleCredentials.get_application_default()
-    # Scoped credentials provide the bearer token we need.
+    # Scoped credentials provide the bearer token we need. However, create_scoped is sometimes
+    # ignored, see the module doc.
     scoped_creds = creds.create_scoped(CLIENT_OAUTH_SCOPES)
     token_info = scoped_creds.get_access_token()
 
@@ -72,13 +79,3 @@ def clear_cache():
     global _token_expiration
     _cached_client = None
     _token_expiration = 0
-
-
-# Self-test / simple example: Make a simple authenticated API call.
-if __name__ == '__main__':
-    print 'Listing workspaces via authenticated API:'
-    from swagger_client.apis.workspaces_api import WorkspacesApi
-    client = WorkspacesApi(api_client=get_authenticated_swagger_client())
-    workspace_list = client.get_workspaces()
-    for ws in workspace_list.items:
-        print '%s/%s\t%s\t%s' % (ws.namespace, ws.id, ws.name, ws.description)
