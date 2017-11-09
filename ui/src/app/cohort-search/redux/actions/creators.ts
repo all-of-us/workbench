@@ -9,8 +9,10 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  SELECT_CRITERIA,
-  UNSELECT_CRITERIA,
+  ADD_PARAMETER,
+  REMOVE_PARAMETER,
+  SET_WIZARD_FOCUS,
+  CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -79,15 +81,24 @@ export const initGroup =
   ): ActionTypes[typeof INIT_SEARCH_GROUP] =>
   ({type: INIT_SEARCH_GROUP, role, groupId});
 
-export const selectCriteria =
-  (criterion: Criteria
-  ): ActionTypes[typeof SELECT_CRITERIA] =>
-  ({type: SELECT_CRITERIA, criterion});
+export const addParameter =
+  (parameter: any
+  ): ActionTypes[typeof ADD_PARAMETER] =>
+  ({type: ADD_PARAMETER, parameter});
 
-export const unselectCriteria =
-  (criterionId?: number, criterion?: Criteria
-  ): ActionTypes[typeof UNSELECT_CRITERIA] =>
-  ({type: UNSELECT_CRITERIA, criterion, criterionId});
+export const removeParameter =
+  (parameterId: string
+  ): ActionTypes[typeof REMOVE_PARAMETER] =>
+  ({type: REMOVE_PARAMETER, parameterId});
+
+export const setWizardFocus =
+  (criterion: any
+  ): ActionTypes[typeof SET_WIZARD_FOCUS] =>
+  ({type: SET_WIZARD_FOCUS, criterion});
+
+export const clearWizardFocus =
+  (): ActionTypes[typeof CLEAR_WIZARD_FOCUS] =>
+  ({type: CLEAR_WIZARD_FOCUS});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string

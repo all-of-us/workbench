@@ -3,14 +3,15 @@ import {By} from '@angular/platform-browser';
 import {ClarityModule} from 'clarity-angular';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {Map, List, fromJS} from 'immutable';
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, dispatch} from '@angular-redux/store';
 
 import {
   activeCriteriaType,
-  activeCriteriaList,
+  activeParameterList,
   CohortSearchActions,
   CohortSearchState,
-  UNSELECT_CRITERIA,
+  REMOVE_PARAMETER,
+  removeParameter,
 } from '../../redux';
 import {SelectionComponent} from './selection.component';
 import {CohortBuilderService} from 'generated';
@@ -23,10 +24,12 @@ const SELECTION_ICD9 = fromJS([
     type: 'icd9',
     name: 'CodeA',
     id: 'CodeA',
+    parameterId: 'CodeA',
   }, {
     type: 'icd9',
     name: 'CodeB',
     id: 'CodeB',
+    parameterId: 'CodeB',
   }
 ]);
 
@@ -37,29 +40,37 @@ const SELECTION_DEMO = fromJS([
     name: 'Female',
     code: 'F',
     id: 0,
+    parameterId: 'Code0',
   }, {
     type: 'DEMO',
     subtype: 'RACE',
     name: 'African American',
     code: 'A',
     id: 1,
+    parameterId: 'Code1',
   }, {
     type: 'DEMO',
     subtype: 'AGE',
     id: 2,
+    parameterId: 'Code0',
   }, {
     type: 'DEMO',
     subtype: 'DEC',
     id: 3,
+    parameterId: 'Code0',
   }
 ]);
+
+class MockActions {
+  @dispatch() removeParameter = removeParameter;
+}
 
 describe('SelectionComponent', () => {
   let fixture: ComponentFixture<SelectionComponent>;
   let comp: SelectionComponent;
+  let mockReduxInst;
 
   let dispatchSpy;
-  let mockReduxInst;
   let typeStub;
   let listStub;
 
@@ -76,7 +87,7 @@ describe('SelectionComponent', () => {
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
           {provide: CohortBuilderService, useValue: {}},
-          CohortSearchActions,
+          {provide: CohortSearchActions, useValue: new MockActions()},
         ],
       })
       .compileComponents();
@@ -94,20 +105,13 @@ describe('SelectionComponent', () => {
 
     listStub = MockNgRedux
       .getSelectorStub<CohortSearchState, List<any>>(
-        activeCriteriaList);
+        activeParameterList);
 
     fixture.detectChanges();
   });
 
   it('Should render', () => {
-    typeStub.next(TYPE_ICD9);
-    listStub.next(SELECTION_ICD9);
     expect(comp).toBeTruthy();
-    fixture.detectChanges();
-
-    const selector = 'div#wizard-criteria-container > div';
-    const rows = fixture.debugElement.queryAll(By.css(selector));
-    expect(rows.length).toEqual(2);
   });
 
   it('Should generate the correct title', () => {
@@ -126,19 +130,18 @@ describe('SelectionComponent', () => {
     expect(title.nativeElement.textContent).toBe('No Selection');
   });
 
-  it('should dispatch UNSELECT_CRITERIA on removal click', () => {
+  it('should dispatch REMOVE_PARAMETER on removal click', () => {
     typeStub.next(TYPE_ICD9);
     listStub.next(SELECTION_ICD9);
     fixture.detectChanges();
 
-    const selector = 'div#wizard-criteria-container button.text-danger';
+    const selector = 'div#wizard-parameter-container button.text-danger';
     const button = fixture.debugElement.query(By.css(selector));
     button.triggerEventHandler('click', null);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
-      type: UNSELECT_CRITERIA,
-      criterionId: 'CodeA',
-      criterion: undefined,
+      type: REMOVE_PARAMETER,
+      parameterId: 'CodeA',
     });
   });
 

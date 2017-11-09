@@ -1,14 +1,13 @@
-import {
-  Component,
-} from '@angular/core';
+import {Component} from '@angular/core';
 import {select} from '@angular-redux/store';
+import {List} from 'immutable';
 
 import {
   CohortSearchActions,
   activeGroupId,
   activeRole,
   activeCriteriaType,
-  activeCriteriaList,
+  activeParameterList,
 } from '../../redux';
 
 import {Criteria} from 'generated';
@@ -22,7 +21,7 @@ import {Criteria} from 'generated';
 export class SelectionComponent {
 
   @select(activeCriteriaType) criteriaType$;
-  @select(activeCriteriaList) criteriaList$;
+  @select(activeParameterList) criteriaList$;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -39,23 +38,55 @@ export class SelectionComponent {
     });
   }
 
-  typeDisplay(criteria): string {
-    const subtype = criteria.get('subtype', '');
-    const _type = criteria.get('type', '');
+  remove(parameter): void {
+    this.actions.removeParameter(parameter.get('parameterId'));
+  }
+
+  typeDisplay(parameter): string {
+    const subtype = parameter.get('subtype', '');
+    const _type = parameter.get('type', '');
 
     if (_type.match(/^DEMO.*/i)) {
       return {
         'GEN': 'Gender',
         'RACE': 'Race/Ethnicity',
-        'AGE': 'Demographic',
-        'DEC': 'Demographic'
+        'AGE': 'Age',
+        'DEC': 'Deceased'
       }[subtype];
     } else {
-      return criteria.get('code');
+      return parameter.get('code');
     }
   }
 
-  nameDisplay(criteria): string {
-    return criteria.get('name');
+  nameDisplay(parameter): string {
+    const subtype = parameter.get('subtype', '');
+    const _type = parameter.get('type', '');
+    if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
+      return '';
+    }
+    return parameter.get('name');
+  }
+
+  attributeDisplay(parameter): string {
+    const attrs = parameter.get('attributes', List());
+
+    if (attrs.isEmpty()) {
+      return '';
+    }
+
+    const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
+    if (kind.match(/^DEMO.*AGE/i)) {
+      const attr = attrs.first();
+      const op = {
+        'RANGE': 'In Range',
+        'EQ': 'Equal To',
+        'GT': 'Greater Than',
+        'LT': 'Less Than',
+        'GTE': 'Greater Than or Equal To',
+        'LTE': 'Less Than or Equal To',
+      }[attr.get('operator')];
+      const args = attr.get('operands', List()).join(', ');
+      return `${op} ${args}`;
+    }
   }
 }
