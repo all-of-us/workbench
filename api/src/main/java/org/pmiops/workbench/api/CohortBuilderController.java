@@ -119,7 +119,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<ChartInfoListResponse> getChartInfo(SearchRequest request) {
         ChartInfoListResponse response = new ChartInfoListResponse();
-        response.addItemsItem(new ChartInfo().gender("M").race("African American").ageRange("12-20").count("10"));
+        response.addItemsItem(new ChartInfo().gender("M").race("African American").ageRange("12-20").count(10L));
         return ResponseEntity.ok(response);
     }
 
