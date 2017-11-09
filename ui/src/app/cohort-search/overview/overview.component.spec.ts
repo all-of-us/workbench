@@ -9,12 +9,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions} from '../redux';
 import {OverviewComponent} from './overview.component';
-import {
-  ChartsComponent,
-  GenderChartComponent,
-  RaceChartComponent,
-  GoogleChartComponent,
-} from '../charts';
+import {ChartsModule} from '../charts/charts.module';
 import {CohortBuilderService} from 'generated';
 
 class MockActions {
@@ -35,14 +30,11 @@ describe('OverviewComponent', () => {
     TestBed
       .configureTestingModule({
         declarations: [
-          ChartsComponent,
-          GenderChartComponent,
-          RaceChartComponent,
-          GoogleChartComponent,
           OverviewComponent,
         ],
         imports: [
           ClarityModule,
+          ChartsModule,
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
