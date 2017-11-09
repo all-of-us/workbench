@@ -2,16 +2,18 @@ import {Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
 import {Observable} from 'rxjs/Observable';
 import {Map} from 'immutable';
+import {trigger, state, style, animate, transition} from '@angular/animations';
 
 import {
   CohortSearchActions,
   CohortSearchState,
-  activeCriteriaList,
+  activeParameterList,
   activeRole,
   activeGroupId,
   activeItem,
   isCriteriaLoading,
   criteriaLoadErrors,
+  focusedCriterion,
 } from '../../redux';
 
 
@@ -19,15 +21,19 @@ import {
   selector: 'app-criteria-wizard',
   templateUrl: './wizard.component.html',
   styleUrls: ['./wizard.component.css'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  animations: [
+    // TODO (jms) animate the thingy
+  ],
 })
 export class WizardComponent implements OnInit {
   @Input() open: boolean;
   @Input() criteriaType: string;
   private readonly parentId = 0;  /* Root parent ID is always zero */
-
   private loading$: Observable<boolean>;
   private errors$: Observable<any>;
+  private nodeInFocus$: Observable<Map<any, any>>;
+  private settingAttributes$: Observable<boolean>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -48,6 +54,8 @@ export class WizardComponent implements OnInit {
           error: val
         })).valueSeq().toJS()
     );
+    this.nodeInFocus$ = this.ngRedux.select(focusedCriterion);
+    this.settingAttributes$ = this.nodeInFocus$.map(node => !node.isEmpty());
   }
 
   get rootNode() {
@@ -73,7 +81,7 @@ export class WizardComponent implements OnInit {
     const role = activeRole(state);
     const groupId = activeGroupId(state);
     const itemId = activeItem(state).get('id');
-    const selections = activeCriteriaList(state);
+    const selections = activeParameterList(state);
     this.actions.finishWizard();
 
     if (!selections.isEmpty()) {

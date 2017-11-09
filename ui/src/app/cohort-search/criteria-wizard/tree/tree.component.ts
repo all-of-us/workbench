@@ -11,10 +11,11 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 import {List} from 'immutable';
 
+import {needsAttributes} from '../utils';
 import {
   CohortSearchActions,
   CohortSearchState,
-  activeCriteriaList,
+  activeParameterList,
   isCriteriaLoading,
   criteriaChildren,
   criteriaError,
@@ -45,7 +46,7 @@ export class TreeComponent implements OnInit, OnDestroy {
     const error$ = this.ngRedux.select(criteriaError(_type, _parentId));
     const loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
     const children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
-    const selections$ = this.ngRedux.select(activeCriteriaList);
+    const selections$ = this.ngRedux.select(activeParameterList);
 
     this.subscriptions = [
       error$.subscribe(value => this.error = value),
@@ -65,25 +66,38 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   /** Functions of the node's child nodes */
-
-  trackById(index, node) {
-    return node ? node.get('id') : undefined;
+  paramId(node) {
+    return `param${node.get('id')}`;
   }
 
   select(node) {
-    this.actions.selectCriteria(node);
-  }
-
-  isSelected(node) {
-    return this.selections.includes(node);
-  }
-
-  nonZeroCount(node) {
-    return node.get('count', 0) > 0;
+    if (needsAttributes(node)) {
+      this.actions.setWizardFocus(node);
+    } else {
+      /*
+       * Here we set the parameter ID to `param<criterion ID>` - this is
+       * deterministic and avoids duplicate parameters for criterion which do
+       * not require attributes.  Criterion which require attributes in order
+       * to have a complete sense are given a unique ID based on the attribute
+       */
+      const param = node.set('parameterId', this.paramId(node));
+      this.actions.addParameter(param);
+    }
   }
 
   selectable(node) {
     return node.get('selectable', false);
+  }
+
+  isSelected(node) {
+    const noAttr = !needsAttributes(node);
+    const selectedIDs = this.selections.map(n => n.get('parameterId'));
+    const selected = selectedIDs.includes(this.paramId(node));
+    return noAttr && selected;
+  }
+
+  nonZeroCount(node) {
+    return node.get('count', 0) > 0;
   }
 
   displayName(node) {

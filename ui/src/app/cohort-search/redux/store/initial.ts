@@ -30,13 +30,14 @@ export const initialState = fromJS({
       },
     },
     items: {},
-    criteria: {},
+    parameters: {},
   },
 
   wizard: {
     open: false,
     item: {},
     selections: {},
+    focused: {},
   },
 
   criteria: {

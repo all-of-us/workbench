@@ -19,8 +19,14 @@
         </crit-alerts>
 
         <crit-tree
+          [style.display]="(settingAttributes$ | async) ? 'none' : 'initial'"
           [node]="rootNode">
         </crit-tree>
+
+        <crit-attributes
+          *ngIf="(settingAttributes$ | async)"
+          [node]="(nodeInFocus$ | async)">
+        </crit-attributes>
       </div>
 
       <div class="criteria-selection-container">

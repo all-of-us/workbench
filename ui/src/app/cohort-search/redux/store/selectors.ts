@@ -22,7 +22,7 @@ export const itemList = groupId => state =>
 
 export const parameterList = itemId => state =>
   state.getIn(['entities', 'items', itemId, 'searchParameters'], List()).map(
-    critId => state.getIn(['entities', 'criteria', critId], Map()));
+    critId => state.getIn(['entities', 'parameters', critId], Map()));
 
 export const getItem = itemId => state =>
   state.getIn(['entities', 'items', itemId], Map());
@@ -61,13 +61,16 @@ export const activeRole = (state): keyof SearchRequest =>
 export const activeGroupId = (state): string =>
   state.getIn(['wizard', 'groupId']);
 
-export const activeCriteriaList = (state): List<any> =>
+export const activeParameterList = (state): List<any> =>
   state
     .getIn(['wizard', 'item', 'searchParameters'], List())
     .map(id => state.getIn(['wizard', 'selections', id]));
 
 export const activeItem = (state) =>
   state.getIn(['wizard', 'item'], Map());
+
+export const focusedCriterion = (state) =>
+  state.getIn(['wizard', 'focused'], Map());
 
 /**
  * Criteria

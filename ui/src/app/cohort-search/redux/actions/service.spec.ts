@@ -13,7 +13,7 @@ import {CohortBuilderService} from 'generated';
 const dummyItem = fromJS({
   id: 'item001',
   type: 'icd9',
-  searchParameters: [0, 1],
+  searchParameters: ['param0', 'param1'],
   modifiers: [],
   count: null,
   isRequesting: false,
@@ -21,6 +21,7 @@ const dummyItem = fromJS({
 
 const zeroCrit = fromJS({
   id: 0,
+  parameterId: 'param0',
   type: 'icd9',
   code: 'CodeA',
   domainId: null,
@@ -28,12 +29,14 @@ const zeroCrit = fromJS({
 
 const oneCrit = fromJS({
   id: 1,
+  parameterId: 'param1',
   type: 'icd9',
   code: 'CodeB',
   domainId: null,
 });
 
 const DEMO_crit = fromJS({
+  parameterId: 'paramF',
   type: 'DEMO',
   subtype: 'GEN',
   code: 'F',
@@ -44,8 +47,8 @@ const DEMO_crit = fromJS({
 
 const dummyState = initialState
   .setIn(['entities', 'groups', 'include0', 'items'], List([dummyItem.get('id')]))
-  .setIn(['entities', 'criteria', 0], zeroCrit)
-  .setIn(['entities', 'criteria', 1], oneCrit)
+  .setIn(['entities', 'parameters', 'param0'], zeroCrit)
+  .setIn(['entities', 'parameters', 'param1'], oneCrit)
   .setIn(['entities', 'items', dummyItem.get('id')], dummyItem);
 
 const expectedSR = {
