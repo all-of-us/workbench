@@ -4,13 +4,3 @@
   height: 100%;
   width: 100%;
 }
-
-#charts {
-  order: -1;
-}
-
-@media all and (min-width: 1200px) {
-  #charts {
-    order: unset;
-  }
-}
