@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_and_test_and_deploy_api:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.8
+      - image: allofustest/workbench:buildimage-0.0.9
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -18,7 +18,7 @@ jobs:
           - api-cache-
       - run:
           working_directory: ~/workbench
-          command: ci/activate_creds.sh circle-sa-key.json
+          command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench
           command: |
@@ -36,10 +36,10 @@ jobs:
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
       - deploy:
           name: Deploy to gcloud test project
+          working_directory: ~/workbench/api
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./ci/deploy.sh api
-            fi
+            ./project.rb circle-deploy \
+              --project all-of-us-workbench-test --creds-file circle-sa-key.json
   build_and_test_and_deploy_ui:
     docker:
       - image: allofustest/workbench:buildimage-0.0.8

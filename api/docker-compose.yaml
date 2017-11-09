@@ -1,5 +1,15 @@
 version: "3"
 services:
+  scripts:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
   db:
     image: mysql:5.7
     env_file:
