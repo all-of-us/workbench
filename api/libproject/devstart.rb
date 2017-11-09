@@ -164,14 +164,7 @@ def read_db_vars(creds_file, project)
   begin
     activate_service_account(creds_file)
     get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
-    db_creds_file.open
-    db_creds_file.each_line do |line|
-      line = line.strip()
-      if !line.empty?
-        parts = line.split("=")
-        ENV[parts[0]] = parts[1]
-      end
-    end
+    ENV.update(Workbench::read_vars_file(db_creds_file.path))
   ensure
     db_creds_file.unlink
   end
@@ -292,7 +285,7 @@ def connect_to_cloud_db(*args)
   op = WbOptionsParser.new("connect-to-cloud-db", args)
   CloudSqlProxyContext.new(GcloudContextV2.new(op)).run do |env_file_path|
     sleep 1 # TODO(dmohs): Detect running better.
-    env = Hash[File.read(env_file_path).split(/\n/).map {|l| l.split(/=/)}]
+    env = Workbench::read_vars_file(env_file_path)
     password = env["WORKBENCH_DB_PASSWORD"]
     Common.new.run_inline %W{
       docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}
