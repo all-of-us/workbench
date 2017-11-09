@@ -8,7 +8,7 @@ import {
   activeCriteriaType,
   activeGroupId,
   activeItem,
-  activeCriteriaList,
+  activeParameterList,
 } from './store';
 
 import {
@@ -21,8 +21,10 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   INIT_SEARCH_GROUP,
-  SELECT_CRITERIA,
-  UNSELECT_CRITERIA,
+  ADD_PARAMETER,
+  REMOVE_PARAMETER,
+  SET_WIZARD_FOCUS,
+  CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -99,30 +101,34 @@ export const rootReducer: Reducer<CohortSearchState> =
             groupList => groupList.push(action.groupId)
           );
 
-      case SELECT_CRITERIA:
+      case ADD_PARAMETER:
         return state
           .setIn(
-            ['wizard', 'selections', action.criterion.get('id')],
-            action.criterion
+            ['wizard', 'selections', action.parameter.get('parameterId')],
+            action.parameter
           )
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
             List(),
-            paramList => paramList.includes(action.criterion.get('id'))
+            paramList => paramList.includes(action.parameter.get('parameterId'))
               ? paramList
-              : paramList.push(action.criterion.get('id'))
+              : paramList.push(action.parameter.get('parameterId'))
           );
 
-      case UNSELECT_CRITERIA:
+      case REMOVE_PARAMETER:
         return state
-          .deleteIn(['wizard', 'selections', action.criterionId || action.criterion.get('id')])
+          .deleteIn(['wizard', 'selections', action.parameterId])
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
             List(),
-            paramList => paramList.filterNot(id =>
-              id === (action.criterionId || action.criterion.get('id'))
-            )
+            paramList => paramList.filterNot(id => id === action.parameterId)
           );
+
+      case SET_WIZARD_FOCUS:
+        return state.setIn(['wizard', 'focused'], action.criterion);
+
+      case CLEAR_WIZARD_FOCUS:
+        return state.setIn(['wizard', 'focused'], Map());
 
       case REMOVE_ITEM: {
         state = state
@@ -133,7 +139,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           )
           .deleteIn(['entities', 'items', action.itemId]);
 
-        const critsInUse = state
+        const paramsInUse = state
           .getIn(['entities', 'items'], Map())
           .reduce(
             (ids, item) => ids.union(item.get('searchParameters', List())),
@@ -141,8 +147,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
         return state.updateIn(
-          ['entities', 'criteria'], Map(),
-          critMap => critMap.filter((_, key) => critsInUse.has(key))
+          ['entities', 'parameters'], Map(),
+          params => params.filter((_, key) => paramsInUse.has(key))
         );
       }
 
@@ -174,7 +180,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.mergeIn(['wizard'], Map({
           open: true,
           item: action.item,
-          selections: state.getIn(['entities', 'criteria'], Map()).filter(
+          selections: state.getIn(['entities', 'parameters'], Map()).filter(
             (_, key) => action.item.get('searchParameters', List()).includes(key)
           ),
           ...action.context
@@ -199,16 +205,16 @@ export const rootReducer: Reducer<CohortSearchState> =
         const setUnique = element => list =>
           list.includes(element) ? list : list.push(element);
 
-        const mergeCriteria = (criteria) =>
-          activeCriteriaList(state).reduce(
-            (critset, crit) => critset.set(crit.get('id'), crit),
-            criteria
+        const mergeParams = (parameter) =>
+          activeParameterList(state).reduce(
+            (paramset, param) => paramset.set(param.get('parameterId'), param),
+            parameter
           );
 
         return state
           .updateIn(groupItems, List(), setUnique(itemId))
           .setIn(['entities', 'items', itemId], item)
-          .updateIn(['entities', 'criteria'], Map(), mergeCriteria)
+          .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}));
       }
 

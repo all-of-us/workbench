@@ -46,8 +46,10 @@ export class CohortSearchActions {
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
   @dispatch() initGroup = ActionFuncs.initGroup;
-  @dispatch() selectCriteria = ActionFuncs.selectCriteria;
-  @dispatch() unselectCriteria = ActionFuncs.unselectCriteria;
+  @dispatch() addParameter = ActionFuncs.addParameter;
+  @dispatch() removeParameter = ActionFuncs.removeParameter;
+  @dispatch() setWizardFocus = ActionFuncs.setWizardFocus;
+  @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
 
@@ -62,9 +64,9 @@ export class CohortSearchActions {
 
   generateId(prefix?: string) {
     prefix = prefix || 'id';
-    let newId = `${prefix}${this._genSuffix()}`;
+    let newId = `${prefix}_${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
-      newId = `${prefix}${this._genSuffix()}`;
+      newId = `${prefix}_${this._genSuffix()}`;
     }
     this._idsInUse = this._idsInUse.add(newId);
     return newId;
@@ -258,7 +260,7 @@ export class CohortSearchActions {
     const critIds = item.get('searchParameters', List());
 
     const params = this.state
-      .getIn(['entities', 'criteria'], Map())
+      .getIn(['entities', 'parameters'], Map())
       .filter((_, key) => critIds.includes(key))
       .valueSeq()
       .map(this.mapParameter)

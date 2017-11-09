@@ -12,6 +12,7 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
+import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
@@ -43,6 +44,7 @@ describe('WizardComponent', () => {
           WizardComponent,
         ],
         imports: [
+          AttributesModule,
           BrowserAnimationsModule,
           ClarityModule,
         ],

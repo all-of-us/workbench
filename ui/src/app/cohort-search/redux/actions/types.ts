@@ -12,8 +12,10 @@ export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
-export const SELECT_CRITERIA = 'SELECT_CRITERIA';
-export const UNSELECT_CRITERIA = 'UNSELECT_CRITERIA';
+export const ADD_PARAMETER = 'ADD_PARAMETER';
+export const REMOVE_PARAMETER = 'REMOVE_PARAMETER';
+export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
+export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
 
@@ -84,14 +86,20 @@ export interface ActionTypes {
     groupId: string;
   };
 
-  SELECT_CRITERIA: {
-    type: typeof SELECT_CRITERIA;
+  ADD_PARAMETER: {
+    type: typeof ADD_PARAMETER;
+    parameter: any;
+  };
+  REMOVE_PARAMETER: {
+    type: typeof REMOVE_PARAMETER;
+    parameterId: string;
+  };
+  SET_WIZARD_FOCUS: {
+    type: typeof SET_WIZARD_FOCUS;
     criterion: any;
   };
-  UNSELECT_CRITERIA: {
-    type: typeof UNSELECT_CRITERIA;
-    criterion?: any;
-    criterionId?: number;
+  CLEAR_WIZARD_FOCUS: {
+    type: typeof CLEAR_WIZARD_FOCUS;
   };
 
   REMOVE_ITEM: {
@@ -137,8 +145,10 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
   | ActionTypes[typeof INIT_SEARCH_GROUP]
-  | ActionTypes[typeof SELECT_CRITERIA]
-  | ActionTypes[typeof UNSELECT_CRITERIA]
+  | ActionTypes[typeof ADD_PARAMETER]
+  | ActionTypes[typeof REMOVE_PARAMETER]
+  | ActionTypes[typeof SET_WIZARD_FOCUS]
+  | ActionTypes[typeof CLEAR_WIZARD_FOCUS]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
   | ActionTypes[typeof OPEN_WIZARD]

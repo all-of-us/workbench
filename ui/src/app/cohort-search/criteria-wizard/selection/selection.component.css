@@ -2,7 +2,7 @@ h5 {
   margin-top: 0;
 }
 
-#wizard-criteria-container {
+#wizard-parameter-container {
   border: 2px solid #d7d7d7;
   height: 100%;
   padding-left: 0.4rem;
@@ -11,7 +11,7 @@ h5 {
   overflow-x: hidden;
 }
 
-#wizard-criteria-container > div {
+#wizard-parameter-container > div {
   display: flex;
   width: 100%;
   padding: 0 0.5rem 0 0;
