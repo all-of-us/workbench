@@ -26,12 +26,13 @@ class GcloudContextV2
     @account = active_config["properties"]["core"]["account"]
     common.status "  account: #{@account}"
     unless @account
-      common.error "Account must be set in gcloud config." \
-          " See gcloud config configurations --help."
+      common.error "Account must be set in gcloud config. Try:\n" \
+          "  gcloud auth login your.name@pmi-ops.org"
       exit 1
     end
     unless @account.end_with?("@pmi-ops.org")
-      common.error "Account is not a pmi-ops.org account: #{@account}"
+      common.error "Account is not a pmi-ops.org account: #{@account}. Try:\n" \
+          "  gcloud auth login your.name@pmi-ops.org"
       exit 1
     end
   end
