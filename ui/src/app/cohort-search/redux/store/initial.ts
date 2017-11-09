@@ -1,6 +1,6 @@
 import {fromJS} from 'immutable';
 
-export const SR_ID = 'searchReqest0';
+export const SR_ID = 'searchRequest0';
 
 /**
  * InitialState

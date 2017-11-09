@@ -55,7 +55,6 @@ export const criteriaRequestError =
   ): ActionTypes[typeof CRITERIA_REQUEST_ERROR] =>
   ({type: CRITERIA_REQUEST_ERROR, kind, parentId, error});
 
-
 /**
  * Count loading mgmt
  */

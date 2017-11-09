@@ -70,20 +70,17 @@ export const rootReducer: Reducer<CohortSearchState> =
             fromJS({error: action.error})
           );
 
+      case BEGIN_CHARTS_REQUEST:
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
           .deleteIn(['entities', action.entityType, action.entityId, 'error']);
 
-      case LOAD_COUNT_RESULTS:
-        return state.mergeIn(
-          ['entities', action.entityType, action.entityId],
-          fromJS({count: action.count, isRequesting: false})
-        );
-
+      case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
         return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false);
 
+      case CHARTS_REQUEST_ERROR:
       case COUNT_REQUEST_ERROR:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false)
@@ -93,7 +90,22 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case LOAD_CHARTS_RESULTS:
-        return state.set('chartData', fromJS(action.chartData));
+        return state
+          .set('chartData', fromJS(action.chartData))
+          .mergeIn(
+            ['entities', action.entityType, action.entityId],
+            fromJS({
+              count: action.chartData.reduce((sum, data) => sum + data.count, 0),
+              isRequesting: false,
+            })
+          );
+
+      case LOAD_COUNT_RESULTS:
+        return state
+          .mergeIn(
+            ['entities', action.entityType, action.entityId],
+            fromJS({count: action.count, isRequesting: false})
+          );
 
       case INIT_SEARCH_GROUP:
         return state

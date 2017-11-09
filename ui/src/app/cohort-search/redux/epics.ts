@@ -63,7 +63,7 @@ export class CohortSearchEpics {
     )
   )
 
-  fetchCounts: CSEpic = (action$) => (
+  fetchCount: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
       ({entityType, entityId, request}: CountRequestAction) =>
       this.service.countSubjects(request)
