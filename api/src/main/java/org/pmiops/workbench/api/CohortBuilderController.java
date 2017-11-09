@@ -15,6 +15,8 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.model.ChartInfo;
+import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -112,6 +114,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
         List<FieldValue> row = result.iterateAll().iterator().next();
         return ResponseEntity.ok(getLong(row, rm.get("count")));
+    }
+
+    @Override
+    public ResponseEntity<ChartInfoListResponse> getChartInfo(SearchRequest request) {
+        ChartInfoListResponse response = new ChartInfoListResponse();
+        response.addItemsItem(new ChartInfo().gender("M").race("African American").ageRange("12-20").count(10L));
+        return ResponseEntity.ok(response);
     }
 
     /**
