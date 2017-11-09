@@ -75,7 +75,7 @@ export const focusedCriterion = (state) =>
  * Criteria
  */
 export const criteriaChildren =
-  (kind: string, parentId:number) =>
+  (kind: string, parentId: number) =>
   (state): List<any> =>
   state.getIn(['criteria', 'tree', kind, parentId], List());
 
