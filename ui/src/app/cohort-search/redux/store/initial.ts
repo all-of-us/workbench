@@ -45,4 +45,6 @@ export const initialState = fromJS({
     requests: {},
     errors: {},
   },
+
+  chartData: [],
 });

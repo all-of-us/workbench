@@ -17,7 +17,8 @@ import {
   excludeGroups,
   wizardOpen,
   totalCount,
-  isRequstingTotal
+  isRequstingTotal,
+  chartData,
 } from '../redux';
 
 @Component({
@@ -31,6 +32,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(excludeGroups) excludeGroups$: Observable<List<any>>;
   @select(wizardOpen) open$: Observable<boolean>;
   @select(totalCount) total$: Observable<number>;
+  @select(chartData) chartData$: Observable<List<any>>;
   @select(isRequstingTotal) isRequesting$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
 
