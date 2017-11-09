@@ -9,7 +9,7 @@ import {
 declare var google: any;
 
 @Directive({
-  selector: '[GoogleChart]'
+  selector: '[appGoogleChart]'
 })
 export class GoogleChartDirective implements OnChanges {
   public _element: any;

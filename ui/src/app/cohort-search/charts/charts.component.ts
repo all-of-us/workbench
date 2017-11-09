@@ -15,13 +15,13 @@ const baseLine = {
   selector: 'app-charts',
   template: `
     <div class="box">
-      <div GoogleChart
+      <div appGoogleChart
         id="genderChart"
         [chartType]="'BarChart'"
         [dataTable]="genderData"
         [options]="genderOpts">
       </div>
-      <div GoogleChart
+      <div appGoogleChart
         id="raceChart"
         [chartType]="'PieChart'"
         [dataTable]="raceData"
