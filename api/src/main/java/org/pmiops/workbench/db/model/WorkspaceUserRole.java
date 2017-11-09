@@ -1,9 +1,11 @@
 package org.pmiops.workbench.db.model;
 
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -11,8 +13,10 @@ import javax.persistence.Table;
 
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
+
 @Entity
 @Table(name = "user_workspace")
+@IdClass(WorkspaceUserRoleId.class)
 public class WorkspaceUserRole {
   @Id
   private long userId;
@@ -21,6 +25,7 @@ public class WorkspaceUserRole {
   private long workspaceId;
   private Workspace workspace;
   private WorkspaceAccessLevel role;
+
 
   @Column(name="user_id")
   public long getUserId() {
