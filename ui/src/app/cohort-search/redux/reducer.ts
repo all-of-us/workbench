@@ -16,10 +16,17 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   CRITERIA_REQUEST_ERROR,
+
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+
+  BEGIN_CHARTS_REQUEST,
+  LOAD_CHARTS_RESULTS,
+  CANCEL_CHARTS_REQUEST,
+  CHARTS_REQUEST_ERROR,
+
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
@@ -84,6 +91,9 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['entities', action.entityType, action.entityId, 'error'],
             fromJS({error: action.error})
           );
+
+      case LOAD_CHARTS_RESULTS:
+        return state.set('chartData', fromJS(action.chartData));
 
       case INIT_SEARCH_GROUP:
         return state

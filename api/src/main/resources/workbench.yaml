@@ -551,31 +551,31 @@ paths:
           description: ID of the workspace containing the cohort definition
 
   # Cohort Builder #######################################################################
-  /api/v1/cohort-builder/criteria/{type}/{parentId}:
+  /api/v1/cohortbuilder/criteria/{type}/{parentId}:
     get:
       tags:
         - cohortBuilder
       description: Returns builder criteria tree with the specified criteria type and parentId
       operationId: "getCriteriaByTypeAndParentId"
       parameters:
-              - in: path
-                name: type
-                type: string
-                required: true
-                description: the specific type of criteria to get
-              - in: path
-                name: parentId
-                type: integer
-                format: int64
-                required: true
-                description: fetch children of parentId
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: parentId
+          type: integer
+          format: int64
+          required: true
+          description: fetch children of parentId
       responses:
-              "200":
-                description: A collection of criteria
-                schema:
-                  $ref: "#/definitions/CriteriaListResponse"
+        "200":
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
 
-  /api/v1/cohort-builder/search:
+  /api/v1/cohortbuilder/search:
     post:
       tags:
         - cohortBuilder
@@ -594,6 +594,25 @@ paths:
           schema:
             type: integer
             format: int64
+
+  /api/v1/cohortbuilder/chartinfo:
+    post:
+      tags:
+        - cohortBuilder
+      description: Searches for demographic info about subjects.
+      operationId: "getChartInfo"
+      parameters:
+        - in: body
+          name: request
+          description: object of parameters by which to perform the search
+          schema:
+            $ref: "#/definitions/SearchRequest"
+          required: true
+      responses:
+        "200":
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/ChartInfoListResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -927,6 +946,38 @@ definitions:
           for leaves in the tree. Parents don't have domain ids and concept
           id will be used in the case that a parent is selectable.
         type: string
+
+  ChartInfoListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChartInfo"
+
+  ChartInfo:
+    type: object
+    required:
+      - gender
+      - race
+      - ageRange
+      - count
+    properties:
+      gender:
+        description: gender of subject
+        type: string
+      race:
+        description: race of subject
+        type: string
+      ageRange:
+        description: age range of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
 
   SearchRequest:
     description: >
