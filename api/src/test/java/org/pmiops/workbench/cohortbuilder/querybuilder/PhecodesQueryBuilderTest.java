@@ -42,48 +42,44 @@ public class PhecodesQueryBuilderTest {
         }
 
         String expected =
-                "select distinct person_id\n" +
+                "select person_id\n" +
                         "from `${projectId}.${dataSetId}.condition_occurrence` co\n" +
-                        "where co.condition_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
-                        "from `${projectId}.${dataSetId}.concept` c\n" +
-                        "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
-                        "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
-                        "where c.vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
-                        "and relationship_id = 'Subsumes'\n" +
-                        "and pci.phecode in unnest(@" + pheCodesNamedParameter + ")\n" +
+                        "where co.condition_source_concept_id in (select concept_id\n" +
+                        "from `${projectId}.${dataSetId}.concept`\n" +
+                        "where concept_code in\n" +
+                        "(select icd9 from `${projectId}.${dataSetId}.phecode_criteria_icd`\n" +
+                        "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
+                        "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
                         "union distinct\n" +
-                        "select distinct person_id\n" +
+                        "select person_id\n" +
                         "from `${projectId}.${dataSetId}.procedure_occurrence` po\n" +
-                        "where po.procedure_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
-                        "from `${projectId}.${dataSetId}.concept` c\n" +
-                        "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
-                        "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
-                        "where c.vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
-                        "and relationship_id = 'Subsumes'\n" +
-                        "and pci.phecode in unnest(@" + pheCodesNamedParameter + ")\n" +
+                        "where po.procedure_source_concept_id in (select concept_id\n" +
+                        "from `${projectId}.${dataSetId}.concept`\n" +
+                        "where concept_code in\n" +
+                        "(select icd9 from `${projectId}.${dataSetId}.phecode_criteria_icd`\n" +
+                        "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
+                        "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
                         "union distinct\n" +
-                        "select distinct person_id\n" +
+                        "select person_id\n" +
                         "from `${projectId}.${dataSetId}.measurement` m\n" +
-                        "where m.measurement_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
-                        "from `${projectId}.${dataSetId}.concept` c\n" +
-                        "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
-                        "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
-                        "where c.vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
-                        "and relationship_id = 'Subsumes'\n" +
-                        "and pci.phecode in unnest(@" + pheCodesNamedParameter + ")\n" +
+                        "where m.measurement_source_concept_id in (select concept_id\n" +
+                        "from `${projectId}.${dataSetId}.concept`\n" +
+                        "where concept_code in\n" +
+                        "(select icd9 from `${projectId}.${dataSetId}.phecode_criteria_icd`\n" +
+                        "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
+                        "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
                         "union distinct\n" +
-                        "select distinct person_id\n" +
+                        "select person_id\n" +
                         "from `${projectId}.${dataSetId}.observation` o\n" +
-                        "where o.observation_source_concept_id in (select distinct concept_id_2 as concept_id\n" +
-                        "from `${projectId}.${dataSetId}.concept` c\n" +
-                        "join `${projectId}.${dataSetId}.concept_relationship` r on (c.concept_id = r.concept_id_1)\n" +
-                        "join `${projectId}.${dataSetId}.phecode_criteria_icd` pci on pci.icd9 = c.concept_code\n" +
-                        "where c.vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
-                        "and relationship_id = 'Subsumes'\n" +
-                        "and pci.phecode in unnest(@" + pheCodesNamedParameter + ")\n" +
+                        "where o.observation_source_concept_id in (select concept_id\n" +
+                        "from `${projectId}.${dataSetId}.concept`\n" +
+                        "where concept_code in\n" +
+                        "(select icd9 from `${projectId}.${dataSetId}.phecode_criteria_icd`\n" +
+                        "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
+                        "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());
