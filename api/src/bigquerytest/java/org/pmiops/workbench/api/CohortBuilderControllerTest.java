@@ -12,6 +12,8 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.ChartInfo;
+import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.SearchGroup;
@@ -286,7 +288,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_DemoGender() throws Exception {
         assertSubjects(
                 controller.countSubjects(
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)))),
+                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")))),
                         1);
     }
 
@@ -297,7 +299,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         int age = Period.between(birthdate, now).getYears();
         assertSubjects(
                 controller.countSubjects(
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE")))),
+                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")))),
                         1);
     }
 
@@ -306,8 +308,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE");
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE");
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
         assertSubjects(
                 controller.countSubjects(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
@@ -320,8 +322,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate now = LocalDate.now();
         int age = Period.between(birthdate, now).getYears();
 
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO_AGE");
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE");
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
                 .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
@@ -334,7 +336,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void countSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
                 .searchParameters(Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")));
@@ -348,10 +350,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void countSubjects_DemoExcluded() throws Exception {
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO_GEN").conceptId(8507L);
+        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("DEMO")
-                .searchParameters(Arrays.asList(new SearchParameter().domain("DEMO_GEN").conceptId(8507L)));
+                .searchParameters(Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")));
         SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
 
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
@@ -442,6 +444,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     @Test
+    public void getChartInfo_PheCodes() throws Exception {
+        assertChartInfoCounts(
+                controller.getChartInfo(
+                        createSearchRequests("PHECODE", Arrays.asList(new SearchParameter().value("008")))),
+                "F", "Unknown", "> 65", 1);
+    }
+
+    @Test
     public void filterBigQueryConfig_WithoutTableName() throws Exception {
         final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
         QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
@@ -475,5 +485,16 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
         Long subjectCount = (Long) response.getBody();
         assertThat(subjectCount).isEqualTo(expectedCount);
+    }
+
+    private void assertChartInfoCounts(ResponseEntity response, String gender, String race, String ageRange, int count) {
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ChartInfoListResponse chartInfoResponse = (ChartInfoListResponse) response.getBody();
+        final ChartInfo chartInfo = chartInfoResponse.getItems().get(0);
+        assertThat(chartInfo.getGender()).isEqualTo(gender);
+        assertThat(chartInfo.getRace()).isEqualTo(race);
+        assertThat(chartInfo.getAgeRange()).isEqualTo(ageRange);
+        assertThat(chartInfo.getCount()).isEqualTo(count);
     }
 }
