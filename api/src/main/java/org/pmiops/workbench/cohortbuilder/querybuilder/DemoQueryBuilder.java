@@ -26,7 +26,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     private static final String DEMO_AGE =
             "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.person` p\n" +
-                    "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) = ${age}\n";
+                    "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) ${operator} ${operands}\n";
 
     private static final String UNION_TEMPLATE = "union distinct\n";
 
