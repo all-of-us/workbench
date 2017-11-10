@@ -248,10 +248,7 @@ public class SubjectCounterTest {
 
         final String expectedSql = "select concept1.concept_code as gender, \n" +
                 "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
-                "case when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 0 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 1 then '< 2' \n" +
-                "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 2 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 5 then '2-5'\n" +
-                "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 6 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 12 then '6-12'\n" +
-                "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 13 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 18 then '13-18'\n" +
+                "case when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 0 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 18 then '0-18'\n" +
                 "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 19 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 44 then '19-44'\n" +
                 "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 45 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 64 then '45-64'\n" +
                 "else '> 65'\n" +
