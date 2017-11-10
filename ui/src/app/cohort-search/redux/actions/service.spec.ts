@@ -102,23 +102,23 @@ describe('CohortSearchActions', () => {
   it('requestGroupCount');
 
   it('requestTotalCount(): no ignore group', () => {
-    const requestCountSpy = spyOn(actions, 'requestCounts');
-    const setCountSpy = spyOn(actions, 'setCount');
+    const requestSpy = spyOn(actions, 'requestCharts');
+    const setDataSpy = spyOn(actions, 'setChartData');
     actions.requestTotalCount();
-    expect(requestCountSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
-    expect(setCountSpy).not.toHaveBeenCalled();
+    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
+    expect(setDataSpy).not.toHaveBeenCalled();
   });
 
   /* If the group being updated is the only group, then whether it has a
     * count or not, we should request totals from the API
     */
   const _requestTotalCountWithOneGroup = (mockStore) => {
-    const requestCountSpy = spyOn(actions, 'requestCounts');
-    const setCountSpy = spyOn(actions, 'setCount');
+    const requestSpy = spyOn(actions, 'requestCharts');
+    const setDataSpy = spyOn(actions, 'setChartData');
     mockReduxInst.getState = () => mockStore;
     actions.requestTotalCount('include0');
-    expect(requestCountSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
-    expect(setCountSpy).not.toHaveBeenCalled();
+    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
+    expect(setDataSpy).not.toHaveBeenCalled();
   };
 
   it('requestTotalCount(id): ignore group is only group, count is null', () => {
@@ -153,8 +153,8 @@ describe('CohortSearchActions', () => {
       .setIn(['entities', 'groups', 'include1'], secondGroup)
       .setIn(['entities', 'items', 'item002'], secondItem);
 
-    const requestCountSpy = spyOn(actions, 'requestCounts');
-    const setCountSpy = spyOn(actions, 'setCount');
+    const requestSpy = spyOn(actions, 'requestCharts');
+    const setDataSpy = spyOn(actions, 'setChartData');
     const newExpectedSR = {
       includes: [{
         items: [{
@@ -187,28 +187,28 @@ describe('CohortSearchActions', () => {
     // Othe group has null count
     mockReduxInst.getState = () => twoGroupState;
     actions.requestTotalCount('include0');
-    expect(requestCountSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
-    expect(setCountSpy).not.toHaveBeenCalled();
+    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
+    expect(setDataSpy).not.toHaveBeenCalled();
 
-    requestCountSpy.calls.reset();
-    setCountSpy.calls.reset();
+    requestSpy.calls.reset();
+    setDataSpy.calls.reset();
 
     const groupCountPath = ['entities', 'groups', 'include1', 'count'];
 
     // Other group has nonzero real count
     mockReduxInst.getState = () => twoGroupState.setIn(groupCountPath, 123);
     actions.requestTotalCount('include0');
-    expect(requestCountSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
-    expect(setCountSpy).not.toHaveBeenCalled();
+    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
+    expect(setDataSpy).not.toHaveBeenCalled();
 
-    requestCountSpy.calls.reset();
-    setCountSpy.calls.reset();
+    requestSpy.calls.reset();
+    setDataSpy.calls.reset();
 
     // Other group has zero count
     mockReduxInst.getState = () => twoGroupState.setIn(groupCountPath, 0);
     actions.requestTotalCount('include0');
-    expect(requestCountSpy).not.toHaveBeenCalled();
-    expect(setCountSpy).toHaveBeenCalledWith('searchRequests', SR_ID, 0);
+    expect(requestSpy).not.toHaveBeenCalled();
+    expect(setDataSpy).toHaveBeenCalledWith('searchRequests', SR_ID, []);
   });
 
   it('mapAll', () => {

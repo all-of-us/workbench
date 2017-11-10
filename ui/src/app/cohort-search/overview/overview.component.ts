@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
+import {List} from 'immutable';
 
 import {CohortSearchActions} from '../redux';
 
@@ -9,6 +10,7 @@ import {CohortSearchActions} from '../redux';
   styleUrls: ['./overview.component.css']
 })
 export class OverviewComponent {
+  @Input() chartData$: Observable<List<any>>;
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
 

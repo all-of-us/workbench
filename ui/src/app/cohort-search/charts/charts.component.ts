@@ -1,77 +1,95 @@
-import {Component, ChangeDetectionStrategy, Input} from '@angular/core';
-import {Set} from 'immutable';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
+import {List, Map} from 'immutable';
 
+const decoder = code => ({M: 'Male', F: 'Female'}[code]);
+const decodeGender = datum => datum.update('gender', decoder);
+const keepOld = (old, _) => old;
+
+const baseLine = {
+  gender: Map({Male: 0, Female: 0}),
+  race: Map({}),
+  ageRange: Map({}),
+};
 
 @Component({
   selector: 'app-charts',
   template: `
     <div class="box">
-      <app-gender-chart [data]="genderCounts">
-      </app-gender-chart>
-    </div>
-    <div>&nbsp;</div>
-    <div class="box">
-      <app-race-chart [data]="raceCounts">
-      </app-race-chart>
+      <div appGoogleChart
+        id="genderChart"
+        [chartType]="'BarChart'"
+        [dataTable]="genderData"
+        [options]="genderOpts">
+      </div>
+      <div appGoogleChart
+        id="raceChart"
+        [chartType]="'PieChart'"
+        [dataTable]="raceData"
+        [options]="raceOpts">
+      </div>
     </div>
   `,
-  styles: [`.box { border: 1px solid #d7d7d7; }`],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styles: [`
+    .box {
+      border: 1px solid #d7d7d7;
+    }
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartsComponent {
-  /*
-   * NOTE (jms) PROVISIONAL
-   * The purpose of this component is to generate the chart data from the
-   * aggregated subject set by iterating that set in a single pass; the
-   * actual counting code and type mappings, however, are NOT finished and
-   * should be considered provisional.
-   */
+  private rawData: List<Map<string, any>>;
 
-  private _subjects: Set<string>;
+  private ageData;
+  private genderData;
+  private raceData;
+
+  private readonly genderOpts = {
+    title: 'Results By Gender',
+    chartArea: {width: '80%'},
+    isStacked: true,
+    legend: { position: 'none' },
+    hAxis: {
+      title: 'Total Count',
+      minValue: 0,
+      width: '100%',
+      height: '300'
+    },
+  };
+
+  private readonly raceOpts = {
+    title: 'Results By Race',
+    chartArea: {width: '80%'},
+    width: '100%',
+    height: '300'
+  };
 
   @Input()
-  set subjects(maybeSubjects) {
-    console.log('Recalculating chart data');
-    const subjectSet = !maybeSubjects ? Set([]) : maybeSubjects;
+  set data(rawData) {
+    const processKey = key =>
+      rawData
+        .map(decodeGender)
+        .groupBy(datum => datum.get(key))
+        .map(data => data.reduce((s, d) => s + d.get('count'), 0))
+        .toMap()
+        .mergeWith(keepOld, baseLine[key])
+        .entrySeq()
+        .toArray();
 
-    const genderCounts = {};
-    const raceCounts = {};
+    this.rawData = rawData;
+    this.genderData = [
+      ['Gender', 'Count'],
+      ...processKey('gender')
+    ];
 
-    subjectSet.forEach(subject => {
-      let [uid, gender, race] = subject.split(',');
-      gender = this.genderCodeMap[gender] || 'Unknown';
-      race = this.raceCodeMap[race] || 'Unknown';
+    this.raceData = [
+      ['Race', 'Count'],
+      ...processKey('race')
+    ];
 
-      /* Check for new keys */
-      if (!genderCounts[gender]) {
-        genderCounts[gender] = 0;
-      }
-      if (!raceCounts[race]) {
-        raceCounts[race] = 0;
-      }
-
-      /* Update the counts */
-      genderCounts[gender] += 1;
-      raceCounts[race] += 1;
-    });
-    this.genderCounts = genderCounts;
-    this.raceCounts = raceCounts;
+    this.ageData = processKey('ageRange');
   }
 
-  get subjects() {
-    return this._subjects;
+  get data() {
+    return this.rawData;
   }
-
-  private genderCounts;
-  private raceCounts;
-
-  readonly genderCodeMap = {
-    '1': 'Male',
-    '2': 'Female',
-  };
-
-  readonly raceCodeMap = {
-    '1': 'Caucasian',
-    '2': 'African American'
-  };
 }
