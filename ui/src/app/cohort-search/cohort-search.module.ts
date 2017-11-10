@@ -10,14 +10,9 @@ import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
-import {
-  ChartsComponent,
-  GenderChartComponent,
-  RaceChartComponent,
-  GoogleChartComponent,
-} from './charts';
 
 /* Other Objects */
+import {ChartsModule} from './charts/charts.module';
 import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
 import {CohortSearchRouter} from './router.module';
 import {
@@ -38,20 +33,15 @@ import {CohortBuilderService} from 'generated';
     NgReduxModule,
     // Ours
     CohortSearchRouter,
+    ChartsModule,
     CriteriaWizardModule,
   ],
   declarations: [
     CohortSearchComponent,
-
     SearchGroupComponent,
     SearchGroupItemComponent,
     SearchGroupListComponent,
     OverviewComponent,
-
-    ChartsComponent,
-    GenderChartComponent,
-    RaceChartComponent,
-    GoogleChartComponent,
   ],
   providers: [
     CohortBuilderService,

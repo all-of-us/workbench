@@ -45,7 +45,6 @@ export const isRequesting = (kind, id) => state =>
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
-
 /**
  * Wizard
  */
@@ -75,7 +74,9 @@ export const focusedCriterion = (state) =>
 /**
  * Criteria
  */
-export const criteriaChildren = (kind, parentId) => state =>
+export const criteriaChildren =
+  (kind: string, parentId: number) =>
+  (state): List<any> =>
   state.getIn(['criteria', 'tree', kind, parentId], List());
 
 export const isCriteriaLoading =
@@ -91,3 +92,10 @@ export const criteriaError =
 export const criteriaLoadErrors =
   (state): any =>
   state.getIn(['criteria', 'errors'], Map());
+
+/**
+ * Other
+ */
+export const chartData =
+  (state): List<any> =>
+  state.get('chartData', List());

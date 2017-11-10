@@ -45,6 +45,10 @@ export class CohortSearchActions {
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
+  @dispatch() requestCharts = ActionFuncs.requestCharts;
+  @dispatch() cancelChartsRequest = ActionFuncs.cancelChartsRequest;
+  @dispatch() setChartData = ActionFuncs.loadChartsRequestResults;
+
   @dispatch() initGroup = ActionFuncs.initGroup;
   @dispatch() addParameter = ActionFuncs.addParameter;
   @dispatch() removeParameter = ActionFuncs.removeParameter;
@@ -195,7 +199,7 @@ export class CohortSearchActions {
   requestTotalCount(outdatedGroupId?: string): void {
     const searchRequest = getSearchRequest(SR_ID)(this.state);
     if (searchRequest.get('isRequesting', false)) {
-      this.cancelCountRequest('searchRequests', SR_ID);
+      this.cancelChartsRequest('searchRequests', SR_ID);
     }
 
     const included = includeGroups(this.state);
@@ -223,12 +227,12 @@ export class CohortSearchActions {
      */
     if (nullIntersection || emptyIntersection) {
       this.debugLog('Not making request');
-      this.setCount('searchRequests', SR_ID, 0);
+      this.setChartData('searchRequests', SR_ID, []);
       return ;
     }
 
     const request = this.mapAll();
-    this.requestCounts('searchRequests', SR_ID, request);
+    this.requestCharts('searchRequests', SR_ID, request);
   }
 
   mapAll = (): SearchRequest => {
