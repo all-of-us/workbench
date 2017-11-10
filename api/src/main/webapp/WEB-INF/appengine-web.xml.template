@@ -15,7 +15,9 @@
     <env-var name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
     <!-- NOTE(RW-235) Keep the db connection alive. -->
     <env-var name="spring.datasource.dbcp.test-on-borrow" value="true" />
-    <env-var name="spring.datasource.dbcp.validationQuery" value="SELECT 1" />
+    <env-var name="spring.datasource.dbcp.test-while-idle" value="true" />
+    <env-var name="spring.datasource.dbcp.time-between-eviction-runs-millis" value="3600000" />
+    <env-var name="spring.datasource.dbcp.validation-query" value="SELECT 1" />
   </env-variables>
 
   <resource-files>

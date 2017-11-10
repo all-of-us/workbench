@@ -16,10 +16,17 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   CRITERIA_REQUEST_ERROR,
+
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+
+  BEGIN_CHARTS_REQUEST,
+  LOAD_CHARTS_RESULTS,
+  CANCEL_CHARTS_REQUEST,
+  CHARTS_REQUEST_ERROR,
+
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
@@ -63,26 +70,41 @@ export const rootReducer: Reducer<CohortSearchState> =
             fromJS({error: action.error})
           );
 
+      case BEGIN_CHARTS_REQUEST:
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
           .deleteIn(['entities', action.entityType, action.entityId, 'error']);
 
-      case LOAD_COUNT_RESULTS:
-        return state.mergeIn(
-          ['entities', action.entityType, action.entityId],
-          fromJS({count: action.count, isRequesting: false})
-        );
-
+      case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
         return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false);
 
+      case CHARTS_REQUEST_ERROR:
       case COUNT_REQUEST_ERROR:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], false)
           .setIn(
             ['entities', action.entityType, action.entityId, 'error'],
             fromJS({error: action.error})
+          );
+
+      case LOAD_CHARTS_RESULTS:
+        return state
+          .set('chartData', fromJS(action.chartData))
+          .mergeIn(
+            ['entities', action.entityType, action.entityId],
+            fromJS({
+              count: action.chartData.reduce((sum, data) => sum + data.count, 0),
+              isRequesting: false,
+            })
+          );
+
+      case LOAD_COUNT_RESULTS:
+        return state
+          .mergeIn(
+            ['entities', action.entityType, action.entityId],
+            fromJS({count: action.count, isRequesting: false})
           );
 
       case INIT_SEARCH_GROUP:

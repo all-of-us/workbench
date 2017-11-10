@@ -4,10 +4,17 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   CRITERIA_REQUEST_ERROR,
+
   BEGIN_COUNT_REQUEST,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+
+  BEGIN_CHARTS_REQUEST,
+  LOAD_CHARTS_RESULTS,
+  CANCEL_CHARTS_REQUEST,
+  CHARTS_REQUEST_ERROR,
+
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
@@ -23,7 +30,7 @@ import {
   ActionTypes,
 } from './types';
 
-import {Criteria, SearchRequest} from 'generated';
+import {Criteria, SearchRequest, ChartInfo} from 'generated';
 
 /**
  * Criteria loading mgmt
@@ -48,7 +55,6 @@ export const criteriaRequestError =
   ): ActionTypes[typeof CRITERIA_REQUEST_ERROR] =>
   ({type: CRITERIA_REQUEST_ERROR, kind, parentId, error});
 
-
 /**
  * Count loading mgmt
  */
@@ -72,6 +78,28 @@ export const countRequestError =
   ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
+/**
+ * Count loading mgmt
+ */
+export const requestCharts =
+  (entityType: string, entityId: string, request: SearchRequest
+  ): ActionTypes[typeof BEGIN_CHARTS_REQUEST] =>
+  ({type: BEGIN_CHARTS_REQUEST, entityType, entityId, request});
+
+export const loadChartsRequestResults =
+  (entityType: string, entityId: string, chartData: ChartInfo[]
+  ): ActionTypes[typeof LOAD_CHARTS_RESULTS] =>
+  ({type: LOAD_CHARTS_RESULTS, entityType, entityId, chartData});
+
+export const cancelChartsRequest =
+  (entityType: string, entityId: string
+  ): ActionTypes[typeof CANCEL_CHARTS_REQUEST] =>
+  ({type: CANCEL_CHARTS_REQUEST, entityType, entityId});
+
+export const chartsRequestError =
+  (entityType: string, entityId: string, error?: any
+  ): ActionTypes[typeof CHARTS_REQUEST_ERROR] =>
+  ({type: CHARTS_REQUEST_ERROR, entityType, entityId, error});
 
 /**
  * Entity creation & deletion mgmt
