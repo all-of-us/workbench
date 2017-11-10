@@ -122,7 +122,6 @@ public class SubjectCounter {
      * Helper method to build sql snippet.
      * @param lo - lower bound of the age range
      * @param hi - upper bound of the age range
-     * @param range - the range of this age range
      * @return
      */
     private static String getAgeRangeSql(int lo, int hi) {
