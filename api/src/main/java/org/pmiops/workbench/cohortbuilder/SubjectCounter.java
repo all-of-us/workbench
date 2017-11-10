@@ -31,9 +31,9 @@ public class SubjectCounter {
     private static final String CHART_INFO_SQL_TEMPLATE =
             "select concept1.concept_code as gender, \n" +
                     "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
-                    "case " + getAgeRangeSql(0, 18, "0-18") + "\n" +
-                    getAgeRangeSql(19, 44, "19-44") + "\n" +
-                    getAgeRangeSql(45, 64, "45-64") + "\n" +
+                    "case " + getAgeRangeSql(0, 18) + "\n" +
+                    getAgeRangeSql(19, 44) + "\n" +
+                    getAgeRangeSql(45, 64) + "\n" +
                     "else '> 65'\n" +
                     "end as ageRange,\n" +
                     "count(*) as count\n" +
@@ -125,8 +125,8 @@ public class SubjectCounter {
      * @param range - the range of this age range
      * @return
      */
-    private static String getAgeRangeSql(int lo, int hi, String range) {
+    private static String getAgeRangeSql(int lo, int hi) {
         return "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= " + lo +
-                " and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= " + hi + " then '" + range + "'";
+                " and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }
