@@ -78,12 +78,12 @@ export class SelectionComponent {
     if (kind.match(/^DEMO.*AGE/i)) {
       const attr = attrs.first();
       const op = {
-        'RANGE': 'In Range',
-        'EQ': 'Equal To',
-        'GT': 'Greater Than',
-        'LT': 'Less Than',
-        'GTE': 'Greater Than or Equal To',
-        'LTE': 'Less Than or Equal To',
+        'between': 'In Range',
+        '=': 'Equal To',
+        '>': 'Greater Than',
+        '<': 'Less Than',
+        '>=': 'Greater Than or Equal To',
+        '<=': 'Less Than or Equal To',
       }[attr.get('operator')];
       const args = attr.get('operands', List()).join(', ');
       return `${op} ${args}`;

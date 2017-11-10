@@ -38,10 +38,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
         for (SearchParameter parameter : parameters.getParameters()) {
             final String demoType = parameter.getSubtype().toLowerCase();
-            final String parameterToReplace = "${" + demoType + "}";
             final String namedParameter = getUniqueNamedParameter(demoType);
             queryParts.add(getDemoSqlStatement(parameter.getSubtype())
-                    .replace(parameterToReplace, "@" + namedParameter));
+                    .replace("${" + demoType + "}", "@" + namedParameter));
 
             queryParams.put(namedParameter,
                     parameter.getSubtype().equals("GEN") ?
