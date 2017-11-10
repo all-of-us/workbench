@@ -1,0 +1,16 @@
+<div
+  class="form-group"
+  [@blueBar]="blueBarState">
+
+  <h3>Codes</h3>
+  <clr-icon shape="search" [ngClass]="isInfoClass"></clr-icon>
+  <input
+    (input)="onInput($event)"
+    (blur)="isFocused=false"
+    (focus)="isFocused=true"
+    id="fuzzyFinder"
+    type="text"
+    name="fuzzyFinder"
+    placeholder="Enter Search Terms"
+    [formControl]="fuzzyFinder">
+</div>

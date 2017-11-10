@@ -18,15 +18,28 @@
           [errors$]="errors$">
         </crit-alerts>
 
-        <crit-tree
+        <div
           [style.display]="(settingAttributes$ | async) ? 'none' : 'initial'"
-          [node]="rootNode">
-        </crit-tree>
+          class="tree-explorer">
+          <crit-fuzzy-finder
+            [criteriaType]="criteriaType">
+          </crit-fuzzy-finder>
 
-        <crit-attributes
-          *ngIf="(settingAttributes$ | async)"
-          [node]="(nodeInFocus$ | async)">
-        </crit-attributes>
+          <div class="search-results">
+          </div>
+
+          <div class="tree">
+            <crit-tree [node]="rootNode">
+            </crit-tree>
+          </div>
+        </div>
+
+        <div *ngIf="(settingAttributes$ | async)"
+          class="attribute-panel">
+          <crit-attributes
+            [node]="(nodeInFocus$ | async)">
+          </crit-attributes>
+        </div>
       </div>
 
       <div class="criteria-selection-container">

@@ -1,0 +1,26 @@
+input[type=text],
+input[type=text]:hover,
+input[type=text]:focus,
+input[type=text]:active {
+  /*
+  * Ignore the global styling at styles.css and reset the
+  * borders back to Clarity default
+  */
+  border: unset;
+  background: unset;
+  transition: none !important;
+}
+
+div.form-group {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  margin: 0.5rem 1rem 0 1.25rem;
+  background: linear-gradient(180deg,transparent 95%,#0094d2 0) no-repeat;
+}
+
+div > h3 {
+  margin: 0;
+  padding-left: 0.25rem;
+  flex: 1;
+}
