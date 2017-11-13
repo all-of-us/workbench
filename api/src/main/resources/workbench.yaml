@@ -1141,11 +1141,9 @@ definitions:
         description: The concept id that maps to concept table.
         type: integer
         format: int64
-      attributes:
+      attribute:
         description: Any applicable arguments that complete the sense of the parameter
-        type: "array"
-        items:
-          $ref: "#/definitions/Attribute"
+        $ref: "#/definitions/Attribute"
     examples:
       leafExample:
         value: "E9293"

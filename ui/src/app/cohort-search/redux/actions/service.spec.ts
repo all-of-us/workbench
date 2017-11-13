@@ -6,6 +6,7 @@ import {initialState, CohortSearchState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
 
 import {CohortBuilderService} from 'generated';
+import {isUndefined} from 'util';
 
 /**
  * Dummy objects / mock state peices
@@ -43,6 +44,7 @@ const DEMO_crit = fromJS({
   name: 'Female',
   conceptId: 12345,
   domainId: null,
+  attribute: null,
 });
 
 const dummyState = initialState
@@ -236,6 +238,7 @@ describe('CohortSearchActions', () => {
       value: 'F',
       subtype: 'GEN',
       conceptId: 12345,
+      attribute: null,
     });
   });
 });
