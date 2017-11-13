@@ -1,6 +1,7 @@
 <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
   <h2>{{workspace.name}}</h2>
   <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
+  <clr-icon class="sharing-icon is-solid" shape="users" (click)="share()"></clr-icon>
 </div>
 <ng-template #workspacePageLoading>
   <div class="loading-area">

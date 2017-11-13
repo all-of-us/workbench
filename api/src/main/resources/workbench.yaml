@@ -380,6 +380,7 @@ paths:
           type: string
           required: true
           description: ID of the workspace containing the cohort definition
+
   /api/v1/workspaces/review:
     get:
       tags:
@@ -412,6 +413,31 @@ paths:
           description: result of the research purpose review
           schema:
             $ref: "#/definitions/ResearchPurposeReviewRequest"
+      responses:
+        "200":
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+    post:
+      tags:
+        - workspaces
+      description: Shares a workspace with users
+      operationId: shareWorkspace
+      parameters:
+          - in: path
+            name: workspaceNamespace
+            type: string
+            required: true
+          - in: path
+            name: workspaceId
+            type: string
+            required: true
+          - in: body
+            name: usersAndRoles
+            description: users to share the workspace with
+            schema:
+              $ref: "#/definitions/UserRoleList"
       responses:
         "200":
           schema:
@@ -703,6 +729,36 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      userRoles:
+        type: "array"
+        items:
+           $ref: "#/definitions/UserRole"
+
+  UserRole:
+    type: object
+    required:
+      - email
+      - role
+    properties:
+      email:
+        type: string
+      role:
+        $ref: "#/definitions/WorkspaceAccessLevel"
+
+  UserRoleList:
+    type: object
+    required:
+     - items
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/UserRole"
+
+  WorkspaceAccessLevel:
+    type: string
+    description: levels of access to workspace
+    enum: [reader, writer, owner]
 
   ResearchPurpose:
     type: object

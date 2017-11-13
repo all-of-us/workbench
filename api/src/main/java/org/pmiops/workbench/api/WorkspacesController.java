@@ -3,8 +3,11 @@ package org.pmiops.workbench.api;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -30,7 +35,10 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.UserRoleList;
 
 
 @RestController
@@ -88,6 +96,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           if (workspace.getCdrVersion() != null) {
             result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
           }
+
+          
+          result.setUserRoles(workspace.getWorkspaceUserRoles().stream().map(TO_CLIENT_USER_ROLE).collect(Collectors.toList()));
+
           return result;
         }
       };
@@ -125,8 +137,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       };
 
 
+      private static final Function<org.pmiops.workbench.db.model.WorkspaceUserRole, UserRole>
+          TO_CLIENT_USER_ROLE =
+          new Function<org.pmiops.workbench.db.model.WorkspaceUserRole, UserRole>() {
+            @Override
+            public UserRole apply(org.pmiops.workbench.db.model.WorkspaceUserRole workspaceUserRole) {
+              UserRole result = new UserRole();
+              result.setEmail(workspaceUserRole.getUser().getEmail());
+              result.setRole(workspaceUserRole.getRole());
+
+              return result;
+            }
+          };
+
+
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
+  private final UserDao userDao;
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
   private final Clock clock;
@@ -135,11 +162,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   WorkspacesController(
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
+      UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
+    this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.clock = clock;
@@ -225,7 +254,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     setCdrVersionId(workspace, dbWorkspace);
-    dbWorkspace = workspaceService.dao.save(dbWorkspace);
+
+    org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
+    permissions.setRole(WorkspaceAccessLevel.OWNER);
+    permissions.setWorkspace(dbWorkspace);
+    permissions.setUser(user);
+
+    dbWorkspace.addWorkspaceUserRole(permissions);
+
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+
+
+
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
@@ -233,7 +273,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Void> deleteWorkspace(String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    workspaceService.dao.delete(dbWorkspace);
+    workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(null);
   }
 
@@ -249,11 +289,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // TODO: use FireCloud to determine what workspaces to return, instead of just returning
     // workspaces created by this user.
     User user = userProvider.get();
-    List<org.pmiops.workbench.db.model.Workspace> workspaces;
-    if (user == null) {
-      workspaces = new ArrayList<>();
-    } else {
-      workspaces = workspaceService.dao.findByCreatorOrderByNameAsc(userProvider.get());
+    List<org.pmiops.workbench.db.model.Workspace> workspaces =
+        new ArrayList<org.pmiops.workbench.db.model.Workspace>();
+    if (user != null) {
+      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
+        workspaces.add(userRole.getWorkspace());
+      }
     }
     WorkspaceListResponse response = new WorkspaceListResponse();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
@@ -279,8 +320,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbWorkspace.setLastModifiedTime(now);
     // TODO: add version, check it here
-    dbWorkspace = workspaceService.dao.save(dbWorkspace);
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
+      UserRoleList userRoleList) {
+    Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
+    for (UserRole user : userRoleList.getItems()) {
+      WorkspaceUserRole newUserRole = new WorkspaceUserRole();
+      User newUser = userDao.findUserByEmail(user.getEmail());
+      if (newUser == null) {
+        throw new BadRequestException(String.format(
+            "User %s doesn't exist",
+            user.getEmail()));
+      }
+      newUserRole.setUser(newUser);
+      newUserRole.setRole(user.getRole());
+      dbUserRoles.add(newUserRole);
+    }
+    workspaceService.updateUserRoles(workspaceNamespace, workspaceId, dbUserRoles);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   /** Record approval or rejection of research purpose. */

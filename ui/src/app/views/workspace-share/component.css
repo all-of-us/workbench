@@ -1,0 +1,51 @@
+input {
+  width: 15rem;
+}
+
+.add-by-text-area {
+  padding-top: 1rem;
+}
+
+.sharing-buttons {
+  height: 1rem;
+  line-height: 0rem;
+}
+
+clr-dropdown {
+  width: 8rem;
+}
+
+clr-dropdown > button {
+  width: 100%;
+}
+
+.paragraph-text {
+  width: 60%;
+}
+
+.return-button {
+  display: block;
+  padding: 0.4rem;
+}
+
+.sharing-area {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.adding-area {
+  flex: 0 0 auto;
+  border-right: 1px solid black;
+}
+
+.find-collaborator-label {
+  display: block;
+}
+
+.removing-area {
+  padding-left: 1rem;
+}
+
+.spinner-padded {
+  padding-top: 1rem;
+}

@@ -1,0 +1,47 @@
+<a class="return-button" (click)="navigateBack()">&lt;&lt; Back to the workspace</a>
+<div *ngIf="!loadingWorkspace else loading">
+  <h3>Share {{workspace.name}}</h3>
+  <p class="paragraph-text">Workspaces can only be shared with existing All of Us users. If you want to
+  share your workspace with someone who is not yet a part of the All of Us
+  community, have them <a routerLink="">create an account</a> first and then you can share the
+  workspace with them.</p>
+ <div class="sharing-area">
+   <div class="adding-area">
+      <h4>Add a New Collaborator</h4>
+      <p>You can add multiple users at once, all with the same role.</p>
+
+      <div class="add-by-text-area">
+        <label class="text-label" class="find-collaborator-label">Find Collaborator</label>
+        <input type="text" class="input share" name="to-share" autofocus
+            [(ngModel)]="toShare" placeholder="Enter name or @researchallofus.com ID">
+        <clr-dropdown>
+          <button type="button" class="btn btn-outline-primary sharing-buttons" clrDropdownTrigger>
+            {{selectedPermission}}
+            <clr-icon shape="caret down"></clr-icon>
+          </button>
+          <clr-dropdown-menu *clrIfOpen>
+            <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
+            <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
+            <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
+          </clr-dropdown-menu>
+        </clr-dropdown>
+        <button type="button" class="btn btn-primary sharing-buttons" (click)="addCollaborator()">Add Collaborator</button>
+      </div>
+    </div>
+    <div class="removing-area">
+      <ul>
+        <div *ngFor="let user of workspace.userRoles">
+          <h5>
+            <clr-icon shape="minus-circle" class="is-solid" (click)="removeCollaborator(user)"></clr-icon>
+            {{user.email}}
+          </h5>
+          <div>{{user.role}}</div>
+        </div>
+      </ul>
+    </div>
+  </div>
+</div>
+<ng-template #loading>
+  <span class="spinner spinner-md spinner-padded"></span>
+  <span class="loading-text">Loading...</span>
+</ng-template>

@@ -34,6 +34,7 @@ public class User {
   private String freeTierBillingProjectName;
   private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
+  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
 
   @Id
   @GeneratedValue
@@ -129,5 +130,18 @@ public class User {
 
   public void setAuthorities(Set<Authority> newAuthorities) {
     this.authorities = newAuthorities;
+  }
+
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
+  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
+    return workspaceUserRoles;
+  }
+
+  /**
+   * Necessary for Spring initialization of the object.
+   * Not actually supported because it won't delete old entries.
+   */
+  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
+    this.workspaceUserRoles = userRoles;
   }
 }
