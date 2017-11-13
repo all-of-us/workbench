@@ -1,14 +1,8 @@
-input[type=text],
-input[type=text]:hover,
+input[type=text], 
 input[type=text]:focus,
-input[type=text]:active {
-  /*
-  * Ignore the global styling at styles.css and reset the
-  * borders back to Clarity default
-  */
-  border: unset;
-  background: unset;
-  transition: none !important;
+input[type=text]:not([readonly]),
+input[type=text]:not([readonly]):focus {
+  border: none;
 }
 
 div.form-group {
@@ -16,7 +10,17 @@ div.form-group {
   flex-flow: row nowrap;
   align-items: center;
   margin: 0.5rem 1rem 0 1.25rem;
-  background: linear-gradient(180deg,transparent 95%,#0094d2 0) no-repeat;
+
+  background: linear-gradient(to bottom, transparent 95%, #0094d2 95%) no-repeat;
+  background-size: 0% 100%;
+  border-bottom: 1px solid #9a9a9a;
+
+  transition: background-size 0.5s ease;
+}
+
+div.form-group:focus-within {
+  background-size: 100% 100%;
+  border-bottom: 1px solid #0094d2;
 }
 
 div > h3 {
