@@ -31,10 +31,6 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                     "from `${projectId}.${dataSetId}.person` p\n" +
                     "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) ${operator}\n";
 
-    private static final String ATTR_ONE_VALUE = "${operator} ${age1}\n";
-
-    private static final String ATTR_TWO_VALUES = "${operator} ${age1} and ${age2}\n";
-
     private static final String UNION_TEMPLATE = "union distinct\n";
 
     @Override
