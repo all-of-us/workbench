@@ -1,7 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -80,32 +83,30 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public void updateUserRoles(String ns, String id, Set<WorkspaceUserRole> userRoleSet) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(
         ns, id);
+    Map<Integer, WorkspaceUserRole> userRoleMap = new HashMap<Integer, WorkspaceUserRole>();
+    for (WorkspaceUserRole userRole : userRoleSet) {
+      userRole.setWorkspace(dbWorkspace);
+      int key = Objects.hash(userRole.getUser().getUserId(), userRole.getWorkspace().hashCode());
+      userRoleMap.put(key, userRole);
+    }
     Iterator<WorkspaceUserRole> dbUserRoles = dbWorkspace.getWorkspaceUserRoles().iterator();
     while (dbUserRoles.hasNext()) {
       boolean resolved = false;
       WorkspaceUserRole currentUserRole = dbUserRoles.next();
 
-      Iterator<WorkspaceUserRole> newUserRoles = userRoleSet.iterator();
-      while (newUserRoles.hasNext()) {
-        WorkspaceUserRole newUserRole = newUserRoles.next();
-        if (currentUserRole.getUser().getUserId() == newUserRole.getUser().getUserId()) {
-          currentUserRole.setRole(newUserRole.getRole());
-          resolved = true;
-          newUserRoles.remove();
-          break;
-        }
-      }
-
-      if (!resolved) {
+      WorkspaceUserRole mapValue = userRoleMap.get(Objects.hash(currentUserRole.getUser().getUserId(),
+          currentUserRole.getWorkspace().hashCode()));
+      if (mapValue != null) {
+        currentUserRole.setRole(mapValue.getRole());
+        userRoleMap.remove(Objects.hash(currentUserRole.getUser().getUserId(),
+            currentUserRole.getWorkspace().hashCode()));
+      } else {
         dbUserRoles.remove();
       }
     }
 
-    Iterator<WorkspaceUserRole> newUserRoles = userRoleSet.iterator();
-    while (newUserRoles.hasNext()) {
-      WorkspaceUserRole newUserRole = newUserRoles.next();
-      newUserRole.setWorkspace(dbWorkspace);
-      dbWorkspace.getWorkspaceUserRoles().add(newUserRole);
+    for (Map.Entry<Integer, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
+      dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
   }
 }

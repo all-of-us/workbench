@@ -6,7 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="brubenst" id="changelog-10-userworkspace">
     <createTable tableName="user_workspace">
-      <addUniqueConstraint columnNames="user_id, workspace_id">
       <column name="user_workspace_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -20,5 +19,8 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <addUniqueConstraint columnNames="user_id, workspace_id"
+        constraintName="user_workspace_pair"
+        tableName="user_workspace"/>
   </changeSet>
 </databaseChangeLog>

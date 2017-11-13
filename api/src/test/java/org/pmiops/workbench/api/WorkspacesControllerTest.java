@@ -27,7 +27,9 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.UserRoleList;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -135,6 +137,9 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getTimeReviewed()).isEqualTo(new Long(1500));
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(new Long(1000));
 
+    //Test that the correct owner is added.
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
+    assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
   }
 
   @Test
@@ -206,5 +211,73 @@ public class WorkspacesControllerTest {
     assertThat(forApproval.size()).isEqualTo(1);
     ws = forApproval.get(0);
     assertThat(ws.getName()).isEqualTo(nameForRequested);
+  }
+
+  @Test
+  public void testShareWorkspace() {
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser = userDao.save(writerUser);
+    User readerUser = new User();
+    readerUser.setEmail("readerfriend@gmail.com");
+    readerUser.setUserId(125L);
+    readerUser = userDao.save(readerUser);
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+    UserRoleList updatedUserRoles = new UserRoleList();
+    UserRole creator = new UserRole();
+    creator.setEmail("bob@gmail.com");
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    updatedUserRoles.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    updatedUserRoles.addItemsItem(writer);
+    UserRole reader = new UserRole();
+    reader.setEmail("readerfriend@gmail.com");
+    reader.setRole(WorkspaceAccessLevel.READER);
+    updatedUserRoles.addItemsItem(reader);
+
+    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
+    Workspace workspace2 =
+        workspacesController.getWorkspace("namespace", "name")
+            .getBody();
+
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
+    int numOwners = 0;
+    int numWriters = 0;
+    int numReaders = 0;
+    for (UserRole userRole : workspace2.getUserRoles()) {
+      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
+        assertThat(userRole.getEmail()).isEqualTo("bob@gmail.com");
+        numOwners++;
+      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
+        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
+        numWriters++;
+      } else {
+        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
+        numReaders++;
+      }
+    }
+    assertThat(numOwners).isEqualTo(1);
+    assertThat(numWriters).isEqualTo(1);
+    assertThat(numReaders).isEqualTo(1);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUnableToShareWithNonExistantUser() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+    UserRoleList updatedUserRoles = new UserRoleList();
+    UserRole creator = new UserRole();
+    creator.setEmail("bob@gmail.com");
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    updatedUserRoles.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    updatedUserRoles.addItemsItem(writer);
+    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
   }
 }
