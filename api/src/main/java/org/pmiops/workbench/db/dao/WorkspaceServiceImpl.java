@@ -83,7 +83,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public void updateUserRoles(String ns, String id, Set<WorkspaceUserRole> userRoleSet) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(
         ns, id);
-    Map<Integer, WorkspaceUserRole> userRoleMap = new HashMap<Integer, WorkspaceUserRole>();
+    Map<Long, WorkspaceUserRole> userRoleMap = new HashMap<Long, WorkspaceUserRole>();
     for (WorkspaceUserRole userRole : userRoleSet) {
       userRole.setWorkspace(dbWorkspace);
       userRoleMap.put(userRole.getUser().getUserId(), userRole);
@@ -102,7 +102,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
 
-    for (Map.Entry<Integer, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
+    for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
       dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
   }
