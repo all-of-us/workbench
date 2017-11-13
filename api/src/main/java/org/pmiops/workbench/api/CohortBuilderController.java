@@ -118,8 +118,23 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<ChartInfoListResponse> getChartInfo(SearchRequest request) {
+
         ChartInfoListResponse response = new ChartInfoListResponse();
-        response.addItemsItem(new ChartInfo().gender("M").race("African American").ageRange("12-20").count(10L));
+
+        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
+        findCodesForEmptyDomains(request.getIncludes());
+        findCodesForEmptyDomains(request.getExcludes());
+
+        QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildChartInfoCounterQuery(request)));
+        Map<String, Integer> rm = getResultMapper(result);
+
+        for (List<FieldValue> row : result.iterateAll()) {
+            response.addItemsItem(new ChartInfo()
+                    .gender(getString(row, rm.get("gender")))
+                    .race(getString(row, rm.get("race")))
+                    .ageRange(getString(row, rm.get("ageRange")))
+                    .count(getLong(row, rm.get("count"))));
+        }
         return ResponseEntity.ok(response);
     }
 

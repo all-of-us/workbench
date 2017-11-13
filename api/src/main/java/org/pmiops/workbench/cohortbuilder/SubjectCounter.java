@@ -28,11 +28,25 @@ public class SubjectCounter {
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
-    private static final String UNION_TEMPLATE =
-            "union distinct\n";
+    private static final String CHART_INFO_SQL_TEMPLATE =
+            "select concept1.concept_code as gender, \n" +
+                    "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+                    "case " + getAgeRangeSql(0, 18) + "\n" +
+                    getAgeRangeSql(19, 44) + "\n" +
+                    getAgeRangeSql(45, 64) + "\n" +
+                    "else '> 65'\n" +
+                    "end as ageRange,\n" +
+                    "count(*) as count\n" +
+                    "from `${projectId}.${dataSetId}.person` person\n" +
+                    "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
+                    "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+                    "where\n";
 
-    private static final String INCLUDE_SQL_TEMPLATE =
-            "person.person_id in (${includeSql})\n";
+    private static final String CHART_INFO_SQL_GROUP_BY = "group by gender, race, ageRange\n" + "order by gender, race, ageRange\n";
+
+    private static final String UNION_TEMPLATE = "union distinct\n";
+
+    private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
 
     private static final String EXCLUDE_SQL_TEMPLATE =
             "not exists\n" +
@@ -41,15 +55,26 @@ public class SubjectCounter {
                     "x where x.person_id = person.person_id)\n";
 
     /**
-     * Provides counts of unique subjects
+     * Provides counts with demographic info for charts
      * defined by the provided {@link SearchRequest}.
      */
     public QueryJobConfiguration buildSubjectCounterQuery(SearchRequest request) {
+        return buildQuery(request, COUNT_SQL_TEMPLATE, "");
+    }
+
+    /**
+     * Provides counts of unique subjects
+     * defined by the provided {@link SearchRequest}.
+     */
+    public QueryJobConfiguration buildChartInfoCounterQuery(SearchRequest request) {
+        return buildQuery(request, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
+    }
+
+    public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String sqlGroupBy) {
         if(request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
             throw new BadRequestException("Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
         }
         Map<String, QueryParameterValue> params = new HashMap<>();
-        List<String> queryParts = new ArrayList<>();
 
         // build query for included search groups
         StringJoiner joiner = buildQuery(request.getIncludes(), params, false);
@@ -61,13 +86,13 @@ public class SubjectCounter {
             joiner.merge(buildQuery(request.getExcludes(), params, true));
         }
 
-        String finalSql = COUNT_SQL_TEMPLATE + joiner.toString();
+        String finalSql = sqlTemplate + joiner.toString() + sqlGroupBy;
 
         return QueryJobConfiguration
-                        .newBuilder(finalSql)
-                        .setNamedParameters(params)
-                        .setUseLegacySql(false)
-                        .build();
+                .newBuilder(finalSql)
+                .setNamedParameters(params)
+                .setUseLegacySql(false)
+                .build();
     }
 
     private StringJoiner buildQuery(List<SearchGroup> groups, Map<String, QueryParameterValue> params, Boolean excludeSQL) {
@@ -91,5 +116,16 @@ public class SubjectCounter {
             queryParts = new ArrayList<>();
         }
         return joiner;
+    }
+
+    /**
+     * Helper method to build sql snippet.
+     * @param lo - lower bound of the age range
+     * @param hi - upper bound of the age range
+     * @return
+     */
+    private static String getAgeRangeSql(int lo, int hi) {
+        return "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= " + lo +
+                " and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }
