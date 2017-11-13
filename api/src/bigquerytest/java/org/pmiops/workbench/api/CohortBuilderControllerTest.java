@@ -12,6 +12,7 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.Criteria;
@@ -296,10 +297,11 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_DemoAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
-        int age = Period.between(birthdate, now).getYears();
+        Integer age = Period.between(birthdate, now).getYears();
         assertSubjects(
                 controller.countSubjects(
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")))),
+                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
+                                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
                         1);
     }
 
@@ -307,8 +309,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_DemoGenderAndAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
-        int age = Period.between(birthdate, now).getYears();
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE");
+        Integer age = Period.between(birthdate, now).getYears();
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
+                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
         SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
         assertSubjects(
                 controller.countSubjects(
@@ -320,9 +323,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
-        int age = Period.between(birthdate, now).getYears();
+        Integer age = Period.between(birthdate, now).getYears();
 
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE");
+        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
+                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
         SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
 
         SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
