@@ -68,15 +68,10 @@ export class SelectionComponent {
   }
 
   attributeDisplay(parameter): string {
-    const attrs = parameter.get('attributes', List());
-
-    if (attrs.isEmpty()) {
-      return '';
-    }
+    const attr = parameter.get('attribute', '');
 
     const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
     if (kind.match(/^DEMO.*AGE/i)) {
-      const attr = attrs.first();
       const op = {
         'between': 'In Range',
         '=': 'Equal To',

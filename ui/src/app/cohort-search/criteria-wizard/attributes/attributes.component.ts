@@ -27,7 +27,7 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
   @Input() node: Map<any, any>;
   @ViewChild(AttributesDirective) attrFormHost: AttributesDirective;
 
-  private _attrs: List<Map<any, any>> = List();
+  private _attr: any;
   private _subs: Subscription[];
   private _form: any;
 
@@ -58,7 +58,7 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
 
     this._subs = [
       this._form.instance.attribute.subscribe(
-        value => this._attrs = this._attrs.push(fromJS(value))
+        value => this._attr = fromJS(value)
       ),
       this._form.instance.submitted.filter(v => v).subscribe(this.submit),
       this._form.instance.cancelled.filter(v => v).subscribe(this.cancel),
@@ -70,9 +70,9 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
   }
 
   submit = (): void => {
-    const parameterId = `param${this._attrs.hashCode()}`;
+    const parameterId = `param${this._attr.hashCode()}`;
     const param = this.node
-      .set('attributes', this._attrs)
+      .set('attribute', this._attr)
       .set('parameterId', parameterId);
     this.actions.addParameter(param);
     this.actions.clearWizardFocus();
