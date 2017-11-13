@@ -10,17 +10,17 @@ import {AttributeFormComponent} from './attributes.interface';
 import {Attribute} from 'generated';
 
 const OPERATORS = {
-  'RANGE': 'In Range',
-  'EQ': 'Equal To',
-  'GT': 'Greater Than',
-  'LT': 'Less Than',
-  'GTE': 'Greater Than or Equal To',
-  'LTE': 'Less Than or Equal To',
+  'between': 'In Range',
+  '=': 'Equal To',
+  '>': 'Greater Than',
+  '<': 'Less Than',
+  '>=': 'Greater Than or Equal To',
+  '<=': 'Less Than or Equal To',
 };
 
 const MAX_AGE = 120;
 const MIN_AGE = 0;
-const _operatorIsRange = (op: string): boolean => (op === 'RANGE');
+const _operatorIsRange = (op: string): boolean => (op === 'between');
 const _operatorIsValid = (op: string): boolean => (Object.keys(OPERATORS).includes(op));
 
 const _asAttribute = (ageForm: FormGroup): Attribute => {

@@ -285,6 +285,7 @@ export class CohortSearchActions {
         value: param.get('code'),
         subtype: param.get('subtype'),
         conceptId: param.get('conceptId'),
+        attribute: param.get('attribute'),
       };
     } else if (_type.match(/^ICD|CPT|PHECODE.*/i)) {
       return <SearchParameter>{
