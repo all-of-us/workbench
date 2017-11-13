@@ -86,18 +86,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Map<Integer, WorkspaceUserRole> userRoleMap = new HashMap<Integer, WorkspaceUserRole>();
     for (WorkspaceUserRole userRole : userRoleSet) {
       userRole.setWorkspace(dbWorkspace);
-      int key = Objects.hash(userRole.getUser().getUserId());
-      userRoleMap.put(key, userRole);
+      userRoleMap.put(userRole.getUser().getUserId(), userRole);
     }
     Iterator<WorkspaceUserRole> dbUserRoles = dbWorkspace.getWorkspaceUserRoles().iterator();
     while (dbUserRoles.hasNext()) {
       boolean resolved = false;
       WorkspaceUserRole currentUserRole = dbUserRoles.next();
 
-      WorkspaceUserRole mapValue = userRoleMap.get(Objects.hash(currentUserRole.getUser().getUserId()));
+      WorkspaceUserRole mapValue = userRoleMap.get(currentUserRole.getUser().getUserId());
       if (mapValue != null) {
         currentUserRole.setRole(mapValue.getRole());
-        userRoleMap.remove(Objects.hash(currentUserRole.getUser().getUserId()));
+        userRoleMap.remove(currentUserRole.getUser().getUserId());
       } else {
         dbUserRoles.remove();
       }
