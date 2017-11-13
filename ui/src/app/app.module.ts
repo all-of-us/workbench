@@ -22,6 +22,7 @@ import {ReviewComponent} from 'app/views/review/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
 /* Our Modules */
@@ -64,7 +65,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     HomePageComponent,
     ReviewComponent,
     WorkspaceComponent,
-    WorkspaceEditComponent
+    WorkspaceEditComponent,
+    WorkspaceShareComponent
   ],
   providers: [
     BugReportService,
