@@ -137,8 +137,30 @@
     "domain_id": "Condition",
     "vocabulary_id": "ICD9CM",
     "concept_class_id": "3-dig nonbill code",
-    "concept_code": "002",
+    "concept_code": "007",
     "valid_start_date": "2009-12-03",
     "valid_end_date": "2009-12-03"
+  },
+  {
+    "concept_id": "8507",
+    "concept_name": "MALE",
+    "domain_id": "Gender",
+    "vocabulary_id": "Gender",
+    "concept_class_id": "Gender",
+    "standard_concept": "S",
+    "concept_code": "M",
+    "valid_start_date": "1970-01-01",
+    "valid_end_date": "2099-12-31"
+  },
+  {
+    "concept_id": "8532",
+    "concept_name": "FEMALE",
+    "domain_id": "Gender",
+    "vocabulary_id": "Gender",
+    "concept_class_id": "Gender",
+    "standard_concept": "S",
+    "concept_code": "F",
+    "valid_start_date": "1970-01-01",
+    "valid_end_date": "2099-12-31"
   }
 ]
