@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -18,12 +19,14 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -65,10 +68,12 @@ public class WorkspacesControllerTest {
 
     // Injecting WorkspaceService fails in the test environment. Work around it by injecting the
     // DAO and creating the service directly.
-    workspaceService = new WorkspaceService(workspaceDao);
+    workspaceService = new WorkspaceServiceImpl();
+    workspaceService.setDao(workspaceDao);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userProvider, fireCloudService, Clock.fixed(NOW, ZoneId.systemDefault()));
+        userDao, userProvider, fireCloudService,
+        Clock.fixed(NOW, ZoneId.systemDefault()));
   }
 
   public Workspace createDefaultWorkspace() {
@@ -93,7 +98,7 @@ public class WorkspacesControllerTest {
     workspace.setDescription("description");
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
-
+    workspace.setUserRoles(new ArrayList<UserRole>());
     return workspace;
   }
 

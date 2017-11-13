@@ -1,10 +1,15 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
@@ -15,6 +20,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 
 @Entity
 @Table(name = "workspace")
@@ -80,6 +86,8 @@ public class Workspace {
   private Boolean approved;
   private Timestamp timeRequested;
   private Timestamp timeReviewed;
+
+  private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
 
   @Id
   @GeneratedValue
@@ -321,5 +329,19 @@ public class Workspace {
   @Transient
   public FirecloudWorkspaceId getFirecloudWorkspaceId() {
     return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
+  }
+
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "workspace", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
+    return usersWithAccess;
+  }
+
+  // Necessary for Spring initialization of the object.
+  public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
+    this.usersWithAccess = userRoles;
+  }
+
+  public void addWorkspaceUserRole(WorkspaceUserRole userRole) {
+    this.usersWithAccess.add(userRole);
   }
 }

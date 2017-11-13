@@ -17,4 +17,5 @@
   <include file="changelog/db.changelog-7.xml"/>
   <include file="changelog/db.changelog-8-ws-index.xml"/>
   <include file="changelog/db.changelog-9-ws-index-fix.xml"/>
+  <include file="changelog/db.changelog-10-userworkspace.xml"/>
 </databaseChangeLog>
