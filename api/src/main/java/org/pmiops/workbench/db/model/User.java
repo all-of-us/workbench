@@ -137,8 +137,10 @@ public class User {
     return workspaceUserRoles;
   }
 
-  // Necessary for Spring initialization of the object.
-  // Not actually supported because it won't delete old entries.
+  /**
+   * Necessary for Spring initialization of the object.
+   * Not actually supported because it won't delete old entries.
+   */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.workspaceUserRoles = userRoles;
   }

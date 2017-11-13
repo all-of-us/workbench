@@ -335,8 +335,10 @@ public class Workspace {
     return usersWithAccess;
   }
 
-  // Necessary for Spring initialization of the object.
-  // Not actually supported because it won't delete old entries.
+  /**
+   * Necessary for Spring initialization of the object.
+   * Not actually supported because it won't delete old entries.
+   */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.usersWithAccess = userRoles;
   }

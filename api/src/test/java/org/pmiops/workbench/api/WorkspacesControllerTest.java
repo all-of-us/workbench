@@ -265,6 +265,62 @@ public class WorkspacesControllerTest {
     assertThat(numReaders).isEqualTo(1);
   }
 
+  @Test
+  public void testUnshareWorkspace() {
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser = userDao.save(writerUser);
+    User readerUser = new User();
+    readerUser.setEmail("readerfriend@gmail.com");
+    readerUser.setUserId(125L);
+    readerUser = userDao.save(readerUser);
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+    UserRoleList updatedUserRoles = new UserRoleList();
+    UserRole creator = new UserRole();
+    creator.setEmail("bob@gmail.com");
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    updatedUserRoles.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    updatedUserRoles.addItemsItem(writer);
+    UserRole reader = new UserRole();
+    reader.setEmail("readerfriend@gmail.com");
+    reader.setRole(WorkspaceAccessLevel.READER);
+    updatedUserRoles.addItemsItem(reader);
+
+    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
+    updatedUserRoles = new UserRoleList();
+    updatedUserRoles.addItemsItem(creator);
+    updatedUserRoles.addItemsItem(writer);
+    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
+    Workspace workspace2 =
+        workspacesController.getWorkspace("namespace", "name")
+            .getBody();
+
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(2);
+    int numOwners = 0;
+    int numWriters = 0;
+    int numReaders = 0;
+    for (UserRole userRole : workspace2.getUserRoles()) {
+      if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
+        assertThat(userRole.getEmail()).isEqualTo("bob@gmail.com");
+        numOwners++;
+      } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
+        assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
+        numWriters++;
+      } else {
+        assertThat(userRole.getEmail()).isEqualTo("readerfriend@gmail.com");
+        numReaders++;
+      }
+    }
+    assertThat(numOwners).isEqualTo(1);
+    assertThat(numWriters).isEqualTo(1);
+    assertThat(numReaders).isEqualTo(0);
+  }
+
   @Test(expected = BadRequestException.class)
   public void testUnableToShareWithNonExistantUser() throws Exception {
     Workspace workspace = createDefaultWorkspace();
