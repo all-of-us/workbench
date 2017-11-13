@@ -8,12 +8,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name = "cohort")
 public class Cohort {
 
   private long cohortId;
+  private int version;
   private String name;
   private String type;
   private String description;
@@ -35,6 +37,14 @@ public class Cohort {
   public void setCohortId(long cohortId) {
     this.cohortId = cohortId;
   }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) { this.version = version; }
 
   @Column(name = "name")
   public String getName() {

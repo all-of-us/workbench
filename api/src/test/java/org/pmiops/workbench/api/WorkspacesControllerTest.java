@@ -1,9 +1,11 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -22,6 +24,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -35,12 +38,18 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
 
   WorkspaceService workspaceService;
@@ -160,6 +169,64 @@ public class WorkspacesControllerTest {
 
     assertThat(researchPurpose.getApproved()).isTrue();
     assertThat(researchPurpose.getTimeReviewed()).isNotNull();
+  }
+
+  @Test
+  public void testUpdateWorkspace() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ws.setName("updated-name");
+    Workspace updated =
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    ws.setEtag(updated.getEtag());
+    assertThat(updated).isEqualTo(ws);
+
+    ws.setName("updated-name2");
+    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    ws.setEtag(updated.getEtag());
+    assertThat(updated).isEqualTo(ws);
+
+    // Verify that we can update without an etag.
+    ws.setEtag(null);
+    ws.setName("updated-name3");
+    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    ws.setEtag(updated.getEtag());
+    assertThat(updated).isEqualTo(ws);
+
+    Workspace got = workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody();
+    assertThat(got).isEqualTo(ws);
+  }
+
+  @Test(expected = ConflictException.class)
+  public void testUpdateWorkspaceStaleThrows() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
+        new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
+
+    // Still using the initial now-stale etag; this should throw.
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
+        new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
+  }
+
+  @Test
+  public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    // TODO: Refactor to be a @Parameterized test case.
+    List<String> cases = ImmutableList.of("hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
+    for (String etag : cases) {
+      try {
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
+            new Workspace().name("updated-name").etag(etag));
+        fail(String.format("expected BadRequestException for etag: %s", etag));
+      } catch(BadRequestException e) {
+        // expected
+      }
+    }
   }
 
   @Test(expected = BadRequestException.class)
