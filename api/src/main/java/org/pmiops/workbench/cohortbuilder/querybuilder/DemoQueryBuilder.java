@@ -33,6 +33,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
     private static final String UNION_TEMPLATE = "union distinct\n";
 
+    public enum DEMOTYPE { GEN, AGE, DEC, RACE };
+
     @Override
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
 
@@ -40,11 +42,11 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         List<String> queryParts = new ArrayList<>();
 
         for (SearchParameter parameter : parameters.getParameters()) {
-            if (parameter.getSubtype().equals("GEN")) {
+            if (parameter.getSubtype().equals(DEMOTYPE.GEN.name())) {
                 final String namedParameter = getUniqueNamedParameter(parameter.getSubtype().toLowerCase());
                 queryParts.add(DEMO_GEN.replace("${gen}", "@" + namedParameter));
                 queryParams.put(namedParameter, QueryParameterValue.int64(parameter.getConceptId()));
-            } else if (parameter.getSubtype().equals("AGE")) {
+            } else if (parameter.getSubtype().equals(DEMOTYPE.AGE.name())) {
                 Optional<Attribute> attribute = Optional.ofNullable(parameter.getAttribute());
                 if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
                     List<String> operandParts = new ArrayList<>();
