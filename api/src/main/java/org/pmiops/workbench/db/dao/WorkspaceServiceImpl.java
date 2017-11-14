@@ -109,6 +109,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
       dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
+    // TODO(calbach): This save() is not technically necessary but included to
+    // workaround RW-252. Remove either this, or @Transactional.
     workspaceDao.save(dbWorkspace);
   }
 }

@@ -309,6 +309,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+    // TODO(calbach): Require etag once client supplies it.
     if(!Strings.isNullOrEmpty(workspace.getEtag())) {
       int version = Etags.toVersion(workspace.getEtag());
       if (dbWorkspace.getVersion() != version) {
@@ -344,6 +345,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
       UserRoleList userRoleList) {
+    // TODO(calbach): Attempt to factor this into updateWorkspace() in order to
+    // share etag/versioning logic.
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : userRoleList.getItems()) {
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
