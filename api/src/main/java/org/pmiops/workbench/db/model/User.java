@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 
@@ -23,6 +24,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 public class User {
 
   private long userId;
+  private int version;
   // The Google email address that the user signs in with.
   private String email;
   // The email address that can be used to contact the user.
@@ -46,6 +48,12 @@ public class User {
   public void setUserId(long userId) {
     this.userId = userId;
   }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() { return version; }
+
+  public void setVersion(int version) { this.version = version; }
 
   @Column(name = "email")
   public String getEmail() {

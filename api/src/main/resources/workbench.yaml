@@ -730,6 +730,12 @@ definitions:
     properties:
       id:
         type: string
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
       name:
         type: string
       namespace:
@@ -863,6 +869,12 @@ definitions:
     properties:
       id:
         type: string
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
       name:
         type: string
       criteria:
