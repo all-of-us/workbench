@@ -138,6 +138,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return ResponseEntity.ok(response);
     }
 
+    @Override
+    public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(String type, String value) {
+        CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+        return ResponseEntity.ok(criteriaResponse);
+    }
+
     /**
      * TODO: this is temporary and will be removed when we figure out the conceptId mappings
      * for ICD9, ICD10 and CPT codes.
