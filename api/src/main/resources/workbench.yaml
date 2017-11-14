@@ -701,6 +701,7 @@ paths:
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
+
   /api/v1/cohortbuilder/quicksearch/{type}/{value}:
     get:
       tags:
@@ -905,6 +906,93 @@ paths:
           description: A collection of CohortSummary
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
+
+  # Data Browser #######################################################################
+  /api/v1/databrowser/search-concepts:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Searches for concepts in concept table with search string and filters
+      operationId: "getConceptsSearch"
+      parameters:
+        - in: query
+          name: concept_name
+          type: string
+          required: false
+          description: concept name search string
+        - in: query
+          name: standard_concept
+          type: string
+          required: false
+          description: standard concept filter
+        - in: query
+          name: concept_code
+          type: string
+          required: false
+          description: concept code  filter
+        - in: query
+          name: vocabulary_id
+          type: string
+          required: false
+          description: vocabulary id filter
+        - in: query
+          name: domain_id
+          type: string
+          required: false
+          description: vocabulary id filter
+      responses:
+        "200":
+          description: A collection of concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
+
+  /api/v1/databrowser/analysis_results:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id and stratum
+      operationId: "getAnalysisResults"
+      parameters:
+        - in: query
+          name: analysis_id
+          type: integer
+          required: true
+          description: analysis_id
+        - in: query
+          name: stratum_1
+          type: string
+          required: false
+          description: stratum 1
+        - in: query
+          name: stratum_2
+          type: string
+          required: false
+          description: stratum 2
+        - in: query
+          name: stratum_3
+          type: string
+          required: false
+          description: stratum 3
+        - in: query
+          name: stratum_4
+          type: string
+          required: false
+          description: stratum 4
+        - in: query
+          name: stratum_5
+          type: string
+          required: false
+          description: stratum 5
+
+      responses:
+        "200":
+          description: A collection of analysis results from ACHILLES_results_view
+          schema:
+            $ref: "#/definitions/AnalysisResultListResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1817,3 +1905,113 @@ definitions:
         $ref: '#/definitions/Workspace'
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
+
+  Concept:
+    type: object
+    required:
+      - conceptId
+      - conceptName
+      - domainId
+      - vocabularyId
+      - conceptCode
+      - conceptClassId
+      - standardConcept
+
+    properties:
+      conceptId:
+        description: id of the concept
+        type: integer
+        format: int64
+      conceptName:
+        description: name of concept
+        type: string
+      domainId:
+        description: domain of concept
+        type: string
+      vocabularyId:
+        description: vocabulary of concept
+        type: string
+      conceptCode:
+        description: original vocab code of concept
+        type: string
+      conceptClassId:
+        description: class of concept
+        type: string
+      standardConcept:
+        description: standard concept value 1 char
+        type: string
+      count:
+        description: est count in the cdr
+        type: integer
+        format: int64
+      prevalence:
+        description: prevalence among participants percent count divided num participants
+        type: integer
+        format: int64
+
+  ConceptListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Concept"
+
+  AnalysisResult:
+      type: object
+      required:
+        - analysisId
+
+      properties:
+        analysisId:
+          description: id analysis
+          type: integer
+          format: int64
+        countValue:
+          description: count
+          type: integer
+          format: int64
+        stratum1:
+          description: stratum 1
+          type: string
+        stratum1Name:
+          description:  usually concept name corresponding to stratum
+          type: string
+        stratum2:
+          description: stratum 2
+          type: string
+        stratum2Name:
+          description:  usually concept name corresponding to stratum
+          type: string
+        stratum3:
+          description: stratum 3
+          type: string
+        stratum3Name:
+          description:  usually concept name corresponding to stratum
+          type: string
+        stratum4:
+          description: stratum 4
+          type: string
+        stratum4Name:
+          description:  usually concept name corresponding to stratum
+          type: string
+        stratum5:
+          description: stratum 5
+          type: string
+        stratum5Name:
+          description:  usually concept name corresponding to stratum
+          type: string
+
+
+  AnalysisResultListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/AnalysisResult"
+

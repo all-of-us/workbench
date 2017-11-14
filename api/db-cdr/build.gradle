@@ -8,10 +8,12 @@ buildscript {
     }
 }
 apply plugin: 'org.liquibase.gradle'
+apply plugin: 'application'
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
+applicationDefaultJvmArgs = ["-Xmx2048m","-Xms2048m"]
 
 liquibase {
     activities {
