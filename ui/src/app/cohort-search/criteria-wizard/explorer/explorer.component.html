@@ -1,0 +1,14 @@
+<crit-root-spinner [loading$]="loading$"></crit-root-spinner>
+<crit-alerts [errors$]="errors$"></crit-alerts>
+
+<crit-fuzzy-finder
+  [criteriaType]="criteriaType">
+</crit-fuzzy-finder>
+
+<crit-tree
+  [node]="rootNode">
+</crit-tree>
+
+<crit-attributes
+  [node]="(nodeInFocus$ | async)">
+</crit-attributes>

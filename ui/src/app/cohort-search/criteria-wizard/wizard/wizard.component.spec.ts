@@ -15,6 +15,7 @@ import {
 
 import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
+import {ExplorerComponent} from '../explorer/explorer.component';
 import {FuzzyFinderComponent} from '../fuzzy-finder/fuzzy-finder.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
@@ -40,6 +41,7 @@ describe('WizardComponent', () => {
       .configureTestingModule({
         declarations: [
           AlertsComponent,
+          ExplorerComponent,
           FuzzyFinderComponent,
           RootSpinnerComponent,
           SelectionComponent,
@@ -85,12 +87,5 @@ describe('WizardComponent', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
     comp.finish();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
-  });
-
-  it('Should render the criteria tree with the correct root node', () => {
-    const roots = fixture.debugElement.query(By.css('crit-tree')).componentInstance;
-    // These should all three be equal
-    expect(roots.node).toEqual(Map({type: 'icd9', id: 0}));
-    expect(roots.node).toEqual(comp.rootNode);
   });
 });
