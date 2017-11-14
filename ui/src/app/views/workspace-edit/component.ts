@@ -23,6 +23,8 @@ export class WorkspaceEditComponent implements OnInit {
   savingWorkspace = false;
   nameNotEntered = false;
   workspaceCreationError = false;
+  workspaceUpdateError = false;
+  workspaceUpdateConflictError = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -89,8 +91,19 @@ export class WorkspaceEditComponent implements OnInit {
     this.locationService.back();
   }
 
-  resetWorkspaceCreation(): void {
+  reloadConflictingWorkspace(): void {
+    this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
+                                        this.oldWorkspaceName)
+      .subscribe((workspace) => {
+        this.workspace = workspace;
+      });
+    this.resetWorkspaceEditor();
+  }
+
+  resetWorkspaceEditor(): void {
     this.workspaceCreationError = false;
+    this.workspaceUpdateError = false;
+    this.workspaceUpdateConflictError = false;
     this.savingWorkspace = false;
   }
 
@@ -110,7 +123,11 @@ export class WorkspaceEditComponent implements OnInit {
               this.navigateBack();
             },
             (error) => {
-              this.workspaceCreationError = true;
+              if (error.status === 409) {
+                this.workspaceUpdateConflictError = true;
+              } else {
+                this.workspaceUpdateError = true;
+              }
             });
       }
     }
