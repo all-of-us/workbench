@@ -5,6 +5,7 @@ import {ClarityModule} from 'clarity-angular';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {Map, fromJS} from 'immutable';
 import {NgRedux} from '@angular-redux/store';
+import {ReactiveFormsModule} from '@angular/forms';
 
 import {
   CohortSearchActions,
@@ -14,6 +15,7 @@ import {
 
 import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
+import {FuzzyFinderComponent} from '../fuzzy-finder/fuzzy-finder.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
 import {TreeComponent} from '../tree/tree.component';
@@ -38,6 +40,7 @@ describe('WizardComponent', () => {
       .configureTestingModule({
         declarations: [
           AlertsComponent,
+          FuzzyFinderComponent,
           RootSpinnerComponent,
           SelectionComponent,
           TreeComponent,
@@ -47,6 +50,7 @@ describe('WizardComponent', () => {
           AttributesModule,
           BrowserAnimationsModule,
           ClarityModule,
+          ReactiveFormsModule,
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
