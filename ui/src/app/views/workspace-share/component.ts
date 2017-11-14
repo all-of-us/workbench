@@ -48,8 +48,6 @@ export class WorkspaceShareComponent implements OnInit {
         this.workspace = workspace;
       }
     );
-
-
   }
 
   navigateBack(): void {
