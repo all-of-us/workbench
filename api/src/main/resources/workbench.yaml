@@ -640,6 +640,29 @@ paths:
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
+  /api/v1/cohortbuilder/quicksearch:
+    get:
+      tags:
+        - cohortBuilder
+      description: Quick search for criteria that matches on code and name.
+      operationId: "getCriteriaTreeQuickSearch"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: value
+          type: string
+          required: true
+          description: value that should match code or name
+      responses:
+        "200":
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
