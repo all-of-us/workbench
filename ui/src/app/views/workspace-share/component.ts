@@ -6,6 +6,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {isBlank} from 'app/utils';
 
 import {DataAccessLevel} from 'generated';
+import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {UserRoleList} from 'generated';
 import {Workspace} from 'generated';
@@ -22,11 +23,13 @@ export class WorkspaceShareComponent implements OnInit {
   toShare = '';
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
+  userEmail: string;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private router: Router,
       private route: ActivatedRoute,
+      private profileService: ProfileService,
       private workspacesService: WorkspacesService,
   ) {}
 
@@ -36,7 +39,11 @@ export class WorkspaceShareComponent implements OnInit {
             this.route.snapshot.params['ns'],
             this.route.snapshot.params['wsid']))
       .subscribe((workspace) => {
-        this.loadingWorkspace = false;
+        this.errorHandlingService.retryApi(
+            this.profileService.getMe()).subscribe(profile => {
+          this.loadingWorkspace = false;
+          this.userEmail = profile.username;
+        });
         this.workspace = workspace;
       }
     );

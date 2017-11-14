@@ -32,7 +32,10 @@
       <ul>
         <div *ngFor="let user of workspace.userRoles">
           <h5>
-            <clr-icon shape="minus-circle" class="is-solid" (click)="removeCollaborator(user)"></clr-icon>
+            <clr-icon *ngIf="user.email !== userEmail"
+                shape="minus-circle" 
+                class="is-solid"
+                (click)="removeCollaborator(user)"></clr-icon>
             {{user.email}}
           </h5>
           <div>{{user.role}}</div>
