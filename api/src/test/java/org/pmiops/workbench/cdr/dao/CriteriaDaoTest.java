@@ -112,7 +112,7 @@ public class CriteriaDaoTest {
                 .conceptId("1000")
                 .domainId("Condition")
                 .group(false)
-                .selectable(false)
+                .selectable(true)
                 .name(name)
                 .parentId(0)
                 .type(type)
