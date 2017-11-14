@@ -6,12 +6,15 @@ import {ReactiveFormsModule} from '@angular/forms';
 
 import {AttributesModule} from './attributes/attributes.module';
 import {AlertsComponent} from './alerts/alerts.component';
-import {FuzzyFinderComponent} from './fuzzy-finder/fuzzy-finder.component';
+import {ExplorerComponent} from './explorer/explorer.component';
+import {QuickSearchComponent} from './quicksearch/quicksearch.component';
+import {
+  QuickSearchResultsComponent
+} from './quicksearch-results/quicksearch-results.component';
 import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
 import {SelectionComponent} from './selection/selection.component';
 import {TreeComponent} from './tree/tree.component';
 import {WizardComponent} from './wizard/wizard.component';
-import { ExplorerComponent } from './explorer/explorer.component';
 
 
 @NgModule({
@@ -25,12 +28,13 @@ import { ExplorerComponent } from './explorer/explorer.component';
   exports: [WizardComponent],
   declarations: [
     AlertsComponent,
-    FuzzyFinderComponent,
+    ExplorerComponent,
+    QuickSearchComponent,
+    QuickSearchResultsComponent,
     RootSpinnerComponent,
     SelectionComponent,
     TreeComponent,
     WizardComponent,
-    ExplorerComponent,
   ],
 })
 export class CriteriaWizardModule { }

@@ -2,11 +2,11 @@ import {Component, Input} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 @Component({
-  selector: 'crit-fuzzy-finder',
-  templateUrl: './fuzzy-finder.component.html',
-  styleUrls: ['./fuzzy-finder.component.css'],
+  selector: 'crit-quicksearch',
+  templateUrl: './quicksearch.component.html',
+  styleUrls: ['./quicksearch.component.css'],
 })
-export class FuzzyFinderComponent {
+export class QuickSearchComponent {
   fuzzyFinder = new FormControl();
   @Input() criteriaType: string;
 
