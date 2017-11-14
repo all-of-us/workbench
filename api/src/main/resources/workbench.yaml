@@ -959,7 +959,7 @@ paths:
       parameters:
         - in: query
           name: analysis_id
-          type: integer
+          type: long
           required: true
           description: analysis_id
         - in: query
