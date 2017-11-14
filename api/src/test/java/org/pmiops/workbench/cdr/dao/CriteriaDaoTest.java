@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import static org.junit.Assert.*;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,14 +33,14 @@ public class CriteriaDaoTest {
 
     @Before
     public void setUp() {
-        icd9Criteria1 = createCriteria("ICD9", null, "002");
-        icd9Criteria2 = createCriteria("ICD9", null, "001");
-        demoCriteria1 = createCriteria("DEMO", "RACE", "Race/Ethnicity");
-        demoCriteria2 = createCriteria("DEMO", "AGE", "Age");
-        icd10Criteria1 = createCriteria("ICD10", null, "002");
-        icd10Criteria2 = createCriteria("ICD10", null, "001");
-        cptCriteria1 = createCriteria("CPT", null, "0039T");
-        cptCriteria2 = createCriteria("CPT", null, "0001T");
+        icd9Criteria1 = createCriteria("ICD9", null, "002", "blah chol");
+        icd9Criteria2 = createCriteria("ICD9", null, "001", "chol blah");
+        demoCriteria1 = createCriteria("DEMO", "RACE", "Race/Ethnicity", "demo race");
+        demoCriteria2 = createCriteria("DEMO", "AGE", "Age", "demo age");
+        icd10Criteria1 = createCriteria("ICD10", null, "002", "icd10 test 1");
+        icd10Criteria2 = createCriteria("ICD10", null, "001", "icd10 test 2");
+        cptCriteria1 = createCriteria("CPT", null, "0039T", "zzzcptzzz");
+        cptCriteria2 = createCriteria("CPT", null, "0001T", "zzzCPTxxx");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -51,26 +52,60 @@ public class CriteriaDaoTest {
         criteriaDao.save(cptCriteria2);
     }
 
+    @After
+    public void tearDown() {
+        criteriaDao.delete(icd9Criteria1);
+        criteriaDao.delete(icd9Criteria2);
+        criteriaDao.delete(demoCriteria1);
+        criteriaDao.delete(demoCriteria2);
+        criteriaDao.delete(icd10Criteria1);
+        criteriaDao.delete(icd10Criteria2);
+        criteriaDao.delete(cptCriteria1);
+        criteriaDao.delete(cptCriteria2);
+    }
+
     @Test
     public void findCriteriaByParentId() throws Exception {
-        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeAndParentId(icd9Criteria1.getType(), 0L);
+        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(icd9Criteria1.getType(), 0L);
         assertEquals(icd9Criteria2, icd9List.get(0));
         assertEquals(icd9Criteria1, icd9List.get(1));
 
-        final List<Criteria> demoList = criteriaDao.findCriteriaByTypeAndParentId("DEMO", 0L);
+        final List<Criteria> demoList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L);
         assertEquals(demoCriteria2, demoList.get(0));
         assertEquals(demoCriteria1, demoList.get(1));
 
-        final List<Criteria> icd10List = criteriaDao.findCriteriaByTypeAndParentId("ICD10", 0L);
+        final List<Criteria> icd10List = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L);
         assertEquals(icd10Criteria2, icd10List.get(0));
         assertEquals(icd10Criteria1, icd10List.get(1));
 
-        final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentId("CPT", 0L);
+        final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L);
         assertEquals(cptCriteria2, cptList.get(0));
         assertEquals(cptCriteria1, cptList.get(1));
     }
 
-    private Criteria createCriteria(String type, String subtype, String code) {
+    @Test
+    public void findCriteriaByTypeAndNameOrCode() throws Exception {
+        List<Criteria> criteriaList
+                = criteriaDao.findCriteriaByTypeAndNameOrCode(icd9Criteria1.getType(), "%ChOL%", "%ChOL%");
+        assertEquals(2, criteriaList.size());
+        assertEquals(icd9Criteria2, criteriaList.get(0));
+        assertEquals(icd9Criteria1, criteriaList.get(1));
+
+        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(icd9Criteria1.getType(), "%002%", "%002%");
+        assertEquals(1, criteriaList.size());
+        assertEquals(icd9Criteria1, criteriaList.get(0));
+
+        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(icd10Criteria1.getType(), "% 1%", "% 1%");
+        assertEquals(1, criteriaList.size());
+        assertEquals(icd10Criteria1, criteriaList.get(0));
+
+        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(cptCriteria1.getType(), "%cpt%", "%cpt%");
+        assertEquals(2, criteriaList.size());
+        assertEquals(cptCriteria2, criteriaList.get(0));
+        assertEquals(cptCriteria1, criteriaList.get(1));
+    }
+
+    private Criteria createCriteria(String type, String subtype, String code, String name) {
         return new Criteria()
                 .code(code)
                 .count("10")
@@ -78,7 +113,7 @@ public class CriteriaDaoTest {
                 .domainId("Condition")
                 .group(false)
                 .selectable(false)
-                .name("name")
+                .name(name)
                 .parentId(0)
                 .type(type)
                 .subtype(subtype);
