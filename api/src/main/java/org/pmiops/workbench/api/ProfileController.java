@@ -17,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -201,7 +203,6 @@ public class ProfileController implements ProfileApiDelegate {
       user.setEmail(userInfo.getEmail());
       user.setGivenName(userInfo.getGivenName());
       user.setFamilyName(userInfo.getFamilyName());
-      userDao.save(user);
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
@@ -212,9 +213,13 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
-      userDao.save(user);
     }
-    return user;
+    try {
+      return userDao.save(user);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
   }
 
   @Override
@@ -312,7 +317,12 @@ public class ProfileController implements ProfileApiDelegate {
     // TODO: add user to authorization domain for registered access; add pet SA to
     // Google group for CDR access
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
-    userDao.save(user);
+    try {
+      userDao.save(user);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
 
     try {
       return ResponseEntity.ok(profileService.getProfile(user));

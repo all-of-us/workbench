@@ -6,9 +6,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +25,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
  * generation in WorkspaceDao, or convenience aliases.
  *
  * This needs to implement an interface to support Transactional
- *
- * TODO(RW-215) Add versioning to detect/prevent concurrent edits.
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
@@ -60,8 +61,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
-  // FIXME @Version instead? Bean instantiation v. @Transactional?
-  //@Transactional
   @Override
   public void setResearchPurposeApproved(String ns, String id, boolean approved) {
     Workspace workspace = getRequired(ns, id);
@@ -75,7 +74,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           ns, id, workspace.getApproved() ? "approved" : "rejected"));
     }
     workspace.setApproved(approved);
-    workspaceDao.save(workspace);
+    try {
+      workspaceDao.save(workspace);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for workspace update", e);
+      throw new ConflictException("Failed due to concurrent workspace modification");
+    }
   }
 
   @Override
@@ -105,5 +109,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
       dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
+    // TODO(calbach): This save() is not technically necessary but included to
+    // workaround RW-252. Remove either this, or @Transactional.
+    workspaceDao.save(dbWorkspace);
   }
 }

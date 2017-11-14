@@ -1,17 +1,21 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
@@ -34,6 +38,7 @@ public class CohortsController implements CohortsApiDelegate {
         @Override
         public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
           Cohort result = new Cohort()
+              .etag(Etags.fromVersion(cohort.getVersion()))
               .lastModifiedTime(cohort.getLastModifiedTime().getTime())
               .creationTime(cohort.getCreationTime().getTime())
               .criteria(cohort.getCriteria())
@@ -88,6 +93,7 @@ public class CohortsController implements CohortsApiDelegate {
     dbCohort.setWorkspaceId(workspace.getWorkspaceId());
     dbCohort.setCreationTime(now);
     dbCohort.setLastModifiedTime(now);
+    dbCohort.setVersion(1);
     try {
       // TODO Make this a pre-check within a transaction?
       dbCohort = cohortDao.save(dbCohort);
@@ -135,6 +141,12 @@ public class CohortsController implements CohortsApiDelegate {
       String cohortId, Cohort cohort) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
+    if(!Strings.isNullOrEmpty(cohort.getEtag())) {
+      int version = Etags.toVersion(cohort.getEtag());
+      if (dbCohort.getVersion() != version) {
+        throw new ConflictException("Attempted to modify outdated cohort version");
+      }
+    }
     if (cohort.getType() != null) {
       dbCohort.setType(cohort.getType());
     }
@@ -149,8 +161,14 @@ public class CohortsController implements CohortsApiDelegate {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbCohort.setLastModifiedTime(now);
-    // TODO: add version, check it here
-    dbCohort = cohortDao.save(dbCohort);
+    try {
+      // The version asserted on save is the same as the one we read via
+      // getRequired() above, see RW-215 for details.
+      dbCohort = cohortDao.save(dbCohort);
+    } catch (OptimisticLockException e) {
+      log.log(Level.WARNING, "version conflict for cohort update", e);
+      throw new ConflictException("Failed due to concurrent cohort modification");
+    }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
