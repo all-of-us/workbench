@@ -6,7 +6,6 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {isBlank} from 'app/utils';
 
 import {DataAccessLevel} from 'generated';
-import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {UserRoleList} from 'generated';
