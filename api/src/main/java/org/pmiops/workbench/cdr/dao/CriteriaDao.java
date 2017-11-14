@@ -13,9 +13,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
     @Query("select c from Criteria c " +
             "where c.type like :type " +
-            "and (lower(c.name) like lower(:name) or lower(c.code) like lower(:code)) " +
+            "and (lower(c.name) like lower(:value) or lower(c.code) like lower(:value)) " +
             "and c.selectable = 1 " +
             "order by c.code asc")
-    List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("name") String name, @Param("code") String code);
+    List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("value") String value);
 
 }
