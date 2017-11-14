@@ -252,7 +252,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId("0");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndNameOrCode("PHECODE", "%testinal%", "%testinal%"))
+                .findCriteriaByTypeAndNameOrCode("PHECODE", "%testinal%"))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -266,7 +266,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .count(0L)
                         .conceptId(0L));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "%testinal%", "%testinal%");
+        verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "%testinal%");
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
