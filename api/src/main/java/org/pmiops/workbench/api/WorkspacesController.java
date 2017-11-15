@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -13,11 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -27,6 +23,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
@@ -39,6 +36,10 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.UserRoleList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -82,6 +83,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             researchPurpose.timeReviewed(workspace.getTimeReviewed().getTime());
           }
           Workspace result = new Workspace()
+              .etag(Etags.fromVersion(workspace.getVersion()))
               .lastModifiedTime(workspace.getLastModifiedTime().getTime())
               .creationTime(workspace.getCreationTime().getTime())
               .dataAccessLevel(workspace.getDataAccessLevel())
@@ -253,6 +255,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCreator(user);
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
+    dbWorkspace.setVersion(1);
     setCdrVersionId(workspace, dbWorkspace);
 
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
@@ -306,7 +309,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    if(!dbWorkspace.getDataAccessLevel().equals(workspace.getDataAccessLevel())){
+    // TODO(calbach): Require etag once client supplies it.
+    if(!Strings.isNullOrEmpty(workspace.getEtag())) {
+      int version = Etags.toVersion(workspace.getEtag());
+      if (dbWorkspace.getVersion() != version) {
+        throw new ConflictException("Attempted to modify outdated workspace version");
+      }
+    }
+    if(workspace.getDataAccessLevel() != null &&
+        !dbWorkspace.getDataAccessLevel().equals(workspace.getDataAccessLevel())){
       throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getDescription() != null) {
@@ -319,14 +330,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     setCdrVersionId(workspace, dbWorkspace);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbWorkspace.setLastModifiedTime(now);
-    // TODO: add version, check it here
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+
+    try {
+      // The version asserted on save is the same as the one we read via
+      // getRequired() above, see RW-215 for details.
+      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for workspace update", e);
+      throw new ConflictException("Failed due to concurrent workspace modification");
+    }
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
       UserRoleList userRoleList) {
+    // TODO(calbach): Attempt to factor this into updateWorkspace() in order to
+    // share etag/versioning logic.
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : userRoleList.getItems()) {
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();

@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -59,6 +60,7 @@ public class Workspace {
   }
 
   private long workspaceId;
+  private int version;
   private String name;
   private String description;
   private String workspaceNamespace;
@@ -98,6 +100,14 @@ public class Workspace {
   public void setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
   }
+
+  @Version
+  @Column(name = "version")
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) { this.version = version; }
 
   @Column(name = "name")
   public String getName() {
