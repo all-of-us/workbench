@@ -14,6 +14,10 @@ import {
   getGroup,
   getSearchRequest,
   SR_ID,
+  activeRole,
+  activeGroupId,
+  activeItem,
+  activeParameterList,
 } from '../store';
 import * as ActionFuncs from './creators';
 
@@ -59,7 +63,7 @@ export class CohortSearchActions {
 
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
-  @dispatch() finishWizard = ActionFuncs.finishWizard;
+  @dispatch() _finishWizard = ActionFuncs.finishWizard;
   @dispatch() cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
@@ -94,7 +98,21 @@ export class CohortSearchActions {
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
    */
-  cancelIfRequesting(kind, id) {
+  finishWizard(): void {
+    const role = activeRole(this.state);
+    const groupId = activeGroupId(this.state);
+    const itemId = activeItem(this.state).get('id');
+    const selections = activeParameterList(this.state);
+    this._finishWizard();
+
+    if (!selections.isEmpty()) {
+      this.requestItemCount(role, itemId);
+      this.requestGroupCount(role, groupId);
+      this.requestTotalCount(groupId);
+    }
+  }
+
+  cancelIfRequesting(kind, id): void {
     if (isRequesting(kind, id)(this.state)) {
       this.cancelCountRequest(kind, id);
     }

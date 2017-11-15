@@ -41,17 +41,6 @@ export class WizardComponent {
   }
 
   finish() {
-    const state = this.ngRedux.getState();
-    const role = activeRole(state);
-    const groupId = activeGroupId(state);
-    const itemId = activeItem(state).get('id');
-    const selections = activeParameterList(state);
     this.actions.finishWizard();
-
-    if (!selections.isEmpty()) {
-      this.actions.requestItemCount(role, itemId);
-      this.actions.requestGroupCount(role, groupId);
-      this.actions.requestTotalCount(groupId);
-    }
   }
 }

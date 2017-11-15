@@ -2,24 +2,24 @@
 <crit-alerts [errors$]="errors$"></crit-alerts>
 
 <crit-quicksearch
-  [criteriaType]="criteriaType">
+  (value)="search($event)"
+  [disabled]="mode === 'SetAttr'">
 </crit-quicksearch>
 
-<div class="container">
-  <div class="content crit-tree">
+<div class="explorer-panels">
+  <div class="explorer-content crit-tree" [class.active]="mode === 'Tree'">
     <crit-tree
       [node]="rootNode">
     </crit-tree>
   </div>
 
-  <div class="content quicksearch-results">
+  <div class="explorer-content quicksearch-results" [class.active]="mode === 'Search'">
     <crit-quicksearch-results>
     </crit-quicksearch-results>
   </div>
 
-  <div class="content attributes">
-    <crit-attributes
-      [node]="(nodeInFocus$ | async)">
+  <div class="explorer-content attributes" [class.active]="mode === 'SetAttr'">
+    <crit-attributes [node]="(nodeInFocus$ | async)">
     </crit-attributes>
   </div>
 </div>

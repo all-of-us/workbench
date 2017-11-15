@@ -11,25 +11,26 @@ import {
   focusedCriterion,
 } from '../../redux';
 
+/* Modes of operation */
 const Tree = 'Tree';
 const Search = 'Search';
 const SetAttr = 'SetAttr';
-type Mode = typeof Tree | typeof Search | typeof SetAttr;
 
 @Component({
   selector: 'crit-explorer',
   templateUrl: './explorer.component.html',
+  styleUrls: ['./explorer.component.css']
 })
 export class ExplorerComponent implements OnInit {
   @Input() criteriaType: string;
   private readonly parentId = 0;  /* Root parent ID is always zero */
 
-  private mode: Mode = Tree;
+  private searchValue = '';
+  private settingAttributes = false;
 
   private loading$: Observable<boolean>;
   private errors$: Observable<any>;
   private nodeInFocus$: Observable<Map<any, any>>;
-  private settingAttributes$: Observable<boolean>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -50,8 +51,23 @@ export class ExplorerComponent implements OnInit {
           error: val
         })).valueSeq().toJS()
     );
-    this.nodeInFocus$ = this.ngRedux.select(focusedCriterion);
-    this.settingAttributes$ = this.nodeInFocus$.map(node => !node.isEmpty());
+
+    this.nodeInFocus$ = this.ngRedux.select(focusedCriterion)
+      .do(node => this.settingAttributes = !node.isEmpty());
+  }
+
+  search(value: string) {
+    this.searchValue = value;
+  }
+
+  get mode() {
+    if (this.settingAttributes) {
+      return SetAttr;
+    } else if (this.searchValue.length > 3) {
+      return Search;
+    } else {
+      return Tree;
+    }
   }
 
   get rootNode() {

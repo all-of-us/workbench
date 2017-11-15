@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 @Component({
@@ -7,13 +7,20 @@ import {FormControl} from '@angular/forms';
   styleUrls: ['./quicksearch.component.css'],
 })
 export class QuickSearchComponent {
-  fuzzyFinder = new FormControl();
-  @Input() criteriaType: string;
-
+  private fuzzyFinder = new FormControl();
   private isFocused = false;
-  private searchString = '';
+  @Output() value = new EventEmitter<string>();
+
+  @Input()
+  set disabled(val: boolean) {
+    if (val) {
+      this.fuzzyFinder.disable();
+    } else {
+      this.fuzzyFinder.enable();
+    }
+  }
 
   onInput(event) {
-    this.searchString = event.target.value;
+    this.value.emit(event.target.value);
   }
 }
