@@ -9,7 +9,14 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-    @Query("select c from Criteria c where c.type like :type% and c.parentId = :parentId order by c.code asc")
-    List<Criteria> findCriteriaByTypeAndParentId(@Param("type") String type, @Param("parentId") Long parentId);
+    List<Criteria> findCriteriaByTypeAndParentIdOrderByCodeAsc(@Param("type") String type, @Param("parentId") Long parentId);
+
+    /** TODO: implement dynamic switching of schemas **/
+    @Query(value = "select * from cdr.criteria c " +
+            "where c.type = :type " +
+            "and match(c.name) against(:value in boolean mode) " +
+            "and c.is_selectable = 1 " +
+            "order by c.code asc", nativeQuery = true)
+    List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("value") String value);
 
 }
