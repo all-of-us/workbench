@@ -647,12 +647,12 @@ paths:
       description: Quick search for criteria that matches on code and name.
       operationId: "getCriteriaTreeQuickSearch"
       parameters:
-        - in: path
+        - in: query
           name: type
           type: string
           required: true
           description: the specific type of criteria to get
-        - in: path
+        - in: query
           name: value
           type: string
           required: true
