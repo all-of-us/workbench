@@ -140,7 +140,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(String type, String value) {
-        String nameOrCode = "%" + value + "%";
+        String nameOrCode = value + "*";
         final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(type, nameOrCode);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();

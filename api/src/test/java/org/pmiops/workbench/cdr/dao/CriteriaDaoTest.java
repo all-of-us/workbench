@@ -83,28 +83,6 @@ public class CriteriaDaoTest {
         assertEquals(cptCriteria1, cptList.get(1));
     }
 
-    @Test
-    public void findCriteriaByTypeAndNameOrCode() throws Exception {
-        List<Criteria> criteriaList
-                = criteriaDao.findCriteriaByTypeAndNameOrCode(icd9Criteria1.getType(), "%ChOL%");
-        assertEquals(2, criteriaList.size());
-        assertEquals(icd9Criteria2, criteriaList.get(0));
-        assertEquals(icd9Criteria1, criteriaList.get(1));
-
-        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(icd9Criteria1.getType(), "%002%");
-        assertEquals(1, criteriaList.size());
-        assertEquals(icd9Criteria1, criteriaList.get(0));
-
-        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(icd10Criteria1.getType(), "% 1%");
-        assertEquals(1, criteriaList.size());
-        assertEquals(icd10Criteria1, criteriaList.get(0));
-
-        criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(cptCriteria1.getType(), "%cpt%");
-        assertEquals(2, criteriaList.size());
-        assertEquals(cptCriteria2, criteriaList.get(0));
-        assertEquals(cptCriteria1, criteriaList.get(1));
-    }
-
     private Criteria createCriteria(String type, String subtype, String code, String name) {
         return new Criteria()
                 .code(code)

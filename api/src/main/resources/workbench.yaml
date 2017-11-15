@@ -640,7 +640,7 @@ paths:
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
-  /api/v1/cohortbuilder/quicksearch:
+  /api/v1/cohortbuilder/quicksearch/{type}/{value}:
     get:
       tags:
         - cohortBuilder
