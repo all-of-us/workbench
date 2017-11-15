@@ -87,7 +87,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
 
-        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentId(type, parentId);
+        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(type, parentId);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
         criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -140,7 +140,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(String type, String value) {
+        String nameOrCode = value + "*";
+        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(type, nameOrCode);
+
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+        criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
         return ResponseEntity.ok(criteriaResponse);
     }
 
