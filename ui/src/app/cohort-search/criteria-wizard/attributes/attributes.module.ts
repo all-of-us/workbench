@@ -25,4 +25,4 @@ import {AgeFormComponent} from './age-form.component';
     AgeFormComponent,
   ],
 })
-export class AttributesModule { }
+export class AttributesModule {}
