@@ -1,15 +1,17 @@
 package org.pmiops.workbench.cdr.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "ACHILLES_results_view", catalog="cdr")
-public class AnalysisResult {
+public class AnalysisResult  {
 
-    @Transient
+
+    @Id private Long id;
     private Long analysisId;
     private String stratum1;
     private String stratum1Name;
@@ -23,6 +25,16 @@ public class AnalysisResult {
     private String stratum5Name;
     private Long countValue;
 
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public AnalysisResult id(Long val) {
+        this.id = val;
+        return this;
+    }
 
     public Long getAnalysisId() {
         return analysisId;

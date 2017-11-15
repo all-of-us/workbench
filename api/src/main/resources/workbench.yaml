@@ -959,7 +959,8 @@ paths:
       parameters:
         - in: query
           name: analysis_id
-          type: long
+          type: integer
+          format: int64
           required: true
           description: analysis_id
         - in: query
@@ -1965,6 +1966,10 @@ definitions:
         - analysisId
 
       properties:
+        id:
+          description: pk id for jpa code to work
+          type: integer
+          format: int64
         analysisId:
           description: id analysis
           type: integer

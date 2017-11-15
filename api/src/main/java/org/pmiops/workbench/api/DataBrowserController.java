@@ -74,6 +74,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 @Override
                 public org.pmiops.workbench.model.AnalysisResult apply(org.pmiops.workbench.cdr.model.AnalysisResult cdr) {
                     return new org.pmiops.workbench.model.AnalysisResult()
+                            .id(cdr.getId())
                             .analysisId( cdr.getAnalysisId())
                             .stratum1(cdr.getStratum1())
                             .stratum1Name(cdr.getStratum1Name())
@@ -136,7 +137,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             String stratum5) {
 
 
-        final List<AnalysisResult> resultList = analysisResultDao.findByAnalysisIdAndStratum1(analysisId, stratum1);
+        //final List<AnalysisResult> resultList = analysisResultDao.findConceptCountByConceptId(analysisId, stratum1);
+        final List<AnalysisResult> resultList = analysisResultDao.findAnalysisResultsByAnalysisId(analysisId);
         AnalysisResultListResponse resp = new AnalysisResultListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS_RESULT).collect(Collectors.toList()));
 
