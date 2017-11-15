@@ -5,7 +5,7 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="brianfreeman" id="changelog-1">
+  <changeSet author="brianfreeman" id="changelog-3">
 
     <createIndex
             indexName="idx_criteria_code"
@@ -19,6 +19,8 @@
             unique="false">
       <column name="name"/>
     </createIndex>
+
+    <comment>The following modify sql tag replaces both indexes</comment>
     <modifySql dbms="mysql">
       <replace replace="INDEX" with="FULLTEXT INDEX"/>
     </modifySql>
