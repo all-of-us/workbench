@@ -42,13 +42,10 @@
         <constraints nullable="true"/>
       </column>
     </createTable>
-    <createIndex
-            indexName="idx_type_parent_id"
-            tableName="criteria"
-            unique="false">
-      <column name="type"/>
-      <column name="parent_id"/>
-    </createIndex>
+
+    <modifySql dbms="mysql">
+      <append value="ENGINE=INNODB DEFAULT CHARSET=UTF8"/>
+    </modifySql>
 
   </changeSet>
 </databaseChangeLog>
