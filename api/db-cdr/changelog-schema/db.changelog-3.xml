@@ -8,12 +8,20 @@
   <changeSet author="brianfreeman" id="changelog-1">
 
     <createIndex
-            indexName="idx_criteria_type_parent_id"
+            indexName="idx_criteria_code"
             tableName="criteria"
             unique="false">
-      <column name="type"/>
-      <column name="parent_id"/>
+      <column name="code"/>
     </createIndex>
+    <createIndex
+            indexName="idx_criteria_name"
+            tableName="criteria"
+            unique="false">
+      <column name="name"/>
+    </createIndex>
+    <modifySql dbms="mysql">
+      <replace replace="INDEX" with="FULLTEXT INDEX"/>
+    </modifySql>
 
   </changeSet>
 </databaseChangeLog>
