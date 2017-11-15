@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
@@ -17,8 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+
 
 /**
  * Workspace manipulation and shared business logic which can't be represented by automatic query
@@ -31,6 +37,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private FireCloudService fireCloudService;
 
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
@@ -92,6 +99,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       userRole.setWorkspace(dbWorkspace);
       userRoleMap.put(userRole.getUser().getUserId(), userRole);
     }
+    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<WorkspaceACLUpdate>();
     Iterator<WorkspaceUserRole> dbUserRoles = dbWorkspace.getWorkspaceUserRoles().iterator();
     while (dbUserRoles.hasNext()) {
       boolean resolved = false;
@@ -102,6 +110,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         currentUserRole.setRole(mapValue.getRole());
         userRoleMap.remove(currentUserRole.getUser().getUserId());
       } else {
+        WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
+        removedUser.setEmail(currentUserRole.getUser().getEmail());
+        removedUser.setCanCompute(false);
+        removedUser.setCanShare(false);
+        removedUser.setAccessLevel("NO ACCESS");
+        updateACLRequestList.add(removedUser);
         dbUserRoles.remove();
       }
     }
@@ -109,8 +123,37 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
       dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
+<<<<<<< HEAD
     // TODO(calbach): This save() is not technically necessary but included to
     // workaround RW-252. Remove either this, or @Transactional.
     workspaceDao.save(dbWorkspace);
+=======
+
+    for(WorkspaceUserRole currentWorkspaceUser : dbWorkspace.getWorkspaceUserRoles()) {
+      if(currentWorkspaceUser.getUser().getFreeTierBillingProjectName() == null) {
+        //Throw exception
+      }
+      WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
+      currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
+      currentUpdate.setCanCompute(false);
+      if (currentWorkspaceUser.getRole() == WorkspaceAccessLevel.OWNER) {
+        currentUpdate.setCanShare(true);
+        currentUpdate.setAccessLevel("OWNER");
+      } else if (currentWorkspaceUser.getRole() == WorkspaceAccessLevel.WRITER) {
+        currentUpdate.setCanShare(true);
+        currentUpdate.setAccessLevel("WRITER");
+      } else {
+        currentUpdate.setCanShare(false);
+        currentUpdate.setAccessLevel("READER");
+      }
+      updateACLRequestList.add(currentUpdate);
+    }
+    try {
+      fireCloudService.updateWorkspaceACL(ns, id, false, updateACLRequestList);
+      workspaceDao.save(dbWorkspace);
+    } catch(org.pmiops.workbench.firecloud.ApiException e) {
+
+    }
+>>>>>>> Firecloud sharing
   }
 }
