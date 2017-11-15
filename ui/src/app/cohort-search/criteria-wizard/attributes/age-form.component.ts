@@ -41,7 +41,7 @@ const _validate = {
   },
   uniqueness: (existent: List<string>) =>
     (ageForm: FormGroup): null|object => {
-      const wrapped = List([fromJS(_asAttribute(ageForm))]);
+      const wrapped = fromJS(_asAttribute(ageForm));
       const hash = wrapped.hashCode();
       const paramId = `param${hash}`;
       return existent.includes(paramId)
@@ -60,9 +60,6 @@ const _validate = {
   templateUrl: './age-form.component.html',
 })
 export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestroy {
-  @select(activeParameterList) parameterSelection$;
-  private selected: List<string>;
-
   ageForm = new FormGroup({
     operator: new FormControl('', [
       Validators.required,
@@ -71,16 +68,14 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
     rangeOpen: new FormControl(),
     rangeClose: new FormControl(),
   });
+  @select(activeParameterList) parameterSelection$;
+  private selected: List<string>;
   private subscription: Subscription;
-
   private readonly operators = OPERATORS;
   private readonly opCodes = Object.keys(OPERATORS);
   private readonly maxAge = MAX_AGE;
   private readonly minAge = MIN_AGE;
-
-  @Output() attribute = new EventEmitter<Attribute>();
-  @Output() submitted = new EventEmitter<boolean>();
-  @Output() cancelled = new EventEmitter<boolean>();
+  @Output() attribute = new EventEmitter<Attribute | null>();
 
   ngOnInit() {
     this.subscription = this.parameterSelection$
@@ -146,11 +141,10 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
 
   submit(): void {
     this.attribute.emit(_asAttribute(this.ageForm));
-    this.submitted.emit(true);
   }
 
   cancel(): void {
-    this.cancelled.emit(true);
+    this.attribute.emit(null);
   }
 
   get debug() { return !!environment.debug; }

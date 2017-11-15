@@ -14,11 +14,13 @@ import {CohortSearchActions} from '../../redux';
 import {AttributesDirective} from './attributes.directive';
 import {AgeFormComponent} from './age-form.component';
 
+import {Attribute} from 'generated';
+
 
 @Component({
   selector: 'crit-attributes',
   template: `
-    <div [style.padding]="'1rem'">
+    <div [style.margin]="'0 1rem 0 1.25rem'">
       <ng-template critAttrFormHost></ng-template>
     </div>
   `
@@ -26,10 +28,7 @@ import {AgeFormComponent} from './age-form.component';
 export class AttributesComponent implements AfterViewInit, OnDestroy {
   @Input() node: Map<any, any>;
   @ViewChild(AttributesDirective) attrFormHost: AttributesDirective;
-
-  private _attr: any;
-  private _subs: Subscription[];
-  private _form: any;
+  private subscription: Subscription;
 
   constructor(
     private actions: CohortSearchActions,
@@ -43,38 +42,40 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this._form.destroy();
-    this._subs.forEach(s => s.unsubscribe());
+    this.subscription.unsubscribe();
   }
 
   createForm() {
     // TODO(jms) selection logic for instantiating the form
     const component = AgeFormComponent;
     const factory = this.resolver.resolveComponentFactory(component);
-    const container = this.attrFormHost.container;
 
-    container.clear();
-    this._form = container.createComponent(factory);
+    this.attrFormHost.container.clear();
+    const form = this.attrFormHost.container.createComponent(factory);
 
-    this._subs = [
-      this._form.instance.attribute.subscribe(
-        value => this._attr = fromJS(value)
-      ),
-      this._form.instance.submitted.filter(v => v).subscribe(this.submit),
-      this._form.instance.cancelled.filter(v => v).subscribe(this.cancel),
-    ];
+    const [cancel$, submit$] = form.instance.attribute
+      .partition(value => value === null);
+
+    this.subscription = cancel$.subscribe(v => {
+      this.cleanup();
+      this.createForm();
+    });
+
+    this.subscription.add(submit$.subscribe(_attr => {
+      const attr = fromJS(_attr);
+      const parameterId = `param${attr.hashCode()}`;
+      const param = this.node
+        .set('attribute', attr)
+        .set('parameterId', parameterId);
+      this.actions.addParameter(param);
+      this.cleanup();
+      this.createForm();
+    }));
   }
 
-  cancel = (): void => {
+  cleanup() {
     this.actions.clearWizardFocus();
-  }
-
-  submit = (): void => {
-    const parameterId = `param${this._attr.hashCode()}`;
-    const param = this.node
-      .set('attribute', this._attr)
-      .set('parameterId', parameterId);
-    this.actions.addParameter(param);
-    this.actions.clearWizardFocus();
+    this.attrFormHost.container.clear();
+    this.subscription.unsubscribe();
   }
 }

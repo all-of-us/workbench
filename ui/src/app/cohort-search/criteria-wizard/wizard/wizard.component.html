@@ -8,32 +8,12 @@
   <clr-wizard-page><!-- Criteria Selection Page -->
     <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
     <div id="criteria-page">
-
-      <div class="criteria-tree-container">
-        <crit-root-spinner
-          [loading$]="loading$">
-        </crit-root-spinner>
-
-        <crit-alerts
-          [errors$]="errors$">
-        </crit-alerts>
-
-        <crit-tree
-          [style.display]="(settingAttributes$ | async) ? 'none' : 'initial'"
-          [node]="rootNode">
-        </crit-tree>
-
-        <crit-attributes
-          *ngIf="(settingAttributes$ | async)"
-          [node]="(nodeInFocus$ | async)">
-        </crit-attributes>
+      <div id="criteria-explorer">
+        <crit-explorer [criteriaType]="criteriaType"></crit-explorer>
       </div>
-
-      <div class="criteria-selection-container">
-        <crit-selection>
-        </crit-selection>
+      <div id="criteria-selection">
+        <crit-selection></crit-selection>
       </div>
-
     </div>
   </clr-wizard-page>
 

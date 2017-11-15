@@ -1,0 +1,38 @@
+<clr-tree-node>
+  <div class="clr-treenode-link flex-container">
+    <div class="item-info">
+      <div class="code">
+        <small class="font-weight-bold">
+          {{ displayCode }}
+        </small>
+      </div>
+      <div class="name">
+        <small class="text-muted">
+          {{ displayName }}
+        </small>
+      </div>
+    </div>
+
+    <div class="item-meta">
+      <span
+          *ngIf="nonZeroCount"
+          class="badge badge-info">
+        {{ node.get('count') }}
+      </span>
+      <button
+          *ngIf="selectable"
+          type="button"
+          class="btn btn-sm btn-link"
+          [disabled]="isSelected"
+          [style.margin]="'0 0 0 0'"
+          [style.color]="'rgb(98, 164, 32)'"
+          (click)="select()">
+        <clr-icon *ngIf="isSelected" shape="check-circle" size="20"></clr-icon>
+        <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20"></clr-icon>
+      </button>
+    </div>
+  </div>
+  <ng-template clrIfExpanded *ngIf="node.get('group')">
+    <crit-tree [node]="node"></crit-tree>
+  </ng-template>
+</clr-tree-node>

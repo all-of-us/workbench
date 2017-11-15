@@ -1,44 +1,11 @@
-<ng-container [clrLoading]="loading">
-  <clr-tree-node *ngIf="hasError">
+<ng-container [clrLoading]="(loading$ | async)">
+  <clr-tree-node *ngIf="(hasError$ | async)">
     <em>Error! Oh Noes!</em>
   </clr-tree-node>
 
-  <clr-tree-node *ngFor="let child of children">
-    <div class="clr-treenode-link flex-container">
-      <div class="item-info">
-        <div class="code">
-          <small class="font-weight-bold">
-            {{ displayCode(child) }}
-          </small>
-        </div>
-        <div class="name">
-          <small class="text-muted">
-            {{ displayName(child) }}
-          </small>
-        </div>
-      </div>
-
-      <div class="item-meta">
-        <span
-           *ngIf="nonZeroCount(child)"
-           class="badge badge-info">
-          {{ child.get('count') }}
-        </span>
-        <button
-           *ngIf="selectable(child)"
-           type="button"
-           class="btn btn-sm btn-link"
-           [disabled]="isSelected(child)"
-           [style.margin]="'0 0 0 0'"
-           [style.color]="'rgb(98, 164, 32)'"
-           (click)="select(child)">
-          <clr-icon *ngIf="isSelected(child)" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected(child)" shape="plus-circle" size="20"></clr-icon>
-        </button>
-      </div>
-    </div>
-    <ng-template clrIfExpanded *ngIf="child.get('group')">
-      <crit-tree [node]="child"></crit-tree>
-    </ng-template>
-  </clr-tree-node>
+  <crit-leaf
+    *ngFor="let child of (children$ | async)" 
+    [node]="child" 
+    [selections]="(selected$ | async)">
+  </crit-leaf>
 </ng-container>

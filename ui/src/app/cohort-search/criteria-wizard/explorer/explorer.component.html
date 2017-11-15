@@ -1,0 +1,24 @@
+<crit-root-spinner [loading$]="loading$"></crit-root-spinner>
+<crit-alerts [errors$]="errors$"></crit-alerts>
+
+<crit-quicksearch
+  (value)="search($event)"
+  [disabled]="mode === 'SetAttr'">
+</crit-quicksearch>
+
+<div class="explorer-panels">
+  <div class="explorer-content crit-tree" [class.active]="mode === 'Tree'">
+    <crit-tree [node]="rootNode">
+    </crit-tree>
+  </div>
+
+  <div class="explorer-content quicksearch-results" [class.active]="mode === 'Search'">
+    <crit-quicksearch-results [results]="searchResults">
+    </crit-quicksearch-results>
+  </div>
+
+  <div class="explorer-content attributes" [class.active]="mode === 'SetAttr'">
+    <crit-attributes [node]="(nodeInFocus$ | async)">
+    </crit-attributes>
+  </div>
+</div>
