@@ -133,7 +133,8 @@
 <clr-modal [(clrModalOpen)]="workspaceUpdateConflictError">
   <h3 class="modal-title">Conflicting update:</h3>
   <div class="modal-body">
-    Workspace has been modified since the beginning of this editing session.
+    Another client has modified this workspace since the beginning of this
+    editing session. Please reload to avoid overwriting those changes.
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="reloadConflictingWorkspace()">Reload Workspace</button>

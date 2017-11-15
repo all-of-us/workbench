@@ -1,6 +1,7 @@
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -58,14 +59,8 @@ export class WorkspaceEditComponent implements OnInit {
     } else {
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
-      this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
-          this.oldWorkspaceName)
-        .subscribe((workspace) => {
-          this.workspace = workspace;
-        }
-      );
+      this.loadWorkspace();
     }
-
   }
 
   addWorkspace(): void {
@@ -87,17 +82,22 @@ export class WorkspaceEditComponent implements OnInit {
       }
     }
   }
+
+  loadWorkspace(): Observable<Workspace> {
+    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+      this.oldWorkspaceNamespace, this.oldWorkspaceName);
+    obs.subscribe((workspace) => {
+        this.workspace = workspace;
+    });
+    return obs;
+  }
+
   navigateBack(): void {
     this.locationService.back();
   }
 
   reloadConflictingWorkspace(): void {
-    this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
-                                        this.oldWorkspaceName)
-      .subscribe((workspace) => {
-        this.workspace = workspace;
-      });
-    this.resetWorkspaceEditor();
+    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
   }
 
   resetWorkspaceEditor(): void {
