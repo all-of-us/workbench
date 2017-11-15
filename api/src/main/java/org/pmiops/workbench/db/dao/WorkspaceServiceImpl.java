@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -123,15 +124,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
       dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
-<<<<<<< HEAD
-    // TODO(calbach): This save() is not technically necessary but included to
-    // workaround RW-252. Remove either this, or @Transactional.
-    workspaceDao.save(dbWorkspace);
-=======
 
     for(WorkspaceUserRole currentWorkspaceUser : dbWorkspace.getWorkspaceUserRoles()) {
       if(currentWorkspaceUser.getUser().getFreeTierBillingProjectName() == null) {
-        //Throw exception
+        throw new ServerErrorException("User not yet initialized in FireCloud.");
       }
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
@@ -140,7 +136,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         currentUpdate.setCanShare(true);
         currentUpdate.setAccessLevel("OWNER");
       } else if (currentWorkspaceUser.getRole() == WorkspaceAccessLevel.WRITER) {
-        currentUpdate.setCanShare(true);
+        currentUpdate.setCanShare(false);
         currentUpdate.setAccessLevel("WRITER");
       } else {
         currentUpdate.setCanShare(false);
@@ -150,10 +146,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     try {
       fireCloudService.updateWorkspaceACL(ns, id, false, updateACLRequestList);
+      // TODO(calbach): This save() is not technically necessary but included to
+      // workaround RW-252. Remove either this, or @Transactional.
       workspaceDao.save(dbWorkspace);
     } catch(org.pmiops.workbench.firecloud.ApiException e) {
-
+      throw new ServerErrorException(e);
     }
->>>>>>> Firecloud sharing
   }
 }
