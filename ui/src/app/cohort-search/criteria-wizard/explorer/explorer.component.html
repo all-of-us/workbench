@@ -8,13 +8,12 @@
 
 <div class="explorer-panels">
   <div class="explorer-content crit-tree" [class.active]="mode === 'Tree'">
-    <crit-tree
-      [node]="rootNode">
+    <crit-tree [node]="rootNode">
     </crit-tree>
   </div>
 
   <div class="explorer-content quicksearch-results" [class.active]="mode === 'Search'">
-    <crit-quicksearch-results>
+    <crit-quicksearch-results [results]="searchResults">
     </crit-quicksearch-results>
   </div>
 

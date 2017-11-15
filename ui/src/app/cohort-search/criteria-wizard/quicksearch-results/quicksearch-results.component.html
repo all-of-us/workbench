@@ -1,2 +1,5 @@
-<crit-tree *ngFor="let node of results" [node]="node">
-</crit-tree>
+<crit-leaf 
+  *ngFor="let node of results" 
+  [node]="node"
+  [selections]="(selected$ | async)">
+</crit-leaf>

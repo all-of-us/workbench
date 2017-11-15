@@ -9,6 +9,7 @@ import {
   CohortSearchActions,
   BEGIN_CRITERIA_REQUEST,
 } from '../../redux';
+import {LeafComponent} from '../leaf/leaf.component';
 import {TreeComponent} from './tree.component';
 import {CohortBuilderService} from 'generated';
 
@@ -27,7 +28,10 @@ describe('TreeComponent', () => {
 
     TestBed
       .configureTestingModule({
-        declarations: [TreeComponent],
+        declarations: [
+          LeafComponent,
+          TreeComponent,
+        ],
         imports: [ClarityModule],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},

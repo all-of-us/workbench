@@ -16,6 +16,7 @@ import {
 import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
 import {ExplorerComponent} from '../explorer/explorer.component';
+import {LeafComponent} from '../leaf/leaf.component';
 import {QuickSearchComponent} from '../quicksearch/quicksearch.component';
 import {QuickSearchResultsComponent
 } from '../quicksearch-results/quicksearch-results.component';
@@ -44,6 +45,7 @@ describe('WizardComponent', () => {
         declarations: [
           AlertsComponent,
           ExplorerComponent,
+          LeafComponent,
           QuickSearchComponent,
           QuickSearchResultsComponent,
           RootSpinnerComponent,

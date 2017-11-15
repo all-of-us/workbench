@@ -7,6 +7,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {AttributesModule} from './attributes/attributes.module';
 import {AlertsComponent} from './alerts/alerts.component';
 import {ExplorerComponent} from './explorer/explorer.component';
+import {LeafComponent} from './leaf/leaf.component';
 import {QuickSearchComponent} from './quicksearch/quicksearch.component';
 import {
   QuickSearchResultsComponent
@@ -29,6 +30,7 @@ import {WizardComponent} from './wizard/wizard.component';
   declarations: [
     AlertsComponent,
     ExplorerComponent,
+    LeafComponent,
     QuickSearchComponent,
     QuickSearchResultsComponent,
     RootSpinnerComponent,
