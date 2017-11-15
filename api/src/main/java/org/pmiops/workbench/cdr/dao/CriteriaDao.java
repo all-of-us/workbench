@@ -14,7 +14,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     /** TODO: implement dynamic switching of schemas **/
     @Query(value = "select * from cdr.criteria c " +
             "where c.type = :type " +
-            "and match(c.name) against(:value in boolean mode) " +
+            "and (match(c.name) against(:value in boolean mode) or match(c.code) against(:value in boolean mode))" +
             "and c.is_selectable = 1 " +
             "order by c.code asc", nativeQuery = true)
     List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("value") String value);

@@ -43,9 +43,13 @@
       </column>
     </createTable>
 
-    <modifySql dbms="mysql">
-      <append value="ENGINE=INNODB DEFAULT CHARSET=UTF8"/>
-    </modifySql>
+    <createIndex
+            indexName="idx_criteria_type_parent_id"
+            tableName="criteria"
+            unique="false">
+      <column name="type"/>
+      <column name="parent_id"/>
+    </createIndex>
 
   </changeSet>
 </databaseChangeLog>
