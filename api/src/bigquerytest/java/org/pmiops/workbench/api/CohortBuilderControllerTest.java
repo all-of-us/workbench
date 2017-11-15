@@ -94,7 +94,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId("0");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentId("ICD9", 0L))
+                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -109,7 +109,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .count(0L)
                         .conceptId(0L));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("ICD9", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -118,29 +118,31 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
-                        .type("DEMO_AGE")
+                        .type("DEMO")
                         .name("Age")
                         .group(false)
                         .selectable(true)
                         .count("0")
-                        .conceptId("12");
+                        .conceptId("12")
+                        .subtype("AGE");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentId("DEMO", 0L))
+                .findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId("DEMO", 0L),
                 new Criteria()
                         .id(1L)
-                        .type("DEMO_AGE")
+                        .type("DEMO")
                         .name("Age")
                         .group(false)
                         .selectable(true)
                         .count(0L)
-                        .conceptId(12L));
+                        .conceptId(12L)
+                        .subtype("AGE"));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("DEMO", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -157,7 +159,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId("0");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentId("ICD10", 0L))
+                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -171,7 +173,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .count(0L)
                         .conceptId(0L));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("ICD10", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -188,7 +190,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId("0");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentId("CPT", 0L))
+                .findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -202,7 +204,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .count(0L)
                         .conceptId(0L));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("CPT", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L);
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
@@ -219,7 +221,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .conceptId("0");
 
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentId("PHECODE", 0L))
+                .findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -233,7 +235,38 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         .count(0L)
                         .conceptId(0L));
 
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentId("PHECODE", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao);
+    }
+
+    @Test
+    public void getCriteriaTreeQuickSearch() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("PHECODE")
+                        .name("Intestinal infection")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0");
+
+        when(mockCriteriaDao
+                .findCriteriaByTypeAndNameOrCode("PHECODE", "infect*"))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaTreeQuickSearch("PHECODE", "infect"),
+                new Criteria()
+                        .id(1L)
+                        .type("PHECODE")
+                        .name("Intestinal infection")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L));
+
+        verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "infect*");
         verifyNoMoreInteractions(mockCriteriaDao);
     }
 
