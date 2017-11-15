@@ -63,11 +63,21 @@ export class ExplorerComponent implements OnInit {
   }
 
   search(value: string) {
+    // TODO(jms) - profile this; it seems likely that we may want to
+    //  (A) debounce the keystrokes
+    //  (B) use an LRU on the search results
+    //  (C) cancel outdated requests
+    //  (D) do something smarter than recreating the Observable (twice) with
+    //      every keystroke
     this.searchValue = value;
     if (value.length >= 3) {
+      this.loading$ = this.loading$.merge(Observable.of(true));
       this.api.getCriteriaTreeQuickSearch(this.criteriaType, value)
         .first()
-        .subscribe(results => this.searchResults = fromJS(results.items));
+        .subscribe(results => {
+          this.searchResults = fromJS(results.items);
+          this.loading$ = this.loading$.merge(Observable.of(false));
+        });
     }
   }
 
