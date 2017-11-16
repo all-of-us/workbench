@@ -786,7 +786,7 @@ definitions:
 
   WorkspaceAccessLevel:
     type: string
-    description: levels of access to workspace
+    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL
     enum: [NO ACCESS, READER, WRITER, OWNER]
 
   ResearchPurpose:
