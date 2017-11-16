@@ -38,7 +38,7 @@ public class Concept {
         return this;
     }
 
-    @Column(name = "conceptName")
+    @Column(name = "concept_name")
     public String getConceptName() {
         return conceptName;
     }

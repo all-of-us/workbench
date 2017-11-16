@@ -7,11 +7,10 @@ import java.io.Serializable;
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
-@Table(name = "ACHILLES_results_view", catalog="cdr")
+@Table(name = "achilles_results_concept", catalog="cdr")
 public class AnalysisResult  {
 
-
-    @Id private Long id;
+    private Long id;
     private Long analysisId;
     private String stratum1;
     private String stratum1Name;
@@ -25,6 +24,7 @@ public class AnalysisResult  {
     private String stratum5Name;
     private Long countValue;
 
+    @Id
     public Long getId() {
         return id;
     }
@@ -36,6 +36,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="analysis_id")
     public Long getAnalysisId() {
         return analysisId;
     }
@@ -58,7 +59,7 @@ public class AnalysisResult  {
         this.stratum1 = val;
         return this;
     }
-
+    @Column(name="stratum_1_name")
     public String getStratum1Name() {
         return stratum1Name;
     }
@@ -69,7 +70,7 @@ public class AnalysisResult  {
         this.stratum1Name = val;
         return this;
     }
-
+    @Column(name="stratum_2")
     public String getStratum2() {
         return stratum2;
     }
@@ -81,6 +82,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_2_name")
     public String getStratum2Name() {
         return stratum2Name;
     }
@@ -91,6 +93,8 @@ public class AnalysisResult  {
         this.stratum2Name = val;
         return this;
     }
+
+    @Column(name="stratum_3")
     public String getStratum3() {
         return stratum3;
     }
@@ -102,6 +106,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_3_name")
     public String getStratum3Name() {
         return stratum3Name;
     }
@@ -113,6 +118,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_4")
     public String getStratum4() {
         return stratum4;
     }
@@ -124,6 +130,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_4_name")
     public String getStratum4Name() {
         return stratum4Name;
     }
@@ -135,6 +142,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_5")
     public String getStratum5() {
         return stratum5;
     }
@@ -146,6 +154,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_5_name")
     public String getStratum5Name() {
         return stratum5Name;
     }
@@ -157,6 +166,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="count_value")
     public Long getCountValue() {
         return countValue;
     }
@@ -170,9 +180,50 @@ public class AnalysisResult  {
 
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AnalysisResult that = (AnalysisResult) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (analysisId != null ? !analysisId.equals(that.analysisId) : that.analysisId != null) return false;
+        if (stratum1 != null ? !stratum1.equals(that.stratum1) : that.stratum1 != null) return false;
+        if (stratum1Name != null ? !stratum1Name.equals(that.stratum1Name) : that.stratum1Name != null) return false;
+        if (stratum2 != null ? !stratum2.equals(that.stratum2) : that.stratum2 != null) return false;
+        if (stratum2Name != null ? !stratum2Name.equals(that.stratum2Name) : that.stratum2Name != null) return false;
+        if (stratum3 != null ? !stratum3.equals(that.stratum3) : that.stratum3 != null) return false;
+        if (stratum3Name != null ? !stratum3Name.equals(that.stratum3Name) : that.stratum3Name != null) return false;
+        if (stratum4 != null ? !stratum4.equals(that.stratum4) : that.stratum4 != null) return false;
+        if (stratum4Name != null ? !stratum4Name.equals(that.stratum4Name) : that.stratum4Name != null) return false;
+        if (stratum5 != null ? !stratum5.equals(that.stratum5) : that.stratum5 != null) return false;
+        if (stratum5Name != null ? !stratum5Name.equals(that.stratum5Name) : that.stratum5Name != null) return false;
+        return countValue != null ? countValue.equals(that.countValue) : that.countValue == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (analysisId != null ? analysisId.hashCode() : 0);
+        result = 31 * result + (stratum1 != null ? stratum1.hashCode() : 0);
+        result = 31 * result + (stratum1Name != null ? stratum1Name.hashCode() : 0);
+        result = 31 * result + (stratum2 != null ? stratum2.hashCode() : 0);
+        result = 31 * result + (stratum2Name != null ? stratum2Name.hashCode() : 0);
+        result = 31 * result + (stratum3 != null ? stratum3.hashCode() : 0);
+        result = 31 * result + (stratum3Name != null ? stratum3Name.hashCode() : 0);
+        result = 31 * result + (stratum4 != null ? stratum4.hashCode() : 0);
+        result = 31 * result + (stratum4Name != null ? stratum4Name.hashCode() : 0);
+        result = 31 * result + (stratum5 != null ? stratum5.hashCode() : 0);
+        result = 31 * result + (stratum5Name != null ? stratum5Name.hashCode() : 0);
+        result = 31 * result + (countValue != null ? countValue.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "AnalysisResult{" +
-                "analysisId=" + analysisId +
+                "id=" + id +
+                ", analysisId=" + analysisId +
                 ", stratum1='" + stratum1 + '\'' +
                 ", stratum1Name='" + stratum1Name + '\'' +
                 ", stratum2='" + stratum2 + '\'' +
@@ -185,43 +236,5 @@ public class AnalysisResult  {
                 ", stratum5Name='" + stratum5Name + '\'' +
                 ", countValue=" + countValue +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        AnalysisResult that = (AnalysisResult) o;
-
-        if (analysisId != that.analysisId) return false;
-        if (countValue != that.countValue) return false;
-        if (stratum1 != null ? !stratum1.equals(that.stratum1) : that.stratum1 != null) return false;
-        if (stratum1Name != null ? !stratum1Name.equals(that.stratum1Name) : that.stratum1Name != null) return false;
-        if (stratum2 != null ? !stratum2.equals(that.stratum2) : that.stratum2 != null) return false;
-        if (stratum2Name != null ? !stratum2Name.equals(that.stratum2Name) : that.stratum2Name != null) return false;
-        if (stratum3 != null ? !stratum3.equals(that.stratum3) : that.stratum3 != null) return false;
-        if (stratum3Name != null ? !stratum3Name.equals(that.stratum3Name) : that.stratum3Name != null) return false;
-        if (stratum4 != null ? !stratum4.equals(that.stratum4) : that.stratum4 != null) return false;
-        if (stratum4Name != null ? !stratum4Name.equals(that.stratum4Name) : that.stratum4Name != null) return false;
-        if (stratum5 != null ? !stratum5.equals(that.stratum5) : that.stratum5 != null) return false;
-        return stratum5Name != null ? stratum5Name.equals(that.stratum5Name) : that.stratum5Name == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (int) (analysisId ^ (analysisId >>> 32));
-        result = 31 * result + (stratum1 != null ? stratum1.hashCode() : 0);
-        result = 31 * result + (stratum1Name != null ? stratum1Name.hashCode() : 0);
-        result = 31 * result + (stratum2 != null ? stratum2.hashCode() : 0);
-        result = 31 * result + (stratum2Name != null ? stratum2Name.hashCode() : 0);
-        result = 31 * result + (stratum3 != null ? stratum3.hashCode() : 0);
-        result = 31 * result + (stratum3Name != null ? stratum3Name.hashCode() : 0);
-        result = 31 * result + (stratum4 != null ? stratum4.hashCode() : 0);
-        result = 31 * result + (stratum4Name != null ? stratum4Name.hashCode() : 0);
-        result = 31 * result + (stratum5 != null ? stratum5.hashCode() : 0);
-        result = 31 * result + (stratum5Name != null ? stratum5Name.hashCode() : 0);
-        result = 31 * result + (int) (countValue ^ (countValue >>> 32));
-        return result;
     }
 }
