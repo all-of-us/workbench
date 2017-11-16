@@ -12,10 +12,13 @@ import org.springframework.stereotype.Service;
 
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.firecloud.FireCloudService;
 
 public interface WorkspaceService {
   public WorkspaceDao getDao();
   public void setDao(WorkspaceDao workspaceDao);
+  public FireCloudService getFireCloudService();
+  public void setFireCloudService(FireCloudService fireCloudService);
   public Workspace get(String ns, String id);
   public Workspace getRequired(String ns, String id);
   public List<Workspace> findForReview();

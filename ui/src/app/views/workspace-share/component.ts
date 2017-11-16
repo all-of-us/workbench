@@ -56,11 +56,11 @@ export class WorkspaceShareComponent implements OnInit {
   setAccess(dropdownSelected: string): void {
     this.selectedPermission = dropdownSelected;
     if (dropdownSelected === 'Owner') {
-      this.accessLevel = WorkspaceAccessLevel.Owner;
+      this.accessLevel = WorkspaceAccessLevel.OWNER;
     } else if (dropdownSelected === 'Writer') {
-      this.accessLevel = WorkspaceAccessLevel.Writer;
+      this.accessLevel = WorkspaceAccessLevel.WRITER;
     } else {
-      this.accessLevel = WorkspaceAccessLevel.Reader;
+      this.accessLevel = WorkspaceAccessLevel.READER;
     }
   }
 
