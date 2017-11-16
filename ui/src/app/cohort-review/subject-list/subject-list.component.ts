@@ -1,6 +1,7 @@
-import { Component, OnInit, HostBinding } from '@angular/core';
-import { StringFilter } from 'clarity-angular';
-import { Subject } from '../model';
+import {Component, OnInit} from '@angular/core';
+import {StringFilter} from 'clarity-angular';
+
+import {Subject} from '../model';
 
 class SubjectFilter implements StringFilter<Subject> {
   accepts(subject: Subject, search: string): boolean {
@@ -18,9 +19,8 @@ export class SubjectListComponent implements OnInit {
 
   public subjects: Subject[];
 
+  /* tslint:disable-next-line:no-unused-variable */
   private subjectFilter = new SubjectFilter();
-
-  constructor() { }
 
   ngOnInit() {
     this.subjects = [new Subject(127736, 'NR'),

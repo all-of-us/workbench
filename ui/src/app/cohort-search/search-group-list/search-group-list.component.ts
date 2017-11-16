@@ -1,8 +1,9 @@
 import {Component, Input} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions} from '../redux';
+
 import {SearchRequest} from 'generated';
 
 @Component({

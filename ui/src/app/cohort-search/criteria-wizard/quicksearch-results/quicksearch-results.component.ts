@@ -1,7 +1,7 @@
-import {Component, Input} from '@angular/core';
 import {select} from '@angular-redux/store';
-import {Observable} from 'rxjs/Observable';
+import {Component, Input} from '@angular/core';
 import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 
 import {activeParameterList} from '../../redux';
 

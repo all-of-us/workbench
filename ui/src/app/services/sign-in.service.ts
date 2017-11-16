@@ -1,12 +1,13 @@
 /**
  * OAuth2 via GAPI sign-in.
  */
-
 import 'rxjs/Rx';
-import {Injectable, NgZone} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
+import {Injectable, NgZone} from '@angular/core';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {Observable} from 'rxjs/Observable';
+
+/* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
 
 const SIGNED_IN_USER = 'signedInUser';

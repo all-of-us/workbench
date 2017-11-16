@@ -8,6 +8,7 @@ export class ErrorHandlingService {
   public noServerResponse: boolean;
   public serverBusy: boolean;
 
+  /* tslint:disable-next-line:no-unused-variable */
   constructor(private zone: NgZone) {
     this.serverError = false;
     this.noServerResponse = false;

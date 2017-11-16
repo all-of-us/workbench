@@ -1,40 +1,40 @@
+import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {NgRedux, dispatch} from '@angular-redux/store';
-import {AnyAction} from 'redux';
-import {List, Map, Set, isCollection, isImmutable} from 'immutable';
+import {isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
 
 import {
-  CohortSearchState,
-  isCriteriaLoading,
-  isRequesting,
-  includeGroups,
-  getItem,
-  getGroup,
-  getSearchRequest,
-  SR_ID,
-  activeRole,
   activeGroupId,
   activeItem,
   activeParameterList,
+  activeRole,
+  /* tslint:disable-next-line:no-unused-variable */
+  CohortSearchState,
+  getGroup,
+  getItem,
+  getSearchRequest,
+  includeGroups,
+  isCriteriaLoading,
+  isRequesting,
+  SR_ID,
 } from '../store';
 import * as ActionFuncs from './creators';
 
 import {
-  Criteria,
-  CohortBuilderService,
-  SearchRequest,
-  SearchParameter,
   SearchGroup,
   SearchGroupItem,
+  SearchParameter,
+  SearchRequest,
 } from 'generated';
 
 
 @Injectable()
 export class CohortSearchActions {
-  constructor(private ngRedux: NgRedux<CohortSearchState>,
-              private service: CohortBuilderService) {}
+  constructor(
+    /* tslint:disable-next-line:no-unused-variable */
+    private ngRedux: NgRedux<CohortSearchState>,
+  ) {}
 
   /*
    * Auto-dispatched action creators:

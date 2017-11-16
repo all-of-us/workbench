@@ -1,4 +1,4 @@
-import {List} from 'immutable';
+/* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
@@ -29,8 +29,9 @@ import {
   SET_WIZARD_CONTEXT,
   ActionTypes,
 } from './types';
+/* tslint:enable:ordered-imports */
 
-import {Criteria, SearchRequest, ChartInfo} from 'generated';
+import {ChartInfo, Criteria, SearchRequest} from 'generated';
 
 /**
  * Criteria loading mgmt

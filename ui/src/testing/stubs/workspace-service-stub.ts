@@ -1,9 +1,6 @@
-
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {Workspace, WorkspaceListResponse} from 'generated';
-
 import {Observable} from 'rxjs/Observable';
-import {Observer} from 'rxjs/Observer';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
