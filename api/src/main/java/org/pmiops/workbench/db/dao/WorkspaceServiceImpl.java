@@ -171,7 +171,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (e.getCode() == 400) {
         throw new BadRequestException(e.getResponseBody());
       } else if (e.getCode() == 404) {
-        throw new BadRequestException("Workspace not found.");
+        throw new NotFoundException("Workspace not found.");
       } else {
         throw new ServerErrorException(e);
       }
