@@ -36,4 +36,15 @@ class GcloudContextV2
       exit 1
     end
   end
+
+  def ensure_service_account()
+    sa_key_path = "src/main/webapp/WEB-INF/sa-key.json"
+    unless File.exist? sa_key_path
+      Common.new.run_inline %W{
+        docker-compose run --rm api gsutil cp
+          gs://#{@project}-credentials/all-of-us-workbench-test-9b5c623a838e.json
+          #{sa_key_path}
+      }
+    end
+  end
 end

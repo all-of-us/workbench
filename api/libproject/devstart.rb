@@ -282,12 +282,15 @@ def drop_cloud_cdr(*args)
 end
 
 def connect_to_cloud_db(*args)
+  common = Common.new
   op = WbOptionsParser.new("connect-to-cloud-db", args)
-  CloudSqlProxyContext.new(GcloudContextV2.new(op)).run do |env_file_path|
-    sleep 1 # TODO(dmohs): Detect running better.
-    env = Workbench::read_vars_file(env_file_path)
+  gcc = GcloudContextV2.new(op)
+  env = Workbench::read_vars(common.capture_stdout(%W{
+    docker-compose run --rm api gsutil cat gs://#{gcc.project}-credentials/vars.env
+  }))
+  CloudSqlProxyContext.new(gcc).run do
     password = env["WORKBENCH_DB_PASSWORD"]
-    Common.new.run_inline %W{
+    common.run_inline %W{
       docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}
       --database=#{env["DB_NAME"]} --password=#{password}},
       redact=password
