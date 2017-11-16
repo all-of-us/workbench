@@ -14,7 +14,7 @@ import {SearchRequest} from 'generated';
 
 const getDisplayName = (criteria: Map<any, any>): string =>
   criteria.get('type', '').match(/^DEMO.*/i)
-    ?  criteria.get('name', 'N/A')
+    ? criteria.get('name', 'N/A')
     : criteria.get('code', 'N/A');
 
 
@@ -70,6 +70,10 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   get codes() {
     return this.rawCodes.map(getDisplayName).join(', ');
+  }
+
+  remove() {
+    this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
   }
 
   launchWizard() {

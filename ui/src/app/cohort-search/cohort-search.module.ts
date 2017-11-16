@@ -3,6 +3,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ClarityModule} from 'clarity-angular';
 import {NgReduxModule} from '@angular-redux/store';
+import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
@@ -31,6 +32,7 @@ import {CohortBuilderService} from 'generated';
     // 3rd Party
     ClarityModule,
     NgReduxModule,
+    NgxPopperModule,
     // Ours
     CohortSearchRouter,
     ChartsModule,
