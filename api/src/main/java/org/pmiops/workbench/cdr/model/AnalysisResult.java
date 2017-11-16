@@ -47,6 +47,7 @@ public class AnalysisResult  {
         return this;
     }
 
+    @Column(name="stratum_1")
     public String getStratum1() {
         return stratum1;
     }

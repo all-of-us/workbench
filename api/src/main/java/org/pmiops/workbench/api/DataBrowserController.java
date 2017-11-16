@@ -30,12 +30,16 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+
+
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
 
 
     @Autowired
     private ConceptDao conceptDao;
+
+    @Autowired
     private AnalysisResultDao analysisResultDao;
 
 
@@ -137,8 +141,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             String stratum5) {
 
 
-        //final List<AnalysisResult> resultList = analysisResultDao.findConceptCountByConceptId(analysisId, stratum1);
-        final List<AnalysisResult> resultList = analysisResultDao.findAnalysisResultsByAnalysisId(analysisId);
+        final List<AnalysisResult> resultList = analysisResultDao.findConceptCountByConceptId(analysisId, stratum1);
+        //final List<AnalysisResult> resultList = analysisResultDao.findAnalysisResultsByAnalysisId(analysisId);
         AnalysisResultListResponse resp = new AnalysisResultListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS_RESULT).collect(Collectors.toList()));
 
