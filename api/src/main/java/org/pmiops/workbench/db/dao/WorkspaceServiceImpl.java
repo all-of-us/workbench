@@ -23,6 +23,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -172,8 +173,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new BadRequestException(e.getResponseBody());
       } else if (e.getCode() == 404) {
         throw new NotFoundException("Workspace not found.");
-      } else {
+      } else if (e.getCode() == 500) {
         throw new ServerErrorException(e);
+      } else {
+        throw new ServerUnavailableException(e);
       }
     }
   }
