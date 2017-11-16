@@ -162,13 +162,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           }
           usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
         }
-        throw new ServerErrorException("Could not find users: " + usersNotFound);
+        throw new BadRequestException(usersNotFound);
       }
       // TODO(calbach): This save() is not technically necessary but included to
       // workaround RW-252. Remove either this, or @Transactional.
       workspaceDao.save(dbWorkspace);
     } catch(org.pmiops.workbench.firecloud.ApiException e) {
-      throw new ServerErrorException(e);
+      if (e.getCode() == 400) {
+        throw new BadRequestException(e.getResponseBody());
+      } else if (e.getCode() == 404) {
+        throw new BadRequestException("Workspace not found.");
+      } else {
+        throw new ServerErrorException(e);
+      }
     }
   }
 }
