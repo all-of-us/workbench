@@ -44,5 +44,5 @@ public interface FireCloudService {
    */
   List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;
 
-  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, Boolean inviteUsersNotFound, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
+  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
 }

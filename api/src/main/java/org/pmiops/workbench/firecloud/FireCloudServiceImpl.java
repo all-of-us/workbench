@@ -110,9 +110,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, Boolean inviteUsersNotFound, List<WorkspaceACLUpdate> aclUpdates) throws ApiException {
+  public WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     // TODO: set authorization domain here
-    return workspacesApi.updateWorkspaceACL(projectName, workspaceName, inviteUsersNotFound, aclUpdates);
+    return workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates);
   }
 }

@@ -120,6 +120,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         currentUserRole.setRole(mapValue.getRole());
         userRoleMap.remove(currentUserRole.getUser().getUserId());
       } else {
+        // This is how to remove a user from the FireCloud ACL:
+        // Pass along an update request with NO ACCESS as the given access level.
         WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
         removedUser.setEmail(currentUserRole.getUser().getEmail());
         removedUser.setCanCompute(false);
@@ -151,7 +153,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       updateACLRequestList.add(currentUpdate);
     }
     try {
-      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(ns, id, false, updateACLRequestList);
+      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(ns, id, updateACLRequestList);
       if (fireCloudResponse.getUsersNotFound().size() != 0) {
         String usersNotFound = "";
         for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
