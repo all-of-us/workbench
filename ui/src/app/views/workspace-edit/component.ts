@@ -1,6 +1,7 @@
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -23,6 +24,8 @@ export class WorkspaceEditComponent implements OnInit {
   savingWorkspace = false;
   nameNotEntered = false;
   workspaceCreationError = false;
+  workspaceUpdateError = false;
+  workspaceUpdateConflictError = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -56,14 +59,8 @@ export class WorkspaceEditComponent implements OnInit {
     } else {
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
-      this.workspacesService.getWorkspace(this.oldWorkspaceNamespace,
-          this.oldWorkspaceName)
-        .subscribe((workspace) => {
-          this.workspace = workspace;
-        }
-      );
+      this.loadWorkspace();
     }
-
   }
 
   addWorkspace(): void {
@@ -85,12 +82,28 @@ export class WorkspaceEditComponent implements OnInit {
       }
     }
   }
+
+  loadWorkspace(): Observable<Workspace> {
+    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+      this.oldWorkspaceNamespace, this.oldWorkspaceName);
+    obs.subscribe((workspace) => {
+        this.workspace = workspace;
+    });
+    return obs;
+  }
+
   navigateBack(): void {
     this.locationService.back();
   }
 
-  resetWorkspaceCreation(): void {
+  reloadConflictingWorkspace(): void {
+    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+  }
+
+  resetWorkspaceEditor(): void {
     this.workspaceCreationError = false;
+    this.workspaceUpdateError = false;
+    this.workspaceUpdateConflictError = false;
     this.savingWorkspace = false;
   }
 
@@ -110,7 +123,11 @@ export class WorkspaceEditComponent implements OnInit {
               this.navigateBack();
             },
             (error) => {
-              this.workspaceCreationError = true;
+              if (error.status === 409) {
+                this.workspaceUpdateConflictError = true;
+              } else {
+                this.workspaceUpdateError = true;
+              }
             });
       }
     }
