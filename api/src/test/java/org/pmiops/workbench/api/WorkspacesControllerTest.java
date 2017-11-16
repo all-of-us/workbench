@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -313,7 +315,10 @@ public class WorkspacesControllerTest {
     reader.setEmail("readerfriend@gmail.com");
     reader.setRole(WorkspaceAccessLevel.READER);
     updatedUserRoles.addItemsItem(reader);
-    when(fireCloudService.updateWorkspaceACL("namespace", "name", new ArrayList<WorkspaceACLUpdate>())).thenReturn(new WorkspaceACLUpdateResponseList());
+
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
@@ -368,42 +373,15 @@ public class WorkspacesControllerTest {
     reader.setRole(WorkspaceAccessLevel.READER);
     updatedUserRoles.addItemsItem(reader);
 
-
-    List<WorkspaceACLUpdate> firecloudUpdates = new ArrayList<WorkspaceACLUpdate>();
-    WorkspaceACLUpdate creatorFirecloud = new WorkspaceACLUpdate();
-    creatorFirecloud.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    creatorFirecloud.setEmail("bob@gmail.com");
-    creatorFirecloud.setCanShare(true);
-    creatorFirecloud.setCanCompute(false);
-    WorkspaceACLUpdate writerFirecloud = new WorkspaceACLUpdate();
-    writerFirecloud.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    writerFirecloud.setEmail("writerfriend@gmail.com");
-    writerFirecloud.setCanShare(false);
-    writerFirecloud.setCanCompute(false);
-    WorkspaceACLUpdate readerFirecloud = new WorkspaceACLUpdate();
-    readerFirecloud.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    readerFirecloud.setEmail("readerfriend@gmail.com");
-    readerFirecloud.setCanShare(false);
-    readerFirecloud.setCanCompute(false);
-    firecloudUpdates.add(creatorFirecloud);
-    firecloudUpdates.add(writerFirecloud);
-    firecloudUpdates.add(readerFirecloud);
-
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
 
-    when(fireCloudService.updateWorkspaceACL("namespace", "name", org.mockito.Mockito.Matchers.anyList())).thenReturn(responseValue);
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     updatedUserRoles = new UserRoleList();
     updatedUserRoles.addItemsItem(creator);
     updatedUserRoles.addItemsItem(writer);
 
-    firecloudUpdates = new ArrayList<WorkspaceACLUpdate>();
-    readerFirecloud.setAccessLevel(WorkspaceAccessLevel.NO_ACCESS.toString());
-    firecloudUpdates.add(creatorFirecloud);
-    firecloudUpdates.add(writerFirecloud);
-    firecloudUpdates.add(readerFirecloud);
-    when(fireCloudService.updateWorkspaceACL("namespace", "name", firecloudUpdates)).thenReturn(responseValue);
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
