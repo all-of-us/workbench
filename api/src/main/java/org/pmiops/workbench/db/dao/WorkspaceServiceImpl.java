@@ -53,6 +53,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.workspaceDao = workspaceDao;
   }
   @Override
+  public FireCloudService getFireCloudService() {
+    return fireCloudService;
+  }
+  @Override
+  public void setFireCloudService(FireCloudService fireCloudService) {
+    this.fireCloudService = fireCloudService;
+  }
+
+  @Override
   public Workspace get(String ns, String id) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
   }
@@ -115,7 +124,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         removedUser.setEmail(currentUserRole.getUser().getEmail());
         removedUser.setCanCompute(false);
         removedUser.setCanShare(false);
-        removedUser.setAccessLevel("NO ACCESS");
+        removedUser.setAccessLevel(WorkspaceAccessLevel.NO_ACCESS.toString());
         updateACLRequestList.add(removedUser);
         dbUserRoles.remove();
       }
@@ -126,26 +135,33 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     for(WorkspaceUserRole currentWorkspaceUser : dbWorkspace.getWorkspaceUserRoles()) {
-      if(currentWorkspaceUser.getUser().getFreeTierBillingProjectName() == null) {
-        throw new ServerErrorException("User not yet initialized in FireCloud.");
-      }
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
       currentUpdate.setCanCompute(false);
       if (currentWorkspaceUser.getRole() == WorkspaceAccessLevel.OWNER) {
         currentUpdate.setCanShare(true);
-        currentUpdate.setAccessLevel("OWNER");
+        currentUpdate.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
       } else if (currentWorkspaceUser.getRole() == WorkspaceAccessLevel.WRITER) {
         currentUpdate.setCanShare(false);
-        currentUpdate.setAccessLevel("WRITER");
+        currentUpdate.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
       } else {
         currentUpdate.setCanShare(false);
-        currentUpdate.setAccessLevel("READER");
+        currentUpdate.setAccessLevel(WorkspaceAccessLevel.READER.toString());
       }
       updateACLRequestList.add(currentUpdate);
     }
     try {
-      fireCloudService.updateWorkspaceACL(ns, id, false, updateACLRequestList);
+      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(ns, id, false, updateACLRequestList);
+      if (fireCloudResponse.getUsersNotFound().size() != 0) {
+        String usersNotFound = "";
+        for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
+          if (i > 0) {
+            usersNotFound += ", ";
+          }
+          usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
+        }
+        throw new ServerErrorException("Could not find users: " + usersNotFound);
+      }
       // TODO(calbach): This save() is not technically necessary but included to
       // workaround RW-252. Remove either this, or @Transactional.
       workspaceDao.save(dbWorkspace);

@@ -74,6 +74,7 @@ public class WorkspacesControllerTest {
     User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
+    user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
@@ -81,6 +82,7 @@ public class WorkspacesControllerTest {
     // DAO and creating the service directly.
     workspaceService = new WorkspaceServiceImpl();
     workspaceService.setDao(workspaceDao);
+    workspaceService.setFireCloudService(fireCloudService);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         userDao, userProvider, fireCloudService,
@@ -285,10 +287,14 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
@@ -337,10 +343,12 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);

@@ -787,7 +787,7 @@ definitions:
   WorkspaceAccessLevel:
     type: string
     description: levels of access to workspace
-    enum: [reader, writer, owner]
+    enum: [NO ACCESS, READER, WRITER, OWNER]
 
   ResearchPurpose:
     type: object
