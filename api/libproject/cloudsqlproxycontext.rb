@@ -13,7 +13,8 @@ class CloudSqlProxyContext
       sleep 1 # TODO(dmohs): Detect running better.
       yield
     ensure
-      common.run_inline %W{docker-compose down}
+      common.run_inline %W{docker-compose stop cloud-sql-proxy}
+      common.run_inline %W{docker-compose rm --force cloud-sql-proxy}
     end
   end
 end
