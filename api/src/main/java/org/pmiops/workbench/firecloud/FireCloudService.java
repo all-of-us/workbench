@@ -2,6 +2,8 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 
 /**
  * Encapsulate Firecloud API interaction details and provide a simple/mockable interface
@@ -41,4 +43,6 @@ public interface FireCloudService {
    * Retrieves all billing project memberships for the user from FireCloud.
    */
   List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;
+
+  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
 }

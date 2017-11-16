@@ -11,6 +11,8 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.Profile;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,5 +107,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private boolean isTrue(Boolean b) {
     return b != null && b == true;
+  }
+
+  @Override
+  public WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    // TODO: set authorization domain here
+    return workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates);
   }
 }
