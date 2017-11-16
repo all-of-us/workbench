@@ -1,4 +1,5 @@
-<h2>Create a new Workspace</h2>
+<h2 *ngIf="adding">Create a new Workspace</h2>
+<h2 *ngIf="!adding">Edit workspace "{{workspace.name}}"</h2>
 <div>* is a required field</div>
 <div class="form-area">
   <div class="name-area" [class.validation-error]="nameNotEntered">
@@ -118,6 +119,25 @@
   <div class="modal-body">Could not create workspace.</div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Creation</button>
-    <button type="button" class="btn btn-primary" (click)="resetWorkspaceCreation()">Keep Editing</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceEditor()">Keep Editing</button>
+  </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="workspaceUpdateError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not update workspace.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Edits</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceEditor()">Keep Editing</button>
+  </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="workspaceUpdateConflictError">
+  <h3 class="modal-title">Conflicting update:</h3>
+  <div class="modal-body">
+    Another client has modified this workspace since the beginning of this
+    editing session. Please reload to avoid overwriting those changes.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="reloadConflictingWorkspace()">Reload Workspace</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceEditor()">Keep Editing</button>
   </div>
 </clr-modal>
