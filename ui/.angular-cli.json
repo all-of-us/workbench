@@ -44,11 +44,17 @@
   "lint": [
     {
       "project": "src/tsconfig.app.json",
-      "exclude": "**/src/generated/**/*.ts"
+      "exclude": [
+        "**/src/generated/**/*.ts",
+        "**/node_modules/**/*"
+      ]
     },
     {
       "project": "src/tsconfig.spec.json",
-      "exclude": "**/src/generated/**/*.ts"
+      "exclude": [
+        "**/src/generated/**/*.ts",
+        "**/node_modules/**/*"
+      ]
     },
     {
       "project": "e2e/tsconfig.e2e.json"
