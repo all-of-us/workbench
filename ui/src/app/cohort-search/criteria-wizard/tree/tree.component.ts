@@ -16,7 +16,6 @@ import {
 @Component({
   selector: 'crit-tree',
   templateUrl: './tree.component.html',
-  styleUrls: ['./tree.component.css'],
 })
 export class TreeComponent implements OnInit {
   @Input() node;

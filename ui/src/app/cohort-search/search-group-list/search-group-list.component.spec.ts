@@ -3,6 +3,7 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from 'clarity-angular';
 import {fromJS, List} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 
 import {
@@ -45,6 +46,7 @@ describe('SearchGroupListComponent', () => {
         ],
         imports: [
           ClarityModule,
+          NgxPopperModule,
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},

@@ -1,6 +1,7 @@
 import {Component, Input, ViewEncapsulation} from '@angular/core';
 
 import {CohortSearchActions} from '../../redux';
+import {typeToTitle} from '../../utils';
 
 @Component({
   selector: 'app-criteria-wizard',
@@ -15,13 +16,7 @@ export class WizardComponent {
   constructor(private actions: CohortSearchActions) {}
 
   get critPageTitle() {
-    let _type = this.criteriaType;
-    if (_type.match(/^DEMO.*/i)) {
-      _type = 'Demographics';
-    } else if (_type.match(/^(ICD|CPT).*/i)) {
-      _type = _type.toUpperCase();
-    }
-    return `Choose ${_type} Codes`;
+    return `Choose ${typeToTitle(this.criteriaType)} Codes`;
   }
 
   cancel() {
