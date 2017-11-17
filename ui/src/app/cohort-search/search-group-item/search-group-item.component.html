@@ -14,14 +14,14 @@
       <clr-icon shape="pencil"></clr-icon>
     </button>
 
-    <small 
+    <small
       [popper]="codesPopper"
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
       class="trigger">
       <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
       <span class="text-muted">Contains</span>
-      <span class="font-weight-bold">{{ codeType }}</span>
+      <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
       <span class="text-muted">{{ codes }}</span>
     </small>
   </div>
@@ -39,6 +39,6 @@
 </div>
 
 <popper-content #codesPopper>
-  <h3 [style.margin]="'0'">Codes</h3>
+  <h3 [style.margin]="'0'">{{ codeTypeDisplay }}</h3>
   <p  [style.margin]="'0'">{{ codes }}</p>
 </popper-content>
