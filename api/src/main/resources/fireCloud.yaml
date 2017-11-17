@@ -228,6 +228,40 @@ paths:
         500:
           description: Internal Server Error
 
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/acl:
+    patch:
+      tags:
+        - Workspaces
+      operationId: updateWorkspaceACL
+      summary: Update workspace ACL
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+        - in: query
+          description: true to invite unregistered users, false to ignore
+          name: inviteUsersNotFound
+          required: true
+          default: false
+          type: boolean
+        - name: aclUpdates
+          description: Series of ACL updates for workspace
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/WorkspaceACLUpdate'
+          in: body
+      responses:
+        200:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/WorkspaceACLUpdateResponseList'
+        400:
+          description: Can't set ACL for workspace
+        404:
+          description: Workspace not found
+        500:
+          description: Internal Server Error
   /me:
     get:
       tags:
@@ -589,3 +623,65 @@ definitions:
       runningSubmissionsCount:
         type: integer
         description: Count of all the running submissions
+  WorkspaceACLUpdate:
+    description: ''
+    required:
+      - email
+      - accessLevel
+    type: object
+    properties:
+      email:
+        type: string
+        description: email address of the user or group whose permissions will be changed
+      accessLevel:
+        type: string
+        description: The access level to grant to this user or group (OWNER, READER, WRITER, NO ACCESS)
+      canShare:
+        type: boolean
+        description: Set to true if you want this user to be able to share the workspace with other users, only meaningful for readers and writers, default false
+      canCompute:
+        type: boolean
+        description: Set to true if you want this user to be able to launch compute in this workspace, may not be true for readers, default false for reader, true otherwise
+  WorkspaceACLUpdateResponse:
+    description: ''
+    required:
+      - subjectId
+      - accessLevel
+    type: object
+    properties:
+      subjectId:
+        type: string
+        description: id of the user or group whose permissions will be changed
+      accessLevel:
+        type: string
+        description: The access level granted to this user or group (OWNER, READER, WRITER, NO ACCESS)
+
+  WorkspaceACLUpdateResponseList:
+    description: ''
+    required:
+      - usersUpdated
+      - invitesSent
+      - invitesUpdated
+      - usersNotFound
+    type: object
+    properties:
+      usersUpdated:
+        type: array
+        description: the users or groups who were updated
+        items:
+          $ref: '#/definitions/WorkspaceACLUpdateResponse'
+      invitesSent:
+        type: array
+        description: the list of invites that were sent
+        items:
+          $ref: '#/definitions/WorkspaceACLUpdate'
+      invitesUpdated:
+        type: array
+        description: the list of invites that were updated
+        items:
+          $ref: '#/definitions/WorkspaceACLUpdate'
+      usersNotFound:
+        type: array
+        description: the users or groups who were not found
+        items:
+          $ref: '#/definitions/WorkspaceACLUpdate'

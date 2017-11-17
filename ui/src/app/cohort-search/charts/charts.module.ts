@@ -1,8 +1,8 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 
-import {GoogleChartDirective} from './google-chart.directive';
 import {ChartsComponent} from './charts.component';
+import {GoogleChartDirective} from './google-chart.directive';
 
 @NgModule({
   imports: [
@@ -12,8 +12,8 @@ import {ChartsComponent} from './charts.component';
     ChartsComponent
   ],
   declarations: [
-    GoogleChartDirective,
     ChartsComponent,
+    GoogleChartDirective,
   ]
 })
 export class ChartsModule {}

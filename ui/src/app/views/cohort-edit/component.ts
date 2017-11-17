@@ -1,11 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 
-import {Cohort} from 'generated';
-import {CohortsService} from 'generated';
+import {Cohort, CohortsService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],

@@ -1,14 +1,12 @@
-import {Component, OnInit, Inject} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
-import {StringFilter, Comparator} from 'clarity-angular';
-import {DOCUMENT} from '@angular/platform-browser';
-import {Observable} from 'rxjs/Observable';
+import {Component, OnInit} from '@angular/core';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {Workspace} from 'generated';
-import {WorkspacesService} from 'generated';
-import {ResearchPurposeReviewRequest} from 'generated';
+import {
+  ResearchPurposeReviewRequest,
+  Workspace,
+  WorkspacesService,
+} from 'generated';
 
 
 /**
@@ -25,7 +23,6 @@ export class ReviewComponent implements OnInit {
   contentLoaded = false;
 
   constructor(
-      private router: Router,
       private errorHandlingService: ErrorHandlingService,
       private workspacesService: WorkspacesService
   ) {}

@@ -1,17 +1,15 @@
-import {Component, DebugElement} from '@angular/core';
-import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
-import {Title, By} from '@angular/platform-browser';
-import {ActivatedRoute, UrlSegment} from '@angular/router';
+import {DebugElement} from '@angular/core';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {FormsModule} from '@angular/forms';
 import {ClarityModule} from 'clarity-angular';
 
-import {HomePageComponent} from 'app/views/home-page/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
-import {updateAndTick, simulateInput} from 'testing/test-helpers';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {HomePageComponent} from 'app/views/home-page/component';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {updateAndTick} from 'testing/test-helpers';
 
 import {WorkspacesService} from 'generated';
 
