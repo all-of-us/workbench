@@ -18,8 +18,8 @@
       <column name="stratum_3_name" type="STRING"/>
       <column name="stratum_4_name" type="STRING"/>
       <column name="stratum_5_name" type="STRING"/>
-      <column name="chartType" type="STRING"/>
-      <column name="dataType" type="STRING"/>
+      <column name="chart_type" type="STRING"/>
+      <column name="data_type" type="STRING"/>
     </loadData>
 
   </changeSet>
