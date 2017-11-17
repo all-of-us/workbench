@@ -1,4 +1,4 @@
-analysis_id,analysis_name,stratum_1_name,stratum_2_name,stratum_3_name,stratum_4_name,stratum_5_name,chartType,dataType
+analysis_id,analysis_name,stratum_1_name,stratum_2_name,stratum_3_name,stratum_4_name,stratum_5_name,chart_type,data_type
 0,Source name,"","","","","",column,counts
 2000,Number of patients with at least 1 Dx and 1 Rx,"","","","","",column,counts
 2001,Number of patients with at least 1 Dx and 1 Proc,"","","","","",column,counts
