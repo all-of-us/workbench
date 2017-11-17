@@ -6,8 +6,6 @@ import {fromJS, List} from 'immutable';
 import {CohortSearchState, initialState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
 
-import {CohortBuilderService} from 'generated';
-
 /**
  * Dummy objects / mock state peices
  */

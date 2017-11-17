@@ -2,6 +2,7 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 import {fromJS} from 'immutable';
 
@@ -54,6 +55,7 @@ describe('WizardComponent', () => {
         ],
         imports: [
           AttributesModule,
+          BrowserAnimationsModule,
           ClarityModule,
           ReactiveFormsModule,
         ],
