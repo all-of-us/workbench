@@ -1085,6 +1085,20 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
+  /api/v1/databrowser/db-domains:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets list of analysis definitions
+      operationId: "getDbDomains"
+      parameters:
+      responses:
+        "200":
+          description: A collection of databrowser domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
 
 
 ##########################################################################################
@@ -2155,4 +2169,36 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/Analysis"
+
+  DbDomain:
+      type: object
+      required:
+        - domainId
+      properties:
+        domainId:
+          description: domain id
+          type: string
+        domainDisplay:
+          description:  web display name
+          type: string
+        domainDesc:
+          description:  full desc text
+          type: string
+        domainParent:
+          description:  parent id
+          type: string
+        domainRoute:
+          description:  route
+          type: string
+
+
+  DbDomainListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/DbDomain"
 

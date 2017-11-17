@@ -22,6 +22,6 @@
   <include file="changelog-data/db.changelog-domain11.xml"/>
   <include file="changelog-data/db.changelog-vocabulary12.xml"/>
   <include file="changelog-data/db.changelog-achilles_results13.xml"/>
-
+  <include file="changelog-data/db.changelog-db_domain14.xml"/>
 
 </databaseChangeLog>
