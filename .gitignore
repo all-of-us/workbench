@@ -36,3 +36,4 @@ npm-debug.log
 tools/*.jar
 tools/cloud_sql_proxy
 .DS_Store
+**/*.egg-info*
