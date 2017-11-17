@@ -84,7 +84,6 @@ describe('CohortSearchActions', () => {
     mockReduxInst.getState = () => dummyState;
     actions = new CohortSearchActions(
       mockReduxInst as NgRedux<CohortSearchState>,
-      {} as CohortBuilderService,
     );
   });
 

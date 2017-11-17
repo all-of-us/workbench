@@ -11,18 +11,18 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
-import {AlertsComponent} from './alerts/alerts.component';
-import {AttributesModule} from './attributes/attributes.module';
-import {ExplorerComponent} from './explorer/explorer.component';
-import {LeafComponent} from './leaf/leaf.component';
+import {AlertsComponent} from '../alerts/alerts.component';
+import {AttributesModule} from '../attributes/attributes.module';
+import {ExplorerComponent} from '../explorer/explorer.component';
+import {LeafComponent} from '../leaf/leaf.component';
 import {
   QuickSearchResultsComponent
-} from './quicksearch-results/quicksearch-results.component';
-import {QuickSearchComponent} from './quicksearch/quicksearch.component';
-import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
-import {SelectionComponent} from './selection/selection.component';
-import {TreeComponent} from './tree/tree.component';
-import {WizardComponent} from './wizard/wizard.component';
+} from '../quicksearch-results/quicksearch-results.component';
+import {QuickSearchComponent} from '../quicksearch/quicksearch.component';
+import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
+import {SelectionComponent} from '../selection/selection.component';
+import {TreeComponent} from '../tree/tree.component';
+import {WizardComponent} from './wizard.component';
 
 import {CohortBuilderService} from 'generated';
 
