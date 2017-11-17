@@ -1,6 +1,7 @@
 import {NgReduxModule} from '@angular-redux/store';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from 'clarity-angular';
 
 /* Components */
@@ -22,6 +23,7 @@ import {CohortBuilderService} from 'generated';
   imports: [
     // Angular
     CommonModule,
+    ReactiveFormsModule,
     // 3rd Party
     ClarityModule,
     NgReduxModule,
