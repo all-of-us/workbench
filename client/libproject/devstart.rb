@@ -28,9 +28,7 @@ def install_py_requirements()
   py_root = File.join(Workbench::WORKBENCH_ROOT, 'client', 'py')
 
   common = Common.new
-  common.run_inline %W{
-      pip install --requirement #{File.join(py_root, "requirements.txt")}
-      --requirement #{File.join(py_root, "swagger-requirements.txt")}}
+  common.run_inline %W{pip install --requirement #{File.join(py_root, "requirements.txt")}}
 end
 
 def pylint()
