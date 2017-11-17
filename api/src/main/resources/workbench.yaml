@@ -434,10 +434,10 @@ paths:
             type: string
             required: true
           - in: body
-            name: usersAndRoles
+            name: body
             description: users to share the workspace with
             schema:
-              $ref: "#/definitions/UserRoleList"
+              $ref: "#/definitions/ShareWorkspaceRequest"
       responses:
         "200":
           schema:
@@ -774,11 +774,17 @@ definitions:
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
 
-  UserRoleList:
+  ShareWorkspaceRequest:
     type: object
     required:
      - items
     properties:
+      workspaceEtag:
+        type: string
+        description: >
+          Associated workspace etag retrieved via reading the workspaces API. If provided,
+          validates that the workspace (and its user roles) has not been modified since this
+          etag was retrieved.
       items:
         type: "array"
         items:
