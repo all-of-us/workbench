@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,8 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -74,6 +78,7 @@ public class WorkspacesControllerTest {
     User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
+    user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
@@ -81,6 +86,7 @@ public class WorkspacesControllerTest {
     // DAO and creating the service directly.
     workspaceService = new WorkspaceServiceImpl();
     workspaceService.setDao(workspaceDao);
+    workspaceService.setFireCloudService(fireCloudService);
 
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         userDao, userProvider, fireCloudService,
@@ -281,14 +287,18 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspace() {
+  public void testShareWorkspace() throws Exception{
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
@@ -306,6 +316,9 @@ public class WorkspacesControllerTest {
     reader.setRole(WorkspaceAccessLevel.READER);
     updatedUserRoles.addItemsItem(reader);
 
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
@@ -333,14 +346,16 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUnshareWorkspace() {
+  public void testUnshareWorkspace() throws Exception {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
+    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
@@ -358,10 +373,15 @@ public class WorkspacesControllerTest {
     reader.setRole(WorkspaceAccessLevel.READER);
     updatedUserRoles.addItemsItem(reader);
 
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+    responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
+
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     updatedUserRoles = new UserRoleList();
     updatedUserRoles.addItemsItem(creator);
     updatedUserRoles.addItemsItem(writer);
+
     workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
