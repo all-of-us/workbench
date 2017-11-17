@@ -2,15 +2,17 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 public class WorkspaceServiceImpl implements WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  // Note: Cannot use an @Autowired constructor with this version of Spring
+  // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private FireCloudService fireCloudService;
 
@@ -50,18 +54,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceDao;
   }
   @Override
-  public void setDao(WorkspaceDao workspaceDao) {
-    this.workspaceDao = workspaceDao;
-  }
-  @Override
   public FireCloudService getFireCloudService() {
     return fireCloudService;
   }
-  @Override
-  public void setFireCloudService(FireCloudService fireCloudService) {
-    this.fireCloudService = fireCloudService;
-  }
-
   @Override
   public Workspace get(String ns, String id) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
