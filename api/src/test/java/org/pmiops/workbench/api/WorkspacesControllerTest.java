@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.User;
@@ -37,10 +35,13 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.UserRoleList;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -55,18 +56,21 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
+  @TestConfiguration
+  @Import(WorkspaceServiceImpl.class)
+  @MockBean(FireCloudService.class)
+  static class Configuration {}
 
-  WorkspaceService workspaceService;
   @Autowired
-  WorkspaceDao workspaceDao;
+  FireCloudService fireCloudService;
+  @Autowired
+  WorkspaceService workspaceService;
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Autowired
   UserDao userDao;
   @Mock
   Provider<User> userProvider;
-  @Mock
-  FireCloudService fireCloudService;
 
   private WorkspacesController workspacesController;
 
@@ -82,15 +86,8 @@ public class WorkspacesControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
-    // Injecting WorkspaceService fails in the test environment. Work around it by injecting the
-    // DAO and creating the service directly.
-    workspaceService = new WorkspaceServiceImpl();
-    workspaceService.setDao(workspaceDao);
-    workspaceService.setFireCloudService(fireCloudService);
-
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userDao, userProvider, fireCloudService,
-        Clock.fixed(NOW, ZoneId.systemDefault()));
+        userDao, userProvider, fireCloudService, FakeClock.fixed(NOW, ZoneId.systemDefault()));
   }
 
   public Workspace createDefaultWorkspace() {
