@@ -8,6 +8,8 @@ import {CohortSearchActions} from '../redux';
 
 import {Cohort, CohortsService} from 'generated';
 
+const COHORT_TYPE = 'AoU_Discover';
+
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
@@ -45,7 +47,7 @@ export class OverviewComponent {
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const criteria = JSON.stringify(this.actions.mapAll());
-    const cohort = <Cohort>{name, description, criteria};
+    const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
 
     const goBack = (_) =>
       this.router.navigate(['../..'], {relativeTo: this.route});
