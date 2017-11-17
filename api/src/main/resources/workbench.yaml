@@ -441,7 +441,7 @@ paths:
       responses:
         "200":
           schema:
-            $ref: "#/definitions/EmptyResponse"
+            $ref: "#/definitions/ShareWorkspaceResponse"
 
   # Cohorts ##############################################################################
 
@@ -789,6 +789,14 @@ definitions:
         type: "array"
         items:
            $ref: "#/definitions/UserRole"
+
+  ShareWorkspaceResponse:
+    type: object
+    properties:
+      workspaceEtag:
+        type: string
+        description: >
+          Updated workspace etag after the share request has been applied.
 
   WorkspaceAccessLevel:
     type: string

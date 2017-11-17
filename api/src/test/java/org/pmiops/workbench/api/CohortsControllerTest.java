@@ -121,13 +121,6 @@ public class CohortsControllerTest {
     cohort.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(cohort);
 
-    // Verify that we can update without an etag.
-    cohort.setEtag(null);
-    cohort.setName("updated-name3");
-    updated = cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort).getBody();
-    cohort.setEtag(updated.getEtag());
-    assertThat(updated).isEqualTo(cohort);
-
     Cohort got = cohortsController.getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId()).getBody();
     assertThat(got).isEqualTo(cohort);
   }
@@ -151,7 +144,7 @@ public class CohortsControllerTest {
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
-    List<String> cases = ImmutableList.of("hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
+    List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
         cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(),

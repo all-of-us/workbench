@@ -16,23 +16,16 @@ import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.stereotype.Service;
 
 
 /**
@@ -111,7 +104,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet) {
+  public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet) {
     Map<Long, WorkspaceUserRole> userRoleMap = new HashMap<Long, WorkspaceUserRole>();
     for (WorkspaceUserRole userRole : userRoleSet) {
       userRole.setWorkspace(workspace);
@@ -184,6 +177,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerUnavailableException(e);
       }
     }
-    this.saveWithLastModified(workspace);
+    return this.saveWithLastModified(workspace);
   }
 }

@@ -31,6 +31,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -330,7 +331,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
+  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
       ShareWorkspaceRequest request) {
     if (Strings.isNullOrEmpty(request.getWorkspaceEtag())) {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
@@ -340,7 +341,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.getRequired(workspaceNamespace, workspaceId);
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated workspace version");
+      throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
     }
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : request.getItems()) {
@@ -355,8 +356,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       newUserRole.setRole(user.getRole());
       dbUserRoles.add(newUserRole);
     }
-    workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
-    return ResponseEntity.ok(new EmptyResponse());
+    dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
+    ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
+    resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
+    return ResponseEntity.ok(resp);
   }
 
   /** Record approval or rejection of research purpose. */

@@ -33,6 +33,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.UserRoleList;
 import org.pmiops.workbench.model.Workspace;
@@ -223,7 +224,7 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
-    List<String> cases = ImmutableList.of("hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
+    List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
@@ -321,10 +322,11 @@ public class WorkspacesControllerTest {
     CLOCK.increment(1000);
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
-    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+    ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
             .getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
     int numOwners = 0;
@@ -383,19 +385,21 @@ public class WorkspacesControllerTest {
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
-    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+    ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
+    Workspace workspace2 = workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId()).getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     CLOCK.increment(1000);
-    Workspace workspace2 = workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId()).getBody();
     shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace2.getEtag());
     shareWorkspaceRequest.addItemsItem(creator);
     shareWorkspaceRequest.addItemsItem(writer);
 
-    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+    shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
     Workspace workspace3 =
         workspacesController.getWorkspace("namespace", "name")
             .getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace3.getEtag());
 
     assertThat(workspace3.getUserRoles().size()).isEqualTo(2);
     int numOwners = 0;
@@ -420,8 +424,39 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getEtag()).isNotEqualTo(workspace3.getEtag());
   }
 
+  @Test
+  public void testStaleShareWorkspace() throws Exception{
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole creator = new UserRole();
+    creator.setEmail("bob@gmail.com");
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    shareWorkspaceRequest = new ShareWorkspaceRequest();
+    // Use the initial etag, not the updated value from shareWorkspace.
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    try {
+      workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+      fail("expected conflict exception when sharing with stale etag");
+    } catch(ConflictException e) {
+      // Expected
+    }
+  }
+
   @Test(expected = BadRequestException.class)
-  public void testUnableToShareWithNonExistantUser() throws Exception {
+  public void testUnableToShareWithNonExistentUser() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();

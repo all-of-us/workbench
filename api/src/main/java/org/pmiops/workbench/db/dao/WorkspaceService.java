@@ -14,5 +14,5 @@ public interface WorkspaceService {
   public Workspace saveWithLastModified(Workspace workspace);
   public List<Workspace> findForReview();
   public void setResearchPurposeApproved(String ns, String id, boolean approved);
-  public void updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
+  public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
 }
