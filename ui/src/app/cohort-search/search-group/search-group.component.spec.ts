@@ -4,6 +4,7 @@ import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing'
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from 'clarity-angular';
 import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
@@ -75,6 +76,7 @@ describe('SearchGroupComponent', () => {
         ],
         imports: [
           ClarityModule,
+          NgxPopperModule,
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},

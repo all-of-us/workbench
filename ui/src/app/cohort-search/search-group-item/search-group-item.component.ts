@@ -10,13 +10,14 @@ import {
   parameterList
 } from '../redux';
 
+import {
+  attributeDisplay,
+  nameDisplay,
+  typeDisplay,
+  typeToTitle,
+} from '../utils';
+
 import {SearchRequest} from 'generated';
-
-
-const getDisplayName = (criteria: Map<any, any>): string =>
-  criteria.get('type', '').match(/^DEMO.*/i)
-    ?  criteria.get('name', 'N/A')
-    : criteria.get('code', 'N/A');
 
 @Component({
   selector: 'app-search-group-item',
@@ -51,13 +52,11 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   get codeType() {
-    let _type = this.item.get('type', '');
-    if (_type.match(/^DEMO.*/i)) {
-      _type = 'Demographics';
-    } else if (_type.match(/^(ICD|CPT).*/i)) {
-      _type = _type.toUpperCase();
-    }
-    return this.item.get('description', `${_type} ${this.pluralizedCode}`);
+    return typeToTitle(this.item.get('type', ''));
+  }
+
+  get codeTypeDisplay() {
+    return `${this.codeType} ${this.pluralizedCode}`;
   }
 
   get pluralizedCode() {
@@ -69,7 +68,19 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   get codes() {
-    return this.rawCodes.map(getDisplayName).join(', ');
+    const _type = this.codeType;
+    const _formatter = (param) => {
+      const funcs = _type === 'Demographics'
+        ? [typeDisplay, nameDisplay, attributeDisplay]
+        : [typeDisplay, attributeDisplay];
+      return funcs.map(f => f(param)).join(' ').trim();
+    };
+    const sep = _type === 'Demographics' ? '; ' : ', ';
+    return this.rawCodes.map(_formatter).join(sep);
+  }
+
+  remove() {
+    this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
   }
 
   launchWizard() {

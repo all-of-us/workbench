@@ -33,6 +33,8 @@
     "enhanced-resolve": "3.3.0",
     "immutable": "^4.0.0-rc.9",
     "mutationobserver-shim": "^0.3.2",
+    "ngx-popper": "^1.4.2",
+    "popper.js": "^1.12.9",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.2",
