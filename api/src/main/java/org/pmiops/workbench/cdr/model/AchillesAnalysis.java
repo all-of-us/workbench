@@ -109,7 +109,7 @@ public class AchillesAnalysis {
         return this;
     }
 
-    @Column(name="chartType")
+    @Column(name="chart_type")
     public String getChartType() {
         return chartType;
     }
@@ -121,7 +121,7 @@ public class AchillesAnalysis {
         return this;
     }
 
-    @Column(name="dataType")
+    @Column(name="data_type")
     public String getDataType() {
         return dataType;
     }
