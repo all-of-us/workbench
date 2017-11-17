@@ -1,22 +1,16 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  Input,
-  ViewEncapsulation,
-} from '@angular/core';
 import {NgRedux, select} from '@angular-redux/store';
-import {Observable} from 'rxjs/Observable';
+import {Component, Input, OnInit} from '@angular/core';
 import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 
-import {needsAttributes} from '../utils';
 import {
-  CohortSearchActions,
-  CohortSearchState,
   activeParameterList,
-  isCriteriaLoading,
+  CohortSearchActions,
+  /* tslint:disable-next-line:no-unused-variable */
+  CohortSearchState,
   criteriaChildren,
   criteriaError,
+  isCriteriaLoading,
 } from '../../redux';
 
 @Component({

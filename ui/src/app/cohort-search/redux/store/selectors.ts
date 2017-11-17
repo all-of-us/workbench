@@ -1,7 +1,9 @@
-import {Map, List} from 'immutable';
-import {Criteria, SearchRequest} from 'generated';
+import {List, Map} from 'immutable';
 
 import {SR_ID} from './initial';
+
+import {SearchRequest} from 'generated';
+
 
 
 /**

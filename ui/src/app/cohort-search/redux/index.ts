@@ -1,18 +1,26 @@
+import {DevToolsExtension, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {createEpicMiddleware, combineEpics} from 'redux-observable';
-import {NgReduxModule, NgRedux, DevToolsExtension} from '@angular-redux/store';
+import {combineEpics, createEpicMiddleware} from 'redux-observable';
+
 import {environment} from 'environments/environment';
 
-import {initialState, CohortSearchState} from './store';
 import {CohortSearchEpics} from './epics';
 import {rootReducer} from './reducer';
+import {
+  /* tslint:disable-next-line:no-unused-variable */
+  CohortSearchState,
+  initialState,
+} from './store';
 
 @Injectable()
 export class ConfigureStore {
+
   constructor(
+    /* tslint:disable:no-unused-variable */
     private ngRedux: NgRedux<CohortSearchState>,
     private epics: CohortSearchEpics,
-    private devTools: DevToolsExtension
+    private devTools: DevToolsExtension,
+    /* tslint:enable:no-unused-variable */
   ) {
 
     let storeEnhancers = [];

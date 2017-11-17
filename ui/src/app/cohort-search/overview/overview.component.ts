@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
 import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions} from '../redux';
 
@@ -14,6 +14,7 @@ export class OverviewComponent {
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
 
+  /* tslint:disable-next-line:no-unused-variable */
   constructor(private actions: CohortSearchActions) {}
 
   save() {

@@ -1,17 +1,12 @@
-import {Component} from '@angular/core';
 import {select} from '@angular-redux/store';
+import {Component} from '@angular/core';
 import {List} from 'immutable';
 
 import {
-  CohortSearchActions,
-  activeGroupId,
-  activeRole,
   activeCriteriaType,
   activeParameterList,
+  CohortSearchActions,
 } from '../../redux';
-
-import {Criteria} from 'generated';
-
 
 @Component({
   selector: 'crit-selection',

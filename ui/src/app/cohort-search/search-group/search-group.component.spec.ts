@@ -1,23 +1,25 @@
+import {dispatch, NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
 import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {DebugElement} from '@angular/core';
 import {ClarityModule} from 'clarity-angular';
-import {NgRedux, dispatch} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, List, fromJS} from 'immutable';
+import {fromJS} from 'immutable';
 
 import {
   CohortSearchActions,
+  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
-  openWizard,
   OPEN_WIZARD,
-  removeGroup,
+  openWizard,
   REMOVE_GROUP,
+  removeGroup,
 } from '../redux';
-import {SearchGroupComponent} from './search-group.component';
 import {SearchGroupItemComponent} from '../search-group-item/search-group-item.component';
+import {SearchGroupComponent} from './search-group.component';
+
 import {CohortBuilderService} from 'generated';
 
+/* tslint:disable-next-line:no-unused-variable */
 const itemA = fromJS({
   id: 'itemA',
   count: null,
@@ -27,6 +29,7 @@ const itemA = fromJS({
   modifiers: [],
 });
 
+/* tslint:disable-next-line:no-unused-variable */
 const itemB = fromJS({
   id: 'itemB',
   count: null,

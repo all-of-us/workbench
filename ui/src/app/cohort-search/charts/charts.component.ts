@@ -1,4 +1,4 @@
-import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {List, Map, Set} from 'immutable';
 
 type Datum = Map<string, any>;
@@ -102,12 +102,13 @@ const combinationDataTable = (cleanData: Data): any[] => {
       border: 1px solid #d7d7d7;
     }
   `],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChartsComponent {
   private rawData: Data;
 
   private genderData: any[];
+
+  /* tslint:disable-next-line:no-unused-variable */
   private readonly genderOpts = {
     title: 'Results By Gender',
     chartArea: {width: '80%'},
@@ -121,6 +122,8 @@ export class ChartsComponent {
   };
 
   private combinationData: any[];
+
+  /* tslint:disable-next-line:no-unused-variable */
   private readonly combinationOpts = {
     title: 'Results by Gender, Age, and Race',
     chartArea: {width: '75%'},

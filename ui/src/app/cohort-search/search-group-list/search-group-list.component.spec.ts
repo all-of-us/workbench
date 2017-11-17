@@ -1,10 +1,8 @@
-import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {DebugElement} from '@angular/core';
-import {ClarityModule} from 'clarity-angular';
-import {NgRedux, dispatch} from '@angular-redux/store';
+import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {List, fromJS} from 'immutable';
+import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ClarityModule} from 'clarity-angular';
+import {fromJS, List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
 import {
@@ -12,11 +10,11 @@ import {
   INIT_SEARCH_GROUP,
   initGroup
 } from '../redux';
-import {SearchGroupComponent} from '../search-group/search-group.component';
 import {SearchGroupItemComponent} from '../search-group-item/search-group-item.component';
-import {CohortBuilderService} from 'generated';
-
+import {SearchGroupComponent} from '../search-group/search-group.component';
 import {SearchGroupListComponent} from './search-group-list.component';
+
+import {CohortBuilderService} from 'generated';
 
 class MockActions {
   @dispatch() initGroup = initGroup;

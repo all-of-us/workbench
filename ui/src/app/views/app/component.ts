@@ -1,19 +1,19 @@
 // UI Component framing the overall app (title and nav).
 // Content is in other Components.
 
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {Authority} from 'generated';
-import {CohortsService, Configuration, ConfigurationParameters, ProfileService} from 'generated';
+import {Authority, ProfileService} from 'generated';
 
+/* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
 
 @Component({
@@ -29,7 +29,6 @@ export class AppComponent implements OnInit {
 
   constructor(
       private activatedRoute: ActivatedRoute,
-      private cohortsService: CohortsService,
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private router: Router,

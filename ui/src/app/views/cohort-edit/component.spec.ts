@@ -1,18 +1,17 @@
-import {Component, DebugElement} from '@angular/core';
-import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
+import {DebugElement} from '@angular/core';
+import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {Title, By} from '@angular/platform-browser';
+import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {DEFAULT_COHORT_ID, CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {CohortsServiceStub, DEFAULT_COHORT_ID} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
-import {updateAndTick, simulateInput} from 'testing/test-helpers';
+import {simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {CohortsService} from 'generated';
 

@@ -1,9 +1,6 @@
-
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {Cohort, CohortListResponse, Workspace} from 'generated';
-
 import {Observable} from 'rxjs/Observable';
-import {Observer} from 'rxjs/Observer';
 
 export let DEFAULT_COHORT_ID = '1';
 
