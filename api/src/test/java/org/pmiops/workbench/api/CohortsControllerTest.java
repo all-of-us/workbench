@@ -34,8 +34,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -69,7 +67,7 @@ public class CohortsControllerTest {
   UserDao userDao;
   @Mock
   Provider<User> userProvider;
-  @Mock
+  @Autowired
   FireCloudService fireCloudService;
 
   private CohortsController cohortsController;
