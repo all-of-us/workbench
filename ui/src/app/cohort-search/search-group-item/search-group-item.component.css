@@ -2,20 +2,17 @@
   display: flex;
 }
 
-.flex-container > clr-tooltip {
+.line-item {
   min-width: 0;
   flex: 4;
-}
-
-.flex-container > div.count {
-  flex: 1;
-  text-align: right;
-}
-
-.line-item {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.count {
+  flex: 1;
+  text-align: right;
 }
 
 .trigger:hover > span {

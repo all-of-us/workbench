@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {List, Map, Set} from 'immutable';
+import {List, Map, Repeat, Set} from 'immutable';
 
 type Datum = Map<string, any>;
 type Data = List<Datum>;
@@ -42,6 +42,7 @@ const combinationDataTable = (cleanData: Data): any[] => {
     : ['Black or African American', 'White', 'Unknown'];
 
   const headers = ['Gender-Age', ...raceSet];
+  const defaultsByRace = Map(List(raceSet).zip(Repeat(0)));
 
   let data = cleanData
     .groupBy(genderAndAge)
@@ -49,6 +50,8 @@ const combinationDataTable = (cleanData: Data): any[] => {
     .map(group => group
       .groupBy(race)
       .map(sumData)
+      .toMap()
+      .mergeWith((old, _) => old, defaultsByRace)
       .sort()
       .valueSeq()
       .toArray()

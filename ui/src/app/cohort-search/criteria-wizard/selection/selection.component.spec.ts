@@ -98,10 +98,6 @@ describe('SelectionComponent', () => {
     typeStub.next(TYPE_DEMO);
     fixture.detectChanges();
     expect(title.nativeElement.textContent).toBe('Selected Demographics Codes');
-
-    typeStub.next(null);
-    fixture.detectChanges();
-    expect(title.nativeElement.textContent).toBe('No Selection');
   });
 
   it('should dispatch REMOVE_PARAMETER on removal click', () => {
