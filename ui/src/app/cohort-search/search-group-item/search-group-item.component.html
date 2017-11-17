@@ -1,32 +1,30 @@
 <div class="flex-container">
-  <clr-tooltip>
-    <div class="line-item">
-      <button
-         type="button"
-         class="btn btn-link btn-sm text-danger"
-         (click)="actions.removeGroupItem(role, groupId, item.get('id'))">
-        <clr-icon shape="close"></clr-icon>
-      </button>
-
-      <button
+  <div class="line-item">
+    <button
         type="button"
-        class="btn btn-link btn-sm"
-        (click)="launchWizard()">
-        <clr-icon shape="pencil"></clr-icon>
-      </button>
+        class="btn btn-link btn-sm text-danger"
+        (click)="remove()">
+      <clr-icon shape="close"></clr-icon>
+    </button>
 
-      <small clrTooltipTrigger class="trigger">
-        <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
-        <span class="text-muted">Contains</span>
-        <span class="font-weight-bold">{{ codeType }}</span>
-        <span class="text-muted">{{ codes }}</span>
-      </small>
-    </div>
-    <clr-tooltip-content *clrIfOpen>
-      <h4 [style.margin-top]="0" [style.color]="'#FFF'">{{ pluralizedCode }}</h4>
-      {{ codes }}
-    </clr-tooltip-content>
-  </clr-tooltip>
+    <button
+      type="button"
+      class="btn btn-link btn-sm"
+      (click)="launchWizard()">
+      <clr-icon shape="pencil"></clr-icon>
+    </button>
+
+    <small
+      [popper]="codesPopper"
+      [popperTrigger]="'hover'"
+      [popperPlacement]="'bottom'"
+      class="trigger">
+      <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
+      <span class="text-muted">Contains</span>
+      <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
+      <span class="text-muted">{{ codes }}</span>
+    </small>
+  </div>
 
   <div class="count">
     <span *ngIf="isRequesting"
@@ -39,3 +37,8 @@
     </small>
   </div>
 </div>
+
+<popper-content #codesPopper>
+  <h3 [style.margin]="'0'">{{ codeTypeDisplay }}</h3>
+  <p  [style.margin]="'0'">{{ codes }}</p>
+</popper-content>
