@@ -1,17 +1,15 @@
-import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {By} from '@angular/platform-browser';
-import {ClarityModule} from 'clarity-angular';
-import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, fromJS} from 'immutable';
 import {NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
+import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ClarityModule} from 'clarity-angular';
+import {fromJS, Map} from 'immutable';
 
 import {CohortSearchActions} from '../../redux';
 import {AttributesComponent} from '../attributes/attributes.component';
+
 import {CohortBuilderService} from 'generated';
 
-class MockActions {
-}
+class MockActions {}
 
 describe('AttributesComponent', () => {
   let fixture: ComponentFixture<AttributesComponent>;

@@ -1,12 +1,12 @@
 import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {List, fromJS} from 'immutable';
+import {fromJS, List} from 'immutable';
 
-import {initialState, CohortSearchState, SR_ID} from '../store';
+/* tslint:disable-next-line:no-unused-variable */
+import {CohortSearchState, initialState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
 
 import {CohortBuilderService} from 'generated';
-import {isUndefined} from 'util';
 
 /**
  * Dummy objects / mock state peices

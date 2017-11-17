@@ -1,7 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 
 import {AlertsComponent} from './alerts/alerts.component';
@@ -21,7 +20,6 @@ import {WizardComponent} from './wizard/wizard.component';
 @NgModule({
   imports: [
     AttributesModule,
-    BrowserAnimationsModule,
     CommonModule,
     ClarityModule,
     ReactiveFormsModule,

@@ -1,19 +1,17 @@
-import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {DebugElement} from '@angular/core';
-import {ClarityModule} from 'clarity-angular';
-import {NgRedux, dispatch} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, List, fromJS} from 'immutable';
+import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ClarityModule} from 'clarity-angular';
+import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
+import {ChartsModule} from '../charts/charts.module';
 import {CohortSearchActions} from '../redux';
 import {OverviewComponent} from './overview.component';
-import {ChartsModule} from '../charts/charts.module';
+
 import {CohortBuilderService} from 'generated';
 
-class MockActions {
-}
+class MockActions {}
 
 describe('OverviewComponent', () => {
   let fixture: ComponentFixture<OverviewComponent>;
