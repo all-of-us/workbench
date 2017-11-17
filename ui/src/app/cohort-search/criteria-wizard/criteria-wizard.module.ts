@@ -1,17 +1,18 @@
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ClarityModule} from 'clarity-angular';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ClarityModule} from 'clarity-angular';
 
-import {AttributesModule} from './attributes/attributes.module';
+
 import {AlertsComponent} from './alerts/alerts.component';
+import {AttributesModule} from './attributes/attributes.module';
 import {ExplorerComponent} from './explorer/explorer.component';
 import {LeafComponent} from './leaf/leaf.component';
-import {QuickSearchComponent} from './quicksearch/quicksearch.component';
 import {
   QuickSearchResultsComponent
 } from './quicksearch-results/quicksearch-results.component';
+import {QuickSearchComponent} from './quicksearch/quicksearch.component';
 import {RootSpinnerComponent} from './root-spinner/root-spinner.component';
 import {SelectionComponent} from './selection/selection.component';
 import {TreeComponent} from './tree/tree.component';

@@ -1,16 +1,16 @@
+import {fromJS, List, Map, Set} from 'immutable';
 import {Reducer} from 'redux';
-import {Map, List, Set, fromJS} from 'immutable';
 
 import {
-  initialState,
-  CohortSearchState,
-  SR_ID,
-  activeCriteriaType,
   activeGroupId,
   activeItem,
   activeParameterList,
+  CohortSearchState,
+  initialState,
+  SR_ID,
 } from './store';
 
+/* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
@@ -41,6 +41,7 @@ import {
   SET_WIZARD_CONTEXT,
   RootAction,
 } from './actions/types';
+/* tslint:enable:ordered-imports */
 
 /**
  * The root Reducer.  Handles synchronous changes to application State

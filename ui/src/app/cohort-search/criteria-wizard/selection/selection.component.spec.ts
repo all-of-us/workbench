@@ -1,19 +1,21 @@
+import {dispatch, NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
 import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from 'clarity-angular';
-import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, List, fromJS} from 'immutable';
-import {NgRedux, dispatch} from '@angular-redux/store';
+import {fromJS} from 'immutable';
 
 import {
   activeCriteriaType,
   activeParameterList,
   CohortSearchActions,
+  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   REMOVE_PARAMETER,
   removeParameter,
 } from '../../redux';
 import {SelectionComponent} from './selection.component';
+
 import {CohortBuilderService} from 'generated';
 
 const TYPE_ICD9 = 'icd9';
@@ -30,34 +32,6 @@ const SELECTION_ICD9 = fromJS([
     name: 'CodeB',
     id: 'CodeB',
     parameterId: 'CodeB',
-  }
-]);
-
-const SELECTION_DEMO = fromJS([
-  {
-    type: 'DEMO',
-    subtype: 'GEN',
-    name: 'Female',
-    code: 'F',
-    id: 0,
-    parameterId: 'Code0',
-  }, {
-    type: 'DEMO',
-    subtype: 'RACE',
-    name: 'African American',
-    code: 'A',
-    id: 1,
-    parameterId: 'Code1',
-  }, {
-    type: 'DEMO',
-    subtype: 'AGE',
-    id: 2,
-    parameterId: 'Code0',
-  }, {
-    type: 'DEMO',
-    subtype: 'DEC',
-    id: 3,
-    parameterId: 'Code0',
   }
 ]);
 
@@ -104,7 +78,7 @@ describe('SelectionComponent', () => {
         activeCriteriaType);
 
     listStub = MockNgRedux
-      .getSelectorStub<CohortSearchState, List<any>>(
+      .getSelectorStub<CohortSearchState, any>(
         activeParameterList);
 
     fixture.detectChanges();

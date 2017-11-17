@@ -1,17 +1,20 @@
-import {Component, OnInit, Inject} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
-import {StringFilter, Comparator} from 'clarity-angular';
+import {Component, Inject, OnInit} from '@angular/core';
 import {DOCUMENT} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Comparator, StringFilter} from 'clarity-angular';
 import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {Cluster} from 'generated';
-import {ClusterService} from 'generated';
-import {Cohort} from 'generated';
-import {CohortsService} from 'generated';
-import {Workspace} from 'generated';
-import {WorkspacesService} from 'generated';
+import {
+  Cluster,
+  ClusterService,
+  Cohort,
+  CohortsService,
+  Workspace,
+  WorkspacesService,
+} from 'generated';
+
 // TODO: use a real swagger generated class for this.
 class Notebook {
   constructor(public name: string, public description: string, public url: string) {}
@@ -76,6 +79,9 @@ export class WorkspaceComponent implements OnInit {
   public static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   public static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
   public static DEFAULT_WORKSPACE_ID = '1';
+
+  /* tslint:disable:no-unused-variable */
+  /* All these are used in the template, not the class */
   private cohortNameFilter = new CohortNameFilter();
   private cohortDescriptionFilter = new CohortDescriptionFilter();
   private notebookNameFilter = new NotebookNameFilter();
@@ -84,6 +90,8 @@ export class WorkspaceComponent implements OnInit {
   private cohortDescriptionComparator = new CohortDescriptionComparator();
   private notebookNameComparator = new NotebookNameComparator();
   private notebookDescriptionComparator = new NotebookDescriptionComparator();
+  /* tslint:enable:no-unused-variable */
+
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
@@ -104,6 +112,7 @@ export class WorkspaceComponent implements OnInit {
       private clusterService: ClusterService,
       private errorHandlingService: ErrorHandlingService,
       private workspacesService: WorkspacesService,
+      /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
   ) {}
   ngOnInit(): void {

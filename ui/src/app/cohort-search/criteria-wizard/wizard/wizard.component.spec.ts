@@ -1,11 +1,10 @@
-import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {By} from '@angular/platform-browser';
-import {ClarityModule} from 'clarity-angular';
-import {MockNgRedux} from '@angular-redux/store/testing';
-import {Map, fromJS} from 'immutable';
 import {NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
+import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ClarityModule} from 'clarity-angular';
+import {fromJS} from 'immutable';
 
 import {
   CohortSearchActions,
@@ -13,13 +12,14 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
-import {AttributesModule} from '../attributes/attributes.module';
 import {AlertsComponent} from '../alerts/alerts.component';
+import {AttributesModule} from '../attributes/attributes.module';
 import {ExplorerComponent} from '../explorer/explorer.component';
 import {LeafComponent} from '../leaf/leaf.component';
-import {QuickSearchComponent} from '../quicksearch/quicksearch.component';
-import {QuickSearchResultsComponent
+import {
+  QuickSearchResultsComponent
 } from '../quicksearch-results/quicksearch-results.component';
+import {QuickSearchComponent} from '../quicksearch/quicksearch.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
 import {SelectionComponent} from '../selection/selection.component';
 import {TreeComponent} from '../tree/tree.component';

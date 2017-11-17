@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 
 @Component({
@@ -8,6 +8,7 @@ import {FormControl} from '@angular/forms';
 })
 export class QuickSearchComponent {
   private fuzzyFinder = new FormControl();
+  /* tslint:disable-next-line:no-unused-variable */
   private isFocused = false;
   @Output() value = new EventEmitter<string>();
 

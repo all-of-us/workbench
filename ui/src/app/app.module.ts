@@ -1,8 +1,3 @@
-// Import all the pieces of the app centrally.
-
-// TODO: Remove the lint-disable comment once we can selectively ignore import lines.
-// https://github.com/palantir/tslint/pull/3099
-// tslint:disable:max-line-length
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
@@ -10,30 +5,35 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 
-/* Our Components */
-import {AccountCreationComponent} from 'app/views/account-creation/component';
-import {AppComponent} from 'app/views/app/component';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {CohortEditComponent} from 'app/views/cohort-edit/component';
-import {ErrorHandlerComponent} from 'app/views/error-handler/component';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {HomePageComponent} from 'app/views/home-page/component';
-import {ReviewComponent} from 'app/views/review/component';
-import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceComponent} from 'app/views/workspace/component';
-import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {ErrorHandlingService} from './services/error-handling.service';
+import {SignInService} from './services/sign-in.service';
+
+import {AccountCreationComponent} from './views/account-creation/component';
+import {AppComponent} from './views/app/component';
+import {BugReportComponent} from './views/bug-report/component';
+import {CohortEditComponent} from './views/cohort-edit/component';
+import {ErrorHandlerComponent} from './views/error-handler/component';
+import {HomePageComponent} from './views/home-page/component';
+import {ReviewComponent} from './views/review/component';
+import {WorkspaceEditComponent} from './views/workspace-edit/component';
+import {WorkspaceShareComponent} from './views/workspace-share/component';
+import {WorkspaceComponent} from './views/workspace/component';
+
 import {environment} from 'environments/environment';
 
 /* Our Modules */
-import {AppRoutingModule} from 'app/app-routing.module';
-import {CohortSearchModule} from './cohort-search/cohort-search.module';
+import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
+import {CohortSearchModule} from './cohort-search/cohort-search.module';
 
-import {BugReportService, CohortsService, Configuration, ConfigurationParameters, ProfileService, WorkspacesService} from 'generated';
-import {ClusterService} from 'generated';
-// tslint:enable:max-line-length
-
+import {
+  BugReportService,
+  ClusterService,
+  CohortsService,
+  Configuration,
+  ProfileService,
+  WorkspacesService
+} from 'generated';
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
@@ -42,8 +42,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
       accessToken: () => signInService.currentAccessToken
     });
 }
-
-
 
 @NgModule({
   imports: [
