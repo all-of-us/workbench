@@ -1,5 +1,4 @@
-import {List} from 'immutable';
-import {Criteria, SearchRequest, ChartInfo} from 'generated';
+import {ChartInfo, Criteria, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';

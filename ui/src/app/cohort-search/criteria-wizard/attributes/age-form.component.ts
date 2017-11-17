@@ -1,13 +1,15 @@
-import {Component, OnInit, OnDestroy, Output, EventEmitter} from '@angular/core';
-import {FormGroup, FormControl, Validators} from '@angular/forms';
 import {select} from '@angular-redux/store';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {List, Map, fromJS} from 'immutable';
 
-import {environment} from 'environments/environment';
 import {activeParameterList} from '../../redux';
 import {AttributeFormComponent} from './attributes.interface';
+
+import {environment} from 'environments/environment';
 import {Attribute} from 'generated';
+
 
 const OPERATORS = {
   'between': 'In Range',
@@ -71,10 +73,15 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   @select(activeParameterList) parameterSelection$;
   private selected: List<string>;
   private subscription: Subscription;
+
+  /* tslint:disable:no-unused-variable */
+  /* All are used in the template */
   private readonly operators = OPERATORS;
   private readonly opCodes = Object.keys(OPERATORS);
   private readonly maxAge = MAX_AGE;
   private readonly minAge = MIN_AGE;
+  /* tslint:enable:no-unused-variable */
+
   @Output() attribute = new EventEmitter<Attribute | null>();
 
   ngOnInit() {

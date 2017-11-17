@@ -1,9 +1,8 @@
-import {Component, DebugElement} from '@angular/core';
-import {TestBed, async, tick, fakeAsync, ComponentFixture} from '@angular/core/testing';
+import {DebugElement} from '@angular/core';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {Title, By} from '@angular/platform-browser';
+import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
 
@@ -12,10 +11,9 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {updateAndTick, simulateInput} from 'testing/test-helpers';
+import {simulateInput, updateAndTick} from 'testing/test-helpers';
 
-import {BugReportService} from 'generated';
-import {ProfileService} from 'generated';
+import {BugReportService, ProfileService} from 'generated';
 
 
 class BugReportPage {

@@ -1,11 +1,11 @@
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ClarityModule} from 'clarity-angular';
+import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
+import {ClarityModule} from 'clarity-angular';
 
-import {AttributesDirective} from './attributes.directive';
-import {AttributesComponent} from './attributes.component';
 import {AgeFormComponent} from './age-form.component';
+import {AttributesComponent} from './attributes.component';
+import {AttributesDirective} from './attributes.directive';
 
 @NgModule({
   imports: [
@@ -17,9 +17,9 @@ import {AgeFormComponent} from './age-form.component';
     AttributesComponent,
   ],
   declarations: [
-    AttributesDirective,
-    AttributesComponent,
     AgeFormComponent,
+    AttributesComponent,
+    AttributesDirective,
   ],
   entryComponents: [
     AgeFormComponent,

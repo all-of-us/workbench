@@ -1,11 +1,9 @@
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {isBlank} from 'app/utils';
 
-import {DataAccessLevel} from 'generated';
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {UserRoleList} from 'generated';
@@ -27,7 +25,6 @@ export class WorkspaceShareComponent implements OnInit {
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
-      private router: Router,
       private route: ActivatedRoute,
       private profileService: ProfileService,
       private workspacesService: WorkspacesService,

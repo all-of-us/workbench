@@ -7,7 +7,7 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test --sourcemaps=false",
-    "lint": "ng lint",
+    "lint": "ng lint --type-check",
     "e2e": "ng e2e",
     "codegen-clean": "rm -rf src/generated",
     "codegen": "npm run codegen-clean && java -jar ../libproject/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2"
@@ -57,7 +57,7 @@
     "karma-webdriver-launcher": "^1.0.5",
     "protractor": "~5.1.2",
     "ts-node": "~3.0.4",
-    "tslint": "~5.3.2",
+    "tslint": "^5.3.2",
     "typescript": "~2.3.3"
   }
 }

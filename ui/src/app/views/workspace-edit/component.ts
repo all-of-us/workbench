@@ -1,15 +1,17 @@
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 import {isBlank} from 'app/utils';
 
-import {DataAccessLevel} from 'generated';
-import {Workspace} from 'generated';
-import {ProfileService, WorkspacesService} from 'generated';
+import {
+  DataAccessLevel,
+  ProfileService,
+  Workspace,
+  WorkspacesService
+} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -30,7 +32,6 @@ export class WorkspaceEditComponent implements OnInit {
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
-      private router: Router,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
       private profileService: ProfileService,

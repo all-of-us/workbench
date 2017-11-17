@@ -1,23 +1,23 @@
-import {ActionsObservable, Epic} from 'redux-observable';
 import {Injectable} from '@angular/core';
+import {Map} from 'immutable';
+import {Epic} from 'redux-observable';
 import {Observable} from 'rxjs/Observable';
-import {List, Map} from 'immutable';
+
+/* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
   CANCEL_CRITERIA_REQUEST,
-  CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
   CANCEL_COUNT_REQUEST,
-  COUNT_REQUEST_ERROR,
 
   BEGIN_CHARTS_REQUEST,
   CANCEL_CHARTS_REQUEST,
-  CHARTS_REQUEST_ERROR,
 
   RootAction,
   ActionTypes,
 } from './actions/types';
+
 import {
   loadCriteriaRequestResults,
   criteriaRequestError,
@@ -28,7 +28,10 @@ import {
   loadChartsRequestResults,
   chartsRequestError,
 } from './actions/creators';
+
 import {CohortSearchState} from './store';
+/* tslint:enable:ordered-imports */
+
 import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
@@ -36,6 +39,7 @@ type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
+
 /**
  * CohortSearchEpics
  *

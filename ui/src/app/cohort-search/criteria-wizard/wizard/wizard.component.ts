@@ -1,15 +1,6 @@
 import {Component, Input, ViewEncapsulation} from '@angular/core';
-import {NgRedux} from '@angular-redux/store';
 
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  activeParameterList,
-  activeRole,
-  activeGroupId,
-  activeItem,
-} from '../../redux';
-
+import {CohortSearchActions} from '../../redux';
 
 @Component({
   selector: 'app-criteria-wizard',
@@ -21,10 +12,7 @@ export class WizardComponent {
   @Input() open: boolean;
   @Input() criteriaType: string;
 
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions,
-  ) {}
+  constructor(private actions: CohortSearchActions) {}
 
   get critPageTitle() {
     let _type = this.criteriaType;

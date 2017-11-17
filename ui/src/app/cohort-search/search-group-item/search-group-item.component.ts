@@ -1,7 +1,7 @@
-import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {NgRedux} from '@angular-redux/store';
-import {Subscription} from 'rxjs/Subscription';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {List, Map} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 
 import {
   CohortSearchActions,
@@ -9,6 +9,7 @@ import {
   getItem,
   parameterList
 } from '../redux';
+
 import {SearchRequest} from 'generated';
 
 
@@ -16,7 +17,6 @@ const getDisplayName = (criteria: Map<any, any>): string =>
   criteria.get('type', '').match(/^DEMO.*/i)
     ?  criteria.get('name', 'N/A')
     : criteria.get('code', 'N/A');
-
 
 @Component({
   selector: 'app-search-group-item',

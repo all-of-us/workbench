@@ -11,9 +11,9 @@ import {RouterModule, Routes} from '@angular/router';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {ReviewComponent} from 'app/views/review/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceComponent} from 'app/views/workspace/component';
 
 // tslint:enable:max-line-length
 

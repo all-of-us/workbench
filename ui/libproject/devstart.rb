@@ -122,7 +122,7 @@ def dev_up(*args)
 end
 
 def run_linter()
-  Common.new.run_inline %W{docker-compose run --rm ui npm run ng lint}
+  Common.new.run_inline %W{docker-compose run --rm ui npm run lint}
 end
 
 def rebuild_image()

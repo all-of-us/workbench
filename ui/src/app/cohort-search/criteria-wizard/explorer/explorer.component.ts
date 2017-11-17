@@ -1,14 +1,15 @@
-import {Component, OnInit, Input} from '@angular/core';
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
+import {Component, Input, OnInit} from '@angular/core';
+import {fromJS, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
-import {Map, fromJS} from 'immutable';
 
 import {
   CohortSearchActions,
+  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
-  isCriteriaLoading,
   criteriaLoadErrors,
   focusedCriterion,
+  isCriteriaLoading,
 } from '../../redux';
 
 import {CohortBuilderService} from 'generated';
@@ -36,9 +37,11 @@ export class ExplorerComponent implements OnInit {
   private nodeInFocus$: Observable<Map<any, any>>;
 
   constructor(
+    /* tslint:disable:no-unused-variable */
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
+    /* tslint:enable:no-unused-variable */
   ) {}
 
   ngOnInit() {
