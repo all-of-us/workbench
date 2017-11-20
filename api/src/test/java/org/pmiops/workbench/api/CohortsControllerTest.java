@@ -34,6 +34,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -48,13 +49,18 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortsControllerTest {
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+
   @TestConfiguration
   @Import(WorkspaceServiceImpl.class)
   @MockBean(FireCloudService.class)
-  static class Configuration {}
-
-  private static final Instant NOW = Instant.now();
-  private static final Clock CLOCK = FakeClock.fixed(NOW, ZoneId.systemDefault());
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+  }
 
   Workspace workspace;
   @Autowired
@@ -86,10 +92,10 @@ public class CohortsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
 
+    CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, userDao, userProvider, fireCloudService, CLOCK);
     workspace = workspacesController.createWorkspace(workspace).getBody();
-
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, userProvider, CLOCK);
   }
@@ -111,13 +117,6 @@ public class CohortsControllerTest {
     assertThat(updated).isEqualTo(cohort);
 
     cohort.setName("updated-name2");
-    updated = cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort).getBody();
-    cohort.setEtag(updated.getEtag());
-    assertThat(updated).isEqualTo(cohort);
-
-    // Verify that we can update without an etag.
-    cohort.setEtag(null);
-    cohort.setName("updated-name3");
     updated = cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort).getBody();
     cohort.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(cohort);
@@ -145,7 +144,7 @@ public class CohortsControllerTest {
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
-    List<String> cases = ImmutableList.of("hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
+    List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
         cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(),

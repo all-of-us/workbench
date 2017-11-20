@@ -141,11 +141,12 @@ public class CohortsController implements CohortsApiDelegate {
       String cohortId, Cohort cohort) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
-    if(!Strings.isNullOrEmpty(cohort.getEtag())) {
-      int version = Etags.toVersion(cohort.getEtag());
-      if (dbCohort.getVersion() != version) {
-        throw new ConflictException("Attempted to modify outdated cohort version");
-      }
+    if(Strings.isNullOrEmpty(cohort.getEtag())) {
+      throw new BadRequestException("missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(cohort.getEtag());
+    if (dbCohort.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated cohort version");
     }
     if (cohort.getType() != null) {
       dbCohort.setType(cohort.getType());

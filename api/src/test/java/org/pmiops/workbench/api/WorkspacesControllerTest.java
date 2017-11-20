@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -31,8 +32,9 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.UserRoleList;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
@@ -42,6 +44,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -56,10 +59,19 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
+  private static final Instant NOW = Instant.now();
+  private static final long NOW_TIME = Timestamp.from(NOW).getTime();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+
   @TestConfiguration
   @Import(WorkspaceServiceImpl.class)
   @MockBean(FireCloudService.class)
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+  }
 
   @Autowired
   FireCloudService fireCloudService;
@@ -74,9 +86,6 @@ public class WorkspacesControllerTest {
 
   private WorkspacesController workspacesController;
 
-  private static final Instant NOW = Instant.now();
-  private static final long NOW_TIME = Timestamp.from(NOW).getTime();
-
   @Before
   public void setUp() {
     User user = new User();
@@ -86,8 +95,9 @@ public class WorkspacesControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
+    CLOCK.setInstant(NOW);
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userDao, userProvider, fireCloudService, FakeClock.fixed(NOW, ZoneId.systemDefault()));
+        userDao, userProvider, fireCloudService, CLOCK);
   }
 
   public Workspace createDefaultWorkspace() {
@@ -190,13 +200,6 @@ public class WorkspacesControllerTest {
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
-    // Verify that we can update without an etag.
-    ws.setEtag(null);
-    ws.setName("updated-name3");
-    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
-    ws.setEtag(updated.getEtag());
-    assertThat(updated).isEqualTo(ws);
-
     Workspace got = workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody();
     assertThat(got).isEqualTo(ws);
   }
@@ -220,7 +223,7 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
-    List<String> cases = ImmutableList.of("hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
+    List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
@@ -298,28 +301,31 @@ public class WorkspacesControllerTest {
 
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
-    workspacesController.createWorkspace(workspace);
-    UserRoleList updatedUserRoles = new UserRoleList();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
     creator.setEmail("bob@gmail.com");
     creator.setRole(WorkspaceAccessLevel.OWNER);
-    updatedUserRoles.addItemsItem(creator);
+    shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     writer.setRole(WorkspaceAccessLevel.WRITER);
-    updatedUserRoles.addItemsItem(writer);
+    shareWorkspaceRequest.addItemsItem(writer);
     UserRole reader = new UserRole();
     reader.setEmail("readerfriend@gmail.com");
     reader.setRole(WorkspaceAccessLevel.READER);
-    updatedUserRoles.addItemsItem(reader);
+    shareWorkspaceRequest.addItemsItem(reader);
 
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
-    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
+    ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
     Workspace workspace2 =
         workspacesController.getWorkspace("namespace", "name")
             .getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
     assertThat(workspace2.getUserRoles().size()).isEqualTo(3);
     int numOwners = 0;
@@ -340,6 +346,7 @@ public class WorkspacesControllerTest {
     assertThat(numOwners).isEqualTo(1);
     assertThat(numWriters).isEqualTo(1);
     assertThat(numReaders).isEqualTo(1);
+    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
   }
 
   @Test
@@ -355,40 +362,49 @@ public class WorkspacesControllerTest {
     readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
-    workspacesController.createWorkspace(workspace);
-    UserRoleList updatedUserRoles = new UserRoleList();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
     creator.setEmail("bob@gmail.com");
     creator.setRole(WorkspaceAccessLevel.OWNER);
-    updatedUserRoles.addItemsItem(creator);
+    shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     writer.setRole(WorkspaceAccessLevel.WRITER);
-    updatedUserRoles.addItemsItem(writer);
+    shareWorkspaceRequest.addItemsItem(writer);
     UserRole reader = new UserRole();
     reader.setEmail("readerfriend@gmail.com");
     reader.setRole(WorkspaceAccessLevel.READER);
-    updatedUserRoles.addItemsItem(reader);
+    shareWorkspaceRequest.addItemsItem(reader);
 
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     responseValue.setUsersNotFound(new ArrayList<WorkspaceACLUpdate>());
 
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
-    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
-    updatedUserRoles = new UserRoleList();
-    updatedUserRoles.addItemsItem(creator);
-    updatedUserRoles.addItemsItem(writer);
+    ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
+    Workspace workspace2 = workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId()).getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
-    Workspace workspace2 =
+    CLOCK.increment(1000);
+    shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace2.getEtag());
+    shareWorkspaceRequest.addItemsItem(creator);
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    shareResp = workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest).getBody();
+    Workspace workspace3 =
         workspacesController.getWorkspace("namespace", "name")
             .getBody();
+    assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace3.getEtag());
 
-    assertThat(workspace2.getUserRoles().size()).isEqualTo(2);
+    assertThat(workspace3.getUserRoles().size()).isEqualTo(2);
     int numOwners = 0;
     int numWriters = 0;
     int numReaders = 0;
-    for (UserRole userRole : workspace2.getUserRoles()) {
+    for (UserRole userRole : workspace3.getUserRoles()) {
       if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
         assertThat(userRole.getEmail()).isEqualTo("bob@gmail.com");
         numOwners++;
@@ -403,21 +419,54 @@ public class WorkspacesControllerTest {
     assertThat(numOwners).isEqualTo(1);
     assertThat(numWriters).isEqualTo(1);
     assertThat(numReaders).isEqualTo(0);
+    assertThat(workspace.getEtag()).isNotEqualTo(workspace2.getEtag());
+    assertThat(workspace2.getEtag()).isNotEqualTo(workspace3.getEtag());
   }
 
-  @Test(expected = BadRequestException.class)
-  public void testUnableToShareWithNonExistantUser() throws Exception {
+  @Test
+  public void testStaleShareWorkspace() throws Exception{
     Workspace workspace = createDefaultWorkspace();
-    workspacesController.createWorkspace(workspace);
-    UserRoleList updatedUserRoles = new UserRoleList();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
     creator.setEmail("bob@gmail.com");
     creator.setRole(WorkspaceAccessLevel.OWNER);
-    updatedUserRoles.addItemsItem(creator);
+    shareWorkspaceRequest.addItemsItem(creator);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    shareWorkspaceRequest = new ShareWorkspaceRequest();
+    // Use the initial etag, not the updated value from shareWorkspace.
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    try {
+      workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
+      fail("expected conflict exception when sharing with stale etag");
+    } catch(ConflictException e) {
+      // Expected
+    }
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUnableToShareWithNonExistentUser() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    UserRole creator = new UserRole();
+    creator.setEmail("bob@gmail.com");
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     writer.setRole(WorkspaceAccessLevel.WRITER);
-    updatedUserRoles.addItemsItem(writer);
-    workspacesController.shareWorkspace("namespace", "name", updatedUserRoles);
+    shareWorkspaceRequest.addItemsItem(writer);
+    workspacesController.shareWorkspace("namespace", "name", shareWorkspaceRequest);
   }
 }

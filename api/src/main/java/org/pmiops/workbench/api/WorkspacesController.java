@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -16,12 +15,12 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -31,14 +30,14 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.UserRoleList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -266,9 +265,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.addWorkspaceUserRole(permissions);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-
-
-
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
@@ -309,12 +305,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    // TODO(calbach): Require etag once client supplies it.
-    if(!Strings.isNullOrEmpty(workspace.getEtag())) {
-      int version = Etags.toVersion(workspace.getEtag());
-      if (dbWorkspace.getVersion() != version) {
-        throw new ConflictException("Attempted to modify outdated workspace version");
-      }
+    if (Strings.isNullOrEmpty(workspace.getEtag())) {
+      throw new BadRequestException("Missing required update field 'etag'");
+    }
+    int version = Etags.toVersion(workspace.getEtag());
+    if (dbWorkspace.getVersion() != version) {
+      throw new ConflictException("Attempted to modify outdated workspace version");
     }
     if(workspace.getDataAccessLevel() != null &&
         !dbWorkspace.getDataAccessLevel().equals(workspace.getDataAccessLevel())){
@@ -328,27 +324,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     // TODO: handle research purpose
     setCdrVersionId(workspace, dbWorkspace);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbWorkspace.setLastModifiedTime(now);
-
-    try {
-      // The version asserted on save is the same as the one we read via
-      // getRequired() above, see RW-215 for details.
-      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for workspace update", e);
-      throw new ConflictException("Failed due to concurrent workspace modification");
-    }
+    // The version asserted on save is the same as the one we read via
+    // getRequired() above, see RW-215 for details.
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
-      UserRoleList userRoleList) {
-    // TODO(calbach): Attempt to factor this into updateWorkspace() in order to
-    // share etag/versioning logic.
+  public ResponseEntity<ShareWorkspaceResponse> shareWorkspace(String workspaceNamespace, String workspaceId,
+      ShareWorkspaceRequest request) {
+    if (Strings.isNullOrEmpty(request.getWorkspaceEtag())) {
+      throw new BadRequestException("Missing required update field 'workspaceEtag'");
+    }
+
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    int version = Etags.toVersion(request.getWorkspaceEtag());
+    if (dbWorkspace.getVersion() != version) {
+      throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
+    }
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
-    for (UserRole user : userRoleList.getItems()) {
+    for (UserRole user : request.getItems()) {
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
       User newUser = userDao.findUserByEmail(user.getEmail());
       if (newUser == null) {
@@ -360,8 +356,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       newUserRole.setRole(user.getRole());
       dbUserRoles.add(newUserRole);
     }
-    workspaceService.updateUserRoles(workspaceNamespace, workspaceId, dbUserRoles);
-    return ResponseEntity.ok(new EmptyResponse());
+    dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
+    ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
+    resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
+    return ResponseEntity.ok(resp);
   }
 
   /** Record approval or rejection of research purpose. */
