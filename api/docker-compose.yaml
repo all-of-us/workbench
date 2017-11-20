@@ -76,6 +76,28 @@ services:
     command: wait-for db:3306 -- ./run-drop-db.sh
     env_file:
       - db-cdr/vars.env
+  cloud-sql-proxy:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: |
+      cloud_sql_proxy
+        -instances all-of-us-workbench-test:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
+        -credential_file=src/main/webapp/WEB-INF/sa-key.json
+  mysql-cloud:
+    depends_on:
+      - cloud-sql-proxy
+    image: mysql:5.7
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+    entrypoint: mysql --host=cloud-sql-proxy --port=3307
   update-config:
     depends_on:
       - db
