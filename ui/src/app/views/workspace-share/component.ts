@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -22,6 +22,13 @@ export class WorkspaceShareComponent implements OnInit {
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
+  updateList: UserRoleList;
+  usersLoading = true;
+  userNotFound = false;
+  userNotFoundEmail = '';
+  inputNotInitialized = true;
+  @ViewChild('usernameSharingInput') input: ElementRef;
+
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
@@ -38,6 +45,7 @@ export class WorkspaceShareComponent implements OnInit {
       .subscribe((workspace) => {
         this.errorHandlingService.retryApi(
             this.profileService.getMe()).subscribe(profile => {
+          this.usersLoading = false;
           this.loadingWorkspace = false;
           this.userEmail = profile.username;
         });
@@ -61,32 +69,72 @@ export class WorkspaceShareComponent implements OnInit {
     }
   }
 
+  convertToEmail(username: string): string {
+    return username + '@fake-research-aou.org';
+  }
+
+  inputChange(): void {
+    this.userNotFound = false;
+  }
+
   addCollaborator(): void {
-    this.workspace.userRoles.push({email: this.toShare, role: this.accessLevel});
-    this.workspacesService.shareWorkspace(
-      this.workspace.namespace, this.workspace.id, {
-        workspaceEtag: this.workspace.etag,
-        items: this.workspace.userRoles
-      }).subscribe((resp: ShareWorkspaceResponse) => {
-        this.workspace.etag = resp.workspaceEtag;
+    if (this.inputNotInitialized) {
+      this.inputNotInitialized = false;
+      this.input.nativeElement.addEventListener('keydown', () => {
+        this.userNotFound = false;
       });
+    }
+    this.usersLoading = true;
+    this.updateList = {items: Array.from(this.workspace.userRoles)};
+    this.updateList.items.push({email: this.convertToEmail(this.toShare),
+        role: this.accessLevel});
+
+    this.errorHandlingService.retryApi(
+      this.workspacesService.shareWorkspace(
+        this.workspace.namespace,
+        this.workspace.id, {
+          workspaceEtag: this.workspace.etag,
+          items: this.updateList})).subscribe(
+      (resp: ShareWorkspaceResponse) => {
+        this.workspace.etag = resp.workspaceEtag;
+        this.usersLoading = false;
+        this.workspace.userRoles = this.updateList.items;
+        this.toShare = '';
+        this.input.nativeElement.focus();
+      },
+      (error) => {
+        if (error.status === 400) {
+          this.userNotFound = true;
+        }
+        this.usersLoading = false;
+      }
+    );
   }
 
   removeCollaborator(user: UserRole): void {
-    const position = this.workspace.userRoles.findIndex((userRole) => {
+    this.usersLoading = true;
+    this.updateList = {items: Array.from(this.workspace.userRoles)};
+    const position = this.updateList.items.findIndex((userRole) => {
       if (user.email === userRole.email) {
         return true;
       } else {
         return false;
       }
     });
-    this.workspace.userRoles.splice(position, 1);
-    this.workspacesService.shareWorkspace(
-      this.workspace.namespace, this.workspace.id, {
-        workspaceEtag: this.workspace.etag,
-        items: this.workspace.userRoles
-      }).subscribe((resp: ShareWorkspaceResponse) => {
+
+    this.updateList.items.splice(position, 1);
+    this.workspacesService.shareWorkspace(this.workspace.namespace,
+        this.workspace.id, {
+          workspaceEtag: this.workspace.etag,
+          items: this.updateList}).subscribe(
+      (resp: ShareWorkspaceResponse) => {
         this.workspace.etag = resp.workspaceEtag;
-      });
+        this.usersLoading = false;
+        this.workspace.userRoles = this.updateList.items;
+      },
+      (error) => {
+        this.usersLoading = false;
+      }
+    );
   }
 }

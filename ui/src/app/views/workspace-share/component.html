@@ -8,12 +8,12 @@
  <div class="sharing-area">
    <div class="adding-area">
       <h4>Add a New Collaborator</h4>
-      <p>You can add multiple users at once, all with the same role.</p>
 
       <div class="add-by-text-area">
         <label class="text-label" class="find-collaborator-label">Find Collaborator</label>
         <input type="text" class="input share" name="to-share" autofocus
-            [(ngModel)]="toShare" placeholder="Enter name or @researchallofus.com ID">
+            [(ngModel)]="toShare" placeholder="Enter username" #usernameSharingInput>
+        <span>@fake-research-aou.org</span>
         <clr-dropdown>
           <button type="button" class="btn btn-outline-primary sharing-buttons" clrDropdownTrigger>
             {{selectedPermission}}
@@ -27,18 +27,25 @@
         </clr-dropdown>
         <button type="button" class="btn btn-primary sharing-buttons" (click)="addCollaborator()">Add Collaborator</button>
       </div>
+      <div *ngIf="userNotFound" class="error-message">
+        User {{toShare}} not found.
+      </div>
     </div>
     <div class="removing-area">
       <ul>
         <div *ngFor="let user of workspace.userRoles">
           <h5>
             <clr-icon *ngIf="user.email !== userEmail"
-                shape="minus-circle" 
+                shape="minus-circle"
                 class="is-solid"
                 (click)="removeCollaborator(user)"></clr-icon>
             {{user.email}}
           </h5>
           <div>{{user.role}}</div>
+        </div>
+        <div *ngIf="usersLoading" class="loading-users">
+          <span class="spinner spinner-sm"></span>
+          <span class="loading-text">Loading updated user list...</span>
         </div>
       </ul>
     </div>
