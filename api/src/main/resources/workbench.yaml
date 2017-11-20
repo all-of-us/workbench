@@ -434,14 +434,14 @@ paths:
             type: string
             required: true
           - in: body
-            name: usersAndRoles
+            name: body
             description: users to share the workspace with
             schema:
-              $ref: "#/definitions/UserRoleList"
+              $ref: "#/definitions/ShareWorkspaceRequest"
       responses:
         "200":
           schema:
-            $ref: "#/definitions/EmptyResponse"
+            $ref: "#/definitions/ShareWorkspaceResponse"
 
   # Cohorts ##############################################################################
 
@@ -774,15 +774,29 @@ definitions:
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
 
-  UserRoleList:
+  ShareWorkspaceRequest:
     type: object
     required:
      - items
     properties:
+      workspaceEtag:
+        type: string
+        description: >
+          Associated workspace etag retrieved via reading the workspaces API. If provided,
+          validates that the workspace (and its user roles) has not been modified since this
+          etag was retrieved.
       items:
         type: "array"
         items:
            $ref: "#/definitions/UserRole"
+
+  ShareWorkspaceResponse:
+    type: object
+    properties:
+      workspaceEtag:
+        type: string
+        description: >
+          Updated workspace etag after the share request has been applied.
 
   WorkspaceAccessLevel:
     type: string
