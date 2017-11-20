@@ -22,7 +22,7 @@ export class WorkspaceShareComponent implements OnInit {
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
-  updateList: UserRoleList;
+  updateList: Array<UserRole>;
   usersLoading = true;
   userNotFound = false;
   userNotFoundEmail = '';
@@ -85,8 +85,8 @@ export class WorkspaceShareComponent implements OnInit {
       });
     }
     this.usersLoading = true;
-    this.updateList = {items: Array.from(this.workspace.userRoles)};
-    this.updateList.items.push({email: this.convertToEmail(this.toShare),
+    this.updateList = Array.from(this.workspace.userRoles);
+    this.updateList.push({email: this.convertToEmail(this.toShare),
         role: this.accessLevel});
 
     this.errorHandlingService.retryApi(
@@ -98,7 +98,7 @@ export class WorkspaceShareComponent implements OnInit {
       (resp: ShareWorkspaceResponse) => {
         this.workspace.etag = resp.workspaceEtag;
         this.usersLoading = false;
-        this.workspace.userRoles = this.updateList.items;
+        this.workspace.userRoles = this.updateList;
         this.toShare = '';
         this.input.nativeElement.focus();
       },
@@ -113,8 +113,8 @@ export class WorkspaceShareComponent implements OnInit {
 
   removeCollaborator(user: UserRole): void {
     this.usersLoading = true;
-    this.updateList = {items: Array.from(this.workspace.userRoles)};
-    const position = this.updateList.items.findIndex((userRole) => {
+    this.updateList = Array.from(this.workspace.userRoles);
+    const position = this.updateList.findIndex((userRole) => {
       if (user.email === userRole.email) {
         return true;
       } else {
@@ -122,7 +122,7 @@ export class WorkspaceShareComponent implements OnInit {
       }
     });
 
-    this.updateList.items.splice(position, 1);
+    this.updateList.splice(position, 1);
     this.workspacesService.shareWorkspace(this.workspace.namespace,
         this.workspace.id, {
           workspaceEtag: this.workspace.etag,
@@ -130,7 +130,7 @@ export class WorkspaceShareComponent implements OnInit {
       (resp: ShareWorkspaceResponse) => {
         this.workspace.etag = resp.workspaceEtag;
         this.usersLoading = false;
-        this.workspace.userRoles = this.updateList.items;
+        this.workspace.userRoles = this.updateList;
       },
       (error) => {
         this.usersLoading = false;
