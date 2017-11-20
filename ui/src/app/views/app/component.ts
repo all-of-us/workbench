@@ -15,6 +15,7 @@ import {Authority, ProfileService} from 'generated';
 
 /* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
+export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -26,6 +27,7 @@ export class AppComponent implements OnInit {
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   private _showCreateAccount = false;
+  private overriddenUrl: string = null;
 
   constructor(
       private activatedRoute: ActivatedRoute,
@@ -37,11 +39,18 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+
     window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
-        localStorage.setItem('allOfUsApiUrlOverride', url);
+        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+          throw "URL should be of the form 'http[s]://host.example.com[:port]'"
+        }
+        this.overriddenUrl = url;
+        localStorage.setItem(overriddenUrlKey, url);
       } else {
-        localStorage.removeItem('allOfUsApiUrlOverride');
+        this.overriddenUrl = null;
+        localStorage.removeItem(overriddenUrlKey);
       }
       window.location.reload();
     };
