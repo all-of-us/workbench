@@ -1,10 +1,9 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
 import {
-  activeParameterList,
   CohortSearchActions,
   /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
@@ -19,7 +18,6 @@ import {
 })
 export class TreeComponent implements OnInit {
   @Input() node;
-  @select(activeParameterList) selected$: Observable<List<any>>;
 
   /* Selections derived from `node` */
   private loading$: Observable<boolean>;
