@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
     window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
         if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-          throw "URL should be of the form 'http[s]://host.example.com[:port]'"
+          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
         }
         this.overriddenUrl = url;
         localStorage.setItem(overriddenUrlKey, url);
