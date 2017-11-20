@@ -248,11 +248,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {
-        final List<DbDomain> resultList  = null;
-        for (DbDomain dbDomain : dbDomainDao.findAll()) {
-            resultList.add(dbDomain);
-        }
-
+        final List<DbDomain> resultList = dbDomainDao.findAllByDomainIdIsNotNull();
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

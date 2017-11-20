@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
 
-
+    List<DbDomain> findAllByDomainIdIsNotNull();
 }

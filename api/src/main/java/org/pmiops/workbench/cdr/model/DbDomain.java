@@ -6,7 +6,7 @@ import javax.persistence.*;
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
-@Table(name = "concept", catalog="cdr")
+@Table(name = "db_domain", catalog="cdr")
 public class DbDomain {
 
     private String domainId;

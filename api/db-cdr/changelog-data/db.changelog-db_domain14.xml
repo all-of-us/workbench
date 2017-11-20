@@ -11,7 +11,7 @@
 
     <delete tableName="db_domain"/>
 
-    <loadData tableName="achilles_results" file="csv/db_domain.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="db_domain" file="csv/db_domain.csv" encoding="UTF-8" quotchar='"'>
       <column name="domain_id" type="STRING"/>
       <column name="domain_display" type="STRING"/>
       <column name="domain_desc" type="STRING"/>
