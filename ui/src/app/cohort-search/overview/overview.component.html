@@ -42,8 +42,7 @@
             formControlName="name"
             size="76"
             type="text"
-            autofocus
-            placeHolder="Ill Communication">
+            autofocus>
           <span class="tooltip-content">
             A Name is required
           </span>
@@ -52,8 +51,7 @@
       <div class="form-group">
         <label for="description">Description</label>
         <textarea name="description"
-          formControlName="description"
-          placeHolder="A compendiary of my favorite diseases...">
+          formControlName="description">
         </textarea>
       </div>
     </form>
@@ -64,7 +62,7 @@
       type="button"
       class="btn btn-outline"
       (click)="open = false">
-      Nah
+      Cancel
     </button>
 
     <button
@@ -72,7 +70,7 @@
       class="btn btn-primary"
       (click)="submit()"
       [disabled]=!cohortForm.valid>
-      Do It!
+      Save Cohort
     </button>
   </div>
 </clr-modal>
