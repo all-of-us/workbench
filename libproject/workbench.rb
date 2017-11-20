@@ -48,4 +48,25 @@ module Workbench
     common.handle_or_die(command, *args)
   end
   module_function :handle_argv_or_die
+
+  def read_vars(source)
+    hash = {}
+    source.each_line do |line|
+      line = line.strip()
+      if !line.empty?
+        parts = line.split("=")
+        hash[parts[0].strip()] = parts[1].strip()
+      end
+    end
+    hash
+  end
+  module_function :read_vars
+
+  def read_vars_file(path)
+    File.open(path, "r") do |f|
+      read_vars f
+    end
+  end
+  module_function :read_vars_file
+
 end

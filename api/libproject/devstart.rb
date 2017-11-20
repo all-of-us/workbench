@@ -4,12 +4,15 @@
 
 require_relative "../../libproject/utils/common"
 require_relative "../../libproject/workbench"
+require_relative "cloudsqlproxycontext"
+require_relative "gcloudcontext"
+require_relative "wboptionsparser"
+require "fileutils"
 require "io/console"
 require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
-require "fileutils"
 
 class Options < OpenStruct
 end
@@ -161,14 +164,7 @@ def read_db_vars(creds_file, project)
   begin
     activate_service_account(creds_file)
     get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
-    db_creds_file.open
-    db_creds_file.each_line do |line|
-      line = line.strip()
-      if !line.empty?
-        parts = line.split("=")
-        ENV[parts[0]] = parts[1]
-      end
-    end
+    ENV.update(Workbench::read_vars_file(db_creds_file.path))
   ensure
     db_creds_file.unlink
   end
@@ -286,13 +282,18 @@ def drop_cloud_cdr(*args)
 end
 
 def connect_to_cloud_db(*args)
-  GcloudContext.new("connect-to-cloud-db", args, true).run do |ctx|
-    pw = ENV["WORKBENCH_DB_PASSWORD"]
-    # TODO Switch this to run_inline once Common supports redaction.
-    run_with_redirects(
-        "mysql -u \"workbench\" -p\"#{pw}\" --host 127.0.0.1 "\
-        "--port 3307 --database #{ENV["DB_NAME"]}",
-        to_redact=pw)
+  common = Common.new
+  op = WbOptionsParser.new("connect-to-cloud-db", args)
+  gcc = GcloudContextV2.new(op)
+  env = Workbench::read_vars(common.capture_stdout(%W{
+    docker-compose run --rm api gsutil cat gs://#{gcc.project}-credentials/vars.env
+  }))
+  CloudSqlProxyContext.new(gcc).run do
+    password = env["WORKBENCH_DB_PASSWORD"]
+    common.run_inline %W{
+      docker-compose run --rm mysql-cloud --user=#{env["WORKBENCH_DB_USER"]}
+      --database=#{env["DB_NAME"]} --password=#{password}},
+      redact=password
   end
 end
 
@@ -735,5 +736,3 @@ Common.register_command({
   :description => "Deploys the API server to the specified cloud project.",
   :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
 })
-
-
