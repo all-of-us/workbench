@@ -687,7 +687,7 @@ paths:
           name: page
           type: integer
           required: false
-          description: specific page (default is 0)
+          description: specific page(default is 0)
         - in: query
           name: limit
           type: integer

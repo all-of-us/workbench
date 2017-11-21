@@ -17,7 +17,7 @@
             <column name="participant_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="VARCHAR(80)">
+            <column name="status" type="tinyint">
                 <constraints nullable="true"/>
             </column>
         </createTable>
@@ -37,6 +37,15 @@
                                  constraintName="fk_cdr_version_id"
                                  referencedColumnNames="cdr_version_id"
                                  referencedTableName="cdr_version"/>
+
+        <createIndex
+                indexName="idx_participant_cohort_status"
+                tableName="participant_cohort_status"
+                unique="false">
+            <column name="cohort_id"/>
+            <column name="cdr_version_id"/>
+            <column name="status"/>
+        </createIndex>
 
     </changeSet>
 </databaseChangeLog>
