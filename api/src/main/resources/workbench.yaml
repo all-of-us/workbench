@@ -687,17 +687,17 @@ paths:
           name: page
           type: integer
           required: false
-          description: specific page(default is 0)
+          description: specific page (default is 0)
         - in: query
           name: limit
           type: integer
           required: false
-          description: page size of results(default is 25)
+          description: page size of results (default is 25)
         - in: query
           name: order
           type: string
           required: false
-          description: sort order(default is 'asc')
+          description: sort order (default is 'asc')
         - in: query
           name: column
           type: string
@@ -1329,7 +1329,7 @@ definitions:
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
-    enum: [Not Reviewed, Included, Excluded, Needs Further Review]
+    enum: [NOT_REVIEWED, INCLUDED, EXCLUDED, NEEDS_FURTHER_REVIEWs]
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
