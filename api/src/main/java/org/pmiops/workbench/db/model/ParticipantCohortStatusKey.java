@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.CohortStatus;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -9,7 +8,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class ParticipantKey implements Serializable {
+public class ParticipantCohortStatusKey implements Serializable {
 
     @Column(name = "cohort_id")
     private long cohortId;
@@ -20,10 +19,10 @@ public class ParticipantKey implements Serializable {
     @Column(name = "participant_id")
     private long participantId;
 
-    public ParticipantKey() {
+    public ParticipantCohortStatusKey() {
     }
 
-    public ParticipantKey(long cohortId, long cdrVersionId, long participantId) {
+    public ParticipantCohortStatusKey(long cohortId, long cdrVersionId, long participantId) {
         this.cohortId = cohortId;
         this.cdrVersionId = cdrVersionId;
         this.participantId = participantId;
@@ -37,7 +36,7 @@ public class ParticipantKey implements Serializable {
         this.cohortId = cohortId;
     }
 
-    public ParticipantKey cohortId(long cohortId) {
+    public ParticipantCohortStatusKey cohortId(long cohortId) {
         this.cohortId = cohortId;
         return this;
     }
@@ -50,7 +49,7 @@ public class ParticipantKey implements Serializable {
         this.cdrVersionId = cdrVersionId;
     }
 
-    public ParticipantKey cdrVersionId(long cdrVersionId) {
+    public ParticipantCohortStatusKey cdrVersionId(long cdrVersionId) {
         this.cdrVersionId = cdrVersionId;
         return this;
     }
@@ -63,7 +62,7 @@ public class ParticipantKey implements Serializable {
         this.participantId = participantId;
     }
 
-    public ParticipantKey participantId(long participantId) {
+    public ParticipantCohortStatusKey participantId(long participantId) {
         this.participantId = participantId;
         return this;
     }
@@ -72,7 +71,7 @@ public class ParticipantKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ParticipantKey that = (ParticipantKey) o;
+        ParticipantCohortStatusKey that = (ParticipantCohortStatusKey) o;
         return cohortId == that.cohortId &&
                 cdrVersionId == that.cdrVersionId &&
                 participantId == that.participantId;

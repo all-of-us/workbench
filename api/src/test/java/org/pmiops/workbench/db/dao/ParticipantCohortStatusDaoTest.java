@@ -6,8 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.Participant;
-import org.pmiops.workbench.db.model.ParticipantKey;
+import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.CohortStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -20,37 +20,35 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
-public class ParticipantDaoTest {
+public class ParticipantCohortStatusDaoTest {
 
-    private Participant participant1;
-    private Participant participant2;
+    private ParticipantCohortStatus participant1;
+    private ParticipantCohortStatus participant2;
     private static Long COHORT_ID = 1L;
     private static Long CDR_VERSION_ID = 1L;
 
     @Before
     public void onSetup() {
-        ParticipantKey key1 = new ParticipantKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(1);
-        ParticipantKey key2 = new ParticipantKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(2);
-        participant1 = new Participant().participantKey(key1).status(CohortStatus.INCLUDED);
-        participant2 = new Participant().participantKey(key2).status(CohortStatus.EXCLUDED);
-        participantDao.save(participant2);
-        participantDao.save(participant1);
+        ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(1);
+        ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(2);
+        participant1 = new ParticipantCohortStatus().participantKey(key1).status(CohortStatus.INCLUDED);
+        participant2 = new ParticipantCohortStatus().participantKey(key2).status(CohortStatus.EXCLUDED);
+        participantCohortStatusDao.save(participant2);
+        participantCohortStatusDao.save(participant1);
     }
 
     @After
     public void onTearDown() {
-        participantDao.delete(participant1);
-        participantDao.delete(participant2);
+        participantCohortStatusDao.delete(participant1);
+        participantCohortStatusDao.delete(participant2);
     }
 
     @Autowired
-    ParticipantDao participantDao;
+    ParticipantCohortStatusDao participantCohortStatusDao;
 
     @Test
     public void findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId_Paging() throws Exception {
@@ -73,8 +71,8 @@ public class ParticipantDaoTest {
         assertParticipant(new PageRequest(0, 1, sortStatusDesc), participant1);
     }
 
-    private void assertParticipant(Pageable pageRequest, Participant expectedParticipant) {
-        Page<Participant> participants = participantDao
+    private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
+        Page<ParticipantCohortStatus> participants = participantCohortStatusDao
                 .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
                         COHORT_ID,
                         CDR_VERSION_ID,

@@ -8,13 +8,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pmiops.workbench.db.dao.ParticipantDao;
-import org.pmiops.workbench.db.model.Participant;
-import org.pmiops.workbench.db.model.ParticipantKey;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.ParticipantListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +27,7 @@ import java.util.List;
 public class CohortReviewControllerTest {
 
     @Mock
-    ParticipantDao participantDao;
+    ParticipantCohortStatusDao participantCohortStatusDao;
 
     @InjectMocks
     CohortReviewController reviewController = new CohortReviewController();
@@ -57,34 +56,34 @@ public class CohortReviewControllerTest {
         Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
         String columnParam = (column == null || column.equals("participantId")) ? "participantKey.participantId" : column;
 
-        ParticipantKey key = new ParticipantKey().cohortId(cohortId).cdrVersionId(cdrVersionId).participantId(1L);
-        Participant dbParticipant = new Participant().participantKey(key).status(CohortStatus.INCLUDED);
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortId(cohortId).cdrVersionId(cdrVersionId).participantId(1L);
+        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
 
-        org.pmiops.workbench.model.Participant respParticipant =
-                new org.pmiops.workbench.model.Participant()
+        org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
+                new org.pmiops.workbench.model.ParticipantCohortStatus()
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED);
 
-        List<Participant> participants = new ArrayList<Participant>();
+        List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
         participants.add(dbParticipant);
         Page expectedPage = new PageImpl(participants);
 
-        when(participantDao.findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
+        when(participantCohortStatusDao.findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
                 cohortId, cdrVersionId,
                 new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam))))
                 .thenReturn(expectedPage);
 
-        ResponseEntity<ParticipantListResponse> response =
-                reviewController.getParticipants(cohortId, cdrVersionId, page, limit, order, column);
+        ResponseEntity<ParticipantCohortStatusListResponse> response =
+                reviewController.getParticipantCohortStatuses(cohortId, cdrVersionId, page, limit, order, column);
 
         assertEquals(1, response.getBody().getItems().size());
         assertEquals(respParticipant, response.getBody().getItems().get(0));
 
-        verify(participantDao, times(1))
+        verify(participantCohortStatusDao, times(1))
                 .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
                         cohortId, cdrVersionId,
                         new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam)));
-        verifyNoMoreInteractions(participantDao);
+        verifyNoMoreInteractions(participantCohortStatusDao);
     }
 
 }

@@ -668,8 +668,8 @@ paths:
     get:
       tags:
          - cohortReview
-      description:  Returns a collection of participants for the specified cohortId and cdrVersionId
-      operationId: "getParticipants"
+      description:  Returns a collection of participants that for the specified cohortId and cdrVersionId
+      operationId: "getParticipantCohortStatuses"
       parameters:
         - in: path
           name: cohortId
@@ -707,7 +707,7 @@ paths:
         "200":
           description: A collection of participants
           schema:
-            $ref: "#/definitions/ParticipantListResponse"
+            $ref: "#/definitions/ParticipantCohortStatusListResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1296,7 +1296,7 @@ definitions:
         operator: "BETWEEN"
         operands: ["18", "35"]
 
-  ParticipantListResponse:
+  ParticipantCohortStatusListResponse:
     type: object
     required:
       - items
@@ -1304,14 +1304,22 @@ definitions:
       items:
         type: "array"
         items:
-          $ref: "#/definitions/Participant"
+          $ref: "#/definitions/ParticipantCohortStatus"
 
-  Participant:
+  ParticipantCohortStatus:
     type: object
     required:
+      - cohortId
+      - cdrVersionId
       - participantId
       - status
     properties:
+      cohortId:
+        type: integer
+        format: int64
+      cdrVersionId:
+        type: integer
+        format: int64
       participantId:
         type: integer
         format: int64

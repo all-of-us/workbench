@@ -13,21 +13,21 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "participant_cohort_status")
-public class Participant {
+public class ParticipantCohortStatus {
 
-    private ParticipantKey participantKey;
+    private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
 
     @EmbeddedId
-    public ParticipantKey getParticipantKey() {
+    public ParticipantCohortStatusKey getParticipantKey() {
         return participantKey;
     }
 
-    public void setParticipantKey(ParticipantKey participantKey) {
+    public void setParticipantKey(ParticipantCohortStatusKey participantKey) {
         this.participantKey = participantKey;
     }
 
-    public Participant participantKey(ParticipantKey participantKey) {
+    public ParticipantCohortStatus participantKey(ParticipantCohortStatusKey participantKey) {
         this.participantKey = participantKey;
         return this;
     }
@@ -42,7 +42,7 @@ public class Participant {
         this.status = status;
     }
 
-    public Participant status(CohortStatus status) {
+    public ParticipantCohortStatus status(CohortStatus status) {
         this.status = status;
         return this;
     }
@@ -51,7 +51,7 @@ public class Participant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Participant that = (Participant) o;
+        ParticipantCohortStatus that = (ParticipantCohortStatus) o;
         return Objects.equals(participantKey.getParticipantId(), that.participantKey.getParticipantId()) &&
                 status == that.status;
     }
