@@ -1,0 +1,19 @@
+.no-results{
+  width:100%;
+  height:400px;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+    }
+    .no-results h1{
+      color:#ccc;
+    }
+.drawer-container{
+  background:white;
+}
+
+hr{
+  border-top: dashed #ccc 1px;
+}

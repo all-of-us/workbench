@@ -1,0 +1,24 @@
+<p>
+  achilles-list works!
+</p>
+
+
+<div id="{{item.section_id}}" *ngFor="let item of sections; let i = index">
+
+  <h3> Analysis: {{i}} {{item.title}}
+    <button (click)="navigation(item.section_id)">
+      <span > View Analyses </span>
+    </button>
+  </h3>
+  <!--
+  <div *ngIf="showSection(item.section_id)" >
+     <li *ngFor="let a of item.data">
+      --<h6> {{a.analysis_id}} : {{a.analysis_name}} -- CountValue {{a.count_value}}
+       Concept info:  {{a.stratum_1_name}} {{a.stratum_1_id}}</h6>
+     </li>
+
+  </div>
+-->
+</div>
+
+<button (click)="go()">click me</button>

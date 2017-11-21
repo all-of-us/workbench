@@ -1,0 +1,47 @@
+<div class="container" *ngFor="let item of analyses; let i = index">
+  <h3>  {{item.analysis_id}}: {{item.analysis_name}} </h3>
+  <h6> Try concept 44820605, 44820606 , 44820607  for stratum test </h6>
+  <ul>
+    <li *ngFor="let name of item.stratum_name; let s = index"> Stratum {{s+1}}: {{name}}
+      <input style="width: 100%;" [(ngModel)]="item.stratum[s]" placeholder="Stratum {{s+1}}">
+    </li>
+  </ul>
+  <div class="row">
+    <!-- <div style="border:black solid 1px"> {{alreadyRan}}</div> -->
+
+    <button class="btn btn-success btn-xs" (click)="runAnalysis(item)"> Run Analysis </button>
+    <div *ngIf="item.results.length">The Following Stratum has been through Analysis:</div>
+    <span *ngFor="let r of item.results">
+      <span style="border:black solid 1px; padding: .1rem .5rem" *ngFor="let s of r.stratum; let i = index">{{r.stratum[i]}}</span>
+    </span>
+    <h6> Results</h6>
+    <pre style="display: flex; justify-content: space-between; flex-wrap: wrap; width: 100%">
+      <div>
+        <div *ngFor="let r of item.results">
+          <span *ngFor="let s of r.stratum; let i = index">
+            Stratum {{i + 1}} - <b>{{s}} : {{r.stratum_name[i]}} </b>
+            <span *ngIf="item.dataType == 'distribution'" >
+              <ul >
+                <li> Min Val: {{r.min_value}} </li>
+                <li> Max Val: {{r.max_value}} </li>
+                <li> Avg Val: {{r.avg_value}} </li>
+                <li> Median Val: {{r.median_value}} </li>
+              </ul>
+            </span>
+          </span> <b>Count Value</b> :{{r.count_value}}
+
+        </div>
+      </div>
+      <div style = "width:40rem">
+        <app-chart *ngIf="item.results.length" [redraw]="redraw" [analysis]="item">
+        </app-chart>
+        <app-chart *ngIf="item.results.length && item.dataType=='distribution'" [analysis]="analyses[i]">
+        </app-chart>
+
+
+      </div>
+
+    </pre>
+
+  </div>
+</div>

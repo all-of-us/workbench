@@ -1,0 +1,53 @@
+.page-container {
+  margin-left: 3rem;
+  margin-right: 3rem;
+}
+
+.page-container-column-view {
+  margin-left: 12rem;
+  margin-right: 12rem;
+}
+
+.none {
+  display: none !important;
+}
+
+.search-container {
+  /*margin-right: 3rem;*/
+  padding-bottom: 3rem;
+}
+
+.my-concepts-container {
+  /*padding-right: 3rem;*/
+}
+
+.toggle-switch {
+  margin-top: -5rem;
+}
+
+.count-chart-container {
+  border: solid #ccc 1px;
+  margin-top: 1rem;
+  height: 20rem;
+}
+
+.page-title-from-header {
+  text-align: center;
+}
+
+.right-count {
+  /*margin-top: -5rem;*/
+}
+
+.caps {
+  text-transform: uppercase;
+}
+
+@media only screen and (max-width: 1199px) {
+  .page-title {
+    position: static;
+  }
+  .my-concepts-container {
+    margin-top: 0rem;
+  }
+}

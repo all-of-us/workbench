@@ -25,6 +25,7 @@ import {environment} from 'environments/environment';
 import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 import {CohortSearchModule} from './cohort-search/cohort-search.module';
+import {DataBrowserModule} from './data-browser/data-browser.module';
 
 import {
   BugReportService,
@@ -62,6 +63,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ClarityModule.forRoot(),
     CohortSearchModule,
     CohortReviewModule,
+    DataBrowserModule
+
   ],
   declarations: [
     AppComponent,

@@ -1,0 +1,102 @@
+.top-spacing {
+  margin-top: 1rem;
+}
+
+.selected {
+  /*text-decoration: underline;*/
+  background: #daeedc;
+  display: inline-block;
+  padding: .5rem 1rem;
+  margin-left: -1rem;
+}
+.selected-title {
+  /*text-decoration: underline;*/
+  background: #daeedc;
+  padding: .5rem 1rem;
+  /*margin-left: -1rem;*/
+}
+.margin-class {
+  margin-left: 1rem;
+}
+
+h2 {
+  margin-top: 2rem;
+  margin-bottom: -1rem;
+}
+
+h3 {
+  margin-top: 2rem;
+}
+
+p {
+  margin-top: .5rem;
+}
+
+.cap {
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.cap:hover {
+  color: #007cbb;
+  text-decoration: underline;
+}
+
+.link-color:link {
+  color: #007cbb
+}
+
+.link-color {
+  color: #007cbb!important;
+  background: red;
+}
+
+.vocab-list {
+  list-style: none;
+  padding: 1rem;
+}
+
+.vocab-list-item {
+  display: inline-block;
+}
+
+.card {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  padding-bottom: 3rem;
+  padding-top: -1rem;
+}
+
+.card-link {
+  margin-top: 1rem;
+  /*text-align: right;*/
+  width: 100%;
+  display: block;
+}
+
+.left {
+  transform: rotate(-90);
+}
+
+.phone-display {
+  display: none
+}
+
+.card-display {
+  transition: all .5s
+}
+
+.card-link {
+  color: #007cbb;
+  font-size: 1.15em;
+  cursor: pointer;
+}
+
+@media only screen and (max-width: 767px) {
+  .card-display {
+    display: none;
+  }
+  .phone-display {
+    display: block;
+  }
+}
