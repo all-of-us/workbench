@@ -663,6 +663,52 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  # Cohort Review  #######################################################################
+  /api/v1/cohortreview/participants/{cohortId}/{cdrVersionId}:
+    get:
+      tags:
+         - cohortReview
+      description:  Returns a collection of participants that for the specified cohortId and cdrVersionId
+      operationId: "getParticipantCohortStatuses"
+      parameters:
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies version of cdr
+        - in: query
+          name: page
+          type: integer
+          required: false
+          description: specific page (default is 0)
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: page size of results (default is 25)
+        - in: query
+          name: order
+          type: string
+          required: false
+          description: sort order (default is 'asc')
+        - in: query
+          name: column
+          type: string
+          required: false
+          description: column to sort(default is 'participantId', can also be 'status')
+      responses:
+        "200":
+          description: A collection of participants
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatusListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1249,6 +1295,41 @@ definitions:
         name: "age_at_event"
         operator: "BETWEEN"
         operands: ["18", "35"]
+
+  ParticipantCohortStatusListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantCohortStatus"
+
+  ParticipantCohortStatus:
+    type: object
+    required:
+      - cohortId
+      - cdrVersionId
+      - participantId
+      - status
+    properties:
+      cohortId:
+        type: integer
+        format: int64
+      cdrVersionId:
+        type: integer
+        format: int64
+      participantId:
+        type: integer
+        format: int64
+      status:
+        $ref: "#/definitions/CohortStatus"
+
+  CohortStatus:
+    type: string
+    description: possible values indicating whether participants are in or out of the cohort
+    enum: [NOT_REVIEWED, INCLUDED, EXCLUDED, NEEDS_FURTHER_REVIEWs]
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

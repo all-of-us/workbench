@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="brianfreeman" id="changelog-12">
+
+        <createTable tableName="participant_cohort_status">
+            <column name="cohort_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cdr_version_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="participant_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="tinyint">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="cohort_id, cdr_version_id, participant_id"
+                       constraintName="pk_participant_cohort_status"
+                       tableName="participant_cohort_status"/>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_id"
+                                 baseTableName="participant_cohort_status"
+                                 constraintName="fk_cohort_id"
+                                 referencedColumnNames="cohort_id"
+                                 referencedTableName="cohort"/>
+
+        <addForeignKeyConstraint baseColumnNames="cdr_version_id"
+                                 baseTableName="participant_cohort_status"
+                                 constraintName="fk_cdr_version_id"
+                                 referencedColumnNames="cdr_version_id"
+                                 referencedTableName="cdr_version"/>
+
+        <createIndex
+                indexName="idx_participant_cohort_status"
+                tableName="participant_cohort_status"
+                unique="false">
+            <column name="cohort_id"/>
+            <column name="cdr_version_id"/>
+            <column name="status"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>
