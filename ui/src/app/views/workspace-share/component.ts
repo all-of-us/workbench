@@ -1,6 +1,7 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
@@ -22,11 +23,10 @@ export class WorkspaceShareComponent implements OnInit {
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
-  updateList: Array<UserRole>;
   usersLoading = true;
   userNotFound = false;
   userNotFoundEmail = '';
-  inputNotInitialized = true;
+  workspaceUpdateConflictError = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
@@ -39,9 +39,7 @@ export class WorkspaceShareComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorHandlingService.retryApi(
-        this.workspacesService.getWorkspace(
-            this.route.snapshot.params['ns'],
-            this.route.snapshot.params['wsid']))
+        this.loadWorkspace())
       .subscribe((workspace) => {
         this.errorHandlingService.retryApi(
             this.profileService.getMe()).subscribe(profile => {
@@ -49,7 +47,6 @@ export class WorkspaceShareComponent implements OnInit {
           this.loadingWorkspace = false;
           this.userEmail = profile.username;
         });
-        this.workspace = workspace;
       }
     );
   }
@@ -73,20 +70,11 @@ export class WorkspaceShareComponent implements OnInit {
     return username + '@fake-research-aou.org';
   }
 
-  inputChange(): void {
-    this.userNotFound = false;
-  }
 
   addCollaborator(): void {
-    if (this.inputNotInitialized) {
-      this.inputNotInitialized = false;
-      this.input.nativeElement.addEventListener('keydown', () => {
-        this.userNotFound = false;
-      });
-    }
     this.usersLoading = true;
-    this.updateList = Array.from(this.workspace.userRoles);
-    this.updateList.push({email: this.convertToEmail(this.toShare),
+    const updateList = Array.from(this.workspace.userRoles);
+    updateList.push({email: this.convertToEmail(this.toShare),
         role: this.accessLevel});
 
     this.errorHandlingService.retryApi(
@@ -94,17 +82,19 @@ export class WorkspaceShareComponent implements OnInit {
         this.workspace.namespace,
         this.workspace.id, {
           workspaceEtag: this.workspace.etag,
-          items: this.updateList})).subscribe(
+          items: updateList})).subscribe(
       (resp: ShareWorkspaceResponse) => {
         this.workspace.etag = resp.workspaceEtag;
         this.usersLoading = false;
-        this.workspace.userRoles = this.updateList;
+        this.workspace.userRoles = updateList;
         this.toShare = '';
         this.input.nativeElement.focus();
       },
       (error) => {
         if (error.status === 400) {
           this.userNotFound = true;
+        } else if (error.status === 409) {
+          this.workspaceUpdateConflictError = true;
         }
         this.usersLoading = false;
       }
@@ -113,8 +103,8 @@ export class WorkspaceShareComponent implements OnInit {
 
   removeCollaborator(user: UserRole): void {
     this.usersLoading = true;
-    this.updateList = Array.from(this.workspace.userRoles);
-    const position = this.updateList.findIndex((userRole) => {
+    const updateList = Array.from(this.workspace.userRoles);
+    const position = updateList.findIndex((userRole) => {
       if (user.email === userRole.email) {
         return true;
       } else {
@@ -122,19 +112,41 @@ export class WorkspaceShareComponent implements OnInit {
       }
     });
 
-    this.updateList.splice(position, 1);
+    updateList.splice(position, 1);
     this.workspacesService.shareWorkspace(this.workspace.namespace,
         this.workspace.id, {
           workspaceEtag: this.workspace.etag,
-          items: this.updateList}).subscribe(
+          items: updateList}).subscribe(
       (resp: ShareWorkspaceResponse) => {
         this.workspace.etag = resp.workspaceEtag;
         this.usersLoading = false;
-        this.workspace.userRoles = this.updateList;
+        this.workspace.userRoles = updateList;
       },
       (error) => {
         this.usersLoading = false;
+        if (error.status === 409) {
+         this.workspaceUpdateConflictError = true;
+       }
       }
     );
+  }
+
+  loadWorkspace(): Observable<Workspace> {
+    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+      this.route.snapshot.params['ns'],
+      this.route.snapshot.params['wsid']);
+    obs.subscribe((workspace) => {
+        this.workspace = workspace;
+    });
+    return obs;
+  }
+
+  reloadConflictingWorkspace(): void {
+    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+  }
+
+  resetWorkspaceEditor(): void {
+    this.workspaceUpdateConflictError = false;
+    this.usersLoading = false;
   }
 }

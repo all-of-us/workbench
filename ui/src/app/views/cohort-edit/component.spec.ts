@@ -8,9 +8,9 @@ import {ClarityModule} from 'clarity-angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsServiceStub, DEFAULT_COHORT_ID} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {CohortsService} from 'generated';
@@ -35,14 +35,14 @@ const activatedRouteStub  = {
   snapshot: {
     url: [
       {path: 'workspace'},
-      {path: WorkspaceComponent.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceComponent.DEFAULT_WORKSPACE_ID},
+      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
+      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
       {path: 'cohorts'},
       {path: 'create'}
     ],
     params: {
-      'ns': WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceComponent.DEFAULT_WORKSPACE_ID,
+      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       'cid': DEFAULT_COHORT_ID
     },
   },
@@ -106,8 +106,8 @@ describe('CohortEditComponent', () => {
     addButton.triggerEventHandler('click', null);
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
-    WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-    WorkspaceComponent.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
       expect(cohorts.items.length).toBe(2);
       expect(cohorts.items[1].name).toBe('New Cohort');
       expect(cohorts.items[1].description).toBe('New Description');
@@ -127,8 +127,8 @@ describe('CohortEditComponent', () => {
     saveButton.triggerEventHandler('click', null);
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
-    WorkspaceComponent.DEFAULT_WORKSPACE_NS,
-    WorkspaceComponent.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+    WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((cohorts) => {
       expect(cohorts.items.length).toBe(1);
       expect(cohorts.items[0].name).toBe('Edited Cohort');
       expect(cohorts.items[0].description).toBe('Edited Description');
