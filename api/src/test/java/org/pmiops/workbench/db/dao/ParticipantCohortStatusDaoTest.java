@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -72,7 +73,7 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
-        Page<ParticipantCohortStatus> participants = participantCohortStatusDao
+        Slice<ParticipantCohortStatus> participants = participantCohortStatusDao
                 .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
                         COHORT_ID,
                         CDR_VERSION_ID,
