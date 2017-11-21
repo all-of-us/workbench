@@ -36,8 +36,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 @Override
                 public org.pmiops.workbench.model.Participant apply(Participant participant) {
                     return new org.pmiops.workbench.model.Participant()
-                            .cohortId(participant.getParticipantKey().getCohortId())
-                            .cdrVersionId(participant.getParticipantKey().getCdrVersionId())
                             .participantId(participant.getParticipantKey().getParticipantId())
                             .status(participant.getStatus());
                 }

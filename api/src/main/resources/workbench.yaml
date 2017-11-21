@@ -668,7 +668,7 @@ paths:
     get:
       tags:
          - cohortReview
-      description:  Returns a collection of participants that for the specified cohortId and cdrVersionId
+      description:  Returns a collection of participants for the specified cohortId and cdrVersionId
       operationId: "getParticipants"
       parameters:
         - in: path
@@ -1309,17 +1309,9 @@ definitions:
   Participant:
     type: object
     required:
-      - cohortId
-      - cdrVersionId
       - participantId
       - status
     properties:
-      cohortId:
-        type: integer
-        format: int64
-      cdrVersionId:
-        type: integer
-        format: int64
       participantId:
         type: integer
         format: int64
