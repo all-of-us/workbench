@@ -1,31 +1,31 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.WorkspaceUserRole;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.WorkspaceUserRole;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 
 /**
@@ -38,8 +38,11 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 public class WorkspaceServiceImpl implements WorkspaceService {
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  // Note: Cannot use an @Autowired constructor with this version of Spring
+  // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private FireCloudService fireCloudService;
+  @Autowired private Clock clock;
 
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
@@ -50,22 +53,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceDao;
   }
   @Override
-  public void setDao(WorkspaceDao workspaceDao) {
-    this.workspaceDao = workspaceDao;
-  }
-  @Override
   public FireCloudService getFireCloudService() {
     return fireCloudService;
   }
   @Override
-  public void setFireCloudService(FireCloudService fireCloudService) {
-    this.fireCloudService = fireCloudService;
-  }
-
-  @Override
   public Workspace get(String ns, String id) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
   }
+
   @Override
   public Workspace getRequired(String ns, String id) {
     Workspace workspace = get(ns, id);
@@ -74,6 +69,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return workspace;
   }
+
+  @Override
+  public Workspace saveWithLastModified(Workspace workspace) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    workspace.setLastModifiedTime(now);
+    try {
+      return workspaceDao.save(workspace);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for workspace update", e);
+      throw new ConflictException("Failed due to concurrent workspace modification");
+    }
+  }
+
   @Override
   public List<Workspace> findForReview() {
     return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
@@ -92,26 +100,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           ns, id, workspace.getApproved() ? "approved" : "rejected"));
     }
     workspace.setApproved(approved);
-    try {
-      workspaceDao.save(workspace);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for workspace update", e);
-      throw new ConflictException("Failed due to concurrent workspace modification");
-    }
+    saveWithLastModified(workspace);
   }
 
   @Override
-  @Transactional
-  public void updateUserRoles(String ns, String id, Set<WorkspaceUserRole> userRoleSet) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = getRequired(
-        ns, id);
+  public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet) {
     Map<Long, WorkspaceUserRole> userRoleMap = new HashMap<Long, WorkspaceUserRole>();
     for (WorkspaceUserRole userRole : userRoleSet) {
-      userRole.setWorkspace(dbWorkspace);
+      userRole.setWorkspace(workspace);
       userRoleMap.put(userRole.getUser().getUserId(), userRole);
     }
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<WorkspaceACLUpdate>();
-    Iterator<WorkspaceUserRole> dbUserRoles = dbWorkspace.getWorkspaceUserRoles().iterator();
+    Iterator<WorkspaceUserRole> dbUserRoles = workspace.getWorkspaceUserRoles().iterator();
     while (dbUserRoles.hasNext()) {
       boolean resolved = false;
       WorkspaceUserRole currentUserRole = dbUserRoles.next();
@@ -133,11 +133,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
 
-    for (Map.Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
-      dbWorkspace.getWorkspaceUserRoles().add(remainingRole.getValue());
+    for (Entry<Long, WorkspaceUserRole> remainingRole : userRoleMap.entrySet()) {
+      workspace.getWorkspaceUserRoles().add(remainingRole.getValue());
     }
 
-    for(WorkspaceUserRole currentWorkspaceUser : dbWorkspace.getWorkspaceUserRoles()) {
+    for(WorkspaceUserRole currentWorkspaceUser : workspace.getWorkspaceUserRoles()) {
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
       currentUpdate.setCanCompute(false);
@@ -154,7 +154,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       updateACLRequestList.add(currentUpdate);
     }
     try {
-      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(ns, id, updateACLRequestList);
+      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(
+          workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
       if (fireCloudResponse.getUsersNotFound().size() != 0) {
         String usersNotFound = "";
         for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
@@ -165,10 +166,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
         throw new BadRequestException(usersNotFound);
       }
-      // TODO(calbach): This save() is not technically necessary but included to
-      // workaround RW-252. Remove either this, or @Transactional.
-      workspaceDao.save(dbWorkspace);
-    } catch(org.pmiops.workbench.firecloud.ApiException e) {
+    } catch(ApiException e) {
       if (e.getCode() == 400) {
         throw new BadRequestException(e.getResponseBody());
       } else if (e.getCode() == 404) {
@@ -179,5 +177,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerUnavailableException(e);
       }
     }
+    return this.saveWithLastModified(workspace);
   }
 }

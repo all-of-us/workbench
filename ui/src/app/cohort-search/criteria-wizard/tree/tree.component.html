@@ -4,8 +4,7 @@
   </clr-tree-node>
 
   <crit-leaf
-    *ngFor="let child of (children$ | async)" 
-    [node]="child" 
-    [selections]="(selected$ | async)">
+    *ngFor="let child of (children$ | async)"
+    [node]="child">
   </crit-leaf>
 </ng-container>

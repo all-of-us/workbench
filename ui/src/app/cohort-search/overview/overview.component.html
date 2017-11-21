@@ -4,12 +4,12 @@
       type="button"
       class="btn btn-success"
       [style.margin-left]="'0'"
-      (click)="save()">
+      (click)="open = true">
       <clr-icon shape="floppy"></clr-icon>
       Save Cohort
     </button>
   </div>
-  <h3>
+  <h3 id="total-count">
     Total Count:
     <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
       Loading...
@@ -21,3 +21,56 @@
 </div>
 
 <app-charts [data]="(chartData$ | async)"></app-charts>
+
+<clr-modal
+  [clrModalClosable]="false"
+  [clrModalStaticBackdrop]="false"
+  [clrModalSize]="'lg'"
+  [(clrModalOpen)]="open">
+  <h3 class="modal-title">Save New Cohort</h3>
+
+  <div class="modal-body">
+    <form [formGroup]="cohortForm" (ngSubmit)="submit()">
+      <div class="form-group">
+        <label for="name required">Cohort Name</label>
+        <label
+          aria-haspopup="true"
+          role="tooltip"
+          class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
+          [class.invalid]="name.invalid && (name.dirty || name.touched)">
+          <input name="name"
+            formControlName="name"
+            size="76"
+            type="text"
+            autofocus>
+          <span class="tooltip-content">
+            A Name is required
+          </span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea name="description"
+          formControlName="description">
+        </textarea>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="open = false">
+      Cancel
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
+      [disabled]=!cohortForm.valid>
+      Save Cohort
+    </button>
+  </div>
+</clr-modal>

@@ -1,6 +1,13 @@
-import {Component, Input} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../../redux';
+import {
+  CohortSearchActions,
+  /* tslint:disable-next-line:no-unused-variable */
+  CohortSearchState,
+  isParameterActive,
+} from '../../redux';
 import {needsAttributes} from '../utils';
 
 @Component({
@@ -8,28 +15,35 @@ import {needsAttributes} from '../utils';
   templateUrl: './leaf.component.html',
   styleUrls: ['./leaf.component.css']
 })
-export class LeafComponent {
+export class LeafComponent implements OnInit, OnDestroy {
   @Input() node;
-  @Input() selections;
+  private isSelected: boolean;
+  private subscription: Subscription;
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor(
+    private ngRedux: NgRedux<CohortSearchState>,
+    private actions: CohortSearchActions
+  ) {}
 
-  /**
-   * Properties
-   */
+  ngOnInit() {
+    const noAttr = !needsAttributes(this.node);
+
+    this.subscription = this.ngRedux
+      .select(isParameterActive(this.paramId))
+      .map(val => noAttr && val)
+      .subscribe(val => this.isSelected = val);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
   get paramId() {
     return `param${this.node.get('id')}`;
   }
 
   get selectable() {
     return this.node.get('selectable', false);
-  }
-
-  get isSelected() {
-    const noAttr = !needsAttributes(this.node);
-    const selectedIDs = this.selections.map(n => n.get('parameterId'));
-    const selected = selectedIDs.includes(this.paramId);
-    return noAttr && selected;
   }
 
   get nonZeroCount() {

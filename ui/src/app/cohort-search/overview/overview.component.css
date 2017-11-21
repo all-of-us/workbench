@@ -6,7 +6,7 @@
   margin: 0.125rem 0;
 }
 
-h3 {
+#total-count {
   text-align: right;
   margin: 0;
   flex: 1;
@@ -17,4 +17,11 @@ h3 {
   margin: 0;
   flex: 1;
   white-space: nowrap;
+}
+
+input[type=text],
+input[type=text]:focus,
+input[type=text]:not([readonly]),
+input[type=text]:not([readonly]):focus {
+  border: none;
 }

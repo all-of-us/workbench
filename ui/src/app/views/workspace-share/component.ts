@@ -6,7 +6,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
-import {UserRoleList} from 'generated';
+import {ShareWorkspaceResponse} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -63,12 +63,13 @@ export class WorkspaceShareComponent implements OnInit {
 
   addCollaborator(): void {
     this.workspace.userRoles.push({email: this.toShare, role: this.accessLevel});
-    const userRoleList: UserRoleList = {items: this.workspace.userRoles};
-    this.workspacesService.shareWorkspace(this.workspace.namespace,
-        this.workspace.id, userRoleList).subscribe(
-      () => {
-      }
-    );
+    this.workspacesService.shareWorkspace(
+      this.workspace.namespace, this.workspace.id, {
+        workspaceEtag: this.workspace.etag,
+        items: this.workspace.userRoles
+      }).subscribe((resp: ShareWorkspaceResponse) => {
+        this.workspace.etag = resp.workspaceEtag;
+      });
   }
 
   removeCollaborator(user: UserRole): void {
@@ -80,11 +81,12 @@ export class WorkspaceShareComponent implements OnInit {
       }
     });
     this.workspace.userRoles.splice(position, 1);
-    const userRoleList: UserRoleList = {items: this.workspace.userRoles};
-    this.workspacesService.shareWorkspace(this.workspace.namespace,
-        this.workspace.id, userRoleList).subscribe(
-      () => {
-      }
-    );
+    this.workspacesService.shareWorkspace(
+      this.workspace.namespace, this.workspace.id, {
+        workspaceEtag: this.workspace.etag,
+        items: this.workspace.userRoles
+      }).subscribe((resp: ShareWorkspaceResponse) => {
+        this.workspace.etag = resp.workspaceEtag;
+      });
   }
 }

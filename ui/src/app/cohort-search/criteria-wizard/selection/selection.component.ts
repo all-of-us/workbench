@@ -1,12 +1,18 @@
 import {select} from '@angular-redux/store';
 import {Component} from '@angular/core';
-import {List} from 'immutable';
 
 import {
   activeCriteriaType,
   activeParameterList,
   CohortSearchActions,
 } from '../../redux';
+
+import {
+  attributeDisplay,
+  nameDisplay,
+  typeDisplay,
+  typeToTitle,
+} from '../../utils';
 
 @Component({
   selector: 'crit-selection',
@@ -18,65 +24,21 @@ export class SelectionComponent {
   @select(activeCriteriaType) criteriaType$;
   @select(activeParameterList) criteriaList$;
 
+  /* Functions of SearchParameters */
+  attributeDisplay = attributeDisplay;
+  nameDisplay = nameDisplay;
+  typeDisplay = typeDisplay;
+
   constructor(private actions: CohortSearchActions) {}
 
   get selectionTitle$() {
-    return this.criteriaType$.map(kind => {
-      kind = kind || '';
-      if (kind.match(/^(ICD|CPT).*/i)) {
-        return `Selected ${kind.toUpperCase()} Codes`;
-      } else if (kind.match(/^DEMO.*/i)) {
-        return 'Selected Demographics Codes';
-      } else {
-        return 'No Selection';
-      }
-    });
+    return this.criteriaType$
+      .filter(thing => thing) // filter out '', null, undefined, etc
+      .map(_type => typeToTitle(_type))
+      .map(title => title ? `Selected ${title} Codes` : 'No Selection');
   }
 
   remove(parameter): void {
     this.actions.removeParameter(parameter.get('parameterId'));
-  }
-
-  typeDisplay(parameter): string {
-    const subtype = parameter.get('subtype', '');
-    const _type = parameter.get('type', '');
-
-    if (_type.match(/^DEMO.*/i)) {
-      return {
-        'GEN': 'Gender',
-        'RACE': 'Race/Ethnicity',
-        'AGE': 'Age',
-        'DEC': 'Deceased'
-      }[subtype];
-    } else {
-      return parameter.get('code');
-    }
-  }
-
-  nameDisplay(parameter): string {
-    const subtype = parameter.get('subtype', '');
-    const _type = parameter.get('type', '');
-    if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
-      return '';
-    }
-    return parameter.get('name');
-  }
-
-  attributeDisplay(parameter): string {
-    const attr = parameter.get('attribute', '');
-
-    const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
-    if (kind.match(/^DEMO.*AGE/i)) {
-      const op = {
-        'between': 'In Range',
-        '=': 'Equal To',
-        '>': 'Greater Than',
-        '<': 'Less Than',
-        '>=': 'Greater Than or Equal To',
-        '<=': 'Less Than or Equal To',
-      }[attr.get('operator')];
-      const args = attr.get('operands', List()).join(', ');
-      return `${op} ${args}`;
-    }
   }
 }
