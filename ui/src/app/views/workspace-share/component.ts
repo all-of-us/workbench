@@ -1,6 +1,7 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
@@ -22,6 +23,12 @@ export class WorkspaceShareComponent implements OnInit {
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
+  usersLoading = true;
+  userNotFound = false;
+  userNotFoundEmail = '';
+  workspaceUpdateConflictError = false;
+  @ViewChild('usernameSharingInput') input: ElementRef;
+
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
@@ -32,16 +39,14 @@ export class WorkspaceShareComponent implements OnInit {
 
   ngOnInit(): void {
     this.errorHandlingService.retryApi(
-        this.workspacesService.getWorkspace(
-            this.route.snapshot.params['ns'],
-            this.route.snapshot.params['wsid']))
+        this.loadWorkspace())
       .subscribe((workspace) => {
         this.errorHandlingService.retryApi(
             this.profileService.getMe()).subscribe(profile => {
+          this.usersLoading = false;
           this.loadingWorkspace = false;
           this.userEmail = profile.username;
         });
-        this.workspace = workspace;
       }
     );
   }
@@ -61,32 +66,91 @@ export class WorkspaceShareComponent implements OnInit {
     }
   }
 
+  convertToEmail(username: string): string {
+    return username + '@fake-research-aou.org';
+  }
+
+
   addCollaborator(): void {
-    this.workspace.userRoles.push({email: this.toShare, role: this.accessLevel});
-    this.workspacesService.shareWorkspace(
-      this.workspace.namespace, this.workspace.id, {
-        workspaceEtag: this.workspace.etag,
-        items: this.workspace.userRoles
-      }).subscribe((resp: ShareWorkspaceResponse) => {
-        this.workspace.etag = resp.workspaceEtag;
-      });
+    if (!this.usersLoading) {
+      this.usersLoading = true;
+      const updateList = Array.from(this.workspace.userRoles);
+      updateList.push({email: this.convertToEmail(this.toShare),
+          role: this.accessLevel});
+
+      this.errorHandlingService.retryApi(
+        this.workspacesService.shareWorkspace(
+          this.workspace.namespace,
+          this.workspace.id, {
+            workspaceEtag: this.workspace.etag,
+            items: updateList})).subscribe(
+        (resp: ShareWorkspaceResponse) => {
+          this.workspace.etag = resp.workspaceEtag;
+          this.usersLoading = false;
+          this.workspace.userRoles = updateList;
+          this.toShare = '';
+          this.input.nativeElement.focus();
+        },
+        (error) => {
+          if (error.status === 400) {
+            this.userNotFound = true;
+          } else if (error.status === 409) {
+            this.workspaceUpdateConflictError = true;
+          }
+          this.usersLoading = false;
+        }
+      );
+    }
   }
 
   removeCollaborator(user: UserRole): void {
-    const position = this.workspace.userRoles.findIndex((userRole) => {
-      if (user.email === userRole.email) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    this.workspace.userRoles.splice(position, 1);
-    this.workspacesService.shareWorkspace(
-      this.workspace.namespace, this.workspace.id, {
-        workspaceEtag: this.workspace.etag,
-        items: this.workspace.userRoles
-      }).subscribe((resp: ShareWorkspaceResponse) => {
-        this.workspace.etag = resp.workspaceEtag;
+    if (!this.usersLoading) {
+      this.usersLoading = true;
+      const updateList = Array.from(this.workspace.userRoles);
+      const position = updateList.findIndex((userRole) => {
+        if (user.email === userRole.email) {
+          return true;
+        } else {
+          return false;
+        }
       });
+
+      updateList.splice(position, 1);
+      this.workspacesService.shareWorkspace(this.workspace.namespace,
+          this.workspace.id, {
+            workspaceEtag: this.workspace.etag,
+            items: updateList}).subscribe(
+        (resp: ShareWorkspaceResponse) => {
+          this.workspace.etag = resp.workspaceEtag;
+          this.usersLoading = false;
+          this.workspace.userRoles = updateList;
+        },
+        (error) => {
+          this.usersLoading = false;
+          if (error.status === 409) {
+           this.workspaceUpdateConflictError = true;
+         }
+        }
+      );
+    }
+  }
+
+  loadWorkspace(): Observable<Workspace> {
+    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+      this.route.snapshot.params['ns'],
+      this.route.snapshot.params['wsid']);
+    obs.subscribe((workspace) => {
+        this.workspace = workspace;
+    });
+    return obs;
+  }
+
+  reloadConflictingWorkspace(): void {
+    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+  }
+
+  resetWorkspaceEditor(): void {
+    this.workspaceUpdateConflictError = false;
+    this.usersLoading = false;
   }
 }

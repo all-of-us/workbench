@@ -1,5 +1,5 @@
 input {
-  width: 15rem;
+  width: 5rem;
 }
 
 .add-by-text-area {
@@ -47,5 +47,13 @@ clr-dropdown > button {
 }
 
 .spinner-padded {
+  padding-top: 1rem;
+}
+
+.error-message {
+  color: red;
+}
+
+.loading-users {
   padding-top: 1rem;
 }
