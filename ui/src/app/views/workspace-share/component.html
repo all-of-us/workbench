@@ -15,7 +15,7 @@
             [(ngModel)]="toShare" placeholder="Enter username" (ngModelChange)="userNotFound = false">
         <span>@fake-research-aou.org</span>
         <clr-dropdown>
-          <button type="button" class="btn btn-outline-primary sharing-buttons" clrDropdownTrigger>
+          <button type="button" class="btn btn-outline-primary sharing-buttons permissions-button" clrDropdownTrigger>
             {{selectedPermission}}
             <clr-icon shape="caret down"></clr-icon>
           </button>
@@ -25,7 +25,7 @@
             <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
           </clr-dropdown-menu>
         </clr-dropdown>
-        <button type="button" class="btn btn-primary sharing-buttons" (click)="addCollaborator()">Add Collaborator</button>
+        <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()">Add Collaborator</button>
       </div>
       <div *ngIf="userNotFound" class="error-message">
         User {{toShare}} not found.
@@ -37,7 +37,7 @@
           <h5>
             <clr-icon *ngIf="user.email !== userEmail"
                 shape="minus-circle"
-                class="is-solid"
+                class="is-solid remove-button"
                 (click)="removeCollaborator(user)"></clr-icon>
             {{user.email}}
           </h5>

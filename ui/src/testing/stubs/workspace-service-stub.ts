@@ -1,4 +1,10 @@
-import {Workspace, WorkspaceAccessLevel, WorkspaceListResponse} from 'generated';
+import {
+  ShareWorkspaceRequest,
+  ShareWorkspaceResponse,
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceListResponse
+} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
 export class WorkspaceStubVariables {
@@ -129,5 +135,27 @@ export class WorkspacesServiceStub {
       }, 0);
     });
     return observable;
+  }
+
+  public shareWorkspace(workspaceNamespace: string,
+      workspaceId: string,
+      request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
+        const observable = new Observable(observer => {
+          setTimeout(() => {
+            const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+              if (workspace.id === workspaceId) {
+                return true;
+              }
+            });
+            if (updateIndex === -1) {
+              observer.error(new Error(`Error sharing. Workspace with `
+                                      + `id: ${workspaceId} does not exist.`));
+            }
+            this.workspaces[updateIndex].userRoles = request.items;
+            observer.next({});
+            observer.complete();
+          }, 0);
+        });
+        return observable;
   }
 }
