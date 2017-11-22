@@ -1,8 +1,16 @@
-import {WorkspaceComponent} from 'app/views/workspace/component';
-import {Workspace, WorkspaceListResponse} from 'generated';
+import {
+  ShareWorkspaceRequest,
+  ShareWorkspaceResponse,
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceListResponse
+} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
 export class WorkspaceStubVariables {
+  static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
+  static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
+  static DEFAULT_WORKSPACE_ID = '1';
   static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
 }
@@ -10,9 +18,9 @@ export class WorkspaceStubVariables {
 export class WorkspacesServiceStub {
   constructor() {
     const stubWorkspace: Workspace = {
-      name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
-      id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS,
+      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+      id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
       cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       creationTime: new Date().getTime(),
@@ -26,7 +34,21 @@ export class WorkspacesServiceStub {
         commercialPurpose: false,
         population: false,
         reviewRequested: false
-      }
+      },
+      userRoles: [
+        {
+          email: 'sampleuser1@fake-research-aou.org',
+          role: WorkspaceAccessLevel.OWNER
+        },
+        {
+          email: 'sampleuser2@fake-research-aou.org',
+          role: WorkspaceAccessLevel.WRITER
+        },
+        {
+          email: 'sampleuser3@fake-research-aou.org',
+          role: WorkspaceAccessLevel.READER
+        },
+      ]
     };
 
 
@@ -113,5 +135,27 @@ export class WorkspacesServiceStub {
       }, 0);
     });
     return observable;
+  }
+
+  public shareWorkspace(workspaceNamespace: string,
+      workspaceId: string,
+      request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
+        const observable = new Observable(observer => {
+          setTimeout(() => {
+            const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+              if (workspace.id === workspaceId) {
+                return true;
+              }
+            });
+            if (updateIndex === -1) {
+              observer.error(new Error(`Error sharing. Workspace with `
+                                      + `id: ${workspaceId} does not exist.`));
+            }
+            this.workspaces[updateIndex].userRoles = request.items;
+            observer.next({});
+            observer.complete();
+          }, 0);
+        });
+        return observable;
   }
 }

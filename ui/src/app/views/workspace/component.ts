@@ -76,9 +76,6 @@ class NotebookDescriptionComparator implements Comparator<Notebook> {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit {
-  public static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
-  public static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
-  public static DEFAULT_WORKSPACE_ID = '1';
 
   /* tslint:disable:no-unused-variable */
   /* All these are used in the template, not the class */

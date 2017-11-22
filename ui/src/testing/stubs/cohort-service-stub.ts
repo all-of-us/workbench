@@ -1,6 +1,8 @@
-import {WorkspaceComponent} from 'app/views/workspace/component';
-import {Cohort, CohortListResponse, Workspace} from 'generated';
 import {Observable} from 'rxjs/Observable';
+
+import {Cohort, CohortListResponse, Workspace} from 'generated';
+
+import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = '1';
 
@@ -41,14 +43,14 @@ class CohortStub implements Cohort {
 export class CohortsServiceStub {
   constructor() {
     const stubWorkspace: Workspace = {
-      name: WorkspaceComponent.DEFAULT_WORKSPACE_NAME,
-      id: WorkspaceComponent.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceComponent.DEFAULT_WORKSPACE_NS
+      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+      id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
     };
 
     const exampleCohort: CohortStub = {id: '',
       name: '', description: '', criteria: '', type: '',
-      workspaceId: WorkspaceComponent.DEFAULT_WORKSPACE_ID};
+      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID};
     exampleCohort.id = DEFAULT_COHORT_ID;
     exampleCohort.name = 'sample name';
     exampleCohort.description = 'sample description';

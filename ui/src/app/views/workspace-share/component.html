@@ -8,14 +8,14 @@
  <div class="sharing-area">
    <div class="adding-area">
       <h4>Add a New Collaborator</h4>
-      <p>You can add multiple users at once, all with the same role.</p>
 
       <div class="add-by-text-area">
         <label class="text-label" class="find-collaborator-label">Find Collaborator</label>
         <input type="text" class="input share" name="to-share" autofocus
-            [(ngModel)]="toShare" placeholder="Enter name or @researchallofus.com ID">
+            [(ngModel)]="toShare" placeholder="Enter username" (ngModelChange)="userNotFound = false">
+        <span>@fake-research-aou.org</span>
         <clr-dropdown>
-          <button type="button" class="btn btn-outline-primary sharing-buttons" clrDropdownTrigger>
+          <button type="button" class="btn btn-outline-primary sharing-buttons permissions-button" clrDropdownTrigger>
             {{selectedPermission}}
             <clr-icon shape="caret down"></clr-icon>
           </button>
@@ -25,25 +25,43 @@
             <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
           </clr-dropdown-menu>
         </clr-dropdown>
-        <button type="button" class="btn btn-primary sharing-buttons" (click)="addCollaborator()">Add Collaborator</button>
+        <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()">Add Collaborator</button>
+      </div>
+      <div *ngIf="userNotFound" class="error-message">
+        User {{toShare}} not found.
       </div>
     </div>
     <div class="removing-area">
       <ul>
-        <div *ngFor="let user of workspace.userRoles">
+        <div *ngFor="let user of workspace.userRoles" class="user">
           <h5>
             <clr-icon *ngIf="user.email !== userEmail"
-                shape="minus-circle" 
-                class="is-solid"
+                shape="minus-circle"
+                class="is-solid remove-button"
                 (click)="removeCollaborator(user)"></clr-icon>
             {{user.email}}
           </h5>
           <div>{{user.role}}</div>
         </div>
+        <div *ngIf="usersLoading" class="loading-users">
+          <span class="spinner spinner-sm"></span>
+          <span class="loading-text">Loading updated user list...</span>
+        </div>
       </ul>
     </div>
   </div>
 </div>
+<clr-modal [(clrModalOpen)]="workspaceUpdateConflictError">
+  <h3 class="modal-title">Conflicting update:</h3>
+  <div class="modal-body">
+    Another client has modified this workspace since the beginning of this
+    sharing session. Please reload to avoid overwriting those changes.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="reloadConflictingWorkspace()">Reload Workspace</button>
+    <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Sharing</button>
+  </div>
+</clr-modal>
 <ng-template #loading>
   <span class="spinner spinner-md spinner-padded"></span>
   <span class="loading-text">Loading...</span>
