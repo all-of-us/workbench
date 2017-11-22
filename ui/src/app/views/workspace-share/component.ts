@@ -72,63 +72,67 @@ export class WorkspaceShareComponent implements OnInit {
 
 
   addCollaborator(): void {
-    this.usersLoading = true;
-    const updateList = Array.from(this.workspace.userRoles);
-    updateList.push({email: this.convertToEmail(this.toShare),
-        role: this.accessLevel});
+    if (!this.usersLoading) {
+      this.usersLoading = true;
+      const updateList = Array.from(this.workspace.userRoles);
+      updateList.push({email: this.convertToEmail(this.toShare),
+          role: this.accessLevel});
 
-    this.errorHandlingService.retryApi(
-      this.workspacesService.shareWorkspace(
-        this.workspace.namespace,
-        this.workspace.id, {
-          workspaceEtag: this.workspace.etag,
-          items: updateList})).subscribe(
-      (resp: ShareWorkspaceResponse) => {
-        this.workspace.etag = resp.workspaceEtag;
-        this.usersLoading = false;
-        this.workspace.userRoles = updateList;
-        this.toShare = '';
-        this.input.nativeElement.focus();
-      },
-      (error) => {
-        if (error.status === 400) {
-          this.userNotFound = true;
-        } else if (error.status === 409) {
-          this.workspaceUpdateConflictError = true;
+      this.errorHandlingService.retryApi(
+        this.workspacesService.shareWorkspace(
+          this.workspace.namespace,
+          this.workspace.id, {
+            workspaceEtag: this.workspace.etag,
+            items: updateList})).subscribe(
+        (resp: ShareWorkspaceResponse) => {
+          this.workspace.etag = resp.workspaceEtag;
+          this.usersLoading = false;
+          this.workspace.userRoles = updateList;
+          this.toShare = '';
+          this.input.nativeElement.focus();
+        },
+        (error) => {
+          if (error.status === 400) {
+            this.userNotFound = true;
+          } else if (error.status === 409) {
+            this.workspaceUpdateConflictError = true;
+          }
+          this.usersLoading = false;
         }
-        this.usersLoading = false;
-      }
-    );
+      );
+    }
   }
 
   removeCollaborator(user: UserRole): void {
-    this.usersLoading = true;
-    const updateList = Array.from(this.workspace.userRoles);
-    const position = updateList.findIndex((userRole) => {
-      if (user.email === userRole.email) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+    if (!this.usersLoading) {
+      this.usersLoading = true;
+      const updateList = Array.from(this.workspace.userRoles);
+      const position = updateList.findIndex((userRole) => {
+        if (user.email === userRole.email) {
+          return true;
+        } else {
+          return false;
+        }
+      });
 
-    updateList.splice(position, 1);
-    this.workspacesService.shareWorkspace(this.workspace.namespace,
-        this.workspace.id, {
-          workspaceEtag: this.workspace.etag,
-          items: updateList}).subscribe(
-      (resp: ShareWorkspaceResponse) => {
-        this.workspace.etag = resp.workspaceEtag;
-        this.usersLoading = false;
-        this.workspace.userRoles = updateList;
-      },
-      (error) => {
-        this.usersLoading = false;
-        if (error.status === 409) {
-         this.workspaceUpdateConflictError = true;
-       }
-      }
-    );
+      updateList.splice(position, 1);
+      this.workspacesService.shareWorkspace(this.workspace.namespace,
+          this.workspace.id, {
+            workspaceEtag: this.workspace.etag,
+            items: updateList}).subscribe(
+        (resp: ShareWorkspaceResponse) => {
+          this.workspace.etag = resp.workspaceEtag;
+          this.usersLoading = false;
+          this.workspace.userRoles = updateList;
+        },
+        (error) => {
+          this.usersLoading = false;
+          if (error.status === 409) {
+           this.workspaceUpdateConflictError = true;
+         }
+        }
+      );
+    }
   }
 
   loadWorkspace(): Observable<Workspace> {
