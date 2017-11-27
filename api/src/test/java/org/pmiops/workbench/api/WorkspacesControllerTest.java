@@ -110,10 +110,7 @@ public class WorkspacesControllerTest {
     fcWorkspace.setCreatedBy(creator);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse = new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-<<<<<<< HEAD
     fcResponse.setAccessLevel("Owner");
-=======
->>>>>>> Fix tests
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
       fcResponse
     );
