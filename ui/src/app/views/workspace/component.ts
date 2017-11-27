@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component, Inject, OnInit} from '@angular/core';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -111,6 +112,7 @@ export class WorkspaceComponent implements OnInit {
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
       private errorHandlingService: ErrorHandlingService,
+      private locationService: Location,
       private workspacesService: WorkspacesService,
       /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
@@ -202,6 +204,10 @@ export class WorkspaceComponent implements OnInit {
         this.clusterPulled = true;
       });
     });
+  }
+
+  navigateBack(): void {
+    this.locationService.back();
   }
 
   killNotebook(): void {
