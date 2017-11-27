@@ -88,10 +88,9 @@ def run_api_and_db(*args)
   run_api(account)
 end
 
-def run_tests(*args)
-  common = Common.new
-
-  common.run_inline %W{docker-compose run --rm api ./gradlew test} + args
+def run_tests(cmd_name, args)
+  ensure_docker cmd_name, args
+  Common.new.run_inline %W{gradle test} + args
 end
 
 def run_integration_tests(*args)
@@ -532,7 +531,7 @@ Common.register_command({
   :invocation => "test",
   :description => "Runs tests. To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => lambda { |*args| run_tests(*args) }
+  :fn => lambda { |*args| run_tests("test", args) }
 })
 
 Common.register_command({
