@@ -9,7 +9,7 @@ import {ErrorHandlingService} from './services/error-handling.service';
 import {SignInService} from './services/sign-in.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
-import {AppComponent} from './views/app/component';
+import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
@@ -37,8 +37,9 @@ import {
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
+    const basePath = localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
     return new Configuration({
-      basePath: environment.allOfUsApiUrl,
+      basePath: basePath,
       accessToken: () => signInService.currentAccessToken
     });
 }
