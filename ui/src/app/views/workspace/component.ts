@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component, Inject, OnInit} from '@angular/core';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -100,6 +101,7 @@ export class WorkspaceComponent implements OnInit {
   cluster: Cluster;
   clusterPulled = false;
   clusterLoading = false;
+  notFound = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   constructor(
@@ -108,6 +110,7 @@ export class WorkspaceComponent implements OnInit {
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
       private errorHandlingService: ErrorHandlingService,
+      private locationService: Location,
       private workspacesService: WorkspacesService,
       /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
@@ -116,28 +119,33 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-    this.errorHandlingService.retryApi(this.cohortsService
-        .getCohortsInWorkspace(this.wsNamespace, this.wsId))
-        .subscribe(
-            cohortsReceived => {
-              for (const coho of cohortsReceived.items) {
-                this.cohortList.push(coho);
-              }
-              this.cohortsLoading = false;
-            },
-            error => {
-              this.cohortsLoading = false;
-              this.cohortsError = true;
-            });
+
     this.errorHandlingService.retryApi(this.workspacesService
       .getWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
           workspaceReceived => {
             this.workspace = workspaceReceived;
             this.workspaceLoading = false;
+            this.errorHandlingService.retryApi(this.cohortsService
+                .getCohortsInWorkspace(this.wsNamespace, this.wsId))
+                .subscribe(
+                    cohortsReceived => {
+                      for (const coho of cohortsReceived.items) {
+                        this.cohortList.push(coho);
+                      }
+                      this.cohortsLoading = false;
+                    },
+                    error => {
+                      this.cohortsLoading = false;
+                      this.cohortsError = true;
+                    });
           },
           error => {
-            this.workspaceLoading = false;
+            if (error.status === 404) {
+              this.notFound = true;
+            } else {
+              this.workspaceLoading = false;
+            }
           });
   }
 
@@ -193,6 +201,10 @@ export class WorkspaceComponent implements OnInit {
         this.clusterPulled = true;
       });
     });
+  }
+
+  navigateBack(): void {
+    this.locationService.back();
   }
 
   killNotebook(): void {
