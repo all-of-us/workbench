@@ -116,9 +116,10 @@
     </div>
   </div>
 </div>
+<!-- TODO: Factor out to component -->
 <ng-template #notFoundMessage>
-  <h3 class="modal-body">
-    404: Workspace {{route.snapshot.params['ns']}}/{{route.snapshot.params['wsid']}} could not be found.
+  <h3>
+    Workspace {{route.snapshot.params['ns']}}/{{route.snapshot.params['wsid']}} could not be found.
   </h3>
 </ng-template>
 <clr-modal [(clrModalOpen)]="workspaceCreationError">
