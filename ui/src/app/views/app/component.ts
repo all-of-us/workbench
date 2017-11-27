@@ -15,6 +15,7 @@ import {Authority, ProfileService} from 'generated';
 
 /* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
+export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -26,6 +27,7 @@ export class AppComponent implements OnInit {
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   private _showCreateAccount = false;
+  private overriddenUrl: string = null;
 
   constructor(
       private activatedRoute: ActivatedRoute,
@@ -37,9 +39,26 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+
+    window['setAllOfUsApiUrl'] = (url: string) => {
+      if (url) {
+        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+        }
+        this.overriddenUrl = url;
+        localStorage.setItem(overriddenUrlKey, url);
+      } else {
+        this.overriddenUrl = null;
+        localStorage.removeItem(overriddenUrlKey);
+      }
+      window.location.reload();
+    };
+    console.log('To override the API URL, try:\n' +
+      'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
-
     this.baseTitle = this.titleService.getTitle();
     if (environment.displayTag) {
       this.baseTitle = `[${environment.displayTag}] ${this.baseTitle}`;
@@ -60,6 +79,7 @@ export class AppComponent implements OnInit {
         }
       }
     });
+
     this.user = this.signInService.user;
     this.user.subscribe(user => {
       if (user.isSignedIn) {
