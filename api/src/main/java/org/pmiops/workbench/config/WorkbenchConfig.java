@@ -8,6 +8,7 @@ public class WorkbenchConfig {
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
+    public String billingAccountId;
     public String billingProjectPrefix;
   }
 

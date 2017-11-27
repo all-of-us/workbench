@@ -2,6 +2,7 @@
 {
   "firecloud": {
     "debugEndpoints": false,
+    "billingAccountId": "001A68-D1B344-975E93",
     "billingProjectPrefix": "aou-free-test-"
   },
   "bigquery": {

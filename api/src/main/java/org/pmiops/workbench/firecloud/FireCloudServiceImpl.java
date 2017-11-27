@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.util.List;
 import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
@@ -22,17 +23,17 @@ import org.springframework.stereotype.Service;
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
 
-  // TODO: put this in a config object in the database
-  private static final String ALL_OF_US_BILLING_ACCOUNT = "billingAccounts/001A68-D1B344-975E93";
-
+  private final Provider<WorkbenchConfig> configProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
   @Autowired
-  public FireCloudServiceImpl(Provider<ProfileApi> profileApiProvider,
+  public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
+      Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider) {
+    this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
@@ -80,7 +81,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void createAllOfUsBillingProject(String projectName) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
-    request.setBillingAccount(ALL_OF_US_BILLING_ACCOUNT);
+    request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
     request.setProjectName(projectName);
     billingApi.createBillingProjectFull(request);
   }
