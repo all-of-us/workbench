@@ -14,6 +14,12 @@ require "optparse"
 require "ostruct"
 require "tempfile"
 
+def ensure_docker(cmd_name, args)
+  unless Workbench::in_docker?
+    exec *(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args)
+  end
+end
+
 class Options < OpenStruct
 end
 
@@ -605,10 +611,7 @@ Common.register_command({
 })
 
 def connect_to_cloud_db(cmd_name, *args)
-  unless Workbench::in_docker?
-    exec *(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args)
-  end
-
+  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
@@ -642,17 +645,8 @@ Common.register_command({
   :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })
 
-Common.register_command({
-  :invocation => "deploy-api",
-  :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| DeployApi.new("deploy-api", args).run }
-})
-
 def deploy(cmd_name, args)
-  unless Workbench::in_docker?
-    exec *(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args)
-  end
-
+  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -690,6 +684,52 @@ Common.register_command({
   :fn => lambda { |*args| deploy("deploy", args) }
 })
 
+def migrate_database()
+  common = Common.new
+  common.status "Migrating main database..."
+  run_with_redirects(
+    "cat db/create_db.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
+  )
+  Dir.chdir("db") do
+    common.run_inline(%W{gradle --info update})
+  end
+end
+
+def migrate_cdr_database()
+  common = Common.new
+  common.status "Migrating CDR database..."
+  run_with_redirects(
+    "cat db-cdr/create_db.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
+  )
+  Dir.chdir("db-cdr") do
+    common.run_inline(%W{gradle --info update -PrunList=schema})
+  end
+end
+
+def load_config()
+  common = Common.new
+  common.status "Loading configuration into database..."
+  Dir.chdir("tools") do
+    common.run_inline %W{gradle --info loadConfig}
+  end
+end
+
+def with_cloud_proxy_and_db_env(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  ENV.update(read_db_vars_v2(gcc))
+  ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
+  CloudSqlProxyContext.new(gcc).run do
+    yield
+  end
+end
+
 def circle_deploy(cmd_name, args)
   unless Workbench::in_docker?
     exec *(%W{docker run --rm -v #{File.expand_path("..")}:/w -w /w/api
@@ -703,40 +743,12 @@ def circle_deploy(cmd_name, args)
     exit 1
   end
 
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-
-  ENV.update(read_db_vars_v2(gcc))
-  ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
-  common.status "Running database migrations..."
   if ENV["CIRCLE_BRANCH"] == "master"
-    CloudSqlProxyContext.new(gcc).run do
-      common.status "Migrating main database..."
-      run_with_redirects(
-        "cat db/create_db.sql | envsubst | " \
-        "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-        to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-      )
-      Dir.chdir("db") do
-        common.run_inline(%W{gradle --info update})
-      end
-
-      common.status "Migrating CDR database..."
-      run_with_redirects(
-        "cat db-cdr/create_db.sql | envsubst | " \
-        "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-        to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-      )
-      Dir.chdir("db-cdr") do
-        common.run_inline(%W{gradle --info update -PrunList=schema})
-      end
-
-      common.status "Loading configuration into database..."
-      Dir.chdir("tools") do
-        common.run_inline %W{gradle --info loadConfig}
-      end
+    common.status "Running database migrations..."
+    with_cloud_proxy_and_db_env(cmd_name, args) do
+      migrate_database
+      migrate_cdr_database
+      load_config
     end
   end
 
@@ -745,8 +757,41 @@ def circle_deploy(cmd_name, args)
   deploy(cmd_name, args + %W{--version #{version} #{promote}})
 end
 
+def run_cloud_migrations(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_database }
+end
+
+def run_cloud_cdr_migrations(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_cdr_database }
+end
+
+def update_cloud_config(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) { load_config }
+end
+
 Common.register_command({
   :invocation => "circle-deploy",
   :description => "Deploys the API server from within the Circle CI envronment.",
   :fn => lambda { |*args| circle_deploy("circle-deploy", args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-migrations",
+  :description => "Runs database migrations on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_migrations("run-cloud-migrations", args) }
+})
+
+Common.register_command({
+  :invocation => "run-cloud-cdr-migrations",
+  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_cdr_migrations("run-cloud-cdr-migrations", args) }
+})
+
+Common.register_command({
+  :invocation => "update-cloud-config",
+  :description => "Updates configuration in Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| update_cloud_config("update-cloud-config", args) }
 })
