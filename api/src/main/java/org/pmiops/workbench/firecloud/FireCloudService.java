@@ -4,6 +4,7 @@ import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
 /**
  * Encapsulate Firecloud API interaction details and provide a simple/mockable interface
@@ -45,4 +46,6 @@ public interface FireCloudService {
   List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;
 
   WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
+
+  WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException;
 }

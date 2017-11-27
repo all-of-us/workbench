@@ -14,6 +14,7 @@ import org.pmiops.workbench.firecloud.model.Profile;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -114,5 +115,11 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     // TODO: set authorization domain here
     return workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates);
+  }
+
+  @Override
+  public WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    return workspacesApi.getWorkspace(projectName, workspaceName);
   }
 }
