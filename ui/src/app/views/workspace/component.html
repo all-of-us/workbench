@@ -1,112 +1,120 @@
-<div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
-  <h2>{{workspace.name}}</h2>
-  <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
-  <clr-icon class="sharing-icon is-solid" shape="users" (click)="share()"></clr-icon>
-</div>
-<ng-template #workspacePageLoading>
-  <div class="loading-area">
-    <span class="spinner spinner-md" style="padding-top: 1rem"></span>
-    <span class="loading-text">Loading...</span>
+<div *ngIf="!notFound else notFoundMessage">
+  <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
+    <h2>{{workspace.name}}</h2>
+    <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
+    <clr-icon class="sharing-icon is-solid" shape="users" (click)="share()"></clr-icon>
   </div>
-</ng-template>
-<div *ngIf="!workspaceLoading;" class="description-text">
-  {{workspace.description}}
-</div>
-<div class="area-block">
-  <h3>CDR Version</h3>
-  <div class="indented">
-    <!-- TODO: Add CDR Version Info - blrubenstein -->
-    <p *ngIf="!workspaceLoading;" class="cdr-text">
-      {{workspace.cdrVersionId}}
-    </p>
+  <ng-template #workspacePageLoading>
+    <div class="loading-area">
+      <span class="spinner spinner-md" style="padding-top: 1rem"></span>
+      <span class="loading-text">Loading...</span>
+    </div>
+  </ng-template>
+  <div *ngIf="!workspaceLoading;" class="description-text">
+    {{workspace.description}}
   </div>
-</div>
-<div class="area-block">
-  <div class="table-header">
-    <h3 class="table-header-descriptor">Cohorts</h3>
-    <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
+  <div class="area-block">
+    <h3>CDR Version</h3>
+    <div class="indented">
+      <!-- TODO: Add CDR Version Info - blrubenstein -->
+      <p *ngIf="!workspaceLoading;" class="cdr-text">
+        {{workspace.cdrVersionId}}
+      </p>
+    </div>
   </div>
-  <div class="indented">
-    <clr-datagrid [clrDgLoading]="cohortsLoading">
-      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" [style.width.%]="25">
-        Name
-        <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" [style.width.%]="50">
-        Description
-        <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
-      <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-        <clr-dg-cell>
-          <div style="display: flex; justify-content: space-between; overflow: hidden;">
-            <div style="display: flex;">
-              <span>{{cohort.name}}</span>
+  <div class="area-block">
+    <div class="table-header">
+      <h3 class="table-header-descriptor">Cohorts</h3>
+      <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
+    </div>
+    <div class="indented">
+      <clr-datagrid [clrDgLoading]="cohortsLoading">
+        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" [style.width.%]="25">
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" [style.width.%]="50">
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
+        <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
+          <clr-dg-cell>
+            <div style="display: flex; justify-content: space-between; overflow: hidden;">
+              <div style="display: flex;">
+                <span>{{cohort.name}}</span>
+              </div>
+              <div style="display: flex; height: 2vh;">
+                <a style="padding-right: 1vh; border-right: 1px solid black;"
+                    routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
+                  Edit
+                </a>
+                <a style="padding-left: 1vh;" routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">Review</a>
+              </div>
             </div>
-            <div style="display: flex; height: 2vh;">
-              <a style="padding-right: 1vh; border-right: 1px solid black;"
-                  routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
-                Edit
-              </a>
-              <a style="padding-left: 1vh;" routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/build">Review</a>
-            </div>
-          </div>
-        </clr-dg-cell>
-        <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-        <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
+          </clr-dg-cell>
+          <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
+          <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </div>
   </div>
-</div>
-<clr-modal [(clrModalOpen)]="cohortsError">
-  <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">Could not fetch cohorts from workspace.</div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
-  </div>
-</clr-modal>
+  <clr-modal [(clrModalOpen)]="cohortsError">
+    <h3 class="modal-title">Error:</h3>
+    <div class="modal-body">Could not fetch cohorts from workspace.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
+    </div>
+  </clr-modal>
 
-<clr-modal [(clrModalOpen)]="clusterPulled">
-  <h3 class="modal-title">Cluster Created:</h3>
-  <div class="modal-body">Your notebook cluster is ready. Would you like to enter the cluster?</div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="openCluster()">Ok</button>
-    <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
-  </div>
-</clr-modal>
-<div class="area-block">
-  <div class="table-header">
-    <h3 class="table-header-descriptor">Notebooks</h3>
-    <button class="btn" (click)="launchNotebook()">Launch Notebook Server</button>
-    <button class="btn" (click)="createAndLaunchNotebook()">
-      <div *ngIf="!clusterLoading; else clusterCreateLoading">Create Notebook Server</div>
-      <ng-template #clusterCreateLoading>
-        <div>
-          <span class="spinner spinner-sm"></span>
-          <span class="loading-text">Creating Notebook Server...</span>
-        </div>
-      </ng-template>
-    </button>
-    <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
-  </div>
-  <div class="indented">
-    <clr-datagrid [clrDgLoading]="notebooksLoading">
-      <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
-        Name
-        <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
-        Description
-        <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column>URL</clr-dg-column>
-      <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
-        <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
-        <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-        <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
+  <clr-modal [(clrModalOpen)]="clusterPulled">
+    <h3 class="modal-title">Cluster Created:</h3>
+    <div class="modal-body">Your notebook cluster is ready. Would you like to enter the cluster?</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="openCluster()">Ok</button>
+      <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
+    </div>
+  </clr-modal>
+  <div class="area-block">
+    <div class="table-header">
+      <h3 class="table-header-descriptor">Notebooks</h3>
+      <button class="btn" (click)="launchNotebook()">Launch Notebook Server</button>
+      <button class="btn" (click)="createAndLaunchNotebook()">
+        <div *ngIf="!clusterLoading; else clusterCreateLoading">Create Notebook Server</div>
+        <ng-template #clusterCreateLoading>
+          <div>
+            <span class="spinner spinner-sm"></span>
+            <span class="loading-text">Creating Notebook Server...</span>
+          </div>
+        </ng-template>
+      </button>
+      <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
+    </div>
+    <div class="indented">
+      <clr-datagrid [clrDgLoading]="notebooksLoading">
+        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>URL</clr-dg-column>
+        <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
+          <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
+          <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
+          <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </div>
   </div>
 </div>
+<!-- TODO: Factor out to component -->
+<ng-template #notFoundMessage>
+  <h3>
+    Workspace {{route.snapshot.params['ns']}}/{{route.snapshot.params['wsid']}} could not be found.
+  </h3>
+</ng-template>

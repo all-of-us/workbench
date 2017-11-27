@@ -1,119 +1,127 @@
-<h2 *ngIf="adding">Create a new Workspace</h2>
-<h2 *ngIf="!adding">Edit workspace "{{workspace.name}}"</h2>
-<div>* is a required field</div>
-<div class="form-area">
-  <div class="name-area" [class.validation-error]="nameNotEntered">
-    <label class="text-label required">Name:</label>
-    <input type="text" class="input name" name="workspace-name" autofocus
-        [(ngModel)]="workspace.name">
-  </div>
+<div *ngIf="!notFound else notFoundMessage">
+  <h2 *ngIf="adding">Create a new Workspace</h2>
+  <h2 *ngIf="!adding">Edit workspace "{{workspace.name}}"</h2>
+  <div>* is a required field</div>
+  <div class="form-area">
+    <div class="name-area" [class.validation-error]="nameNotEntered">
+      <label class="text-label required">Name:</label>
+      <input type="text" class="input name" name="workspace-name" autofocus
+          [(ngModel)]="workspace.name">
+    </div>
 
-  <div>
-    <h3>Research Purpose</h3>
-    <!-- TODO: Real description of workspace purpose -->
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
     <div>
-      <label class="text-label">Describe your research purpose:</label>
-      <textarea class="input description" name="workspace-description"
-          [(ngModel)]="this.workspace.description">
-      </textarea>
-    </div>
-    <section class="form-block">
-      <h4>Please select all that apply</h4>
-      <div class="form-group">
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="disease-focused-research"
-              id="disease-focused-research"
-              [(ngModel)]="this.workspace.researchPurpose.diseaseFocusedResearch"
-              [clrDisabled]="!this.adding">
-            Disease focused research
-          </clr-checkbox>
-          <input type="text" class="input" name="disease-specification"
-              [(ngModel)]="this.workspace.researchPurpose.diseaseOfFocus" [disabled]="!this.adding">
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="methods-development"
-              id="methods-development"
-              [(ngModel)]="this.workspace.researchPurpose.methodsDevelopment"
-              [clrDisabled]="!this.adding">
-            Methods development/validation study
-          </clr-checkbox>
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="control-set"
-              id="control-set"
-              [(ngModel)]="this.workspace.researchPurpose.controlSet"
-              [clrDisabled]="!this.adding">
-            Control set
-          </clr-checkbox>
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="aggregate-analysis"
-              id="aggregate-analysis"
-              [(ngModel)]="this.workspace.researchPurpose.aggregateAnalysis"
-              [clrDisabled]="!this.adding">
-            Aggregate analysis to understand variation in general population
-          </clr-checkbox>
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="ancestry"
-              id="ancestry"
-              [(ngModel)]="this.workspace.researchPurpose.ancestry"
-              [clrDisabled]="!this.adding">
-            Population origins or ancestry
-          </clr-checkbox>
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="commercial-purpose"
-              id="commercial-purpose"
-              [(ngModel)]="this.workspace.researchPurpose.commercialPurpose"
-              [clrDisabled]="!this.adding">
-            Commercial purpose/entity
-          </clr-checkbox>
-        </div>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="population"
-              id="population"
-              [(ngModel)]="this.workspace.researchPurpose.population"
-              [clrDisabled]="!this.adding">
-            Restricted to a specific population
-          </clr-checkbox>
-          <!-- TODO: Dropdown for population-->
-        </div>
-        <!-- TODO: Add includes an underserved population -->
-        <h4>Request a Review of Your Research Purpose</h4>
-        <!-- TODO: Replace with real request approval text. -->
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-        <div class="checkbox-group">
-          <clr-checkbox
-              name="requestApproval"
-              id="requestApproval"
-              [(ngModel)]="this.workspace.researchPurpose.reviewRequested"
-              [clrDisabled]="!this.adding">
-            Review my workspace
-          </clr-checkbox>
-        </div>
+      <h3>Research Purpose</h3>
+      <!-- TODO: Real description of workspace purpose -->
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      <div>
+        <label class="text-label">Describe your research purpose:</label>
+        <textarea class="input description" name="workspace-description"
+            [(ngModel)]="this.workspace.description">
+        </textarea>
       </div>
-    </section>
-  </div>
-  <div style="display: flex; flex: 0 0 0; padding: 0">
-    <div class="button">
-      <button *ngIf="this.adding else editing" class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="addWorkspace()">Create Workspace</button>
-      <ng-template #editing>
-        <button class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="updateWorkspace()">Update Workspace</button>
-      </ng-template>
-      <button class="btn" (click)="navigateBack()">Cancel</button>
+      <section class="form-block">
+        <h4>Please select all that apply</h4>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="disease-focused-research"
+                id="disease-focused-research"
+                [(ngModel)]="this.workspace.researchPurpose.diseaseFocusedResearch"
+                [clrDisabled]="!this.adding">
+              Disease focused research
+            </clr-checkbox>
+            <input type="text" class="input" name="disease-specification"
+                [(ngModel)]="this.workspace.researchPurpose.diseaseOfFocus" [disabled]="!this.adding">
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="methods-development"
+                id="methods-development"
+                [(ngModel)]="this.workspace.researchPurpose.methodsDevelopment"
+                [clrDisabled]="!this.adding">
+              Methods development/validation study
+            </clr-checkbox>
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="control-set"
+                id="control-set"
+                [(ngModel)]="this.workspace.researchPurpose.controlSet"
+                [clrDisabled]="!this.adding">
+              Control set
+            </clr-checkbox>
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="aggregate-analysis"
+                id="aggregate-analysis"
+                [(ngModel)]="this.workspace.researchPurpose.aggregateAnalysis"
+                [clrDisabled]="!this.adding">
+              Aggregate analysis to understand variation in general population
+            </clr-checkbox>
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="ancestry"
+                id="ancestry"
+                [(ngModel)]="this.workspace.researchPurpose.ancestry"
+                [clrDisabled]="!this.adding">
+              Population origins or ancestry
+            </clr-checkbox>
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="commercial-purpose"
+                id="commercial-purpose"
+                [(ngModel)]="this.workspace.researchPurpose.commercialPurpose"
+                [clrDisabled]="!this.adding">
+              Commercial purpose/entity
+            </clr-checkbox>
+          </div>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="population"
+                id="population"
+                [(ngModel)]="this.workspace.researchPurpose.population"
+                [clrDisabled]="!this.adding">
+              Restricted to a specific population
+            </clr-checkbox>
+            <!-- TODO: Dropdown for population-->
+          </div>
+          <!-- TODO: Add includes an underserved population -->
+          <h4>Request a Review of Your Research Purpose</h4>
+          <!-- TODO: Replace with real request approval text. -->
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+          <div class="checkbox-group">
+            <clr-checkbox
+                name="requestApproval"
+                id="requestApproval"
+                [(ngModel)]="this.workspace.researchPurpose.reviewRequested"
+                [clrDisabled]="!this.adding">
+              Review my workspace
+            </clr-checkbox>
+          </div>
+        </div>
+      </section>
     </div>
-    <p *ngIf="this.valueNotEntered;">* is a required field</p>
+    <div style="display: flex; flex: 0 0 0; padding: 0">
+      <div class="button">
+        <button *ngIf="this.adding else editing" class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="addWorkspace()">Create Workspace</button>
+        <ng-template #editing>
+          <button class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="updateWorkspace()">Update Workspace</button>
+        </ng-template>
+        <button class="btn" (click)="navigateBack()">Cancel</button>
+      </div>
+      <p *ngIf="this.valueNotEntered;">* is a required field</p>
+    </div>
   </div>
 </div>
+<!-- TODO: Factor out to component -->
+<ng-template #notFoundMessage>
+  <h3>
+    Workspace {{route.snapshot.params['ns']}}/{{route.snapshot.params['wsid']}} could not be found.
+  </h3>
+</ng-template>
 <clr-modal [(clrModalOpen)]="workspaceCreationError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not create workspace.</div>

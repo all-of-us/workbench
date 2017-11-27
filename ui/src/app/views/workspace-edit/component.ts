@@ -28,6 +28,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceCreationError = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
+  notFound = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -87,9 +88,16 @@ export class WorkspaceEditComponent implements OnInit {
   loadWorkspace(): Observable<Workspace> {
     const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
       this.oldWorkspaceNamespace, this.oldWorkspaceName);
-    obs.subscribe((workspace) => {
+    obs.subscribe(
+      (workspace) => {
         this.workspace = workspace;
-    });
+      },
+      (error) => {
+        if (error.status === 404) {
+          this.notFound = true;
+        }
+      }
+    );
     return obs;
   }
 

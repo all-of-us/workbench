@@ -205,7 +205,7 @@ paths:
         200:
           description: Successful Request
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/WorkspaceResponse'
         404:
           description: Workspace does not exist
         500:
@@ -593,7 +593,7 @@ definitions:
     description: ''
     properties:
       accessLevel:
-        $ref: '#/definitions/WorkspaceAccessLevel'
+        type: string
       canShare:
         type: boolean
       catalog:

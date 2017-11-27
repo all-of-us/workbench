@@ -22,6 +22,7 @@ export class WorkspaceShareComponent implements OnInit {
   toShare = '';
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
+  notFound = false;
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
@@ -114,7 +115,6 @@ export class WorkspaceShareComponent implements OnInit {
           return false;
         }
       });
-
       updateList.splice(position, 1);
       this.workspacesService.shareWorkspace(this.workspace.namespace,
           this.workspace.id, {
@@ -139,9 +139,16 @@ export class WorkspaceShareComponent implements OnInit {
     const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
       this.route.snapshot.params['ns'],
       this.route.snapshot.params['wsid']);
-    obs.subscribe((workspace) => {
+    obs.subscribe(
+      (workspace) => {
         this.workspace = workspace;
-    });
+      },
+      (error) => {
+        if (error.status === 404) {
+          this.notFound = true;
+        }
+      }
+    );
     return obs;
   }
 
