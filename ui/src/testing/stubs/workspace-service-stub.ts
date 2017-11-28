@@ -3,7 +3,8 @@ import {
   ShareWorkspaceResponse,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceListResponse
+  WorkspaceListResponse,
+  WorkspaceResponse
 } from 'generated';
 import {Observable} from 'rxjs/Observable';
 
@@ -53,8 +54,15 @@ export class WorkspacesServiceStub {
 
 
     this.workspaces = [stubWorkspace];
+    this.workspaceResponses = [
+      {
+        workspace: stubWorkspace,
+        accessLevel: WorkspaceAccessLevel.OWNER
+      }
+    ];
   }
   public workspaces: Workspace[];
+  public workspaceResponses: WorkspaceResponse[];
 
   public createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     const observable = new Observable(observer => {
@@ -95,11 +103,16 @@ export class WorkspacesServiceStub {
   public getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<Workspace> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        observer.next(this.workspaces.find(function(workspace: Workspace) {
+        const workspaceReceived = this.workspaces.find(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
             return true;
           }
-        }));
+        });
+        const response: WorkspaceResponse = {
+          workspace: workspaceReceived,
+          accessLevel: WorkspaceAccessLevel.OWNER
+        };
+        observer.next(response);
         observer.complete();
       }, 0);
     });
@@ -109,7 +122,7 @@ export class WorkspacesServiceStub {
   public getWorkspaces(): Observable<WorkspaceListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        observer.next({items: this.workspaces});
+        observer.next({items: this.workspaceResponses});
         observer.complete();
       }, 0);
     });
