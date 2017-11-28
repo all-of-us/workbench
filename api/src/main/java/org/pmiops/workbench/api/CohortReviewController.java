@@ -41,10 +41,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             };
 
     /**
-     * Get all participants for the specified cohortId and cdrVersionId.
+     * Get all participants for the specified cohortReviewId.
      *
-     * @param cohortId
-     * @param cdrVersionId
+     * @param cohortReviewId
      * @param page
      * @param limit
      * @param order
@@ -53,7 +52,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     @Override
     public ResponseEntity<ParticipantCohortStatusListResponse>
-    getParticipantCohortStatuses(Long cohortId, Long cdrVersionId, Integer page, Integer limit, String order, String column) {
+    getParticipantCohortStatuses(Long cohortReviewId, Integer page, Integer limit, String order, String column) {
 
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int limitParam = Optional.ofNullable(limit).orElse(LIMIT);
@@ -65,9 +64,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         final Sort sort = new Sort(orderParam, columnParam);
         final PageRequest pageRequest = new PageRequest(pageParam, limitParam, sort);
         final List<ParticipantCohortStatus> participantList =
-                participantCohortStatusDao.findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                        cohortId,
-                        cdrVersionId,
+                participantCohortStatusDao.findParticipantByParticipantKey_CohortReviewId(
+                        cohortReviewId,
                         pageRequest)
                         .getContent();
 

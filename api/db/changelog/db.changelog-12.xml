@@ -8,7 +8,7 @@
     <changeSet author="brianfreeman" id="changelog-12">
 
         <createTable tableName="cohort_review">
-            <column name="cohort_review_id" type="bigint">
+            <column name="cohort_review_id" type="bigint" autoIncrement="true">
                 <constraints nullable="false"/>
             </column>
             <column name="cohort_id" type="bigint">
@@ -29,7 +29,10 @@
             <column name="reviewed_count" type="bigint">
                 <constraints nullable="true"/>
             </column>
-            <column name="review_position" type="blob">
+            <column name="page_request" type="blob">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_participant_edit" type="bigint">
                 <constraints nullable="true"/>
             </column>
         </createTable>
@@ -70,6 +73,7 @@
                                  baseTableName="participant_cohort_status"
                                  constraintName="fk_cohort_review_id"
                                  referencedColumnNames="cohort_review_id"
+                                 onDelete="CASCADE"
                                  referencedTableName="cohort_review"/>
 
         <createIndex

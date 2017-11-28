@@ -711,7 +711,7 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /api/v1/cohortreview/participants/{cohortId}/{cdrVersionId}:
+  /api/v1/cohortreview/participants/{cohortReviewId}:
     get:
       tags:
          - cohortReview
@@ -719,17 +719,11 @@ paths:
       operationId: "getParticipantCohortStatuses"
       parameters:
         - in: path
-          name: cohortId
+          name: cohortReviewId
           type: integer
           format: int64
           required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies version of cdr
+          description: specifies which cohort review
         - in: query
           name: page
           type: integer
@@ -1462,10 +1456,7 @@ definitions:
       - participantId
       - status
     properties:
-      cohortId:
-        type: integer
-        format: int64
-      cdrVersionId:
+      cohortReviewId:
         type: integer
         format: int64
       participantId:
