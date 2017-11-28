@@ -3,7 +3,8 @@ import {
   ShareWorkspaceResponse,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceListResponse
+  WorkspaceListResponse,
+  WorkspaceResponse
 } from 'generated';
 import {Observable} from 'rxjs/Observable';
 
@@ -95,11 +96,16 @@ export class WorkspacesServiceStub {
   public getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<Workspace> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        observer.next(this.workspaces.find(function(workspace: Workspace) {
+        const workspaceReceived = this.workspaces.find(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
             return true;
           }
-        }));
+        });
+        const response: WorkspaceResponse = {
+          workspace: workspaceReceived,
+          accessLevel: WorkspaceAccessLevel.OWNER
+        };
+        observer.next(response);
         observer.complete();
       }, 0);
     });
