@@ -10,6 +10,7 @@ import {UserRole} from 'generated';
 import {ShareWorkspaceResponse} from 'generated';
 import {Workspace} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
+import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
 
 @Component({
@@ -135,13 +136,13 @@ export class WorkspaceShareComponent implements OnInit {
     }
   }
 
-  loadWorkspace(): Observable<Workspace> {
-    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+  loadWorkspace(): Observable<WorkspaceResponse> {
+    const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
       this.route.snapshot.params['ns'],
       this.route.snapshot.params['wsid']);
     obs.subscribe(
-      (workspace) => {
-        this.workspace = workspace;
+      (workspaceResponse) => {
+        this.workspace = workspaceResponse.workspace;
       },
       (error) => {
         if (error.status === 404) {

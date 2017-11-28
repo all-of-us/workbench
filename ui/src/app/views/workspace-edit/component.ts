@@ -10,6 +10,7 @@ import {
   DataAccessLevel,
   ProfileService,
   Workspace,
+  WorkspaceResponse,
   WorkspacesService
 } from 'generated';
 
@@ -85,12 +86,12 @@ export class WorkspaceEditComponent implements OnInit {
     }
   }
 
-  loadWorkspace(): Observable<Workspace> {
-    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+  loadWorkspace(): Observable<WorkspaceResponse> {
+    const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
       this.oldWorkspaceNamespace, this.oldWorkspaceName);
     obs.subscribe(
-      (workspace) => {
-        this.workspace = workspace;
+      (workspaceResponse) => {
+        this.workspace = workspaceResponse.workspace;
       },
       (error) => {
         if (error.status === 404) {

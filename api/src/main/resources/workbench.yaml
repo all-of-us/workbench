@@ -297,7 +297,7 @@ paths:
         "200":
           description: A list of workspace definitions.
           schema:
-            $ref: "#/definitions/WorkspaceListResponse"
+            $ref: "#/definitions/WorkspaceResponseListResponse"
     post:
       tags:
         - workspaces
@@ -333,9 +333,9 @@ paths:
           description: ID of the workspace containing the cohort definition
       responses:
         "200":
-          description: A workspace definition
+          description: A workspace response containing workspace and access level
           schema:
-            $ref: "#/definitions/Workspace"
+            $ref: "#/definitions/WorkspaceResponse"
     patch:
       tags:
         - workspaces
@@ -768,6 +768,16 @@ definitions:
         type: "array"
         items:
            $ref: "#/definitions/Workspace"
+
+  WorkspaceResponseListResponse:
+    type: object
+    required:
+     - items
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/WorkspaceResponse"
 
   Workspace:
     type: object
@@ -1433,3 +1443,14 @@ definitions:
         type: boolean
     example:
       isTaken: false
+
+  WorkspaceResponse:
+    type: object
+    required:
+      - workspace
+      - accessLevel
+    properties:
+      workspace:
+        $ref: '#/definitions/Workspace'
+      accessLevel:
+        $ref: '#/definitions/WorkspaceAccessLevel'
