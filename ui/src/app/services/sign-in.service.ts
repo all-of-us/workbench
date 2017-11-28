@@ -4,6 +4,7 @@
 import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
+import {environment} from 'environments/environment';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 
@@ -66,7 +67,7 @@ export class SignInService {
       gapi.load('auth2', () => {
         gapi.auth2.init({
             client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
-            // hosted_domain: 'pmi-ops.org',
+            hosted_domain: environment.gSuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
