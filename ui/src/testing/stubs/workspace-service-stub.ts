@@ -54,8 +54,15 @@ export class WorkspacesServiceStub {
 
 
     this.workspaces = [stubWorkspace];
+    this.workspaceResponses = [
+      {
+        workspace: stubWorkspace,
+        accessLevel: WorkspaceAccessLevel.OWNER
+      }
+    ];
   }
   public workspaces: Workspace[];
+  public workspaceResponses: WorkspaceResponse[];
 
   public createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     const observable = new Observable(observer => {
@@ -115,7 +122,7 @@ export class WorkspacesServiceStub {
   public getWorkspaces(): Observable<WorkspaceListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
-        observer.next({items: this.workspaces});
+        observer.next({items: this.workspaceResponses});
         observer.complete();
       }, 0);
     });
