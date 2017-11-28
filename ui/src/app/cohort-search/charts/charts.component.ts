@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {List, Map, Repeat, Set} from 'immutable';
+import {List, Map} from 'immutable';
 
 type Datum = Map<string, any>;
 type Data = List<Datum>;
@@ -17,87 +17,77 @@ const count = (datum: Datum): number => datum.get('count', 0);
 const sumData = (data: Data): number => data.reduce((s, d) => s + count(d), 0);
 const genderAndAge = (datum: Datum): string => `${gender(datum)} ${range(datum)}`;
 
-const genderDataTable = (cleanData: Data): any[] => {
-  const headers = ['Gender', 'Count', {role: 'style'}];
-  const defaults = {Male: 0, Female: 0};
-  const colors = {Male: '#6870C4', Female: '#6FEAD9'};
-
-  const data = cleanData
-    .groupBy(gender)
-    .map(sumData)
-    .toMap()  // Makes typescript happy; otherwise unnecessary
-    .mergeWith((old, _) => old, defaults)
-    .map((_count, _gender) => [_gender, _count, colors[_gender]])
-    .valueSeq()
-    .toArray();
-
-  return [headers, ...data];
+const _genderChart = (data) => {
+  const counts = data.groupBy(gender).map(sumData);
+  return [{
+    type: 'bar',
+    orientation: 'h',
+    marker: {
+      color: ['#6870C4', '#6FEAD9'],
+    },
+    y: ['Male', 'Female'],
+    x: [counts.get('Male', 0), counts.get('Female', 0)]
+  }];
 };
 
-const combinationDataTable = (cleanData: Data): any[] => {
-  let raceSet = Set(cleanData.map(race)).toArray().sort();
+const _comboChart = (data) => {
+  const _trace = {
+    type: 'bar',
+    orientation: 'h',
+    y: [
+      'Male > 65',
+      'Male 45-64',
+      'Male 19-44',
+      'Male 0-18',
+      'Female > 65',
+      'Female 45-64',
+      'Female 19-44',
+      'Female 0-18',
+    ]
+  };
 
-  raceSet = raceSet.length > 0
-    ? raceSet
-    : ['Black or African American', 'White', 'Unknown'];
+  const _getCounts = (_data) => {
+    const counts = _data
+      .groupBy(genderAndAge)
+      .map(val => val.getIn([0, 'count']));
+    return _trace.y.map(key => counts.get(key, 0));
+  };
 
-  const headers = ['Gender-Age', ...raceSet];
-  const defaultsByRace = Map(List(raceSet).zip(Repeat(0)));
-
-  let data = cleanData
-    .groupBy(genderAndAge)
-    .sort()
-    .map(group => group
-      .groupBy(race)
-      .map(sumData)
-      .toMap()
-      .mergeWith((old, _) => old, defaultsByRace)
-      .sort()
-      .valueSeq()
-      .toArray()
-    )
-    .map((val, key) => [key, ...val])
+  return data
+    .groupBy(race)
+    .map((val, key) => ({
+      ..._trace,
+      name: key,
+      x: _getCounts(val),
+    }))
     .valueSeq()
     .toArray();
-
-  if (!data.length) {
-    data = [
-      ['Female 0-18',  0, 0, 0],
-      ['Female 19-44', 0, 0, 0],
-      ['Female 45-64', 0, 0, 0],
-      ['Female > 65',  0, 0, 0],
-      ['Male 0-18',    0, 0, 0],
-      ['Male 19-44',   0, 0, 0],
-      ['Male 45-64',   0, 0, 0],
-      ['Male > 65',    0, 0, 0],
-    ];
-  }
-
-  return [headers, ...data];
 };
-
 
 @Component({
   selector: 'app-charts',
   template: `
     <div class="box">
-
-      <div appGoogleChart
+      <div
+        *ngIf="!(genderData || combinationData)"
         [style.padding]="'0.5rem'"
+        [style.text-align]="'center'">
+        <em>No data to display yet.</em>
+      </div>
+
+      <app-plotly
+        *ngIf="genderData"
         id="genderChart"
-        [chartType]="'BarChart'"
-        [dataTable]="genderData"
-        [options]="genderOpts">
-      </div>
+        [data]="genderData"
+        [layout]="genderLayout">
+      </app-plotly>
 
-      <div appGoogleChart
-        [style.padding]="'0.5rem'"
+      <app-plotly
+        *ngIf="combinationData"
         id="combinationChart"
-        [chartType]="'BarChart'"
-        [dataTable]="combinationData"
-        [options]="combinationOpts">
-      </div>
-
+        [data]="combinationData"
+        [layout]="combinationLayout">
+      </app-plotly>
     </div>
   `,
   styles: [`
@@ -107,51 +97,56 @@ const combinationDataTable = (cleanData: Data): any[] => {
   `],
 })
 export class ChartsComponent {
-  private rawData: Data;
-
-  private genderData: any[];
+  private _data: Data;
+  private genderData;
+  private combinationData;
 
   /* tslint:disable-next-line:no-unused-variable */
-  private readonly genderOpts = {
+  private readonly genderLayout = {
     title: 'Results By Gender',
-    chartArea: {width: '80%'},
-    legend: { position: 'none' },
-    hAxis: {
-      title: 'Total Count',
-      minValue: 0,
-      width: '100%',
-      height: '300'
-    },
+    showLegend: false,
   };
 
-  private combinationData: any[];
-
   /* tslint:disable-next-line:no-unused-variable */
-  private readonly combinationOpts = {
+  private readonly combinationLayout = {
     title: 'Results by Gender, Age, and Race',
-    chartArea: {width: '75%'},
-    bar: {groupWidth: '75%'},
-    legend: {position: 'top', maxlines: 3},
-    hAxis: {
-      title: 'Total Count',
-      minValue: 0,
-      width: '100%',
-      height: '300',
+    barmode: 'stack',
+    margin: {
+      l: 90,
     },
-    isStacked: 'percent',
+    legend: {
+      x: 1,
+      y: 1,
+      font: {
+        family: 'sans-serif',
+        size: 12,
+        color: '#000'
+      },
+      bgcolor: '#E2E2E2',
+      bordercolor: '#FFFFFF',
+      borderwidth: 2
+    },
   };
 
   @Input()
   set data(rawData: Data) {
-    this.rawData = rawData;
+    this._data = rawData;
+
+    if (rawData.isEmpty()) {
+      this.genderData = null;
+      this.combinationData = null;
+      return;
+    }
+
     // Preprocess Codes into Human Readable Strings
     const cleanData = rawData.map(decodeGender);
-    // Process the data into charts
-    this.genderData = genderDataTable(cleanData);
-    this.combinationData = combinationDataTable(cleanData);
+
+    // Generate the charts
+    this.genderData = _genderChart(cleanData);
+    this.combinationData = _comboChart(cleanData);
   }
 
   get data() {
-    return this.rawData;
+    return this._data;
   }
 }

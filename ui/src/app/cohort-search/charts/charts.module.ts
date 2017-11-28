@@ -2,7 +2,7 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 
 import {ChartsComponent} from './charts.component';
-import {GoogleChartDirective} from './google-chart.directive';
+import {PlotlyComponent} from './plotly.component';
 
 @NgModule({
   imports: [
@@ -13,7 +13,7 @@ import {GoogleChartDirective} from './google-chart.directive';
   ],
   declarations: [
     ChartsComponent,
-    GoogleChartDirective,
+    PlotlyComponent,
   ]
 })
 export class ChartsModule {}
