@@ -34,29 +34,28 @@ public class CohortReviewControllerTest {
 
     @Test
     public void getParticipants() throws Exception {
-        long cohortId = 1L;
-        long cdrVersionId = 2L;
+        long cohortReviewId = 1L;
         int page = 1;
         int limit = 22;
         String order = "desc";
         String column = "status";
 
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, limit, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, order, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, null, column);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, limit, order, "participantId");
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, limit, order, column);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, null, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, page, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, null, limit, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, null, null, order, null);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, null, null, null, column);
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, page, limit, order, "participantId");
+        assertFindByCohortIdAndCdrVersionId(cohortReviewId, page, limit, order, column);
     }
 
-    private void assertFindByCohortIdAndCdrVersionId(long cohortId, long cdrVersionId, Integer page, Integer limit, String order, String column) {
+    private void assertFindByCohortIdAndCdrVersionId(long cohortReviewId, Integer page, Integer limit, String order, String column) {
         Integer pageParam = page == null ? 0 : page;
         Integer limitParam = limit == null ? 25 : limit;
         Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
         String columnParam = (column == null || column.equals("participantId")) ? "participantKey.participantId" : column;
 
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortId(cohortId).cdrVersionId(cdrVersionId).participantId(1L);
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortReviewId).participantId(1L);
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
 
         org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
@@ -68,20 +67,20 @@ public class CohortReviewControllerTest {
         participants.add(dbParticipant);
         Page expectedPage = new PageImpl(participants);
 
-        when(participantCohortStatusDao.findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                cohortId, cdrVersionId,
+        when(participantCohortStatusDao.findParticipantByParticipantKey_CohortReviewId(
+                cohortReviewId,
                 new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam))))
                 .thenReturn(expectedPage);
 
         ResponseEntity<ParticipantCohortStatusListResponse> response =
-                reviewController.getParticipantCohortStatuses(cohortId, cdrVersionId, page, limit, order, column);
+                reviewController.getParticipantCohortStatuses(cohortReviewId, page, limit, order, column);
 
         assertEquals(1, response.getBody().getItems().size());
         assertEquals(respParticipant, response.getBody().getItems().get(0));
 
         verify(participantCohortStatusDao, times(1))
-                .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                        cohortId, cdrVersionId,
+                .findParticipantByParticipantKey_CohortReviewId(
+                        cohortReviewId,
                         new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam)));
         verifyNoMoreInteractions(participantCohortStatusDao);
     }
