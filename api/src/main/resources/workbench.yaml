@@ -297,7 +297,7 @@ paths:
         "200":
           description: A list of workspace definitions.
           schema:
-            $ref: "#/definitions/WorkspaceListResponse"
+            $ref: "#/definitions/WorkspaceResponseListResponse"
     post:
       tags:
         - workspaces
@@ -768,6 +768,16 @@ definitions:
         type: "array"
         items:
            $ref: "#/definitions/Workspace"
+
+  WorkspaceResponseListResponse:
+    type: object
+    required:
+     - items
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/WorkspaceResponse"
 
   Workspace:
     type: object

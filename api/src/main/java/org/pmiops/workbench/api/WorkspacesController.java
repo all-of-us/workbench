@@ -39,6 +39,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -358,19 +359,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceListResponse> getWorkspaces() {
+  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     // TODO: use FireCloud to determine what workspaces to return, instead of just returning
-    // workspaces created by this user.
+    // workspaces from our database.
     User user = userProvider.get();
-    List<org.pmiops.workbench.db.model.Workspace> workspaces =
-        new ArrayList<org.pmiops.workbench.db.model.Workspace>();
+    List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        workspaces.add(userRole.getWorkspace());
+        // TODO: Use FireCloud to determine access roles, not our DB
+        WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+        currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
+        currentWorkspace.setAccessLevel(userRole.getRole());
+        responseList.add(currentWorkspace);
       }
     }
-    WorkspaceListResponse response = new WorkspaceListResponse();
-    response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
+    WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+    response.setItems(responseList);
     return ResponseEntity.ok(response);
   }
 

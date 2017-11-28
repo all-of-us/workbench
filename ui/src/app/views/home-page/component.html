@@ -14,13 +14,13 @@
       <clr-dg-column [style.width.%]="15">Last Modified</clr-dg-column>
       <clr-dg-column>Research Purpose</clr-dg-column>
       <clr-dg-placeholder>No workspaces found.</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let workspace of workspaceList" [clrDgItem]="workspace" class="table-row workspace-table-row">
+      <clr-dg-row *clrDgItems="let workspaceResponse of workspaceList" [clrDgItem]="workspaceResponse" class="table-row workspace-table-row">
         <clr-dg-cell>
-          <div *ngIf="(workspace.researchPurpose.reviewRequested === true && workspace.researchPurpose.approved === null) else rejected">
+          <div *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === null) else rejected">
             <clr-icon shape="warning-standard" class="warning"></clr-icon>
           </div>
           <ng-template #rejected>
-            <div *ngIf="(workspace.researchPurpose.reviewRequested === true && workspace.researchPurpose.approved === false) else owner">
+            <div *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === false) else owner">
               <clr-icon shape="ban" class="rejected"></clr-icon>
             </div>
           </ng-template>
@@ -29,9 +29,9 @@
           </ng-template>
           <!-- TODO: Add reader and writer display to notebook status. -->
         </clr-dg-cell>
-        <clr-dg-cell><a routerLink="/workspace/{{workspace.namespace}}/{{workspace.id}}">{{workspace.name}}</a></clr-dg-cell>
-        <clr-dg-cell>{{workspace.lastModifiedTime | date:'medium'}}</clr-dg-cell>
-        <clr-dg-cell>{{workspace.description}}</clr-dg-cell>
+        <clr-dg-cell><a routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">{{workspaceResponse.workspace.name}}</a></clr-dg-cell>
+        <clr-dg-cell>{{workspaceResponse.workspace.lastModifiedTime | date:'medium'}}</clr-dg-cell>
+        <clr-dg-cell>{{workspaceResponse.workspace.description}}</clr-dg-cell>
       </clr-dg-row>
     </clr-datagrid>
   </div>

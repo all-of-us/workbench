@@ -4,7 +4,11 @@ import {Comparator, StringFilter} from 'clarity-angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {Workspace, WorkspacesService} from 'generated';
+import {
+  Workspace,
+  WorkspaceResponse,
+  WorkspacesService
+} from 'generated';
 
 /*
 * Search filters used by the workspace data table to
@@ -43,7 +47,7 @@ export class HomePageComponent implements OnInit {
   private workspaceNameComparator = new WorkspaceNameComparator();
   /* tslint:enable:no-unused-variable */
 
-  workspaceList: Workspace[] = [];
+  workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   constructor(
       private route: ActivatedRoute,
