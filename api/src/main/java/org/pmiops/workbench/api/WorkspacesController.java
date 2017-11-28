@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -330,13 +331,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> getWorkspace(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<WorkspaceResponse> getWorkspace(String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    WorkspaceResponse response = new WorkspaceResponse();
+
     try {
-      fcWorkspace = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId).getWorkspace();
+      fcResponse = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId);
+      fcWorkspace = fcResponse.getWorkspace();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
@@ -345,7 +351,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
-    return ResponseEntity.ok(TO_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+
+    response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+    response.setWorkspace(TO_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(response);
   }
 
   @Override

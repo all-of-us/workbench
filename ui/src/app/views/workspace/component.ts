@@ -12,6 +12,7 @@ import {
   Cohort,
   CohortsService,
   Workspace,
+  WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
 
@@ -101,6 +102,7 @@ export class WorkspaceComponent implements OnInit {
   clusterPulled = false;
   clusterLoading = false;
   notFound = false;
+  accessLevel: WorkspaceAccessLevel;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   constructor(
@@ -121,8 +123,9 @@ export class WorkspaceComponent implements OnInit {
     this.errorHandlingService.retryApi(this.workspacesService
       .getWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
-          workspaceReceived => {
-            this.workspace = workspaceReceived;
+          workspaceResponse => {
+            this.workspace = workspaceResponse.workspace;
+            this.accessLevel = workspaceResponse.accessLevel;
             this.workspaceLoading = false;
             this.errorHandlingService.retryApi(this.cohortsService
                 .getCohortsInWorkspace(this.wsNamespace, this.wsId))
