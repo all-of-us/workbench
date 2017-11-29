@@ -30,6 +30,7 @@ import {
   BugReportService,
   ClusterService,
   CohortsService,
+  ConfigService,
   Configuration,
   ProfileService,
   WorkspacesService
@@ -71,6 +72,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BugReportService,
     ClusterService,
     CohortsService,
+    ConfigService,
     ErrorHandlingService,
     ProfileService,
     SignInService,

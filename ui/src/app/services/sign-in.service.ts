@@ -4,7 +4,7 @@
 import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
-import {environment} from 'environments/environment';
+import {ConfigResponse, ConfigService} from 'generated';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 
@@ -40,9 +40,11 @@ export class SignInService {
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
 
-  constructor(private zone: NgZone) {
+  constructor(private zone: NgZone, private configService: ConfigService) {
     this.zone = zone;
-    this.auth2 = this.makeAuth2();
+    this.getServerConfig().subscribe((config) => {
+      this.auth2 = this.makeAuth2(config);
+    });
     this.user = this.makeUserSubject();
     this.user.subscribe(newUserDetails => {
       window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
@@ -62,12 +64,16 @@ export class SignInService {
     this.auth2.then(auth2 => auth2.getAuthInstance().signOut());
   }
 
-  private makeAuth2(): Promise<any> {
+  private getServerConfig(): Observable<ConfigResponse> {
+    return this.configService.getConfig();
+  }
+
+  private makeAuth2(config: ConfigResponse): Promise<any> {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
             client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
-            hosted_domain: environment.gSuiteDomain,
+            hosted_domain: config.gSuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
