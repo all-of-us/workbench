@@ -96,6 +96,10 @@ export class WorkspaceEditComponent implements OnInit {
     obs.subscribe(
       (workspaceResponse) => {
         this.accessLevel = workspaceResponse.accessLevel;
+        if (this.accessLevel === WorkspaceAccessLevel.OWNER
+            || this.accessLevel === WorkspaceAccessLevel.WRITER) {
+          this.insufficientPermissions = false;
+        }
         this.workspace = workspaceResponse.workspace;
       },
       (error) => {
