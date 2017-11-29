@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, CohortBuilderController.class, SubjectCounter.class})
+@Import({QueryBuilderFactory.class, SubjectCounter.class, BigQueryService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -55,6 +55,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
+
+    @Autowired
+    private BigQueryService bigQueryService;
 
     @Mock
     private CriteriaDao mockCriteriaDao;
@@ -76,8 +79,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
-        this.controller = new CohortBuilderController(bigquery, subjectCounter,
-                workbenchConfig, mockCriteriaDao);
+        this.controller = new CohortBuilderController(bigQueryService, subjectCounter,
+                mockCriteriaDao);
     }
 
     @Test
@@ -493,7 +496,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
         QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
         final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(queryJobConfiguration).getQuery());
+        assertThat(expectedResult).isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
     }
 
     protected String getTablePrefix() {

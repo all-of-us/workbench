@@ -21,7 +21,7 @@ import java.util.UUID;
 public class TestBigQueryConfig {
 
     @Bean
-    public BigQuery bigQueryService() throws Exception {
+    public BigQuery bigQuery() throws Exception {
         InputStream keyStream =
           new FileInputStream(new File("src/main/webapp/WEB-INF/sa-key.json"));
         GoogleCredentials credentials = ServiceAccountCredentials.fromStream(keyStream);

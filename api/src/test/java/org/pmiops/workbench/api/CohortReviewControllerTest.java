@@ -30,7 +30,7 @@ public class CohortReviewControllerTest {
     ParticipantCohortStatusDao participantCohortStatusDao;
 
     @InjectMocks
-    CohortReviewController reviewController = new CohortReviewController();
+    CohortReviewController reviewController;
 
     @Test
     public void getParticipants() throws Exception {
