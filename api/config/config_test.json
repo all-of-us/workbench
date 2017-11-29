@@ -2,7 +2,8 @@
 {
   "firecloud": {
     "debugEndpoints": false,
-    "billingProjectPrefix": "aou-free-test-"
+    "billingAccountId": "001A68-D1B344-975E93",
+    "billingProjectPrefix": "aou-test-free-"
   },
   "bigquery": {
     "dataSetId": "synpuf",

@@ -10,6 +10,7 @@ import {
   DataAccessLevel,
   ProfileService,
   Workspace,
+  WorkspaceResponse,
   WorkspacesService
 } from 'generated';
 
@@ -28,6 +29,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceCreationError = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
+  notFound = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -84,12 +86,19 @@ export class WorkspaceEditComponent implements OnInit {
     }
   }
 
-  loadWorkspace(): Observable<Workspace> {
-    const obs: Observable<Workspace> = this.workspacesService.getWorkspace(
+  loadWorkspace(): Observable<WorkspaceResponse> {
+    const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
       this.oldWorkspaceNamespace, this.oldWorkspaceName);
-    obs.subscribe((workspace) => {
-        this.workspace = workspace;
-    });
+    obs.subscribe(
+      (workspaceResponse) => {
+        this.workspace = workspaceResponse.workspace;
+      },
+      (error) => {
+        if (error.status === 404) {
+          this.notFound = true;
+        }
+      }
+    );
     return obs;
   }
 

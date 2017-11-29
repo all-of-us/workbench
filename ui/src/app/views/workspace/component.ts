@@ -12,6 +12,7 @@ import {
   Cohort,
   CohortsService,
   Workspace,
+  WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
 
@@ -100,6 +101,8 @@ export class WorkspaceComponent implements OnInit {
   cluster: Cluster;
   clusterPulled = false;
   clusterLoading = false;
+  notFound = false;
+  accessLevel: WorkspaceAccessLevel;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   constructor(
@@ -116,28 +119,34 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-    this.errorHandlingService.retryApi(this.cohortsService
-        .getCohortsInWorkspace(this.wsNamespace, this.wsId))
-        .subscribe(
-            cohortsReceived => {
-              for (const coho of cohortsReceived.items) {
-                this.cohortList.push(coho);
-              }
-              this.cohortsLoading = false;
-            },
-            error => {
-              this.cohortsLoading = false;
-              this.cohortsError = true;
-            });
+
     this.errorHandlingService.retryApi(this.workspacesService
       .getWorkspace(this.wsNamespace, this.wsId))
         .subscribe(
-          workspaceReceived => {
-            this.workspace = workspaceReceived;
+          workspaceResponse => {
+            this.workspace = workspaceResponse.workspace;
+            this.accessLevel = workspaceResponse.accessLevel;
             this.workspaceLoading = false;
+            this.errorHandlingService.retryApi(this.cohortsService
+                .getCohortsInWorkspace(this.wsNamespace, this.wsId))
+                .subscribe(
+                    cohortsReceived => {
+                      for (const coho of cohortsReceived.items) {
+                        this.cohortList.push(coho);
+                      }
+                      this.cohortsLoading = false;
+                    },
+                    error => {
+                      this.cohortsLoading = false;
+                      this.cohortsError = true;
+                    });
           },
           error => {
-            this.workspaceLoading = false;
+            if (error.status === 404) {
+              this.notFound = true;
+            } else {
+              this.workspaceLoading = false;
+            }
           });
   }
 

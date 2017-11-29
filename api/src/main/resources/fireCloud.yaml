@@ -17,7 +17,7 @@ info:
     url: http://opensource.org/licenses/BSD-3-Clause
   termsOfService: https://github.com/broadinstitute/firecloud-orchestration
 
-host: "api.firecloud.org"
+host: "firecloud-orchestration.dsde-dev.broadinstitute.org"
 schemes:
   - "https"
 basePath: /
@@ -205,7 +205,7 @@ paths:
         200:
           description: Successful Request
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/WorkspaceResponse'
         404:
           description: Workspace does not exist
         500:
@@ -593,7 +593,7 @@ definitions:
     description: ''
     properties:
       accessLevel:
-        $ref: '#/definitions/WorkspaceAccessLevel'
+        type: string
       canShare:
         type: boolean
       catalog:
