@@ -702,7 +702,7 @@ paths:
           name: column
           type: string
           required: false
-          description: column to sort(default is 'participantId', can also be 'status')
+          description: column to sort (default is 'participantId', can also be 'status')
       responses:
         "200":
           description: A collection of participants
