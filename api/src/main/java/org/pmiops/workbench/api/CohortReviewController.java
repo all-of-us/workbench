@@ -1,15 +1,27 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryResult;
+import com.google.gson.Gson;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDefinition;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.model.CohortReviewInfo;
 import org.pmiops.workbench.model.ParticipantCohortStatusListResponse;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileReader;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,6 +33,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     public static final String PARTICIPANT_ID = "participantKey.participantId";
     public static final Integer PAGE = 0;
     public static final Integer LIMIT = 25;
+
+    @Autowired
+    private CohortReviewDao cohortReviewDao;
+
+    @Autowired
+    private CohortDao cohortDao;
 
     @Autowired
     private ParticipantCohortStatusDao participantCohortStatusDao;
@@ -39,6 +57,32 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .status(participant.getStatus());
                 }
             };
+
+    /**
+     * Get the cohort review info.
+     *
+     * @param cohortId
+     * @param cdrVersionId
+     * @return
+     */
+    @Override
+    public ResponseEntity<CohortReviewInfo> getCohortReviewInfo(Long cohortId, Long cdrVersionId) {
+        CohortReviewInfo info = new CohortReviewInfo();
+
+        CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        if (cohortReview == null) {
+            CohortDefinition definition = cohortDao.findCohortByCohortId(cohortId);
+            SearchRequest searchRequest = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+//            QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
+//            Map<String, Integer> rm = getResultMapper(result);
+//            List<FieldValue> row = result.iterateAll().iterator().next();
+            info.setCohortCount(0L);
+        } else {
+            info.setCohortReviewId(cohortReview.getCohortReviewId());
+            info.setCohortCount(cohortReview.getMatchedParticipantCount());
+        }
+        return ResponseEntity.ok(info);
+    }
 
     /**
      * Get all participants for the specified cohortReviewId.
