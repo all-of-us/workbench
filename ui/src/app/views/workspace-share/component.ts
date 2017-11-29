@@ -29,6 +29,7 @@ export class WorkspaceShareComponent implements OnInit {
   userNotFound = false;
   userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
+  insufficientPermissions = true;
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
@@ -142,6 +143,9 @@ export class WorkspaceShareComponent implements OnInit {
       this.route.snapshot.params['wsid']);
     obs.subscribe(
       (workspaceResponse) => {
+        if (workspaceResponse.accessLevel === WorkspaceAccessLevel.OWNER) {
+          this.insufficientPermissions = false;
+        }
         this.workspace = workspaceResponse.workspace;
       },
       (error) => {
