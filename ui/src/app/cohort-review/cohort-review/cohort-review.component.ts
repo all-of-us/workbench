@@ -1,3 +1,4 @@
+// TODO(jms) - remove the linting silencer when this is beyond a stub
 /* tslint:disable:no-unused-variable */
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
