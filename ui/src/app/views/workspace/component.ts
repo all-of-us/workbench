@@ -103,6 +103,7 @@ export class WorkspaceComponent implements OnInit {
   clusterLoading = false;
   notFound = false;
   accessLevel: WorkspaceAccessLevel;
+  workspaceAccessLevel = WorkspaceAccessLevel;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   constructor(

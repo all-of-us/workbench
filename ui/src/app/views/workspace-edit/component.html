@@ -6,7 +6,7 @@
     <div class="name-area" [class.validation-error]="nameNotEntered">
       <label class="text-label required">Name:</label>
       <input type="text" class="input name" name="workspace-name" autofocus
-          [(ngModel)]="workspace.name">
+          [(ngModel)]="workspace.name" [clrDisabled]="this.insufficientPermissions">
     </div>
 
     <div>
@@ -16,7 +16,7 @@
       <div>
         <label class="text-label">Describe your research purpose:</label>
         <textarea class="input description" name="workspace-description"
-            [(ngModel)]="this.workspace.description">
+            [(ngModel)]="this.workspace.description" [clrDisabled]="this.insufficientPermissions">
         </textarea>
       </div>
       <section class="form-block">

@@ -10,6 +10,7 @@ import {
   DataAccessLevel,
   ProfileService,
   Workspace,
+  WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
@@ -30,7 +31,9 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   notFound = false;
-
+  accessLevel: WorkspaceAccessLevel;
+  workspaceAccessLevel = WorkspaceAccessLevel;
+  insufficientPermissions = true;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
@@ -59,6 +62,7 @@ export class WorkspaceEditComponent implements OnInit {
       this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
+      this.accessLevel = this.workspaceAccessLevel.OWNER;
     } else {
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
@@ -91,6 +95,7 @@ export class WorkspaceEditComponent implements OnInit {
       this.oldWorkspaceNamespace, this.oldWorkspaceName);
     obs.subscribe(
       (workspaceResponse) => {
+        this.accessLevel = workspaceResponse.accessLevel;
         this.workspace = workspaceResponse.workspace;
       },
       (error) => {
