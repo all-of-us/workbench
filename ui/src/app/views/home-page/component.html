@@ -25,7 +25,17 @@
             </div>
           </ng-template>
           <ng-template #owner>
-            <clr-icon shape="success-standard" class="is-solid"></clr-icon>
+            <div *ngIf="workspaceResponse.accessLevel === workspaceAccessLevel.OWNER else writer">
+              <clr-icon shape="star"></clr-icon>
+            </div>
+          </ng-template>
+          <ng-template #writer>
+            <div *ngIf="workspaceResponse.accessLevel === workspaceAccessLevel.WRITER else reader">
+              <clr-icon shape="pencil"></clr-icon>
+            </div>
+          </ng-template>
+          <ng-template #reader>
+            <clr-icon shape="book"></clr-icon>
           </ng-template>
           <!-- TODO: Add reader and writer display to notebook status. -->
         </clr-dg-cell>
