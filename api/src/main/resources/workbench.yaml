@@ -600,7 +600,7 @@ paths:
            $ref: "#/definitions/MaterializeCohortRequest"
       responses:
         "200":
-          description: The updated cohort definition
+          description: The results of materializing the cohort
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
@@ -1020,16 +1020,16 @@ definitions:
           The name of a CDR version to use when evaluating the cohort; if none is specified,
           the CDR version currently associated with the workspace will be used
         type: string
-      token:
+      pageToken:
         description: >
           Pagination token retrieved from a previous call to materializeCohort; used for
           retrieving additional pages of results. If this is specified, all other fields on
-          MaterializeCohortRequest will be ignored, so don't bother specifying them --
-          the token encodes all the other field values for you.
+          MaterializeCohortRequest apart from pageSize must match the values specified
+          on the request that generated this token.
         type: string
-      count:
+      pageSize:
         description: >
-          Maximum number of results to return. Defaults to 1000.
+          Maximum number of results to return in a response. Defaults to 1000.
         type: int32
       # TODO: add fieldSpec, output information
 
@@ -1042,7 +1042,7 @@ definitions:
         type: array
         items:
           type: object
-      nextToken:
+      nextPageToken:
         description: >
           Pagination token that can be used in a subsequent call to MaterializeCohortRequest to
           retrieve more results. If not set, there are no more results to retrieve.
