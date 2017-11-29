@@ -9,7 +9,7 @@
 
         <createTable tableName="cohort_review">
             <column name="cohort_review_id" type="bigint" autoIncrement="true">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="cohort_id" type="bigint">
                 <constraints nullable="false"/>
@@ -36,10 +36,6 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
-
-        <addPrimaryKey columnNames="cohort_review_id"
-                       constraintName="pk_cohort_review"
-                       tableName="cohort_review"/>
 
         <addForeignKeyConstraint baseColumnNames="cohort_id"
                                  baseTableName="cohort_review"

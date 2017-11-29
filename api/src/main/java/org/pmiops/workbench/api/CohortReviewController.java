@@ -3,10 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
+import org.pmiops.workbench.cohortbuilder.SubjectCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.FileReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,14 +33,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     public static final Integer PAGE = 0;
     public static final Integer LIMIT = 25;
 
-    @Autowired
     private CohortReviewDao cohortReviewDao;
-
-    @Autowired
     private CohortDao cohortDao;
-
-    @Autowired
     private ParticipantCohortStatusDao participantCohortStatusDao;
+    private BigQueryService bigQueryService;
+    private SubjectCounter subjectCounter;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -58,6 +54,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 }
             };
 
+    @Autowired
+    CohortReviewController(CohortReviewDao cohortReviewDao,
+                           CohortDao cohortDao,
+                           ParticipantCohortStatusDao participantCohortStatusDao,
+                           BigQueryService bigQueryService,
+                           SubjectCounter subjectCounter) {
+        this.cohortReviewDao = cohortReviewDao;
+        this.cohortDao = cohortDao;
+        this.participantCohortStatusDao = participantCohortStatusDao;
+        this.bigQueryService = bigQueryService;
+        this.subjectCounter = subjectCounter;
+    }
+
     /**
      * Get the cohort review info.
      *
@@ -72,11 +81,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         if (cohortReview == null) {
             CohortDefinition definition = cohortDao.findCohortByCohortId(cohortId);
-            SearchRequest searchRequest = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
-//            QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
-//            Map<String, Integer> rm = getResultMapper(result);
-//            List<FieldValue> row = result.iterateAll().iterator().next();
-            info.setCohortCount(0L);
+            SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+            QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
+            Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+            List<FieldValue> row = result.iterateAll().iterator().next();
+            info.setCohortCount(bigQueryService.getLong(row, rm.get("count")));
         } else {
             info.setCohortReviewId(cohortReview.getCohortReviewId());
             info.setCohortCount(cohortReview.getMatchedParticipantCount());
