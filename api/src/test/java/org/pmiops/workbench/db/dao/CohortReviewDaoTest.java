@@ -32,7 +32,6 @@ import java.util.Calendar;
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 public class CohortReviewDaoTest {
 
-    private CohortReview cohortReview;
     private static long COHORT_ID = 1;
     private static long CDR_VERSION_ID = 1;
 
@@ -44,7 +43,7 @@ public class CohortReviewDaoTest {
 
     @Test
     public void save() throws Exception {
-        createCohortReview();
+        CohortReview cohortReview = createCohortReview();
 
         cohortReviewDao.save(cohortReview);
 
@@ -57,7 +56,7 @@ public class CohortReviewDaoTest {
 
     @Test
     public void update() throws Exception {
-        createCohortReview();
+        CohortReview cohortReview = createCohortReview();
 
         cohortReviewDao.save(cohortReview);
 
@@ -77,13 +76,24 @@ public class CohortReviewDaoTest {
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
     }
 
-    private void createCohortReview() {
+    @Test
+    public void findCohortReviewByCohortIdAndCdrVersionId() throws Exception {
+        CohortReview cohortReview = createCohortReview();
+
+        cohortReviewDao.save(cohortReview);
+        cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReview.getCohortId(), cohortReview.getCdrVersionId());
+
+//        assertEquals(cohortReview, cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReview.getCohortId(),
+//                cohortReview.getCdrVersionId()));
+    }
+
+    private CohortReview createCohortReview() {
         final Sort sort = new Sort(Sort.Direction.ASC, "status");
         final PageRequest pageRequest = new PageRequest(0, 25, sort);
 
         Gson gson = new Gson();
 
-        cohortReview = new CohortReview()
+        return new CohortReview()
                 .cohortId(COHORT_ID)
                 .cdrVersionId(CDR_VERSION_ID)
                 .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
