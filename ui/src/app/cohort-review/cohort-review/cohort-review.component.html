@@ -15,12 +15,15 @@
     <clr-vertical-nav
       [clrVerticalNavCollapsible]="true"
       [(clrVerticalNavCollapsed)]="collapsed">
-      <a
-        *ngFor="let subject of (subjects$ | async)"
+      <a clrVerticalNavLink
+        routerLink="overview"
+        routerLinkActive="active">
+        Overview
+      </a>
+      <a *ngFor="let subject of (subjects$ | async)"
         clrVerticalNavLink
         [routerLink]="[subject.id]"
-        routerLinkActive="active"
-        >
+        routerLinkActive="active">
         {{ subject.id}}
       </a>
     </clr-vertical-nav>
