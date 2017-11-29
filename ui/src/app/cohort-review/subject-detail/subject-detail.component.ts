@@ -14,6 +14,7 @@ export class SubjectDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    /* tslint:disable-next-line:no-unused-variable */
     private reviewApi: CohortReviewService,
   ) {}
 

@@ -1,3 +1,4 @@
+/* tslint:disable:no-unused-variable */
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -28,7 +29,4 @@ export class CohortReviewComponent {
     route: ActivatedRoute,
     reviewApi: CohortReviewService,
   ) {}
-
-  ngOnInit() {
-  }
 }
