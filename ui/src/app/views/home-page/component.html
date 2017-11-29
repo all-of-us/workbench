@@ -20,12 +20,17 @@
             <clr-icon shape="warning-standard" class="warning"></clr-icon>
           </div>
           <ng-template #rejected>
-            <div *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === false) else owner">
+            <div *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === false) else permissions">
               <clr-icon shape="ban" class="rejected"></clr-icon>
             </div>
           </ng-template>
-          <ng-template #owner>
-            <clr-icon shape="success-standard" class="is-solid"></clr-icon>
+          <ng-template #permissions>
+            <div [ngSwitch]="workspaceResponse.accessLevel">
+              <clr-icon *ngSwitchCase="workspaceAccessLevel.OWNER" shape="star"></clr-icon>
+              <clr-icon *ngSwitchCase="workspaceAccessLevel.WRITER" shape="pencil"></clr-icon>
+              <clr-icon *ngSwitchCase="workspaceAccessLevel.READER" shape="book"></clr-icon>
+              <ng-template ngSwitchDefault>Error</ng-template>
+            </div>
           </ng-template>
           <!-- TODO: Add reader and writer display to notebook status. -->
         </clr-dg-cell>
