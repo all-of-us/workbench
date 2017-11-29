@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {HttpModule} from '@angular/http';
+import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
@@ -36,11 +36,18 @@ import {
   WorkspacesService
 } from 'generated';
 
+function getBasePath() {
+  return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+}
+
+export function getConfigService(http: Http) {
+  return new ConfigService(http, getBasePath(), null);
+}
+
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
-    const basePath = localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
     return new Configuration({
-      basePath: basePath,
+      basePath: getBasePath(),
       accessToken: () => signInService.currentAccessToken
     });
 }
@@ -72,15 +79,19 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BugReportService,
     ClusterService,
     CohortsService,
-    ConfigService,
-    ErrorHandlingService,
-    ProfileService,
-    SignInService,
+    {
+      provide: ConfigService,
+      deps: [Http],
+      useFactory: getConfigService
+    },
     {
       provide: Configuration,
       deps: [SignInService],
       useFactory: getConfiguration
     },
+    ErrorHandlingService,
+    ProfileService,
+    SignInService,
     WorkspacesService,
   ],
   // This specifies the top-level components, to load first.

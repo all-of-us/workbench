@@ -40,19 +40,13 @@ export class SignInService {
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
 
-  constructor(private zone: NgZone, private configService: ConfigService) {
+  constructor(private zone: NgZone, configService: ConfigService) {
     this.zone = zone;
-    this.getServerConfig().subscribe((config) => {
-      this.auth2 = this.makeAuth2(config);
-    });
     this.user = this.makeUserSubject();
-    this.user.subscribe(newUserDetails => {
-      window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
-      if (!newUserDetails.isSignedIn) {
-        this.currentAccessToken = null;
-        return;
-      }
-      this.currentAccessToken = newUserDetails.authResponse['access_token'];
+    this.subscribeToUser();
+    configService.getConfig().subscribe((config) => {
+      this.auth2 = this.makeAuth2(config);
+      this.subscribeToAuth2User();
     });
   }
 
@@ -62,10 +56,6 @@ export class SignInService {
 
   public signOut(): void {
     this.auth2.then(auth2 => auth2.getAuthInstance().signOut());
-  }
-
-  private getServerConfig(): Observable<ConfigResponse> {
-    return this.configService.getConfig();
   }
 
   private makeAuth2(config: ConfigResponse): Promise<any> {
@@ -85,21 +75,34 @@ export class SignInService {
     const initialDetailsString = window.sessionStorage.getItem(SIGNED_IN_USER);
     const initialDetails: SignInDetails = initialDetailsString ?
       JSON.parse(initialDetailsString) : {isSignedIn: false};
-    const ret = new BehaviorSubject(initialDetails);
+    return new BehaviorSubject(initialDetails);
+  }
 
+  private subscribeToAuth2User(): void {
     this.auth2.then(auth2 => {
-        gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
-          const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
-          const details = this.extractSignInDetails(currentUser);
+      gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
+        const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
+        const details = this.extractSignInDetails(currentUser);
 
-          // Without this, Angular views won't "notice" the externally-triggered
-          // event, though the Angular models will update... so the change
-          // won't propagate to UI automatically. Calling `zone.run`
-          // ensures Angular notices as soon as the change occurs.
-          this.zone.run(() => ret.next(details));
-        });
+        // Without this, Angular views won't "notice" the externally-triggered
+        // event, though the Angular models will update... so the change
+        // won't propagate to UI automatically. Calling `zone.run`
+        // ensures Angular notices as soon as the change occurs.
+        const user: BehaviorSubject<SignInDetails> = this.user as BehaviorSubject<SignInDetails>;
+        this.zone.run(() => user.next(details));
+      });
     });
-    return ret;
+  }
+
+  private subscribeToUser(): void {
+    this.user.subscribe(newUserDetails => {
+      window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
+      if (!newUserDetails.isSignedIn) {
+        this.currentAccessToken = null;
+        return;
+      }
+      this.currentAccessToken = newUserDetails.authResponse['access_token'];
+    });
   }
 
   private extractSignInDetails(currentUser: any): SignInDetails {
