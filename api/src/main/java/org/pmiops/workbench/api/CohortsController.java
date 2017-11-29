@@ -181,10 +181,10 @@ public class CohortsController implements CohortsApiDelegate {
     // TODO(danrodney): get list of participant IDs by:
     // 1. Retrieve participant cohort statuses matching the status filter.
     // 2. If the status filter does not contain NOT_REVIEWED, or the cohort review contains
-    // all participant IDs in the cohort, return the IDs directly.
+    // all participant IDs in the cohort, return the IDs directly (subject to pagination.)
     // 3. Otherwise, query BigQuery for participant IDs using SQL constructed from the cohort
-    // criteria; remove IDs for participants that had a cohort status not included in the
-    // status filter.
+    // criteria, subject to pagination; remove IDs for participants that had a cohort status not
+    // included in the status filter.
     return ResponseEntity.ok(new MaterializeCohortResponse());
   }
 
