@@ -11,16 +11,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class BlockscoreServiceImpl implements BlockscoreService {
 
-  private final CloudStorageService cloudStorageService;
+  private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private String apiKey = null;
 
   @Autowired
-  public BlockscoreServiceImpl(CloudStorageService cloudStorageService) {
-    this.cloudStorageService = cloudStorageService;
-    apiKey = cloudStorageService.readBlockscoreApiKey();
+  public BlockscoreServiceImpl(Provider<CloudStorageService> cloudStorageServiceProvider) {
+    this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
 
   public PaginatedResult<Person> listPeople() {
+    if (apiKey == null) {
+      apiKey = cloudStorageServiceProvider.get().readBlockscoreApiKey();
+    }
     BlockscoreApiClient client = new BlockscoreApiClient(apiKey);
     return client.listPeople();
   }
