@@ -1,8 +1,31 @@
-<div class="row">
-  <div class="col-xs-2">
-    <app-subject-list></app-subject-list>
+<clr-main-container>
+  <div class="content-container">
+    <div class="content-area">
+      <div class="cohort-review-main">
+        <div *ngIf="loading" class="spinner">
+          Loading...
+        </div>
+
+        <!-- Main content area for the Cohort Review Sub-application -->
+        <router-outlet></router-outlet>
+
+      </div>
+    </div>
+
+    <clr-vertical-nav
+      [clrVerticalNavCollapsible]="true"
+      [(clrVerticalNavCollapsed)]="collapsed">
+      <a clrVerticalNavLink
+        routerLink="overview"
+        routerLinkActive="active">
+        Overview
+      </a>
+      <a *ngFor="let subject of (subjects$ | async)"
+        clrVerticalNavLink
+        [routerLink]="[subject.id]"
+        routerLinkActive="active">
+        {{ subject.id}}
+      </a>
+    </clr-vertical-nav>
   </div>
-  <div class="col-xs-10">
-    <app-subject-detail></app-subject-detail>
-  </div>
-</div>
+</clr-main-container>
