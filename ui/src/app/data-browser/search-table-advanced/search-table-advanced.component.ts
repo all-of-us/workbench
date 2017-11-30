@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { FormBuilder, FormGroup} from '@angular/forms';
+import { ActivatedRoute} from '@angular/router';
 import { State } from 'clarity-angular';
 import { AchillesService } from '../services/achilles.service';
 
@@ -10,7 +10,6 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./search-table-advanced.component.css']
 })
 export class SearchTableAdvancedComponent implements OnInit {
-  //aoeuaoeu
   /* Todo et these dynamically possibly */
   sourceConceptFilters =
       [{ vocabulary_id: 'ICD9CM' }, { vocabulary_id: 'ICD10' }, { vocabulary_id: 'ICD10CM'} ];
@@ -169,7 +168,8 @@ export class SearchTableAdvancedComponent implements OnInit {
   }
   searchData(params) {
     // Takes params and runs search.
-    // SearhcParams are set in the submit search form and refresh() pager and filter call back of the grid
+    // SearhcParams are set in the submit search form and refresh()
+      // pager and filter call back of the grid
     // This just runs the search
     this.searchParams = params ;
 
@@ -181,8 +181,7 @@ export class SearchTableAdvancedComponent implements OnInit {
     // Search only standard concepts when not adv
     if (!this.toggleAdv) {
       this.searchParams.standard_concept = 's';
-    }
-    else {
+    } else {
       this.searchParams.standard_concept = '';
     }
 
