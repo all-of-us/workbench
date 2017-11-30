@@ -1,7 +1,5 @@
-import { Location } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import {TreeComponent} from '../../cohort-search/criteria-wizard/tree/tree.component';
+
+import { Component, EventEmitter, Output } from '@angular/core';
 import { TreeService } from '../services/tree.service';
 @Component({
   selector: 'app-tree-container',
@@ -18,7 +16,9 @@ export class TreeContainerComponent {
     'Person-Medical-History': 'PersonalMedicalHistory',
     'Family-Medical-History': 'FamilyHistory'
   };
-  vocabs =  [{type: 'PPI', id: 0, vocabulary_id: 'PPI', name: 'PPI'}, {type: 'ICD9', id: 0, vocabulary_id: 'ICD9', name: 'ICD9'}, {type: 'ICD10', id: 0, vocabulary_id: 'ICD10', name: 'ICD10'}];
+  vocabs =  [{type: 'PPI', id: 0, vocabulary_id: 'PPI', name: 'PPI'},
+      {type: 'ICD9', id: 0, vocabulary_id: 'ICD9', name: 'ICD9'},
+      {type: 'ICD10', id: 0, vocabulary_id: 'ICD10', name: 'ICD10'}];
 
   vocabularyId;
   routeId;
