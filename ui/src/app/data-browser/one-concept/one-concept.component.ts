@@ -31,12 +31,12 @@ export class OneConceptComponent implements OnInit {
 
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
-    let section = 3000;
+
     let aids = [3001, 3002]
     this.show_source_graph = false
     this.show_source_table = false
 
-    this.achillesService.getSectionAnalyses(section, aids)
+    this.achillesService.getSectionAnalyses(aids)
       .then(analyses => {
         // this.hideTen = true;
         this.analyses = analyses;

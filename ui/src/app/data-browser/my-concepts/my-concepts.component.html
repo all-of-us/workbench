@@ -50,8 +50,7 @@
         <button style="margin:auto!important;" class="btn btn-sm btn-icon btn-danger-outline" (click)="sendRemove(concept)"><clr-icon shape="times"></clr-icon></button>
       </clr-dg-cell>
       <clr-dg-row-detail>
-        <!-- <app-concept-drawer style="width:100%;" *clrIfExpanded="concept.concept_id==newConcept.concept_id" (onParentSelected)="drawerParentSelected($event)" [route]="route" [concept]="concept" [analyses]="analyses"></app-concept-drawer> -->
-        <app-concept-drawer style="width:100%;" *clrIfExpanded (onParentSelected)="drawerParentSelected($event)" [concept]="concept " [analyses]="analyses "></app-concept-drawer>
+         <app-concept-drawer style="width:100%;" *clrIfExpanded (onParentSelected)="drawerParentSelected($event)" [concept]="concept " [analyses]="analyses "></app-concept-drawer>
       </clr-dg-row-detail>
 
     </clr-dg-row>

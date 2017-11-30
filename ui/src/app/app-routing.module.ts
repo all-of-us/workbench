@@ -6,9 +6,14 @@ import {RouterModule, Routes} from '@angular/router';
 import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {ReviewComponent} from 'app/views/review/component';
+
 import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+
+import { HomeComponent } from 'app/data-browser/home/home.component';
+import { SearchComponent } from 'app/data-browser/search/search.component';
+
 
 const routes: Routes = [
   {path: '', component: HomePageComponent, data: {title: 'View Workspaces'}},
@@ -32,7 +37,13 @@ const routes: Routes = [
           data: {title: 'Review Research Purposes'}},
   {path: 'workspace/:ns/:wsid/share',
           component: WorkspaceShareComponent,
-          data: {title: 'Share Workspace'}}
+          data: {title: 'Share Workspace'}},
+    {path: 'data-browser/home',
+        component: HomeComponent,
+        data: {title: 'Data Browser'}},
+    {path: 'data-browser/browse',
+        component: SearchComponent,
+        data: {title: 'Browse'}}
 ];
 
 @NgModule({

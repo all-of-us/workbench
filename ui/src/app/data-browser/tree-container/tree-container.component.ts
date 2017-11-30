@@ -1,14 +1,15 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { TreeService } from '../services/tree.service';
-import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Location } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import {TreeComponent} from '../../cohort-search/criteria-wizard/tree/tree.component';
+import { TreeService } from '../services/tree.service';
 @Component({
   selector: 'app-tree-container',
   templateUrl: './tree-container.component.html',
   styleUrls: ['./tree-container.component.css']
 })
 export class TreeContainerComponent implements OnInit {
-  conceptsArray = []
+  conceptsArray = [];
   pageDomainId = null;
   tree_nodes = {};
   routeDomain = {
@@ -16,20 +17,20 @@ export class TreeContainerComponent implements OnInit {
     'Overall-Health': 'OverallHealth',
     'Person-Medical-History': 'PersonalMedicalHistory',
     'Family-Medical-History': 'FamilyHistory'
-  }
-  vocabs =  [{vocabulary_id: 'PPI', name: 'PPI'}, {vocabulary_id: 'ICD9CM', name: 'ICD9CM'}, {vocabulary_id: 'ICD10CM', name: 'ICD10'},{vocabulary_id: 'ICD10CM', name: 'ICD10CM'}];
+  };
+  vocabs =  [{type: 'PPI', id: 0, vocabulary_id: 'PPI', name: 'PPI'}, {type: 'ICD9', id: 0, vocabulary_id: 'ICD9', name: 'ICD9'}, {type: 'ICD10', id: 0, vocabulary_id: 'ICD10', name: 'ICD10'}];
 
-  vocabularyId
-  routeId
-  @Output() conceptsArrayEvent = new EventEmitter()
+  vocabularyId;
+  routeId;
+  @Output() conceptsArrayEvent = new EventEmitter();
   constructor(private treeService: TreeService,
     private route: ActivatedRoute,
     private location: Location) {
       // Inititialize trees to first level
-      for (let v of this.vocabs) {
+      for (const v of this.vocabs) {
         this.treeService.getTreeNodes(v.vocabulary_id, 0).subscribe(results => {
           this.tree_nodes[v.vocabulary_id] = results;
-        })
+        });
       }
 
 
@@ -48,10 +49,7 @@ export class TreeContainerComponent implements OnInit {
     */
   }
   ngOnChanges(changes) {
-    // reinit tree nodes on changes if the vocabularyId changed
-    if (changes.vocabularyId.previousValue != changes.vocabularyId.currentValue ) {
 
-    }
 
   }
   openVocabTree(v) {
@@ -63,11 +61,11 @@ export class TreeContainerComponent implements OnInit {
   }
 
   passChildren(event) {
-    this.conceptsArrayEvent.emit(event)
+    this.conceptsArrayEvent.emit(event);
   }
   receiveItem(item) {
 
-    this.conceptsArrayEvent.emit(item)
+    this.conceptsArrayEvent.emit(item);
   }
 
 }

@@ -34,17 +34,16 @@ export class SearchTableAdvancedComponent implements OnInit {
   searchParams: any = null;
   standardConceptCheck: boolean
   filters = false;
-
-
-  retainedString
+  selectedRow: any;
+  retainedString: string;
 
   @Output() onItemSelected: EventEmitter<any>;
   @Output() emittSearchString: EventEmitter<any>;
-  @Input() savedSearchStringAdv
-  @Input() itemFromHeader
-  @Input() toggleAdv
-  @Input() domain_id
-  @Input() vocabulary_id
+  @Input() savedSearchStringAdv;
+  @Input() itemFromHeader;
+  @Input() toggleAdv;
+  @Input() domain_id;
+  @Input() vocabulary_id;
 
   myForm: FormGroup;
 
@@ -59,7 +58,6 @@ export class SearchTableAdvancedComponent implements OnInit {
     let domains_fg = {}
     for (let v of this.standardConceptFilters) {
       standard_vocabs_fg[v.vocabulary_id] = false;
-      //this.standard_vocabs_model[v.vocabulary_id] = { checked: false };
     }
     for (let v of this.sourceConceptFilters) {
       source_vocabs_fg[v.vocabulary_id] = false;
@@ -114,24 +112,23 @@ export class SearchTableAdvancedComponent implements OnInit {
   }
 
 
+    // Send concept click out to world
+    itemClick(concept: any, index) {
+        this.selectedRow = index;
+        this.onItemSelected.emit(concept);
+    }
+
+    // Send search string out to world
+    sendString(string) {
+        this.emittSearchString.emit(string);
+    }
 
   // Pager clicked on grid, sends state object
   refresh(state: State) {
-    // Note , this calls search on page load . So if it is first time, initialize search params with form defaults
+    // Note , this calls search on page load . initialize search params with form defaults
     if (!this.searchParams) {
       this.searchParams = this.myForm.value;
     }
-
-    // We convert the filters from an array to a map,
-    // because that's what our backend-calling service is expecting
-    // May want to have filters
-    /*let filters:{[prop:string]: any[]} = {};
-    if (state.filters) {
-        for (let filter of state.filters) {
-            let {property, value} = <{property: string, value: string}>filter;
-            filters[property] = [value];
-        }
-    }*/
 
     this.searchParams.sort = state.sort ? state.sort : null;
     this.searchParams.filters = state.filters ? state.filters : null;
@@ -154,17 +151,7 @@ export class SearchTableAdvancedComponent implements OnInit {
 
   }
 
-  selectedRow;
-  // Send concept click out to world
-  itemClick(concept: any, index) {
-    this.selectedRow = index;
-    this.onItemSelected.emit(concept);
-  }
 
-  // Send search string out to world
-  sendString(string) {
-    this.emittSearchString.emit(string);
-  }
 
 
 

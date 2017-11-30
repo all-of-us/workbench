@@ -23,24 +23,26 @@ import { TreeService } from './services/tree.service';
 import { LocalStorageModule } from 'angular-2-local-storage';
 
 
-import { SearchComponent } from './search/search.component';
-import { MyConceptsComponent } from './my-concepts/my-concepts.component';
-import { RecursiveTreeComponent } from './recursive-tree/recursive-tree.component';
-import { LazyTreeComponent } from './lazy-tree/lazy-tree.component';
-import { SurveyDrawerComponent } from './survey-drawer/survey-drawer.component';
-import { TreeContainerComponent } from './tree-container/tree-container.component';
-import { SearchTableAdvancedComponent } from './search-table-advanced/search-table-advanced.component';
-import { HomeComponent } from './home/home.component';
 import { HomeAsideComponent } from './home/home-aside/home-aside.component';
 import { HomeInfoComponent } from './home/home-info/home-info.component';
+import { HomeComponent } from './home/home.component';
+import { LazyTreeComponent } from './lazy-tree/lazy-tree.component';
 import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
+import { MyConceptsComponent } from './my-concepts/my-concepts.component';
 import { OneConceptComponent } from './one-concept/one-concept.component';
 import { PlaceholderComponent } from './placeholder/placeholder.component';
+import { RecursiveTreeComponent } from './recursive-tree/recursive-tree.component';
+import { SearchTableAdvancedComponent } from './search-table-advanced/search-table-advanced.component';
+import { SearchComponent } from './search/search.component';
+import { SurveyDrawerComponent } from './survey-drawer/survey-drawer.component';
+import { TreeContainerComponent } from './tree-container/tree-container.component';
+
+
 
 
 import {DataBrowserService} from 'generated';
-import {DataBrowserRouter} from './dbrouter.module';
-import {ConceptDrawerComponent} from "./concept-drawer/concept-drawer.component";
+import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
+
 /*Add highmaps to highchart in factory for workaround  to build problems with angular2-highcharts */
 export function highchartsFactory() {
    // highmaps(highcharts);
@@ -79,10 +81,13 @@ export function highchartsFactory() {
       HomeInfoComponent,
       MobileChartsComponent,
       OneConceptComponent,
-      PlaceholderComponent,
+      PlaceholderComponent
+
+
   ],
   providers: [
       AchillesService,
+      DataBrowserService,
       TreeService,
       {
         provide: HighchartsStatic, useFactory: highchartsFactory

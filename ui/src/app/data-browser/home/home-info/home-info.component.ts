@@ -19,7 +19,7 @@ export class HomeInfoComponent implements OnInit {
   constructor(private router: Router,
     private achillesService: AchillesService) {
 
-    achillesService.getDomains()
+    /*achillesService.getDomains()
       .subscribe(results => {
         for (let b of results) {
           this.achillesService.VocabShow(b)
@@ -30,6 +30,7 @@ export class HomeInfoComponent implements OnInit {
         this.phoneData = results
 
       })//end of subscibe
+      */
   }
 
 

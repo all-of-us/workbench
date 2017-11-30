@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AchillesService } from '../services/achilles.service'
 //import {NgForm,FormBuilder,FormGroup, Validators, AbstractControl} from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { IConcept,Concept } from '../ConceptClasses'
-// import {Search} from '../SearchClass'
+import { Concept, IConcept } from '../ConceptClasses';
+import { AchillesService } from '../services/achilles.service';
+
 @Component({
   selector: 'app-search',
   templateUrl: './search.component.html',
@@ -11,30 +11,30 @@ import { IConcept,Concept } from '../ConceptClasses'
 })
 export class SearchComponent implements OnInit {
 
-  filterValueAr = []
+  filterValueAr = [];
   conceptResults;
   conceptCard;
   redraw: number[] = []; // flag te redraw analysis , indexed exactly like analyses
   showCard = false;
-  conceptArr
-  analyses = []
-  topTenAnalysis
-  conceptsArray = []
+  conceptArr;
+  analyses = [];
+  topTenAnalysis;
+  conceptsArray = [];
   resetAnalyses;
   routeId: string;
-  colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']
+  colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4'];
   counter = 0;
-  loading: boolean = true;
+  loading = true;
   clickedConcept: IConcept;
-  toggleTree: boolean
+  toggleTree: boolean;
   vocabulary_id: string;
-  savedSearchString: string
-  itemFromHeader
-  showAdvanced
+  savedSearchString: string;
+  itemFromHeader;
+  showAdvanced;
   toggleColumn = false;
-  toggleAdv = false
-  searchTitle  = "Standard Vocabularies Only"
-  pageTitle = "All Participants' Summary Analyses"
+  toggleAdv = true;
+  searchTitle  = 'Standard Vocabularies Only';
+  pageTitle = 'All Participants\' Summary Analyses';
 
   // Route domain map -- todo , these can be more than one eventually
   routeDomain = {
@@ -42,32 +42,34 @@ export class SearchComponent implements OnInit {
     'procedures': 'Procedure',
     'drugs': 'Drug',
     'all': 'all',
-    'icd9cm':'ICD9CM',
-    'icd9':'ICD9',
-    'icd10':'ICD10',
-    'icd10cm':'ICD10CM',
-    'cpt4':'cpt4',
-    'snomed':'snomed',
-  }
+    'icd9cm': 'ICD9CM',
+    'icd9': 'ICD9',
+    'icd10': 'ICD10',
+    'icd10cm': 'ICD10CM',
+    'cpt4': 'cpt4',
+    'snomed': 'snomed',
+  };
   // Map route to vocabulary_id
   routeVocabulary = {
 
     'all': 'all',
-    'icd9cm':'ICD9CM',
-    'icd9':'ICD9',
-    'icd10':'ICD10',
-    'icd10cm':'ICD10CM',
-    'cpt4':'CPT4',
-    'snomed':'SNOMED',
-  }
+    'icd9cm': 'ICD9CM',
+    'icd9': 'ICD9',
+    'icd10': 'ICD10',
+    'icd10cm': 'ICD10CM',
+    'cpt4': 'CPT4',
+    'snomed': 'SNOMED',
+  };
   pageDomainId = null;
 
 
   constructor(private achillesService: AchillesService, private route: ActivatedRoute) {
 
     this.route.params.subscribe(params => {
-      //get parameter from URL...  example:  http://localhost:4200/data-browser/drug  <--drug is params.id, which is defined in router.\
-      // Set the domain id for the page if this route is dombain specific
+      // get parameter from URL...
+      // example:  http://localhost:4200/data-browser/drug
+      // <--drug is params.id, which is defined in router.
+      // Set the domain id for the page if this route is domain specific
       this.routeId = params.id;
       if (this.routeDomain[this.routeId]) {
         this.pageDomainId = this.routeDomain[this.routeId];
@@ -75,33 +77,31 @@ export class SearchComponent implements OnInit {
 
       // What do we need for vocabulary_id
       if (this.routeVocabulary[this.routeId]) {
-        this.vocabulary_id= this.routeVocabulary[this.routeId];
+        this.vocabulary_id = this.routeVocabulary[this.routeId];
       }
       else {
         //this.vocabulary_id = this.routeId;
       }
 
       if (this.routeId != 'PPI') {
-        this.toggleTree = false
+        this.toggleTree = false;
       } else {
-        this.toggleTree = true
+        this.toggleTree = true;
       }
 
 
       //
-    })//end of subscribe
+    }); //end of subscribe
 
 
 
 
-
-    let section = 3000;
-    let alist = [3000]
-    this.achillesService.getSectionAnalyses(section, alist)
+    const alist = [3000];
+    this.achillesService.getSectionAnalyses( alist)
       .then(analyses => {
         this.analyses = analyses;
         this.resetAnalyses = analyses;
-      });//end of .subscribe
+      }); //end of .subscribe
 
   }
 
@@ -118,26 +118,26 @@ export class SearchComponent implements OnInit {
     add to selected concepts list and run analysis if it isn't in list
     */
   itemSelected(obj) {
-    let params = {
+    const params = {
       search : this.savedSearchString,
       toggleTree: this.toggleTree,
       toggleAdv: this.toggleAdv
-    }
+    };
     if (params.toggleTree) {
-      params.search='';
+      params.search = '';
     }
-    this.achillesService.logClickedConcept(obj,params);
+    this.achillesService.logClickedConcept(obj, params);
 
-    let item = obj
-    let children = obj.children;
+    const item = obj;
+    const children = obj.children;
     // Set the clicked concept to this one to trigger things on page
     this.clickedConcept = item;
     //
     // Check that it's not in concept list before adding
     let addConcept = true;
-    let prevConceptsLen = this.conceptsArray.length;
+    const prevConceptsLen = this.conceptsArray.length;
     if (item.concept_id) {
-      for (let c of this.conceptsArray) {
+      for (const c of this.conceptsArray) {
         if (c.concept_id == item.concept_id) {
           addConcept = false;
           return;
@@ -160,7 +160,7 @@ export class SearchComponent implements OnInit {
       for (c of item.children) {
         addConcept = true;
         if (c.concept_id ) {
-          for (let a of this.conceptsArray) {
+          for (const a of this.conceptsArray) {
             if (c.concept_id == a.concept_id) {
               addConcept = false;
               break;
@@ -183,16 +183,16 @@ export class SearchComponent implements OnInit {
     // note
 
     for (let i = 0; i < this.analyses.length; i++) {
-      let b = this.analyses[i];
+      const b = this.analyses[i];
 
 
       // Put the selected concept as the stratum for the analysis
-      var arr = []
+      const arr = [];
       for (let i = 0; i < this.conceptsArray.length; i++) {
-        arr.push(this.conceptsArray[i].concept_id)
+        arr.push(this.conceptsArray[i].concept_id);
       }
 
-      b.stratum[0] = arr.join(",");
+      b.stratum[0] = arr.join(',');
 
       //
       // Run the analysis -- getting the results in the analysis.results
@@ -202,7 +202,7 @@ export class SearchComponent implements OnInit {
           // Put result for this concept on the concept.count
           // if node is passed , we update the count value for that one
           if (node) {
-            for (let r of b.results) {
+            for (const r of b.results) {
               if (r.stratum[0] == node.concept_id) {
                 node.count = r.count_value;
                 break;
@@ -212,7 +212,7 @@ export class SearchComponent implements OnInit {
           //
           b.status = 'Done';
           this.redraw[i] = Math.random();
-        });//end of .then
+        }); //end of .then
     }//end of for loop
 
   }
@@ -224,29 +224,29 @@ export class SearchComponent implements OnInit {
   }
 */
   columnSwitch() {
-    this.toggleColumn = !this.toggleColumn
+    this.toggleColumn = !this.toggleColumn;
   }
 
   remove(node) {
-    var index = this.conceptsArray.indexOf(node)
+    const index = this.conceptsArray.indexOf(node);
     if (index > -1) {
       this.conceptsArray.splice(index, 1);
     }
     // remove data from series for this concept;
     // this will remove it from the graph without redrawing graph and hitting DB
-    this.removeFromSeries(node)
+    this.removeFromSeries(node);
   }
 
   removeFromSeries(node) {
     // remove the result object from all the analysis on this page for this node
     for (let i = 0; i < this.analyses.length; i++) {
-      let b = this.analyses[i];
+      const b = this.analyses[i];
       // Loop through results , remove if the result is for this node and trigger redraw of that analysis
       if (typeof b.results != 'undefined') {
-        let removeIndexes = [];
+        const removeIndexes = [];
         //
         for (let index = 0; index < b.results.length; index++) {
-          let r = b.results[index];
+          const r = b.results[index];
           for (let i2 = 0; i2 < r.stratum.length; i2++) {
             if (r.stratum[i2] == node.concept_id) {
               removeIndexes.push(index);
@@ -264,8 +264,8 @@ export class SearchComponent implements OnInit {
         //removeIndexes.sort((a,b )=>  a-b); no need to sort as its already sorted
         let offset = 0;
         //
-        for (let i3 of removeIndexes) {
-          let realIndex = i3 - offset;
+        for (const i3 of removeIndexes) {
+          const realIndex = i3 - offset;
           b.results.splice(realIndex, 1);
           offset = 1;
         }
@@ -293,15 +293,15 @@ export class SearchComponent implements OnInit {
     this.reset();
   }
   setString(event) {
-    this.savedSearchString = event
+    this.savedSearchString = event;
     //
   }
   sectionFromHeader(event){
 //clear out the concepts and the analysis results on route change
-    this.itemFromHeader=event;
+    this.itemFromHeader = event;
     this.conceptsArray = [];
-    for(let a of this.analyses){
-      a.results=[]
+    for (const a of this.analyses){
+      a.results = [];
     }
 
   }
@@ -309,7 +309,7 @@ export class SearchComponent implements OnInit {
     if (this.toggleTree == false) {
       this.toggleAdv = true;
     }else{
-      this.toggleAdv=false;
+      this.toggleAdv = false;
     }
   }
 

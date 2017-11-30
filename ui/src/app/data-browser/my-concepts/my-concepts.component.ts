@@ -24,15 +24,13 @@ export class MyConceptsComponent implements OnInit {
 
   constructor(private achillesService: AchillesService) {
     let section = 3000;
-    let aids = [3000, 3001, 3002]
+    let aids = [3000, 3101, 3102]
     //
     this.analyses = [];
     this.countAnalysis = null
-    this.achillesService.getSectionAnalyses(section, aids)
+    this.achillesService.getSectionAnalyses( aids)
       .then(analyses => {
         // Get the count analysis separate id 3000
-        //this.analyses = analyses;
-
         for (let a of analyses) {
           if (a.analysis_id == 3000) {
             this.countAnalysis = a;
@@ -72,7 +70,7 @@ export class MyConceptsComponent implements OnInit {
 
     }
 
-
+    console.log("Count analysis", this.countAnalysis);
     // Run total count analysis for all concepts
     if (this.countAnalysis) {
       if (this.conceptsArray.length) {
@@ -89,6 +87,7 @@ export class MyConceptsComponent implements OnInit {
         // Run the analysis -- getting the results in the analysis.results
         this.achillesService.getAnalysisResults(this.countAnalysis)
           .then(results => {
+            console.log("Got count analysis results ", results );
             for (let i = 0; i < this.conceptsArray.length; i++) {
               for (let b = 0; b < results.length; b++) {
                 if (this.conceptsArray[i].concept_name == results[b].stratum_name[0]) {

@@ -66,12 +66,12 @@
                         </clr-tooltip-content>
                       </clr-tooltip>
                     </clr-dg-cell>
-                    <clr-dg-cell *ngIf="route != 'PPI'">{{item.domain_id}}</clr-dg-cell>
-                    <clr-dg-cell *ngIf="route != 'PPI'">{{item.vocabulary_id}}</clr-dg-cell>
-                    <clr-dg-cell *ngIf="route != 'PPI'">{{item.concept_code}}</clr-dg-cell>
-                    <clr-dg-cell>{{item.count_value}} out of total participants</clr-dg-cell>
+                    <clr-dg-cell >{{item.domain_id}}</clr-dg-cell>
+                    <clr-dg-cell >{{item.vocabulary_id}}</clr-dg-cell>
+                    <clr-dg-cell >{{item.concept_code}}</clr-dg-cell>
+                    <clr-dg-cell>{{item.count_value}} </clr-dg-cell>
                     <clr-dg-row-detail>
-                      <app-concept-drawer style="width:100%;" *clrIfExpanded="item.count_value" [route]="route" [concept]="item" [analyses]="analyses"></app-concept-drawer>
+                      <app-concept-drawer style="width:100%;" *clrIfExpanded="item.count_value" [concept]="item" [analyses]="analyses"></app-concept-drawer>
                     </clr-dg-row-detail>
                   </clr-dg-row>
 

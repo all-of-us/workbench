@@ -45,9 +45,7 @@
     <div *ngIf="toggleAdv && conceptsArray.length">
       <app-my-concepts class="mobile-hide" (resetEmit)="reset()" (removalEmit)="remove($event)" [route]="routeId" (addEmit)="itemSelected($event)" [newConcept]="clickedConcept" [conceptsArray]="conceptsArray"></app-my-concepts>
     </div>
-    <div *ngFor="let concept of conceptsArray">
-      <app-mobile-charts class="mobile-show" (removalEmit)="remove($event)" [concept]="concept" [analyses]="analysisMobile"></app-mobile-charts>
-    </div>
+
 
   </div>
 </div>

@@ -56,6 +56,7 @@ export class ChartComponent  {
   ngOnChanges() {
     this.chartOptions = null;
 
+    console.log("Chart on changes a", this.analysis, this.concepts);
     if (this.concepts && this.concepts.length) {
       let a  = this.makeConceptsAnalysis(this.concepts);
       this.chartOptions = a.hcChartOptions();
@@ -66,17 +67,20 @@ export class ChartComponent  {
       this.localAnalysis  = this.analysis;
       this.chartOptions = this.localAnalysis.hcChartOptions();
       this.chartType = this.analysis.chartType;
+      console.log(this.chartOptions);
     }
   }
 
   makeConceptsAnalysis(concepts: IConcept[]): Analysis {
 
+    console.log("Making concepts analysis ", concepts);
     // Make an analysis object id = 3000 with results to chart these concepts results in histogram
     let obj = {
       analysis_id: 3000,
       analysis_name: "Number of Participants by Source Concepts",
       results: [],
       chartType: "column",
+        dataType: "counts"
     }
 
     for (let i = 0; i < this.concepts.length; i++) {
@@ -89,10 +93,11 @@ export class ChartComponent  {
         stratum_1: this.concepts[i].concept_id,
         count_value: this.concepts[i].count_value
       }
-      let series = new AnalysisResult(resultObj)
-      obj.results.push(series)
+      let series =  AnalysisResult.clone(resultObj);
+      obj.results.push(series);
     }
-    let a = new Analysis(obj);
+    const a =  Analysis.analysisClone(obj);
+    console.log(a);
     //
     return a;
   }

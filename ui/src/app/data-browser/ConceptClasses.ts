@@ -1,6 +1,8 @@
 
   // Concept Classes
-export interface IConcept {
+import {Criteria} from '../../generated/model/criteria';
+
+  export interface IConcept {
   concept_name: string;
   prevalence: string;
   concept_id: number;
@@ -35,26 +37,42 @@ export class Concept implements IConcept {
   is_selectable: boolean;
   color: string;
 
-  moreInfo(): string {
-    return 'More information about concept class ' + this.constructor.name;
-  }
-
-
+  static conceptFromCriteria(obj: Criteria):  Concept {
+        const concept = new Concept();
+        concept.concept_name = obj.name;
+        concept.concept_id = obj.conceptId;
+        concept.count_value = obj.count;
+        concept.is_group = obj.group;
+        concept.is_selectable = obj.selectable;
+        concept.domain_id = obj.domainId;
+        concept.id = obj.id;
+        concept.concept_code = obj.code;
+        concept.vocabulary_id = obj.type;
+        return concept;
+    }
   constructor(obj?: any) {
-    this.concept_name = obj && obj.concept_name || '';
-    this.concept_class_id = obj && obj.concept_class_id || '';
+    this.concept_name = obj && obj.conceptName || '';
+    this.concept_class_id = obj && obj.conceptClassId || '';
     this.prevalence = obj && obj.prevalence || 0;
-    this.concept_id = obj && obj.concept_id || 0;
-    this.concept_code = obj && obj.concept_code || '';
-    this.vocabulary_id = obj && obj.vocabulary_id || '';
-    this.domain_id = obj && obj.domain_id || '';
-    this.count_value = obj && obj.count_value || 0;
+    this.concept_id = obj && obj.conceptId || 0;
+    this.concept_code = obj && obj.conceptCode || '';
+    this.vocabulary_id = obj && obj.vocabularyId || '';
+    this.domain_id = obj && obj.domainId || '';
+    this.count_value = obj && obj.countValue || 0;
     this.children = [];
     this.parents = [];
     this.id = obj && obj.id || 0;
-    this.is_group = obj && obj.is_group || false;
-    this.is_selectable = obj && obj.is_selectable || false;
+    this.is_group = obj && obj.isGroup || false;
+    this.is_selectable = obj && obj.isSelectable || false;
   }
+
+    moreInfo(): string {
+        return 'More information about concept class ' + this.constructor.name;
+    }
+
+
+
+
 }
 
 export class ConceptPpi extends Concept {
@@ -83,7 +101,7 @@ export class ConceptPpi extends Concept {
       for (const c of obj.children) {
         c.count_value = ranNum();
         c.domain_id = obj.domain_id;
-        this.children.push(new ConceptPpi(c))
+        this.children.push(new ConceptPpi(c));
       }
     }
     if (obj.parents) {
@@ -107,6 +125,6 @@ export class Survey {
   link: string;
 
   constructor(obj?: any) {
-    this.title = obj && obj.title || 'Untitled Survey Object'
+    this.title = obj && obj.title || 'Untitled Survey Object';
   }
 }
