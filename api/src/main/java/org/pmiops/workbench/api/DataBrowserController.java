@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 
-import io.swagger.annotations.ApiParam;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
@@ -10,24 +9,12 @@ import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.cdr.dao.AnalysisResultDao;
 import org.pmiops.workbench.cdr.model.AnalysisResult;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SubjectCounter;
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
-import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
-import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -69,7 +56,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 .conceptClassId(concept.getConceptClassId())
                                 .vocabularyId(concept.getVocabularyId())
                                 .domainId(concept.getDomainId())
-                                .count(concept.getCount())
+                                .countValue(concept.getCountValue())
                                 .prevalence(concept.getPrevalence());
                 }
             };
@@ -164,13 +151,52 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             String vocabulary_id,
             String domain_id) {
 
-        final List<Concept> conceptList = conceptDao.findConceptLikeName(conceptName);
+
+        List<Concept> conceptList;
+
+        // If Concept name do search on name
+
+        if (conceptName != null) {
+            conceptList = conceptDao.findConceptLikeName(conceptName);
+        }
+        else {
+            conceptList = conceptDao.findConceptsOrderedByCount();
+        }
+
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * This method gets concepts with maps to relationship in concept relationship table
+     *
+     * @param conceptId
+     * @param conceptNum
+     * @return
+     */
+    @Override
+    public ResponseEntity<ConceptListResponse> getConceptsMapsTo(
+            Long conceptId,
+            Long conceptNum) {
+
+
+        List<Concept> conceptList;
+
+        // If Concept num is 2 , children
+        if (conceptNum == 2 ) {
+            conceptList = conceptDao.findConceptsMapsToChildren(conceptId);
+        }
+        else {
+            conceptList = conceptDao.findConceptsMapsToParents(conceptId);
+        }
+
+        ConceptListResponse resp = new ConceptListResponse();
+        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(resp);
+    }
     /**
      * This method searches concepts
      *
@@ -216,7 +242,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         final List<AnalysisResult> resultList  =  analysisResultDao.findAnalysisResultsByAnalysisId(aid);
         AnalysisResultListResponse resp = new AnalysisResultListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS_RESULT).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp.getItems().get(0));
+        if ( resp.getItems().size() > 0 ) {
+            return ResponseEntity.ok(resp.getItems().get(0));
+        }
+        else {
+            // Todo handle error better
+            org.pmiops.workbench.model.AnalysisResult r = new org.pmiops.workbench.model.AnalysisResult();
+            r.setAnalysisId( (long) 1);
+            r.setCountValue((long) 0);
+            return ResponseEntity.ok(r);
+        }
     }
 
     @Override
@@ -228,7 +263,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<AnalysisResultListResponse> getConceptCountByGender(String conceptId) {
         long aid = 3101;
-        return this.getAnalysisResults(aid, conceptId, null, null , null, null);
+        return this.getAnalysisResults(aid, conceptId, null, null,null,null);
     }
 
     @Override

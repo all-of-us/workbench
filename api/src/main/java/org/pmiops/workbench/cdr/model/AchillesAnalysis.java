@@ -37,7 +37,7 @@ public class AchillesAnalysis {
         return this;
     }
 
-    @Column(name="analysisName")
+    @Column(name="analysis_name")
     public String getAnalysisName() {
         return analysisName;
     }

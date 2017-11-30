@@ -1100,6 +1100,34 @@ paths:
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
+  /api/v1/databrowser/concept-maps-to:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets list of analysis definitions
+      operationId: "getConceptsMapsTo"
+      parameters:
+        - in: query
+          name: concept_id
+          type: integer
+          format: int64
+          required: true
+          description: concept id to get maps to concepts
+        - in: query
+          name: concept_num
+          type: integer
+          format: int64
+          required: true
+          description: concept num in relationship table
+      responses:
+        "200":
+          description: A collection of databrowser domains
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
+
+
 
 ##########################################################################################
 ## DEFINITIONS
@@ -2047,14 +2075,15 @@ definitions:
       standardConcept:
         description: standard concept value 1 char
         type: string
-      count:
+      countValue:
         description: est count in the cdr
         type: integer
         format: int64
       prevalence:
         description: prevalence among participants percent count divided num participants
-        type: integer
-        format: int64
+        type: number
+        format: float
+
 
   ConceptListResponse:
       type: object

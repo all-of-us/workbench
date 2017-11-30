@@ -1,9 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import javax.persistence.*;
-import java.util.Objects;
 
 
 @Entity
@@ -19,12 +16,12 @@ public class Concept {
     private String conceptClassId;
     private String vocabularyId;
     private String domainId;
-    private long count;
-    private long prevalence;
+    private long countValue;
+    private float prevalence;
 
 
     @Id
-    @Column(name = "conceptId")
+    @Column(name = "concept_id")
     public long getConceptId() {
         return conceptId;
     }
@@ -52,7 +49,7 @@ public class Concept {
         return this;
     }
 
-    @Column(name = "standardConcept")
+    @Column(name = "standard_concept")
     public String getStandardConcept() {
         return standardConcept;
     }
@@ -66,7 +63,7 @@ public class Concept {
         return this;
     }
 
-    @Column(name = "conceptCode")
+    @Column(name = "concept_code")
     public String getConceptCode() {
         return conceptCode;
     }
@@ -79,7 +76,7 @@ public class Concept {
         this.conceptCode = conceptCode;
         return this;
     }
-    @Column(name = "conceptClassId")
+    @Column(name = "concept_class_id")
     public String getConceptClassId() {
         return conceptClassId;
     }
@@ -93,7 +90,7 @@ public class Concept {
         return this;
     }
 
-    @Column(name = "vocabularyId")
+    @Column(name = "vocabulary_id")
     public String getVocabularyId() {
         return vocabularyId;
     }
@@ -107,7 +104,7 @@ public class Concept {
         return this;
     }
 
-    @Column(name = "domainId")
+    @Column(name = "domain_id")
     public String getDomainId() {
         return domainId;
     }
@@ -122,30 +119,30 @@ public class Concept {
     }
 
 
-    @Transient
-    public long getCount() {
-        return count;
+    @Column(name= "count_value")
+    public long getCountValue() {
+        return countValue;
     }
 
-    public void setCount(long count) {
-        this.count = count;
+    public void setCountValue(long count) {
+        this.countValue = count;
     }
 
     public Concept count(long count) {
-        this.count = count;
+        this.countValue = count;
         return this;
     }
 
-    @Transient
-    public long getPrevalence() {
+    @Column(name = "prevalence")
+    public float getPrevalence() {
         return prevalence;
     }
 
-    public void setPrevalence(long prevalence) {
+    public void setPrevalence(float prevalence) {
         this.prevalence = prevalence;
     }
 
-    public Concept prevalence(long prevalence) {
+    public Concept prevalence(float prevalence) {
         this.prevalence = prevalence;
         return this;
     }
@@ -159,27 +156,30 @@ public class Concept {
         Concept concept = (Concept) o;
 
         if (conceptId != concept.conceptId) return false;
-       // if (count != concept.count) return false;
-       // if (prevalence != concept.prevalence) return false;
-        if (!conceptName.equals(concept.conceptName)) return false;
-        if (!standardConcept.equals(concept.standardConcept)) return false;
-        if (!conceptCode.equals(concept.conceptCode)) return false;
-        if (!conceptClassId.equals(concept.conceptClassId)) return false;
-        if (!vocabularyId.equals(concept.vocabularyId)) return false;
-        return domainId.equals(concept.domainId);
+        if (countValue != concept.countValue) return false;
+        if (Float.compare(concept.prevalence, prevalence) != 0) return false;
+        if (conceptName != null ? !conceptName.equals(concept.conceptName) : concept.conceptName != null) return false;
+        if (standardConcept != null ? !standardConcept.equals(concept.standardConcept) : concept.standardConcept != null)
+            return false;
+        if (conceptCode != null ? !conceptCode.equals(concept.conceptCode) : concept.conceptCode != null) return false;
+        if (conceptClassId != null ? !conceptClassId.equals(concept.conceptClassId) : concept.conceptClassId != null)
+            return false;
+        if (vocabularyId != null ? !vocabularyId.equals(concept.vocabularyId) : concept.vocabularyId != null)
+            return false;
+        return domainId != null ? domainId.equals(concept.domainId) : concept.domainId == null;
     }
 
     @Override
     public int hashCode() {
         int result = (int) (conceptId ^ (conceptId >>> 32));
-        result = 31 * result + conceptName.hashCode();
-        result = 31 * result + standardConcept.hashCode();
-        result = 31 * result + conceptCode.hashCode();
-        result = 31 * result + conceptClassId.hashCode();
-        result = 31 * result + vocabularyId.hashCode();
-        result = 31 * result + domainId.hashCode();
-        result = 31 * result + (int) (count ^ (count >>> 32));
-        result = 31 * result + (int) (prevalence ^ (prevalence >>> 32));
+        result = 31 * result + (conceptName != null ? conceptName.hashCode() : 0);
+        result = 31 * result + (standardConcept != null ? standardConcept.hashCode() : 0);
+        result = 31 * result + (conceptCode != null ? conceptCode.hashCode() : 0);
+        result = 31 * result + (conceptClassId != null ? conceptClassId.hashCode() : 0);
+        result = 31 * result + (vocabularyId != null ? vocabularyId.hashCode() : 0);
+        result = 31 * result + (domainId != null ? domainId.hashCode() : 0);
+        result = 31 * result + (int) (countValue ^ (countValue >>> 32));
+        result = 31 * result + (prevalence != +0.0f ? Float.floatToIntBits(prevalence) : 0);
         return result;
     }
 
@@ -193,7 +193,7 @@ public class Concept {
                 ", conceptClassId='" + conceptClassId + '\'' +
                 ", vocabularyId='" + vocabularyId + '\'' +
                 ", domainId='" + domainId + '\'' +
-                ", count=" + count +
+                ", countValue=" + countValue +
                 ", prevalence=" + prevalence +
                 '}';
     }
