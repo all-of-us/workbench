@@ -79,7 +79,7 @@ public class ClusterController implements ClusterApiDelegate {
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster("broad-dsde-dev", clusterName, createFirecloudClusterRequest()));
+      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster(workspaceNamespace, clusterName, createFirecloudClusterRequest()));
     } catch (ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
@@ -93,7 +93,7 @@ public class ClusterController implements ClusterApiDelegate {
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      this.notebooksService.deleteCluster("broad-dsde-dev", clusterName);
+      this.notebooksService.deleteCluster(workspaceNamespace, clusterName);
     } catch (ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
@@ -109,7 +109,7 @@ public class ClusterController implements ClusterApiDelegate {
     Cluster cluster;
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
-      cluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.getCluster("broad-dsde-dev", clusterName));
+      cluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.getCluster(workspaceNamespace, clusterName));
     } catch(ApiException e) {
       // TODO: Actually handle errors reasonably
       throw new RuntimeException(e);
