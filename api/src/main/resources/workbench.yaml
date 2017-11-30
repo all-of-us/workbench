@@ -733,6 +733,8 @@ definitions:
     required:
       - gsuiteDomain
     properties:
+      # This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
+      # response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
       gsuiteDomain:
         type: string
         description: G-Suite domain containing user accounts.
