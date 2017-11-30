@@ -2,8 +2,6 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
-import org.pmiops.workbench.firecloud.model.PermissionReport;
-import org.pmiops.workbench.firecloud.model.PermissionReportRequest;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -50,6 +48,4 @@ public interface FireCloudService {
   WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
 
   WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException;
-
-  PermissionReport getUserPermissionsOnWorkspace(String projectName, String workspaceName, String user) throws ApiException;
 }
