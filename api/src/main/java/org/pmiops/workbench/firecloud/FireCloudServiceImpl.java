@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -11,6 +12,8 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.PermissionReport;
+import org.pmiops.workbench.firecloud.model.PermissionReportRequest;
 import org.pmiops.workbench.firecloud.model.Profile;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -123,4 +126,15 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     return workspacesApi.getWorkspace(projectName, workspaceName);
   }
+
+  @Override
+  public PermissionReport getUserPermissionsOnWorkspace(String projectName, String workspaceName, String user) throws ApiException {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    PermissionReportRequest request = new PermissionReportRequest();
+    ArrayList<String> userList = new ArrayList<String>();
+    userList.add(user);
+    request.setUsers(userList);
+    return workspacesApi.workspacePermissionReport(projectName, workspaceName, request);
+  }
+
 }

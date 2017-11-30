@@ -24,9 +24,11 @@ import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.PermissionReport;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -383,6 +385,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+    PermissionReport userPermissions;
+    try {
+       userPermissions = fireCloudService.getUserPermissionsOnWorkspace(
+          workspaceNamespace, workspaceId, userProvider.get().getEmail());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+    String userAccess = userPermissions.getWorkspaceACL().get(userProvider.get().getEmail()).getAccessLevel();
+    if (userAccess == null) {
+      //Actual message.
+      throw new NotFoundException(String.format(
+          "Workspace %s/%s doesn't exist",
+          workspaceNamespace, workspaceId));
+    }
+    if (userAccess.equals(WorkspaceAccessLevel.READER)) {
+      throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
+          workspaceNamespace, workspaceId));
+    }
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }

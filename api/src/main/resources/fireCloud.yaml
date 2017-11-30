@@ -304,6 +304,31 @@ paths:
           500:
             description: Internal server error
 
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/permissionReport:
+    post:
+      tags:
+        - Workspaces
+      operationId: workspacePermissionReport
+      summary: Retrieve user permissions for the workspace
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+        - name: reportInput
+          description: Users and/or configs on which to report, both optional
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/PermissionReportRequest'
+      responses:
+        200:
+          description: Permission Report
+          schema:
+            $ref: '#/definitions/PermissionReport'
+        404:
+          description: Workspace does not exist
+        500:
+          description: Internal Server Error
+
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################
@@ -685,3 +710,25 @@ definitions:
         description: the users or groups who were not found
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
+
+  PermissionReport:
+    description: ACLs for users of a workspace and methods referenced by that workspace
+    required:
+      - workspaceACL
+    properties:
+      workspaceACL:
+        description: a map of (user email -> WorkspaceAccessEntry). `exampleEmail` is an example key.
+        properties:
+          exampleEmail:
+            $ref: '#/definitions/WorkspaceAccessEntry'
+        additionalProperties:
+          $ref: '#/definitions/WorkspaceAccessEntry'
+
+  PermissionReportRequest:
+    description: users and/or configs on which to report.
+    properties:
+      users:
+        description: list of email addresses; optional; defaults to all users in the workspace
+        type: array
+        items:
+          type: string
