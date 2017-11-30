@@ -207,12 +207,14 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator());
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
+    stubGetWorkspace(ws.getNamespace(), ws.getName(), ws.getCreator());
     updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
@@ -225,7 +227,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-
+    stubGetWorkspace(ws.getNamespace(), ws.getName(), ws.getCreator());
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
         new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
 
@@ -243,6 +245,7 @@ public class WorkspacesControllerTest {
     List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
+        stubGetWorkspace(ws.getNamespace(), ws.getName(), ws.getCreator());
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
             new Workspace().name("updated-name").etag(etag));
         fail(String.format("expected BadRequestException for etag: %s", etag));
