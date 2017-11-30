@@ -1,8 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { AchillesService } from '../services/achilles.service'
-import { NgForm, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { State } from "clarity-angular";
+import { State } from 'clarity-angular';
+import { AchillesService } from '../services/achilles.service';
 
 @Component({
   selector: 'app-search-table-advanced',
@@ -17,22 +17,22 @@ export class SearchTableAdvancedComponent implements OnInit {
   domainFilters = [{ domain_id: 'Condition' }, { domain_id: 'Procedure' }, { domain_id: 'Drug' }, { domain_id: 'Visit' }];
 
 
-  filterValueAr = []
-  source_vocabs_model = {}
-  standard_vocabs_model = {} // model of standard for form
+  filterValueAr = [];
+  source_vocabs_model = {};
+  standard_vocabs_model = {}; // model of standard for form
   conceptResults;
 
   redraw: number[] = []; // flag te redraw analysis , indexed exactly like analyses
-  analyses = []
+  analyses = [];
   routeId: string;
-  colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']
+  colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4'];
   counter = 0;
   page_len = 10;
   cur_page = 1;
-  loading: boolean = true;
+  loading = true;
   totalItems: number;
   searchParams: any = null;
-  standardConceptCheck: boolean
+  standardConceptCheck: boolean;
   filters = false;
   selectedRow: any;
   retainedString: string;
@@ -53,16 +53,16 @@ export class SearchTableAdvancedComponent implements OnInit {
     this.onItemSelected = new EventEmitter();
     this.emittSearchString = new EventEmitter();
     // Build the form
-    let source_vocabs_fg = {}
-    let standard_vocabs_fg = {}
-    let domains_fg = {}
-    for (let v of this.standardConceptFilters) {
+    const source_vocabs_fg = {};
+    const standard_vocabs_fg = {};
+    const domains_fg = {};
+    for (const v of this.standardConceptFilters) {
       standard_vocabs_fg[v.vocabulary_id] = false;
     }
-    for (let v of this.sourceConceptFilters) {
+    for (const v of this.sourceConceptFilters) {
       source_vocabs_fg[v.vocabulary_id] = false;
     }
-    for (let v of this.domainFilters) {
+    for (const v of this.domainFilters) {
       domains_fg[v.domain_id] = false;
     }
 
@@ -98,7 +98,7 @@ export class SearchTableAdvancedComponent implements OnInit {
   ngOnChanges(changes) {
     // Set our input search if we have it
     this.myForm.value.search = this.savedSearchStringAdv;
-    this.retainedString = this.savedSearchStringAdv
+    this.retainedString = this.savedSearchStringAdv;
 
     if (changes.toggleAdv) {
       // When toggle adv is turned off, reset all the filters on th eform to ignore them
@@ -136,11 +136,11 @@ export class SearchTableAdvancedComponent implements OnInit {
     // Default page
     let curPage = 1;
     this.searchParams.page_len = this.page_len;
-    this.searchParams.page_from = 0
-    this.searchParams.page_to = 1
+    this.searchParams.page_from = 0;
+    this.searchParams.page_to = 1;
     if (state.page) {
       this.searchParams.page_len = state.page.size ? state.page.size : this.page_len;
-      this.searchParams.page_from = state.page.from? state.page.from : 0;
+      this.searchParams.page_from = state.page.from ? state.page.from : 0;
       this.searchParams.page_to = state.page.to ? state.page.to : this.page_len - 1;
       if (state.page.from > 0) {
         curPage = state.page.from / state.page.size + 1;
@@ -161,7 +161,7 @@ export class SearchTableAdvancedComponent implements OnInit {
     // Form logic is as so:
     // If no form.domains are checked then we search all domains {}
     // Set domain id if we have one
-    this.searchData(form)
+    this.searchData(form);
   }
   searchData(params) {
     // Takes params and runs search.
@@ -171,15 +171,15 @@ export class SearchTableAdvancedComponent implements OnInit {
 
 
     // Concept_name goes in search for now. may expand search outside of just concept name
-    if (!this.searchParams.search) { this.searchParams.search = ''};
+    if (!this.searchParams.search) { this.searchParams.search = ''; }
     this.searchParams.concept_name = this.searchParams.search;
 
     // Search only standard concepts when not adv
     if (!this.toggleAdv) {
-      this.searchParams.standard_concept = "s"
+      this.searchParams.standard_concept = 's';
     }
     else {
-      this.searchParams.standard_concept = "";
+      this.searchParams.standard_concept = '';
     }
 
     this.loading = true;
@@ -194,7 +194,7 @@ export class SearchTableAdvancedComponent implements OnInit {
 
   logSearchParams(params){
     //Log search params to back end
-    params['advanced']=this.toggleAdv;
+    params['advanced'] = this.toggleAdv;
     this.achillesService.logSearchParams(params);
   }
 
