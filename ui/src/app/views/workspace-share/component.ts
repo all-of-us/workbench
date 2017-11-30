@@ -23,12 +23,14 @@ export class WorkspaceShareComponent implements OnInit {
   toShare = '';
   selectedPermission = 'Select Permission';
   accessLevel: WorkspaceAccessLevel;
+  selectedAccessLevel: WorkspaceAccessLevel;
   notFound = false;
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
   userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
+  insufficientPermissions = true;
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
@@ -60,11 +62,11 @@ export class WorkspaceShareComponent implements OnInit {
   setAccess(dropdownSelected: string): void {
     this.selectedPermission = dropdownSelected;
     if (dropdownSelected === 'Owner') {
-      this.accessLevel = WorkspaceAccessLevel.OWNER;
+      this.selectedAccessLevel = WorkspaceAccessLevel.OWNER;
     } else if (dropdownSelected === 'Writer') {
-      this.accessLevel = WorkspaceAccessLevel.WRITER;
+      this.selectedAccessLevel = WorkspaceAccessLevel.WRITER;
     } else {
-      this.accessLevel = WorkspaceAccessLevel.READER;
+      this.selectedAccessLevel = WorkspaceAccessLevel.READER;
     }
   }
 
@@ -78,7 +80,7 @@ export class WorkspaceShareComponent implements OnInit {
       this.usersLoading = true;
       const updateList = Array.from(this.workspace.userRoles);
       updateList.push({email: this.convertToEmail(this.toShare),
-          role: this.accessLevel});
+          role: this.selectedAccessLevel});
 
       this.errorHandlingService.retryApi(
         this.workspacesService.shareWorkspace(
@@ -142,6 +144,7 @@ export class WorkspaceShareComponent implements OnInit {
       this.route.snapshot.params['wsid']);
     obs.subscribe(
       (workspaceResponse) => {
+        this.accessLevel = workspaceResponse.accessLevel;
         this.workspace = workspaceResponse.workspace;
       },
       (error) => {
@@ -160,5 +163,9 @@ export class WorkspaceShareComponent implements OnInit {
   resetWorkspaceEditor(): void {
     this.workspaceUpdateConflictError = false;
     this.usersLoading = false;
+  }
+
+  hasPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 }

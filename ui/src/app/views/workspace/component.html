@@ -1,7 +1,9 @@
 <div *ngIf="!notFound else notFoundMessage">
   <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
     <h2>{{workspace.name}}</h2>
-    <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
+    <span *ngIf="hasPermission()">
+      <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
+    </span>
     <clr-icon class="sharing-icon is-solid" shape="users" (click)="share()"></clr-icon>
   </div>
   <ng-template #workspacePageLoading>
@@ -106,7 +108,7 @@
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-          <clr-dg-cell>{{this.document.location.href}}{{notebook.url}}</clr-dg-cell>
+          <clr-dg-cell>{{document.location.href}}{{notebook.url}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>
