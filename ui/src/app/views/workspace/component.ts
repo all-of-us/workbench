@@ -216,4 +216,9 @@ export class WorkspaceComponent implements OnInit {
   share(): void {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
+
+  hasPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+        || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
 }
