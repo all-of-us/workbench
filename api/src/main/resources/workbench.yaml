@@ -1039,6 +1039,9 @@ definitions:
       results:
         description: >
           An array of JSON dictionaries representing results to the cohort materialization.
+          (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
+          list[object] where each object is a dictionary. In Typescript clients, this is an
+          Array<any> where each object is a dictionary.)
         type: array
         items:
           type: object
