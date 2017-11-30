@@ -32,7 +32,6 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateConflictError = false;
   notFound = false;
   accessLevel: WorkspaceAccessLevel;
-  workspaceAccessLevel = WorkspaceAccessLevel;
   insufficientPermissions = true;
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -62,7 +61,7 @@ export class WorkspaceEditComponent implements OnInit {
       this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
-      this.accessLevel = this.workspaceAccessLevel.OWNER;
+      this.accessLevel = WorkspaceAccessLevel.OWNER;
     } else {
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
@@ -96,10 +95,6 @@ export class WorkspaceEditComponent implements OnInit {
     obs.subscribe(
       (workspaceResponse) => {
         this.accessLevel = workspaceResponse.accessLevel;
-        if (this.accessLevel === WorkspaceAccessLevel.OWNER
-            || this.accessLevel === WorkspaceAccessLevel.WRITER) {
-          this.insufficientPermissions = false;
-        }
         this.workspace = workspaceResponse.workspace;
       },
       (error) => {
@@ -150,5 +145,9 @@ export class WorkspaceEditComponent implements OnInit {
             });
       }
     }
+  }
+  hasPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+        || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 }
