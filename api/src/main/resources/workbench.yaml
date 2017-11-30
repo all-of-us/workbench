@@ -37,6 +37,20 @@ security:
 ## PATHS
 ##########################################################################################
 paths:
+
+  /api/v1/config:
+    get:
+      tags:
+        - config
+      description: Returns some server configuration data.
+      operationId: getConfig
+      security: []
+      responses:
+        "200":
+          schema:
+            $ref: "#/definitions/ConfigResponse"
+
+
    # User methods ########################################################################
 
   /api/v1/me:
@@ -713,6 +727,18 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+
+  ConfigResponse:
+    type: object
+    required:
+      - gsuiteDomain
+    properties:
+      # This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
+      # response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
+      gsuiteDomain:
+        type: string
+        description: G-Suite domain containing user accounts.
+
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
     description: ''
