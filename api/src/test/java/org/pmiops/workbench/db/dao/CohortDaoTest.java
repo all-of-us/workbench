@@ -17,11 +17,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@Transactional
 public class CohortDaoTest {
 
     @Autowired
@@ -37,13 +39,13 @@ public class CohortDaoTest {
                 "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1);
+        cohort.setWorkspaceId(9999);
         cohort.setCriteria(cohortJson);
 
         //need to insert a workspace to satisfy the foreign key contraint of cohort
         jdbcTemplate.execute("insert into workspace" +
                 "(workspace_id, name, workspace_namespace, firecloud_name, data_access_level, creation_time, last_modified_time)" +
-                "values (1, 'name', 'name', 'name', 1, sysdate(), sysdate())");
+                "values (9999, 'name', 'name', 'name', 1, sysdate(), sysdate())");
 
         cohortDao.save(cohort);
 
