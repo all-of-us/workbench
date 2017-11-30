@@ -4,6 +4,7 @@
 import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
+import {ConfigResponse, ConfigService} from 'generated';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 
@@ -39,17 +40,13 @@ export class SignInService {
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
 
-  constructor(private zone: NgZone) {
+  constructor(private zone: NgZone, configService: ConfigService) {
     this.zone = zone;
-    this.auth2 = this.makeAuth2();
     this.user = this.makeUserSubject();
-    this.user.subscribe(newUserDetails => {
-      window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
-      if (!newUserDetails.isSignedIn) {
-        this.currentAccessToken = null;
-        return;
-      }
-      this.currentAccessToken = newUserDetails.authResponse['access_token'];
+    this.subscribeToUser();
+    configService.getConfig().subscribe((config) => {
+      this.auth2 = this.makeAuth2(config);
+      this.subscribeToAuth2User();
     });
   }
 
@@ -61,12 +58,12 @@ export class SignInService {
     this.auth2.then(auth2 => auth2.getAuthInstance().signOut());
   }
 
-  private makeAuth2(): Promise<any> {
+  private makeAuth2(config: ConfigResponse): Promise<any> {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
             client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
-            // hosted_domain: 'pmi-ops.org',
+            hosted_domain: config.gsuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
@@ -78,21 +75,34 @@ export class SignInService {
     const initialDetailsString = window.sessionStorage.getItem(SIGNED_IN_USER);
     const initialDetails: SignInDetails = initialDetailsString ?
       JSON.parse(initialDetailsString) : {isSignedIn: false};
-    const ret = new BehaviorSubject(initialDetails);
+    return new BehaviorSubject(initialDetails);
+  }
 
+  private subscribeToAuth2User(): void {
     this.auth2.then(auth2 => {
-        gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
-          const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
-          const details = this.extractSignInDetails(currentUser);
+      gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
+        const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
+        const details = this.extractSignInDetails(currentUser);
 
-          // Without this, Angular views won't "notice" the externally-triggered
-          // event, though the Angular models will update... so the change
-          // won't propagate to UI automatically. Calling `zone.run`
-          // ensures Angular notices as soon as the change occurs.
-          this.zone.run(() => ret.next(details));
-        });
+        // Without this, Angular views won't "notice" the externally-triggered
+        // event, though the Angular models will update... so the change
+        // won't propagate to UI automatically. Calling `zone.run`
+        // ensures Angular notices as soon as the change occurs.
+        const user: BehaviorSubject<SignInDetails> = this.user as BehaviorSubject<SignInDetails>;
+        this.zone.run(() => user.next(details));
+      });
     });
-    return ret;
+  }
+
+  private subscribeToUser(): void {
+    this.user.subscribe(newUserDetails => {
+      window.sessionStorage.setItem(SIGNED_IN_USER, JSON.stringify(newUserDetails));
+      if (!newUserDetails.isSignedIn) {
+        this.currentAccessToken = null;
+        return;
+      }
+      this.currentAccessToken = newUserDetails.authResponse['access_token'];
+    });
   }
 
   private extractSignInDetails(currentUser: any): SignInDetails {
