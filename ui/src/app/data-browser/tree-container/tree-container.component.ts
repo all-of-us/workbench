@@ -23,9 +23,7 @@ export class TreeContainerComponent {
   vocabularyId;
   routeId;
   @Output() conceptsArrayEvent = new EventEmitter();
-  constructor(private treeService: TreeService,
-    private route: ActivatedRoute,
-    private location: Location) {
+  constructor(private treeService: TreeService) {
       // Inititialize trees to first level
       for (const v of this.vocabs) {
         this.treeService.getTreeNodes(v.vocabulary_id, 0).subscribe(results => {
@@ -36,18 +34,16 @@ export class TreeContainerComponent {
 
     }
 
-  openVocabTree(v) {
-
-    if (this.vocabularyId != v && this.tree_nodes[v].length == 0) {
+  openVocabTree(v: any) {
+    if (this.vocabularyId !== v && this.tree_nodes[v].length === 0) {
       this.vocabularyId = v;
-
     }
   }
 
-  passChildren(event) {
+  passChildren(event: any) {
     this.conceptsArrayEvent.emit(event);
   }
-  receiveItem(item) {
+  receiveItem(item: any) {
     this.conceptsArrayEvent.emit(item);
   }
 

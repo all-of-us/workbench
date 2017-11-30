@@ -10,17 +10,21 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./search-table-advanced.component.css']
 })
 export class SearchTableAdvancedComponent implements OnInit {
-
+  //aoeuaoeu
   /* Todo et these dynamically possibly */
-  sourceConceptFilters = [{ vocabulary_id: 'ICD9CM' }, { vocabulary_id: 'ICD10' }, { vocabulary_id: 'ICD10CM'} ];
-  standardConceptFilters = [{ vocabulary_id: 'SNOMED' }, { vocabulary_id: 'RxNorm' }, { vocabulary_id: 'CPT4' }];
-  domainFilters = [{ domain_id: 'Condition' }, { domain_id: 'Procedure' }, { domain_id: 'Drug' }, { domain_id: 'Visit' }];
+  sourceConceptFilters =
+      [{ vocabulary_id: 'ICD9CM' }, { vocabulary_id: 'ICD10' }, { vocabulary_id: 'ICD10CM'} ];
+  standardConceptFilters =
+      [{ vocabulary_id: 'SNOMED' }, { vocabulary_id: 'RxNorm' }, { vocabulary_id: 'CPT4' }];
+  domainFilters =
+      [{ domain_id: 'Condition' }, { domain_id: 'Procedure' },
+          { domain_id: 'Drug' }, { domain_id: 'Visit' }];
 
 
   filterValueAr = [];
   source_vocabs_model = {};
   standard_vocabs_model = {}; // model of standard for form
-  conceptResults;
+  conceptResults: any;
 
   redraw: number[] = []; // flag te redraw analysis , indexed exactly like analyses
   analyses = [];
