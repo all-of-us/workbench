@@ -2,16 +2,6 @@
 
 ./ci/activate_creds.sh ~/gcloud-credentials.key
 
-if [ "$1" == "api" ]
-then
-  (cd ./api && ./project.rb run-cloud-migrations --project all-of-us-workbench-test \
-    --creds_file ~/gcloud-credentials.key)
-  (cd ./api && ./project.rb run-cloud-cdr-migrations --project all-of-us-workbench-test \
-      --creds_file ~/gcloud-credentials.key)
-  (cd ./api && ./project.rb update-cloud-config --project all-of-us-workbench-test \
-    --creds_file ~/gcloud-credentials.key)
-fi
-
 if [ -z "${CIRCLE_TAG}" ]
 then
   # On test, CircleCI automatically deploys all commits to master, for testing.
@@ -24,13 +14,6 @@ else
 fi
 echo "Version: ${VERSION}"
 
-if [ "$1" == "api" ]
-then
-  (cd ./api && ./project.rb deploy-api --project all-of-us-workbench-test \
-     --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-     --creds_file ~/gcloud-credentials.key --version $VERSION --promote)
-else
-  (cd ./ui && ./project.rb deploy-ui --project all-of-us-workbench-test \
-    --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-    --version $VERSION --promote)
-fi
+(cd ./ui && ./project.rb deploy-ui --project all-of-us-workbench-test \
+  --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+  --version $VERSION --promote)
