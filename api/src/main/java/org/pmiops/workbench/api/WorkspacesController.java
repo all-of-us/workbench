@@ -385,10 +385,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    PermissionReport userPermissions;
+    String userAccess;
     try {
-       userPermissions = fireCloudService.getUserPermissionsOnWorkspace(
-          workspaceNamespace, workspaceId, userProvider.get().getEmail());
+       userAccess = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId).getAccessLevel();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
@@ -397,14 +397,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
-    String userAccess = userPermissions.getWorkspaceACL().get(userProvider.get().getEmail()).getAccessLevel();
     if (userAccess == null) {
       //Actual message.
       throw new NotFoundException(String.format(
           "Workspace %s/%s doesn't exist",
           workspaceNamespace, workspaceId));
     }
-    if (userAccess.equals(WorkspaceAccessLevel.READER)) {
+
+    if (userAccess.equals(WorkspaceAccessLevel.READER.toString())) {
       throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
           workspaceNamespace, workspaceId));
     }
