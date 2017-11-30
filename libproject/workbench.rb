@@ -26,6 +26,16 @@ module Workbench
   end
   module_function :ensure_git_hooks
 
+  def in_docker?()
+    File.exist?("/.dockerenv")
+  end
+  module_function :in_docker?
+
+  def assert_in_docker()
+    raise StandardError.new("Not within a docker container") unless Workbench::in_docker?
+  end
+  module_function :assert_in_docker
+
   # Runs a command (typically project.rb) from the main file's directory.
   def handle_argv_or_die(main_filename)
     common = Common.new
@@ -33,7 +43,7 @@ module Workbench
 
     check_submodules
     ensure_git_hooks
-    unless ENV["CIRCLECI"] == "true"
+    unless in_docker?
       common.docker.requires_docker
     end
 
