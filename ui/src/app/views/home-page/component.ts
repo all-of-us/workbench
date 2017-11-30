@@ -5,7 +5,7 @@ import {Comparator, StringFilter} from 'clarity-angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
-  Workspace,
+  WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
@@ -15,22 +15,22 @@ import {
 * determine which of the cohorts loaded into client side memory
 * are displayed.
 */
-class WorkspaceNameFilter implements StringFilter<Workspace> {
-  accepts(workspace: Workspace, search: string): boolean {
-    return workspace.name.toLowerCase().indexOf(search) >= 0;
+class WorkspaceNameFilter implements StringFilter<WorkspaceResponse> {
+  accepts(workspaceResponse: WorkspaceResponse, search: string): boolean {
+    return workspaceResponse.workspace.name.toLowerCase().indexOf(search) >= 0;
   }
 }
 
-class WorkspaceNameComparator implements Comparator<Workspace> {
-  compare(a: Workspace, b: Workspace) {
-    return a.name.localeCompare(b.name);
+class WorkspaceNameComparator implements Comparator<WorkspaceResponse> {
+  compare(a: WorkspaceResponse, b: WorkspaceResponse) {
+    return a.workspace.name.localeCompare(b.workspace.name);
   }
 }
 
 // TODO: Change to research purpose?
-class WorkspaceResearchPurposeFilter implements StringFilter<Workspace> {
-  accepts(workspace: Workspace, search: string): boolean {
-    return workspace.description.toLowerCase().indexOf(search) >= 0;
+class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> {
+  accepts(workspaceResponse: WorkspaceResponse, search: string): boolean {
+    return workspaceResponse.workspace.description.toLowerCase().indexOf(search) >= 0;
   }
 }
 
@@ -49,6 +49,7 @@ export class HomePageComponent implements OnInit {
 
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
+  workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
       private route: ActivatedRoute,
       private errorHandlingService: ErrorHandlingService,
