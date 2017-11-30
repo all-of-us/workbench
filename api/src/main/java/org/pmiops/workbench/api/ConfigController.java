@@ -23,7 +23,7 @@ public class ConfigController implements ConfigApiDelegate {
   public ResponseEntity<ConfigResponse> getConfig() {
     return ResponseEntity.ok(
       new ConfigResponse()
-        .gSuiteDomain(configProvider.get().googleDirectoryService.gSuiteDomain)
+        .gsuiteDomain(configProvider.get().googleDirectoryService.gSuiteDomain)
     );
   }
 }

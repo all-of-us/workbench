@@ -731,9 +731,9 @@ definitions:
   ConfigResponse:
     type: object
     required:
-      - gSuiteDomain
+      - gsuiteDomain
     properties:
-      gSuiteDomain:
+      gsuiteDomain:
         type: string
         description: G-Suite domain containing user accounts.
 

@@ -63,7 +63,7 @@ export class SignInService {
       gapi.load('auth2', () => {
         gapi.auth2.init({
             client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
-            hosted_domain: config.gSuiteDomain,
+            hosted_domain: config.gsuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
         resolve(gapi.auth2);
