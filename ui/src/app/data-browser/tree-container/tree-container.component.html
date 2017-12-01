@@ -4,11 +4,6 @@
     {{v.name}}
     <ng-template [clrIfExpanded] >
       <div class="tree-height">
-        <div *ngIf="v.vocabulary_id == 'PPI'">
-          <app-recursive-tree (conceptEmit)='passChildren($event)' *ngFor="let item of tree_nodes[v.vocabulary_id]" [item]="item">
-          </app-recursive-tree>
-        </div>
-
         <div *ngIf="v.vocabulary_id != 'PPI'">
             <clr-tree-node *ngFor="let item of tree_nodes[v.vocabulary_id]">
 

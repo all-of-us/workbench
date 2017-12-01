@@ -19,7 +19,6 @@ export class SearchTableAdvancedComponent implements OnInit {
       [{ domain_id: 'Condition' }, { domain_id: 'Procedure' },
           { domain_id: 'Drug' }, { domain_id: 'Visit' }];
 
-
   filterValueAr = [];
   source_vocabs_model = {};
   standard_vocabs_model = {}; // model of standard for form
@@ -155,10 +154,6 @@ export class SearchTableAdvancedComponent implements OnInit {
   }
 
 
-
-
-
-  //
   submitSearchForm(form) {
     // Search form submit has domain and vocab filters, plus search text and other options
     // Form logic is as so:
@@ -196,7 +191,7 @@ export class SearchTableAdvancedComponent implements OnInit {
   }
 
   logSearchParams(params){
-    //Log search params to back end
+    // Log search params to back end
     params['advanced'] = this.toggleAdv;
     this.achillesService.logSearchParams(params);
   }

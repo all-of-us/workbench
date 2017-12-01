@@ -28,7 +28,6 @@ import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
 import { MyConceptsComponent } from './my-concepts/my-concepts.component';
 import { OneConceptComponent } from './one-concept/one-concept.component';
 import { PlaceholderComponent } from './placeholder/placeholder.component';
-import { RecursiveTreeComponent } from './recursive-tree/recursive-tree.component';
 import { SearchTableAdvancedComponent } from './search-table-advanced/search-table-advanced.component';
 import { SearchComponent } from './search/search.component';
 import { TreeContainerComponent } from './tree-container/tree-container.component';
@@ -65,7 +64,6 @@ export function highchartsFactory() {
       ConceptDrawerComponent,
       SearchComponent,
       MyConceptsComponent,
-      RecursiveTreeComponent,
       LazyTreeComponent,
       TreeContainerComponent,
       SearchTableAdvancedComponent,
@@ -75,8 +73,6 @@ export function highchartsFactory() {
       MobileChartsComponent,
       OneConceptComponent,
       PlaceholderComponent
-
-
   ],
   providers: [
       AchillesService,
