@@ -66,10 +66,6 @@ export class SearchComponent implements OnInit {
   constructor(private achillesService: AchillesService, private route: ActivatedRoute) {
 
     this.route.params.subscribe(params => {
-      // get parameter from URL...
-      // example:  http://localhost:4200/data-browser/drug
-      // <--drug is params.id, which is defined in router.
-      // Set the domain id for the page if this route is domain specific
       this.routeId = params.id;
       if (this.routeDomain[this.routeId]) {
         this.pageDomainId = this.routeDomain[this.routeId];

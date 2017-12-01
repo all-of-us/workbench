@@ -67,7 +67,6 @@ export function highchartsFactory() {
       MyConceptsComponent,
       RecursiveTreeComponent,
       LazyTreeComponent,
-      SurveyDrawerComponent,
       TreeContainerComponent,
       SearchTableAdvancedComponent,
       HomeComponent,

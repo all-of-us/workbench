@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { AchillesService } from '../services/achilles.service'
-import { IConcept, Concept } from '../ConceptClasses'
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Concept, IConcept } from '../ConceptClasses';
+import { AchillesService } from '../services/achilles.service';
 
 @Component({
   selector: 'app-one-concept',
@@ -10,20 +10,20 @@ import { IConcept, Concept } from '../ConceptClasses'
 export class OneConceptComponent implements OnInit {
   // @Input() newConcept:IConcept; // Last concept added
   @Input() redraw;
-  @Input() concept
-  @Input() analyses
-  @Input() routeId
-  @Output() removeOneEmit = new EventEmitter()
-  singleGraph = []
+  @Input() concept;
+  @Input() analyses;
+  @Input() routeId;
+  @Output() removeOneEmit = new EventEmitter();
+  singleGraph = [];
 
   // @Input() ppi
   // @Output() onParentSelected:EventEmitter<any> = new EventEmitter();
-  initialized: boolean = false; // Flag to set initialized
+  initialized = false; // Flag to set initialized
   arrayConcept = [];
-  show_source_graph = false
-  show_source_table = false
+  show_source_graph = false;
+  show_source_table = false;
 
-  randNum
+  randNum;
 
   constructor(private achillesService: AchillesService) {
 
@@ -32,9 +32,9 @@ export class OneConceptComponent implements OnInit {
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
 
-    let aids = [3001, 3002]
-    this.show_source_graph = false
-    this.show_source_table = false
+    const aids = [3001, 3002];
+    this.show_source_graph = false;
+    this.show_source_table = false;
 
     this.achillesService.getSectionAnalyses(aids)
       .then(analyses => {
@@ -42,8 +42,8 @@ export class OneConceptComponent implements OnInit {
         this.analyses = analyses;
         // Clone each analysis on the concept object so they have their own copy for results
         // This is run every time for a clarity drawer .
-        let aclones = [];
-        for (let a of this.analyses) {
+        const aclones = [];
+        for (const a of this.analyses) {
           //
           aclones.push(this.achillesService.cloneAnalysis(a));
         }
@@ -60,17 +60,17 @@ export class OneConceptComponent implements OnInit {
           this.show_source_table = true;
           this.show_source_graph = false;
           for (let i = 0; i < this.analyses.length; i++) {
-            this.analyses[i].showgraph = false
+            this.analyses[i].showgraph = false;
           }
         }
         else if (this.analyses.length > 0) {
-          this.analyses[0].showgraph = true
+          this.analyses[0].showgraph = true;
         }
 
         this.randNum = Math.random();
 
         // Get any maps to parents and children and add them to the concept
-        if (this.concept.vocabulary_id != "PPI") {
+        if (this.concept.vocabulary_id != 'PPI') {
           this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
             .subscribe(data => {
               this.concept.children = data;
@@ -80,7 +80,7 @@ export class OneConceptComponent implements OnInit {
               this.concept.parents = data;
             });
         }
-      });//end of .subscribe
+      }); //end of .subscribe
   } // end of ngOnChanges()
 
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
@@ -89,7 +89,7 @@ export class OneConceptComponent implements OnInit {
   }
 
   sendRemove(node) {
-    this.removeOneEmit.emit(node)
+    this.removeOneEmit.emit(node);
   }
 
   graphBool(analysis, item) {
@@ -104,13 +104,13 @@ export class OneConceptComponent implements OnInit {
 
       }
       else if (item == 'source-table') {
-        this.show_source_table = !this.show_source_table
+        this.show_source_table = !this.show_source_table;
         if (this.show_source_table) {
           this.show_source_graph = false;
         }
       }
       if (this.show_source_table || this.show_source_graph) {
-        for (let a of this.analyses) {
+        for (const a of this.analyses) {
           a.showgraph = false;
         }
       }
@@ -135,7 +135,7 @@ export class OneConceptComponent implements OnInit {
           }
         }
         else {
-          this.analyses[i].showgraph = false
+          this.analyses[i].showgraph = false;
         }
       }
     }
