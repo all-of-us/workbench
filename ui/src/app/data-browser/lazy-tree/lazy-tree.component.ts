@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import {Concept, IConcept} from '../ConceptClasses';
+import { ActivatedRoute, Router } from '@angular/router';
+import {IConcept} from '../ConceptClasses';
 import { TreeService } from '../services/tree.service';
 @Component({
   selector: 'app-lazy-tree',
@@ -45,7 +45,8 @@ export class LazyTreeComponent implements OnInit {
     return false;
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, private treeService: TreeService, ) {
+  constructor(private route: ActivatedRoute, private router: Router,
+              private treeService: TreeService, ) {
     this.route.params.subscribe(params => {
       // get parameter from URL...
         // example:  http://localhost:4200/data-browser/drug
@@ -65,8 +66,7 @@ export class LazyTreeComponent implements OnInit {
     if (this.parent.children && this.parent.children.length) {
         this.tree_nodes = this.parent.children;
         this.loading = false;
-    }
-    else {
+    } else {
       this.treeService.getTreeNodes(this.vocabularyId, this.parent.id).subscribe(results => {
         this.tree_nodes = results;
         this.parent.children = results;
@@ -82,8 +82,7 @@ export class LazyTreeComponent implements OnInit {
     // If have children,  then emit
     if (item.children && item.children.length) {
       this.conceptEmit.emit(item);
-    }
-    else {
+    } else {
       this.treeService.getTreeNodes(this.vocabularyId, item.id).subscribe(results => {
         item.children = results;
         this.loading = false;

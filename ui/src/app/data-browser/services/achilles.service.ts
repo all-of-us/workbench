@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Http} from '@angular/http';
 import {DataBrowserService} from 'generated';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
@@ -14,7 +13,7 @@ import 'rxjs/add/operator/toPromise';
 @Injectable()
 export class AchillesService {
   constructor(
-    private http: Http, private api: DataBrowserService
+     private api: DataBrowserService
   ) { }
   private handleError(error: any): Promise<any> {
     console.error('An error occurred: ', error);
@@ -259,12 +258,8 @@ export class AchillesService {
     if (aclass === 'AnalysisDist') {
       a = new AnalysisDist(analysis);
     }
-    const rand = Math.random();
-    console.log('Clone a', a);
     a.results = []; // clear out any results that were in there
-
     return a;
-
   }
 
   cloneConceptChildren(children) {

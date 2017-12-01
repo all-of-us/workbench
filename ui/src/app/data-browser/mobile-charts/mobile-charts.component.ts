@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Concept, IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 @Component({
   selector: 'app-mobile-charts',
@@ -25,11 +24,6 @@ export class MobileChartsComponent implements OnInit {
 
   }
 
-  ngOnChanges() {
-    // //
-  }
-
-  //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnInit() {
     const section = 3000;
     const aids = [3101, 3102];
@@ -71,7 +65,7 @@ export class MobileChartsComponent implements OnInit {
         }
 
 
-      }); //end of .subscribe
+      });
 
 
 
@@ -82,9 +76,9 @@ export class MobileChartsComponent implements OnInit {
   }
 
   graphBool(analysis) {
-    if (analysis == null){
+    if (analysis == null) {
       // SHow children graph
-      if (this.show_source_graph == false) {
+      if (this.show_source_graph === false) {
       this.show_source_graph = true;
     }
     else {
@@ -94,27 +88,20 @@ export class MobileChartsComponent implements OnInit {
         a.showgraph = false;
       }
       return;
-    }
-else {
-    for (let i = 0; i < this.analyses.length; i++) {
-      if (this.analyses[i] == analysis) {
-        if (this.analyses[i].showgraph == false || typeof (this.analyses[i].showgraph) == 'undefined') {
-          this.analyses[i].showgraph = true;
-          this.show_source_graph = false;
-          // this.singleGraph.push(this.analyses[i])
+    } else {
+        for (let i = 0; i < this.analyses.length; i++) {
+          if (this.analyses[i] === analysis) {
+            if (this.analyses[i].showgraph === false ||
+                typeof (this.analyses[i].showgraph) === 'undefined') {
+              this.analyses[i].showgraph = true;
+              this.show_source_graph = false;
+            } else {
+              this.analyses[i].showgraph = false;
+            }
+          } else {
+              this.analyses[i].showgraph = false;
+          }
         }
-        else {
-          this.analyses[i].showgraph = false;
-          // this.singleGraph.splice(this.analyses[i], 1)
-        }
-      }
-      else {
-          this.analyses[i].showgraph = false;
-      }
     }
   }
-    //
-  }
-
-
 }

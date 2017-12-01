@@ -1,4 +1,4 @@
-import { Component, Input, NgModule } from '@angular/core';
+import {Component, Input, NgModule, OnChanges} from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
 
 // import highcharts and highmaps and add highmaps to it.
@@ -30,7 +30,7 @@ import { IConcept } from '../ConceptClasses';
 @NgModule({
   imports: [ChartModule]
 })
-export class ChartComponent  {
+export class ChartComponent implements OnChanges {
   @Input() redraw;
   @Input() analysis: Analysis;
   @Input() concepts: IConcept[];

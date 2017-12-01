@@ -1,41 +1,5 @@
 <div class="container">
-  <div class="phone-display">
-    <h2>EHR</h2>
-    <span *ngFor="let data of phoneData">
-      <div *ngIf="data.domain_parent=='ehr'" class="card col-lg-10 col-sm-12">
-        <h1 class="cap">{{data.domain_display}}</h1>
-        <p class="col-sm-12" >{{data.domain_desc}}</p>
 
-
-        <ul class="vocab-list col-sm-12" >
-          <h5> <strong>Vocabularies that are included in {{data.domain_display}}</strong>:</h5>
-
-          <li *ngFor="let vocab of data.domain_vocab"class="vocab-list-item ">{{vocab.vocabulary_id}}
-            <clr-signpost>
-                    <clr-signpost-content *clrIfOpen="openState">
-                        <h5>{{vocab.vocabulary_id}}</h5>
-                        <a href="{{vocab.vocabulary_reference}}" target="_blank">More info <clr-icon shape="pop-out"></clr-icon></a>
-                    </clr-signpost-content>
-                </clr-signpost>
-          </li>
-        </ul>
-
-        <a class="card-link" (click)="routeTo(data)" *ngIf="data.domain_display" class="card-link" >Browse <span >{{data.domain_display}} Data</span>
-    <clr-icon style="margin-top:-.2rem; font-size:1.5rem" class="is-solid" shape="bar-chart"></clr-icon>
-    </a>
-  </div>
-  </span>
-  <h2>PPI</h2>
-  <span *ngFor="let data of phoneData">
-      <div *ngIf="data.domain_parent=='ppi'" class="card col-lg-10 col-sm-12">
-        <h1 class="cap">{{data.domain_display}}</h1>
-        <p class="col-sm-12" >{{data.domain_desc}}</p>
-        <a  (click)="routeTo(data)" *ngIf="data.domain_display" class="card-link" >Browse <span >{{data.domain_display}} Data</span>
-  <clr-icon style="margin-top:-.2rem; font-size:1.5rem" class="is-solid" shape="bar-chart"></clr-icon>
-  </a>
-</div>
-</span>
-</div>
 <div class="row col-sm-12">
   <div class="col-lg-6 col-md-12">
     <h3>What is the Data Browser?</h3>
@@ -76,7 +40,7 @@
   </div>
 </div>
 <hr>
-<div class="col-sm-11">
+<div class="col-sm-12">
   <h2 class= "text-center" id = "domains" [ngClass]="{'selected-title': 'domains' == highlight}">Domains</h2>
   <div *ngFor="let object of homeData">
     <div class = "top-spacing" id="{{object.domain_display}}"  *ngIf="object.domain_display  && object.domain_parent=='domain'" class="">

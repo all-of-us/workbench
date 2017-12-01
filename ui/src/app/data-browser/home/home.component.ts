@@ -1,5 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute, Router} from '@angular/router';
+import { Component } from '@angular/core';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
