@@ -272,6 +272,7 @@ public class CohortReviewControllerTest {
 
         org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
+                        .cohortReviewId(cohortReviewId)
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED);
 
