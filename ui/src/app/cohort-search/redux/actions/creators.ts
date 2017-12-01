@@ -27,6 +27,9 @@ import {
   WIZARD_FINISH,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
+
+  LOAD_ENTITIES,
+  RESET_STORE,
   ActionTypes,
 } from './types';
 /* tslint:enable:ordered-imports */
@@ -161,3 +164,11 @@ export const cancelWizard =
 export const setWizardContext =
   (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
   ({type: SET_WIZARD_CONTEXT, context});
+
+export const loadEntities =
+  (entities: any): ActionTypes[typeof LOAD_ENTITIES] =>
+  ({type: LOAD_ENTITIES, entities});
+
+export const resetStore =
+  (): ActionTypes[typeof RESET_STORE] =>
+  ({type: RESET_STORE});

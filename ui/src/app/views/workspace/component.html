@@ -48,6 +48,11 @@
                 <span>{{cohort.name}}</span>
               </div>
               <div style="display: flex; height: 2vh;">
+                <a routerLink="{{document.location.pathname}}/cohorts/build"
+                   [queryParams]="{criteria: cohort.criteria}"
+                  >
+                  Clone
+                </a>
                 <a style="padding-right: 1vh; border-right: 1px solid black;"
                     routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
                   Edit

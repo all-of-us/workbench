@@ -1,6 +1,6 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {isImmutable, List, Map, Set} from 'immutable';
+import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
 
@@ -14,6 +14,7 @@ import {
   getGroup,
   getItem,
   getSearchRequest,
+  groupList,
   includeGroups,
   isCriteriaLoading,
   isRequesting,
@@ -67,6 +68,9 @@ export class CohortSearchActions {
   @dispatch() cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
+  @dispatch() loadEntities = ActionFuncs.loadEntities;
+  @dispatch() resetStore = ActionFuncs.resetStore;
+
   /** Internal tooling */
   _idsInUse = Set<string>();
 
@@ -76,7 +80,7 @@ export class CohortSearchActions {
     while (this._idsInUse.has(newId)) {
       newId = `${prefix}_${this._genSuffix()}`;
     }
-    this._idsInUse = this._idsInUse.add(newId);
+    this.addId(newId);
     return newId;
   }
 
@@ -86,6 +90,10 @@ export class CohortSearchActions {
 
   removeId(id: string) {
     this._idsInUse = this._idsInUse.delete(id);
+  }
+
+  addId(newId: string) {
+    this._idsInUse = this._idsInUse.add(newId);
   }
 
   get state() {
@@ -253,6 +261,30 @@ export class CohortSearchActions {
     this.requestCharts('searchRequests', SR_ID, request);
   }
 
+  /*
+   * Iterates through the full state object, re-running all count / chart
+   * requests
+   */
+  runAllRequests() {
+    const _doRequests = (kind) => {
+      const groups = groupList(kind)(this.state);
+      groups.forEach(group => {
+        group.get('items', List()).forEach(itemId => {
+          this.requestItemCount(kind, itemId);
+        });
+        this.requestGroupCount(kind, group.get('id'));
+      });
+    };
+    _doRequests('includes');
+    _doRequests('excludes');
+
+    /* Since everything is being run again, the optimizations in
+     * `this.requestTotalCount` are sure to be off.  Basically ALL the groups
+     * are outdated at the time this runs */
+    const request = this.mapAll();
+    this.requestCharts('searchRequests', SR_ID, request);
+  }
+
   mapAll = (): SearchRequest => {
     const getGroups = kind =>
       (getSearchRequest(SR_ID)(this.state))
@@ -314,5 +346,56 @@ export class CohortSearchActions {
     }
 
     return param;
+  }
+
+  /*
+   * Deserializes a JSONified SearchRequest into an entities object
+   */
+  deserializeEntities(jsonStore) {
+    const data = JSON.parse(jsonStore);
+    const entities = {
+      searchRequests: {
+        [SR_ID]: {
+          includes: data.includes.map(g => g.id),
+          excludes: data.excludes.map(g => g.id),
+        }
+      },
+      groups: {},
+      items: {},
+      parameters: {},
+    };
+
+    for (const role of ['includes', 'excludes']) {
+      entities.searchRequests[SR_ID][role] = data[role].map(group => {
+        group.items = group.items.map(item => {
+          item.searchParameters = item.searchParameters.map(param => {
+            param.code = param.value;
+            entities.parameters[param.parameterId] = param;
+            this.addId(param.parameterId);
+            return param.parameterId;
+          });
+          item.count = 0;
+          item.isRequesting = false;
+          entities.items[item.id] = item;
+          this.addId(item.id);
+          return item.id;
+        });
+        group.count = 0;
+        group.isRequesting = false;
+        entities.groups[group.id] = group;
+        this.addId(group.id);
+        return group.id;
+      });
+    }
+
+    return fromJS(entities);
+  }
+
+  /*
+   * Loads a JSONified SearchRequest into the store
+   */
+  loadFromJSON(json) {
+    const entities = this.deserializeEntities(json);
+    this.loadEntities(entities);
   }
 }

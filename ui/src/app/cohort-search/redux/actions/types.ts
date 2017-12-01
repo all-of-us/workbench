@@ -29,6 +29,9 @@ export const WIZARD_FINISH = 'WIZARD_FINISH';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
 export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
+export const LOAD_ENTITIES = 'LOAD_ENTITIES';
+export const RESET_STORE = 'RESET_STORE';
+
 export interface ActiveContext {
   criteriaType?: string;
   role?: keyof SearchRequest;
@@ -161,6 +164,14 @@ export interface ActionTypes {
     type: typeof SET_WIZARD_CONTEXT;
     context: ActiveContext;
   };
+
+  LOAD_ENTITIES: {
+    type: typeof LOAD_ENTITIES;
+    entities: any;
+  };
+  RESET_STORE: {
+    type: typeof RESET_STORE;
+  };
 }
 
 export type RootAction =
@@ -191,4 +202,7 @@ export type RootAction =
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
+
+  | ActionTypes[typeof LOAD_ENTITIES]
+  | ActionTypes[typeof RESET_STORE]
   ;

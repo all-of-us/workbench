@@ -39,6 +39,9 @@ import {
   WIZARD_FINISH,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
+
+  LOAD_ENTITIES,
+  RESET_STORE,
   RootAction,
 } from './actions/types';
 /* tslint:enable:ordered-imports */
@@ -246,6 +249,12 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SET_WIZARD_CONTEXT:
         return state.mergeDeepIn(['wizard'], action.context);
+
+      case LOAD_ENTITIES:
+        return state.set('entities', action.entities);
+
+      case RESET_STORE:
+        return initialState;
 
       default: return state;
     }
