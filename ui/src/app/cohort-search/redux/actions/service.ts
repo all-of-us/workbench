@@ -69,12 +69,12 @@ export class CohortSearchActions {
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
-  @dispatch() resetStore = ActionFuncs.resetStore;
+  @dispatch() _resetStore = ActionFuncs.resetStore;
 
   /** Internal tooling */
   _idsInUse = Set<string>();
 
-  generateId(prefix?: string) {
+  generateId(prefix?: string): string {
     prefix = prefix || 'id';
     let newId = `${prefix}_${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
@@ -84,15 +84,15 @@ export class CohortSearchActions {
     return newId;
   }
 
-  _genSuffix() {
+  _genSuffix(): string {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  removeId(id: string) {
+  removeId(id: string): void {
     this._idsInUse = this._idsInUse.delete(id);
   }
 
-  addId(newId: string) {
+  addId(newId: string): void {
     this._idsInUse = this._idsInUse.add(newId);
   }
 
@@ -351,7 +351,7 @@ export class CohortSearchActions {
   /*
    * Deserializes a JSONified SearchRequest into an entities object
    */
-  deserializeEntities(jsonStore) {
+  deserializeEntities(jsonStore: string): Map<any, any> {
     const data = JSON.parse(jsonStore);
     const entities = {
       searchRequests: {
@@ -392,10 +392,20 @@ export class CohortSearchActions {
   }
 
   /*
+   * Reset the ID cache, then
    * Loads a JSONified SearchRequest into the store
    */
-  loadFromJSON(json) {
+  loadFromJSON(json: string): void {
+    this._idsInUse = Set<string>();
     const entities = this.deserializeEntities(json);
     this.loadEntities(entities);
+  }
+
+  /*
+   * Reset Store: reset the store to the initial state and wipe all cached ID's
+   */
+  resetStore(): void {
+    this._idsInUse = Set<string>();
+    this._resetStore();
   }
 }
