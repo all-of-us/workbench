@@ -1,10 +1,7 @@
-
-import {CommonModule} from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClarityModule } from 'clarity-angular';
 
@@ -34,11 +31,7 @@ import { PlaceholderComponent } from './placeholder/placeholder.component';
 import { RecursiveTreeComponent } from './recursive-tree/recursive-tree.component';
 import { SearchTableAdvancedComponent } from './search-table-advanced/search-table-advanced.component';
 import { SearchComponent } from './search/search.component';
-import { SurveyDrawerComponent } from './survey-drawer/survey-drawer.component';
 import { TreeContainerComponent } from './tree-container/tree-container.component';
-
-
-
 
 import {DataBrowserService} from 'generated';
 import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
