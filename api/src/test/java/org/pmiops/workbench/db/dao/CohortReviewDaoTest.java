@@ -83,10 +83,9 @@ public class CohortReviewDaoTest {
         CohortReview cohortReview = createCohortReview();
 
         cohortReviewDao.save(cohortReview);
-        cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReview.getCohortId(), cohortReview.getCdrVersionId());
 
-//        assertEquals(cohortReview, cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReview.getCohortId(),
-//                cohortReview.getCdrVersionId()));
+        assertEquals(cohortReview, cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReview.getCohortId(),
+                cohortReview.getCdrVersionId()));
     }
 
     private CohortReview createCohortReview() {
