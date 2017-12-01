@@ -18,8 +18,15 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   public String readInvitationKey() {
-    String bucketName = configProvider.get().googleCloudStorageService.credentialsBucketName;
-    return readToString(bucketName, "invitation-key.txt").trim();
+    return readToString(getCredentialsBucketName(), "invitation-key.txt").trim();
+  }
+
+  public String readBlockscoreApiKey() {
+    return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
+  }
+
+  String getCredentialsBucketName() {
+    return configProvider.get().googleCloudStorageService.credentialsBucketName;
   }
 
   String readToString(String bucketName, String objectPath) {

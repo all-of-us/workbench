@@ -6,4 +6,5 @@ package org.pmiops.workbench.google;
 public interface CloudStorageService {
 
   public String readInvitationKey();
+  public String readBlockscoreApiKey();
 }

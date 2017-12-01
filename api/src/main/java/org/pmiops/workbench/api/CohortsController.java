@@ -19,6 +19,8 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.MaterializeCohortRequest;
+import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -171,6 +173,19 @@ public class CohortsController implements CohortsApiDelegate {
       throw new ConflictException("Failed due to concurrent cohort modification");
     }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+  }
+
+  @Override
+  public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
+      String workspaceId, MaterializeCohortRequest request) {
+    // TODO(danrodney): get list of participant IDs by:
+    // 1. Retrieve participant cohort statuses matching the status filter.
+    // 2. If the status filter does not contain NOT_REVIEWED, or the cohort review contains
+    // all participant IDs in the cohort, return the IDs directly (subject to pagination.)
+    // 3. Otherwise, query BigQuery for participant IDs using SQL constructed from the cohort
+    // criteria, subject to pagination; remove IDs for participants that had a cohort status not
+    // included in the status filter.
+    return ResponseEntity.ok(new MaterializeCohortResponse());
   }
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,

@@ -195,12 +195,16 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.8.0'
   compile 'com.google.code.gson:gson:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:+'
+  compile 'com.squareup.okhttp:okhttp:2.4.0'
   compile 'com.squareup.okhttp:logging-interceptor:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
+  compile 'com.blockscore:blockscore-java:4.0.2'
+
+  // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
+  compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
