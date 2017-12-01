@@ -1,7 +1,7 @@
 <div *ngIf="!notFound else notFoundMessage">
   <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
     <h2>{{workspace.name}}</h2>
-    <div>
+    <div class="icon-area">
       <clr-icon *ngIf="hasWritePermission()"
           class="editing-icon is-solid" shape="pencil"
           (click)="edit()"></clr-icon>
@@ -9,7 +9,7 @@
       <clr-icon *ngIf="hasOwnerPermission()"
           class="deleting-icon is-solid"
           shape="trash" (click)="delete()"></clr-icon>
-      <span class="icon-notify"><span class="spinner spinner-sm"></span><span>
+      <span *ngIf="deleting" class="icon-notify spinner spinner-sm"></span>
     </div>
   </div>
   <ng-template #workspacePageLoading>
