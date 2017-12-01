@@ -5,7 +5,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
-    private SubjectCounter subjectCounter;
+    private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -61,10 +61,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             };
 
     @Autowired
-    CohortBuilderController(BigQueryService bigQueryService, SubjectCounter subjectCounter,
+    CohortBuilderController(BigQueryService bigQueryService, ParticipantCounter participantCounter,
                             CriteriaDao criteriaDao) {
         this.bigQueryService = bigQueryService;
-        this.subjectCounter = subjectCounter;
+        this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
     }
 
@@ -94,13 +94,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<Long> countSubjects(SearchRequest request) {
+    public ResponseEntity<Long> countParticipants(SearchRequest request) {
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
-        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request));
+        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -117,7 +117,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
-        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(subjectCounter.buildChartInfoCounterQuery(request));
+        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

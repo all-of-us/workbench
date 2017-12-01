@@ -21,10 +21,15 @@ import java.util.StringJoiner;
  * defined by the provided {@link SearchRequest}.
  */
 @Service
-public class SubjectCounter {
+public class ParticipantCounter {
 
     private static final String COUNT_SQL_TEMPLATE =
             "select count(distinct person_id) as count\n" +
+                    "from `${projectId}.${dataSetId}.person` person\n" +
+                    "where\n";
+
+    private static final String ID_SQL_TEMPLATE =
+            "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
@@ -44,6 +49,8 @@ public class SubjectCounter {
 
     private static final String CHART_INFO_SQL_GROUP_BY = "group by gender, race, ageRange\n" + "order by gender, race, ageRange\n";
 
+    private static final String ID_SQL_ORDER_BY = "order by person_id\n" + "limit";
+
     private static final String UNION_TEMPLATE = "union distinct\n";
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
@@ -58,7 +65,7 @@ public class SubjectCounter {
      * Provides counts with demographic info for charts
      * defined by the provided {@link SearchRequest}.
      */
-    public QueryJobConfiguration buildSubjectCounterQuery(SearchRequest request) {
+    public QueryJobConfiguration buildParticipantCounterQuery(SearchRequest request) {
         return buildQuery(request, COUNT_SQL_TEMPLATE, "");
     }
 
@@ -68,6 +75,10 @@ public class SubjectCounter {
      */
     public QueryJobConfiguration buildChartInfoCounterQuery(SearchRequest request) {
         return buildQuery(request, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
+    }
+
+    public QueryJobConfiguration buildParticipantIdQuery(SearchRequest request, long resultSize) {
+        return buildQuery(request, ID_SQL_TEMPLATE, ID_SQL_ORDER_BY + " " + resultSize);
     }
 
     public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String sqlGroupBy) {
