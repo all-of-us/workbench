@@ -3,13 +3,15 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortReviewInfo;
 import org.pmiops.workbench.model.ParticipantCohortStatusListResponse;
 import org.pmiops.workbench.model.SearchRequest;
@@ -19,6 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +41,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private BigQueryService bigQueryService;
-    private SubjectCounter subjectCounter;
+    private ParticipantCounter participantCounter;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -50,6 +54,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
+                            .cohortReviewId(participant.getParticipantKey().getCohortReviewId())
                             .status(participant.getStatus());
                 }
             };
@@ -59,16 +64,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                            CohortDao cohortDao,
                            ParticipantCohortStatusDao participantCohortStatusDao,
                            BigQueryService bigQueryService,
-                           SubjectCounter subjectCounter) {
+                           ParticipantCounter participantCounter) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.bigQueryService = bigQueryService;
-        this.subjectCounter = subjectCounter;
+        this.participantCounter = participantCounter;
     }
 
     /**
-     * Get the cohort review info.
+     * Get the cohort review info. If a cohort review does not exist, a default review will be created without
+     * any participants. The {@link CohortReviewInfo#getReviewCount()} will equal zero (0) and be the indicatior
+     * that the cohort review has not been fully created. If a cohort review does exist, the
+     * {@link CohortReviewInfo#getReviewCount()} will be > 0. If a cohort definition for the specified cohortId
+     * doesn't exist a {@link BadRequestException} will be thrown.
      *
      * @param cohortId
      * @param cdrVersionId
@@ -76,25 +85,80 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     @Override
     public ResponseEntity<CohortReviewInfo> getCohortReviewInfo(Long cohortId, Long cdrVersionId) {
-        CohortReviewInfo info = new CohortReviewInfo();
 
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         if (cohortReview == null) {
             CohortDefinition definition = cohortDao.findCohortByCohortId(cohortId);
+            if (definition == null) {
+                throw new BadRequestException("Invalid Request: No Cohort definition matching cohortId: " + cohortId);
+            }
             SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
-            QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
+            QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
             Map<String, Integer> rm = bigQueryService.getResultMapper(result);
             List<FieldValue> row = result.iterateAll().iterator().next();
-            info.setCohortCount(bigQueryService.getLong(row, rm.get("count")));
-        } else {
-            info.setCohortReviewId(cohortReview.getCohortReviewId());
-            info.setCohortCount(cohortReview.getMatchedParticipantCount());
+            long cohortCount = bigQueryService.getLong(row, rm.get("count"));
+
+            cohortReview = new CohortReview();
+            cohortReview.setCohortId(cohortId);
+            cohortReview.setCdrVersionId(cdrVersionId);
+            cohortReview.matchedParticipantCount(cohortCount);
+            cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
+            cohortReviewDao.save(cohortReview);
         }
+
+        long count = participantCohortStatusDao.countByParticipantKey_CohortReviewId(cohortReview.getCohortReviewId());
+        CohortReviewInfo info = new CohortReviewInfo()
+                .cohortReviewId(cohortReview.getCohortReviewId())
+                .reviewCount(count)
+                .cohortCount(cohortReview.getMatchedParticipantCount());
+
         return ResponseEntity.ok(info);
     }
 
     /**
-     * Get all participants for the specified cohortReviewId.
+     * Create a cohort review per the specified cohortReviewId and size. If participant cohort status
+     * data exists for a review or no cohort review exists for cohortReviewId then throw a
+     * {@link BadRequestException}.
+     *
+     * @param cohortReviewId
+     * @param size
+     * @return
+     */
+    @Override
+    public ResponseEntity<CohortReviewInfo> createCohortReview(Long cohortReviewId, Integer size) {
+        if(participantCohortStatusDao.countByParticipantKey_CohortReviewId(cohortReviewId) > 0) {
+            throw new BadRequestException("Invalid Request: Cohort Review already created for cohortReviewId: " + cohortReviewId);
+        }
+        CohortReview cohortReview = cohortReviewDao.findOne(cohortReviewId);
+        if (cohortReview == null) {
+            throw new BadRequestException("Invalid Request: No Cohort Review matching cohortReviewId: " + cohortReviewId);
+        }
+
+        CohortDefinition definition = cohortDao.findCohortByCohortId(cohortReview.getCohortId());
+        SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantIdQuery(request, size)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+        List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
+        for (List<FieldValue> row : result.iterateAll()) {
+            participantCohortStatuses.add(
+                    new ParticipantCohortStatus()
+                    .participantKey(new ParticipantCohortStatusKey(cohortReviewId, bigQueryService.getLong(row, rm.get("person_id")))));
+        }
+
+        participantCohortStatusDao.save(participantCohortStatuses);
+
+        CohortReviewInfo info = new CohortReviewInfo()
+                .cohortReviewId(cohortReview.getCohortReviewId())
+                .reviewCount(new Long(participantCohortStatuses.size()))
+                .cohortCount(cohortReview.getMatchedParticipantCount());
+
+        return ResponseEntity.ok(info);
+    }
+
+    /**
+     * Get all participants for the specified cohortReviewId. This endpoint does pagination
+     * based on page, limit, order and column.
      *
      * @param cohortReviewId
      * @param page

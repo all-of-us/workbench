@@ -652,8 +652,8 @@ paths:
     post:
       tags:
         - cohortBuilder
-      description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
-      operationId: "countSubjects"
+      description: Searches for participants based on criteria, criteria specific parameters, and modifiers.
+      operationId: "countParticipants"
       parameters:
         - in: body
           name: request
@@ -711,11 +711,15 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /api/v1/cohortreview/participants/{cohortId}/{cdrVersionId}:
+  /api/v1/cohortreview/info/{cohortId}/{cdrVersionId}:
     get:
       tags:
          - cohortReview
-      description:  Returns a cohortReviewId and cohort count
+      description: >
+        This endpoint will check for existence of a cohort review specified by cohortId and
+        cdrVersionId. If a review exist, this endpoint will return a CohortReviewInfo that has
+        an initialized reviewCount > 0. If a review doesn't exist, it will return a CohortReviewInfo
+        that has a reviewCount = 0 and will insert a default cohort_review.
       operationId: "getCohortReviewInfo"
       parameters:
         - in: path
@@ -732,6 +736,32 @@ paths:
           description: specifies which cdr version
       responses:
         "200":
+          description: A cohortReviewId, creationTime and cohortCount
+          schema:
+            $ref: "#/definitions/CohortReviewInfo"
+
+  /api/v1/cohortreview/create/{cohortReviewId}:
+    get:
+      tags:
+        - cohortReview
+      description:  >
+        This endpoint will create an cohort review which is a participant cohort sample
+        specified by the review size parameter.
+      operationId: "createCohortReview"
+      parameters:
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort review
+        - in: query
+          name: size
+          type: integer
+          required: false
+          description: size of the participant cohort statuses sample
+      responses:
+        "200":
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReviewInfo"
@@ -740,7 +770,9 @@ paths:
     get:
       tags:
          - cohortReview
-      description:  Returns a collection of participants that for the specified cohortId and cdrVersionId
+      description:  >
+        Returns a collection of participants that for the specified cohortReviewId. This endpoint
+        does pagination based on page, limit, order and column.
       operationId: "getParticipantCohortStatuses"
       parameters:
         - in: path
@@ -1468,11 +1500,15 @@ definitions:
     required:
       - cohortReviewId
       - cohortCount
+      - reviewCount
     properties:
       cohortReviewId:
         type: integer
         format: int64
       cohortCount:
+        type: integer
+        format: int64
+      reviewCount:
         type: integer
         format: int64
 
