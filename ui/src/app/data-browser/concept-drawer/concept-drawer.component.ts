@@ -53,12 +53,13 @@ export class ConceptDrawerComponent {
 
     this.randNum = Math.random();
     // Get any maps to parents and children and add them to the concept
-    if (this.concept.vocabulary_id != 'PPI') {
+    if (this.concept.vocabulary_id !== 'PPI') {
       this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
         .subscribe(data => {
           this.concept.children = data;
-          //  Initialize first graph to show. If we have children show that. Otherwise first analyses
-          if (this.concept.children.length > 0){
+          // Initialize first graph to show.
+            // If we have children show that. Otherwise first analyses
+          if (this.concept.children.length > 0) {
             this.show_source_table = true;
             this.show_source_graph = false;
             for (let i = 0; i < this.analyses.length; i++) {
@@ -84,16 +85,14 @@ export class ConceptDrawerComponent {
 
   graphBool(analysis, item) {
     // Toggle on graph items
-    if (analysis == null){
-      if (item == 'source-graph') {
+    if (analysis == null) {
+      if (item === 'source-graph') {
         // toggle children graph
         this.show_source_graph = !this.show_source_graph;
         if (this.show_source_graph) {
             this.show_source_table = false;
         }
-
-    }
-      else if (item == 'source-table') {
+      } else if (item === 'source-table') {
         this.show_source_table = !this.show_source_table;
         if (this.show_source_table) {
           this.show_source_graph = false;
@@ -103,35 +102,24 @@ export class ConceptDrawerComponent {
         for (const a of this.analyses) {
           a.showgraph = false;
         }
-        }
-
+      }
       return;
-    }
-
-
-
-  else {
+    } else {
       for (let i = 0; i < this.analyses.length; i++) {
-        if (this.analyses[i] == analysis) {
-          if (this.analyses[i].showgraph == false || typeof (this.analyses[i].showgraph) == 'undefined') {
-
+        if (this.analyses[i] === analysis) {
+          if (this.analyses[i].showgraph === false ||
+              typeof (this.analyses[i].showgraph) === 'undefined') {
             this.analyses[i].showgraph = true;
             this.show_source_graph = false;
             this.show_source_table = false;
-
-            // this.singleGraph.push(this.analyses[i])
-          }
-          else {
+          } else {
             this.analyses[i].showgraph = false;
-            // this.singleGraph.splice(this.analyses[i], 1)
           }
-        }
-        else {
+        } else {
             this.analyses[i].showgraph = false;
         }
       }
     }
-    //
   }
 
 }
