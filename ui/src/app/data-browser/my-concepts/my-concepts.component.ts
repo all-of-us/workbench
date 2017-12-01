@@ -31,8 +31,7 @@ export class MyConceptsComponent implements OnInit, OnChanges {
         for (const a of analyses) {
           if (a.analysis_id === 3000) {
             this.countAnalysis = a;
-          }
-          else {
+          } else {
             this.analyses.push(a);
           }
         }

@@ -28,7 +28,8 @@ import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
 import { MyConceptsComponent } from './my-concepts/my-concepts.component';
 import { OneConceptComponent } from './one-concept/one-concept.component';
 import { PlaceholderComponent } from './placeholder/placeholder.component';
-import { SearchTableAdvancedComponent } from './search-table-advanced/search-table-advanced.component';
+import { SearchTableAdvancedComponent }
+from './search-table-advanced/search-table-advanced.component';
 import { SearchComponent } from './search/search.component';
 import { TreeContainerComponent } from './tree-container/tree-container.component';
 
