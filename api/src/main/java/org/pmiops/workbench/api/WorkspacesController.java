@@ -28,7 +28,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.PermissionReport;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
