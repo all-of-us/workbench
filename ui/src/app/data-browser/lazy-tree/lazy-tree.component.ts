@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {IConcept} from '../ConceptClasses';
 import { TreeService } from '../services/tree.service';
 @Component({
@@ -45,7 +45,7 @@ export class LazyTreeComponent implements OnInit {
     return false;
   }
 
-  constructor(private route: ActivatedRoute, private router: Router,
+  constructor(private route: ActivatedRoute,
               private treeService: TreeService, ) {
     this.route.params.subscribe(params => {
       // get parameter from URL...

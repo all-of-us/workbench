@@ -5,9 +5,6 @@ import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
 import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
 import { Concept } from '../ConceptClasses';
 import { DomainClass } from '../DomainClasses';
-import { Vocabulary } from '../VocabularyClasses';
-
-
 import 'rxjs/add/operator/toPromise';
 
 @Injectable()

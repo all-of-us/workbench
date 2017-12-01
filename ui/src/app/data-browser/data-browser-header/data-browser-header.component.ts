@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AnalysisSection} from '../AnalysisClasses';
 
 @Component({
@@ -14,7 +14,6 @@ export class DataBrowserHeaderComponent {
   @Input() pageTitle;
 
   constructor(
-    private router: Router,
     private route: ActivatedRoute) {
       this.route.params.subscribe(params => {
         this.routeId = params.id;

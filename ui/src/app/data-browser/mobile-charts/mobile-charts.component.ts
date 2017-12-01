@@ -25,7 +25,6 @@ export class MobileChartsComponent implements OnInit {
   }
 
   ngOnInit() {
-    const section = 3000;
     const aids = [3101, 3102];
     //
     this.achillesService.getSectionAnalyses(aids)
@@ -53,7 +52,7 @@ export class MobileChartsComponent implements OnInit {
 
 
         // Get any maps to parents and children and add them to the concept
-        if (this.concept.vocabulary_id != 'PPI') {
+        if (this.concept.vocabulary_id !== 'PPI') {
           this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
             .subscribe(data => {
               this.concept.children = data;
@@ -80,8 +79,7 @@ export class MobileChartsComponent implements OnInit {
       // SHow children graph
       if (this.show_source_graph === false) {
       this.show_source_graph = true;
-    }
-    else {
+    } else {
       this.show_source_graph = false;
     }
       for (const a of this.analyses) {

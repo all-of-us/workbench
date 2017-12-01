@@ -6,8 +6,6 @@ import { Concept } from '../ConceptClasses';
 
 @Injectable()
 export class TreeService {
-  private base_url = 'https://cpmdev.app.vumc.org/api/public/';
-
   constructor(
       private api: CohortBuilderService) { }
 
