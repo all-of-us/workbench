@@ -405,11 +405,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    try {
-      checkWorkspaceWriteAccess(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    checkWorkspaceWriteAccess(workspaceNamespace, workspaceId);
 
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
