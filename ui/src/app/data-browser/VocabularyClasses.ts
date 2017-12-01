@@ -1,4 +1,4 @@
-export interface IVocabulary{
+export interface IVocabulary {
   domain_id: string;
   vocabulary_id: string;
   vocabulary_name: string;

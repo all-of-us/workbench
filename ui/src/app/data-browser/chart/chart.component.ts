@@ -1,4 +1,4 @@
-import { Component, Input, NgModule, OnInit } from '@angular/core';
+import { Component, Input, NgModule } from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
 
 // import highcharts and highmaps and add highmaps to it.

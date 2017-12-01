@@ -10,12 +10,12 @@ import { AchillesService } from '../services/achilles.service';
 export class HomeComponent {
   homeData;
   infoData = {};
-    anchor;
+  anchor;
   pageTitle = 'AoU Data Browser Home';
 
   constructor( private achillesService: AchillesService) {
     this.homeData = achillesService.getDomains().subscribe(results => {
-        this.homeData = results;
+      this.homeData = results;
     });
   }
 

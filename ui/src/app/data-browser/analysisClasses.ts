@@ -313,7 +313,7 @@ export class Analysis implements IAnalysis {
   }
   seriesLegend() {
     // this.analysis_id ==4 is a grouping of columns... which is why we need series legend
-    if (this.analysis_id == 4) {
+    if (this.analysis_id === 4) {
       return true;
     } else {
       return false;

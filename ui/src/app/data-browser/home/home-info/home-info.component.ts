@@ -33,10 +33,11 @@ export class HomeInfoComponent{
   }
 
   ngOnChanges() {
+      /*
     this.achillesService.VocabShow(this.infoData)
       .subscribe(results => {
         this.vocabularies = results;
-      });
+      });*/
 
       if (this.infoData) {
         window.location.hash = this.infoData.domain_display;
@@ -50,7 +51,6 @@ export class HomeInfoComponent{
   }
 
   routeTo(id) {
-
       let path = '/all?';
       if (id.domain_parent = 'domain') {
         path += 'domain_id=' + id.domain_id;

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Http} from '@angular/http';
 import {DataBrowserService} from 'generated';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
-import { AnalysisSection } from '../AnalysisClasses';
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
 import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
 import { Concept } from '../ConceptClasses';
@@ -14,13 +13,6 @@ import 'rxjs/add/operator/toPromise';
 
 @Injectable()
 export class AchillesService {
-
-  private baseUrl = 'https://cpmdev.app.vumc.org/api/public/';
-//  private baseUrl = "https://dev.aou-api.org/api/public/";
-  private sections = [];
-
-
-
   constructor(
     private http: Http, private api: DataBrowserService
   ) { }
@@ -86,7 +78,6 @@ export class AchillesService {
   /* Get all the analysis Objects we want to run for an analysisSection
      If justThese is an array , just return ones with id in array  */
   getSectionAnalyses( aids: number[]): Promise<IAnalysis[]> {
-    const url = this.baseUrl + 'analyses';
     return this.api.getAnalyses()
       .toPromise()
       .then(response => {
@@ -118,15 +109,14 @@ export class AchillesService {
   getConceptResults(args) {
     console.log('In get concepts ');
 
-    const q =
-      {
+    const q = {
         concept_name: args.search,
         page: args.page,
         page_len: args.page_len,
         page_from: args.page_from,
         page_to: args.page_to,
         observed: args.observed,
-      };
+    };
 
     if (args.observed) {
       q.observed = true;
@@ -234,22 +224,8 @@ export class AchillesService {
     return this.http.post(url, urlSearchParams).subscribe();
     */
   }
-
-  getSearchVocabFilters() {
-    //
-    const url = this.baseUrl + '/concept_vocabularies';
-    return this.http.get(url)
-      .map(
-      (response) => {
-        const data = response.json();
-        //
-        return data.data;
-      }
-      );
-  }
-
-  // pass the concept obj in an array of analyses and the analyses with only that concept obj
-  // or
+    // pass the concept obj in an array of analyses and the analyses with only that concept obj
+    // or
   // pass an array of analyses with the stratum and it will run ( no concept Obj )
   runAnalysis(analyses: any[], concept?: any) {
     //
@@ -260,10 +236,6 @@ export class AchillesService {
       if (concept && typeof concept.concept_id !== 'undefined') {
         analyses[i].stratum[0] = concept.concept_id.toString();
       }
-
-      // Put the selected concept as the stratum for the analysis
-      const arr = [];
-
       // analyses[i].stratum[0] = arr.join(",");
       console.log('get anares', analyses[i]);
       // Run the analysis -- getting the results in the analysis.results
@@ -272,9 +244,8 @@ export class AchillesService {
           analyses[i].results = results;
           ////
           analyses[i].status = 'Done';
-
         }); // end of .then
-    }// end of for loop
+    } // end of for loop
 
   }
 
@@ -324,8 +295,8 @@ export class AchillesService {
 
   }
 
+  /* todo
   VocabShow(args: any) {
-    //
     const q: any = {
         vocabulary_id: args.vocabulary_id,
         standard_concept: args.standard_concept,
@@ -344,9 +315,8 @@ export class AchillesService {
 
       }
       );
-
-
   }
+  */
 
   getDomains() {
 
@@ -356,16 +326,7 @@ export class AchillesService {
                  return new DomainClass(item);
              });
          }
-      );
-
-     /*subscribe(data => {
-        console.log('Domain response ', data);
-        return data.items.map(item => {
-          return new DomainClass(item);
-        }
-        );
-      }
-     );*/
+     );
   }
 
 }

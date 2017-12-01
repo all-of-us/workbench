@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
@@ -50,7 +50,6 @@ export class SearchComponent {
     this.achillesService.logClickedConcept(obj, params);
 
     const item = obj;
-    const children = obj.children;
     // Set the clicked concept to this one to trigger things on page
     this.clickedConcept = item;
     //
@@ -59,7 +58,7 @@ export class SearchComponent {
     const prevConceptsLen = this.conceptsArray.length;
     if (item.concept_id) {
       for (const c of this.conceptsArray) {
-        if (c.concept_id == item.concept_id) {
+        if (c.concept_id === item.concept_id) {
           addConcept = false;
           return;
         }
@@ -169,7 +168,7 @@ export class SearchComponent {
     this.savedSearchString = event;
   }
 
-  sectionFromHeader(event){
+  sectionFromHeader(event) {
     // clear out the concepts and the analysis results on route change
     this.itemFromHeader = event;
     this.conceptsArray = [];

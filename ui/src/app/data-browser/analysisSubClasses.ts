@@ -1,4 +1,4 @@
-import { Analysis, AnalysisResult, IAnalysis, IAnalysisResult } from './AnalysisClasses';
+import { Analysis, AnalysisResult} from './AnalysisClasses';
 
 export class AnalysisDistResult extends AnalysisResult {
   min_value: number;
@@ -11,7 +11,6 @@ export class AnalysisDistResult extends AnalysisResult {
   p75_value: number;
   p90_value: number;
   colors: any;
-
 
   constructor(obj?: any) {
     super(obj);
