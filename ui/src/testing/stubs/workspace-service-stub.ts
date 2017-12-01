@@ -122,6 +122,14 @@ export class WorkspacesServiceStub {
   public getWorkspaces(): Observable<WorkspaceListResponse> {
     const observable = new Observable(observer => {
       setTimeout(() => {
+        this.workspaceResponses = [];
+        this.workspaces.forEach((workspace) => {
+          this.workspaceResponses.push(
+            {
+              workspace: workspace,
+              accessLevel: WorkspaceAccessLevel.OWNER
+            });
+        });
         observer.next({items: this.workspaceResponses});
         observer.complete();
       }, 0);
