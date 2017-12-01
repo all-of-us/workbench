@@ -21,7 +21,7 @@
         <app-tree-container (conceptsArrayEvent)="itemSelected($event)"  > </app-tree-container>
       </span>
       <span *ngIf="!toggleTree">
-        <app-search-table-advanced [domain_id]="pageDomainId" [toggleAdv]= "toggleAdv" [itemFromHeader]="itemFromHeader"  [savedSearchStringAdv]="savedSearchString"  (onItemSelected)="itemSelected($event)" (emittSearchString)="setString($event)"></app-search-table-advanced>
+        <app-search-table [domain_id]="pageDomainId" [toggleAdv]= "toggleAdv" [itemFromHeader]="itemFromHeader"  [savedSearchStringAdv]="savedSearchString"  (onItemSelected)="itemSelected($event)" (emittSearchString)="setString($event)"></app-search-table>
       </span>
 
     </div>

@@ -4,11 +4,11 @@ import { State } from 'clarity-angular';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
-  selector: 'app-search-table-advanced',
-  templateUrl: './search-table-advanced.component.html',
-  styleUrls: ['./search-table-advanced.component.css']
+  selector: 'app-search-table',
+  templateUrl: './search-table.component.html',
+  styleUrls: ['./search-table.component.css']
 })
-export class SearchTableAdvancedComponent implements OnChanges {
+export class SearchTableComponent implements OnChanges {
   /* Todo et these dynamically possibly */
   sourceConceptFilters =
       [{ vocabulary_id: 'ICD9CM' }, { vocabulary_id: 'ICD10' }, { vocabulary_id: 'ICD10CM'} ];
