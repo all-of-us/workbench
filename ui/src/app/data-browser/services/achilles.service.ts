@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Headers, Http, URLSearchParams } from '@angular/http';
+import { Http} from '@angular/http';
 import {DataBrowserService} from 'generated';
-// import { Observable } from 'rxjs';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
-import { AnalysisSection } from '../analysisClasses';
-import { Analysis, AnalysisResult, IAnalysis, IAnalysisResult } from '../analysisClasses';
-import { AnalysisDist, AnalysisDistResult } from '../analysisSubClasses';
+import { AnalysisSection } from '../AnalysisClasses';
+import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
+import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
 import { Concept } from '../ConceptClasses';
-import { DomainClass } from '../domain-class';
+import { DomainClass } from '../DomainClasses';
 import { Vocabulary } from '../VocabularyClasses';
 
 
@@ -33,108 +32,60 @@ export class AchillesService {
 
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
 
-    // const url = this.baseUrl + 'analysis_result';
-    // var q = '?analysis_id='+a.analysis_id+'&dataType='+a.dataType;
-    const q = {
-      'analysis_id': a.analysis_id,
-      'dataType': a.dataType
-    };
-    console.log('get results ', a);
-    let i = 0;
-    for (i = 0; i < a.stratum.length; i++) {
-      /*
-      Todo: split stratum one on a comma for multiple stratum id's
-      */
-        let makeArray;
-      if (a.stratum[i] !== '') {
-        if (typeof a.stratum[i] === 'string') {
-          makeArray = a.stratum[i].split(',');
-        } else {
-          makeArray = [a.stratum[i]];
-        }
-        // //
-        const i_name = i + 1;
-        const stratumVar = 'stratum_' + i_name + '[]'; // must add [] for array params
-        q[stratumVar] = makeArray;
+      // const url = this.baseUrl + 'analysis_result';
+      // var q = '?analysis_id='+a.analysis_id+'&dataType='+a.dataType;
+      const q = {
+          'analysis_id': a.analysis_id,
+          'dataType': a.dataType
+      };
+      for (let i = 0; i < a.stratum.length; i++) {
+          /*
+          Todo: split stratum one on a comma for multiple stratum id's
+          */
+          let makeArray;
+          if (a.stratum[i] !== '') {
+              if (typeof a.stratum[i] === 'string') {
+                  makeArray = a.stratum[i].split(',');
+              } else {
+                  makeArray = [a.stratum[i]];
+              }
+              // //
+              const i_name = i + 1;
+              const stratumVar = 'stratum_' + i_name + '[]'; // must add [] for array params
+              q[stratumVar] = makeArray;
+          }
       }
-    }
 
+      return this.api.getAnalysisResults(a.analysis_id, a.stratum[0], a.stratum[1],
+          a.stratum[2], a.stratum[3], a.stratum[4], a.stratum[5])
+          .toPromise()
+          .then(response => {
+            const data = response.items;
+            if (!data.length) {
+                return [];
+            }
+            return data.map(item => {
+              let ar = null;
+              if (a.dataType === 'distribution') {
+                ar = new AnalysisDistResult(item);
+                return ar;
+              }
+              if (a.chartType === 'map') {
+                ar = new AnalysisResult(item);
+              } else {
+                  ar = new AnalysisResult(item);
+              }
+              return ar;
+            });
 
-    return this.api.getAnalysisResults(a.analysis_id, a.stratum[0], a.stratum[1], a.stratum[2], a.stratum[3], a.stratum[4], a.stratum[5])
-      .toPromise()
-      .then(response => {
-        const data = response.items;
-
-        if (!data.length) { return []; }
-        const r = data.map(item => {
-          let ar = null;
-          if (a.dataType == 'distribution') {
-            ar = new AnalysisDistResult(item);
-            return ar;
-          }
-          if (a.chartType == 'map') {
-            ar = new AnalysisResult(item);
-          }
-
-          else {
-            ar = new AnalysisResult(item);
-          }
-
-          return ar;
-        });
-
-        return r;
-
-      })
-      .catch(this.handleError);
-
+          })
+          .catch(this.handleError);
   }
 
-
-  getSections(routeId: string): Promise<AnalysisSection[]> {
-    // Get sections for this routeId. These are used to make the header menu
-    let url = this.baseUrl + 'analysis_sections';
-    url = url + '?route_id=' + routeId;
-
-    const sectionAnalysesMap = {
-      0: [1, 2, 3, 4, 12, 1101],
-      100: [101, 102],
-      400: [3000, 3001, 3002], // Conditions
-      500: [500, 501, 505, 506],
-      600: [600, 601, 606],
-      700: [700, 701, 703, 706],
-      800: [800, 801, 803, 805, 806],
-      1100: [1101, 1103],
-      2000: [2000, 2001, 2002, 2003],
-      3000: [3000, 3001, 3002],
-      3100: [3000, 3001, 3002], // Lifestyle survey
-      3200: [3000, 3001, 3002], // Overall Health
-
-    };
-    return this.http.get(url)
-      .toPromise()
-      .then(response => {
-        const sections: AnalysisSection[] = response.json().map(item => {
-          if (sectionAnalysesMap[item.section_id]) {
-            item.analyses = sectionAnalysesMap[item.section_id];
-          }
-          else {
-            item.analyses = sectionAnalysesMap[3000];
-          }
-          // item.analyses.push();
-          return item as AnalysisSection;
-        });
-        return sections;
-      })
-      .catch(this.handleError);
-  }
 
   /* Get all the analysis Objects we want to run for an analysisSection
      If justThese is an array , just return ones with id in array  */
-
-
   getSectionAnalyses( aids: number[]): Promise<IAnalysis[]> {
-
     const url = this.baseUrl + 'analyses';
     return this.api.getAnalyses()
       .toPromise()
@@ -180,10 +131,10 @@ export class AchillesService {
     if (args.observed) {
       q.observed = true;
     }
-    if (args.standard_concept == 's') {
+    if (args.standard_concept === 's') {
       q['standard_concept'] = 's';
     }
-    //datagrid filters
+    // datagrid filters
     if (args.filters) {
 
       for (const b of args.filters) {
@@ -195,7 +146,7 @@ export class AchillesService {
     if (args.sort) {
       q['sortCol'] = args.sort.by;
 
-      if (args.sort.reverse == false) {
+      if (args.sort.reverse === false) {
         q['sortDir'] = 'ASC';
       } else {
         q['sortDir'] = 'DESC';
@@ -206,12 +157,12 @@ export class AchillesService {
     const vocabs = []; // array of vocabulary_id filters
     const domains = [];
     for (const v of Object.keys(args.standard_vocabs)) {
-      if (args.standard_vocabs[v] == true) {
+      if (args.standard_vocabs[v] === true) {
         vocabs.push(v);
       }
     }
     for (const v of Object.keys(args.source_vocabs)) {
-      if (args.source_vocabs[v] == true) {
+      if (args.source_vocabs[v] === true) {
         vocabs.push(v);
       }
     }
@@ -220,7 +171,7 @@ export class AchillesService {
     }
 
     for (const v of Object.keys(args.domains)) {
-      if (args.domains[v] == true) {
+      if (args.domains[v] === true) {
         domains.push(v);
       }
     }
@@ -297,11 +248,6 @@ export class AchillesService {
       );
   }
 
-  binDataByAge(data) {
-
-    return data;
-  }
-
   // pass the concept obj in an array of analyses and the analyses with only that concept obj
   // or
   // pass an array of analyses with the stratum and it will run ( no concept Obj )
@@ -336,18 +282,14 @@ export class AchillesService {
     const aclass = analysis.constructor.name;
     //
     let a = null;
-    if (aclass == 'Analysis') {
+    if (aclass === 'Analysis') {
       a =  Analysis.analysisClone(analysis);
-
     }
-
-    if (aclass == 'AnalysisDist') {
+    if (aclass === 'AnalysisDist') {
       a = new AnalysisDist(analysis);
-
     }
     const rand = Math.random();
     console.log('Clone a', a);
-    a.stratum.push(rand); /* ?? */
     a.results = []; // clear out any results that were in there
 
     return a;
@@ -358,18 +300,15 @@ export class AchillesService {
     const aclass = children.constructor.name;
     //
     let a = null;
-
-    if (aclass == 'Concept') {
+    if (aclass === 'Concept') {
       a = new Concept(children);
     }
-
-
     return a;
-
   }
 
   // Pass concept_id and concept_num = 2
-  // and This will Get concepts that map to the concept arg (Children of the concept ) : concept_num = 2
+  // and This will Get concepts that map to the concept arg
+    // (Children of the concept ) : concept_num = 2
   // Pass concept_id and  concept_num = 1 if you want the parent(s) of the concept
   // Example -- to get the children of snomed concept_id , pass concept_num=2
   getConceptMapsTo(concept_id: number, concept_num: number) {
@@ -387,8 +326,7 @@ export class AchillesService {
 
   VocabShow(args: any) {
     //
-    const q: any =
-      {
+    const q: any = {
         vocabulary_id: args.vocabulary_id,
         standard_concept: args.standard_concept,
         domain_id: args.domain_id

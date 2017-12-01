@@ -1,7 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
-import { IConcept, Concept } from '../ConceptClasses';
-import { ConceptDrawerComponent } from '../concept-drawer/concept-drawer.component';
 
 
 @Component({
@@ -10,28 +9,28 @@ import { ConceptDrawerComponent } from '../concept-drawer/concept-drawer.compone
   styleUrls: ['./my-concepts.component.css']
 })
 export class MyConceptsComponent implements OnInit {
-  @Input() conceptsArray: IConcept[] = []
+  @Input() conceptsArray: IConcept[] = [];
   @Input() newConcept: IConcept; // Last concept added
-  @Input() route: string
-  @Output() removalEmit = new EventEmitter()
-  @Output() resetConcepts = new EventEmitter()
-  @Output() addEmit = new EventEmitter()
-  @Output() resetEmit = new EventEmitter()
-  analyses
-  countAnalysis
+  @Input() route: string;
+  @Output() removalEmit = new EventEmitter();
+  @Output() resetConcepts = new EventEmitter();
+  @Output() addEmit = new EventEmitter();
+  @Output() resetEmit = new EventEmitter();
+  analyses;
+  countAnalysis;
 
   redraw: number[] = []; // flag te redraw analysis , indexed exactly like analyses
 
   constructor(private achillesService: AchillesService) {
-    let section = 3000;
-    let aids = [3000, 3101, 3102]
+    const section = 3000;
+    const aids = [3000, 3101, 3102];
     //
     this.analyses = [];
-    this.countAnalysis = null
+    this.countAnalysis = null;
     this.achillesService.getSectionAnalyses( aids)
       .then(analyses => {
         // Get the count analysis separate id 3000
-        for (let a of analyses) {
+        for (const a of analyses) {
           if (a.analysis_id == 3000) {
             this.countAnalysis = a;
           }
@@ -59,18 +58,18 @@ export class MyConceptsComponent implements OnInit {
     //
   }
   ngOnChanges() {
-    let colors = ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4'] //colors we use for our charts
-    let b = 0
+    const colors = ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']; //colors we use for our charts
+    let b = 0;
     for (let i = 0; i < this.conceptsArray.length; i++) {
       this.conceptsArray[i].color = colors[b];
-      b++
+      b++;
       if (b >= 6) { //forces to loop back through our colors Array.
         b = 0;
       }
 
     }
 
-    console.log("Count analysis", this.countAnalysis);
+    console.log('Count analysis', this.countAnalysis);
     // Run total count analysis for all concepts
     if (this.countAnalysis) {
       if (this.conceptsArray.length) {
@@ -78,16 +77,16 @@ export class MyConceptsComponent implements OnInit {
 
         // Clone the analysis so chart updates
         this.countAnalysis = this.achillesService.cloneAnalysis(this.countAnalysis);
-        var arr = []
+        const arr = [];
         for (let i = 0; i < this.conceptsArray.length; i++) {
-          arr.push(this.conceptsArray[i].concept_id)
+          arr.push(this.conceptsArray[i].concept_id);
         }
 
-        this.countAnalysis.stratum[0] = arr.join(",");
+        this.countAnalysis.stratum[0] = arr.join(',');
         // Run the analysis -- getting the results in the analysis.results
         this.achillesService.getAnalysisResults(this.countAnalysis)
           .then(results => {
-            console.log("Got count analysis results ", results );
+            console.log('Got count analysis results ', results );
             for (let i = 0; i < this.conceptsArray.length; i++) {
               for (let b = 0; b < results.length; b++) {
                 if (this.conceptsArray[i].concept_name == results[b].stratum_name[0]) {
@@ -99,32 +98,32 @@ export class MyConceptsComponent implements OnInit {
 
           });
       } else {
-        this.countAnalysis.results = []
+        this.countAnalysis.results = [];
       }
     }
   }  //end of onChanges()
 
   reset() {
-    this.resetEmit.emit()
+    this.resetEmit.emit();
   }
 
   sendRemove(node) {
-    this.removalEmit.emit(node)
-    this.removeFromSeries(node)
+    this.removalEmit.emit(node);
+    this.removeFromSeries(node);
   }
 
   removeFromSeries(node) {
-    let results = this.countAnalysis.results;
+    const results = this.countAnalysis.results;
     for (let i = 0; i < results.length; i++) {
       if (results[i].stratum_name[0] == node.concept_name) {
         results.splice(i, 1);
-        this.countAnalysis.results = results
+        this.countAnalysis.results = results;
         if (this.countAnalysis.results.length) {
           this.redraw[i] = Math.random();
         }
       }
     }
-    this.ngOnChanges()
+    this.ngOnChanges();
   }
 
 

@@ -1,11 +1,11 @@
-import { Component, OnInit, Input, NgModule } from '@angular/core';
+import { Component, Input, NgModule, OnInit } from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
 
 // import highcharts and highmaps and add highmaps to it.
 // Note, must import the js/modules/map so it can play nice. See highcharts docs
 // https://www.highcharts.com/docs/getting-started/installation
-//import * as highcharts from 'highcharts';
-//import * as highmaps from 'highcharts/js/modules/map';
+// import * as highcharts from 'highcharts';
+// import * as highmaps from 'highcharts/js/modules/map';
 
 // Call this to add higcharts-more functionality
 export declare var require: any;
@@ -14,12 +14,12 @@ ChartModule.forRoot(
   highcharts,
   require('highcharts/highcharts-more')
 );
-//highmaps(highcharts);  // Call this to add highmaps functionality to highcharts
+// highmaps(highcharts);  // Call this to add highmaps functionality to highcharts
 
 
 
 
-import { Analysis, AnalysisResult } from '../analysisClasses';
+import { Analysis, AnalysisResult } from '../AnalysisClasses';
 import { IConcept } from '../ConceptClasses';
 
 @Component({
@@ -34,15 +34,15 @@ export class ChartComponent  {
   @Input() redraw;
   @Input() analysis: Analysis;
   @Input() concepts: IConcept[];
-  chartType
-  chartOptions
-  chart
+  chartType;
+  chartOptions;
+  chart;
   localAnalysis: Analysis;
   constructor() {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
       colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']
-    })
+    });
     //
   }
   saveInstance(chartInstance) {
@@ -56,13 +56,12 @@ export class ChartComponent  {
   ngOnChanges() {
     this.chartOptions = null;
 
-    console.log("Chart on changes a", this.analysis, this.concepts);
+    console.log('Chart on changes a', this.analysis, this.concepts);
     if (this.concepts && this.concepts.length) {
-      let a  = this.makeConceptsAnalysis(this.concepts);
+      const a  = this.makeConceptsAnalysis(this.concepts);
       this.chartOptions = a.hcChartOptions();
       this.chartType = a.chartType;
-    }
-    else if (this.analysis && this.analysis.results.length) {
+    } else if (this.analysis && this.analysis.results.length) {
       // HC automatically redraws when changing chart options
       this.localAnalysis  = this.analysis;
       this.chartOptions = this.localAnalysis.hcChartOptions();
@@ -73,27 +72,24 @@ export class ChartComponent  {
 
   makeConceptsAnalysis(concepts: IConcept[]): Analysis {
 
-    console.log("Making concepts analysis ", concepts);
+    console.log('Making concepts analysis ', concepts);
     // Make an analysis object id = 3000 with results to chart these concepts results in histogram
-    let obj = {
+    const obj = {
       analysis_id: 3000,
-      analysis_name: "Number of Participants by Source Concepts",
+      analysis_name: 'Number of Participants by Source Concepts',
       results: [],
-      chartType: "column",
-        dataType: "counts"
-    }
+      chartType: 'column',
+        dataType: 'counts'
+    };
 
     for (let i = 0; i < this.concepts.length; i++) {
-
-      // //
-
-      let resultObj = {
+      const resultObj = {
         analysis_id: 3000,
         stratum_1_name: this.concepts[i].concept_name,
         stratum_1: this.concepts[i].concept_id,
         count_value: this.concepts[i].count_value
-      }
-      let series =  AnalysisResult.clone(resultObj);
+      };
+      const series =  AnalysisResult.clone(resultObj);
       obj.results.push(series);
     }
     const a =  Analysis.analysisClone(obj);

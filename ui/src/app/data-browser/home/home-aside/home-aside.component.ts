@@ -1,4 +1,4 @@
-import { Component, OnInit,Input,Output,EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-home-aside',
@@ -6,12 +6,12 @@ import { Component, OnInit,Input,Output,EventEmitter } from '@angular/core';
   styleUrls: ['./home-aside.component.css']
 })
 export class HomeAsideComponent implements OnInit {
-  ehr
-  ppi
-  selectedRow
-@Input() homeData
-@Output() infoEmit= new EventEmitter();
-@Output() anchorEmit= new EventEmitter();
+  ehr;
+  ppi;
+  selectedRow;
+  @Input() homeData;
+  @Output() infoEmit= new EventEmitter();
+  @Output() anchorEmit= new EventEmitter();
   constructor() {
 
   }
@@ -19,12 +19,12 @@ export class HomeAsideComponent implements OnInit {
   ngOnInit() {
 
   }
-  passData(item, index){
-        this.selectedRow = index
+  passData(item, index) {
+        this.selectedRow = index;
         this.infoEmit.emit(item);
   }
   passAnchor(item) {
-    this.anchorEmit.emit(item)
+    this.anchorEmit.emit(item);
   }
 
 }

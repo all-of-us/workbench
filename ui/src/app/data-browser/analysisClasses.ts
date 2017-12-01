@@ -1,5 +1,4 @@
-
-
+/* AnalysisClass definitions */
 export interface IAnalysis {
   analysis_id: number;
   analysis_name: string;
@@ -24,7 +23,6 @@ export class Analysis implements IAnalysis {
   dataType: string;
   status: string;
   redraw: boolean;
-  notAlphabetical = [400, 500, 600, 700, 800];
   // Ojbect that defines the colors for the analysis results graphs
   /* Example for Number of person by Gender
   {
@@ -38,8 +36,8 @@ export class Analysis implements IAnalysis {
   */
   colors: any;
 
-  static analysisClone(obj:any) {
-    let a = new Analysis();
+  static analysisClone(obj: any) {
+    const a = new Analysis();
     a.analysis_id = obj.analysis_id;
     a.analysis_name =  obj.analysis_name;
     a.results =  obj.results ;
@@ -47,7 +45,7 @@ export class Analysis implements IAnalysis {
     a.stratum = [];
     a.stratum_name = [];
     a.chartType =  obj.chartType ;
-    a.dataType =obj.dataType ;
+    a.dataType = obj.dataType ;
     a.redraw = false;
     a.colors = obj.colors;
     /* Don't copy stratum */
@@ -59,11 +57,10 @@ export class Analysis implements IAnalysis {
         }
     }*/
 
-    if (obj.stratum_name && obj.stratum_name.length)
-    {
-        for (const n2 of obj.stratum_name) {
-            a.stratum_name.push(n2);
-        }
+    if (obj.stratum_name && obj.stratum_name.length) {
+      for (const n2 of obj.stratum_name) {
+          a.stratum_name.push(n2);
+      }
     }
     return a;
   }
@@ -71,8 +68,7 @@ export class Analysis implements IAnalysis {
   constructor(obj?: any) {
     if (obj && obj.analysisId) {
       this.analysis_id = obj.analysisId;
-    }
-    else {
+    } else {
       this.analysis_id = null;
     }
     this.analysis_name = obj && obj.analysisName || null;
@@ -81,8 +77,11 @@ export class Analysis implements IAnalysis {
     this.stratum = [];
     this.stratum_name = [];
     this.chartType = obj && obj.chartType || 'pie';
-    if (this.analysis_id === 3000 || this.analysis_id === 3102) { this.chartType = 'column'; }
-    else { this.chartType = 'pie'; }
+    if (this.analysis_id === 3000 || this.analysis_id === 3102) {
+      this.chartType = 'column';
+    } else {
+      this.chartType = 'pie';
+    }
     this.dataType = obj && obj.dataType || 'counts';
     this.redraw = false;
     this.colors = {
@@ -111,11 +110,8 @@ export class Analysis implements IAnalysis {
     }
   }
 
-
-
   hcChartOptions(): any {
-    // //
-    const chartOptions = {
+      return {
 
       chart: {
 
@@ -140,8 +136,9 @@ export class Analysis implements IAnalysis {
         series: {
           animation: {
             duration: 350,
-          }, //this.seriesAnimation(), // turns off animation if this.seriesAnimation() is uncommented
-          maxPointWidth: 45, //125,
+          }, // this.seriesAnimation(),
+            // turns off animation if this.seriesAnimation() is uncommented
+          maxPointWidth: 45,
         },
         pie: {
           // size: 260,
@@ -162,9 +159,7 @@ export class Analysis implements IAnalysis {
         }
       },
       yAxis: {
-
       },
-
       xAxis: {
         categories: this.makeCountCategories(),
         type: 'category',
@@ -173,10 +168,8 @@ export class Analysis implements IAnalysis {
             whiteSpace: 'nowrap',
           }
         }
-
       },
       zAxis: {
-
       },
       legend: {
         enabled: this.seriesLegend()
@@ -184,24 +177,16 @@ export class Analysis implements IAnalysis {
       series: this.hcSeries(),
       colorByPoint: false
     };
-    return chartOptions;
-
-  }//end of hcChartOptions ()
+  }
 
   hcPointFormat() {
-    if (this.analysis_id == 12) {
-      const pointFormat = '{series.name}<br>count: {point.y}';
-      return pointFormat;
+    let pointFormat = '';
+    if (this.chartType === 'column') {
+      pointFormat = 'count: {point.y}';
+    } else if (this.chartType === 'pie') {
+      pointFormat = '<b>{point.percentage:.1f}%</b><br>count: {point.y}';
     }
-    else if (this.chartType == 'column') {
-      const pointFormat = 'count: {point.y}';
-      return pointFormat;
-    }
-    else if (this.chartType == 'pie') {
-      const pointFormat = '<b>{point.percentage:.1f}%</b><br>count: {point.y}';
-      return pointFormat;
-    }
-
+    return pointFormat;
   }
 
   hcSeries() {
@@ -213,12 +198,12 @@ export class Analysis implements IAnalysis {
   makeCountCategories() {
     // For two stratum , get the unique cats
     // //
-    if (this.stratum_name.length == 2) {
+    if (this.stratum_name.length === 2) {
       return this.makeTwoStratumCountCategories();
     }
 
     let catArray = [];
-    if (this.analysis_id == 3) {
+    if (this.analysis_id === 3) {
       for (let i = 0; i < this.results.length; i++) {
         catArray.push(this.results[i].stratum_name[0]);
       }
@@ -233,7 +218,7 @@ export class Analysis implements IAnalysis {
 
     for (const b of this.results) {
       // If item not in array, push it
-      if (catArray.indexOf(b.stratum_name[0]) == -1) {
+      if (catArray.indexOf(b.stratum_name[0]) === -1) {
         catArray.push(b.stratum_name[0]);
       }
     }
@@ -247,27 +232,19 @@ export class Analysis implements IAnalysis {
   makeTwoStratumSeries() {
     // If analysis has two stratum like race and ethnicity for example,
     // use this
-    const chartSeries = [];
     let ethArray = [];
-    const data = [];
     // Get distinct category list
     const raceCat = this.makeCountCategories();
     // for each category item push 3eth counts in to the data array in the series object
     // make a series object for each eth
 
-    //make an unique array of eths
-
+    // make an unique array of eths
     for (let i = 0; i < this.results.length; i++) {
       ethArray.push(this.results[i].stratum_name[1]);
     }
-    const unique = ethArray.filter(function(itm, i, a) {
-      return i == a.indexOf(itm);
+    ethArray = ethArray.filter(function(itm, i, a) {
+      return i === a.indexOf(itm);
     });
-
-
-    ethArray = unique;
-
-
     const chartCategories = [];
 
     for (let x = 0; x < ethArray.length; x++) {
@@ -276,11 +253,9 @@ export class Analysis implements IAnalysis {
     for (let b = 0; b < raceCat.length; b++) {
       for (let x = 0; x < chartCategories.length; x++) {
         for (let i = 0; i < this.results.length; i++) {
-
-          if (chartCategories[x].name === this.results[i].stratum_name[1] && raceCat[b] === this.results[i].stratum_name[0]) {
-
+          if (chartCategories[x].name === this.results[i].stratum_name[1] &&
+            raceCat[b] === this.results[i].stratum_name[0]) {
             chartCategories[x].data.push(this.results[i].count_value);
-
           }
         }
       }
@@ -291,8 +266,7 @@ export class Analysis implements IAnalysis {
   }
   makeCountSeries() {
 
-    // //
-    if (this.stratum_name.length == 2) {
+    if (this.stratum_name.length === 2) {
 
       return this.makeTwoStratumSeries();
     }
@@ -302,53 +276,27 @@ export class Analysis implements IAnalysis {
       let name;
       const last_stratum_index = this.results[i].stratum.length - 1;
       let color_stratum_index = this.colors.stratum_index;
-      if (color_stratum_index == -1 || color_stratum_index > last_stratum_index) {
+      if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
         color_stratum_index = last_stratum_index;
       }
       const color_stratum_value = this.results[i].stratum[color_stratum_index];
       name = this.results[i].stratum_name[last_stratum_index];
       const color = this.colors.stratum_colors[color_stratum_value];
-      if (name == 0) {
+      if (!name) {
+        name = 'Other';
+      } else if (name == null) {
         name = 'Other';
       }
-      else if (name == null) {
-        name = 'Other';
-      }
-      /* No work for column
-      let thisSeries = {color: color, data: { name: name, y: this.results[i].count_value } };
-      chartSeries.push(thisSeries);
-      */
+
+      chartSeries[0].data.push({ name: name, y: this.results[i].count_value, color: color});
       // chartSeries[0].color = color;
-
-      chartSeries[0].data.push({ name: name, y: this.results[i].count_value, color:'red'});
-
     }
-
-    ////
-    //defalut sort
-    if (this.analysis_id == 2) {
-      chartSeries[0].data.sort(function(a, b): number {
-        const nameA = a.name.toLowerCase(), nameB = b.name.toLowerCase();
-        if (nameA < nameB) //sort string ascending
-          return -1;
-        if (nameA > nameB)
-          return 1;
-        return 0; //default return value (no sorting)
-      });
-      // return chartSeries;
-    } else {
-
-      // TODO: make numaric sort desending
-      chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
-    }
+    // TODO: make numaric sort desending
+    chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
     return chartSeries;
-
-
-
-
   }
 
-  nameLength(name) {
+  nameLength(name: string) {
     if (name.length > 35) {
       return name.substring(0, 35) + '...';
     } else {
@@ -357,7 +305,7 @@ export class Analysis implements IAnalysis {
   }
 
   colorByPoint() {
-    if (this.analysis_id == 12) {
+    if (this.analysis_id === 12) {
       return false;
     } else {
       return true;
@@ -429,8 +377,8 @@ export class AnalysisResult {
   stratum: string[];
   count_value: number;
 
-  static clone(obj:any) {
-    let r = new AnalysisResult();
+  static clone(obj: any) {
+    const r = new AnalysisResult();
     r.analysis_id = obj && obj.analysis_id || null;
     r.count_value = obj && obj.count_value || 0;
     r.stratum = obj.stratum;
@@ -448,8 +396,7 @@ export class AnalysisResult {
       this.stratum.push(obj.stratum1);
       if (obj.stratum1Name) {
         this.stratum_name.push(obj.stratum1Name);
-      }
-      else {
+      } else {
         this.stratum_name.push(obj.stratum1);
       }
     }
@@ -469,9 +416,7 @@ export class AnalysisResult {
       this.stratum.push(obj.stratum5);
       this.stratum_name.push(obj.stratum5Name);
     }
-
   }
-
 }
 
 

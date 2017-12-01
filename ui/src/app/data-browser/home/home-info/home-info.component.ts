@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input} from '@angular/core';
 import { Router } from '@angular/router';
 import { AchillesService } from '../../services/achilles.service';
 
@@ -7,14 +7,13 @@ import { AchillesService } from '../../services/achilles.service';
   templateUrl: './home-info.component.html',
   styleUrls: ['./home-info.component.css']
 })
-export class HomeInfoComponent implements OnInit {
+export class HomeInfoComponent{
   @Input() infoData;
   @Input() homeData;
   @Input() anchor;
   vocabularies = [];
   phoneData;
-  highlight
-
+  highlight;
 
   constructor(private router: Router,
     private achillesService: AchillesService) {
@@ -33,47 +32,33 @@ export class HomeInfoComponent implements OnInit {
       */
   }
 
-
-  ngOnInit() {
-
-  }
   ngOnChanges() {
-
     this.achillesService.VocabShow(this.infoData)
       .subscribe(results => {
         this.vocabularies = results;
-        //
-      }) // end of getDomains.subscibe
+      });
 
-
-
-      if (this.infoData){
-      window.location.hash = this.infoData.domain_display;
-      this.highlight = this.infoData.domain_display;
-}
-      if (this.anchor){
-      this.highlight = this.anchor
-      window.location.hash = this.anchor;
-      this.anchor = undefined;
-}
-
-}
-
-
-
-  log(stuff) {
+      if (this.infoData) {
+        window.location.hash = this.infoData.domain_display;
+        this.highlight = this.infoData.domain_display;
+      }
+      if (this.anchor) {
+        this.highlight = this.anchor;
+        window.location.hash = this.anchor;
+        this.anchor = undefined;
+      }
   }
 
   routeTo(id) {
 
-      let path="/all?"
+      let path = '/all?';
       if (id.domain_parent = 'domain') {
-        path += "domain_id=" + id.domain_id;
+        path += 'domain_id=' + id.domain_id;
       }
       else {
-        path += "vocabulary_id=" + id.domain_id;
+        path += 'vocabulary_id=' + id.domain_id;
       }
-      let link = ['all'];
+      const link = ['all'];
       this.router.navigate(link);
 
   }

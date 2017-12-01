@@ -1,4 +1,4 @@
-import { Analysis, AnalysisResult, IAnalysis, IAnalysisResult } from './analysisClasses';
+import { Analysis, AnalysisResult, IAnalysis, IAnalysisResult } from './AnalysisClasses';
 
 export class AnalysisDistResult extends AnalysisResult {
   min_value: number;
@@ -43,7 +43,7 @@ export class AnalysisDist extends Analysis {
 
   hcChartOptions(): any {
 
-    let chartOptions = {
+    const chartOptions = {
 
       chart: {
 
@@ -93,10 +93,10 @@ export class AnalysisDist extends Analysis {
         enabled: false
       },
       series: this.hcSeries()
-    }
+    };
     return chartOptions;
 
-  }//end of hcChartOptions()
+  }// end of hcChartOptions()
 
   hcSeries() {
     if (this.dataType === 'distribution') {
@@ -113,7 +113,7 @@ export class AnalysisDist extends Analysis {
 
 
   makeCategories() {
-    let name = [];
+    const name = [];
     for (let i = 0; i < this.results.length; i++) {
       name.push(this.results[i].stratum_name[0] + ' [' + this.results[i].stratum_name[1] + '] ');
     }
@@ -123,26 +123,30 @@ export class AnalysisDist extends Analysis {
 
 
   makeDistSeries() {
-    let chartSeries = [{ data: [] }];
+    const chartSeries = [{ data: [] }];
     for (let i = 0; i < this.results.length; i++) {
-      var name;
-      var last_stratum_index = this.results[i].stratum.length - 1;
+      let name;
+      const last_stratum_index = this.results[i].stratum.length - 1;
       let color_stratum_index = this.colors.stratum_index;
-      if (color_stratum_index == -1 || color_stratum_index > last_stratum_index) {
+      if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
         color_stratum_index = last_stratum_index;
       }
-      var color_stratum_value = this.results[i].stratum[color_stratum_index];
+      const color_stratum_value = this.results[i].stratum[color_stratum_index];
       name = this.results[i].stratum_name[last_stratum_index];
-      let color = this.colors.stratum_colors[color_stratum_value];
-      if (name == 0) {
-        name = 'Other'
-      }
-      else if (name == null) {
-        name = 'Other'
+      const color = this.colors.stratum_colors[color_stratum_value];
+      if (!name) {
+        name = 'Other';
+      } else if (name == null) {
+        name = 'Other';
       }
 
 
-      chartSeries[0].data.push({ low: this.results[i].min_value, high: this.results[i].max_value, median: this.results[i].median_value, q1: this.results[i].p10_value, q3: this.results[i].p90_value, color: color })
+      chartSeries[0].data.push({ low: this.results[i].min_value,
+          high: this.results[i].max_value,
+          median: this.results[i].median_value,
+          q1: this.results[i].p10_value,
+          q3: this.results[i].p90_value,
+          color: color });
     }
     return chartSeries;
   }

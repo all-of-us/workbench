@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Concept, IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
@@ -7,7 +7,7 @@ import { AchillesService } from '../services/achilles.service';
   templateUrl: './one-concept.component.html',
   styleUrls: ['./one-concept.component.css']
 })
-export class OneConceptComponent implements OnInit {
+export class OneConceptComponent {
   // @Input() newConcept:IConcept; // Last concept added
   @Input() redraw;
   @Input() concept;
@@ -80,13 +80,10 @@ export class OneConceptComponent implements OnInit {
               this.concept.parents = data;
             });
         }
-      }); //end of .subscribe
+      }); // end of .subscribe
   } // end of ngOnChanges()
 
-  //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
-  ngOnInit() {
 
-  }
 
   sendRemove(node) {
     this.removeOneEmit.emit(node);
@@ -94,16 +91,15 @@ export class OneConceptComponent implements OnInit {
 
   graphBool(analysis, item) {
     // Toggle on graph items
-    if (analysis == null) {
-      if (item == 'source-graph') {
+    if (analysis === null) {
+      if (item === 'source-graph') {
         // toggle children graph
         this.show_source_graph = !this.show_source_graph;
         if (this.show_source_graph) {
           this.show_source_table = false;
         }
 
-      }
-      else if (item == 'source-table') {
+      } else if (item === 'source-table') {
         this.show_source_table = !this.show_source_table;
         if (this.show_source_table) {
           this.show_source_graph = false;
@@ -116,30 +112,23 @@ export class OneConceptComponent implements OnInit {
       }
 
       return;
-    }
-
-    else {
+    } else {
       for (let i = 0; i < this.analyses.length; i++) {
-        if (this.analyses[i] == analysis) {
-          if (this.analyses[i].showgraph == false || typeof (this.analyses[i].showgraph) == 'undefined') {
-
+        if (this.analyses[i] === analysis) {
+          if (this.analyses[i].showgraph === false
+              || typeof (this.analyses[i].showgraph) === 'undefined') {
             this.analyses[i].showgraph = true;
             this.show_source_graph = false;
             this.show_source_table = false;
-
-            // this.singleGraph.push(this.analyses[i])
-          }
-          else {
+          } else {
             this.analyses[i].showgraph = false;
             // this.singleGraph.splice(this.analyses[i], 1)
           }
-        }
-        else {
+        } else {
           this.analyses[i].showgraph = false;
         }
       }
     }
-    //
   }
 
 

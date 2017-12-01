@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
 import {CohortBuilderService} from '../../../generated/api/cohortBuilder.service';
-import { AnalysisSection } from '../analysisClasses';
+import { AnalysisSection } from '../AnalysisClasses';
 import { Concept, ConceptPpi } from '../ConceptClasses';
 import { AchillesService } from './achilles.service';
 

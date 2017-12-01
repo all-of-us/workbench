@@ -50,7 +50,8 @@ export class SearchTableAdvancedComponent implements OnInit {
   myForm: FormGroup;
 
 
-  constructor(private achillesService: AchillesService, private route: ActivatedRoute, fb: FormBuilder) {
+  constructor(private achillesService: AchillesService,
+              private route: ActivatedRoute, fb: FormBuilder) {
     // instantiate our event emitter Output
     this.onItemSelected = new EventEmitter();
     this.emittSearchString = new EventEmitter();
@@ -104,7 +105,7 @@ export class SearchTableAdvancedComponent implements OnInit {
 
     if (changes.toggleAdv) {
       // When toggle adv is turned off, reset all the filters on th eform to ignore them
-      if (changes.toggleAdv.currentValue == false && changes.toggleAdv.previousValue == true)  {
+      if (changes.toggleAdv.currentValue === false && changes.toggleAdv.previousValue === true)  {
         this.resetSearchForm(false);
       }
 
@@ -190,7 +191,7 @@ export class SearchTableAdvancedComponent implements OnInit {
       });
   }
 
-  logSearchParams(params){
+  logSearchParams(params) {
     // Log search params to back end
     params['advanced'] = this.toggleAdv;
     this.achillesService.logSearchParams(params);

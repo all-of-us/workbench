@@ -1,10 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 // import { Chart } from 'angular-highcharts';
 import { Router } from '@angular/router';
 
-import { Analysis } from '../analysisClasses';
-import { AchillesService } from '../services/achilles.service'
+import { Analysis } from '../AnalysisClasses';
 import { IConcept } from '../ConceptClasses';
+import { AchillesService } from '../services/achilles.service';
 
 @Component({
   selector: 'app-concept-drawer',
@@ -12,18 +12,18 @@ import { IConcept } from '../ConceptClasses';
   styleUrls: ['./concept-drawer.component.css']
 })
 
-export class ConceptDrawerComponent implements OnInit {
+export class ConceptDrawerComponent {
   @Input() redraw;
-  @Input() concept
-  @Input() analyses
-  @Input() ppi
+  @Input() concept;
+  @Input() analyses;
+  @Input() ppi;
   @Output() onParentSelected: EventEmitter<any> = new EventEmitter();
-  initialized: boolean = false; // Flag to set initialized
+  initialized = false; // Flag to set initialized
   arrayConcept = [];
-  randNum
-  singleGraph = []
+  randNum;
+  singleGraph = [];
   show_source_graph = false;
-  show_source_table = false
+  show_source_table = false;
 
   constructor(private achillesService: AchillesService, private router: Router) {
   }
@@ -31,21 +31,16 @@ export class ConceptDrawerComponent implements OnInit {
   parentClick(concept: any) {
     this.onParentSelected.emit(concept);
   }
-  // If analysis object results changed , update the chart
-  ngOnInit() {
-    // //
-
-  }
 
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
     this.show_source_graph = false;
     this.show_source_table = false;
     // This is run every time for a clarity drawer .
-    let aclones = [];
+    const aclones = [];
 
     if (this.analyses) {
-      for (let a of this.analyses) {
+      for (const a of this.analyses) {
         aclones.push(this.achillesService.cloneAnalysis(a));
       }
     }
@@ -58,7 +53,7 @@ export class ConceptDrawerComponent implements OnInit {
 
     this.randNum = Math.random();
     // Get any maps to parents and children and add them to the concept
-    if (this.concept.vocabulary_id != "PPI") {
+    if (this.concept.vocabulary_id != 'PPI') {
       this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
         .subscribe(data => {
           this.concept.children = data;
@@ -67,11 +62,11 @@ export class ConceptDrawerComponent implements OnInit {
             this.show_source_table = true;
             this.show_source_graph = false;
             for (let i = 0; i < this.analyses.length; i++) {
-              this.analyses[i].showgraph = false
+              this.analyses[i].showgraph = false;
             }
           }
           else if (this.analyses.length > 0){
-            this.analyses[0].showgraph = true
+            this.analyses[0].showgraph = true;
           }
         });
       this.achillesService.getConceptMapsTo(this.concept.concept_id, 1)
@@ -83,7 +78,7 @@ export class ConceptDrawerComponent implements OnInit {
   } // end of ngOnChanges()
 
   routeToSurvey(id) {
-    let link = [id];
+    const link = [id];
     this.router.navigate(link);
   }
 
@@ -94,18 +89,18 @@ export class ConceptDrawerComponent implements OnInit {
         // toggle children graph
         this.show_source_graph = !this.show_source_graph;
         if (this.show_source_graph) {
-            this.show_source_table =false;
+            this.show_source_table = false;
         }
 
     }
       else if (item == 'source-table') {
-        this.show_source_table = !this.show_source_table
+        this.show_source_table = !this.show_source_table;
         if (this.show_source_table) {
-          this.show_source_graph =false;
+          this.show_source_graph = false;
         }
       }
       if (this.show_source_table || this.show_source_graph) {
-        for (let a of this.analyses) {
+        for (const a of this.analyses) {
           a.showgraph = false;
         }
         }
@@ -132,7 +127,7 @@ export class ConceptDrawerComponent implements OnInit {
           }
         }
         else {
-            this.analyses[i].showgraph = false
+            this.analyses[i].showgraph = false;
         }
       }
     }
