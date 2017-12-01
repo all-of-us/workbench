@@ -72,6 +72,11 @@ public class ParticipantCohortStatusDaoTest {
         assertParticipant(new PageRequest(0, 1, sortStatusDesc), participant1);
     }
 
+    @Test
+    public void countByParticipantKey_CohortReviewId() throws Exception {
+        assertEquals(new Long(2), participantCohortStatusDao.countByParticipantKey_CohortReviewId(COHORT_REVIEW_ID));
+    }
+
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
         Slice<ParticipantCohortStatus> participants = participantCohortStatusDao
                 .findParticipantByParticipantKey_CohortReviewId(
