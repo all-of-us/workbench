@@ -48,4 +48,6 @@ public interface FireCloudService {
   WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
 
   WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException;
+
+  void deleteWorkspace(String projectName, String workspaceName) throws ApiException;
 }

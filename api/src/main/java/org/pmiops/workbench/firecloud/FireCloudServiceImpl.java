@@ -123,4 +123,9 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     return workspacesApi.getWorkspace(projectName, workspaceName);
   }
+
+  public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    workspacesApi.deleteWorkspace(projectName, workspaceName);
+  }
 }

@@ -103,6 +103,7 @@ export class WorkspaceComponent implements OnInit {
   clusterLoading = false;
   notFound = false;
   accessLevel: WorkspaceAccessLevel;
+  deleting = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   constructor(
@@ -217,8 +218,20 @@ export class WorkspaceComponent implements OnInit {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
-  hasPermission(): boolean {
+  delete(): void {
+    this.deleting = true;
+    this.workspacesService.deleteWorkspace(
+        this.workspace.namespace, this.workspace.id).subscribe(() => {
+          this.router.navigate(['/']);
+        });
+  }
+
+  hasWritePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+
+  hasOwnerPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 }
