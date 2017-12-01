@@ -274,7 +274,7 @@ export class CohortSearchActions {
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{items};
+    return <SearchGroup>{id: groupId, items};
   }
 
   mapGroupItem = (itemId: string): SearchGroupItem => {
@@ -289,29 +289,30 @@ export class CohortSearchActions {
       .toJS();
 
     return <SearchGroupItem>{
+      id: itemId,
       type: item.get('type', '').toUpperCase(),
       searchParameters: params,
       modifiers: [],
     };
   }
 
-  mapParameter = (param): SearchParameter => {
-    const _type = param.get('type');
+  mapParameter = (_param): SearchParameter => {
+    const param = <SearchParameter>{
+      parameterId: _param.get('parameterId'),
+      name: _param.get('name', ''),
+      value: _param.get('code'),
+      type: _param.get('type', ''),
+      subtype: _param.get('subtype', ''),
+      group: _param.get('group'),
+    };
 
-    if (_type.match(/^DEMO.*/i)) {
-      return <SearchParameter>{
-        value: param.get('code'),
-        subtype: param.get('subtype'),
-        conceptId: param.get('conceptId'),
-        attribute: param.get('attribute'),
-      };
-    } else if (_type.match(/^ICD|CPT|PHECODE.*/i)) {
-      return <SearchParameter>{
-        value: param.get('code'),
-        domain: param.get('domainId'),
-      };
-    } else {
-      return;
+    if (param.type.match(/^DEMO.*/i)) {
+      param.conceptId = _param.get('conceptId');
+      param.attribute = _param.get('attribute');
+    } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
+      param.domain = _param.get('domainId');
     }
+
+    return param;
   }
 }
