@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -266,6 +267,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
+  private boolean checkWorkspaceWriteAccess(String workspaceNamespace, String workspaceId) {
+    String userAccess;
+    try {
+       userAccess = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId).getAccessLevel();
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+    if (!userAccess.equals(WorkspaceAccessLevel.OWNER.toString())
+        && !userAccess.equals(WorkspaceAccessLevel.WRITER.toString())) {
+      throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
+          workspaceNamespace, workspaceId));
+    }
+    return true;
+  }
+
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
     if (workspace.getName().equals("")) {
@@ -383,6 +405,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+    checkWorkspaceWriteAccess(workspaceNamespace, workspaceId);
+
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }
