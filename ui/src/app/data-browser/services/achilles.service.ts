@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import {DataBrowserService} from 'generated';
+import 'rxjs/add/operator/toPromise';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
 import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
 import { Concept } from '../ConceptClasses';
 import { DomainClass } from '../DomainClasses';
-import 'rxjs/add/operator/toPromise';
 
 @Injectable()
 export class AchillesService {

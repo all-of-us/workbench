@@ -1,5 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Concept, IConcept } from '../ConceptClasses';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
@@ -7,7 +6,7 @@ import { AchillesService } from '../services/achilles.service';
   templateUrl: './one-concept.component.html',
   styleUrls: ['./one-concept.component.css']
 })
-export class OneConceptComponent {
+export class OneConceptComponent implements OnChanges {
   // @Input() newConcept:IConcept; // Last concept added
   @Input() redraw;
   @Input() concept;
@@ -31,7 +30,6 @@ export class OneConceptComponent {
 
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
-
     const aids = [3001, 3002];
     this.show_source_graph = false;
     this.show_source_table = false;
@@ -62,15 +60,14 @@ export class OneConceptComponent {
           for (let i = 0; i < this.analyses.length; i++) {
             this.analyses[i].showgraph = false;
           }
-        }
-        else if (this.analyses.length > 0) {
+        } else if (this.analyses.length > 0) {
           this.analyses[0].showgraph = true;
         }
 
         this.randNum = Math.random();
 
         // Get any maps to parents and children and add them to the concept
-        if (this.concept.vocabulary_id != 'PPI') {
+        if (this.concept.vocabulary_id !== 'PPI') {
           this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
             .subscribe(data => {
               this.concept.children = data;

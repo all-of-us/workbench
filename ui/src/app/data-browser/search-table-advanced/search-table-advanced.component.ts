@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormBuilder, FormGroup} from '@angular/forms';
-import { ActivatedRoute} from '@angular/router';
 import { State } from 'clarity-angular';
 import { AchillesService } from '../services/achilles.service';
 
@@ -9,7 +8,7 @@ import { AchillesService } from '../services/achilles.service';
   templateUrl: './search-table-advanced.component.html',
   styleUrls: ['./search-table-advanced.component.css']
 })
-export class SearchTableAdvancedComponent implements OnInit {
+export class SearchTableAdvancedComponent implements OnChanges {
   /* Todo et these dynamically possibly */
   sourceConceptFilters =
       [{ vocabulary_id: 'ICD9CM' }, { vocabulary_id: 'ICD10' }, { vocabulary_id: 'ICD10CM'} ];
@@ -51,7 +50,7 @@ export class SearchTableAdvancedComponent implements OnInit {
 
 
   constructor(private achillesService: AchillesService,
-              private route: ActivatedRoute, fb: FormBuilder) {
+              fb: FormBuilder) {
     // instantiate our event emitter Output
     this.onItemSelected = new EventEmitter();
     this.emittSearchString = new EventEmitter();
@@ -90,12 +89,6 @@ export class SearchTableAdvancedComponent implements OnInit {
       this.searchData(this.myForm.value);
     }
   }
-
-  ngOnInit() {
-
-  //  this.retainedString = this.savedSearchStringAdv;
-  }
-
 
 
   ngOnChanges(changes) {

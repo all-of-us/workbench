@@ -1,9 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-// import { Chart } from 'angular-highcharts';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { Router } from '@angular/router';
-
-import { Analysis } from '../AnalysisClasses';
-import { IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
@@ -12,7 +8,7 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./concept-drawer.component.css']
 })
 
-export class ConceptDrawerComponent {
+export class ConceptDrawerComponent implements OnChanges {
   @Input() redraw;
   @Input() concept;
   @Input() analyses;
@@ -65,8 +61,7 @@ export class ConceptDrawerComponent {
             for (let i = 0; i < this.analyses.length; i++) {
               this.analyses[i].showgraph = false;
             }
-          }
-          else if (this.analyses.length > 0){
+          } else if (this.analyses.length > 0) {
             this.analyses[0].showgraph = true;
           }
         });

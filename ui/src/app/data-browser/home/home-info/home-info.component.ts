@@ -34,8 +34,7 @@ export class HomeInfoComponent implements OnChanges {
       let path = '/all?';
       if (id.domain_parent = 'domain') {
         path += 'domain_id=' + id.domain_id;
-      }
-      else {
+      } else {
         path += 'vocabulary_id=' + id.domain_id;
       }
       const link = ['all'];

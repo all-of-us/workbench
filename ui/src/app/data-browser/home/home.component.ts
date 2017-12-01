@@ -13,7 +13,7 @@ export class HomeComponent {
   pageTitle = 'AoU Data Browser Home';
 
   constructor( private achillesService: AchillesService) {
-    this.homeData = achillesService.getDomains().subscribe(results => {
+    this.homeData = this.achillesService.getDomains().subscribe(results => {
       this.homeData = results;
     });
   }
