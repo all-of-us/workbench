@@ -301,9 +301,6 @@ public class Workspace {
   }
 
   public void setApproved(Boolean approved) {
-    if (approved != null && this.timeReviewed == null) {
-      this.timeReviewed = new Timestamp(System.currentTimeMillis());
-    }
     this.approved = approved;
   }
 
