@@ -52,7 +52,7 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findParticipantByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Paging() throws Exception {
+    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Paging() throws Exception {
 
         final Sort sort = new Sort(Sort.Direction.ASC, "participantKey.participantId");
         assertParticipant(new PageRequest(0, 1, sort), participant1);
@@ -60,7 +60,7 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findParticipantByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Sorting() throws Exception {
+    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Sorting() throws Exception {
 
         final Sort sortParticipantAsc = new Sort(Sort.Direction.ASC, "participantKey.participantId");
         final Sort sortParticipantDesc = new Sort(Sort.Direction.DESC, "participantKey.participantId");
@@ -79,7 +79,7 @@ public class ParticipantCohortStatusDaoTest {
 
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
         Slice<ParticipantCohortStatus> participants = participantCohortStatusDao
-                .findParticipantByParticipantKey_CohortReviewId(
+                .findByParticipantKey_CohortReviewId(
                         expectedParticipant.getParticipantKey().getCohortReviewId(),
                         pageRequest);
         assertEquals(expectedParticipant, participants.getContent().get(0));

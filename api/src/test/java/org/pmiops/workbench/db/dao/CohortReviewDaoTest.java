@@ -62,18 +62,18 @@ public class CohortReviewDaoTest {
 
         cohortReviewDao.save(cohortReview);
 
-        String sql = "select count(*) from cohort_review where cohort_review_id = ? and last_participant_edit = ?";
-        Object[] sqlParams = { cohortReview.getCohortReviewId(), cohortReview.getLastParticipantEdit() };
+        String sql = "select count(*) from cohort_review where cohort_review_id = ? and reviewed_count = ?";
+        Object[] sqlParams = { cohortReview.getCohortReviewId(), cohortReview.getReviewedCount() };
         Integer expectedCount = new Integer("1");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
 
         cohortReview = cohortReviewDao.findOne(cohortReview.getCohortReviewId());
-        cohortReview.setLastParticipantEdit(3);
+        cohortReview.setReviewedCount(3);
         cohortReviewDao.saveAndFlush(cohortReview);
 
-        sql = "select count(*) from cohort_review where cohort_review_id = ? and last_participant_edit = ?";
-        sqlParams = new Object[] { cohortReview.getCohortReviewId(), cohortReview.getLastParticipantEdit() };
+        sql = "select count(*) from cohort_review where cohort_review_id = ? and reviewed_count = ?";
+        sqlParams = new Object[] { cohortReview.getCohortReviewId(), cohortReview.getReviewedCount() };
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
     }
@@ -99,10 +99,8 @@ public class CohortReviewDaoTest {
                 .cdrVersionId(CDR_VERSION_ID)
                 .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
                 .lastModifiedTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
-                .lastParticipantEdit(2)
                 .matchedParticipantCount(100)
-                .reviewedCount(10)
-                .pageRequest(gson.toJson(pageRequest));
+                .reviewedCount(10);
     }
 
 }
