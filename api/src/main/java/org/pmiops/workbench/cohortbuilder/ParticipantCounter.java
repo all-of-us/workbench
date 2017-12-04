@@ -81,7 +81,7 @@ public class ParticipantCounter {
         return buildQuery(request, ID_SQL_TEMPLATE, ID_SQL_ORDER_BY + " " + resultSize);
     }
 
-    public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String sqlGroupBy) {
+    public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String endSql) {
         if(request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
             throw new BadRequestException("Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
         }
@@ -97,7 +97,7 @@ public class ParticipantCounter {
             joiner.merge(buildQuery(request.getExcludes(), params, true));
         }
 
-        String finalSql = sqlTemplate + joiner.toString() + sqlGroupBy;
+        String finalSql = sqlTemplate + joiner.toString() + endSql;
 
         return QueryJobConfiguration
                 .newBuilder(finalSql)

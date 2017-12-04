@@ -11,7 +11,8 @@ public interface CohortDao extends CrudRepository<Cohort, Long> {
      * Using an interface based projection to return only the cohort definition.
      *
      * @param cohortId
+     * @param workspaceId
      * @return
      */
-    CohortDefinition findCohortByCohortId(@Param("cohortId") long cohortId);
+    CohortDefinition findCohortByCohortIdAndWorkspaceId(@Param("cohortId") long cohortId, @Param("workspaceId") long workspaceId);
 }

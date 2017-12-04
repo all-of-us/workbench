@@ -1,14 +1,19 @@
 package org.pmiops.workbench.db.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +29,10 @@ public class CohortReview {
     private Timestamp creationTime;
     private Timestamp lastModifiedTime;
     private long matchedParticipantCount;
+    private long reviewSize;
     private long reviewedCount;
-    private String pageRequest;
-    private long lastParticipantEdit;
+    private ReviewStatus reviewStatus;
+    private List<ParticipantCohortStatus> participantCohortStatuses;
 
     @Id
     @GeneratedValue
@@ -114,6 +120,20 @@ public class CohortReview {
         return this;
     }
 
+    @Column(name = "review_size")
+    public long getReviewSize() {
+        return reviewSize;
+    }
+
+    public void setReviewSize(long reviewSize) {
+        this.reviewSize = reviewSize;
+    }
+
+    public CohortReview reviewSize(long reviewSize) {
+        this.reviewSize = reviewSize;
+        return this;
+    }
+
     @Column(name = "reviewed_count")
     public long getReviewedCount() {
         return reviewedCount;
@@ -128,31 +148,32 @@ public class CohortReview {
         return this;
     }
 
-    @Column(name = "page_request")
-    public String getPageRequest() {
-        return pageRequest;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_status")
+    public ReviewStatus getReviewStatus() {
+        return reviewStatus;
     }
 
-    public void setPageRequest(String pageRequest) {
-        this.pageRequest = pageRequest;
+    public void setReviewStatus(ReviewStatus reviewStatus) {
+        this.reviewStatus = reviewStatus;
     }
 
-    public CohortReview pageRequest(String pageRequest) {
-        this.pageRequest = pageRequest;
+    public CohortReview reviewStatus(ReviewStatus reviewStatus) {
+        this.reviewStatus = reviewStatus;
         return this;
     }
 
-    @Column(name = "last_participant_edit")
-    public long getLastParticipantEdit() {
-        return lastParticipantEdit;
+    @Transient
+    public List<ParticipantCohortStatus> getParticipantCohortStatuses() {
+        return participantCohortStatuses;
     }
 
-    public void setLastParticipantEdit(long lastParticipantEdit) {
-        this.lastParticipantEdit = lastParticipantEdit;
+    public void setParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
+        this.participantCohortStatuses = participantCohortStatuses;
     }
 
-    public CohortReview lastParticipantEdit(long lastParticipantEdit) {
-        this.lastParticipantEdit = lastParticipantEdit;
+    public CohortReview participantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
+        this.participantCohortStatuses = participantCohortStatuses;
         return this;
     }
 
@@ -164,16 +185,16 @@ public class CohortReview {
         return cohortId == that.cohortId &&
                 cdrVersionId == that.cdrVersionId &&
                 matchedParticipantCount == that.matchedParticipantCount &&
+                reviewSize == that.reviewSize &&
                 reviewedCount == that.reviewedCount &&
-                lastParticipantEdit == that.lastParticipantEdit &&
-                Objects.equals(creationTime, that.creationTime) &&
                 Objects.equals(lastModifiedTime, that.lastModifiedTime) &&
-                Objects.equals(pageRequest, that.pageRequest);
+                reviewStatus == that.reviewStatus &&
+                Objects.equals(participantCohortStatuses, that.participantCohortStatuses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cdrVersionId, creationTime, lastModifiedTime, matchedParticipantCount, reviewedCount, pageRequest, lastParticipantEdit);
+        return Objects.hash(cdrVersionId, lastModifiedTime, matchedParticipantCount, reviewSize, reviewedCount, reviewStatus, participantCohortStatuses);
     }
 
     @Override
@@ -185,9 +206,10 @@ public class CohortReview {
                 .append("creationTime", creationTime)
                 .append("lastModifiedTime", lastModifiedTime)
                 .append("matchedParticipantCount", matchedParticipantCount)
+                .append("reviewSize", reviewSize)
                 .append("reviewedCount", reviewedCount)
-                .append("pageRequest", pageRequest)
-                .append("lastParticipantEdit", lastParticipantEdit)
+                .append("reviewStatus", reviewStatus)
+                .append("participantCohortStatuses", participantCohortStatuses)
                 .toString();
     }
 }
