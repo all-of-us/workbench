@@ -76,7 +76,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .creationTime(cohortReview.getCreationTime().toString())
                             .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
                             .reviewedCount(cohortReview.getReviewedCount())
-                            .reviewStatus(cohortReview.getReviewStatus());
+                            .reviewStatus(cohortReview.getReviewStatus())
+                            .reviewSize(cohortReview.getReviewSize());
                 }
             };
 
