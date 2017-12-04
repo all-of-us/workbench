@@ -31,8 +31,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   notFound = false;
-  accessLevel: WorkspaceAccessLevel;
-  insufficientPermissions = true;
+  private accessLevel: WorkspaceAccessLevel;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
@@ -146,7 +145,7 @@ export class WorkspaceEditComponent implements OnInit {
       }
     }
   }
-  hasPermission(): boolean {
+  get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }

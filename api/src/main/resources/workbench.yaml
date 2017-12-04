@@ -394,6 +394,11 @@ paths:
           type: string
           required: true
           description: ID of the workspace containing the cohort definition
+      responses:
+        "202":
+          description: Workspace deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
 
   /api/v1/workspaces/review:
     get:
