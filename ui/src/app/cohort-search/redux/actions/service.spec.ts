@@ -21,25 +21,31 @@ const dummyItem = fromJS({
 const zeroCrit = fromJS({
   id: 0,
   parameterId: 'param0',
-  type: 'icd9',
+  name: 'CodeA',
   code: 'CodeA',
+  type: 'icd9',
+  group: false,
   domainId: null,
 });
 
 const oneCrit = fromJS({
   id: 1,
   parameterId: 'param1',
-  type: 'icd9',
+  name: 'CodeB',
   code: 'CodeB',
+  type: 'icd9',
+  group: true,
   domainId: null,
 });
 
 const DEMO_crit = fromJS({
+  id: 3,
   parameterId: 'paramF',
+  name: 'Female',
   type: 'DEMO',
   subtype: 'GEN',
   code: 'F',
-  name: 'Female',
+  group: false,
   conceptId: 12345,
   domainId: null,
   attribute: null,
@@ -53,13 +59,25 @@ const dummyState = initialState
 
 const expectedSR = {
   includes: [{
+    id: 'include0',
     items: [{
+      id: 'item001',
       type: 'ICD9',
       searchParameters: [{
+          parameterId: 'param0',
+          name: 'CodeA',
           value: 'CodeA',
+          type: 'icd9',
+          subtype: '',
+          group: false,
           domain: null,
         }, {
+          parameterId: 'param1',
+          name: 'CodeB',
           value: 'CodeB',
+          type: 'icd9',
+          subtype: '',
+          group: true,
           domain: null,
         }],
       modifiers: [],
@@ -156,27 +174,51 @@ describe('CohortSearchActions', () => {
     const setDataSpy = spyOn(actions, 'setChartData');
     const newExpectedSR = {
       includes: [{
+        id: 'include0',
         items: [{
+          id: 'item001',
           type: 'ICD9',
           searchParameters: [{
+              parameterId: 'param0',
+              name: 'CodeA',
               value: 'CodeA',
+              type: 'icd9',
+              subtype: '',
+              group: false,
               domain: null,
             }, {
+              parameterId: 'param1',
+              name: 'CodeB',
               value: 'CodeB',
+              type: 'icd9',
+              subtype: '',
+              group: true,
               domain: null,
-            }],
+          }],
           modifiers: [],
         }]
       }, {
+        id: 'include1',
         items: [{
+          id: 'item002',
           type: 'ICD9',
           searchParameters: [{
+              parameterId: 'param0',
+              name: 'CodeA',
               value: 'CodeA',
+              type: 'icd9',
+              subtype: '',
+              group: false,
               domain: null,
             }, {
+              parameterId: 'param1',
+              name: 'CodeB',
               value: 'CodeB',
+              type: 'icd9',
+              subtype: '',
+              group: true,
               domain: null,
-            }],
+          }],
           modifiers: [],
         }]
       }],
@@ -226,14 +268,23 @@ describe('CohortSearchActions', () => {
     // ICD9, ICD10, CPT
     const zeroParam = actions.mapParameter(zeroCrit);
     expect(zeroParam).toEqual({
+      parameterId: 'param0',
+      name: 'CodeA',
       value: 'CodeA',
+      type: 'icd9',
+      subtype: '',
+      group: false,
       domain: null,
     });
     // Demographics
     const demoParam = actions.mapParameter(DEMO_crit);
     expect(demoParam).toEqual({
+      parameterId: 'paramF',
+      name: 'Female',
       value: 'F',
+      type: 'DEMO',
       subtype: 'GEN',
+      group: false,
       conceptId: 12345,
       attribute: null,
     });

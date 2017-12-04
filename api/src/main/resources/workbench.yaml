@@ -1296,6 +1296,9 @@ definitions:
     required:
       - items
     properties:
+      id:
+        description: Unique within the cohort definition
+        type: string
       items:
         type: "array"
         items:
@@ -1313,6 +1316,9 @@ definitions:
       - type
       - searchParameters
     properties:
+      id:
+        description: Unique within the cohort definition
+        type: string
       type:
         description: type of criteria
         type: string
@@ -1341,14 +1347,31 @@ definitions:
   SearchParameter:
     type: object
     required:
+      - parameterId
+      - name
       - value
+      - type
+      - subtype
+      - group
     properties:
+      parameterId:
+        description: Unique within the cohort definition
+        type: string
+      name:
+        description: The name of the generating Criterion
+        type: string
       value:
         description: The Value of the Criteria within its Category Tree
         type: string
-      subtype:
-        description: The subtype of SearchParameter
+      type:
+        description: The type of the generating Criterion
         type: string
+      subtype:
+        description: The subtype of the generating Criterion
+        type: string
+      group:
+        description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
+        type: boolean
       domain:
         description: clue to determine which tables to search
         type: string
