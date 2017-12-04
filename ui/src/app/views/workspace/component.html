@@ -1,10 +1,20 @@
 <div *ngIf="!notFound else notFoundMessage">
   <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
     <h2>{{workspace.name}}</h2>
-    <span *ngIf="hasPermission()">
-      <clr-icon class="editing-icon is-solid" shape="pencil" (click)="edit()"></clr-icon>
-    </span>
-    <clr-icon class="sharing-icon is-solid" shape="users" (click)="share()"></clr-icon>
+    <clr-button-group class="permissions-group btn-primary">
+      <clr-button [disabled]="!writePermission" (click)="edit()"
+          class="btn btn-icon">
+        <clr-icon class="is-solid" shape="pencil"></clr-icon>
+      </clr-button>
+      <clr-button (click)="share()" class="btn btn-icon">
+        <clr-icon class="is-solid" shape="users"></clr-icon>
+      </clr-button>
+      <clr-button [disabled]="!ownerPermission"
+          (click)="delete()" class="btn btn-icon btn-danger btn-deleting"
+          [clrLoading]="deleting">
+        <clr-icon class="is-solid" shape="trash"></clr-icon>
+      </clr-button>
+    </clr-button-group>
   </div>
   <ng-template #workspacePageLoading>
     <div class="loading-area">

@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -192,6 +193,20 @@ public class WorkspacesControllerTest {
     //Test that the correct owner is added.
     assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
     assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testDeleteWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+    verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+
+    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    Workspace workspace2 =
+        workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
+            .getBody().getWorkspace();
   }
 
   @Test

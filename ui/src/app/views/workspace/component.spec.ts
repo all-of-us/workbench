@@ -112,6 +112,25 @@ describe('WorkspaceComponent', () => {
       .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
   }));
 
+  it('deletes the correct workspace', fakeAsync(() => {
+    let originalWorkspaceLength = 0;
+    workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
+      originalWorkspaceLength = workspaces.items.length;
+    });
+    tick();
+    const deleteIcon =
+        workspacePage.fixture.debugElement.queryAll(By.css('.btn-deleting'))[0];
+    deleteIcon.triggerEventHandler('click', null);
+    tick();
+    let workspaceLength;
+    workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
+      workspaceLength = workspaces.items.length;
+    });
+    tick();
+    expect(workspaceLength).toBe(originalWorkspaceLength - 1);
+
+  }));
+
 
 
 });

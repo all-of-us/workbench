@@ -6,7 +6,7 @@
     <div class="name-area" [class.validation-error]="nameNotEntered">
       <label class="text-label required">Name:</label>
       <input type="text" class="input name" name="workspace-name" autofocus
-          [(ngModel)]="workspace.name" [disabled]="!hasPermission()">
+          [(ngModel)]="workspace.name" [disabled]="!hasPermission">
     </div>
 
     <div>
@@ -16,7 +16,7 @@
       <div>
         <label class="text-label">Describe your research purpose:</label>
         <textarea class="input description" name="workspace-description"
-            [(ngModel)]="workspace.description" [disabled]="!hasPermission()">
+            [(ngModel)]="workspace.description" [disabled]="!hasPermission">
         </textarea>
       </div>
       <section class="form-block">
@@ -108,7 +108,7 @@
       <div class="button">
         <button *ngIf="adding else editing" class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="addWorkspace()">Create Workspace</button>
         <ng-template #editing>
-          <button class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="updateWorkspace()" [disabled]="!hasPermission()">Update Workspace</button>
+          <button class="btn add-button btn-primary" [clrLoading]="savingWorkspace" (click)="updateWorkspace()" [disabled]="!hasPermission">Update Workspace</button>
         </ng-template>
         <button class="btn" (click)="navigateBack()">Cancel</button>
       </div>

@@ -22,7 +22,7 @@ export class WorkspaceShareComponent implements OnInit {
   loadingWorkspace = true;
   toShare = '';
   selectedPermission = 'Select Permission';
-  accessLevel: WorkspaceAccessLevel;
+  private accessLevel: WorkspaceAccessLevel;
   selectedAccessLevel: WorkspaceAccessLevel;
   notFound = false;
   userEmail: string;
@@ -30,7 +30,6 @@ export class WorkspaceShareComponent implements OnInit {
   userNotFound = false;
   userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
-  insufficientPermissions = true;
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
@@ -165,7 +164,7 @@ export class WorkspaceShareComponent implements OnInit {
     this.usersLoading = false;
   }
 
-  hasPermission(): boolean {
+  get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 }

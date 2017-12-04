@@ -346,11 +346,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> deleteWorkspace(String workspaceNamespace, String workspaceId) {
+  public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
+    try {
+      fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 403) {
+        throw new ForbiddenException(String.format("Insufficient permissions to delete workspace %s/%s",
+            workspaceNamespace, workspaceId));
+      } else if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
     workspaceService.getDao().delete(dbWorkspace);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
