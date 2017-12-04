@@ -72,8 +72,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace saveWithLastModified(Workspace workspace) {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    workspace.setLastModifiedTime(now);
+    return saveWithLastModified(workspace, new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  private Workspace saveWithLastModified(Workspace workspace, Timestamp ts) {
+    workspace.setLastModifiedTime(ts);
     try {
       return workspaceDao.save(workspace);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -99,8 +102,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           "Workspace %s/%s already %s.",
           ns, id, workspace.getApproved() ? "approved" : "rejected"));
     }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
-    saveWithLastModified(workspace);
+    workspace.setTimeReviewed(now);
+    saveWithLastModified(workspace, now);
   }
 
   @Override
