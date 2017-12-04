@@ -26,13 +26,14 @@
             <column name="matched_participant_count" type="bigint">
                 <constraints nullable="true"/>
             </column>
+            <!-- This column represents the sample size of this review -->
+            <column name="review_size" type="bigint">
+                <constraints nullable="true"/>
+            </column>
             <column name="reviewed_count" type="bigint">
                 <constraints nullable="true"/>
             </column>
-            <column name="page_request" type="blob">
-                <constraints nullable="true"/>
-            </column>
-            <column name="last_participant_edit" type="bigint">
+            <column name="review_status" type="tinyint">
                 <constraints nullable="true"/>
             </column>
         </createTable>
