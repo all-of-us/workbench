@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -140,7 +141,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .status(CohortStatus.NOT_REVIEWED));
         }
 
-        cohortReview.setReviewSize(size);
+        cohortReview
+                .reviewSize(participantCohortStatuses.size())
+                .reviewedCount(0L)
+                .reviewStatus(ReviewStatus.CREATED);
         cohortReview.setParticipantCohortStatuses(participantCohortStatuses
                 .stream()
                 .limit(LIMIT)
@@ -191,6 +195,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             cohortReview.setCdrVersionId(cdrVersionId);
             cohortReview.matchedParticipantCount(cohortCount);
             cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
+            cohortReview.reviewedCount(0L);
+            cohortReview.reviewStatus(ReviewStatus.NONE);
             cohortReviewDao.save(cohortReview);
         }
 
