@@ -37,21 +37,9 @@ public class BigQueryService {
         // Execute the query
         QueryResponse response = null;
         try {
-            response = bigquery.query(query);
+            response = bigquery.query(query, BigQuery.QueryOption.of(BigQuery.QueryResultsOption.maxWaitTime(60000L)));
         } catch (InterruptedException e) {
             throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
-        }
-
-        // Wait for the job to finish
-        while (!response.jobCompleted()) {
-            response = bigquery.getQueryResults(response.getJobId());
-        }
-
-        // Check for errors.
-        if (response.hasErrors()) {
-            if (response.getExecutionErrors().size() != 0) {
-                throw new BigQueryException(500, "Something went wrong with BigQuery: ", response.getExecutionErrors().get(0));
-            }
         }
 
         return response.getResult();
@@ -73,7 +61,10 @@ public class BigQueryService {
     }
 
     public Long getLong(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
+        if (row.get(index).isNull()) {
+            throw new BigQueryException(500, "FieldValue is null at position: " + index);
+        }
+        return row.get(index).getLongValue();
     }
 
     public String getString(List<FieldValue> row, int index) {

@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCohortStatus, Long> {
 
-    Slice<ParticipantCohortStatus> findParticipantByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId,
-                                                                                  Pageable pageRequest);
+    Slice<ParticipantCohortStatus> findByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId,
+                                                                               Pageable pageRequest);
 
     Long countByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId);
 }
