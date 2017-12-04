@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -103,14 +104,26 @@ public class WorkspacesControllerTest {
 
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator) throws Exception {
+  private void stubGetWorkspaceOwner(String ns, String name, String creator) throws Exception {
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse = new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel("Owner");
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
+      fcResponse
+    );
+  }
+  private void stubGetWorkspaceReader(String ns, String name, String creator) throws Exception {
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
+    fcWorkspace.setNamespace(ns);
+    fcWorkspace.setName(name);
+    fcWorkspace.setCreatedBy(creator);
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse = new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspace);
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
       fcResponse
     );
@@ -148,7 +161,7 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -193,7 +206,7 @@ public class WorkspacesControllerTest {
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
     request.setApproved(true);
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
-    stubGetWorkspace(ws.getNamespace(), ws.getName(), ws.getCreator());
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
     ws = workspacesController.getWorkspace(ws.getNamespace(), ws.getName()).getBody().getWorkspace();
     researchPurpose = ws.getResearchPurpose();
 
@@ -207,29 +220,43 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getId(), ws.getCreator());
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
     updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
-    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator());
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getId(), ws.getCreator());
     Workspace got = workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testReaderUpdateWorkspaceThrows() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ws.setName("updated-name");
+    stubGetWorkspaceReader(ws.getNamespace(), ws.getId(), ws.getCreator());
+    Workspace updated =
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
         new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
 
     // Still using the initial now-stale etag; this should throw.
+    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
         new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
   }
@@ -243,6 +270,7 @@ public class WorkspacesControllerTest {
     List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
+        stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
             new Workspace().name("updated-name").etag(etag));
         fail(String.format("expected BadRequestException for etag: %s", etag));
@@ -339,7 +367,7 @@ public class WorkspacesControllerTest {
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -403,7 +431,7 @@ public class WorkspacesControllerTest {
     CLOCK.increment(1000);
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getId(), workspace.getCreator());
+    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getId(), workspace.getCreator());
     Workspace workspace2 = workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
