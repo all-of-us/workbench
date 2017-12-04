@@ -1,7 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
@@ -111,7 +110,8 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
 
 
-    simulateClick(workspaceSharePage.fixture, queryByCss(workspaceSharePage.fixture, '.add-button'));
+    simulateClick(workspaceSharePage.fixture,
+        queryByCss(workspaceSharePage.fixture, '.add-button'));
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.userRolesOnPage)
         .toEqual(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);

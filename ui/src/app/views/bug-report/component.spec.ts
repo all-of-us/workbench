@@ -1,7 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';

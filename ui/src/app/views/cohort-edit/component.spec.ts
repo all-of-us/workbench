@@ -1,7 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
@@ -12,7 +11,6 @@ import {CohortsServiceStub, DEFAULT_COHORT_ID} from 'testing/stubs/cohort-servic
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
-  queryAllByCss,
   queryByCss,
   simulateClick,
   simulateInput,
@@ -129,7 +127,6 @@ describe('CohortEditComponent', () => {
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'Edited Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'Edited Description');
     simulateClick(cohortEditPage.fixture, queryByCss(cohortEditPage.fixture, '.save-button'));
-    
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
