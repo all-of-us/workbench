@@ -119,7 +119,7 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     const deleteIcon =
-        workspacePage.fixture.debugElement.queryAll(By.css('.deleting-icon'))[0];
+        workspacePage.fixture.debugElement.queryAll(By.css('.btn-deleting'))[0];
     deleteIcon.triggerEventHandler('click', null);
     tick();
     let workspaceLength;
