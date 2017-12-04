@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CohortDaoTest {
 
+    public static final long WORKSPACE_ID = 9999;
     @Autowired
     CohortDao cohortDao;
 
@@ -39,17 +40,17 @@ public class CohortDaoTest {
                 "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(9999);
+        cohort.setWorkspaceId(WORKSPACE_ID);
         cohort.setCriteria(cohortJson);
 
         //need to insert a workspace to satisfy the foreign key contraint of cohort
         jdbcTemplate.execute("insert into workspace" +
                 "(workspace_id, name, workspace_namespace, firecloud_name, data_access_level, creation_time, last_modified_time)" +
-                "values (9999, 'name', 'name', 'name', 1, sysdate(), sysdate())");
+                "values (" + WORKSPACE_ID + ", 'name', 'name', 'name', 1, sysdate(), sysdate())");
 
         cohortDao.save(cohort);
 
-        CohortDefinition definition = cohortDao.findCohortByCohortId(cohort.getCohortId());
+        CohortDefinition definition = cohortDao.findCohortByCohortIdAndWorkspaceId(cohort.getCohortId(), WORKSPACE_ID);
         assertEquals(cohortJson, definition.getCriteria());
     }
 
