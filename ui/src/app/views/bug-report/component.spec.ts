@@ -11,7 +11,12 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  queryByCss,
+  simulateClick,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {BugReportService, ProfileService} from 'generated';
 
@@ -33,10 +38,10 @@ class BugReportPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.reportBugButton = this.fixture.debugElement.query(By.css('#report-bug'));
-    this.sendButton = this.fixture.debugElement.query(By.css('#send-bug-report'));
-    this.shortDescription = this.fixture.debugElement.query(By.css('#bug-report-short-descr'));
-    this.reproSteps = this.fixture.debugElement.query(By.css('#bug-report-repro-steps'));
+    this.reportBugButton = queryByCss(this.fixture, '#report-bug');
+    this.sendButton = queryByCss(this.fixture, '#send-bug-report');
+    this.shortDescription = queryByCss(this.fixture, '#bug-report-short-descr');
+    this.reproSteps = queryByCss(this.fixture, '#bug-report-repro-steps');
   }
 }
 
@@ -67,18 +72,12 @@ describe('BugReportComponent', () => {
 
 
   it('submits a bug report', fakeAsync(() => {
-    bugReportPage.reportBugButton.triggerEventHandler('click', null);
-    updateAndTick(bugReportPage.fixture);
-    updateAndTick(bugReportPage.fixture);
+    simulateClick(bugReportPage.fixture, bugReportPage.reportBugButton);
     bugReportPage.readPageData();
     simulateInput(bugReportPage.fixture, bugReportPage.shortDescription, testShortDescription);
     simulateInput(bugReportPage.fixture, bugReportPage.reproSteps, testReproSteps);
-    updateAndTick(bugReportPage.fixture);
-    updateAndTick(bugReportPage.fixture);
     bugReportPage.readPageData();
-    bugReportPage.sendButton.triggerEventHandler('click', null);
-    updateAndTick(bugReportPage.fixture);
-    updateAndTick(bugReportPage.fixture);
+    simulateClick(bugReportPage.fixture, bugReportPage.sendButton);
     expect(bugReportPage.fixture.componentInstance.bugReport.shortDescription)
       .toBe(testShortDescription);
     expect(bugReportPage.fixture.componentInstance.bugReport.reproSteps).toBe(testReproSteps);

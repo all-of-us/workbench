@@ -13,6 +13,7 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {
   queryAllByCss,
   queryByCss,
+  simulateClick,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -121,11 +122,7 @@ describe('WorkspaceComponent', () => {
     workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
       originalWorkspaceLength = workspaces.items.length;
     });
-    tick();
-    const deleteIcon =
-        workspacePage.fixture.debugElement.queryAll(By.css('.btn-deleting'))[0];
-    deleteIcon.triggerEventHandler('click', null);
-    tick();
+    simulateClick(workspacePage.fixture, queryByCss(workspacePage.fixture, '.btn-deleting'));
     let workspaceLength;
     workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
       workspaceLength = workspaces.items.length;
