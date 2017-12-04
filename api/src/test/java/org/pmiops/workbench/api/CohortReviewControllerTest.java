@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -161,8 +162,9 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setCohortId(cohortId);
         cohortReviewAfter.setCdrVersionId(cdrVersionId);
         cohortReviewAfter.setMatchedParticipantCount(1000);
-        cohortReviewAfter.setReviewSize(200);
+        cohortReviewAfter.setReviewSize(1);
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
+        cohortReviewAfter.setReviewStatus(ReviewStatus.CREATED);
         cohortReviewAfter.setParticipantCohortStatuses(Arrays.asList(pcs));
 
         CohortDefinition definition = new CohortDefinition() {
@@ -252,6 +254,7 @@ public class CohortReviewControllerTest {
                         .cdrVersionId(cdrVersionId)
                         .matchedParticipantCount(1000L)
                         .reviewedCount(0L)
+                        .reviewSize(200L)
                 .participantCohortStatuses(Arrays.asList(respParticipant));
 
         List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();

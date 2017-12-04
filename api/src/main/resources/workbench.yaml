@@ -17,9 +17,9 @@ securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
   # by defining an `aou_oauth` security mode, which we'll assing
   # to any protected endpoints below.
-#  aou_oauth:
-#    type: oauth2
-#    flow: accessCode
+  aou_oauth:
+    type: oauth2
+    flow: accessCode
 schemes:
   - "https"
 produces:
@@ -27,7 +27,7 @@ produces:
 # Establish the fact that all endpoints are protected: this annotation
 # ensures that client libraries know to send bearer tokens when calling
 security:
-#  - aou_oauth: []
+  - aou_oauth: []
 
 # Throughout, we use integer/int64 in preference to string/date-time because Swagger's
 # date formatting is inconsistent between server and client. Time values are stored as
