@@ -25,32 +25,6 @@ h3 {
   display: inline-block;
 }
 
-.icon-area {
-  margin-top: 1.5rem;
-}
-
-.editing-icon {
-  margin-left: 0.3rem;
-  border: 1px solid grey;
-  align-items: center;
-}
-
-.sharing-icon {
-  margin-left: 0.3rem;
-  border: 1px solid grey;
-  align-items: center;
-}
-
-.deleting-icon {
-  margin-left: 0.3rem;
-  color: red;
-  border: 1px solid red;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.icon-notify {
-  margin-left: 0.3rem;
-  justify-content: flex-end;
-  align-items: flex-end;
+.permissions-group {
+  margin: 1rem 0rem 0rem 1rem;
 }

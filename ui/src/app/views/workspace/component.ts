@@ -102,7 +102,7 @@ export class WorkspaceComponent implements OnInit {
   clusterPulled = false;
   clusterLoading = false;
   notFound = false;
-  accessLevel: WorkspaceAccessLevel;
+  private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
@@ -226,12 +226,12 @@ export class WorkspaceComponent implements OnInit {
         });
   }
 
-  hasWritePermission(): boolean {
+  get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
-  hasOwnerPermission(): boolean {
+  get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 }

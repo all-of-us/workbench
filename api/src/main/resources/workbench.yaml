@@ -396,7 +396,7 @@ paths:
           description: ID of the workspace containing the cohort definition
       responses:
         "202":
-          description: Cluster deletion request accepted
+          description: Workspace deletion request accepted
           schema:
             $ref: '#/definitions/EmptyResponse'
 
