@@ -1,6 +1,6 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {isImmutable, List, Map, Set} from 'immutable';
+import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
 
@@ -14,6 +14,7 @@ import {
   getGroup,
   getItem,
   getSearchRequest,
+  groupList,
   includeGroups,
   isCriteriaLoading,
   isRequesting,
@@ -67,25 +68,32 @@ export class CohortSearchActions {
   @dispatch() cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
+  @dispatch() loadEntities = ActionFuncs.loadEntities;
+  @dispatch() _resetStore = ActionFuncs.resetStore;
+
   /** Internal tooling */
   _idsInUse = Set<string>();
 
-  generateId(prefix?: string) {
+  generateId(prefix?: string): string {
     prefix = prefix || 'id';
     let newId = `${prefix}_${this._genSuffix()}`;
     while (this._idsInUse.has(newId)) {
       newId = `${prefix}_${this._genSuffix()}`;
     }
-    this._idsInUse = this._idsInUse.add(newId);
+    this.addId(newId);
     return newId;
   }
 
-  _genSuffix() {
+  _genSuffix(): string {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  removeId(id: string) {
+  removeId(id: string): void {
     this._idsInUse = this._idsInUse.delete(id);
+  }
+
+  addId(newId: string): void {
+    this._idsInUse = this._idsInUse.add(newId);
   }
 
   get state() {
@@ -253,6 +261,30 @@ export class CohortSearchActions {
     this.requestCharts('searchRequests', SR_ID, request);
   }
 
+  /*
+   * Iterates through the full state object, re-running all count / chart
+   * requests
+   */
+  runAllRequests() {
+    const _doRequests = (kind) => {
+      const groups = groupList(kind)(this.state);
+      groups.forEach(group => {
+        group.get('items', List()).forEach(itemId => {
+          this.requestItemCount(kind, itemId);
+        });
+        this.requestGroupCount(kind, group.get('id'));
+      });
+    };
+    _doRequests('includes');
+    _doRequests('excludes');
+
+    /* Since everything is being run again, the optimizations in
+     * `this.requestTotalCount` are sure to be off.  Basically ALL the groups
+     * are outdated at the time this runs */
+    const request = this.mapAll();
+    this.requestCharts('searchRequests', SR_ID, request);
+  }
+
   mapAll = (): SearchRequest => {
     const getGroups = kind =>
       (getSearchRequest(SR_ID)(this.state))
@@ -274,7 +306,7 @@ export class CohortSearchActions {
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{items};
+    return <SearchGroup>{id: groupId, items};
   }
 
   mapGroupItem = (itemId: string): SearchGroupItem => {
@@ -289,29 +321,91 @@ export class CohortSearchActions {
       .toJS();
 
     return <SearchGroupItem>{
+      id: itemId,
       type: item.get('type', '').toUpperCase(),
       searchParameters: params,
       modifiers: [],
     };
   }
 
-  mapParameter = (param): SearchParameter => {
-    const _type = param.get('type');
+  mapParameter = (_param): SearchParameter => {
+    const param = <SearchParameter>{
+      parameterId: _param.get('parameterId'),
+      name: _param.get('name', ''),
+      value: _param.get('code'),
+      type: _param.get('type', ''),
+      subtype: _param.get('subtype', ''),
+      group: _param.get('group'),
+    };
 
-    if (_type.match(/^DEMO.*/i)) {
-      return <SearchParameter>{
-        value: param.get('code'),
-        subtype: param.get('subtype'),
-        conceptId: param.get('conceptId'),
-        attribute: param.get('attribute'),
-      };
-    } else if (_type.match(/^ICD|CPT|PHECODE.*/i)) {
-      return <SearchParameter>{
-        value: param.get('code'),
-        domain: param.get('domainId'),
-      };
-    } else {
-      return;
+    if (param.type.match(/^DEMO.*/i)) {
+      param.conceptId = _param.get('conceptId');
+      param.attribute = _param.get('attribute');
+    } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
+      param.domain = _param.get('domainId');
     }
+
+    return param;
+  }
+
+  /*
+   * Deserializes a JSONified SearchRequest into an entities object
+   */
+  deserializeEntities(jsonStore: string): Map<any, any> {
+    const data = JSON.parse(jsonStore);
+    const entities = {
+      searchRequests: {
+        [SR_ID]: {
+          includes: data.includes.map(g => g.id),
+          excludes: data.excludes.map(g => g.id),
+        }
+      },
+      groups: {},
+      items: {},
+      parameters: {},
+    };
+
+    for (const role of ['includes', 'excludes']) {
+      entities.searchRequests[SR_ID][role] = data[role].map(group => {
+        group.items = group.items.map(item => {
+          item.searchParameters = item.searchParameters.map(param => {
+            param.code = param.value;
+            entities.parameters[param.parameterId] = param;
+            this.addId(param.parameterId);
+            return param.parameterId;
+          });
+          item.count = 0;
+          item.isRequesting = false;
+          entities.items[item.id] = item;
+          this.addId(item.id);
+          return item.id;
+        });
+        group.count = 0;
+        group.isRequesting = false;
+        entities.groups[group.id] = group;
+        this.addId(group.id);
+        return group.id;
+      });
+    }
+
+    return fromJS(entities);
+  }
+
+  /*
+   * Reset the ID cache, then
+   * Loads a JSONified SearchRequest into the store
+   */
+  loadFromJSON(json: string): void {
+    this._idsInUse = Set<string>();
+    const entities = this.deserializeEntities(json);
+    this.loadEntities(entities);
+  }
+
+  /*
+   * Reset Store: reset the store to the initial state and wipe all cached ID's
+   */
+  resetStore(): void {
+    this._idsInUse = Set<string>();
+    this._resetStore();
   }
 }

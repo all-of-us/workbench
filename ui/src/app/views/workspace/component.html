@@ -42,20 +42,25 @@
         <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
         <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-          <clr-dg-cell>
-            <div style="display: flex; justify-content: space-between; overflow: hidden;">
-              <div style="display: flex;">
-                <span>{{cohort.name}}</span>
-              </div>
-              <div style="display: flex; height: 2vh;">
-                <a style="padding-right: 1vh; border-right: 1px solid black;"
-                    routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
-                  Edit
-                </a>
-                <a style="padding-left: 1vh;" routerLink="/cohorts/{{cohort.id}}/review">Review</a>
-              </div>
-            </div>
-          </clr-dg-cell>
+          <clr-dg-action-overflow>
+            <button class="action-item"
+              routerLink="{{document.location.pathname}}/cohorts/build"
+              [queryParams]="{criteria: cohort.criteria}">
+              <clr-icon shape="copy"></clr-icon>
+              Clone
+            </button>
+            <button class="action-item"
+              routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
+              <clr-icon shape="pencil"></clr-icon>
+              Edit
+            </button>
+            <button class="action-item"
+              routerLink="/cohorts/{{cohort.id}}/review">
+              <clr-icon shape="grid-view"></clr-icon>
+              Review
+            </button>
+          </clr-dg-action-overflow>
+          <clr-dg-cell>{{cohort.name}}</clr-dg-cell>
           <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
           <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
         </clr-dg-row>
