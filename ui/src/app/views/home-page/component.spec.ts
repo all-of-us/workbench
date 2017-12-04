@@ -9,7 +9,11 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {HomePageComponent} from 'app/views/home-page/component';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {updateAndTick} from 'testing/test-helpers';
+import {
+  queryAllByCss,
+  queryByCss,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {WorkspacesService} from 'generated';
 
@@ -29,8 +33,8 @@ class HomePage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.workspaceTableRows = this.fixture.debugElement.queryAll(By.css('.workspace-table-row'));
-    this.loggedOutMessage = this.fixture.debugElement.query(By.css('.logged-out-message'));
+    this.workspaceTableRows = queryAllByCss(this.fixture, '.workspace-table-row');
+    this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
   }
 }
 

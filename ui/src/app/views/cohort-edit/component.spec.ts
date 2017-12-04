@@ -11,7 +11,13 @@ import {CohortEditComponent} from 'app/views/cohort-edit/component';
 import {CohortsServiceStub, DEFAULT_COHORT_ID} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  queryAllByCss,
+  queryByCss,
+  simulateClick,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {CohortsService} from 'generated';
 
@@ -26,8 +32,8 @@ class CohortEditPage {
     this.fixture = testBed.createComponent(CohortEditComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute);
     this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
-    this.nameField = this.fixture.debugElement.query(By.css('.name'));
-    this.descriptionField = this.fixture.debugElement.query(By.css('.description'));
+    this.nameField = queryByCss(this.fixture, '.name');
+    this.descriptionField = queryByCss(this.fixture, '.description');
   }
 }
 
@@ -102,8 +108,7 @@ describe('CohortEditComponent', () => {
     updateAndTick(cohortEditPage.fixture);
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'New Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'New Description');
-    const addButton = cohortEditPage.fixture.debugElement.query(By.css('.add-button'));
-    addButton.triggerEventHandler('click', null);
+    simulateClick(cohortEditPage.fixture, queryByCss(cohortEditPage.fixture, '.add-button'));
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -121,10 +126,10 @@ describe('CohortEditComponent', () => {
     cohortEditPage.route.snapshot.url.push(new UrlSegment('edit', {}));
     cohortEditPage.route.routeConfig.data.adding = false;
     updateAndTick(cohortEditPage.fixture);
-    const saveButton = cohortEditPage.fixture.debugElement.query(By.css('.save-button'));
     simulateInput(cohortEditPage.fixture, cohortEditPage.nameField, 'Edited Cohort');
     simulateInput(cohortEditPage.fixture, cohortEditPage.descriptionField, 'Edited Description');
-    saveButton.triggerEventHandler('click', null);
+    simulateClick(cohortEditPage.fixture, queryByCss(cohortEditPage.fixture, '.save-button'));
+    
     updateAndTick(cohortEditPage.fixture);
     cohortEditPage.cohortsService.getCohortsInWorkspace(
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
