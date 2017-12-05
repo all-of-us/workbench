@@ -711,9 +711,8 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/create/{cohortId}/{cdrVersionId}:
-    get:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+    post:
       tags:
         - cohortReview
       description:  >
@@ -739,18 +738,18 @@ paths:
           format: int64
           required: true
           description: specifies which cdr version
-        - in: query
-          name: size
+        - in: body
+          name: request
           type: integer
-          required: false
+          required: true
           description: size of the participant cohort statuses sample
+          schema:
+            $ref: "#/definitions/CreateReviewRequest"
       responses:
         "200":
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReview"
-
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/participants/{cohortId}/{cdrVersionId}:
     get:
       tags:
          - cohortReview
@@ -803,7 +802,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/overview/{cohortId}/{cdrVersionId}/{domain}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
     get:
       tags:
         - cohortReview
@@ -1589,6 +1588,15 @@ definitions:
     type: string
     description: possible values indicating whether review has been created
     enum: [NONE, CREATED]
+
+  CreateReviewRequest:
+      type: object
+      required:
+        - size
+      properties:
+        size:
+          description: A sample size to review
+          type: integer
 
   CohortSummaryListResponse:
     type: object
