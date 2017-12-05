@@ -64,7 +64,6 @@ export class ChartComponent implements OnChanges {
       // HC automatically redraws when changing chart options
       this.chartOptions = this.analysis.hcChartOptions();
       this.chartType = this.analysis.chartType;
-      console.log("analyses chart options ", this.chartOptions);
     }
   }
 

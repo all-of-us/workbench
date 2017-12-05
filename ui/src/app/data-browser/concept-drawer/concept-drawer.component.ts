@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { Router } from '@angular/router';
+import {IAnalysis} from '../AnalysisClasses';
 import { AchillesService } from '../services/achilles.service';
-import {IAnalysis} from "../AnalysisClasses";
 
 @Component({
   selector: 'app-concept-drawer',

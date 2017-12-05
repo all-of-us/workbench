@@ -23,7 +23,7 @@ export class Analysis implements IAnalysis {
   dataType: string;
   status: string;
   redraw: boolean;
-
+  colors: any;
   static ageDecileCategories() {
     return [
       '0 - 17',
@@ -62,7 +62,7 @@ export class Analysis implements IAnalysis {
       }
       if (noResult) {
         // If here, we don't have a result for this so make one and push it on final
-        const newR = new AnalysisResult({
+        const newR: AnalysisResult = new AnalysisResult({
           analysisId: 3102,
           countValue: 0,
           stratum1: results[0].stratum[0], // concept id
@@ -88,7 +88,7 @@ export class Analysis implements IAnalysis {
     }
   }
   */
-  colors: any;
+
 
   static analysisClone(obj: any) {
     const a = new Analysis();
@@ -355,7 +355,6 @@ export class Analysis implements IAnalysis {
         }
         console.log(this.results[i]);
         const color_stratum_value = this.results[i].stratum[color_stratum_index];
-        const ageDecile = this.results[i].stratum[last_stratum_index];
         let name = this.results[i].stratum_name[last_stratum_index];
         const color = this.colors.stratum_colors[color_stratum_value];
         if (!name) {

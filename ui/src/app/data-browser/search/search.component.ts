@@ -55,7 +55,6 @@ export class SearchComponent {
     //
     // Check that it's not in concept list before adding
     let addConcept = true;
-    const prevConceptsLen = this.conceptsArray.length;
     if (item.concept_id) {
       for (const c of this.conceptsArray) {
         if (c.concept_id === item.concept_id) {
