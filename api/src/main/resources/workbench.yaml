@@ -17,9 +17,9 @@ securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
   # by defining an `aou_oauth` security mode, which we'll assing
   # to any protected endpoints below.
-  aou_oauth:
-    type: oauth2
-    flow: accessCode
+#  aou_oauth:
+#    type: oauth2
+#    flow: accessCode
 schemes:
   - "https"
 produces:
@@ -27,7 +27,7 @@ produces:
 # Establish the fact that all endpoints are protected: this annotation
 # ensures that client libraries know to send bearer tokens when calling
 security:
-  - aou_oauth: []
+#  - aou_oauth: []
 
 # Throughout, we use integer/int64 in preference to string/date-time because Swagger's
 # date formatting is inconsistent between server and client. Time values are stored as
@@ -803,6 +803,42 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/overview/{cohortId}/{cdrVersionId}/{domain}:
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortSummary for UI charting in cohort review.
+      operationId: "getCohortSummary"
+      parameters:
+        - in: path
+          name: workspaceId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the CohortSummary should belon to.
+      responses:
+        "200":
+          description: A collection of CohortSummary
+          schema:
+            $ref: "#/definitions/CohortSummaryListResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1550,9 +1586,41 @@ definitions:
     enum: [NOT_REVIEWED, INCLUDED, EXCLUDED, NEEDS_FURTHER_REVIEW]
 
   ReviewStatus:
-      type: string
-      description: possible values indicating whether review has been created
-      enum: [NONE, CREATED]
+    type: string
+    description: possible values indicating whether review has been created
+    enum: [NONE, CREATED]
+
+  CohortSummaryListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortSummary"
+
+  CohortSummary:
+    type: object
+    required:
+      - type
+      - name
+      - code
+      - count
+    properties:
+      type:
+        type: string
+        description: the criteria type
+      name:
+        type: string
+        description: the name of this criteria
+      code:
+        type: string
+        description: the code for this criteria
+      count:
+        type: integer
+        format: int64
+        description: the count for this criteria type in the cohort
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
