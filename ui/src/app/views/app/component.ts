@@ -109,10 +109,8 @@ export class AppComponent implements OnInit {
     return this._showCreateAccount ? '10vh' : '30vh';
   }
 
-  deleteAccount(): void {
-    this.profileService.deleteAccount().subscribe(() => {
-      this.signInService.signOut();
-    });
+  showTabs(): boolean {
+    return !(new Set(['/profile', '/id-verification'])).has(this.router.url);
   }
 
   get reviewActive(): boolean {
