@@ -42,6 +42,7 @@ public class ProfileService {
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setEnabledInFireCloud(enabledInFireCloud);
+    profile.setBlockscoreVerificationIsValid(user.getBlockscoreVerificationIsValid());
     if (user.getDataAccessLevel() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }

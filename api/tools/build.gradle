@@ -61,6 +61,7 @@ sourceSets {
                    // org.pmiops.workbench.model (Swagger-generated classes),
                    // so we selectively whitelist as needed.
                    'org/pmiops/workbench/model/Authority.java',
+                   'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',
                    'org/pmiops/workbench/model/DataAccessLevel.java',
                    'org/pmiops/workbench/model/ErrorResponse.java',
                    'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
@@ -87,4 +88,14 @@ dependencies {
   compile 'io.swagger:swagger-annotations:1.5.9'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile rootProject
+}
+
+
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+  if (state.failure && task.path == ":tools:compileJava") {
+    logger.warn(
+      "\n\n*** Tools compilation failed. ***\nIf the failure is due to a missing class, ensure" +
+      " the class is included in the sourceSets section of tools/build.gradle.\n"
+    )
+  }
 }
