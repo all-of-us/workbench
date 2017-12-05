@@ -13,11 +13,14 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CohortSummaryListResponse;
+import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -102,13 +105,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      * @param workspaceId
      * @param cohortId
      * @param cdrVersionId
-     * @param size
+     * @param request
      * @return
      */
     @Override
     public ResponseEntity<org.pmiops.workbench.model.CohortReview> createCohortReview(
-            Long workspaceId, Long cohortId, Long cdrVersionId, Integer size) {
-        if (size <= 0 || size > MAX_REVIEW_SIZE) {
+            Long workspaceId, Long cohortId, Long cdrVersionId, CreateReviewRequest request) {
+        if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
             throw new BadRequestException("Invalid Request: Cohort Review size must be between 0 and " + MAX_REVIEW_SIZE);
         }
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
@@ -126,9 +129,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException("Invalid Request: No Cohort definition matching cohortId: "
                     + cohortId + ", workspaceId: " + workspaceId);
         }
-        SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+        SearchRequest searchRequest = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantIdQuery(request, size)));
+                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize())));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
@@ -158,6 +161,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<CohortSummaryListResponse> getCohortSummary(Long workspaceId, Long cohortId, Long cdrVersionId, String domain) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
     }
 
     /**
