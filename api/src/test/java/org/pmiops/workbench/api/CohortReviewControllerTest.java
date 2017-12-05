@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.data.domain.Page;
@@ -71,7 +72,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review already created for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
@@ -88,7 +89,7 @@ public class CohortReviewControllerTest {
         long cdrVersionId = 1;
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 20000);
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
@@ -105,7 +106,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(null);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review does not exist for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
@@ -127,7 +128,7 @@ public class CohortReviewControllerTest {
         when(cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId)).thenReturn(null);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: No Cohort definition matching cohortId: "
                     + cohortId + ", workspaceId: " + workspaceId, e.getMessage());
@@ -194,7 +195,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 0)).thenReturn(0L);
         when(cohortReviewDao.save(cohortReviewAfter)).thenReturn(cohortReviewAfter);
 
-        reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+        reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId);
