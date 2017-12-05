@@ -1,6 +1,6 @@
 // UI Component framing the overall app (title and nav).
 // Content is in other Components.
-
+import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
@@ -32,6 +32,7 @@ export class AppComponent implements OnInit {
   constructor(
       private activatedRoute: ActivatedRoute,
       private errorHandlingService: ErrorHandlingService,
+      private locationService: Location,
       private profileService: ProfileService,
       private router: Router,
       private signInService: SignInService,
@@ -40,7 +41,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
-
     window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
         if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
@@ -111,5 +111,13 @@ export class AppComponent implements OnInit {
     this.profileService.deleteAccount().subscribe(() => {
       this.signInService.signOut();
     });
+  }
+
+  get reviewActive(): boolean {
+    return this.locationService.path().startsWith('/review');
+  }
+
+  get workspacesActive(): boolean {
+    return !this.reviewActive;
   }
 }
