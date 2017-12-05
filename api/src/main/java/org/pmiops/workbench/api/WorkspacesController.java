@@ -320,8 +320,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               workspaceId.getWorkspaceName(),
               e.getResponseBody()),
           e);
-      // TODO: figure out what happens if the workspace already exists
-      throw new ServerErrorException("Error creating FC workspace", e);
+      if (e.getCode() == 403) {
+        throw new ForbiddenException(e.getResponseBody());
+      } else if (e.getCode() == 409) {
+        throw new ConflictException(e.getResponseBody());
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization
