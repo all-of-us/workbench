@@ -711,9 +711,8 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/create/{cohortId}/{cdrVersionId}:
-    get:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+    post:
       tags:
         - cohortReview
       description:  >
@@ -739,18 +738,18 @@ paths:
           format: int64
           required: true
           description: specifies which cdr version
-        - in: query
-          name: size
+        - in: body
+          name: request
           type: integer
-          required: false
+          required: true
           description: size of the participant cohort statuses sample
+          schema:
+            $ref: "#/definitions/CreateReviewRequest"
       responses:
         "200":
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReview"
-
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/participants/{cohortId}/{cdrVersionId}:
     get:
       tags:
          - cohortReview
@@ -802,6 +801,42 @@ paths:
           description: A collection of participants
           schema:
             $ref: "#/definitions/CohortReview"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortSummary for UI charting in cohort review.
+      operationId: "getCohortSummary"
+      parameters:
+        - in: path
+          name: workspaceId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the CohortSummary should belong to.
+      responses:
+        "200":
+          description: A collection of CohortSummary
+          schema:
+            $ref: "#/definitions/CohortSummaryListResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1550,9 +1585,50 @@ definitions:
     enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
 
   ReviewStatus:
-      type: string
-      description: possible values indicating whether review has been created
-      enum: [NONE, CREATED]
+    type: string
+    description: possible values indicating whether review has been created
+    enum: [NONE, CREATED]
+
+  CreateReviewRequest:
+      type: object
+      required:
+        - size
+      properties:
+        size:
+          description: A sample size to review
+          type: integer
+
+  CohortSummaryListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortSummary"
+
+  CohortSummary:
+    type: object
+    required:
+      - type
+      - name
+      - code
+      - count
+    properties:
+      type:
+        type: string
+        description: the criteria type
+      name:
+        type: string
+        description: the name of this criteria
+      code:
+        type: string
+        description: the code for this criteria
+      count:
+        type: integer
+        format: int64
+        description: the count for this criteria type in the cohort
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
