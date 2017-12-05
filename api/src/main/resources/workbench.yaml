@@ -831,7 +831,7 @@ paths:
           name: domain
           type: string
           required: true
-          description: specifies which domain the CohortSummary should belon to.
+          description: specifies which domain the CohortSummary should belong to.
       responses:
         "200":
           description: A collection of CohortSummary
