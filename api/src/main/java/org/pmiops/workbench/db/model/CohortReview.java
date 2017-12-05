@@ -32,7 +32,6 @@ public class CohortReview {
     private long reviewSize;
     private long reviewedCount;
     private ReviewStatus reviewStatus;
-    private List<ParticipantCohortStatus> participantCohortStatuses;
 
     @Id
     @GeneratedValue
@@ -148,7 +147,6 @@ public class CohortReview {
         return this;
     }
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "review_status")
     public ReviewStatus getReviewStatus() {
         return reviewStatus;
@@ -163,20 +161,6 @@ public class CohortReview {
         return this;
     }
 
-    @Transient
-    public List<ParticipantCohortStatus> getParticipantCohortStatuses() {
-        return participantCohortStatuses;
-    }
-
-    public void setParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-        this.participantCohortStatuses = participantCohortStatuses;
-    }
-
-    public CohortReview participantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-        this.participantCohortStatuses = participantCohortStatuses;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -188,13 +172,12 @@ public class CohortReview {
                 reviewSize == that.reviewSize &&
                 reviewedCount == that.reviewedCount &&
                 Objects.equals(lastModifiedTime, that.lastModifiedTime) &&
-                reviewStatus == that.reviewStatus &&
-                Objects.equals(participantCohortStatuses, that.participantCohortStatuses);
+                reviewStatus == that.reviewStatus;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cdrVersionId, lastModifiedTime, matchedParticipantCount, reviewSize, reviewedCount, reviewStatus, participantCohortStatuses);
+        return Objects.hash(cdrVersionId, lastModifiedTime, matchedParticipantCount, reviewSize, reviewedCount, reviewStatus);
     }
 
     @Override
@@ -209,7 +192,6 @@ public class CohortReview {
                 .append("reviewSize", reviewSize)
                 .append("reviewedCount", reviewedCount)
                 .append("reviewStatus", reviewStatus)
-                .append("participantCohortStatuses", participantCohortStatuses)
                 .toString();
     }
 }
