@@ -62,8 +62,8 @@ export class Analysis implements IAnalysis {
       }
       if (noResult) {
         // If here, we don't have a result for this so make one and push it on final
-        let newR: AnalysisResult;
-        newR = new AnalysisResult({
+        const newR = new AnalysisResult(
+          {
           analysisId: 3102,
           countValue: 0,
           stratum1: results[0].stratum[0], // concept id
