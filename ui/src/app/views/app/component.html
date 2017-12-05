@@ -37,13 +37,15 @@
       <button (click)="signOut()" class="btn">Sign Out</button>
     </div>
   </div>
-  <clr-tabs>
-    <clr-tab>
-      <button clrTabLink routerLink="/" routerLinkActive="active">My Workspaces</button>
-      <button *ngIf="hasReviewResearchPurpose" clrTabLink routerLink="/review"
-          routerLinkActive="active">Review Research Purposes</button>
-    </clr-tab>
-  </clr-tabs>
+  <div class="top-nav btn-primary">
+    <button class="btn tab-link"
+        [class.active]="workspacesActive"
+        routerLink="/">My Workspaces</button>
+    <button class="btn tab-link"
+        [class.active]="reviewActive"
+        *ngIf="hasReviewResearchPurpose"
+        routerLink="/review">Review Research Purposes</button>
+  </div>
   <div>
     <!--
       Angular's builtin Router module will attach specific views here

@@ -36,3 +36,19 @@
 .image-link-wrapper {
   text-decoration: none;
 }
+
+.top-nav {
+  border-bottom: 1px solid #ccc;
+  display: flex;
+}
+
+.tab-link {
+  border-radius: 0;
+  margin: 0;
+  border: 1px solid #00537d;
+}
+
+.tab-link.active {
+  border-bottom: 3px solid black;
+  font-weight: bold;
+}
