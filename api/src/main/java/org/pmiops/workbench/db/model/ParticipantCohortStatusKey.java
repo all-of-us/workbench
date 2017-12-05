@@ -10,11 +10,8 @@ import java.util.Objects;
 @Embeddable
 public class ParticipantCohortStatusKey implements Serializable {
 
-    @Column(name = "cohort_id")
-    private long cohortId;
-
-    @Column(name = "cdr_version_id")
-    private long cdrVersionId;
+    @Column(name = "cohort_review_id")
+    private long cohortReviewId;
 
     @Column(name = "participant_id")
     private long participantId;
@@ -22,35 +19,21 @@ public class ParticipantCohortStatusKey implements Serializable {
     public ParticipantCohortStatusKey() {
     }
 
-    public ParticipantCohortStatusKey(long cohortId, long cdrVersionId, long participantId) {
-        this.cohortId = cohortId;
-        this.cdrVersionId = cdrVersionId;
+    public ParticipantCohortStatusKey(long cohortReviewId, long participantId) {
+        this.cohortReviewId = cohortReviewId;
         this.participantId = participantId;
     }
 
-    public long getCohortId() {
-        return cohortId;
+    public long getCohortReviewId() {
+        return cohortReviewId;
     }
 
-    public void setCohortId(long cohortId) {
-        this.cohortId = cohortId;
+    public void setCohortReviewId(long cohortReviewId) {
+        this.cohortReviewId = cohortReviewId;
     }
 
-    public ParticipantCohortStatusKey cohortId(long cohortId) {
-        this.cohortId = cohortId;
-        return this;
-    }
-
-    public long getCdrVersionId() {
-        return cdrVersionId;
-    }
-
-    public void setCdrVersionId(long cdrVersionId) {
-        this.cdrVersionId = cdrVersionId;
-    }
-
-    public ParticipantCohortStatusKey cdrVersionId(long cdrVersionId) {
-        this.cdrVersionId = cdrVersionId;
+    public ParticipantCohortStatusKey cohortReviewId(long cohortReviewId) {
+        this.cohortReviewId = cohortReviewId;
         return this;
     }
 
@@ -72,21 +55,19 @@ public class ParticipantCohortStatusKey implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantCohortStatusKey that = (ParticipantCohortStatusKey) o;
-        return cohortId == that.cohortId &&
-                cdrVersionId == that.cdrVersionId &&
+        return cohortReviewId == that.cohortReviewId &&
                 participantId == that.participantId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cohortId, cdrVersionId, participantId);
+        return Objects.hash(cohortReviewId, participantId);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("cohortId", cohortId)
-                .append("cdrVersionId", cdrVersionId)
+                .append("cohortReviewId", cohortReviewId)
                 .append("participantId", participantId)
                 .toString();
     }

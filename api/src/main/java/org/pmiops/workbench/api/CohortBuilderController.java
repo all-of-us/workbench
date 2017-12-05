@@ -1,19 +1,14 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.BigQueryException;
-import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
@@ -26,12 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -39,9 +32,8 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
-    private BigQuery bigquery;
-    private SubjectCounter subjectCounter;
-    private Provider<WorkbenchConfig> workbenchConfig;
+    private BigQueryService bigQueryService;
+    private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
@@ -69,11 +61,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             };
 
     @Autowired
-    CohortBuilderController(BigQuery bigquery, SubjectCounter subjectCounter,
-                            Provider<WorkbenchConfig> workbenchConfig, CriteriaDao criteriaDao) {
-        this.bigquery = bigquery;
-        this.subjectCounter = subjectCounter;
-        this.workbenchConfig = workbenchConfig;
+    CohortBuilderController(BigQueryService bigQueryService, ParticipantCounter participantCounter,
+                            CriteriaDao criteriaDao) {
+        this.bigQueryService = bigQueryService;
+        this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
     }
 
@@ -103,17 +94,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<Long> countSubjects(SearchRequest request) {
+    public ResponseEntity<Long> countParticipants(SearchRequest request) {
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
-        QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildSubjectCounterQuery(request)));
-        Map<String, Integer> rm = getResultMapper(result);
+        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
+        QueryResult result = bigQueryService.executeQuery(qjc);
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<FieldValue> row = result.iterateAll().iterator().next();
-        return ResponseEntity.ok(getLong(row, rm.get("count")));
+        return ResponseEntity.ok(bigQueryService.getLong(row, rm.get("count")));
     }
 
     @Override
@@ -125,15 +117,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         findCodesForEmptyDomains(request.getIncludes());
         findCodesForEmptyDomains(request.getExcludes());
 
-        QueryResult result = executeQuery(filterBigQueryConfig(subjectCounter.buildChartInfoCounterQuery(request)));
-        Map<String, Integer> rm = getResultMapper(result);
+        QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
+        QueryResult result = bigQueryService.executeQuery(qjc);
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         for (List<FieldValue> row : result.iterateAll()) {
             response.addItemsItem(new ChartInfo()
-                    .gender(getString(row, rm.get("gender")))
-                    .race(getString(row, rm.get("race")))
-                    .ageRange(getString(row, rm.get("ageRange")))
-                    .count(getLong(row, rm.get("count"))));
+                    .gender(bigQueryService.getString(row, rm.get("gender")))
+                    .race(bigQueryService.getString(row, rm.get("race")))
+                    .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
+                    .count(bigQueryService.getLong(row, rm.get("count"))));
         }
         return ResponseEntity.ok(response);
     }
@@ -162,18 +155,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
                     for (SearchParameter parameter : item.getSearchParameters()) {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
-                            QueryResult result = executeQuery(
-                                    filterBigQueryConfig(
+                            QueryResult result = bigQueryService.executeQuery(
+                                    bigQueryService.filterBigQueryConfig(
                                             builder.buildQueryJobConfig(new QueryParameters()
                                             .type(item.getType())
                                             .parameters(Arrays.asList(parameter)))));
 
-                            Map<String, Integer> rm = getResultMapper(result);
+                            Map<String, Integer> rm = bigQueryService.getResultMapper(result);
                             List<SearchParameter> paramsWithDomains = new ArrayList<>();
                             for (List<FieldValue> row : result.iterateAll()) {
                                 paramsWithDomains.add(new SearchParameter()
-                                        .domain(getString(row, rm.get("domainId")))
-                                        .value(getString(row, rm.get("code"))));
+                                        .domain(bigQueryService.getString(row, rm.get("domainId")))
+                                        .value(bigQueryService.getString(row, rm.get("code"))));
                             }
                             item.setSearchParameters(paramsWithDomains);
                         }
@@ -181,61 +174,4 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                 });
     }
 
-    /**
-     * Execute the provided query using bigquery.
-     *
-     * @param query
-     * @return
-     */
-    private QueryResult executeQuery(QueryJobConfiguration query) {
-
-        // Execute the query
-        QueryResponse response = null;
-        try {
-            response = bigquery.query(query);
-        } catch (InterruptedException e) {
-            throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
-        }
-
-        // Wait for the job to finish
-        while (!response.jobCompleted()) {
-            response = bigquery.getQueryResults(response.getJobId());
-        }
-
-        // Check for errors.
-        if (response.hasErrors()) {
-            if (response.getExecutionErrors().size() != 0) {
-                throw new BigQueryException(500, "Something went wrong with BigQuery: ", response.getExecutionErrors().get(0));
-            }
-        }
-
-        return response.getResult();
-    }
-
-    private Map<String, Integer> getResultMapper(QueryResult result) {
-        AtomicInteger index = new AtomicInteger();
-        return result.getSchema().getFields().stream().collect(
-                Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
-    }
-
-    protected QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
-        String returnSql = queryJobConfiguration.getQuery().replace("${projectId}", workbenchConfig.get().bigquery.projectId);
-        returnSql = returnSql.replace("${dataSetId}", workbenchConfig.get().bigquery.dataSetId);
-        return queryJobConfiguration
-                .toBuilder()
-                .setQuery(returnSql)
-                .build();
-    }
-
-    private Long getLong(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? 0: row.get(index).getLongValue();
-    }
-
-    private String getString(List<FieldValue> row, int index) {
-        return row.get(index).isNull() ? null : row.get(index).getStringValue();
-    }
-
-    private Boolean getBoolean(List<FieldValue> row, int index) {
-        return row.get(index).getBooleanValue();
-    }
 }

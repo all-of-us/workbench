@@ -64,7 +64,10 @@ sourceSets {
                    'org/pmiops/workbench/model/DataAccessLevel.java',
                    'org/pmiops/workbench/model/ErrorResponse.java',
                    'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
-                   'org/pmiops/workbench/model/CohortStatus.java']
+                   'org/pmiops/workbench/model/CohortStatus.java',
+                   'org/pmiops/workbench/model/CohortReview.java',
+                   'org/pmiops/workbench/model/ParticipantCohortStatus.java',
+                   'org/pmiops/workbench/model/ReviewStatus.java']
        excludes = ['org/pmiops/workbench/db/dao/WorkspaceService.java',
                    'org/pmiops/workbench/db/dao/WorkspaceServiceImpl.java']
     }

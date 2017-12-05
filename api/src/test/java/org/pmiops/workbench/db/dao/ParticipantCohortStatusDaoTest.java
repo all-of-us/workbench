@@ -14,28 +14,31 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@Transactional
 public class ParticipantCohortStatusDaoTest {
 
     private ParticipantCohortStatus participant1;
     private ParticipantCohortStatus participant2;
-    private static Long COHORT_ID = 1L;
-    private static Long CDR_VERSION_ID = 1L;
+    private static Long COHORT_REVIEW_ID = 1L;
+
+    @Autowired
+    ParticipantCohortStatusDao participantCohortStatusDao;
 
     @Before
     public void onSetup() {
-        ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(1);
-        ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortId(COHORT_ID).cdrVersionId(CDR_VERSION_ID).participantId(2);
+        ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1);
+        ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2);
         participant1 = new ParticipantCohortStatus().participantKey(key1).status(CohortStatus.INCLUDED);
         participant2 = new ParticipantCohortStatus().participantKey(key2).status(CohortStatus.EXCLUDED);
         participantCohortStatusDao.save(participant2);
@@ -48,11 +51,8 @@ public class ParticipantCohortStatusDaoTest {
         participantCohortStatusDao.delete(participant2);
     }
 
-    @Autowired
-    ParticipantCohortStatusDao participantCohortStatusDao;
-
     @Test
-    public void findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId_Paging() throws Exception {
+    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Paging() throws Exception {
 
         final Sort sort = new Sort(Sort.Direction.ASC, "participantKey.participantId");
         assertParticipant(new PageRequest(0, 1, sort), participant1);
@@ -60,7 +60,7 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId_Sorting() throws Exception {
+    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Sorting() throws Exception {
 
         final Sort sortParticipantAsc = new Sort(Sort.Direction.ASC, "participantKey.participantId");
         final Sort sortParticipantDesc = new Sort(Sort.Direction.DESC, "participantKey.participantId");
@@ -72,11 +72,15 @@ public class ParticipantCohortStatusDaoTest {
         assertParticipant(new PageRequest(0, 1, sortStatusDesc), participant1);
     }
 
+    @Test
+    public void countByParticipantKey_CohortReviewId() throws Exception {
+        assertEquals(new Long(2), participantCohortStatusDao.countByParticipantKey_CohortReviewId(COHORT_REVIEW_ID));
+    }
+
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
         Slice<ParticipantCohortStatus> participants = participantCohortStatusDao
-                .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                        COHORT_ID,
-                        CDR_VERSION_ID,
+                .findByParticipantKey_CohortReviewId(
+                        expectedParticipant.getParticipantKey().getCohortReviewId(),
                         pageRequest);
         assertEquals(expectedParticipant, participants.getContent().get(0));
     }

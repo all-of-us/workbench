@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class BigQueryConfig {
 
     @Bean
-    public BigQuery bigQueryService() {
+    public BigQuery bigQuery() {
         return new BigQueryOptions
                 .DefaultBigqueryFactory()
                 .create( BigQueryOptions.getDefaultInstance() );
