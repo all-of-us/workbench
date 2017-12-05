@@ -1,6 +1,5 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
@@ -10,7 +9,12 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {updateAndTick} from 'testing/test-helpers';
+import {
+  queryAllByCss,
+  queryByCss,
+  simulateClick,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {ClusterService} from 'generated';
 import {CohortsService} from 'generated';
@@ -42,11 +46,11 @@ class WorkspacePage {
     updateAndTick(this.fixture);
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
-    this.cohortsTableRows = this.fixture.debugElement.queryAll(By.css('.cohort-table-row'));
-    this.notebookTableRows = this.fixture.debugElement.queryAll(By.css('.notebook-table-row'));
-    this.cdrText = this.fixture.debugElement.query(By.css('.cdr-text'));
-    this.workspaceDescription = this.fixture.debugElement.query(By.css('.description-text'));
-    this.loggedOutMessage = this.fixture.debugElement.query(By.css('.logged-out-message'));
+    this.cohortsTableRows = queryAllByCss(this.fixture, '.cohort-table-row');
+    this.notebookTableRows = queryAllByCss(this.fixture, '.notebook-table-row');
+    this.cdrText = queryByCss(this.fixture, '.cdr-text');
+    this.workspaceDescription = queryByCss(this.fixture, '.description-text');
+    this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
   }
 }
 
@@ -117,11 +121,7 @@ describe('WorkspaceComponent', () => {
     workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
       originalWorkspaceLength = workspaces.items.length;
     });
-    tick();
-    const deleteIcon =
-        workspacePage.fixture.debugElement.queryAll(By.css('.btn-deleting'))[0];
-    deleteIcon.triggerEventHandler('click', null);
-    tick();
+    simulateClick(workspacePage.fixture, queryByCss(workspacePage.fixture, '.btn-deleting'));
     let workspaceLength;
     workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
       workspaceLength = workspaces.items.length;
