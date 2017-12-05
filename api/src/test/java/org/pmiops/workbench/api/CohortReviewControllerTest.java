@@ -3,25 +3,40 @@ package org.pmiops.workbench.api;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryResult;
+import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.model.CohortDefinition;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.ParticipantCohortStatusListResponse;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortReviewControllerTest {
@@ -29,60 +44,258 @@ public class CohortReviewControllerTest {
     @Mock
     ParticipantCohortStatusDao participantCohortStatusDao;
 
+    @Mock
+    CohortReviewDao cohortReviewDao;
+
+    @Mock
+    CohortDao cohortDao;
+
+    @Mock
+    BigQueryService bigQueryService;
+
+    @Mock
+    ParticipantCounter participantCounter;
+
     @InjectMocks
-    CohortReviewController reviewController = new CohortReviewController();
+    CohortReviewController reviewController;
+
+    @Test
+    public void createCohortReview_ReviewAlreadyCreated() throws Exception {
+        long cohortId = 1;
+        long workspaceId = 1;
+        long cdrVersionId = 1;
+
+        CohortReview cohortReview = new CohortReview();
+        cohortReview.setReviewSize(1);
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
+
+        try {
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+        } catch (BadRequestException e) {
+            assertEquals("Invalid Request: Cohort Review already created for cohortId: "
+                    + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
+        }
+
+        verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+    }
+
+    @Test
+    public void createCohortReview_MoreThanTenThousand() throws Exception {
+        long cohortId = 1;
+        long workspaceId = 1;
+        long cdrVersionId = 1;
+
+        try {
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 20000);
+        } catch (BadRequestException e) {
+            assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
+        }
+
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+    }
+
+    @Test
+    public void createCohortReview_BadCohortIdOrCdrVersionId() throws Exception {
+        long cohortId = 1;
+        long workspaceId = 1;
+        long cdrVersionId = 1;
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(null);
+
+        try {
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+        } catch (BadRequestException e) {
+            assertEquals("Invalid Request: Cohort Review does not exist for cohortId: "
+                    + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
+        }
+
+        verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+    }
+
+    @Test
+    public void createCohortReview_NoCohortDefinitionFound() throws Exception {
+        long cohortId = 1;
+        long workspaceId = 1;
+        long cdrVersionId = 1;
+
+        CohortReview cohortReview = new CohortReview();
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
+        when(cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId)).thenReturn(null);
+
+        try {
+            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+        } catch (BadRequestException e) {
+            assertEquals("Invalid Request: No Cohort definition matching cohortId: "
+                    + cohortId + ", workspaceId: " + workspaceId, e.getMessage());
+        }
+
+        verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        verify(cohortDao, times(1)).findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+    }
+
+    @Test
+    public void createCohortReview() throws Exception {
+        long cohortReviewId = 1;
+        long cohortId = 1;
+        long cdrVersionId = 1;
+        long workspaceId = 1;
+
+        CohortReview cohortReview = new CohortReview();
+        cohortReview.setCohortReviewId(cohortReviewId);
+        cohortReview.setCohortId(cohortId);
+        cohortReview.setCdrVersionId(cdrVersionId);
+        cohortReview.setMatchedParticipantCount(1000);
+        cohortReview.setReviewSize(0);
+        cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
+
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+        pcs.setParticipantKey(new ParticipantCohortStatusKey().participantId(0).cohortReviewId(cohortReviewId));
+        pcs.status(CohortStatus.NOT_REVIEWED);
+
+        CohortReview cohortReviewAfter = new CohortReview();
+        cohortReviewAfter.setCohortReviewId(cohortReviewId);
+        cohortReviewAfter.setCohortId(cohortId);
+        cohortReviewAfter.setCdrVersionId(cdrVersionId);
+        cohortReviewAfter.setMatchedParticipantCount(1000);
+        cohortReviewAfter.setReviewSize(1);
+        cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
+        cohortReviewAfter.setReviewStatus(ReviewStatus.CREATED);
+        cohortReviewAfter.setParticipantCohortStatuses(Arrays.asList(pcs));
+
+        CohortDefinition definition = new CohortDefinition() {
+            @Override
+            public String getCriteria() {
+                return "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
+                        "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
+                        "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
+            }
+        };
+
+        SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+        QueryResult queryResult = mock(QueryResult.class);
+        Iterable testIterable = new Iterable() {
+            @Override
+            public Iterator iterator() {
+                List<FieldValue> list = new ArrayList<>();
+                list.add(null);
+                return list.iterator();
+            }
+        };
+        Map<String, Integer> rm = new HashMap<>();
+        rm.put("person_id", 0);
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
+        when(cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId)).thenReturn(definition);
+        when(participantCounter.buildParticipantIdQuery(request, 200)).thenReturn(null);
+        when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+        when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
+        when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
+        when(queryResult.iterateAll()).thenReturn(testIterable);
+        when(bigQueryService.getLong(null, 0)).thenReturn(0L);
+        when(cohortReviewDao.save(cohortReviewAfter)).thenReturn(cohortReviewAfter);
+
+        reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, 200);
+
+        verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+        verify(cohortDao, times(1)).findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId);
+        verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200);
+        verify(bigQueryService, times(1)).filterBigQueryConfig(null);
+        verify(bigQueryService, times(1)).executeQuery(null);
+        verify(bigQueryService, times(1)).getResultMapper(queryResult);
+        verify(bigQueryService, times(1)).getLong(null, 0);
+        verify(queryResult, times(1)).iterateAll();
+        verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+    }
 
     @Test
     public void getParticipants() throws Exception {
         long cohortId = 1L;
-        long cdrVersionId = 2L;
+        long workspaceId = 1L;
+        long cdrVersionId = 1L;
         int page = 1;
         int limit = 22;
         String order = "desc";
         String column = "status";
 
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, limit, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, order, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, null, null, null, column);
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, limit, order, "participantId");
-        assertFindByCohortIdAndCdrVersionId(cohortId, cdrVersionId, page, limit, order, column);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, null, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, limit, null, null);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, null, order, null);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, null, null, column);
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, limit, order, "participantId");
+        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, limit, order, column);
     }
 
-    private void assertFindByCohortIdAndCdrVersionId(long cohortId, long cdrVersionId, Integer page, Integer limit, String order, String column) {
+    private void assertFindByCohortIdAndCdrVersionId(
+            long cohortId, long workspaceId, long cdrVersionId, Integer page, Integer limit, String order, String column) {
         Integer pageParam = page == null ? 0 : page;
         Integer limitParam = limit == null ? 25 : limit;
         Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
         String columnParam = (column == null || column.equals("participantId")) ? "participantKey.participantId" : column;
 
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortId(cohortId).cdrVersionId(cdrVersionId).participantId(1L);
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
 
         org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
+                        .cohortReviewId(cohortId)
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED);
+        org.pmiops.workbench.model.CohortReview respCohortReview =
+                new org.pmiops.workbench.model.CohortReview()
+                .cohortReviewId(1L)
+                        .cohortId(cohortId)
+                        .cdrVersionId(cdrVersionId)
+                        .matchedParticipantCount(1000L)
+                        .reviewedCount(0L)
+                        .reviewSize(200L)
+                .participantCohortStatuses(Arrays.asList(respParticipant));
 
         List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
         participants.add(dbParticipant);
         Page expectedPage = new PageImpl(participants);
 
-        when(participantCohortStatusDao.findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                cohortId, cdrVersionId,
-                new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam))))
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+        pcs.setParticipantKey(new ParticipantCohortStatusKey().participantId(0).cohortReviewId(1L));
+        pcs.status(CohortStatus.NOT_REVIEWED);
+
+        CohortReview cohortReviewAfter = new CohortReview();
+        cohortReviewAfter.setCohortReviewId(1L);
+        cohortReviewAfter.setCohortId(cohortId);
+        cohortReviewAfter.setCdrVersionId(cdrVersionId);
+        cohortReviewAfter.setMatchedParticipantCount(1000);
+        cohortReviewAfter.setReviewSize(200);
+        cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
+        cohortReviewAfter.setParticipantCohortStatuses(Arrays.asList(pcs));
+
+        final Sort sort = (columnParam.equals(CohortReviewController.PARTICIPANT_ID))
+                ? new Sort(orderParam, columnParam)
+                : new Sort(orderParam, columnParam, CohortReviewController.PARTICIPANT_ID);
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
+        when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
+                cohortId,
+                new PageRequest(pageParam, limitParam, sort)))
                 .thenReturn(expectedPage);
 
-        ResponseEntity<ParticipantCohortStatusListResponse> response =
-                reviewController.getParticipantCohortStatuses(cohortId, cdrVersionId, page, limit, order, column);
+        ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
+                reviewController.getParticipantCohortStatuses(workspaceId, cohortId, cdrVersionId, page, limit, order, column);
 
-        assertEquals(1, response.getBody().getItems().size());
-        assertEquals(respParticipant, response.getBody().getItems().get(0));
+        org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
+        respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
+        assertEquals(respCohortReview, response.getBody());
 
+        verify(cohortReviewDao, atLeast(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(participantCohortStatusDao, times(1))
-                .findParticipantByParticipantKey_CohortIdAndParticipantKey_CdrVersionId(
-                        cohortId, cdrVersionId,
-                        new PageRequest(pageParam, limitParam, new Sort(orderParam, columnParam)));
+                .findByParticipantKey_CohortReviewId(
+                        cohortId,
+                        new PageRequest(pageParam, limitParam, sort));
         verifyNoMoreInteractions(participantCohortStatusDao);
     }
 

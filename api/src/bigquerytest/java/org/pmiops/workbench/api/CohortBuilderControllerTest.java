@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.SubjectCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, CohortBuilderController.class, SubjectCounter.class})
+@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -51,10 +51,13 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private BigQuery bigquery;
 
     @Autowired
-    private SubjectCounter subjectCounter;
+    private ParticipantCounter participantCounter;
 
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
+
+    @Autowired
+    private BigQueryService bigQueryService;
 
     @Mock
     private CriteriaDao mockCriteriaDao;
@@ -76,8 +79,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
-        this.controller = new CohortBuilderController(bigquery, subjectCounter,
-                workbenchConfig, mockCriteriaDao);
+        this.controller = new CohortBuilderController(bigQueryService, participantCounter,
+                mockCriteriaDao);
     }
 
     @Test
@@ -272,56 +275,56 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
                         1);
     }
 
     @Test
     public void countSubjects_ICD9MeasurementLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
                         1);
     }
 
     @Test
     public void countSubjects_ICD9MeasurementParent() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
                         1);
     }
 
     @Test
     public void countSubjects_DemoGender() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")))),
                         1);
     }
@@ -331,8 +334,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
                                 .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
                         1);
@@ -346,8 +349,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
                 .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
         SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
                         1);
     }
@@ -368,7 +371,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
         testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-        assertSubjects( controller.countSubjects(testSearchRequest), 1);
+        assertParticipants( controller.countParticipants(testSearchRequest), 1);
     }
 
     @Test
@@ -382,7 +385,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
         testSearchRequest.getIncludes().add(anotherSearchGroup);
 
-        assertSubjects( controller.countSubjects(testSearchRequest), 1);
+        assertParticipants( controller.countParticipants(testSearchRequest), 1);
     }
 
     @Test
@@ -396,69 +399,69 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
         testSearchRequest.getExcludes().add(anotherSearchGroup);
 
-        assertSubjects( controller.countSubjects(testSearchRequest), 0);
+        assertParticipants( controller.countParticipants(testSearchRequest), 0);
     }
 
     @Test
     public void countSubjects_ICD10ConditionOccurrenceLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("A09").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10ConditionOccurrenceParent() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("C00")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10ProcedureOccurrenceLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("16070").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10MeasurementLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("R92.2").domain("Measurement")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTProcedureOccurrenceLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001T").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTObservationLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Z").domain("Observation")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTMeasurementLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Q").domain("Measurement")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTDrugExposureLeaf() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("90703").domain("Drug")))),
                 1);
     }
@@ -466,7 +469,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void countSubjects_EmptyIcludesAndExcludes() throws Exception {
         try {
-            controller.countSubjects(new SearchRequest());
+            controller.countParticipants(new SearchRequest());
         } catch (BadRequestException e) {
             assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
         }
@@ -474,8 +477,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void countSubjects_PheCodes() throws Exception {
-        assertSubjects(
-                controller.countSubjects(
+        assertParticipants(
+                controller.countParticipants(
                         createSearchRequests("PHECODE", Arrays.asList(new SearchParameter().value("008")))),
                 1);
     }
@@ -493,7 +496,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
         QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
         final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
-        assertThat(expectedResult).isEqualTo(controller.filterBigQueryConfig(queryJobConfiguration).getQuery());
+        assertThat(expectedResult).isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
     }
 
     protected String getTablePrefix() {
@@ -517,11 +520,11 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         return new SearchRequest().includes(groups);
     }
 
-    private void assertSubjects(ResponseEntity response, Integer expectedCount) {
+    private void assertParticipants(ResponseEntity response, Integer expectedCount) {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        Long subjectCount = (Long) response.getBody();
-        assertThat(subjectCount).isEqualTo(expectedCount);
+        Long participantCount = (Long) response.getBody();
+        assertThat(participantCount).isEqualTo(expectedCount);
     }
 
     private void assertChartInfoCounts(ResponseEntity response, String gender, String race, String ageRange, int count) {

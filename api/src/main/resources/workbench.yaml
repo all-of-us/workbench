@@ -652,8 +652,8 @@ paths:
     post:
       tags:
         - cohortBuilder
-      description: Searches for subjects based on criteria, criteria specific parameters, and modifiers.
-      operationId: "countSubjects"
+      description: Searches for participants based on criteria, criteria specific parameters, and modifiers.
+      operationId: "countParticipants"
       parameters:
         - in: body
           name: request
@@ -711,13 +711,22 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /api/v1/cohortreview/participants/{cohortId}/{cdrVersionId}:
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/create/{cohortId}/{cdrVersionId}:
     get:
       tags:
-         - cohortReview
-      description:  Returns a collection of participants that for the specified cohortId and cdrVersionId
-      operationId: "getParticipantCohortStatuses"
+        - cohortReview
+      description:  >
+        This endpoint will create an cohort review which is a participant cohort sample
+        specified by the review size parameter.
+      operationId: "createCohortReview"
       parameters:
+        - in: path
+          name: workspaceId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which workspace
         - in: path
           name: cohortId
           type: integer
@@ -729,7 +738,45 @@ paths:
           type: integer
           format: int64
           required: true
-          description: specifies version of cdr
+          description: specifies which cdr version
+        - in: query
+          name: size
+          type: integer
+          required: false
+          description: size of the participant cohort statuses sample
+      responses:
+        "200":
+          description: A cohortReviewId and cohort count
+          schema:
+            $ref: "#/definitions/CohortReview"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/participants/{cohortId}/{cdrVersionId}:
+    get:
+      tags:
+         - cohortReview
+      description:  >
+        Returns a collection of participants that for the specified cohortReviewId. This endpoint
+        does pagination based on page, limit, order and column.
+      operationId: "getParticipantCohortStatuses"
+      parameters:
+        - in: path
+          name: workspaceId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
         - in: query
           name: page
           type: integer
@@ -754,7 +801,7 @@ paths:
         "200":
           description: A collection of participants
           schema:
-            $ref: "#/definitions/ParticipantCohortStatusListResponse"
+            $ref: "#/definitions/CohortReview"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1444,12 +1491,39 @@ definitions:
         operator: "BETWEEN"
         operands: ["18", "35"]
 
-  ParticipantCohortStatusListResponse:
+  CohortReview:
     type: object
     required:
-      - items
+      - cohortReviewId
+      - cohortId
+      - cdrVersionId
+      - creationTime
+      - matchedParticipantCount
+      - reviewStatus
     properties:
-      items:
+      cohortReviewId:
+        type: integer
+        format: int64
+      cohortId:
+        type: integer
+        format: int64
+      cdrVersionId:
+        type: integer
+        format: int64
+      creationTime:
+        type: string
+      matchedParticipantCount:
+        type: integer
+        format: int64
+      reviewSize:
+        type: integer
+        format: int64
+      reviewedCount:
+        type: integer
+        format: int64
+      reviewStatus:
+        $ref: "#/definitions/ReviewStatus"
+      participantCohortStatuses:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantCohortStatus"
@@ -1457,15 +1531,11 @@ definitions:
   ParticipantCohortStatus:
     type: object
     required:
-      - cohortId
-      - cdrVersionId
+      - cohortReviewId
       - participantId
       - status
     properties:
-      cohortId:
-        type: integer
-        format: int64
-      cdrVersionId:
+      cohortReviewId:
         type: integer
         format: int64
       participantId:
@@ -1478,6 +1548,11 @@ definitions:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
     enum: [NOT_REVIEWED, INCLUDED, EXCLUDED, NEEDS_FURTHER_REVIEW]
+
+  ReviewStatus:
+      type: string
+      description: possible values indicating whether review has been created
+      enum: [NONE, CREATED]
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
