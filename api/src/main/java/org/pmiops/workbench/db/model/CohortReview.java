@@ -32,7 +32,6 @@ public class CohortReview {
     private long reviewSize;
     private long reviewedCount;
     private ReviewStatus reviewStatus;
-//    private List<ParticipantCohortStatus> participantCohortStatuses;
 
     @Id
     @GeneratedValue
@@ -161,20 +160,6 @@ public class CohortReview {
         this.reviewStatus = reviewStatus;
         return this;
     }
-
-//    @Transient
-//    public List<ParticipantCohortStatus> getParticipantCohortStatuses() {
-//        return participantCohortStatuses;
-//    }
-//
-//    public void setParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-//        this.participantCohortStatuses = participantCohortStatuses;
-//    }
-//
-//    public CohortReview participantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-//        this.participantCohortStatuses = participantCohortStatuses;
-//        return this;
-//    }
 
     @Override
     public boolean equals(Object o) {
