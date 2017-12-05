@@ -153,10 +153,6 @@ public class CohortReviewControllerTest {
         cohortReview.setReviewSize(0);
         cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
 
-        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
-        pcs.setParticipantKey(new ParticipantCohortStatusKey().participantId(0).cohortReviewId(cohortReviewId));
-        pcs.status(CohortStatus.NOT_REVIEWED);
-
         CohortReview cohortReviewAfter = new CohortReview();
         cohortReviewAfter.setCohortReviewId(cohortReviewId);
         cohortReviewAfter.setCohortId(cohortId);
@@ -165,7 +161,6 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setReviewSize(1);
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
         cohortReviewAfter.setReviewStatus(ReviewStatus.CREATED);
-        cohortReviewAfter.setParticipantCohortStatuses(Arrays.asList(pcs));
 
         CohortDefinition definition = new CohortDefinition() {
             @Override
@@ -261,10 +256,6 @@ public class CohortReviewControllerTest {
         participants.add(dbParticipant);
         Page expectedPage = new PageImpl(participants);
 
-        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
-        pcs.setParticipantKey(new ParticipantCohortStatusKey().participantId(0).cohortReviewId(1L));
-        pcs.status(CohortStatus.NOT_REVIEWED);
-
         CohortReview cohortReviewAfter = new CohortReview();
         cohortReviewAfter.setCohortReviewId(1L);
         cohortReviewAfter.setCohortId(cohortId);
@@ -272,7 +263,6 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setMatchedParticipantCount(1000);
         cohortReviewAfter.setReviewSize(200);
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
-        cohortReviewAfter.setParticipantCohortStatuses(Arrays.asList(pcs));
 
         final Sort sort = (columnParam.equals(CohortReviewController.PARTICIPANT_ID))
                 ? new Sort(orderParam, columnParam)
