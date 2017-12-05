@@ -1,10 +1,65 @@
 /* AnalysisClass definitions */
+export interface IAnalysisResult {
+  analysis_id: number;
+  stratum_name: string[];
+  stratum: string[];
+  count_value: number;
+
+}
+export class AnalysisResult {
+  analysis_id: number;
+  stratum_name: string[];
+  stratum: string[];
+  count_value: number;
+
+  static clone(obj: any) {
+    const r = new AnalysisResult();
+    r.analysis_id = obj && obj.analysis_id || null;
+    r.count_value = obj && obj.count_value || 0;
+    r.stratum = obj.stratum;
+    r.stratum_name = obj.stratum_name;
+    return r;
+
+  }
+  constructor(obj?: any) {
+    this.analysis_id = obj && obj.analysisId || null;
+    this.count_value = obj && obj.countValue || 0;
+    this.stratum = [];
+    this.stratum_name = [];
+
+    if (obj && obj.stratum1) {
+      this.stratum.push(obj.stratum1);
+      if (obj.stratum1Name) {
+        this.stratum_name.push(obj.stratum1Name);
+      } else {
+        this.stratum_name.push(obj.stratum1);
+      }
+    }
+    if (obj && obj.stratum2) {
+      this.stratum.push(obj.stratum2);
+      this.stratum_name.push(obj.stratum2Name);
+    }
+    if (obj && obj.stratum3) {
+      this.stratum.push(obj.stratum3);
+      this.stratum_name.push(obj.stratum3Name);
+    }
+    if (obj && obj.stratum_4) {
+      this.stratum.push(obj.stratum4);
+      this.stratum_name.push(obj.stratum4Name);
+    }
+    if (obj && obj.stratum5) {
+      this.stratum.push(obj.stratum5);
+      this.stratum_name.push(obj.stratum5Name);
+    }
+  }
+}
+
 export interface IAnalysis {
   analysis_id: number;
   analysis_name: string;
   stratum_name: string[];
   stratum: string[];
-  results: IAnalysisResult[]; // = new AnalysisResult ;
+  results: IAnalysisResult[];
   status: string;
   chartType: string;
   dataType: string;
@@ -467,60 +522,6 @@ export class Analysis implements IAnalysis {
 
 }
 
-export interface IAnalysisResult {
-  analysis_id: number;
-  stratum_name: string[];
-  stratum: string[];
-  count_value: number;
-
-}
-export class AnalysisResult {
-  analysis_id: number;
-  stratum_name: string[];
-  stratum: string[];
-  count_value: number;
-
-  static clone(obj: any) {
-    const r = new AnalysisResult();
-    r.analysis_id = obj && obj.analysis_id || null;
-    r.count_value = obj && obj.count_value || 0;
-    r.stratum = obj.stratum;
-    r.stratum_name = obj.stratum_name;
-    return r;
-
-  }
-  constructor(obj?: any) {
-    this.analysis_id = obj && obj.analysisId || null;
-    this.count_value = obj && obj.countValue || 0;
-    this.stratum = [];
-    this.stratum_name = [];
-
-    if (obj && obj.stratum1) {
-      this.stratum.push(obj.stratum1);
-      if (obj.stratum1Name) {
-        this.stratum_name.push(obj.stratum1Name);
-      } else {
-        this.stratum_name.push(obj.stratum1);
-      }
-    }
-    if (obj && obj.stratum2) {
-      this.stratum.push(obj.stratum2);
-      this.stratum_name.push(obj.stratum2Name);
-    }
-    if (obj && obj.stratum3) {
-      this.stratum.push(obj.stratum3);
-      this.stratum_name.push(obj.stratum3Name);
-    }
-    if (obj && obj.stratum_4) {
-      this.stratum.push(obj.stratum4);
-      this.stratum_name.push(obj.stratum4Name);
-    }
-    if (obj && obj.stratum5) {
-      this.stratum.push(obj.stratum5);
-      this.stratum_name.push(obj.stratum5Name);
-    }
-  }
-}
 
 
 export class AnalysisSection {
