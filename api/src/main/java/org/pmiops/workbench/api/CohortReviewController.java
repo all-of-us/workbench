@@ -155,7 +155,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         participantCohortStatusDao.save(participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview);
-        responseReview.setParticipantCohortStatuses(participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+        responseReview.setParticipantCohortStatuses(cohortReview.getParticipantCohortStatuses().stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
     }

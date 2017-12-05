@@ -148,7 +148,6 @@ public class CohortReview {
         return this;
     }
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "review_status")
     public ReviewStatus getReviewStatus() {
         return reviewStatus;
