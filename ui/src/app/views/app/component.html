@@ -43,9 +43,6 @@
         routerLink="/">My Workspaces</button>
     <button class="btn tab-link"
         [class.active]="reviewActive"
-        routerLink="/review">Review</button>
-    <button class="btn tab-link"
-        [class.active]="reviewActive"
         *ngIf="hasReviewResearchPurpose"
         routerLink="/review">Review Research Purposes</button>
   </div>
