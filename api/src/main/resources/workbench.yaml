@@ -1547,7 +1547,7 @@ definitions:
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
-    enum: [NOT_REVIEWED, INCLUDED, EXCLUDED, NEEDS_FURTHER_REVIEW]
+    enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
 
   ReviewStatus:
       type: string

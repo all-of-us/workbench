@@ -32,7 +32,6 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     public CohortStatus getStatus() {
         return status;
