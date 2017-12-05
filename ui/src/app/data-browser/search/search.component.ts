@@ -68,11 +68,10 @@ export class SearchComponent {
       // then add . icd trees have some parents that aren't concepts
     if (addConcept && item.concept_id !== null && item.concept_id > 0) {
       this.conceptsArray.unshift(item);
-      // this.runAnalysis(item);
     } else if (item.children.length) {
-        // We clicked add on concept in ist already
+        // add children of item to concept array if it is a parent place holder concept
       this.conceptsArray = item.children;
-      let c = null;
+      /*let c = null;
       for (c of item.children) {
         addConcept = true;
         if (c.concept_id ) {
@@ -86,11 +85,8 @@ export class SearchComponent {
             this.conceptsArray.unshift(c);
           }
         }
-      }
-      // Run analyses if we added concept
-      if (this.conceptsArray.length > prevConceptsLen) {
-        // this.runAnalysis(null);
-      }
+      }*/
+
     }
 
 

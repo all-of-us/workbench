@@ -23,6 +23,60 @@ export class Analysis implements IAnalysis {
   dataType: string;
   status: string;
   redraw: boolean;
+
+  static ageDecileCategories() {
+    return [
+      '0 - 17',
+      '18-29',
+      '30-39',
+      '40-49',
+      '50-59',
+      '60-69',
+      '70-79',
+      '80-89',
+      '90-99',
+      '100-109',
+      '110-119',
+      '120-129'];
+  }
+
+  static arrangeAgeDecileResults(results: AnalysisResult[]) {
+    // Fill in any missing age deciles with 0 values and arrange them in order
+    const cats = this.ageDecileCategories();
+    // categories are inde
+    const finalResults = [];
+    // Loop through categories making sure we have a result for each one , even if it is zero
+    // set stratum name in result too
+    let i = 0; // category index
+    for (const s of cats) {
+      i++;  // age decile stratum values are 1 (0-17), 2 (18-29) , 3 (30-39) ...
+      // push the right r on the final results
+      let noResult = true;
+      for (const r of results) {
+        if (r.stratum[1] === i.toString()) {
+          r.stratum_name[1] = s;
+          finalResults.push(r);
+          noResult = false;
+          break;
+        }
+      }
+      if (noResult) {
+        // If here, we don't have a result for this so make one and push it on final
+        const newR = new AnalysisResult({
+          analysisId: 3102,
+          countValue: 0,
+          stratum1: results[0].stratum[0], // concept id
+          stratum1Name: results[0].stratum_name[0], // Concept name
+          stratum2Name: s, // age decile name
+          stratum2: i // age decile value
+        });
+        finalResults.push(newR);
+      }
+    }
+    return finalResults;
+  }
+
+
   // Ojbect that defines the colors for the analysis results graphs
   /* Example for Number of person by Gender
   {
@@ -114,9 +168,7 @@ export class Analysis implements IAnalysis {
       return {
 
       chart: {
-
         type: this.chartType,
-
       },
       credits: {
         enabled: false
@@ -124,21 +176,17 @@ export class Analysis implements IAnalysis {
       tooltip: {
         pointFormat: this.hcPointFormat()
       },
-
       title: {
         text: this.analysis_name
       },
       subtitle: {
-
-
       },
       plotOptions: {
         series: {
           animation: {
             duration: 350,
-          }, // this.seriesAnimation(),
-            // turns off animation if this.seriesAnimation() is uncommented
-          maxPointWidth: 45,
+          },
+            maxPointWidth: 45
         },
         pie: {
           // size: 260,
@@ -146,16 +194,13 @@ export class Analysis implements IAnalysis {
             enabled: true,
             distance: -50,
             format: '{point.name} <br> Count: {point.y}'
-          },
-          showInLegend: true,
-            colorByPoint: false
+          }
         },
         column: {
           shadow: false,
-          colorByPoint: false,
-          // pointPadding: -1,
+          colorByPoint: this.colorByPoint(),
           groupPadding: 0,
-          dataLabels: this.rotation()
+          dataLabels: this.dataLabels()
         }
       },
       yAxis: {
@@ -164,9 +209,9 @@ export class Analysis implements IAnalysis {
         categories: this.makeCountCategories(),
         type: 'category',
         labels: {
-          style: {
-            whiteSpace: 'nowrap',
-          }
+            style: {
+                whiteSpace: 'nowrap',
+            }
         }
       },
       zAxis: {
@@ -175,7 +220,7 @@ export class Analysis implements IAnalysis {
         enabled: this.seriesLegend()
       },
       series: this.hcSeries(),
-      colorByPoint: false
+      colorByPoint: true
     };
   }
 
@@ -196,37 +241,41 @@ export class Analysis implements IAnalysis {
   }
 
   makeCountCategories() {
-    // For two stratum , get the unique cats
-    // //
-    if (this.stratum_name.length === 2) {
-      return this.makeTwoStratumCountCategories();
-    }
 
-    let catArray = [];
-    if (this.analysis_id === 3) {
+    // For two stratum , get the unique cats
+    if (this.analysis_id === 3000 || this.analysis_id === 3101) {
+      let catArray = [];
       for (let i = 0; i < this.results.length; i++) {
         catArray.push(this.results[i].stratum_name[0]);
       }
       catArray = catArray.sort((a, b) => a - b);
       return catArray;
     }
+    // For age decile
+    if (this.analysis_id === 3102) {
+      return Analysis.ageDecileCategories();
+    }
+    // For two stratum , get the unique cats
+    if (this.stratum_name.length === 2) {
+        return this.makeTwoStratumCountCategories();
+    }
+
   }
 
+
+
   makeTwoStratumCountCategories() {
+    console.log('Making two strat cats ');
     const catArray = [];
     // Use First stratum as category in two stratum analysis
-
+      // We don't want to duplicate
     for (const b of this.results) {
       // If item not in array, push it
       if (catArray.indexOf(b.stratum_name[0]) === -1) {
         catArray.push(b.stratum_name[0]);
       }
     }
-
-
-
     return catArray;
-
   }
 
   makeTwoStratumSeries() {
@@ -264,16 +313,74 @@ export class Analysis implements IAnalysis {
     return chartCategories;
 
   }
+  makePieSeries() {
+    // Pie chart has two stratum -- 1 is concept, 2 is gender or other concept
+
+    const data = [];
+    for (let i = 0; i < this.results.length; i++) {
+      // last stratum is gender or something
+      const last_stratum_index = 1;
+      let color_stratum_index = this.colors.stratum_index;
+      if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
+          color_stratum_index = last_stratum_index;
+      }
+      console.log(this.results[i]);
+      const color_stratum_value = this.results[i].stratum[color_stratum_index];
+      let name = this.results[i].stratum_name[last_stratum_index];
+      const color = this.colors.stratum_colors[color_stratum_value];
+      if (!name) {
+          name = 'Other';
+      } else if (name == null) {
+          name = 'Other';
+      }
+      console.log('Color is color ', color);
+      data.push({ name: name, y: this.results[i].count_value});
+    }
+    // TODO: make numaric sort desending
+      console.log('series data', data);
+   // chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
+    return [{ name: this.analysis_name, colorByPoint: true, data: data }];
+  }
+
+
+  makeAgeSeries() {
+    // Age results have two stratum-- 1 is concept, 2 is age decile
+    const data = [];
+    for (let i = 0; i < this.results.length; i++) {
+        // last stratum is gender or something
+        const last_stratum_index = 1;
+        let color_stratum_index = this.colors.stratum_index;
+        if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
+            color_stratum_index = last_stratum_index;
+        }
+        console.log(this.results[i]);
+        const color_stratum_value = this.results[i].stratum[color_stratum_index];
+        const ageDecile = this.results[i].stratum[last_stratum_index];
+        let name = this.results[i].stratum_name[last_stratum_index];
+        const color = this.colors.stratum_colors[color_stratum_value];
+        if (!name) {
+            name = 'Other';
+        } else if (name == null) {
+            name = 'Other';
+        }
+        console.log('Color is color ', color);
+        data.push({ name: name, y: this.results[i].count_value});
+    }
+    return [{ name: this.analysis_name, colorByPoint: true, data: data }];
+  }
   makeCountSeries() {
+    if (this.chartType === 'pie') {
+         return this.makePieSeries();
+    }
 
-    if (this.stratum_name.length === 2) {
-
-      return this.makeTwoStratumSeries();
+    if (this.analysis_id === 3102) {
+      return this.makeAgeSeries();
     }
 
     const chartSeries = [{ data: [] }];
     for (let i = 0; i < this.results.length; i++) {
       let name;
+      console.log(this.results[i]);
       const last_stratum_index = this.results[i].stratum.length - 1;
       let color_stratum_index = this.colors.stratum_index;
       if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
@@ -287,9 +394,9 @@ export class Analysis implements IAnalysis {
       } else if (name == null) {
         name = 'Other';
       }
-
+      console.log('Color is color ', color);
       chartSeries[0].data.push({ name: name, y: this.results[i].count_value, color: color});
-      // chartSeries[0].color = color;
+
     }
     // TODO: make numaric sort desending
     chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
@@ -312,12 +419,8 @@ export class Analysis implements IAnalysis {
     }
   }
   seriesLegend() {
-    // this.analysis_id ==4 is a grouping of columns... which is why we need series legend
-    if (this.analysis_id === 4) {
-      return true;
-    } else {
-      return false;
-    }
+    // May need this at some point for certain analyses
+    return false;
   }
 
   seriesAnimation() {
@@ -327,7 +430,7 @@ export class Analysis implements IAnalysis {
       return false;
     }
   }
-  rotation() {
+  dataLabels() {
     ////
     if (this.results.length > 0) {
       return {

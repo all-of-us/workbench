@@ -1,5 +1,6 @@
 import {Component, Input, NgModule, OnChanges} from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
+import { AchillesService} from '../services/achilles.service';
 
 // import highcharts and highmaps and add highmaps to it.
 // Note, must import the js/modules/map so it can play nice. See highcharts docs
@@ -38,7 +39,7 @@ export class ChartComponent implements OnChanges {
   chartOptions;
   chart;
   localAnalysis: Analysis;
-  constructor() {
+  constructor(private achillesService: AchillesService) {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
       colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']
@@ -55,18 +56,15 @@ export class ChartComponent implements OnChanges {
   // If analysis object results changed , update the chart
   ngOnChanges() {
     this.chartOptions = null;
-
-    console.log('Chart on changes a', this.analysis, this.concepts);
     if (this.concepts && this.concepts.length) {
-      const a  = this.makeConceptsAnalysis(this.concepts);
+      const a  = this.achillesService.makeConceptsCountAnalysis(this.concepts);
       this.chartOptions = a.hcChartOptions();
       this.chartType = a.chartType;
     } else if (this.analysis && this.analysis.results.length) {
       // HC automatically redraws when changing chart options
-      this.localAnalysis  = this.analysis;
-      this.chartOptions = this.localAnalysis.hcChartOptions();
+      this.chartOptions = this.analysis.hcChartOptions();
       this.chartType = this.analysis.chartType;
-      console.log(this.chartOptions);
+      console.log("analyses chart options ", this.chartOptions);
     }
   }
 
@@ -93,7 +91,7 @@ export class ChartComponent implements OnChanges {
       obj.results.push(series);
     }
     const a =  Analysis.analysisClone(obj);
-    console.log(a);
+    console.log('New analysis', a);
     //
     return a;
   }

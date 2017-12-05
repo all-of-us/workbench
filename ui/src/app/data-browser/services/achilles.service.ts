@@ -4,7 +4,7 @@ import 'rxjs/add/operator/toPromise';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
 import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
-import { Concept } from '../ConceptClasses';
+import { Concept, IConcept } from '../ConceptClasses';
 import { DomainClass } from '../DomainClasses';
 
 @Injectable()
@@ -17,32 +17,31 @@ export class AchillesService {
     return Promise.reject(error.message || error);
   }
 
+    // Return an Analysis object with results for the concepts array.
+    // This analysis obj can then be passed to app-chart
+    makeConceptsCountAnalysis(concepts: IConcept[]): Analysis {
+        const obj = {
+            analysisId: 3000,
+            analysisName: 'Number of Participants',
+            results: [],
+            chartType: 'column',
+            dataType: 'counts',
+            stratum1Name: ['Concept id']
+        };
+        for (let i = 0; i < concepts.length; i++) {
+            const ar =  new AnalysisResult({
+                analysisId: 3000,
+                stratum1Name: concepts[i].concept_name,
+                stratum1: concepts[i].concept_id,
+                countValue: concepts[i].count_value
+            });
+            obj.results.push(ar);
+        }
+        const a =  new Analysis(obj);
+        return a;
+    }
 
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
-
-      // const url = this.baseUrl + 'analysis_result';
-      // var q = '?analysis_id='+a.analysis_id+'&dataType='+a.dataType;
-      const q = {
-          'analysis_id': a.analysis_id,
-          'dataType': a.dataType
-      };
-      for (let i = 0; i < a.stratum.length; i++) {
-          /*
-          Todo: split stratum one on a comma for multiple stratum id's
-          */
-          let makeArray;
-          if (a.stratum[i] !== '') {
-              if (typeof a.stratum[i] === 'string') {
-                  makeArray = a.stratum[i].split(',');
-              } else {
-                  makeArray = [a.stratum[i]];
-              }
-              // //
-              const i_name = i + 1;
-              const stratumVar = 'stratum_' + i_name + '[]'; // must add [] for array params
-              q[stratumVar] = makeArray;
-          }
-      }
 
       return this.api.getAnalysisResults(a.analysis_id, a.stratum[0], a.stratum[1],
           a.stratum[2], a.stratum[3], a.stratum[4], a.stratum[5])
@@ -52,7 +51,7 @@ export class AchillesService {
             if (!data.length) {
                 return [];
             }
-            return data.map(item => {
+            let results =  data.map(item => {
               let ar = null;
               if (a.dataType === 'distribution') {
                 ar = new AnalysisDistResult(item);
@@ -65,6 +64,12 @@ export class AchillesService {
               }
               return ar;
             });
+
+            // If age decile results , arrange them in order filling in any missing deciles
+            if (a.analysis_id === 3102) {
+              results = Analysis.arrangeAgeDecileResults(results);
+            }
+            return results;
 
           })
           .catch(this.handleError);
@@ -103,8 +108,6 @@ export class AchillesService {
 
 
   getConceptResults(args) {
-    console.log('In get concepts ');
-
     const q = {
         concept_name: args.search,
         page: args.page,
@@ -128,7 +131,6 @@ export class AchillesService {
 
       }
     }
-
     if (args.sort) {
       q['sortCol'] = args.sort.by;
 
@@ -138,7 +140,6 @@ export class AchillesService {
         q['sortDir'] = 'DESC';
       }
     }
-
 
     const vocabs = []; // array of vocabulary_id filters
     const domains = [];
@@ -165,15 +166,12 @@ export class AchillesService {
       q['domain_id[]'] = domains;
     }
 
-    console.log('searching getConcepts' , q.concept_name);
-    if (!q.concept_name) { q.concept_name = 'heart'; }
     return this.api.getConceptsSearch(q.concept_name).map(
       (response) => {
 
         const  data = response.items.map(item => {
           return new Concept(item);
         });
-        console.log(data);
         return {data: data, totalItems: data.length};
 
       });
@@ -232,8 +230,7 @@ export class AchillesService {
       if (concept && typeof concept.concept_id !== 'undefined') {
         analyses[i].stratum[0] = concept.concept_id.toString();
       }
-      // analyses[i].stratum[0] = arr.join(",");
-      console.log('get anares', analyses[i]);
+
       // Run the analysis -- getting the results in the analysis.results
       this.getAnalysisResults(analyses[i])
         .then(results => {

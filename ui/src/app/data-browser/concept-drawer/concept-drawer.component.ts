@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AchillesService } from '../services/achilles.service';
+import {IAnalysis} from "../AnalysisClasses";
 
 @Component({
   selector: 'app-concept-drawer',
@@ -21,6 +22,8 @@ export class ConceptDrawerComponent implements OnChanges {
   show_source_graph = false;
   show_source_table = false;
 
+  sourcesCountAnalysis: IAnalysis;
+
   constructor(private achillesService: AchillesService, private router: Router) {
   }
 
@@ -28,7 +31,6 @@ export class ConceptDrawerComponent implements OnChanges {
     this.onParentSelected.emit(concept);
   }
 
-  //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
     this.show_source_graph = false;
     this.show_source_table = false;
@@ -58,6 +60,9 @@ export class ConceptDrawerComponent implements OnChanges {
           if (this.concept.children.length > 0) {
             this.show_source_table = true;
             this.show_source_graph = false;
+            this.sourcesCountAnalysis =
+                this.achillesService.makeConceptsCountAnalysis(this.concept.children);
+            console.log('source a ', this.sourcesCountAnalysis);
             for (let i = 0; i < this.analyses.length; i++) {
               this.analyses[i].showgraph = false;
             }

@@ -37,13 +37,20 @@
               {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
             </button>
           </div>
+
         </div>
         <div>
         </div>
+
+
         <div style="height:100%; width:99%;margin:auto">
+
+          <!-- Children column chart -->
           <div class="children-chart">
             <app-chart style="width:100%" *ngIf="concept.children.length>0 && show_source_graph" [redraw]="randNum" [concepts]="concept.children"></app-chart>
           </div>
+
+
           <!-- Children table -->
           <div style="width:100%" *ngIf="concept.children && concept.children.length && this.show_source_table">
             <div class="col-xs-12">

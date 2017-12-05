@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
+import { IAnalysis } from '../AnalysisClasses';
 import { IConcept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
@@ -17,7 +18,7 @@ export class MyConceptsComponent implements OnInit, OnChanges {
   @Output() addEmit = new EventEmitter();
   @Output() resetEmit = new EventEmitter();
   analyses;
-  countAnalysis;
+  countAnalysis: IAnalysis;
 
   redraw: number[] = []; // flag te redraw analysis , indexed exactly like analyses
 
@@ -35,7 +36,6 @@ export class MyConceptsComponent implements OnInit, OnChanges {
             this.analyses.push(a);
           }
         }
-
         // Call onchanges when this comes back to do some drawing
         this.ngOnChanges();
 
@@ -54,6 +54,7 @@ export class MyConceptsComponent implements OnInit, OnChanges {
 
   ngOnInit() {
   }
+
   ngOnChanges() {
     const colors = ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4'];
     // colors we use for our charts
@@ -70,34 +71,9 @@ export class MyConceptsComponent implements OnInit, OnChanges {
     console.log('Count analysis', this.countAnalysis);
     // Run total count analysis for all concepts
     if (this.countAnalysis) {
-      if (this.conceptsArray.length) {
-
-
-        // Clone the analysis so chart updates
-        this.countAnalysis = this.achillesService.cloneAnalysis(this.countAnalysis);
-        const arr = [];
-        for (let i = 0; i < this.conceptsArray.length; i++) {
-          arr.push(this.conceptsArray[i].concept_id);
+        if (this.conceptsArray) {
+            this.countAnalysis = this.achillesService.makeConceptsCountAnalysis(this.conceptsArray);
         }
-
-        this.countAnalysis.stratum[0] = arr.join(',');
-        // Run the analysis -- getting the results in the analysis.results
-        this.achillesService.getAnalysisResults(this.countAnalysis)
-          .then(results => {
-            console.log('Got count analysis results ', results );
-            for (let i = 0; i < this.conceptsArray.length; i++) {
-              for (let c = 0; c < results.length; c++) {
-                if (this.conceptsArray[i].concept_name === results[c].stratum_name[0]) {
-                  results.splice(i, 0, results.splice(c, 1)[0]);
-                }
-              }
-            }
-            this.countAnalysis.results = results;
-
-          });
-      } else {
-        this.countAnalysis.results = [];
-      }
     }
   }  // end of onChanges()
 

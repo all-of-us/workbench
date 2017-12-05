@@ -17,3 +17,21 @@
 hr{
   border-top: dashed #ccc 1px;
 }
+
+
+.break-down-charts {
+  display: flex;
+  justify-content: center;
+}
+
+.drawer-title {
+  margin-top: 0;
+}
+
+.drawer-subtitle {
+  margin-top: .75rem;
+}
+
+.standard-column {
+  width: 4.5rem
+}

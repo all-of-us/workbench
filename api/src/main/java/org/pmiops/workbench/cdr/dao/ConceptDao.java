@@ -18,11 +18,11 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     nativeQuery = true)
     List<Concept> findConceptsOrderedByCount();
 
-    @Query(value = "select c.* from cdr.concept c join cdr.concept_relationship rel on rel.concept_id_1 = c.concept_id and rel.concept_id_2 = :conceptId and rel.relationship_id = 'maps to' order by c.count_value desc",
+    @Query(value = "select c.* from cdr.concept c join cdr.concept_relationship rel on rel.concept_id_1 = c.concept_id and rel.concept_id_2 = :conceptId and rel.relationship_id = 'maps to' where c.concept_id != :conceptId order by c.count_value desc",
             nativeQuery = true)
     List<Concept> findConceptsMapsToChildren(@Param("conceptId") long conceptId);
 
-    @Query(value = "select c.* from cdr.concept c join cdr.concept_relationship rel on rel.concept_id_2 = c.concept_id and rel.concept_id_1 = :conceptId and rel.relationship_id = 'maps to' order by c.count_value desc",
+    @Query(value = "select c.* from cdr.concept c join cdr.concept_relationship rel on rel.concept_id_2 = c.concept_id and rel.concept_id_1 = :conceptId and rel.relationship_id = 'maps to' where c.concept_id != :conceptId order by c.count_value desc",
             nativeQuery = true)
     List<Concept> findConceptsMapsToParents(@Param("conceptId") long conceptId);
 
