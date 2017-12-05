@@ -52,6 +52,7 @@ public class ClusterController implements ClusterApiDelegate {
     firecloudClusterRequest.setServiceAccount("");
     Map<String, String> labels = new HashMap<String, String>();
     labels.put("all-of-us", "true");
+    labels.put("created-by", userProvider.get().getEmail());
     firecloudClusterRequest.setLabels(labels);
     // TODO: Host our extension somewhere.
     // firecloudClusterRequest.setJupyterExtensionUri("");
