@@ -18,6 +18,12 @@ securityDefinitions:
   # by defining an `aou_oauth` security mode, which we'll assing
   # to any protected endpoints below.
   aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
     type: oauth2
     flow: accessCode
 schemes:
@@ -47,6 +53,7 @@ paths:
       security: []
       responses:
         "200":
+          description: Configuration data
           schema:
             $ref: "#/definitions/ConfigResponse"
 
@@ -175,7 +182,7 @@ paths:
           type: string
       responses:
         "200":
-          description: A list of workspace definitions.
+          description: A list of cluster definitions.
           schema:
             $ref: "#/definitions/ClusterListResponse"
         "400":
@@ -410,6 +417,7 @@ paths:
       operationId: getWorkspacesForReview
       responses:
         "200":
+          description: A list of workspaces
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
@@ -434,6 +442,7 @@ paths:
             $ref: "#/definitions/ResearchPurposeReviewRequest"
       responses:
         "200":
+          description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
 
@@ -459,6 +468,7 @@ paths:
               $ref: "#/definitions/ShareWorkspaceRequest"
       responses:
         "200":
+          description: Successful share response
           schema:
             $ref: "#/definitions/ShareWorkspaceResponse"
 
@@ -594,6 +604,11 @@ paths:
           type: string
           required: true
           description: ID of the workspace containing the cohort definition
+      responses:
+        "202":
+          description: Cluster deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
     post:
@@ -1021,7 +1036,8 @@ definitions:
   ResearchPurposeReviewRequest:
     description: Approve or reject a workspace's research purpose.
     type: object
-    required: approved
+    required:
+      - approved
     properties:
       approved:
         type: boolean
@@ -1029,7 +1045,7 @@ definitions:
   CohortListResponse:
     type: object
     required:
-     - items
+      - items
     properties:
       items:
         type: "array"
@@ -1108,7 +1124,8 @@ definitions:
       pageSize:
         description: >
           Maximum number of results to return in a response. Defaults to 1000.
-        type: int32
+        type: integer
+        format: int32
       # TODO: add fieldSpec, output information
 
   MaterializeCohortResponse:
@@ -1321,7 +1338,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/SearchGroup"
-    examples:
+    example:
       typical:
         {
           include: [
@@ -1434,7 +1451,7 @@ definitions:
       attribute:
         description: Any applicable arguments that complete the sense of the parameter
         $ref: "#/definitions/Attribute"
-    examples:
+    example:
       leafExample:
         value: "E9293"
         subtype: "AGE"
@@ -1456,7 +1473,7 @@ definitions:
         type: "array"
         items:
           type: string
-    examples:
+    example:
       singleValued:
         operator: "GTE"
         operands: ["20"]
@@ -1481,7 +1498,7 @@ definitions:
         type: "array"
         items:
           type: string
-    examples:
+    example:
       singleValued:
         name: "age_at_event"
         operator: "GTE"
