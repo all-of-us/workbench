@@ -164,7 +164,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     @Override
     public ResponseEntity<CohortSummaryListResponse> getCohortSummary(Long workspaceId, Long cohortId, Long cdrVersionId, String domain) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
     }
 
     /**
