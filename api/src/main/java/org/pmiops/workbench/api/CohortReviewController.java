@@ -58,7 +58,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
-                            .cohortReviewId(participant.getParticipantKey().getCohortReviewId())
                             .status(participant.getStatus());
                 }
             };
@@ -231,5 +230,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         responseReview.setParticipantCohortStatuses(participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
+    updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId,
+                                  org.pmiops.workbench.model.ParticipantCohortStatus participantCohortStatus) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
     }
 }

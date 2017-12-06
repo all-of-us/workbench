@@ -754,7 +754,7 @@ paths:
       tags:
          - cohortReview
       description:  >
-        Returns a collection of participants that for the specified cohortReviewId. This endpoint
+        Returns a collection of participants for the specified cohortId and cdrVersionId. This endpoint
         does pagination based on page, limit, order and column.
       operationId: "getParticipantCohortStatuses"
       parameters:
@@ -801,6 +801,40 @@ paths:
           description: A collection of participants
           schema:
             $ref: "#/definitions/CohortReview"
+    patch:
+      tags:
+        - cohortReview
+      description: Modifies the ParticipantCohortStatus status
+      operationId: updateParticipantCohortStatus
+      parameters:
+        - in: path
+          name: workspaceId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: body
+          name: participantCohortStatus
+          description: Contains participant id and the new review status
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
+      responses:
+        "200":
+          description: The updated ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
     get:
@@ -1566,13 +1600,9 @@ definitions:
   ParticipantCohortStatus:
     type: object
     required:
-      - cohortReviewId
       - participantId
       - status
     properties:
-      cohortReviewId:
-        type: integer
-        format: int64
       participantId:
         type: integer
         format: int64
