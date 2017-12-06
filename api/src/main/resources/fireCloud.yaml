@@ -81,10 +81,10 @@ paths:
       operationId: createBillingProjectFull
       security:
         - googleoauth:
-        - openid
-        - email
-        - profile
-        - https://www.googleapis.com/auth/cloud-billing
+          - openid
+          - email
+          - profile
+          - https://www.googleapis.com/auth/cloud-billing
 
   /api/billing/{projectId}/{role}/{email}:
       put:

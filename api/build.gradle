@@ -87,10 +87,14 @@ configurations {
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.9.0'
     classpath 'io.swagger:swagger-codegen:+'
   }
 }
@@ -101,6 +105,7 @@ apply plugin: 'idea'
 apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
+apply plugin: 'org.hidetake.swagger.generator'
 
 configurations {
   integrationCompile.extendsFrom testCompile
@@ -223,6 +228,18 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:+'
   generatedCompile 'joda-time:joda-time:+'
 
+}
+
+swaggerSources {
+  workbench {
+    inputFile = file("$projectDir/$swaggerSourceFile")
+  }
+  firecloud {
+    inputFile = file("$projectDir/$fireCloudApiFile")
+  }
+  notebooks {
+    inputFile = file("$projectDir/$notebooksApiFile")
+  }
 }
 
 task integration(type: Test) {
