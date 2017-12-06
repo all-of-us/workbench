@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   Workspace findByWorkspaceNamespaceAndFirecloudName(
       String workspaceNamespace, String firecloudName);
+  Workspace findByWorkspaceNamespaceAndName(String workspaceNamespace, String name);
   List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
   List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();

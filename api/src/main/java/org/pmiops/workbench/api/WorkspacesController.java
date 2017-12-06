@@ -288,26 +288,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return true;
   }
 
-  @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (workspace.getName().equals("")) {
-      throw new BadRequestException("Cannot create a workspace with no name.");
-    }
-    User user = userProvider.get();
-    if (user == null) {
-      // You won't be able to create workspaces prior to creating a user record once our
-      // registration flow is done, so this should never happen.
-      throw new BadRequestException("User is not initialized yet; please register");
-    }
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
-        workspace.getName());
-    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.get(
-        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-    if (existingWorkspace != null) {
-      throw new BadRequestException(String.format(
-          "Workspace %s/%s already exists",
-          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
-    }
+  private void attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     try {
       fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
           workspaceId.getWorkspaceName());
@@ -328,11 +309,47 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
+  }
+
+  @Override
+  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
+    if (workspace.getName().equals("")) {
+      throw new BadRequestException("Cannot create a workspace with no name.");
+    }
+    User user = userProvider.get();
+    if (user == null) {
+      // You won't be able to create workspaces prior to creating a user record once our
+      // registration flow is done, so this should never happen.
+      throw new BadRequestException("User is not initialized yet; please register");
+    }
+    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
+        workspace.getName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
+        workspaceId.getWorkspaceNamespace(), workspace.getName());
+    if (existingWorkspace != null) {
+      throw new BadRequestException(String.format(
+          "Workspace %s/%s already exists",
+          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
+    }
+    FirecloudWorkspaceId attemptId = new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    for (int attemptValue = 1; attemptValue < 6; attemptValue++) {
+      attemptId =
+          new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
+              workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+      try {
+        attemptFirecloudWorkspaceCreation(attemptId);
+        break;
+      } catch (RuntimeException e) {
+        if (!(e instanceof ConflictException) || attemptValue >= 5) {
+          throw e;
+        }
+      }
+    }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization
     org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudName(attemptId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(attemptId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
