@@ -730,10 +730,15 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def circle_deploy(cmd_name, args)
+  # See https://circleci.com/docs/1.0/environment-variables/#build-details
+  common = Common.new
+  common.status "circle_deploy with branch='#{ENV.fetch("CIRCLE_BRANCH", "")}'" +
+  " and tag='#{ENV.fetch("CIRCLE_TAG", "")}'"
   if ENV.has_key?("CIRCLE_BRANCH") and ENV.has_key?("CIRCLE_TAG")
     raise("expected exactly one of CIRCLE_BRANCH and CIRCLE_TAG env vars to be set")
   end
-  if ENV.fetch("CIRCLE_BRANCH", "") != "master" and !ENV.has_key?("CIRCLE_TAG")
+  is_master = ENV.fetch("CIRCLE_BRANCH", "") == "master"
+  if !is_master and !ENV.has_key?("CIRCLE_TAG")
     common.status "not master or a git tag, nothing to deploy"
     return
   end
@@ -750,7 +755,7 @@ def circle_deploy(cmd_name, args)
     exit 1
   end
 
-  if ENV.fetch("CIRCLE_BRANCH", "") == "master"
+  if is_master
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do
       migrate_database
@@ -761,7 +766,7 @@ def circle_deploy(cmd_name, args)
 
   promote = ""
   version = ""
-  if ENV.fetch("CIRCLE_BRANCH", "") == "master"
+  if is_master
     # Note that --promote will generally be a no-op, as we expect
     # circle-ci-test to always be serving 100% traffic. Pushing to an existing
     # live version will immediately make those changes live. In the event that
