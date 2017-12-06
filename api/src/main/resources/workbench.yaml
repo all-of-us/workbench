@@ -1,7 +1,6 @@
 # If validation fails, gradle:generateApi fails claiming this file does not exist.
 # For separate validation (with some false positives), do:
-#     sudo npm install -g swagger-cli
-#     swagger validate .../workbench.yaml
+#     ./project.rb validate-swagger
 swagger: '2.0'
 info:
   version: "0.1.0"

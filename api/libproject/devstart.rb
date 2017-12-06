@@ -88,6 +88,10 @@ def run_api_and_db(*args)
   run_api(account)
 end
 
+def validate_swagger(*args)
+  Common.new.run_inline %W{docker-compose run --rm api ./gradlew validateSwagger}
+end
+
 def run_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle test} + args
@@ -525,6 +529,12 @@ Common.register_command({
   :invocation => "get-service-creds",
   :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
   :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
+})
+
+Common.register_command({
+  :invocation => "validate-swagger",
+  :description => "Validate swagger definition files",
+  :fn => lambda { |*args| validate_swagger(*args) }
 })
 
 Common.register_command({
