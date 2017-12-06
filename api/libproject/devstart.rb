@@ -762,6 +762,7 @@ def circle_deploy(cmd_name, args)
     # commit.
     promote = "--promote"
     default_version = "circle-ci-master"
+  end
   version = ENV.fetch("CIRCLE_TAG", default_version)
 
   deploy(cmd_name, args + %W{--version #{version}})
