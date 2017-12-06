@@ -730,6 +730,11 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def circle_deploy(cmd_name, args)
+  if ENV["CIRCLE_BRANCH"] != "master"
+    common.status "circle branch is not master, nothing to deploy"
+    return
+  end
+
   unless Workbench::in_docker?
     exec *(%W{docker run --rm -v #{File.expand_path("..")}:/w -w /w/api
       allofustest/workbench:buildimage-0.0.9
@@ -742,30 +747,25 @@ def circle_deploy(cmd_name, args)
     exit 1
   end
 
-  if ENV["CIRCLE_BRANCH"] == "master"
-    common.status "Running database migrations..."
-    with_cloud_proxy_and_db_env(cmd_name, args) do
-      migrate_database
-      migrate_cdr_database
-      load_config
-    end
+  common.status "Running database migrations..."
+  with_cloud_proxy_and_db_env(cmd_name, args) do
+    migrate_database
+    migrate_cdr_database
+    load_config
   end
 
-  default_version = "circle-ci-test"
-  promote = "--no-promote"
-  if ENV["CIRCLE_BRANCH"] == "master"
-    # Note that --promote will generally be a no-op, as we expect
-    # circle-ci-master to always be serving 100% traffic. Pushing to an existing
-    # live version will immediately make those changes live. In the event that
-    # someone mistakenly pushes a different version manually, this --promote
-    # will restore us to the expected circle-ci-master version on the next
-    # commit.
-    promote = "--promote"
-    default_version = "circle-ci-master"
-  end
-  version = ENV.fetch("CIRCLE_TAG", default_version)
-
-  deploy(cmd_name, args + %W{--version #{version}})
+  # Note that --promote will generally be a no-op, as we expect
+  # circle-ci-master to always be serving 100% traffic. Pushing to an existing
+  # live version will immediately make those changes live. In the event that
+  # someone mistakenly pushes a different version manually, this --promote
+  # will restore us to the expected circle-ci-master version on the next
+  # commit.
+  promote = "--promote"
+  version = "circle-ci-test"
+  if ENV.has_key("CIRCLE_TAG")
+    promote = "--no-promote"
+    version = ENV["CIRCLE_TAG"]
+  deploy(cmd_name, args + %W{--version #{version} #{promote}})
 end
 
 def run_cloud_migrations(cmd_name, args)
