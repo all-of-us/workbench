@@ -730,8 +730,11 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def circle_deploy(cmd_name, args)
-  if ENV["CIRCLE_BRANCH"] != "master"
-    common.status "circle branch is not master, nothing to deploy"
+  if ENV.has_key("CIRCLE_BRANCH") and ENV.has_key("CIRCLE_TAG")
+    raise("expected exactly one of CIRCLE_BRANCH and CIRCLE_TAG env vars to be set")
+  end
+  if ENV.fetch("CIRCLE_BRANCH", "") != "master" and !ENV.has_key("CIRCLE_TAG")
+    common.status "not master or a git tag, nothing to deploy"
     return
   end
 
@@ -747,24 +750,31 @@ def circle_deploy(cmd_name, args)
     exit 1
   end
 
-  common.status "Running database migrations..."
-  with_cloud_proxy_and_db_env(cmd_name, args) do
-    migrate_database
-    migrate_cdr_database
-    load_config
+  if ENV.fetch("CIRCLE_BRANCH", "") == "master"
+    common.status "Running database migrations..."
+    with_cloud_proxy_and_db_env(cmd_name, args) do
+      migrate_database
+      migrate_cdr_database
+      load_config
+    end
   end
 
-  # Note that --promote will generally be a no-op, as we expect
-  # circle-ci-master to always be serving 100% traffic. Pushing to an existing
-  # live version will immediately make those changes live. In the event that
-  # someone mistakenly pushes a different version manually, this --promote
-  # will restore us to the expected circle-ci-master version on the next
-  # commit.
-  promote = "--promote"
-  version = "circle-ci-test"
-  if ENV.has_key("CIRCLE_TAG")
+  promote = ""
+  version = ""
+  if ENV.fetch("CIRCLE_BRANCH", "") == "master":
+    # Note that --promote will generally be a no-op, as we expect
+    # circle-ci-master to always be serving 100% traffic. Pushing to an existing
+    # live version will immediately make those changes live. In the event that
+    # someone mistakenly pushes a different version manually, this --promote
+    # will restore us to the expected circle-ci-master version on the next
+    # commit.
+    promote = "--promote"
+    version = "circle-ci-test"
+  elsif ENV.has_key("CIRCLE_TAG")
     promote = "--no-promote"
     version = ENV["CIRCLE_TAG"]
+  end
+
   deploy(cmd_name, args + %W{--version #{version} #{promote}})
 end
 
