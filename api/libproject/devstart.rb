@@ -88,8 +88,9 @@ def run_api_and_db(*args)
   run_api(account)
 end
 
-def validate_swagger(*args)
-  Common.new.run_inline %W{docker-compose run --rm api ./gradlew validateSwagger}
+def validate_swagger(cmd_name, args)
+  ensure_docker cmd_name, args
+  Common.new.run_inline %W{gradle validateSwagger} + args
 end
 
 def run_tests(cmd_name, args)
@@ -534,7 +535,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "validate-swagger",
   :description => "Validate swagger definition files",
-  :fn => lambda { |*args| validate_swagger(*args) }
+  :fn => lambda { |*args| validate_swagger("validate-swagger", args) }
 })
 
 Common.register_command({
