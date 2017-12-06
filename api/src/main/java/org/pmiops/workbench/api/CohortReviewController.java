@@ -15,6 +15,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
-                            .cohortReviewId(participant.getParticipantKey().getCohortReviewId())
                             .status(participant.getStatus());
                 }
             };
@@ -231,5 +231,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         responseReview.setParticipantCohortStatuses(participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
+    updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId, ModifyCohortStatusRequest cohortStatusRequest) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
     }
 }
