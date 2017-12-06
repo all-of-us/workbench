@@ -763,11 +763,10 @@ def circle_deploy(cmd_name, args)
   version = ""
   if ENV.fetch("CIRCLE_BRANCH", "") == "master":
     # Note that --promote will generally be a no-op, as we expect
-    # circle-ci-master to always be serving 100% traffic. Pushing to an existing
+    # circle-ci-test to always be serving 100% traffic. Pushing to an existing
     # live version will immediately make those changes live. In the event that
     # someone mistakenly pushes a different version manually, this --promote
-    # will restore us to the expected circle-ci-master version on the next
-    # commit.
+    # will restore us to the expected circle-ci-test version on the next commit.
     promote = "--promote"
     version = "circle-ci-test"
   elsif ENV.has_key("CIRCLE_TAG")
