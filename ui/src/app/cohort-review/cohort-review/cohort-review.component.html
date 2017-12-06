@@ -1,31 +1,32 @@
-<clr-main-container>
-  <div class="content-container">
-    <div class="content-area">
-      <div class="cohort-review-main">
-        <div *ngIf="loading" class="spinner">
-          Loading...
-        </div>
+<div
+  #wrapper
+  class="cohort-review-wrapper">
 
-        <!-- Main content area for the Cohort Review Sub-application -->
-        <router-outlet></router-outlet>
-
-      </div>
-    </div>
-
-    <clr-vertical-nav
-      [clrVerticalNavCollapsible]="true"
-      [(clrVerticalNavCollapsed)]="collapsed">
-      <a clrVerticalNavLink
-        routerLink="overview"
-        routerLinkActive="active">
-        Overview
-      </a>
-      <a *ngFor="let subject of (subjects$ | async)"
-        clrVerticalNavLink
-        [routerLink]="[subject.id]"
-        routerLinkActive="active">
-        {{ subject.id}}
-      </a>
-    </clr-vertical-nav>
+  <div #subjectNav
+    class="subject-nav"
+    [style.width]="open ? '250px' : 0">
+    <a class="closebtn" (click)="open = false">&times;</a>
+    <a
+      (click)="open = false"
+      routerLink="overview"
+      routerLinkActive="active">
+      Overview
+    </a>
+    <a *ngFor="let subject of (subjects$ | async)"
+      (click)="open = false"
+      [routerLink]="[subject.id]"
+      routerLinkActive="active">
+      {{ subject.id}}
+    </a>
   </div>
-</clr-main-container>
+
+  <div class="cohort-review-main"
+    [style.margin-left]="open ? '250px' : 0"
+    [style.background-color]="open ? 'rgba(0, 0, 0, 0.4)' : 'rgb(250, 250, 250)'">
+    <button #openNav (click)="open = true">Open</button>
+
+    <!-- Main content area for the Cohort Review Sub-application -->
+    <router-outlet></router-outlet>
+
+  </div>
+</div>

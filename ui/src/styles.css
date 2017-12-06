@@ -10,7 +10,7 @@ h2, h3 {
   font-weight: lighter;
 }
 body {
-  margin: 0.6rem 1.2rem;
+  margin: 0.6rem 1.2rem 0 1.2rem;
 }
 body, input[text], button {
   color: #888;
@@ -77,7 +77,7 @@ button:disabled {
   background-color: #FFEEEE;
 }
 
-/* 
+/*
  * ngx-popper => default background is transparent.
  * That is usually unusable.  Also we'd rather it wrap
  * at some point than just grow infinitely wide
