@@ -19,7 +19,7 @@ jobs:
       - run:
           name: Validate swagger definitions
           working_directory: ~/workbench/api
-          command: ./project.rb validateSwagger --project-prop verboseTestLogging=yes
+          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
