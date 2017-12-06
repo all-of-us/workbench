@@ -730,10 +730,10 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def circle_deploy(cmd_name, args)
-  if ENV.has_key("CIRCLE_BRANCH") and ENV.has_key("CIRCLE_TAG")
+  if ENV.has_key?("CIRCLE_BRANCH") and ENV.has_key?("CIRCLE_TAG")
     raise("expected exactly one of CIRCLE_BRANCH and CIRCLE_TAG env vars to be set")
   end
-  if ENV.fetch("CIRCLE_BRANCH", "") != "master" and !ENV.has_key("CIRCLE_TAG")
+  if ENV.fetch("CIRCLE_BRANCH", "") != "master" and !ENV.has_key?("CIRCLE_TAG")
     common.status "not master or a git tag, nothing to deploy"
     return
   end
@@ -761,7 +761,7 @@ def circle_deploy(cmd_name, args)
 
   promote = ""
   version = ""
-  if ENV.fetch("CIRCLE_BRANCH", "") == "master":
+  if ENV.fetch("CIRCLE_BRANCH", "") == "master"
     # Note that --promote will generally be a no-op, as we expect
     # circle-ci-test to always be serving 100% traffic. Pushing to an existing
     # live version will immediately make those changes live. In the event that
@@ -769,7 +769,7 @@ def circle_deploy(cmd_name, args)
     # will restore us to the expected circle-ci-test version on the next commit.
     promote = "--promote"
     version = "circle-ci-test"
-  elsif ENV.has_key("CIRCLE_TAG")
+  elsif ENV.has_key?("CIRCLE_TAG")
     promote = "--no-promote"
     version = ENV["CIRCLE_TAG"]
   end
