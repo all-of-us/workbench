@@ -753,7 +753,7 @@ def circle_deploy(cmd_name, args)
 
   default_version = "circle-ci-test"
   promote = "--no-promote"
-  if ENV["CIRCLE_BRANCH"] == "master":
+  if ENV["CIRCLE_BRANCH"] == "master"
     # Note that --promote will generally be a no-op, as we expect
     # circle-ci-master to always be serving 100% traffic. Pushing to an existing
     # live version will immediately make those changes live. In the event that
