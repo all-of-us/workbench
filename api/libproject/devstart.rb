@@ -751,9 +751,20 @@ def circle_deploy(cmd_name, args)
     end
   end
 
-  version = ENV.fetch("CIRCLE_TAG", "circle-ci-test")
-  promote = ENV["CIRCLE_BRANCH"] == "master" ? "--promote" : "--no-promote"
-  deploy(cmd_name, args + %W{--version #{version} #{promote}})
+  default_version = "circle-ci-test"
+  promote = "--no-promote"
+  if ENV["CIRCLE_BRANCH"] == "master":
+    # Note that --promote will generally be a no-op, as we expect
+    # circle-ci-master to always be serving 100% traffic. Pushing to an existing
+    # live version will immediately make those changes live. In the event that
+    # someone mistakenly pushes a different version manually, this --promote
+    # will restore us to the expected circle-ci-master version on the next
+    # commit.
+    promote = "--promote"
+    default_version = "circle-ci-master"
+  version = ENV.fetch("CIRCLE_TAG", default_version)
+
+  deploy(cmd_name, args + %W{--version #{version}})
 end
 
 def run_cloud_migrations(cmd_name, args)
