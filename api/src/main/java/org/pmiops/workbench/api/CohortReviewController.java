@@ -15,6 +15,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -234,8 +235,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId,
-                                  org.pmiops.workbench.model.ParticipantCohortStatus participantCohortStatus) {
+    updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId, ModifyCohortStatusRequest cohortStatusRequest) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
                 .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
     }
