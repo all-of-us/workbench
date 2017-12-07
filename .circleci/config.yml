@@ -79,7 +79,7 @@ jobs:
           name: Deploy to gcloud test project
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./ci/deploy.sh ui
+              ./ci/deploy_ui.sh
             fi
   test_client:
     docker:
