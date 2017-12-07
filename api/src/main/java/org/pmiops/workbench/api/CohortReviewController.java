@@ -7,10 +7,12 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
@@ -44,6 +46,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
+    private WorkspaceDao workspaceDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private BigQueryService bigQueryService;
     private ParticipantCounter participantCounter;
@@ -87,11 +90,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Autowired
     CohortReviewController(CohortReviewDao cohortReviewDao,
                            CohortDao cohortDao,
+                           WorkspaceDao workspaceDao,
                            ParticipantCohortStatusDao participantCohortStatusDao,
                            BigQueryService bigQueryService,
                            ParticipantCounter participantCounter) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
+        this.workspaceDao = workspaceDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.bigQueryService = bigQueryService;
         this.participantCounter = participantCounter;
@@ -236,6 +241,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Override
     public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
     updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId, ModifyCohortStatusRequest cohortStatusRequest) {
+        Workspace workspace = workspaceDao.findOne(workspaceId);
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
                 .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
     }
