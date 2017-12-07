@@ -754,9 +754,8 @@ paths:
           description: specifies which cdr version
         - in: body
           name: request
-          type: integer
           required: true
-          description: size of the participant cohort statuses sample
+          description: cohort review creation request body
           schema:
             $ref: "#/definitions/CreateReviewRequest"
       responses:
@@ -1635,7 +1634,7 @@ definitions:
   ModifyCohortStatusRequest:
     type: object
     required:
-      -status
+      - status
     properties:
       status:
         $ref: "#/definitions/CohortStatus"
