@@ -8,7 +8,6 @@ import {CohortReviewService, CohortStatus} from 'generated';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
-const CDR_VERSION = 1;
 
 const subjects$ = Observable.of([
   {id: 1, status: CohortStatus.INCLUDED},

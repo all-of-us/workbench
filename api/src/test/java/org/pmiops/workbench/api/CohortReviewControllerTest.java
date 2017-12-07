@@ -15,6 +15,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -56,6 +57,9 @@ public class CohortReviewControllerTest {
 
     @Mock
     ParticipantCounter participantCounter;
+
+    @Mock
+    WorkspaceDao workspaceDao;
 
     @InjectMocks
     CohortReviewController reviewController;

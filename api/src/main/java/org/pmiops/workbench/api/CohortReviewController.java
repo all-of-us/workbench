@@ -9,11 +9,9 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
@@ -50,6 +48,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private BigQueryService bigQueryService;
     private ParticipantCounter participantCounter;
+    private WorkspaceDao workspaceDao;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -121,7 +120,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     @Override
     public ResponseEntity<org.pmiops.workbench.model.CohortReview> createCohortReview(String workspaceNamespace,
-                                                                                      String workspaceName,
+                                                                                      String workspaceId,
                                                                                       Long cohortId,
                                                                                       Long cdrVersionId,
                                                                                       CreateReviewRequest request) {
@@ -139,13 +138,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         Cohort cohort = cohortDao.findOne(cohortId);
-        CohortDefinition definition = cohort.getCriteria();
+        String definition = cohort.getCriteria();
         Long wsId = cohort.getWorkspaceId();
 
-        if (wsId != getWorkspaceId(workspaceNamespace, workspaceName)) {
+        if (wsId != getWorkspaceId(workspaceNamespace, workspaceId)) {
             throw new BadRequestException("Cohort " + cohortId + " is not in workspace "
                     + ", workspaceNamespace: " + workspaceNamespace
-                    + ", workspaceId: " + workspaceName);
+                    + ", workspaceId: " + workspaceId);
         }
 
         if (definition == null) {
@@ -154,7 +153,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     + ", workspaceNamespace: " + workspaceNamespace
                     + ", workspaceId: " + workspaceId);
         }
-        SearchRequest searchRequest = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+
+        SearchRequest searchRequest = new Gson().fromJson(definition, SearchRequest.class);
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
                 participantCounter.buildParticipantIdQuery(searchRequest, request.getSize())));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -225,7 +225,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         if (cohortReview == null) {
 
             Cohort cohort = cohortDao.findOne(cohortId);
-            CohortDefinition definition = cohort.getCriteria();
+            String definition = cohort.getCriteria();
             Long wsId = cohort.getWorkspaceId();
 
             if (wsId != getWorkspaceId(workspaceNamespace, workspaceId)) {
@@ -240,7 +240,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                         + ", workspaceNamespace: " + workspaceNamespace
                         + ", workspaceId: " + workspaceId);
             }
-            SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+
+            SearchRequest request = new Gson().fromJson(definition, SearchRequest.class);
             QueryResult result = bigQueryService.executeQuery(
                     bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
             Map<String, Integer> rm = bigQueryService.getResultMapper(result);
