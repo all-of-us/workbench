@@ -755,7 +755,7 @@ paths:
         - in: body
           name: request
           required: true
-          description: size of the participant cohort statuses sample
+          description: cohort review creation request body
           schema:
             $ref: "#/definitions/CreateReviewRequest"
       responses:
