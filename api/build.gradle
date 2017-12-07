@@ -147,6 +147,7 @@ sourceSets {
   }
 }
 
+generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
 ideaModule.dependsOn generateFireCloudClient
