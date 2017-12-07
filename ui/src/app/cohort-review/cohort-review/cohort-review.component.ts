@@ -1,12 +1,13 @@
 /* TODO(jms) re-enable linting before merge to master */
 /* tslint:disable */
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {CohortReviewService, CohortStatus} from 'generated';
 
 const pixel = (n: number) => `${n}px`;
+const ONE_REM = 24;  // value in pixels
 const CDR_VERSION = 1;
 
 const subjects$ = Observable.of([
@@ -44,9 +45,8 @@ export class CohortReviewComponent implements OnInit {
   get subjectNav() { return this._subjectNav.nativeElement; }
 
   constructor(
-    private cohortApi: CohortReviewService,
+    private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
-    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -69,7 +69,7 @@ export class CohortReviewComponent implements OnInit {
 
   _updateWrapperDimensions() {
     const {top} = this.wrapper.getBoundingClientRect();
-    this.wrapper.style.minHeight = pixel(window.innerHeight - top);
+    this.wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
   statusText(stat: CohortStatus): string {
