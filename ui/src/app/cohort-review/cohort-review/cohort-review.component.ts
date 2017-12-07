@@ -1,12 +1,13 @@
+/* TODO(jms) re-enable linting before merge to master */
+/* tslint:disable */
 import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {CohortReviewService, CohortStatus} from 'generated';
 
-const CDR_VERSION = 1;
-
 const pixel = (n: number) => `${n}px`;
+const CDR_VERSION = 1;
 
 const subjects$ = Observable.of([
   {id: 1, status: CohortStatus.INCLUDED},
@@ -29,15 +30,24 @@ const subjects$ = Observable.of([
 })
 export class CohortReviewComponent implements OnInit {
   private subjects$ = subjects$;
+
   private open = false;
+  private loading = false;
 
   @ViewChild('wrapper') _wrapper;
   @ViewChild('subjectNav') _subjectNav;
   @ViewChild('openNav') _openNav;
+  @ViewChild('createCohortModal') createCohortModal;
 
   get wrapper() { return this._wrapper.nativeElement; }
   get openNav() { return this._openNav.nativeElement; }
   get subjectNav() { return this._subjectNav.nativeElement; }
+
+  constructor(
+    private cohortApi: CohortReviewService,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this._updateWrapperDimensions();

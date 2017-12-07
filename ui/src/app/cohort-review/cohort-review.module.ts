@@ -9,8 +9,9 @@ import {SubjectDetailComponent} from './subject-detail/subject-detail.component'
 
 import {CohortReviewService} from 'generated';
 
+
 const routes = [{
-  path: 'cohorts/:cohortID/review',
+  path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Subjects'},
   children: [

@@ -1,13 +1,12 @@
-<div
-  #wrapper
-  class="cohort-review-wrapper">
+<div #wrapper class="cohort-review-wrapper">
+  <div *ngIf="loading" class="spinner">Loading...</div>
 
+  <!-- Main subject navigation sidebar -->
   <div #subjectNav
     class="subject-nav"
     [class.subject-nav-open]="open">
     <a class="closebtn" (click)="open = false">&times;</a>
-    <a
-      (click)="open = false"
+    <a (click)="open = false"
       routerLink="overview"
       routerLinkActive="active">
       Overview
@@ -32,5 +31,13 @@
     <router-outlet></router-outlet>
   </div>
 
+  <!-- Sidebar is active overlay -->
   <div class="blanket" [class.blanket-active]="open"></div>
+
+  <!-- Cohort creation modal -->
+  <clr-modal
+    #createCohortModal
+    [clrModalStaticBackdrop]="false"
+    [clrModalSize]="'lg'">
+  </clr-modal>
 </div>

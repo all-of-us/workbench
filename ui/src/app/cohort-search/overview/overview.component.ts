@@ -20,16 +20,12 @@ export class OverviewComponent {
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
 
-  /* tslint:disable-next-line:no-unused-variable */
-  private open = false;
-
   private cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl()
   });
 
   constructor(
-    /* tslint:disable-next-line:no-unused-variable */
     private actions: CohortSearchActions,
     private cohortApi: CohortsService,
     private route: ActivatedRoute,
