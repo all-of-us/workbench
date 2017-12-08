@@ -5,7 +5,7 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="biopete" id="changelog-11-concept-count-update">
+  <changeSet author="biopete" id="changelog-15-concept-count-update">
 
     <sql>
       update cdr.concept c join cdr.achilles_results r on r.stratum_1 = c.concept_id and r.analysis_id = 3000 set c.count_value = r.count_value;
@@ -16,16 +16,5 @@
     </sql>
 
   </changeSet>
-  <changeSet author="biopete" id="changelog-11.1-concept-relationship indexes">
 
-    <createIndex tableName="concept_relationship" indexName="idx-concept-1">
-      <column name="concept_id_1" type="bigint"></column>
-    </createIndex>
-    <createIndex tableName="concept_relationship" indexName="idx-concept-1" schemaName="cdr">
-      <column name="concept_id_2" type="bigint"></column>
-    </createIndex>
-    <createIndex tableName="concept_relationship" indexName="idx-concept-1" schemaName="cdr">
-      <column name="relationship_id" type="varchar(20)"></column>
-    </createIndex>
-  </changeSet>
 </databaseChangeLog>

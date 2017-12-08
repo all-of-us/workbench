@@ -1,6 +1,9 @@
 package org.pmiops.workbench.cdr.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
+import java.util.Objects;
 
 
 @Entity
@@ -152,49 +155,26 @@ public class Concept {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Concept concept = (Concept) o;
-
-        if (conceptId != concept.conceptId) return false;
-        if (countValue != concept.countValue) return false;
-        if (Float.compare(concept.prevalence, prevalence) != 0) return false;
-        if (conceptName != null ? !conceptName.equals(concept.conceptName) : concept.conceptName != null) return false;
-        if (standardConcept != null ? !standardConcept.equals(concept.standardConcept) : concept.standardConcept != null)
-            return false;
-        if (conceptCode != null ? !conceptCode.equals(concept.conceptCode) : concept.conceptCode != null) return false;
-        if (conceptClassId != null ? !conceptClassId.equals(concept.conceptClassId) : concept.conceptClassId != null)
-            return false;
-        if (vocabularyId != null ? !vocabularyId.equals(concept.vocabularyId) : concept.vocabularyId != null)
-            return false;
-        return domainId != null ? domainId.equals(concept.domainId) : concept.domainId == null;
+        return conceptId == concept.conceptId &&
+                countValue == concept.countValue &&
+                Float.compare(concept.prevalence, prevalence) == 0 &&
+                Objects.equals(conceptName, concept.conceptName) &&
+                Objects.equals(standardConcept, concept.standardConcept) &&
+                Objects.equals(conceptCode, concept.conceptCode) &&
+                Objects.equals(conceptClassId, concept.conceptClassId) &&
+                Objects.equals(vocabularyId, concept.vocabularyId) &&
+                Objects.equals(domainId, concept.domainId);
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (conceptId ^ (conceptId >>> 32));
-        result = 31 * result + (conceptName != null ? conceptName.hashCode() : 0);
-        result = 31 * result + (standardConcept != null ? standardConcept.hashCode() : 0);
-        result = 31 * result + (conceptCode != null ? conceptCode.hashCode() : 0);
-        result = 31 * result + (conceptClassId != null ? conceptClassId.hashCode() : 0);
-        result = 31 * result + (vocabularyId != null ? vocabularyId.hashCode() : 0);
-        result = 31 * result + (domainId != null ? domainId.hashCode() : 0);
-        result = 31 * result + (int) (countValue ^ (countValue >>> 32));
-        result = 31 * result + (prevalence != +0.0f ? Float.floatToIntBits(prevalence) : 0);
-        return result;
+        return Objects.hash(conceptId, conceptName, standardConcept, conceptCode, conceptClassId, vocabularyId, domainId, countValue, prevalence);
     }
 
     @Override
     public String toString() {
-        return "Concept{" +
-                "conceptId=" + conceptId +
-                ", conceptName='" + conceptName + '\'' +
-                ", standardConcept='" + standardConcept + '\'' +
-                ", conceptCode='" + conceptCode + '\'' +
-                ", conceptClassId='" + conceptClassId + '\'' +
-                ", vocabularyId='" + vocabularyId + '\'' +
-                ", domainId='" + domainId + '\'' +
-                ", countValue=" + countValue +
-                ", prevalence=" + prevalence +
-                '}';
+        return  ToStringBuilder.reflectionToString(this);
+
     }
 }

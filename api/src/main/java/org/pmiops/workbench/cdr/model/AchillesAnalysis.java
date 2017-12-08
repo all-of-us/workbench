@@ -1,9 +1,12 @@
 package org.pmiops.workbench.cdr.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 
 
 @Entity
@@ -133,6 +136,29 @@ public class AchillesAnalysis {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AchillesAnalysis that = (AchillesAnalysis) o;
+        return Objects.equals(analysisId, that.analysisId) &&
+                Objects.equals(analysisName, that.analysisName) &&
+                Objects.equals(stratum1Name, that.stratum1Name) &&
+                Objects.equals(stratum2Name, that.stratum2Name) &&
+                Objects.equals(stratum3Name, that.stratum3Name) &&
+                Objects.equals(stratum4Name, that.stratum4Name) &&
+                Objects.equals(stratum5Name, that.stratum5Name) &&
+                Objects.equals(chartType, that.chartType) &&
+                Objects.equals(dataType, that.dataType);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(analysisId, analysisName, stratum1Name, stratum2Name, stratum3Name, stratum4Name, stratum5Name, chartType, dataType);
+    }
 
+    @Override
+    public String toString() {
+        return  ToStringBuilder.reflectionToString(this);
+    }
 }

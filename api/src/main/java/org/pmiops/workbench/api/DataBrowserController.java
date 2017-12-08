@@ -253,7 +253,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             return ResponseEntity.ok(r);
         }
     }
-
+    /* getConceptCount(conceptId)
+     * Returns
+     */
     @Override
     public ResponseEntity<AnalysisResultListResponse> getConceptCount(String conceptId) {
         long aid = 3000;

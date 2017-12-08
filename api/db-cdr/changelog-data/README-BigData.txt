@@ -2,6 +2,7 @@
 # to fill the cdr.concept and cdr.concept_relationship tables  for data browser follow these steps :
 # Note , you don’t need do this if you are not running the data browser in the ui or using the api
 
+# Todo  -- finalize big data imports solution for cdr releases outside of liquibase, ie automate this as part of cdr builds and  test
 1. download  concept.csv and concept_relationship.csv to your local computer
 
 https://storage.googleapis.com/all-of-us-ehr-dev-peter-speltz/concept.csv

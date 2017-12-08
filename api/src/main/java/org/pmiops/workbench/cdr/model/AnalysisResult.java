@@ -1,7 +1,10 @@
 package org.pmiops.workbench.cdr.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 
 @Entity
@@ -183,58 +186,29 @@ public class AnalysisResult  {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         AnalysisResult that = (AnalysisResult) o;
-
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (analysisId != null ? !analysisId.equals(that.analysisId) : that.analysisId != null) return false;
-        if (stratum1 != null ? !stratum1.equals(that.stratum1) : that.stratum1 != null) return false;
-        if (stratum1Name != null ? !stratum1Name.equals(that.stratum1Name) : that.stratum1Name != null) return false;
-        if (stratum2 != null ? !stratum2.equals(that.stratum2) : that.stratum2 != null) return false;
-        if (stratum2Name != null ? !stratum2Name.equals(that.stratum2Name) : that.stratum2Name != null) return false;
-        if (stratum3 != null ? !stratum3.equals(that.stratum3) : that.stratum3 != null) return false;
-        if (stratum3Name != null ? !stratum3Name.equals(that.stratum3Name) : that.stratum3Name != null) return false;
-        if (stratum4 != null ? !stratum4.equals(that.stratum4) : that.stratum4 != null) return false;
-        if (stratum4Name != null ? !stratum4Name.equals(that.stratum4Name) : that.stratum4Name != null) return false;
-        if (stratum5 != null ? !stratum5.equals(that.stratum5) : that.stratum5 != null) return false;
-        if (stratum5Name != null ? !stratum5Name.equals(that.stratum5Name) : that.stratum5Name != null) return false;
-        return countValue != null ? countValue.equals(that.countValue) : that.countValue == null;
+        return
+                Objects.equals(analysisId, that.analysisId) &&
+                Objects.equals(stratum1, that.stratum1) &&
+                Objects.equals(stratum1Name, that.stratum1Name) &&
+                Objects.equals(stratum2, that.stratum2) &&
+                Objects.equals(stratum2Name, that.stratum2Name) &&
+                Objects.equals(stratum3, that.stratum3) &&
+                Objects.equals(stratum3Name, that.stratum3Name) &&
+                Objects.equals(stratum4, that.stratum4) &&
+                Objects.equals(stratum4Name, that.stratum4Name) &&
+                Objects.equals(stratum5, that.stratum5) &&
+                Objects.equals(stratum5Name, that.stratum5Name) &&
+                Objects.equals(countValue, that.countValue);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (analysisId != null ? analysisId.hashCode() : 0);
-        result = 31 * result + (stratum1 != null ? stratum1.hashCode() : 0);
-        result = 31 * result + (stratum1Name != null ? stratum1Name.hashCode() : 0);
-        result = 31 * result + (stratum2 != null ? stratum2.hashCode() : 0);
-        result = 31 * result + (stratum2Name != null ? stratum2Name.hashCode() : 0);
-        result = 31 * result + (stratum3 != null ? stratum3.hashCode() : 0);
-        result = 31 * result + (stratum3Name != null ? stratum3Name.hashCode() : 0);
-        result = 31 * result + (stratum4 != null ? stratum4.hashCode() : 0);
-        result = 31 * result + (stratum4Name != null ? stratum4Name.hashCode() : 0);
-        result = 31 * result + (stratum5 != null ? stratum5.hashCode() : 0);
-        result = 31 * result + (stratum5Name != null ? stratum5Name.hashCode() : 0);
-        result = 31 * result + (countValue != null ? countValue.hashCode() : 0);
-        return result;
+        return Objects.hash(id, analysisId, stratum1, stratum1Name, stratum2, stratum2Name, stratum3, stratum3Name, stratum4, stratum4Name, stratum5, stratum5Name, countValue);
     }
 
     @Override
     public String toString() {
-        return "AnalysisResult{" +
-                "id=" + id +
-                ", analysisId=" + analysisId +
-                ", stratum1='" + stratum1 + '\'' +
-                ", stratum1Name='" + stratum1Name + '\'' +
-                ", stratum2='" + stratum2 + '\'' +
-                ", stratum2Name='" + stratum2Name + '\'' +
-                ", stratum3='" + stratum3 + '\'' +
-                ", stratum3Name='" + stratum3Name + '\'' +
-                ", stratum4='" + stratum4 + '\'' +
-                ", stratum4Name='" + stratum4Name + '\'' +
-                ", stratum5='" + stratum5 + '\'' +
-                ", stratum5Name='" + stratum5Name + '\'' +
-                ", countValue=" + countValue +
-                '}';
+        return  ToStringBuilder.reflectionToString(this);
     }
 }

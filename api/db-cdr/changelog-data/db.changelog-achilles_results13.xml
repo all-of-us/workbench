@@ -26,8 +26,7 @@
   <changeSet author="biopete" id="changelog-13.1 fill achilles_results_concept">
     <sql
             splitStatements="true"
-            stripComments="true">insert into achilles_results_concept
-
+            stripComments="true">INSERT INTO achilles_results_concept
             SELECT
             `a`.id AS `id`,
             `a`.`analysis_id` AS `analysis_id`,

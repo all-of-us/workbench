@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestCdrJpaConfig.class})
 @ActiveProfiles("test-cdr")
-public class DataBrowserDaoTest {
+public class AchillesAnalysisDaoTest {
 
     @Autowired
     AchillesAnalysisDao dao;
@@ -45,15 +45,15 @@ public class DataBrowserDaoTest {
 
     @Test
     public void findAllAnalyses() throws Exception {
+        /* Todo write more tests */
         final List<AchillesAnalysis> list = dao.findAllByAnalysisIdIsGreaterThanEqual((long) 0);
-
         assert(obj1.getAnalysisId() == 1);
         AchillesAnalysis item = list.get(0);
         assert(item.getAnalysisId() == obj1.getAnalysisId());
 
     }
 
-    private AchillesAnalysis createAnalysis(long aid, String name) {
+    private AchillesAnalysis createAnalysis(int aid, String name) {
         return new AchillesAnalysis()
                 .analysisId(aid)
                 .analysisName(name)

@@ -1,6 +1,9 @@
 package org.pmiops.workbench.cdr.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import javax.persistence.*;
+import java.util.Objects;
 
 
 @Entity
@@ -87,41 +90,29 @@ public class DbDomain {
         return this;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         DbDomain dbDomain = (DbDomain) o;
-
-        if (domainId != null ? !domainId.equals(dbDomain.domainId) : dbDomain.domainId != null) return false;
-        if (domainDisplay != null ? !domainDisplay.equals(dbDomain.domainDisplay) : dbDomain.domainDisplay != null)
-            return false;
-        if (domainDesc != null ? !domainDesc.equals(dbDomain.domainDesc) : dbDomain.domainDesc != null) return false;
-        if (domainParent != null ? !domainParent.equals(dbDomain.domainParent) : dbDomain.domainParent != null)
-            return false;
-        return domainRoute != null ? domainRoute.equals(dbDomain.domainRoute) : dbDomain.domainRoute == null;
+        return Objects.equals(domainId, dbDomain.domainId) &&
+                Objects.equals(domainDisplay, dbDomain.domainDisplay) &&
+                Objects.equals(domainDesc, dbDomain.domainDesc) &&
+                Objects.equals(domainParent, dbDomain.domainParent) &&
+                Objects.equals(domainRoute, dbDomain.domainRoute);
     }
 
     @Override
     public int hashCode() {
-        int result = domainId != null ? domainId.hashCode() : 0;
-        result = 31 * result + (domainDisplay != null ? domainDisplay.hashCode() : 0);
-        result = 31 * result + (domainDesc != null ? domainDesc.hashCode() : 0);
-        result = 31 * result + (domainParent != null ? domainParent.hashCode() : 0);
-        result = 31 * result + (domainRoute != null ? domainRoute.hashCode() : 0);
-        return result;
+        return Objects.hash(domainId, domainDisplay, domainDesc, domainParent, domainRoute);
     }
 
     @Override
     public String toString() {
-        return "DbDomain{" +
-                "domainId='" + domainId + '\'' +
-                ", domainDisplay='" + domainDisplay + '\'' +
-                ", domainDesc='" + domainDesc + '\'' +
-                ", domainParent='" + domainParent + '\'' +
-                ", domainRoute='" + domainRoute + '\'' +
-                '}';
+        return  ToStringBuilder.reflectionToString(this);
+
     }
+
+
+
 }
