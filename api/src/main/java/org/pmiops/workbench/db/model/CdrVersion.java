@@ -8,6 +8,8 @@ import javax.persistence.Table;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.model.DataAccessLevel;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "cdr_version")
 public class CdrVersion {
@@ -18,7 +20,7 @@ public class CdrVersion {
   private short releaseNumber;
   private String bigqueryProject;
   private String bigqueryDataset;
-  private DateTime creationTime;
+  private Timestamp creationTime;
   private int numParticipants;
 
   @Id
@@ -78,11 +80,11 @@ public class CdrVersion {
   }
 
   @Column(name = "creation_time")
-  public DateTime getCreationTime() {
+  public Timestamp getCreationTime() {
     return creationTime;
   }
 
-  public void setCreationTime(DateTime creationTime) {
+  public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
 
