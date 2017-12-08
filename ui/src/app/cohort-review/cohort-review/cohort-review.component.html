@@ -1,31 +1,64 @@
-<clr-main-container>
-  <div class="content-container">
-    <div class="content-area">
-      <div class="cohort-review-main">
-        <div *ngIf="loading" class="spinner">
-          Loading...
-        </div>
+<div #wrapper class="cohort-review-wrapper">
+  <div *ngIf="loading" class="spinner">Loading...</div>
 
-        <!-- Main content area for the Cohort Review Sub-application -->
-        <router-outlet></router-outlet>
+  <!-- Main subject navigation sidebar -->
+  <div #subjectNav
+    class="subject-nav"
+    [class.subject-nav-open]="open">
+    <a class="closebtn" (click)="open = false">&times;</a>
+    <a (click)="open = false"
+      routerLink="overview"
+      routerLinkActive="active">
+      Overview
+    </a>
+    <hr />
+    <a *ngFor="let subject of review.participantCohortStatuses"
+      (click)="open = false"
+      [routerLink]="[subject.participantId]"
+      routerLinkActive="active">
+      {{ subject.participantId}}
+      <span class="label"
+        [ngClass]="statusClass(subject.status)">
+        {{ statusText(subject.status) }}
+      </span>
+    </a>
+  </div>
 
-      </div>
+  <!-- Main content area for the Cohort Review Sub-application -->
+  <div class="cohort-review-main"
+    [style.margin-left]="open ? '300px' : 0">
+    <button #openNav (click)="open = true">Open</button>
+    <router-outlet></router-outlet>
+  </div>
+
+  <!-- Sidebar is active overlay -->
+  <div class="blanket" [class.blanket-active]="open"></div>
+
+  <!-- Cohort creation modal -->
+  <clr-modal
+    #createCohortModal
+    [clrModalStaticBackdrop]="false"
+    [clrModalSize]="'lg'">
+    <h3 class="modal-title">Generate Review Set</h3>
+
+    <div class="modal-body">
+      Hello
     </div>
 
-    <clr-vertical-nav
-      [clrVerticalNavCollapsible]="true"
-      [(clrVerticalNavCollapsed)]="collapsed">
-      <a clrVerticalNavLink
-        routerLink="overview"
-        routerLinkActive="active">
-        Overview
-      </a>
-      <a *ngFor="let subject of (subjects$ | async)"
-        clrVerticalNavLink
-        [routerLink]="[subject.id]"
-        routerLinkActive="active">
-        {{ subject.id}}
-      </a>
-    </clr-vertical-nav>
-  </div>
-</clr-main-container>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelReview()">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="createReview()">
+        Save Review Set
+      </button>
+    </div>
+  </clr-modal>
+</div>
