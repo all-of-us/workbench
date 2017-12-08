@@ -19,8 +19,6 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-
-
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
 
@@ -36,6 +34,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Autowired
     private DbDomainDao dbDomainDao;
+
+    public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
+    public static final long COUNT_ANALYSIS_ID = 3000;
+    public static final long GENDER_ANALYSIS_ID = 3101;
+    public static final long AGE_ANALYSIS_ID = 3102;
+
+
 
     private static final Logger log = Logger.getLogger(DataBrowserController.class.getName());
 
@@ -173,49 +178,44 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      * This method gets concepts with maps to relationship in concept relationship table
      *
      * @param conceptId
-     * @param conceptNum
      * @return
      */
     @Override
-    public ResponseEntity<ConceptListResponse> getConceptsMapsTo(
-            Long conceptId,
-            Long conceptNum) {
-
-
-        List<Concept> conceptList;
-
-        // If Concept num is 2 , children
-        if (conceptNum == 2 ) {
-            conceptList = conceptDao.findConceptsMapsToChildren(conceptId);
-        }
-        else {
-            conceptList = conceptDao.findConceptsMapsToParents(conceptId);
-        }
-
+    public ResponseEntity<ConceptListResponse> getChildConcepts(Long conceptId) {
+        List<Concept> conceptList = conceptDao.findConceptsMapsToChildren(conceptId);
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
         return ResponseEntity.ok(resp);
     }
+
+    /**
+     * This method gets concepts with maps to relationship in concept relationship table
+     *
+     * @param conceptId
+     * @return
+     */
+    @Override
+    public ResponseEntity<ConceptListResponse> getParentConcepts(Long conceptId) {
+        List<Concept> conceptList = conceptDao.findConceptsMapsToParents(conceptId);
+        ConceptListResponse resp = new ConceptListResponse();
+        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
     /**
      * This method searches concepts
      *
      * @param analysisId
      * @param stratum1
      * @param stratum2
-     * @param stratum3
-     * @param stratum4
-     * @param stratum5
      * @return
      */
     @Override
     public ResponseEntity<AnalysisResultListResponse> getAnalysisResults(
             Long analysisId,
             String stratum1,
-            String stratum2,
-            String stratum3,
-            String stratum4,
-            String stratum5) {
+            String stratum2
+           ) {
 
         final List<AnalysisResult> resultList;
 
@@ -238,55 +238,39 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.AnalysisResult> getParticipantCount() {
-        long aid =  1; // partipant count analysis id
-        final List<AnalysisResult> resultList  =  analysisResultDao.findAnalysisResultsByAnalysisId(aid);
-        AnalysisResultListResponse resp = new AnalysisResultListResponse();
-        resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS_RESULT).collect(Collectors.toList()));
-        if ( resp.getItems().size() > 0 ) {
-            return ResponseEntity.ok(resp.getItems().get(0));
-        }
-        else {
-            // Todo handle error better
-            org.pmiops.workbench.model.AnalysisResult r = new org.pmiops.workbench.model.AnalysisResult();
-            r.setAnalysisId( (long) 1);
-            r.setCountValue((long) 0);
-            return ResponseEntity.ok(r);
-        }
+        AnalysisResult result  =  analysisResultDao.findAnalysisResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
+        return ResponseEntity.ok(TO_CLIENT_ANALYSIS_RESULT.apply(result));
     }
     /* getConceptCount(conceptId)
      * Returns
      */
     @Override
     public ResponseEntity<AnalysisResultListResponse> getConceptCount(String conceptId) {
-        long aid = 3000;
-        return this.getAnalysisResults(aid, conceptId, null, null , null, null);
+        return this.getAnalysisResults(COUNT_ANALYSIS_ID, conceptId, null);
     }
 
     @Override
     public ResponseEntity<AnalysisResultListResponse> getConceptCountByGender(String conceptId) {
-        long aid = 3101;
-        return this.getAnalysisResults(aid, conceptId, null, null,null,null);
+        return this.getAnalysisResults(GENDER_ANALYSIS_ID, conceptId, null);
     }
 
     @Override
     public ResponseEntity<AnalysisResultListResponse> getConceptCountByAge(String conceptId) {
-        long aid = 3102;
-        return this.getAnalysisResults(aid, conceptId, null, null , null, null);
+        return this.getAnalysisResults(AGE_ANALYSIS_ID, conceptId, null);
     }
 
     @Override
     public ResponseEntity<AnalysisListResponse> getAnalyses() {
-        long num = 1;
-        final List<AchillesAnalysis> resultList = achillesAnalysisDao.findAllByAnalysisIdIsGreaterThanEqual((Long)num);
+
+        List<AchillesAnalysis> resultList = achillesAnalysisDao.findAll();
         AnalysisListResponse resp = new AnalysisListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
-
     }
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {
-        final List<DbDomain> resultList = dbDomainDao.findAllByDomainIdIsNotNull();
+        List<DbDomain> resultList = dbDomainDao.findAll();
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

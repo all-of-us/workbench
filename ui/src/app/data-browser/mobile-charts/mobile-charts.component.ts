@@ -53,11 +53,11 @@ export class MobileChartsComponent implements OnInit {
 
         // Get any maps to parents and children and add them to the concept
         if (this.concept.vocabulary_id !== 'PPI') {
-          this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
+          this.achillesService.getChildConcepts(this.concept.concept_id)
             .subscribe(data => {
               this.concept.children = data;
             });
-          this.achillesService.getConceptMapsTo(this.concept.concept_id, 1)
+          this.achillesService.getParentConcepts(this.concept.concept_id)
             .subscribe(data => {
               this.concept.parents = data;
             });

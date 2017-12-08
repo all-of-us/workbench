@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
-
-    List<DbDomain> findAllByDomainIdIsNotNull();
+    // TODO -- maybe add order by
+    List<DbDomain> findAll();
 }

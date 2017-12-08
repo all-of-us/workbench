@@ -52,7 +52,7 @@ export class ConceptDrawerComponent implements OnChanges {
     this.randNum = Math.random();
     // Get any maps to parents and children and add them to the concept
     if (this.concept.vocabulary_id !== 'PPI') {
-      this.achillesService.getConceptMapsTo(this.concept.concept_id, 2)
+      this.achillesService.getChildConcepts(this.concept.concept_id)
         .subscribe(data => {
           this.concept.children = data;
           // Initialize first graph to show.
@@ -70,7 +70,7 @@ export class ConceptDrawerComponent implements OnChanges {
             this.analyses[0].showgraph = true;
           }
         });
-      this.achillesService.getConceptMapsTo(this.concept.concept_id, 1)
+      this.achillesService.getParentConcepts(this.concept.concept_id)
         .subscribe(data => {
           this.concept.parents = data;
         });

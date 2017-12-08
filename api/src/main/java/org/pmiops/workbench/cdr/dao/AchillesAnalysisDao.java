@@ -5,8 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface AchillesAnalysisDao extends CrudRepository<AchillesAnalysis, Long> {
-
-    List<AchillesAnalysis> findAchillesAnalysesByAnalysisId(Long analysisId);
-    List<AchillesAnalysis> findAllByAnalysisIdIsGreaterThanEqual(Long num);
-
+    List<AchillesAnalysis> findAll();
 }

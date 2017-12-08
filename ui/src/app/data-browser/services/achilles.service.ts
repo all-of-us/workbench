@@ -44,7 +44,7 @@ export class AchillesService {
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
 
       return this.api.getAnalysisResults(a.analysis_id, a.stratum[0], a.stratum[1],
-          a.stratum[2], a.stratum[3], a.stratum[4], a.stratum[5])
+          a.stratum[2])
           .toPromise()
           .then(response => {
             const data = response.items;
@@ -180,50 +180,15 @@ export class AchillesService {
 
   logSearchParams(args) {
     return;
-    /*
-    let url = this.baseUrl + "log/search"
-    //URLSearchParams needed to make a post request
-    let urlSearchParams = new URLSearchParams();
-
-    for (let v of Object.keys(args.standard_vocabs)) {
-      if (args.standard_vocabs[v] == true) {
-        urlSearchParams.append('vocabulary[]', v);
-      }
-    }
-    for (let v of Object.keys(args.source_vocabs)) {
-      if (args.source_vocabs[v] == true) {
-        urlSearchParams.append('vocabulary[]', v);
-      }
-    }
-    for (let d of Object.keys(args.domains)) {
-      if (args.domains[d] == true) {
-        urlSearchParams.append('domain[]', d);
-      }
-    }
-    urlSearchParams.append('search', args.search);
-    urlSearchParams.append('advanced', args.advanced);
-    return this.http.post(url, urlSearchParams).subscribe();
-    */
-
   }
   logClickedConcept(concept, params) {
     return;
-    /*
-    let url = this.baseUrl + "log/concept_click";
-    let urlSearchParams = new URLSearchParams();
-    urlSearchParams.append('concept_id', concept.concept_id);
-    urlSearchParams.append('search', params.search);
-    urlSearchParams.append('toggleTree', params.toggleTree);
-    urlSearchParams.append('toggleAdv', params.toggleTree);
-    return this.http.post(url, urlSearchParams).subscribe();
-    */
   }
-    // pass the concept obj in an array of analyses and the analyses with only that concept obj
-    // or
+
+  // pass the concept obj in an array of analyses and the analyses with only that concept obj
+  // or
   // pass an array of analyses with the stratum and it will run ( no concept Obj )
   runAnalysis(analyses: any[], concept?: any) {
-    //
-    console.log(analyses);
     for (let i = 0; i < analyses.length; i++) {
       // getAnalysisResults to get results
 
@@ -239,12 +204,10 @@ export class AchillesService {
           analyses[i].status = 'Done';
         }); // end of .then
     } // end of for loop
-
   }
 
   cloneAnalysis(analysis: IAnalysis) {
     const aclass = analysis.constructor.name;
-    //
     let a = null;
     if (aclass === 'Analysis') {
       a =  Analysis.analysisClone(analysis);
@@ -266,22 +229,25 @@ export class AchillesService {
     return a;
   }
 
-  // Pass concept_id and concept_num = 2
-  // and This will Get concepts that map to the concept arg
-    // (Children of the concept ) : concept_num = 2
-  // Pass concept_id and  concept_num = 1 if you want the parent(s) of the concept
-  // Example -- to get the children of snomed concept_id , pass concept_num=2
-  getConceptMapsTo(concept_id: number, concept_num: number) {
-
-    return this.api.getConceptsMapsTo(concept_id, concept_num)
+  // Get concept children for the concept
+  getChildConcepts(concept_id: number) {
+    return this.api.getChildConcepts(concept_id)
       .map(response => {
         const data = response.items;
         return data.map(item => {
           return new Concept(item);
         });
-      }
-      );
-
+      });
+  }
+  // Get concept parents for the concept
+  getParentConcepts(concept_id: number) {
+    return this.api.getParentConcepts(concept_id)
+      .map(response => {
+        const data = response.items;
+        return data.map(item => {
+          return new Concept(item);
+        });
+      });
   }
 
   /* todo

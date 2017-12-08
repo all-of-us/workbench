@@ -18,6 +18,6 @@
   <include file="changelog-schema/db.changelog-8-achilles-indexes.xml"/>
   <include file="changelog-schema/db.changelog-9-concept-count-cols.xml"/>
   <include file="changelog-schema/db.changelog-10-concept-count-index.xml"/>
-
+  <include file="changelog-schema/db.changelog-11-drop-achilles-views.xml"/>
 
 </databaseChangeLog>

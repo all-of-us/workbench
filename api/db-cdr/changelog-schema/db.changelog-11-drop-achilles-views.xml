@@ -5,32 +5,15 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="biopete" id="changelog-11-concept-count-index">
+  <changeSet author="biopete" id="changelog-11-drop achilles_results_view">
 
-    <createIndex tableName="concept" schemaName="cdr" indexName="idx-count-value">
-      <column name="count_value" defaultValue="0" type="bigint(20)"/>
-    </createIndex>
+    <dropView viewName="achilles_results_view" schemaName="cdr"/>
 
   </changeSet>
 
-  <changeSet author="biopete" id="changelog-11.1-concept-relationship indexes">
-
-    <createIndex tableName="concept_relationship" indexName="idx-concept-11">
-      <column name="concept_id_1" type="bigint"></column>
-    </createIndex>
+  <changeSet author="biopete" id="changelog-11.1 drop achilles_results_dist_view">
+    <dropView viewName="achilles_results_dist_view" schemaName="cdr"/>
   </changeSet>
-
-  <changeSet author="biopete" id="concept rel concept 2 index" >
-    <createIndex tableName="concept_relationship" indexName="idx-concept-21" schemaName="cdr">
-      <column name="concept_id_2" type="bigint"></column>
-    </createIndex>
-  </changeSet>
-  <changeSet id="concept rel rel id index" author="biopete">
-    <createIndex tableName="concept_relationship" indexName="idx-relationship-id1" schemaName="cdr">
-      <column name="relationship_id" type="varchar(20)"></column>
-    </createIndex>
-  </changeSet>
-
 
 </databaseChangeLog>
-c
+

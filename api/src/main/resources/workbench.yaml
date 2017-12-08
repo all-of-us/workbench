@@ -973,22 +973,6 @@ paths:
           type: string
           required: false
           description: stratum 2
-        - in: query
-          name: stratum_3
-          type: string
-          required: false
-          description: stratum 3
-        - in: query
-          name: stratum_4
-          type: string
-          required: false
-          description: stratum 4
-        - in: query
-          name: stratum_5
-          type: string
-          required: false
-          description: stratum 5
-
       responses:
         "200":
           description: A collection of analysis results from achilles_results_view
@@ -1003,7 +987,7 @@ paths:
 
       description: Gets list of analysis definitions
       operationId: "getAnalyses"
-      parameters:
+      parameters: []
       responses:
         "200":
           description: A collection of analysis definitions
@@ -1018,7 +1002,7 @@ paths:
 
       description: Gets results for an analysis id and stratum
       operationId: "getParticipantCount"
-      parameters:
+      parameters: []
       responses:
         "200":
           description: A collection of analysis results from achilles_results_view
@@ -1061,7 +1045,7 @@ paths:
          description: concept id to get count for
       responses:
         "200":
-          description: A collection with count  for concept for by gender
+          description: A collection with count for concept by gender
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
@@ -1081,7 +1065,7 @@ paths:
          description: concept id to get count for
       responses:
         "200":
-          description: A collection with count  for concept for by age decile
+          description: A collection with count for concept by age decile
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
@@ -1093,21 +1077,21 @@ paths:
 
       description: Gets list of analysis definitions
       operationId: "getDbDomains"
-      parameters:
+      parameters: []
       responses:
         "200":
           description: A collection of databrowser domains
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
-  /api/v1/databrowser/concept-maps-to:
+  /api/v1/databrowser/child-concepts:
     get:
       security: []
       tags:
         - dataBrowser
 
-      description: Gets list of analysis definitions
-      operationId: "getConceptsMapsTo"
+      description: Get children of the given concept
+      operationId: "getChildConcepts"
       parameters:
         - in: query
           name: concept_id
@@ -1115,17 +1099,32 @@ paths:
           format: int64
           required: true
           description: concept id to get maps to concepts
-        - in: query
-          name: concept_num
-          type: integer
-          format: int64
-          required: true
-          description: concept num in relationship table
       responses:
         "200":
-          description: A collection of databrowser domains
+          description: a collection of concepts
           schema:
             $ref: "#/definitions/ConceptListResponse"
+
+  /api/v1/databrowser/parent-concepts:
+      get:
+        security: []
+        tags:
+          - dataBrowser
+
+        description: Gets parent concepts for the given concept
+        operationId: "getParentConcepts"
+        parameters:
+          - in: query
+            name: concept_id
+            type: integer
+            format: int64
+            required: true
+            description: concept id to get maps to concepts
+        responses:
+          "200":
+            description: A collection of databrowser domains
+            schema:
+              $ref: "#/definitions/ConceptListResponse"
 
 
 ##########################################################################################
