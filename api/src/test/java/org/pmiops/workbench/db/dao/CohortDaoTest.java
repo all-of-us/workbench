@@ -50,8 +50,6 @@ public class CohortDaoTest {
 
         cohortDao.save(cohort);
 
-        CohortDefinition definition = cohortDao.findCohortByCohortIdAndWorkspaceId(cohort.getCohortId(), WORKSPACE_ID);
-        assertEquals(cohortJson, definition.getCriteria());
+        assertEquals(cohortJson, cohort.getCriteria());
     }
-
 }
