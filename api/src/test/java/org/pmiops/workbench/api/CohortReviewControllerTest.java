@@ -141,7 +141,7 @@ public class CohortReviewControllerTest {
         Workspace workspace = new Workspace();
         workspace.setWorkspaceId(0);
         workspace.setWorkspaceNamespace(namespace);
-        workspace.setName(name);
+        workspace.setFirecloudName(name);
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
@@ -178,7 +178,7 @@ public class CohortReviewControllerTest {
         Workspace workspace = new Workspace();
         workspace.setWorkspaceId(0);
         workspace.setWorkspaceNamespace(namespace);
-        workspace.setName(name);
+        workspace.setFirecloudName(name);
 
         cohortReview.setCohortReviewId(cohortReviewId);
         cohortReview.setCohortId(cohortId);

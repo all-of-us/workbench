@@ -137,7 +137,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         Workspace workspace = workspaceDao.findOne(cohort.getWorkspaceId());
 
         if (!workspace.getWorkspaceNamespace().equals(workspaceNamespace) ||
-                !workspace.getName().equals(workspaceId)) {
+                !workspace.getFirecloudName().equals(workspaceId)) {
             throw new BadRequestException("Invalid Request: No workspace matching "
                     + "workspaceNamespace: " + workspaceNamespace
                     + ", workspaceId: " + workspaceId);
@@ -212,7 +212,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     @Override
     public ResponseEntity<org.pmiops.workbench.model.CohortReview>
-    getParticipantCohortStatuses(String workspaceNamespace,
+        getParticipantCohortStatuses(String workspaceNamespace,
                                  String workspaceId,
                                  Long cohortId,
                                  Long cdrVersionId,
@@ -230,7 +230,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             Workspace workspace = workspaceDao.findOne(cohort.getWorkspaceId());
 
             if (!workspace.getWorkspaceNamespace().equals(workspaceNamespace) ||
-                    !workspace.getName().equals(workspaceId)) {
+                    !workspace.getFirecloudName().equals(workspaceId)) {
                 throw new BadRequestException("Invalid Request: No workspace matching "
                         + "workspaceNamespace: " + workspaceNamespace
                         + ", workspaceId: " + workspaceId);
