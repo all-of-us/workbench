@@ -138,8 +138,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         if (!workspace.getWorkspaceNamespace().equals(workspaceNamespace) ||
                 !workspace.getName().equals(workspaceId)) {
-            throw new BadRequestException("Cohort " + cohortId + " is not in workspace "
-                    + ", workspaceNamespace: " + workspaceNamespace
+            throw new BadRequestException("Invalid Request: No workspace matching "
+                    + "workspaceNamespace: " + workspaceNamespace
                     + ", workspaceId: " + workspaceId);
         }
 
