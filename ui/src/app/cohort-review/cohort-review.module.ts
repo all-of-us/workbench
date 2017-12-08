@@ -4,13 +4,15 @@ import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
+import {ReviewResolverGuard} from './guards';
 import {OverviewComponent} from './overview/overview.component';
 import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
 
 import {CohortReviewService} from 'generated';
 
+
 const routes = [{
-  path: 'cohorts/:cohortID/review',
+  path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Subjects'},
   children: [
@@ -18,6 +20,7 @@ const routes = [{
     {path: 'overview', component: OverviewComponent},
     {path: ':subjectID', component: SubjectDetailComponent},
   ],
+  resolve: { review: ReviewResolverGuard}
 }];
 
 @NgModule({
@@ -32,7 +35,8 @@ const routes = [{
     SubjectDetailComponent,
   ],
   providers: [
-    CohortReviewService
+    ReviewResolverGuard,
+    CohortReviewService,
   ]
 })
 export class CohortReviewModule {}

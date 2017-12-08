@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
+    private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
@@ -61,9 +62,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             };
 
     @Autowired
-    CohortBuilderController(BigQueryService bigQueryService, ParticipantCounter participantCounter,
+    CohortBuilderController(BigQueryService bigQueryService,
+                            CodeDomainLookupService codeDomainLookupService,
+                            ParticipantCounter participantCounter,
                             CriteriaDao criteriaDao) {
         this.bigQueryService = bigQueryService;
+        this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
     }
@@ -97,8 +101,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<Long> countParticipants(SearchRequest request) {
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-        findCodesForEmptyDomains(request.getIncludes());
-        findCodesForEmptyDomains(request.getExcludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
@@ -114,8 +118,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         ChartInfoListResponse response = new ChartInfoListResponse();
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-        findCodesForEmptyDomains(request.getIncludes());
-        findCodesForEmptyDomains(request.getExcludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
@@ -140,38 +144,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
         return ResponseEntity.ok(criteriaResponse);
-    }
-
-    /**
-     * TODO: this is temporary and will be removed when we figure out the conceptId mappings
-     * for ICD9, ICD10 and CPT codes.
-     **/
-    private void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
-        AbstractQueryBuilder builder = QueryBuilderFactory.getQueryBuilder(FactoryKey.GROUP_CODES);
-        searchGroups.stream()
-                .flatMap(searchGroup -> searchGroup.getItems().stream())
-                .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
-                .forEach(item -> {
-
-                    for (SearchParameter parameter : item.getSearchParameters()) {
-                        if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
-                            QueryResult result = bigQueryService.executeQuery(
-                                    bigQueryService.filterBigQueryConfig(
-                                            builder.buildQueryJobConfig(new QueryParameters()
-                                            .type(item.getType())
-                                            .parameters(Arrays.asList(parameter)))));
-
-                            Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-                            List<SearchParameter> paramsWithDomains = new ArrayList<>();
-                            for (List<FieldValue> row : result.iterateAll()) {
-                                paramsWithDomains.add(new SearchParameter()
-                                        .domain(bigQueryService.getString(row, rm.get("domainId")))
-                                        .value(bigQueryService.getString(row, rm.get("code"))));
-                            }
-                            item.setSearchParameters(paramsWithDomains);
-                        }
-                    }
-                });
     }
 
 }

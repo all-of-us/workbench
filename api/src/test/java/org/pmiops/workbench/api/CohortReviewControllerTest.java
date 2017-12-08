@@ -15,11 +15,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.CohortDefinition;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
@@ -57,13 +59,20 @@ public class CohortReviewControllerTest {
     @Mock
     ParticipantCounter participantCounter;
 
+    @Mock
+    WorkspaceDao workspaceDao;
+
+    @Mock
+    CodeDomainLookupService codeDomainLookupService;
+
     @InjectMocks
     CohortReviewController reviewController;
 
     @Test
     public void createCohortReview_ReviewAlreadyCreated() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1;
-        long workspaceId = 1;
         long cdrVersionId = 1;
 
         CohortReview cohortReview = new CohortReview();
@@ -72,7 +81,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
+            reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review already created for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
@@ -84,12 +93,13 @@ public class CohortReviewControllerTest {
 
     @Test
     public void createCohortReview_MoreThanTenThousand() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1;
-        long workspaceId = 1;
         long cdrVersionId = 1;
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
+            reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
@@ -99,14 +109,15 @@ public class CohortReviewControllerTest {
 
     @Test
     public void createCohortReview_BadCohortIdOrCdrVersionId() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1;
-        long workspaceId = 1;
         long cdrVersionId = 1;
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(null);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
+            reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review does not exist for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
@@ -118,35 +129,57 @@ public class CohortReviewControllerTest {
 
     @Test
     public void createCohortReview_NoCohortDefinitionFound() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1;
-        long workspaceId = 1;
         long cdrVersionId = 1;
 
         CohortReview cohortReview = new CohortReview();
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(0);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(0);
+        workspace.setWorkspaceNamespace(namespace);
+        workspace.setFirecloudName(name);
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
-        when(cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId)).thenReturn(null);
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
 
         try {
-            reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
+            reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: No Cohort definition matching cohortId: "
-                    + cohortId + ", workspaceId: " + workspaceId, e.getMessage());
+                         + cohortId
+                         + ", workspaceNamespace: " + namespace
+                         + ", workspaceId: " + name,
+                         e.getMessage());
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verify(cohortDao, times(1)).findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+        verify(cohortDao, times(1)).findOne(cohortId);
+        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter, workspaceDao);
     }
 
     @Test
     public void createCohortReview() throws Exception {
-        long cohortReviewId = 1;
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1;
         long cdrVersionId = 1;
-        long workspaceId = 1;
+        long cohortReviewId = 1;
 
         CohortReview cohortReview = new CohortReview();
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(0);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(0);
+        workspace.setWorkspaceNamespace(namespace);
+        workspace.setFirecloudName(name);
+
         cohortReview.setCohortReviewId(cohortReviewId);
         cohortReview.setCohortId(cohortId);
         cohortReview.setCdrVersionId(cdrVersionId);
@@ -163,16 +196,13 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
         cohortReviewAfter.setReviewStatus(ReviewStatus.CREATED);
 
-        CohortDefinition definition = new CohortDefinition() {
-            @Override
-            public String getCriteria() {
-                return "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
-                        "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
-                        "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
-            }
-        };
+        String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
+                            "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
+                            "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
-        SearchRequest request = new Gson().fromJson(definition.getCriteria(), SearchRequest.class);
+        cohort.setCriteria(definition);
+
+        SearchRequest request = new Gson().fromJson(definition, SearchRequest.class);
         QueryResult queryResult = mock(QueryResult.class);
         Iterable testIterable = new Iterable() {
             @Override
@@ -186,7 +216,8 @@ public class CohortReviewControllerTest {
         rm.put("person_id", 0);
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
-        when(cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId)).thenReturn(definition);
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
         when(participantCounter.buildParticipantIdQuery(request, 200)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -195,10 +226,11 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 0)).thenReturn(0L);
         when(cohortReviewDao.save(cohortReviewAfter)).thenReturn(cohortReviewAfter);
 
-        reviewController.createCohortReview(workspaceId, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
+        reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verify(cohortDao, times(1)).findCohortByCohortIdAndWorkspaceId(cohortId, cdrVersionId);
+        verify(cohortDao, times(1)).findOne(cohortId);
+        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
         verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -206,30 +238,37 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, participantCounter);
     }
 
     @Test
     public void getParticipants() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
         long cohortId = 1L;
-        long workspaceId = 1L;
         long cdrVersionId = 1L;
         int page = 1;
         int limit = 22;
         String order = "desc";
         String column = "status";
 
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, null, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, limit, null, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, null, order, null);
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId,null, null, null, column);
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, limit, order, "participantId");
-        assertFindByCohortIdAndCdrVersionId(cohortId, workspaceId, cdrVersionId, page, limit, order, column);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, null, null, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, limit, null, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, order, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, column);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, "participantId");
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
     }
 
-    private void assertFindByCohortIdAndCdrVersionId(
-            long cohortId, long workspaceId, long cdrVersionId, Integer page, Integer limit, String order, String column) {
+    private void assertFindByCohortIdAndCdrVersionId(String namespace,
+                                                     String name,
+                                                     long cohortId,
+                                                     long cdrVersionId,
+                                                     Integer page,
+                                                     Integer limit,
+                                                     String order,
+                                                     String column) {
         Integer pageParam = page == null ? 0 : page;
         Integer limitParam = limit == null ? 25 : limit;
         Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -275,7 +314,7 @@ public class CohortReviewControllerTest {
                 .thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(workspaceId, cohortId, cdrVersionId, page, limit, order, column);
+                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());

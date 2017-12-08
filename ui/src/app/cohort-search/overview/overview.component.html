@@ -4,7 +4,7 @@
       type="button"
       class="btn btn-success"
       [style.margin-left]="'0'"
-      (click)="open = true">
+      (click)="saveModal.open()">
       <clr-icon shape="floppy"></clr-icon>
       Save Cohort
     </button>
@@ -23,16 +23,15 @@
 <app-charts [data]="(chartData$ | async)"></app-charts>
 
 <clr-modal
-  [clrModalClosable]="false"
+  #saveModal
   [clrModalStaticBackdrop]="false"
-  [clrModalSize]="'lg'"
-  [(clrModalOpen)]="open">
+  [clrModalSize]="'lg'">
   <h3 class="modal-title">Save New Cohort</h3>
 
   <div class="modal-body">
     <form [formGroup]="cohortForm" (ngSubmit)="submit()">
       <div class="form-group">
-        <label for="name required">Cohort Name</label>
+        <label for="name" class="required">Cohort Name</label>
         <label
           aria-haspopup="true"
           role="tooltip"
@@ -61,7 +60,7 @@
     <button
       type="button"
       class="btn btn-outline"
-      (click)="open = false">
+      (click)="saveModal.close()">
       Cancel
     </button>
 
@@ -69,7 +68,7 @@
       type="button"
       class="btn btn-primary"
       (click)="submit()"
-      [disabled]=!cohortForm.valid>
+      [disabled]="!cohortForm.valid">
       Save Cohort
     </button>
   </div>

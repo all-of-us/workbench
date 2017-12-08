@@ -735,9 +735,12 @@ paths:
       operationId: "createCohortReview"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
@@ -772,9 +775,12 @@ paths:
       operationId: "getParticipantCohortStatuses"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
@@ -820,12 +826,15 @@ paths:
       tags:
         - cohortReview
       description: Modifies the ParticipantCohortStatus status
-      operationId: updateParticipantCohortStatus
+      operationId: "updateParticipantCohortStatus"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
@@ -859,9 +868,12 @@ paths:
       operationId: "getCohortSummary"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
