@@ -17,6 +17,10 @@ jobs:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
       - run:
+          name: Validate swagger definitions
+          working_directory: ~/workbench/api
+          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
+      - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
@@ -75,7 +79,7 @@ jobs:
           name: Deploy to gcloud test project
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./ci/deploy.sh ui
+              ./ci/deploy_ui.sh
             fi
   test_client:
     docker:

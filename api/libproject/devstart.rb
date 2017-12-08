@@ -88,6 +88,11 @@ def run_api_and_db(*args)
   run_api(account)
 end
 
+def validate_swagger(cmd_name, args)
+  ensure_docker cmd_name, args
+  Common.new.run_inline %W{gradle validateSwagger} + args
+end
+
 def run_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle test} + args
@@ -528,6 +533,12 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "validate-swagger",
+  :description => "Validate swagger definition files",
+  :fn => lambda { |*args| validate_swagger("validate-swagger", args) }
+})
+
+Common.register_command({
   :invocation => "test",
   :description => "Runs tests. To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
@@ -730,6 +741,19 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
 end
 
 def circle_deploy(cmd_name, args)
+  # See https://circleci.com/docs/1.0/environment-variables/#build-details
+  common = Common.new
+  common.status "circle_deploy with branch='#{ENV.fetch("CIRCLE_BRANCH", "")}'" +
+  " and tag='#{ENV.fetch("CIRCLE_TAG", "")}'"
+  if ENV.has_key?("CIRCLE_BRANCH") and ENV.has_key?("CIRCLE_TAG")
+    raise("expected exactly one of CIRCLE_BRANCH and CIRCLE_TAG env vars to be set")
+  end
+  is_master = ENV.fetch("CIRCLE_BRANCH", "") == "master"
+  if !is_master and !ENV.has_key?("CIRCLE_TAG")
+    common.status "not master or a git tag, nothing to deploy"
+    return
+  end
+
   unless Workbench::in_docker?
     exec *(%W{docker run --rm -v #{File.expand_path("..")}:/w -w /w/api
       allofustest/workbench:buildimage-0.0.9
@@ -742,7 +766,7 @@ def circle_deploy(cmd_name, args)
     exit 1
   end
 
-  if ENV["CIRCLE_BRANCH"] == "master"
+  if is_master
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do
       migrate_database
@@ -751,8 +775,21 @@ def circle_deploy(cmd_name, args)
     end
   end
 
-  version = ENV.fetch("CIRCLE_TAG", "circle-ci-test")
-  promote = ENV["CIRCLE_BRANCH"] == "master" ? "--promote" : "--no-promote"
+  promote = ""
+  version = ""
+  if is_master
+    # Note that --promote will generally be a no-op, as we expect
+    # circle-ci-test to always be serving 100% traffic. Pushing to an existing
+    # live version will immediately make those changes live. In the event that
+    # someone mistakenly pushes a different version manually, this --promote
+    # will restore us to the expected circle-ci-test version on the next commit.
+    promote = "--promote"
+    version = "circle-ci-test"
+  elsif ENV.has_key?("CIRCLE_TAG")
+    promote = "--no-promote"
+    version = ENV["CIRCLE_TAG"]
+  end
+
   deploy(cmd_name, args + %W{--version #{version} #{promote}})
 end
 

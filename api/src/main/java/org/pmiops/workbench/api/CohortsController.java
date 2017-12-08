@@ -19,6 +19,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,7 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> deleteCohort(String workspaceNamespace, String workspaceId,
+  public ResponseEntity<EmptyResponse> deleteCohort(String workspaceNamespace, String workspaceId,
       String cohortId) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
