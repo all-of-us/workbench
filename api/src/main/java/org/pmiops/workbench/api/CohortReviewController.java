@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -239,9 +240,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    updateParticipantCohortStatus(Long workspaceId, Long cohortId, Long cdrVersionId, ModifyCohortStatusRequest cohortStatusRequest) {
-        Workspace workspace = workspaceDao.findOne(workspaceId);
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> updateParticipantCohortStatus(
+            String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId, ModifyCohortStatusRequest cohortStatusRequest) {
+        Cohort cohort = cohortDao.findOne(cohortId);
+        Workspace workspace = workspaceDao.findOne(cohort.getWorkspaceId());
+
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
                 .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
     }

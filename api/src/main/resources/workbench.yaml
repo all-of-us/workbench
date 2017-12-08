@@ -810,9 +810,13 @@ paths:
       operationId: updateParticipantCohortStatus
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
