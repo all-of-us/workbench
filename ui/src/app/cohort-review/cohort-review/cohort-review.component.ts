@@ -1,38 +1,30 @@
-/* TODO(jms) re-enable linting before merge to master */
-/* tslint:disable */
-import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
-import {CohortReviewService, CohortStatus} from 'generated';
+import {
+  CohortReview,
+  CohortReviewService,
+  CohortStatus,
+  ParticipantCohortStatus,
+  ReviewStatus,
+} from 'generated';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
-
-const subjects$ = Observable.of([
-  {id: 1, status: CohortStatus.INCLUDED},
-  {id: 2, status: CohortStatus.INCLUDED},
-  {id: 4, status: CohortStatus.EXCLUDED},
-  {id: 5, status: CohortStatus.NEEDSFURTHERREVIEW},
-  {id: 6, status: CohortStatus.NEEDSFURTHERREVIEW},
-  {id: 7, status: CohortStatus.EXCLUDED},
-  {id: 8, status: CohortStatus.NOTREVIEWED},
-  {id: 9, status: CohortStatus.NOTREVIEWED},
-  {id: 10, status: CohortStatus.EXCLUDED},
-  {id: 11, status: CohortStatus.NOTREVIEWED},
-  {id: 12, status: CohortStatus.EXCLUDED},
-]);
 
 @Component({
   selector: 'app-cohort-review',
   templateUrl: './cohort-review.component.html',
   styleUrls: ['./cohort-review.component.css']
 })
-export class CohortReviewComponent implements OnInit {
-  private subjects$ = subjects$;
+export class CohortReviewComponent implements OnInit, OnDestroy {
+  private review: CohortReview;
 
   private open = false;
   private loading = false;
+  private subscription: Subscription;
 
   @ViewChild('wrapper') _wrapper;
   @ViewChild('subjectNav') _subjectNav;
@@ -46,10 +38,30 @@ export class CohortReviewComponent implements OnInit {
   constructor(
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit() {
     this._updateWrapperDimensions();
+    this.subscription = this.route.data.subscribe(({review}) => {
+      this.review = review;
+      if (review.reviewStatus === ReviewStatus.NONE) {
+        this.createCohortModal.open();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  cancelReview() {
+    const params = this.route.snapshot.params;
+    this.router.navigate(['workspace', params.ns, params.wsid]);
+  }
+
+  createReview() {
+    console.log('Createing review... ');
   }
 
   @HostListener('document:click', ['$event'])

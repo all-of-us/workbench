@@ -12,11 +12,11 @@
       Overview
     </a>
     <hr />
-    <a *ngFor="let subject of (subjects$ | async)"
+    <a *ngFor="let subject of review.participantCohortStatuses"
       (click)="open = false"
-      [routerLink]="[subject.id]"
+      [routerLink]="[subject.participantId]"
       routerLinkActive="active">
-      {{ subject.id}}
+      {{ subject.participantId}}
       <span class="label"
         [ngClass]="statusClass(subject.status)">
         {{ statusText(subject.status) }}
@@ -39,5 +39,26 @@
     #createCohortModal
     [clrModalStaticBackdrop]="false"
     [clrModalSize]="'lg'">
+    <h3 class="modal-title">Generate Review Set</h3>
+
+    <div class="modal-body">
+      Hello
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="cancelReview()">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="createReview()">
+        Save Review Set
+      </button>
+    </div>
   </clr-modal>
 </div>
