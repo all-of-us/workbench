@@ -42,7 +42,43 @@
     <h3 class="modal-title">Generate Review Set</h3>
 
     <div class="modal-body">
-      Hello
+      <p> Cohort {{ cohort.name }} has {{ review.matchedParticipantCount }}
+        participants for possible review.  How many would you like to review?
+        (max 10000)
+      </p>
+      <form [formGroup]="reviewParamForm" (ngSubmit)="createReview()">
+        <label>Cohort Review Parameters</label>
+        <section class="form-block">
+          <div class="form-group">
+            <label for="numParticipants" class="required">Number of Participants</label>
+            <label
+              role="tooltip"
+              class="tooltip tooltip-validation tooltip-sm"
+              [class.invalid]="numParticipants.invalid && (numParticipants.dirty || numParticipants.touched)">
+              <input
+                id="numParticipants"
+                formControlName="numParticipants"
+                type="number"
+                min="0" max="maxParticipants">
+              <span
+                *ngIf="numParticipants.errors?.required"
+                class="tooltip-content">
+                You must select a number of participants for review.
+              </span>
+              <span
+                *ngIf="numParticipants.errors?.min"
+                class="tooltip-content">
+                You must review more than zero participants.
+              </span>
+              <span
+                *ngIf="numParticipants.errors?.max"
+                class="tooltip-content">
+                You may only review up to {{ maxParticipants }}.
+              </span>
+            </label>
+          </div>
+        </section>
+      </form>
     </div>
 
     <div class="modal-footer">
@@ -56,6 +92,7 @@
       <button
         type="button"
         class="btn btn-primary"
+        [disabled]="reviewParamForm.invalid"
         (click)="createReview()">
         Save Review Set
       </button>

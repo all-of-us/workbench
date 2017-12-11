@@ -1,12 +1,15 @@
 import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
+  Cohort,
   CohortReview,
   CohortReviewService,
   CohortStatus,
+  CreateReviewRequest,
   ParticipantCohortStatus,
   ReviewStatus,
 } from 'generated';
@@ -20,6 +23,11 @@ const ONE_REM = 24;  // value in pixels
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
+  reviewParamForm = new FormGroup({
+    numParticipants: new FormControl(),
+  });
+
+  private cohort: Cohort;
   private review: CohortReview;
 
   private open = false;
@@ -34,6 +42,7 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   get wrapper() { return this._wrapper.nativeElement; }
   get openNav() { return this._openNav.nativeElement; }
   get subjectNav() { return this._subjectNav.nativeElement; }
+  get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -43,12 +52,25 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._updateWrapperDimensions();
-    this.subscription = this.route.data.subscribe(({review}) => {
+    this.subscription = this.route.data.subscribe(({cohort, review}) => {
+      this.cohort = cohort;
       this.review = review;
       if (review.reviewStatus === ReviewStatus.NONE) {
         this.createCohortModal.open();
+        this.numParticipants.setValidators(Validators.compose([
+          Validators.required,
+          Validators.min(1),
+          Validators.max(this.maxParticipants),
+        ]));
       }
     });
+  }
+
+  get maxParticipants() {
+    if (this.review && this.review.matchedParticipantCount) {
+      return Math.min(10000, this.review.matchedParticipantCount);
+    }
+    return 10000;
   }
 
   ngOnDestroy() {
@@ -61,7 +83,19 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   }
 
   createReview() {
-    console.log('Createing review... ');
+    console.log('Creating review... ');
+    const params = this.route.snapshot.params;
+    /* TODO: wire up CDR version */
+    this.reviewAPI.createCohortReview(
+      params.ns,
+      params.wsid,
+      params.cid,
+      1,
+      <CreateReviewRequest>{size: this.numParticipants.value},
+    ).subscribe(review => {
+      this.review = review;
+      this.createCohortModal.close();
+    });
   }
 
   @HostListener('document:click', ['$event'])
