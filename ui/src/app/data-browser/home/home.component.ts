@@ -21,15 +21,7 @@ export class HomeComponent {
 
   // Recieve selected domain from tree browser menu
   receiveData(data) {
-    // this.infoData = data;
-    const title = data.domain_display;
-    const id = data.domain_id;
-    const desc = data.domain_desc;
-    const parent = data.domain_parent;
-    const route = data.domain_route;
     this.infoData = data;
-    //{ domain_id: id, domain_display: title,
-      //  domain_desc: desc, domain_parent: parent, domain_route: route };
   }
 
   passAnchor(data) {

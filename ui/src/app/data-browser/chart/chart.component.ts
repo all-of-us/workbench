@@ -20,7 +20,7 @@ ChartModule.forRoot(
 
 
 
-import { Analysis, AnalysisResult } from '../AnalysisClasses';
+import { Analysis } from '../AnalysisClasses';
 import { IConcept } from '../ConceptClasses';
 
 @Component({
@@ -57,12 +57,10 @@ export class ChartComponent implements OnChanges {
   ngOnChanges() {
     this.chartOptions = null;
     if (this.concepts && this.concepts.length) {
-      console.log("Have concepts in chart component for count analysis");
       const a  = this.achillesService.makeConceptsCountAnalysis(this.concepts);
       this.chartOptions = a.hcChartOptions();
       this.chartType = a.chartType;
     } else if (this.analysis && this.analysis.results.length) {
-      console.log("have analysis in chart comp");
       // HC automatically redraws when changing chart options
       this.chartOptions = this.analysis.hcChartOptions();
       this.chartType = this.analysis.chartType;

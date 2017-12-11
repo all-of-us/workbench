@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import { AchillesService } from '../services/achilles.service';
 import {IAnalysis} from '../AnalysisClasses';
+import { AchillesService } from '../services/achilles.service';
 
 @Component({
   selector: 'app-one-concept',
