@@ -1,24 +1,13 @@
-/* tslint:disable */
 import {Injectable} from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  Resolve,
-  Router,
-} from '@angular/router';
+import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {
-  CohortReview,
-  CohortReviewService,
-} from 'generated';
+import {CohortReview, CohortReviewService} from 'generated';
 
 @Injectable()
 export class ReviewResolverGuard implements Resolve<CohortReview> {
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-    private router: Router,
-  ) {}
+  constructor(private reviewAPI: CohortReviewService) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<CohortReview> {
     const wsNamespace = route.paramMap.get('ns');
@@ -28,8 +17,6 @@ export class ReviewResolverGuard implements Resolve<CohortReview> {
     /* TODO use a real CDR version */
     const CDR_VERSION = 1;
 
-    return this.reviewAPI
-      .getParticipantCohortStatuses(wsNamespace, wsID, cohortID, CDR_VERSION)
-      .take(1);
+    return this.reviewAPI.getParticipantCohortStatuses(wsNamespace, wsID, cohortID, CDR_VERSION);
   }
 }
