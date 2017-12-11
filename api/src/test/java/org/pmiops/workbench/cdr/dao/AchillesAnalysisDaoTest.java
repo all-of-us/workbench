@@ -46,11 +46,9 @@ public class AchillesAnalysisDaoTest {
     @Test
     public void findAllAnalyses() throws Exception {
         /* Todo write more tests */
-        final List<AchillesAnalysis> list = dao.findAllByAnalysisIdIsGreaterThanEqual((long) 0);
+        final List<AchillesAnalysis> list = dao.findAll();
         assert(obj1.getAnalysisId() == 1);
-        AchillesAnalysis item = list.get(0);
-        assert(item.getAnalysisId() == obj1.getAnalysisId());
-
+        assert(list.get(0).getAnalysisId() == obj1.getAnalysisId());
     }
 
     private AchillesAnalysis createAnalysis(int aid, String name) {
