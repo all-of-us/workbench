@@ -10,8 +10,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -71,6 +74,8 @@ public class CohortsController implements CohortsApiDelegate {
 
   private final WorkspaceService workspaceService;
   private final CohortDao cohortDao;
+  private final CdrVersionDao cdrVersionDao;
+  private final CohortMaterializationService cohortMaterializationService;
   private final Provider<User> userProvider;
   private final Clock clock;
 
@@ -78,10 +83,14 @@ public class CohortsController implements CohortsApiDelegate {
   CohortsController(
       WorkspaceService workspaceService,
       CohortDao cohortDao,
+      CdrVersionDao cdrVersionDao,
+      CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
+    this.cdrVersionDao = cdrVersionDao;
+    this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
   }
@@ -186,12 +195,41 @@ public class CohortsController implements CohortsApiDelegate {
     // 3. Otherwise, query BigQuery for participant IDs using SQL constructed from the cohort
     // criteria, subject to pagination; remove IDs for participants that had a cohort status not
     // included in the status filter.
-    return ResponseEntity.ok(new MaterializeCohortResponse());
+
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new BadRequestException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+    }
+    String cohortSpec;
+    if (request.getCohortName() != null) {
+      org.pmiops.workbench.db.model.Cohort cohort =
+          cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+      if (cohort == null) {
+        throw new BadRequestException(
+            String.format("Couldn't find cohort with name %s in workspace %s/%s",
+                request.getCohortName(), workspaceNamespace, workspaceId));
+      }
+      cohortSpec = cohort.getCriteria();
+    } else if (request.getCohortSpec() != null) {
+      cohortSpec = request.getCohortSpec();
+    } else {
+      throw new BadRequestException("Must specify either cohortName or cohortSpec");
+    }
+
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
+        cdrVersion, cohortSpec, request.getStatusFilter(), request.getPageSize(),
+        request.getPageToken());
+    return ResponseEntity.ok(response);
   }
 
-  private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,
+  private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,
       String workspaceId, String cohortId) {
-    Workspace workspace = workspaceService.getRequired(workspaceName, workspaceId);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(convertCohortId(cohortId));
