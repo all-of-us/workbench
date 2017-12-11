@@ -17,9 +17,6 @@ import {
   ReviewStatus,
 } from 'generated';
 
-const pixel = (n: number) => `${n}px`;
-const ONE_REM = 24;  // value in pixels
-
 @Component({
   selector: 'app-cohort-review',
   templateUrl: './cohort-review.component.html',
@@ -42,14 +39,12 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   private subjectNavOpen = false;
   private statusBarOpen = false;
 
-  @ViewChild('wrapper') _wrapper;
   @ViewChild('createCohortModal') createCohortModal;
   @ViewChild('subjectNav') _subjectNav;
   @ViewChild('openNav') _openNav;
   @ViewChild('statusBar') _statusBar;
   @ViewChild('openStatus') _openStatus;
 
-  get wrapper() { return this._wrapper.nativeElement; }
   get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
   get openNav() { return this._openNav.nativeElement; }
   get subjectNav() { return this._subjectNav.nativeElement; }
@@ -63,7 +58,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this._updateWrapperDimensions();
     this.subscription = this.route.data.subscribe(({cohort, review}) => {
       this.cohort = cohort;
       this.review = review;
@@ -163,16 +157,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         || this.openStatus.contains(event.target))) {
       this.statusBarOpen = false;
     }
-  }
-
-  @HostListener('window:resize')
-  onResize() {
-    this._updateWrapperDimensions();
-  }
-
-  _updateWrapperDimensions() {
-    const {top} = this.wrapper.getBoundingClientRect();
-    this.wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
   statusText(stat: CohortStatus): string {

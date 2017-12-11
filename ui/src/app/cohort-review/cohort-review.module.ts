@@ -5,6 +5,7 @@ import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
+import {FullpageAppComponent} from './fullpage-app/fullpage-app.component';
 import {CohortResolverGuard, ReviewResolverGuard} from './guards';
 import {OverviewComponent} from './overview/overview.component';
 import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
@@ -38,6 +39,7 @@ const routes = [{
     CohortReviewComponent,
     OverviewComponent,
     SubjectDetailComponent,
+    FullpageAppComponent,
   ],
   providers: [
     CohortResolverGuard,
