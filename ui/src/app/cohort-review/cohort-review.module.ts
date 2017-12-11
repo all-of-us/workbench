@@ -1,10 +1,11 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
-import {ReviewResolverGuard} from './guards';
+import {CohortResolverGuard, ReviewResolverGuard} from './guards';
 import {OverviewComponent} from './overview/overview.component';
 import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
 
@@ -20,13 +21,17 @@ const routes = [{
     {path: 'overview', component: OverviewComponent},
     {path: ':subjectID', component: SubjectDetailComponent},
   ],
-  resolve: { review: ReviewResolverGuard}
+  resolve: {
+    cohort: CohortResolverGuard,
+    review: ReviewResolverGuard,
+  }
 }];
 
 @NgModule({
   imports: [
     ClarityModule,
     CommonModule,
+    ReactiveFormsModule,
     RouterModule.forChild(routes),
   ],
   declarations: [
@@ -35,6 +40,7 @@ const routes = [{
     SubjectDetailComponent,
   ],
   providers: [
+    CohortResolverGuard,
     ReviewResolverGuard,
     CohortReviewService,
   ]
