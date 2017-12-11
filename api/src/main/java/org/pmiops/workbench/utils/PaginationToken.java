@@ -17,7 +17,7 @@ public final class PaginationToken {
   @JsonProperty("h")
   private int parameterHash;
 
-  private PaginationToken(int offset, int parameterHash) {
+  private PaginationToken(long offset, int parameterHash) {
     this.offset = offset;
     this.parameterHash = parameterHash;
   }
@@ -34,7 +34,7 @@ public final class PaginationToken {
     return Objects.hash(parameters) == parameterHash;
   }
 
-  public static PaginationToken of(int offset, Object... parameters) {
+  public static PaginationToken of(long offset, Object... parameters) {
     return new PaginationToken(offset, Objects.hash(parameters));
   }
 

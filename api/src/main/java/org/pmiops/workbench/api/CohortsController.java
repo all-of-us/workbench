@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CohortsController implements CohortsApiDelegate {
 
+  private static final int MAX_PAGE_SIZE = 10000;
+  private static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
 
   /**
@@ -220,9 +222,19 @@ public class CohortsController implements CohortsApiDelegate {
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
+    Integer pageSize = request.getPageSize();
+    if (pageSize == null) {
+      pageSize = DEFAULT_PAGE_SIZE;
+    } else {
+      if (pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
+        throw new BadRequestException(
+            String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
+                MAX_PAGE_SIZE));
+      }
+    }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cdrVersion, cohortSpec, request.getStatusFilter(), request.getPageSize(),
+        cdrVersion, cohortSpec, request.getStatusFilter(), pageSize,
         request.getPageToken());
     return ResponseEntity.ok(response);
   }

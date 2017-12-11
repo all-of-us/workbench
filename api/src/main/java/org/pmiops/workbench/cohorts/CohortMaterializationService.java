@@ -41,8 +41,8 @@ public class CohortMaterializationService {
       throw new BadRequestException("Invalid cohort spec");
     }
     long offset = 0L;
-    Object[] paginationParameters = new Object[] { cdrVersion.getCdrVersionId(), cohortSpec,
-          statusFilter };
+    // TODO: add CDR version ID here
+    Object[] paginationParameters = new Object[] { cohortSpec, statusFilter };
     if (paginationToken != null) {
       PaginationToken token = PaginationToken.fromBase64(paginationToken);
       if (token.matchesParameters(paginationParameters)) {
@@ -52,16 +52,29 @@ public class CohortMaterializationService {
             String.format("Use of pagination token %s with new parameter values", paginationToken));
       }
     }
+    int limit = pageSize + 1;
     // TODO: use CDR version, statusFilter here
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-        participantCounter.buildParticipantIdQuery(searchRequest, pageSize, offset)));
+        participantCounter.buildParticipantIdQuery(searchRequest, limit, offset)));
     MaterializeCohortResponse response = new MaterializeCohortResponse();
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    int numResults = 0;
+    boolean hasMoreResults = false;
     for (List<FieldValue> row : result.iterateAll()) {
       long personId = bigQueryService.getLong(row, rm.get("person_id"));
       Map<String, Object> resultMap = new HashMap<>(1);
       resultMap.put("person_id", personId);
       response.addResultsItem(resultMap);
+      numResults++;
+      if (numResults == pageSize) {
+        hasMoreResults = true;
+        break;
+      }
+    }
+    if (hasMoreResults) {
+      // TODO: consider pagination based on cursor / values rather than offset
+      PaginationToken token = PaginationToken.of(offset + pageSize, paginationParameters);
+      response.setNextPageToken(token.toBase64());
     }
     return response;
   }
