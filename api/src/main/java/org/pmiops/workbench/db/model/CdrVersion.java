@@ -88,12 +88,12 @@ public class CdrVersion {
     this.creationTime = creationTime;
   }
 
-//  @Column(name = "num_participants")
-//  public int getNumParticipants() {
-//    return numParticipants;
-//  }
-//
-//  public void setNumParticipants(int numParticipants) {
-//    this.numParticipants = numParticipants;
-//  }
+  @Column(name = "num_participants")
+  public int getNumParticipants() {
+    return numParticipants;
+  }
+
+  public void setNumParticipants(int numParticipants) {
+    this.numParticipants = numParticipants;
+  }
 }

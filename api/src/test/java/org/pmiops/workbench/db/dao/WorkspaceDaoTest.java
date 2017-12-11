@@ -26,13 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspaceDaoTest {
 
-  public static final long WORKSPACE_ID = 9999;
-
   @Autowired
   WorkspaceDao workspaceDao;
-
-  @Autowired
-  JdbcTemplate jdbcTemplate;
 
   @Test
   public void testWorkspaceVersionLocking() {
