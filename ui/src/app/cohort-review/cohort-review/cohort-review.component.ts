@@ -9,6 +9,7 @@ import {
   CohortReview,
   CohortReviewService,
   CohortStatus,
+  CreateReviewRequest,
   ParticipantCohortStatus,
   ReviewStatus,
 } from 'generated';
@@ -56,14 +57,13 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
       this.review = review;
       if (review.reviewStatus === ReviewStatus.NONE) {
         this.createCohortModal.open();
+        this.numParticipants.setValidators(Validators.compose([
+          Validators.required,
+          Validators.min(1),
+          Validators.max(this.maxParticipants),
+        ]));
       }
     });
-
-    this.numParticipants.setValidators(Validators.compose([
-      Validators.required,
-      Validators.min(1),
-      Validators.max(this.maxParticipants),
-    ]));
   }
 
   get maxParticipants() {
@@ -84,6 +84,18 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
   createReview() {
     console.log('Creating review... ');
+    const params = this.route.snapshot.params;
+    /* TODO: wire up CDR version */
+    this.reviewAPI.createCohortReview(
+      params.ns,
+      params.wsid,
+      params.cid,
+      1,
+      <CreateReviewRequest>{size: this.numParticipants.value},
+    ).subscribe(review => {
+      this.review = review;
+      this.createCohortModal.close();
+    });
   }
 
   @HostListener('document:click', ['$event'])
