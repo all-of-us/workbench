@@ -735,9 +735,12 @@ paths:
       operationId: "createCohortReview"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
@@ -772,9 +775,12 @@ paths:
       operationId: "getParticipantCohortStatuses"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path
@@ -844,6 +850,12 @@ paths:
           format: int64
           required: true
           description: specifies which cdr version
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
         - in: body
           name: cohortStatusRequest
           description: Contains the new review status
@@ -863,9 +875,12 @@ paths:
       operationId: "getCohortSummary"
       parameters:
         - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
           name: workspaceId
-          type: integer
-          format: int64
+          type: string
           required: true
           description: specifies which workspace
         - in: path

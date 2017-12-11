@@ -1,29 +1,31 @@
-<button id="report-bug" class="bug-report btn btn-primary" (click)="reportBug()">Report A Bug</button>
-<clr-modal [(clrModalOpen)]="reporting" [clrModalSize]="'lg'">
-  <h3 class="modal-title">Report Bug</h3>
-  <div class="modal-body">
+<div class="bug-report">
+  <clr-modal [(clrModalOpen)]="reporting" [clrModalSize]="'lg'">
+    <h3 class="modal-title">Report Bug</h3>
+    <div class="modal-body">
 
-    <div class="form-area">
-      <div class="form-section">
-        <label>Description:</label>
-        <input id="bug-report-short-descr" type="text" class="input" name="short-description" autofocus
-            [(ngModel)]="shortDescription">
-      </div>
-      <div class="form-section">
-        <label>How to Reproduce:</label>
-        <textarea id="bug-report-repro-steps" class="input" name="repro-steps"
-            [(ngModel)]="reproSteps">
-        </textarea>
-      </div>
-      <div class="form-section">
-        <label>Contact Email:</label>
-        <input id="bug-report-contact-email" type="text" class="input" name="contact-email"
-            [(ngModel)]="contactEmail">
+      <div class="form-area">
+        <div class="form-section">
+          <label>Description:</label>
+          <input id="bug-report-short-descr" type="text" class="input" name="short-description" autofocus
+              [(ngModel)]="shortDescription">
+        </div>
+        <div class="form-section">
+          <label>How to Reproduce:</label>
+          <textarea id="bug-report-repro-steps" class="input" name="repro-steps"
+              [(ngModel)]="reproSteps">
+          </textarea>
+        </div>
+        <div class="form-section">
+          <label>Contact Email:</label>
+          <input id="bug-report-contact-email" type="text" class="input" name="contact-email"
+              [(ngModel)]="contactEmail">
+        </div>
       </div>
     </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="reporting=false">Cancel</button>
-    <button id="send-bug-report" type="button" class="btn btn-primary" (click)="send()">Send</button>
-  </div>
-</clr-modal>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="reporting=false">Cancel</button>
+      <button id="send-bug-report" type="button" class="btn btn-primary" (click)="send()">Send</button>
+    </div>
+  </clr-modal>
+  <button id="report-bug" class="btn btn-primary" (click)="reportBug()">Report A Bug</button>
+</div>

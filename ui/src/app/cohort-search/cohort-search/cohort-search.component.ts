@@ -1,5 +1,11 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -15,6 +21,9 @@ import {
   wizardOpen,
 } from '../redux';
 
+const pixel = (n: number) => `${n}px`;
+const ONE_REM = 24;  // value in pixels
+
 @Component({
   selector: 'app-cohort-search',
   templateUrl: './cohort-search.component.html',
@@ -29,6 +38,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(chartData) chartData$: Observable<List<any>>;
   @select(isRequstingTotal) isRequesting$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
+
+  @ViewChild('wrapper') _wrapper;
 
   private subscription;
 
@@ -51,9 +62,22 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         this.actions.runAllRequests();
       }
     });
+    this._updateWrapperDimensions();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this._updateWrapperDimensions();
+  }
+
+  _updateWrapperDimensions() {
+    const wrapper = this._wrapper.nativeElement;
+
+    const {top} = wrapper.getBoundingClientRect();
+    wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 }
