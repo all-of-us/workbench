@@ -1,8 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
@@ -10,20 +7,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +37,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortReviewControllerTest {
@@ -57,7 +61,7 @@ public class CohortReviewControllerTest {
     ParticipantCounter participantCounter;
 
     @Mock
-    WorkspaceDao workspaceDao;
+    WorkspaceService workspaceService;
 
     @Mock
     CodeDomainLookupService codeDomainLookupService;
@@ -86,7 +90,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -103,7 +107,7 @@ public class CohortReviewControllerTest {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
 
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -124,7 +128,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -145,7 +149,7 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -160,8 +164,8 @@ public class CohortReviewControllerTest {
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter, workspaceDao);
+        verify(workspaceService, times(1)).getRequired(namespace, name);
+        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter, workspaceService);
     }
 
     @Test
@@ -218,7 +222,7 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(participantCounter.buildParticipantIdQuery(request, 200)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -231,7 +235,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
+        verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -239,7 +243,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -288,7 +292,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -298,17 +302,19 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
         long participantId = 1;
+        long workspaceId = 1;
         ModifyCohortStatusRequest cohortStatusRequest = new ModifyCohortStatusRequest();
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1L);
+        cohort.setWorkspaceId(workspaceId);
 
         Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(2);
         workspace.setWorkspaceNamespace(workspaceNamespace);
         workspace.setFirecloudName("bad" + workspaceName);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
 
         try {
             reviewController.updateParticipantCohortStatus(
@@ -325,8 +331,8 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -336,17 +342,19 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
         long participantId = 1;
+        long workspaceId = 1;
         ModifyCohortStatusRequest cohortStatusRequest = new ModifyCohortStatusRequest();
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1L);
+        cohort.setWorkspaceId(workspaceId);
 
         Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(1);
         workspace.setWorkspaceNamespace(workspaceNamespace);
         workspace.setFirecloudName(workspaceName);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(null);
 
         try {
@@ -364,10 +372,10 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
+        verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
         verify(cohortReviewDao, times(1))
                 .findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -377,12 +385,14 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
         long participantId = 1;
+        long workspaceId = 1;
         ModifyCohortStatusRequest cohortStatusRequest = new ModifyCohortStatusRequest();
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1);
+        cohort.setWorkspaceId(workspaceId);
 
         Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
         workspace.setWorkspaceNamespace(workspaceNamespace);
         workspace.setFirecloudName(workspaceName);
 
@@ -390,7 +400,7 @@ public class CohortReviewControllerTest {
         cohortReview.setCohortReviewId(1);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(participantCohortStatusDao
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
@@ -411,13 +421,13 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
+        verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
         verify(cohortReviewDao, times(1))
                 .findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     @Test
@@ -427,13 +437,15 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
         long participantId = 1;
+        long workspaceId = 1;
         ModifyCohortStatusRequest cohortStatusRequest = new ModifyCohortStatusRequest();
         cohortStatusRequest.setStatus(CohortStatus.INCLUDED);
 
         Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1);
+        cohort.setWorkspaceId(workspaceId);
 
         Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
         workspace.setWorkspaceNamespace(workspaceNamespace);
         workspace.setFirecloudName(workspaceName);
 
@@ -447,7 +459,7 @@ public class CohortReviewControllerTest {
         participantCohortStatus.setParticipantKey(key);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceDao.findOne(cohort.getWorkspaceId())).thenReturn(workspace);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(participantCohortStatusDao
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
@@ -468,13 +480,13 @@ public class CohortReviewControllerTest {
         assertEquals(expectedPcs, pcs);
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceDao, times(1)).findOne(cohort.getWorkspaceId());
+        verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
         verify(cohortReviewDao, times(1))
                 .findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceDao, participantCounter);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
     private void assertFindByCohortIdAndCdrVersionId(String namespace,
