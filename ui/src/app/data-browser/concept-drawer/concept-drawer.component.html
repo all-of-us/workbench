@@ -28,24 +28,24 @@
 
   </h5>
     <div class="col-sm-12" style="display:flex;justify-content: center">
-      <!-- <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route != 'PPI'" (click)="graphBool(null)">
+      <!-- <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route != 'PPI'" (click)="toggleGraphs(null)">
         Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
       </button>
-      <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route == 'PPI'" (click)="graphBool(null)">
+      <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route == 'PPI'" (click)="toggleGraphs(null)">
         Answers <clr-icon size="16" shape="bar-chart"></clr-icon>
       </button> -->
 
-      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_table}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="graphBool(null, 'source-table')">
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_table}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null, 'source-table')">
         Source Details <clr-icon size="16" shape="view-list"></clr-icon>
       </button>
-      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="graphBool(null,'source-graph')">
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null,'source-graph')">
         Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
       </button>
-      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id =='PPI'" (click)="graphBool(null, 'ppi-answers')">
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id =='PPI'" (click)="toggleGraphs(null, 'ppi-answers')">
         Answers <clr-icon size="16" shape="bar-chart"></clr-icon>
       </button>
       <div *ngFor="let analysis of analyses">
-        <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': analysis.showgraph}" *ngIf="analysis.results && analysis.results.length>0" (click)="graphBool(analysis)">
+        <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{ 'btn-primary': analysis_show_graph[analysis.analysis_id] }" *ngIf="analysis.results && analysis.results.length>0" (click)="toggleGraphs(analysis)">
           {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
         </button>
       </div>
@@ -55,8 +55,6 @@
 
     <!-- Only show break down charts if we have concept counts -->
     <div class="row break-down-charts">
-      <!-- <div style="height:100%" [ngClass]="{'col-sm-12':singleGraph.length==1, 'col-sm-6':singleGraph.length>1 }" *ngFor=" let analysis of analyses;let i=index "> -->
-
       <div *ngIf="concept.count_value"  style="height:100%;" class="col-sm-12">
         <!-- Children column chart -->
         <div class="children-chart col-sm-12">
@@ -65,7 +63,7 @@
 
         <!-- Analysis break down charts -- gender and age and more maybe -->
         <div class="col-sm-12" *ngFor=" let analysis of analyses;let i=index ">
-          <app-chart class="col-sm-12" *ngIf="analysis.results && analysis.results.length>0 && analysis.showgraph" [redraw]="true" [concepts]="null" [analysis]="analysis"></app-chart>
+          <app-chart class="col-sm-12" *ngIf="analysis.results && analysis.results.length>0 && analysis_show_graph[analysis.analysis_id] "[concepts]="null" [analysis]="analysis"></app-chart>
         </div>
 
       </div>
@@ -93,10 +91,10 @@
                     </clr-tooltip-content>
                   </clr-tooltip>
                 </clr-dg-cell>
-                <clr-dg-cell *ngIf="route != 'PPI'">{{item.domain_id}}</clr-dg-cell>
-                <clr-dg-cell *ngIf="route != 'PPI'">{{item.vocabulary_id}}</clr-dg-cell>
-                <clr-dg-cell *ngIf="route != 'PPI'">{{item.concept_code}}</clr-dg-cell>
-                <clr-dg-cell>{{item.count_value}} out of total participants</clr-dg-cell>
+                <clr-dg-cell >{{item.domain_id}}</clr-dg-cell>
+                <clr-dg-cell >{{item.vocabulary_id}}</clr-dg-cell>
+                <clr-dg-cell >{{item.concept_code}}</clr-dg-cell>
+                <clr-dg-cell>{{item.count_value}} of of {{achillesService.getTotalParticipants()}}</clr-dg-cell>
                 <clr-dg-row-detail>
                   <!-- <app-one-concept style="width:100%;" *clrIfExpanded="item.count_value"  [concept]="item" [analyses]="analyses"></app-one-concept>-->
                   <app-concept-drawer style="width:100%;" *clrIfExpanded="item.count_value"  [concept]="item" [analyses]="analyses"></app-concept-drawer>

@@ -19,6 +19,8 @@ export class HomeAsideComponent implements OnInit {
   ngOnInit() {
 
   }
+  // Save selected index of item they clicked
+  // and send selected item to parent
   passData(item, index) {
         this.selectedRow = index;
         this.infoEmit.emit(item);

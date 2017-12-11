@@ -11,11 +11,11 @@
       <div *ngIf="concept.count_value">
 
         <div class="col-sm-12" style="display:flex;justify-content: center; padding-bottom: .5rem;">
-          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0" (click)="graphBool(null)">
+          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0" (click)="toggleGraphs(null)">
             Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
           </button>
           <div *ngFor="let analysis of analyses">
-            <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': analysis.showgraph}" *ngIf="analysis.results.length>0" (click)="graphBool(analysis)">
+            <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': analysis.showgraph}" *ngIf="analysis.results.length>0" (click)="toggleGraphs(analysis)">
               {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
             </button>
           </div>

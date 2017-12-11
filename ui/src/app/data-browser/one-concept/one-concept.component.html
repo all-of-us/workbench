@@ -7,33 +7,33 @@
     <div class="card-text">
       <table style="width:100%; margin-bottom : 1rem; padding-bottom:.7rem; border-bottom:1px solid #eeeeee" class="text-center">
         <tr>
-          <th style="width:7rem; font-size:1.2rem;">Count:</th>
-          <th style="width:7rem; font-size:1.2rem;">Prevalence:</th>
-          <th style="width:7rem; font-size:1.2rem;">Vocabulary and Concept Code:</th>
+          <th style="">Count:</th>
+          <th style="">Prevalence:</th>
+          <th style="">Code:</th>
         </tr>
         <tr>
           <td>{{concept.count_value | number}}</td>
           <td>
             {{concept.prevalence | percent}}
           </td>
-          <td>{{concept.vocabulary_id}} {{concept.code}}</td>
+          <td>{{concept.vocabulary_id}} {{concept.concept_code}}</td>
         </tr>
       </table>
       <div *ngIf="concept.count_value">
         <div class="col-sm-12" style="display:flex;justify-content: center; padding-bottom: .5rem;">
 
-          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_table}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="graphBool(null, 'source-table')">
+          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_table}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null, 'source-table')">
             Source Details <clr-icon size="16" shape="view-list"></clr-icon>
           </button>
-          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="graphBool(null,'source-graph')">
+          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null,'source-graph')">
             Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
           </button>
-          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id =='PPI'" (click)="graphBool(null, 'ppi-answers')">
+          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id =='PPI'" (click)="toggleGraphs(null, 'ppi-answers')">
             Answers <clr-icon size="16" shape="bar-chart"></clr-icon>
           </button>
 
           <div *ngFor="let analysis of analyses">
-            <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': analysis.showgraph}" *ngIf="analysis.results.length>0" (click)="graphBool(analysis)">
+            <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': analysis_show_graph[analysis.analysis_id] }" *ngIf="analysis.results.length>0" (click)="toggleGraphs(analysis)">
               {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
             </button>
           </div>
@@ -88,7 +88,7 @@
           </div>
           <div style="width:100%" *ngFor=" let analysis of analyses;let i=index ">
             <div style="width:100%">
-              <app-chart style="width:100%" *ngIf="analysis.results.length>0 && analysis.showgraph" [redraw]="true" [analysis]="analysis"></app-chart>
+              <app-chart style="width:100%" *ngIf="analysis.results.length>0 && analysis_show_graph[analysis.analysis_id]" [redraw]="true" [analysis]="analysis"></app-chart>
             </div>
           </div>
         </div>

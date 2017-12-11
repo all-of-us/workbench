@@ -380,7 +380,6 @@ export class Analysis implements IAnalysis {
       if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
           color_stratum_index = last_stratum_index;
       }
-      console.log(this.results[i]);
       const color_stratum_value = this.results[i].stratum[color_stratum_index];
       let name = this.results[i].stratum_name[last_stratum_index];
       const color = this.colors.stratum_colors[color_stratum_value];
@@ -389,12 +388,9 @@ export class Analysis implements IAnalysis {
       } else if (name == null) {
           name = 'Other';
       }
-      console.log('Color is color ', color);
       data.push({ name: name, y: this.results[i].count_value});
     }
-    // TODO: make numaric sort desending
-      console.log('series data', data);
-   // chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
+
     return [{ name: this.analysis_name, colorByPoint: true, data: data }];
   }
 
@@ -409,7 +405,6 @@ export class Analysis implements IAnalysis {
         if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
             color_stratum_index = last_stratum_index;
         }
-        console.log(this.results[i]);
         const color_stratum_value = this.results[i].stratum[color_stratum_index];
         let name = this.results[i].stratum_name[last_stratum_index];
         const color = this.colors.stratum_colors[color_stratum_value];
@@ -418,7 +413,7 @@ export class Analysis implements IAnalysis {
         } else if (name == null) {
             name = 'Other';
         }
-        console.log('Color is color ', color);
+
         data.push({ name: name, y: this.results[i].count_value});
     }
     return [{ name: this.analysis_name, colorByPoint: true, data: data }];
@@ -435,7 +430,6 @@ export class Analysis implements IAnalysis {
     const chartSeries = [{ data: [] }];
     for (let i = 0; i < this.results.length; i++) {
       let name;
-      console.log(this.results[i]);
       const last_stratum_index = this.results[i].stratum.length - 1;
       let color_stratum_index = this.colors.stratum_index;
       if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
@@ -449,11 +443,8 @@ export class Analysis implements IAnalysis {
       } else if (name == null) {
         name = 'Other';
       }
-      console.log('Color is color ', color);
       chartSeries[0].data.push({ name: name, y: this.results[i].count_value, color: color});
-
     }
-    // TODO: make numaric sort desending
     chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
     return chartSeries;
   }

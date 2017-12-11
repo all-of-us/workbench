@@ -39,11 +39,11 @@
       <app-placeholder></app-placeholder>
     </div>
     <div *ngIf="conceptsArray.length && !toggleAdv">
-      <app-one-concept class="mobile-hide" (removeOneEmit)="removeOne()" [concept]="clickedConcept" [analyses]="analysisMobile" [routeId]="routeId"></app-one-concept>
+      <app-one-concept (removeOneEmit)="removeOne()" [concept]="clickedConcept" ></app-one-concept>
     </div>
 
     <div *ngIf="toggleAdv && conceptsArray.length">
-      <app-my-concepts class="mobile-hide" (resetEmit)="reset()" (removalEmit)="remove($event)" [route]="routeId" (addEmit)="itemSelected($event)" [newConcept]="clickedConcept" [conceptsArray]="conceptsArray"></app-my-concepts>
+      <app-my-concepts class="mobile-hide" (resetEmit)="reset()" (removalEmit)="remove($event)"  (addEmit)="itemSelected($event)" [newConcept]="clickedConcept" [conceptsArray]="conceptsArray"></app-my-concepts>
     </div>
 
 

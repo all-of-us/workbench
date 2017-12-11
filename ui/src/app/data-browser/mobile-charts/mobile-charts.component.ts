@@ -74,7 +74,7 @@ export class MobileChartsComponent implements OnInit {
     this.removalEmit.emit(node);
   }
 
-  graphBool(analysis) {
+  toggleGraphs(analysis) {
     if (analysis == null) {
       // SHow children graph
       if (this.show_source_graph === false) {

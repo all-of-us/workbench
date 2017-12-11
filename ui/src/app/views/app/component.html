@@ -9,7 +9,7 @@
 </ng-template>
 <ng-template #notSignedIn>
 
-  <div *ngIf="currentUrl === '/data-browser/home' || currentUrl === '/data-browser/browse'">
+  <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === 0">
     <div class="page-container">
       <div style="height: 3rem;">
         <ng-template *ngIf="true; then logoImages"></ng-template>
@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <div *ngIf="currentUrl !== '/data-browser/home' && currentUrl !== '/data-browser/browse'"class="sign-in-container">
+  <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
     <h6> {{currentUrl}} </h6>
     <div class="sign-in-inner-container" [style.margin-top]="getTopMargin()">
       <div style="height: 2rem; margin: 0.5rem 2rem;">

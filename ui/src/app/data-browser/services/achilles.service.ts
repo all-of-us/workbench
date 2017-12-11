@@ -9,37 +9,44 @@ import { DomainClass } from '../DomainClasses';
 
 @Injectable()
 export class AchillesService {
+  private totalParticipants: number;
+
   constructor(
      private api: DataBrowserService
-  ) { }
+  ) {
+    api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+  }
   private handleError(error: any): Promise<any> {
     console.error('An error occurred: ', error);
     return Promise.reject(error.message || error);
   }
 
-    // Return an Analysis object with results for the concepts array.
-    // This analysis obj can then be passed to app-chart
-    makeConceptsCountAnalysis(concepts: IConcept[]): Analysis {
-        const obj = {
-            analysisId: 3000,
-            analysisName: 'Number of Participants',
-            results: [],
-            chartType: 'column',
-            dataType: 'counts',
-            stratum1Name: ['Concept id']
-        };
-        for (let i = 0; i < concepts.length; i++) {
-            const ar =  new AnalysisResult({
-                analysisId: 3000,
-                stratum1Name: concepts[i].concept_name,
-                stratum1: concepts[i].concept_id,
-                countValue: concepts[i].count_value
-            });
-            obj.results.push(ar);
-        }
-        const a =  new Analysis(obj);
-        return a;
-    }
+  getTotalParticipants() {
+    return this.totalParticipants;
+  }
+  // Return an Analysis object with results for the concepts array.
+  // This analysis obj can then be passed to app-chart
+  makeConceptsCountAnalysis(concepts: IConcept[]): Analysis {
+      const obj = {
+          analysisId: 3000,
+          analysisName: 'Number of Participants',
+          results: [],
+          chartType: 'column',
+          dataType: 'counts',
+          stratum1Name: ['Concept id']
+      };
+      for (let i = 0; i < concepts.length; i++) {
+          const ar =  new AnalysisResult({
+              analysisId: 3000,
+              stratum1Name: concepts[i].concept_name,
+              stratum1: concepts[i].concept_id,
+              countValue: concepts[i].count_value
+          });
+          obj.results.push(ar);
+      }
+      const a =  new Analysis(obj);
+      return a;
+  }
 
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
 

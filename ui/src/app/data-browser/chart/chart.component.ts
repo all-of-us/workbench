@@ -57,41 +57,16 @@ export class ChartComponent implements OnChanges {
   ngOnChanges() {
     this.chartOptions = null;
     if (this.concepts && this.concepts.length) {
+      console.log("Have concepts in chart component for count analysis");
       const a  = this.achillesService.makeConceptsCountAnalysis(this.concepts);
       this.chartOptions = a.hcChartOptions();
       this.chartType = a.chartType;
     } else if (this.analysis && this.analysis.results.length) {
+      console.log("have analysis in chart comp");
       // HC automatically redraws when changing chart options
       this.chartOptions = this.analysis.hcChartOptions();
       this.chartType = this.analysis.chartType;
     }
   }
 
-  makeConceptsAnalysis(concepts: IConcept[]): Analysis {
-
-    console.log('Making concepts analysis ', concepts);
-    // Make an analysis object id = 3000 with results to chart these concepts results in histogram
-    const obj = {
-      analysis_id: 3000,
-      analysis_name: 'Number of Participants by Source Concepts',
-      results: [],
-      chartType: 'column',
-        dataType: 'counts'
-    };
-
-    for (let i = 0; i < this.concepts.length; i++) {
-      const resultObj = {
-        analysis_id: 3000,
-        stratum_1_name: this.concepts[i].concept_name,
-        stratum_1: this.concepts[i].concept_id,
-        count_value: this.concepts[i].count_value
-      };
-      const series =  AnalysisResult.clone(resultObj);
-      obj.results.push(series);
-    }
-    const a =  Analysis.analysisClone(obj);
-    console.log('New analysis', a);
-    //
-    return a;
-  }
 }

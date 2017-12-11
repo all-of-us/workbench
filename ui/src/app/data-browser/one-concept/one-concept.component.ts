@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import { AchillesService } from '../services/achilles.service';
+import {IAnalysis} from '../AnalysisClasses';
 
 @Component({
   selector: 'app-one-concept',
@@ -7,22 +8,14 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./one-concept.component.css']
 })
 export class OneConceptComponent implements OnChanges {
-  // @Input() newConcept:IConcept; // Last concept added
-  @Input() redraw;
-  @Input() concept;
-  @Input() analyses;
-  @Input() routeId;
-  @Output() removeOneEmit = new EventEmitter();
-  singleGraph = [];
 
-  // @Input() ppi
-  // @Output() onParentSelected:EventEmitter<any> = new EventEmitter();
-  initialized = false; // Flag to set initialized
-  arrayConcept = [];
+  @Input() concept;
+  @Output() removeOneEmit = new EventEmitter();
+
   show_source_graph = false;
   show_source_table = false;
-
-  randNum;
+  analyses: IAnalysis[];
+  analysis_show_graph = { }; // flags for toggling analyses graphs off on and on
 
   constructor(private achillesService: AchillesService) {
 
@@ -30,7 +23,7 @@ export class OneConceptComponent implements OnChanges {
 
   //  makeChartOptions = this.analysis.hcChartOptions.bind(this.analysis);
   ngOnChanges() {
-    const aids = [3001, 3002];
+    const aids = [3101, 3102];
     this.show_source_graph = false;
     this.show_source_table = false;
 
@@ -38,33 +31,10 @@ export class OneConceptComponent implements OnChanges {
       .then(analyses => {
         // this.hideTen = true;
         this.analyses = analyses;
-        // Clone each analysis on the concept object so they have their own copy for results
-        // This is run every time for a clarity drawer .
-        const aclones = [];
+        // Initialieze show graph for analyses
         for (const a of this.analyses) {
-          //
-          aclones.push(this.achillesService.cloneAnalysis(a));
+          this.analysis_show_graph[a.analysis_id] = false;
         }
-        this.analyses = aclones;
-        //
-        this.achillesService.runAnalysis(this.analyses, this.concept);
-        this.initialized = true;
-        if (!this.concept.children) {
-          this.concept.children = [];
-        }
-
-        //  Initialize first graph to show. If we have children show that. Otherwise first analyses
-        if (this.concept.children.length > 0) {
-          this.show_source_table = true;
-          this.show_source_graph = false;
-          for (let i = 0; i < this.analyses.length; i++) {
-            this.analyses[i].showgraph = false;
-          }
-        } else if (this.analyses.length > 0) {
-          this.analyses[0].showgraph = true;
-        }
-
-        this.randNum = Math.random();
 
         // Get any maps to parents and children and add them to the concept
         if (this.concept.vocabulary_id !== 'PPI') {
@@ -77,6 +47,17 @@ export class OneConceptComponent implements OnChanges {
               this.concept.parents = data;
             });
         }
+
+        this.achillesService.runAnalysis(this.analyses, this.concept);
+        //  Initialize first graph to show. If we have children show that. Otherwise first analyses
+        if (this.concept.children.length > 0) {
+          this.show_source_table = true;
+          this.show_source_graph = false;
+
+        } else if (this.analyses.length > 0) {
+          this.analysis_show_graph[analyses[0].analysis_id] = true;
+        }
+
       }); // end of .subscribe
   } // end of ngOnChanges()
 
@@ -86,8 +67,10 @@ export class OneConceptComponent implements OnChanges {
     this.removeOneEmit.emit(node);
   }
 
-  graphBool(analysis, item) {
-    // Toggle on graph items
+
+  // Handle graph button toggle click
+  toggleGraphs(analysis, item) {
+
     if (analysis === null) {
       if (item === 'source-graph') {
         // toggle children graph
@@ -104,25 +87,23 @@ export class OneConceptComponent implements OnChanges {
       }
       if (this.show_source_table || this.show_source_graph) {
         for (const a of this.analyses) {
-          a.showgraph = false;
+          this.analysis_show_graph[a.analysis_id] = false;
         }
       }
 
       return;
     } else {
-      for (let i = 0; i < this.analyses.length; i++) {
-        if (this.analyses[i] === analysis) {
-          if (this.analyses[i].showgraph === false
-              || typeof (this.analyses[i].showgraph) === 'undefined') {
-            this.analyses[i].showgraph = true;
+      for (const a of this.analyses) {
+        if (a.analysis_id === analysis.analysis_id) {
+          if (this.analysis_show_graph[a.analysis_id] === false) {
+            this.analysis_show_graph[a.analysis_id] = true;
             this.show_source_graph = false;
             this.show_source_table = false;
           } else {
-            this.analyses[i].showgraph = false;
-            // this.singleGraph.splice(this.analyses[i], 1)
+            this.analysis_show_graph[a.analysis_id] = false;
           }
         } else {
-          this.analyses[i].showgraph = false;
+          this.analysis_show_graph[a.analysis_id] = false;
         }
       }
     }
