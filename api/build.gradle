@@ -197,7 +197,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
-  compile 'com.google.cloud:google-cloud-bigquery:+'
+  compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
   compile 'com.google.cloud:google-cloud-storage:1.8.0'
   compile 'com.google.code.gson:gson:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
