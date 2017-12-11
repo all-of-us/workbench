@@ -380,7 +380,7 @@ export class Analysis implements IAnalysis {
       if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
           color_stratum_index = last_stratum_index;
       }
-      const color_stratum_value = this.results[i].stratum[color_stratum_index];
+      // const color_stratum_value = this.results[i].stratum[color_stratum_index];
       let name = this.results[i].stratum_name[last_stratum_index];
       // const color = this.colors.stratum_colors[color_stratum_value];
       if (!name) {
@@ -405,9 +405,9 @@ export class Analysis implements IAnalysis {
         if (color_stratum_index === -1 || color_stratum_index > last_stratum_index) {
             color_stratum_index = last_stratum_index;
         }
-        const color_stratum_value = this.results[i].stratum[color_stratum_index];
+        // const color_stratum_value = this.results[i].stratum[color_stratum_index];
         let name = this.results[i].stratum_name[last_stratum_index];
-        const color = this.colors.stratum_colors[color_stratum_value];
+        // const color = this.colors.stratum_colors[color_stratum_value];
         if (!name) {
             name = 'Other';
         } else if (name == null) {
