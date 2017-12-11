@@ -4,12 +4,15 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
+const CDR_VERSION = 1;
+
 import {
   Cohort,
   CohortReview,
   CohortReviewService,
   CohortStatus,
   CreateReviewRequest,
+  ModifyCohortStatusRequest,
   ParticipantCohortStatus,
   ReviewStatus,
 } from 'generated';
@@ -23,26 +26,35 @@ const ONE_REM = 24;  // value in pixels
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
+  readonly CohortStatus = CohortStatus;
+
   reviewParamForm = new FormGroup({
     numParticipants: new FormControl(),
   });
 
+  subjectStatus = new FormControl();
+
+  private activeSubject: ParticipantCohortStatus | null;
   private cohort: Cohort;
   private review: CohortReview;
-
-  private open = false;
   private loading = false;
   private subscription: Subscription;
+  private subjectNavOpen = false;
+  private statusBarOpen = false;
 
   @ViewChild('wrapper') _wrapper;
+  @ViewChild('createCohortModal') createCohortModal;
   @ViewChild('subjectNav') _subjectNav;
   @ViewChild('openNav') _openNav;
-  @ViewChild('createCohortModal') createCohortModal;
+  @ViewChild('statusBar') _statusBar;
+  @ViewChild('openStatus') _openStatus;
 
   get wrapper() { return this._wrapper.nativeElement; }
+  get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
   get openNav() { return this._openNav.nativeElement; }
   get subjectNav() { return this._subjectNav.nativeElement; }
-  get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
+  get openStatus() { return this._openStatus.nativeElement; }
+  get statusBar() { return this._statusBar.nativeElement; }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -64,6 +76,40 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         ]));
       }
     });
+
+    const [detailview, overview] = this.route.firstChild.params
+      .map(params => params.subjectID)
+      .distinctUntilChanged()
+      .partition(id => id);  // undefined means overview, not detail view
+
+    const detailviewSub = detailview
+      .map(id => +id)
+      .map(id => (pstat: ParticipantCohortStatus): boolean => pstat.participantId === id)
+      .map(finder => this.review.participantCohortStatuses.find(finder))
+      .subscribe(subject => {
+        console.log(`DetailView changing to participant: ${subject.participantId}`);
+        this.subjectNavOpen = false;
+        this.activeSubject = subject;
+        this.subjectStatus.enable();
+        this.subjectStatus.setValue(subject.status, {emitEvent: false});
+      });
+
+    const statusChangerSub = this.subjectStatus.valueChanges
+      .switchMap(status => {
+        const request = <ModifyCohortStatusRequest>{status};
+        const {ns, wsid, cid} = this.route.snapshot.params;
+        return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, CDR_VERSION, request);
+      })
+      .map(resp =>
+        this.review.participantCohortStatuses.map(statObj =>
+          statObj.participantId === resp.participantId
+            ? resp
+            : statObj
+      ))
+      .subscribe(newStatusSet => this.review.participantCohortStatuses = newStatusSet);
+
+    this.subscription.add(detailviewSub);
+    this.subscription.add(statusChangerSub);
   }
 
   get maxParticipants() {
@@ -84,27 +130,39 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
   createReview() {
     console.log('Creating review... ');
-    const params = this.route.snapshot.params;
-    /* TODO: wire up CDR version */
-    this.reviewAPI.createCohortReview(
-      params.ns,
-      params.wsid,
-      params.cid,
-      1,
-      <CreateReviewRequest>{size: this.numParticipants.value},
-    ).subscribe(review => {
-      this.review = review;
-      this.createCohortModal.close();
-    });
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const request = <CreateReviewRequest>{size: this.numParticipants.value};
+    this.reviewAPI
+      .createCohortReview(ns, wsid, cid, CDR_VERSION, request)
+      .subscribe(review => {
+        this.review = review;
+        this.createCohortModal.close();
+      });
+  }
+
+  selectSubject(subject: ParticipantCohortStatus) {
+    this.subjectNavOpen = false;
+    this.activeSubject = subject;
+    this.subjectStatus.enable();
+    this.subjectStatus.setValue(subject.status, {emitEvent: false});
+  }
+
+  goToOverview() {
+    this.subjectNavOpen = false;
+    this.activeSubject = null;
+    this.subjectStatus.disable();
   }
 
   @HostListener('document:click', ['$event'])
   onClick(event) {
-    if (this.subjectNav.contains(event.target)
-        || this.openNav.contains(event.target)) {
-      return;
+    if (!(this.subjectNav.contains(event.target)
+        || this.openNav.contains(event.target))) {
+      this.subjectNavOpen = false;
     }
-    this.open = false;
+    if (!(this.statusBar.contains(event.target)
+        || this.openStatus.contains(event.target))) {
+      this.statusBarOpen = false;
+    }
   }
 
   @HostListener('window:resize')

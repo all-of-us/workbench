@@ -3,17 +3,16 @@
 
   <!-- Main subject navigation sidebar -->
   <div #subjectNav
-    class="subject-nav"
-    [class.subject-nav-open]="open">
-    <a class="closebtn" (click)="open = false">&times;</a>
-    <a (click)="open = false"
+    class="sidebar subject-nav"
+    [class.subject-nav-open]="subjectNavOpen">
+    <a class="closebtn" (click)="subjectNavOpen = false">&times;</a>
+    <a (click)="goToOverview()"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
     <a *ngFor="let subject of review.participantCohortStatuses"
-      (click)="open = false"
       [routerLink]="[subject.participantId]"
       routerLinkActive="active">
       {{ subject.participantId}}
@@ -24,15 +23,51 @@
     </a>
   </div>
 
-  <!-- Main content area for the Cohort Review Sub-application -->
-  <div class="cohort-review-main"
-    [style.margin-left]="open ? '300px' : 0">
-    <button #openNav (click)="open = true">Open</button>
-    <router-outlet></router-outlet>
+  <!-- Annotations & Status sidebar -->
+  <div #statusBar
+    class="sidebar status-bar"
+    [class.status-bar-open]="statusBarOpen">
+    <a class="closebtn" (click)="statusBarOpen = false">&times;</a>
+    <div class="form-group">
+      <label>Participant Review Status</label>
+      <div class="radio">
+        <input type="radio" name="subjectStatus" id="subject-included-status"
+          [formControl]="subjectStatus"
+          value="CohortStatus.INCLUDED">
+        <label for="subject-included-status">Include</label>
+      </div>
+      <div class="radio">
+        <input type="radio" name="subjectStatus" id="subject-excluded-status"
+          [formControl]="subjectStatus"
+          value="CohortStatus.EXCLUDED">
+        <label for="subject-excluded-status">Exclude</label>
+      </div>
+      <div class="radio">
+        <input type="radio" name="subjectStatus" id="subject-needs-further-review"
+          [formControl]="subjectStatus"
+          value="CohortStatus.NEEDSFURTHERREVIEW">
+        <label for="subject-needs-further-review">Needs Further Review</label>
+      </div>
+      <div class="radio">
+        <input type="radio" name="subjectStatus" id="subject-unreviewed"
+          [formControl]="subjectStatus"
+          value="CohortStatus.NOTREVIEWED">
+        <label for="subject-unreviewed">Unreviewed</label>
+      </div>
+    </div>
   </div>
 
-  <!-- Sidebar is active overlay -->
-  <div class="blanket" [class.blanket-active]="open"></div>
+  <!-- Sidebar-is-active overlay -->
+  <div class="blanket" [class.blanket-active]="subjectNavOpen || statusBarOpen"></div>
+
+  <!-- Main content area for the Cohort Review Sub-application -->
+  <div class="cohort-review-main"
+    [style.margin-left]="subjectNavOpen ? '300px' : 0"
+    [style.margin-right]="statusBarOpen ? '300px' : 0">
+    <button #openNav (click)="subjectNavOpen = true">Open</button>
+    <button #openStatus (click)="statusBarOpen = true">Open</button>
+    <router-outlet></router-outlet>
+  </div>
 
   <!-- Cohort creation modal -->
   <clr-modal
