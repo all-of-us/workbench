@@ -139,7 +139,9 @@ public class CohortReviewControllerTest {
         long cdrVersionId = 1;
 
         CohortReview cohortReview = new CohortReview();
+        cohortReview.setCohortId(cohortId);
         Cohort cohort = new Cohort();
+        cohort.setCohortId(cohortId);
         cohort.setWorkspaceId(0);
 
         Workspace workspace = new Workspace();
@@ -156,9 +158,7 @@ public class CohortReviewControllerTest {
             fail("Should have thrown a BadRequestException!");
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: No Cohort definition matching cohortId: "
-                         + cohortId
-                         + ", workspaceNamespace: " + namespace
-                         + ", workspaceId: " + name,
+                         + cohortId,
                          e.getMessage());
         }
 

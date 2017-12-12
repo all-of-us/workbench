@@ -136,16 +136,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        String definition = cohort.getCriteria();
-        if (definition == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort definition matching cohortId: %s, workspaceNamespace: %s, workspaceId: %s",
-                            cohortId, workspaceNamespace, workspaceId));
-        }
-
-        SearchRequest searchRequest = new Gson().fromJson(definition, SearchRequest.class);
+        SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
@@ -222,16 +215,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
             Cohort cohort = findCohort(cohortId);
             //this validates that the user is in the proper workspace
-            findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+            validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-            String definition = cohort.getCriteria();
-            if (definition == null) {
-                throw new BadRequestException(
-                        String.format("Invalid Request: No Cohort definition matching cohortId: %s, workspaceNamespace: %s, workspaceId: %s",
-                                cohortId, workspaceNamespace, workspaceId));
-            }
-
-            SearchRequest request = new Gson().fromJson(definition, SearchRequest.class);
+            SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
             /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
             codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
@@ -288,7 +274,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         CohortReview cohortReview = findCohortReview(cohortId, cdrVersionId);
 
@@ -315,14 +301,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return cohort;
     }
 
-    private Workspace findWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
+    private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
         if (workspace.getWorkspaceId() != workspaceId) {
             throw new BadRequestException(
                     String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
         }
-        return workspace;
     }
 
     private CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
@@ -334,6 +319,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             cohortId, cdrVersionId));
         }
         return cohortReview;
+    }
+
+    private String getCohortDefinition(Cohort cohort) {
+        String definition = cohort.getCriteria();
+        if (definition == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
+        }
+        return definition;
     }
 
 }
