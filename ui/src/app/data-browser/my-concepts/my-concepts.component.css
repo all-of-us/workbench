@@ -1,0 +1,15 @@
+.datagrid-row:hover {
+  background: rgb(252, 252, 252)!important
+}
+
+.scroll-container {
+  max-height: 63.4rem;
+  overflow-y: auto
+}
+
+.limit-chr {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 3rem
+}

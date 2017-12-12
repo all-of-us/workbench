@@ -1,0 +1,124 @@
+<form class="form-block" [formGroup]="myForm" (ngSubmit)="searchData(myForm.value);sendString(myForm.value.search);logSearchParams(myForm.value)" novalidate>
+  <div class="row text-input-row right-gutter">
+    <input value="{{savedSearchStringAdv}}" type="text" placeholder="Search by name or code or drug ingredient" formControlName="search" class="form-control col-sm-11 col-md-11" name="search">
+    <input type="hidden" id="standard_concept_input" formControlName="standard_concept">
+    <div class="col-sm-1 col-md-1">
+
+      <button id="go" (click)="sendString(myForm.value.search)" class="btn btn-secondary go-btn">Go</button>
+    </div>
+  </div>
+
+  <!-- <div class="row filter">
+    <div>
+      <label style="padding-right:.5rem;" for="observed" class="custom-control custom-checkbox">
+        <input  type="checkbox" formControlName="observed" name="observed" (change)="searchData(myForm.value)"> Observed
+      </label>
+    </div>
+  </div>
+-->
+  <div *ngIf="toggleAdv" class="row filter" formGroupName="domains">
+    <div class="col-xs-3 text-left">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-circle" size="24"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="md" *clrIfOpen>
+          <span>Health record data is organized by domains such as Condition, Drug, Procedure, etc. You can filter by one or more domains.</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      Domains:
+    </div>
+    <div class="col-xs-2 mycheckbox" *ngFor="let filter of domainFilters;let i = index">
+      <label for="{{filter.domain_id}}" class="custom-control custom-checkbox">
+          <input type="checkbox"   formControlName="{{filter.domain_id}}" (change)="submitSearchForm(myForm.value);logSearchParams(myForm.value)"> {{filter.domain_id}}
+      </label>
+    </div>
+  </div>
+  <div *ngIf="toggleAdv" class="row filter" formGroupName="standard_vocabs">
+    <div class="col-xs-3 text-left">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-circle" size="24"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="md" *clrIfOpen>
+          <span>Most EHR data comes in the form of specific medical language vocabulary such as SNOMED or RXNORM. Standard vocabularies are used to standardize the representation of EHR data to make it more usable for researchers.</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      Standard Vocabularies:</div>
+    <div class="col-xs-2 mycheckbox" *ngFor="let filter of standardConceptFilters;let i = index">
+      <label for="{{filter.vocabulary_id}}" class="custom-control custom-checkbox">
+          <input type="checkbox"   formControlName="{{filter.vocabulary_id}}" (change)="submitSearchForm(myForm.value);logSearchParams(myForm.value)"> {{filter.vocabulary_id}}
+      </label>
+    </div>
+  </div>
+  <div *ngIf="toggleAdv" class="row filter" formGroupName="source_vocabs">
+    <div class="col-xs-3 text-left">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-circle" size="24"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="md" *clrIfOpen>
+          <span>Source vocabularies are other vocabularies that EHR data is received in that are mapped to Standard Vocabularies if possible.  For example, the source ICD9 codes Form an EHR are mapped to the standard SNOMED codes.  The source data is retained after the mapping and is available here.</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      Source Vocabularies:</div>
+    <div class="col-xs-2 mycheckbox" *ngFor="let filter of sourceConceptFilters;let i = index">
+      <label for="{{filter.vocabulary_id}}" class="custom-control custom-checkbox">
+          <input type="checkbox"   formControlName="{{filter.vocabulary_id}}" (change)="submitSearchForm(myForm.value);logSearchParams(myForm.value)"> {{filter.vocabulary_id}}
+      </label>
+    </div>
+  </div>
+
+</form>
+
+<div class="row">
+  <div class="col-xs-3"> <h5 class="component-header"> Search Results</h5></div>
+  <div *ngIf="toggleAdv" style="" class=""> <h5 class="component-header reset-link"><a class="text-danger" (click)="resetSearchForm(true)"><clr-icon shape="times"></clr-icon> Reset Filters </a></h5> </div>
+</div>
+<!-- Data grid . The refresh event sends a state object of the data grid with page info and such -->
+<clr-datagrid style="position:relative" (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading" class="search-result-scroll-container">
+
+  <!-- <clr-dg-column>Concept Id</clr-dg-column> -->
+  <clr-dg-column>Concept Name</clr-dg-column>
+  <clr-dg-column class="mobile-hide" [clrDgField]="'domain_id'">
+    <clr-tooltip>
+      <span clrTooltipTrigger>Domain</span>
+      <clr-tooltip-content *clrIfOpen>
+        <span>Domain defines the set of allowable Concepts for the fields in the CDM tables</span>
+      </clr-tooltip-content>
+    </clr-tooltip>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'vocabulary_id'">
+    <clr-tooltip>
+      <span clrTooltipTrigger>Vocabulary</span>
+      <clr-tooltip-content *clrIfOpen>
+        <span>Vocabulary is collected Form various sources or created de novo by the OMOP community.</span>
+      </clr-tooltip-content>
+    </clr-tooltip>
+  </clr-dg-column>
+  <clr-dg-column class="mobile-hide" [clrDgField]="'concept_code'">
+    <clr-tooltip>
+      <span clrTooltipTrigger>Code</span>
+      <clr-tooltip-content *clrIfOpen>
+        <span>The source code being translated into a Standard Concept</span>
+      </clr-tooltip-content>
+    </clr-tooltip>
+  </clr-dg-column>
+  <clr-dg-column class="mobile-hide" [clrDgField]="'prevalence'">Prevalence</clr-dg-column>
+  <clr-dg-column [clrDgField]="'count_value'">Particpant Count</clr-dg-column>
+
+  <!-- Note* You have to use ngFor for server side grid or no work  -->
+  <clr-dg-row [ngClass]="{'highlighted-row': i==selectedRow }" *ngFor="let concept of conceptResults; let i = index" (click)="itemClick(concept,i);">
+    <!-- <clr-dg-cell>{{concept.concept_id}}</clr-dg-cell> -->
+    <clr-dg-cell>
+      {{concept.concept_name}} - {{concept.concept_class_id}} <span style="font-size: 10px"> {{concept.concept_id}}</span>
+    </clr-dg-cell>
+    <clr-dg-cell class="mobile-hide">{{concept.domain_id}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.vocabulary_id}}</clr-dg-cell>
+    <clr-dg-cell class="mobile-hide">{{concept.concept_code}}</clr-dg-cell>
+    <clr-dg-cell class="mobile-hide">{{concept.prevalence | percent}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.count_value | number}}</clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>
+    Pager {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} of {{pagination.totalItems}} Concepts
+    <clr-dg-pagination #pagination [clrDgPageSize]="page_len" [clrDgTotalItems]="totalItems"></clr-dg-pagination>
+  </clr-dg-footer>
+
+</clr-datagrid>
+
+<!-- end row -->

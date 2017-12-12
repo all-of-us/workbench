@@ -1,0 +1,124 @@
+<div class="container">
+
+<div class="row col-sm-12">
+  <div class="col-lg-6 col-md-12">
+    <h3>What is the Data Browser?</h3>
+
+    <p>Dive deeper into survey data. Explore survey questions, compare responses across gender and age, learn more about the demographics of the All of Us Research Program participants.
+      <br> Learn more about Electronic Health Record (EHR) data. Filter and sort results based on conditions, drugs, and procedures. <br> Access aggregate counts for concepts and topics of interest. Explore the data set to assess feasibility.</p>
+  </div>
+
+  <div class="col-lg-6 col-md-12">
+    <h3>What are Electronic Health Records (EHR)?</h3>
+    <p>
+      Electronic health records Health records are the information collected when you get health care. The data for/from all participants who consent to link their EHR data will be saved to AllOfUS Data Research Center (DRC). EHR data will be accessed longitudinally
+      throughout the life of the program. The initial data collected include demographics, ICD-9, CPT codes, medications charts, labs etc.</p>
+  </div>
+  <div class="col-lg-6 col-md-12">
+    <h3>What are Survey Modules?</h3>
+    <p>Surveys are grouped into modules, based on the types of questions they include. Currently, participants are asked to complete three survey modules: The Basics, Overall Health, and Lifestyle. Additional surveys will be included as they are developed.</p>
+  </div>
+  <div class="col-lg-6 col-md-12">
+    <h3>What is Participant Provided Information (PPI)?</h3>
+    <p>When participants enroll in the program, they are asked to respond to a number of surveys. Participants are asked to answer honestly and to the best of their knowledge. Surveys are available in both English and Spanish.</p>
+  </div>
+
+
+  <div class="col-lg-6 col-md-12">
+    <h3>What is the OMOP Data Model?</h3>
+    <p>AllofUS program employs Observational Medical outcomes Partnership (OMOP) Common Data Model Version 5 infrastructure to ensure feasibility and standardization across EHR data
+      <br> The Observational Medical Outcomes Partnership (OMOP) was a public-private partnership established to inform the appropriate use of observational healthcare databases for studying the effects of medical products. Over the course of the 5-year
+      project and through its community of researchers from industry, government, and academia, OMOP successfully achieved its aims to: 1) conduct methodological research to empirically evaluate the performance of various analytical methods on their ability
+      to identify true associations and avoid false findings, 2) develop tools and capabilities for transforming, characterizing, and analyzing disparate data sources across the health care delivery spectrum, and 3) establish a shared resource so that
+      the broader research community can collaboratively advance the science.
+    </p>
+  </div>
+  <div class="col-lg-6 col-md-12">
+    <h3>Where can I learn more about the development of the Instrument?</h3>
+    <p>Instruments were vetted by a consortium of experts and piloted with focus groups to ensure readability and accessibility. More specific information related to the development of the survey instruments, including references to additional survey instruments
+      which contributed to the development of the All of Us Research Program survey modules can be found in the Survey Instruments Explorer.</p>
+  </div>
+</div>
+<hr>
+<div class="col-sm-12">
+  <h2 class= "text-center" id = "domains" [ngClass]="{'selected-title': 'domains' == highlight}">Domains</h2>
+  <div *ngFor="let object of homeData">
+    <div class = "top-spacing" id="{{object.domain_display}}"  *ngIf="object.domain_display  && object.domain_parent=='domain'" class="">
+      <h3 (click)="routeTo(object)" class="cap" [ngClass]="{'selected': object.domain_display == highlight}">{{object.domain_display}} <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></h3>
+      <p>{{object.domain_desc}}</p>
+      <ul class="vocab-list col-sm-6" *ngIf="object.domain_display && object.domain_parent=='ehr'">
+        <h5> <strong>Vocabularies that are included in {{object.domain_display}}</strong></h5>
+        <li class="vocab-list-item " *ngFor="let vocab of vocabularies">{{vocab.vocabulary_id}}
+          <clr-signpost>
+            <clr-signpost-content *clrIfOpen="openState">
+              <h5 style="margin-top: 0">{{vocab.vocabulary_name}}</h5>
+              <a href="{{vocab.vocabulary_reference}}" target="_blank">More info <clr-icon shape="pop-out"></clr-icon></a>
+            </clr-signpost-content>
+          </clr-signpost>
+        </li>
+      </ul>
+      <!-- <a class="card-link" (click)="routeTo(object)" *ngIf="object.domain_display" class="card-link">Browse <span >{{object.domain_display}}</span> Data <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></a> -->
+    </div>
+  </div>
+  <h2 class= "text-center" id = "standard" [ngClass]="{'selected-title': 'standard' == highlight}">Standard Vocabularies</h2>
+  <div *ngFor="let object of homeData">
+    <div class = "top-spacing" id="{{object.domain_display}}" *ngIf="object.domain_display  && object.domain_parent=='standard'" class="">
+      <h3 (click)="routeTo(object)" class="cap" [ngClass]="{'selected': object.domain_display == highlight}">{{object.domain_display}} <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></h3>
+      <p>{{object.domain_desc}}</p>
+      <ul class="vocab-list col-sm-6" *ngIf="object.domain_display && object.domain_parent=='ehr'">
+        <h5> <strong>Vocabularies that are included in {{object.domain_display}}</strong></h5>
+        <li class="vocab-list-item " *ngFor="let vocab of vocabularies">{{vocab.vocabulary_id}}
+          <clr-signpost>
+            <clr-signpost-content *clrIfOpen="openState">
+              <h5 style="margin-top: 0">{{vocab.vocabulary_name}}</h5>
+              <a href="{{vocab.vocabulary_reference}}" target="_blank">More info <clr-icon shape="pop-out"></clr-icon></a>
+            </clr-signpost-content>
+          </clr-signpost>
+        </li>
+      </ul>
+      <!-- <a class="card-link" (click)="routeTo(object)" *ngIf="object.domain_display" class="card-link">Browse <span >{{object.domain_display}}</span> Data <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></a> -->
+    </div>
+  </div>
+  <h2 class= "text-center" id = "source" [ngClass]="{'selected-title': 'source' == highlight}">Source Vocabularies</h2>
+  <div *ngFor="let object of homeData">
+    <div class = "top-spacing" class = "top-spacing" id="{{object.domain_display}}" *ngIf="object.domain_display  && object.domain_parent=='source'" >
+      <h3 (click)="routeTo(object)" class="cap" [ngClass]="{'selected': object.domain_display == highlight}">{{object.domain_display}}  <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></h3>
+      <p>{{object.domain_desc}}</p>
+      <ul class="vocab-list col-sm-6" *ngIf="object.domain_display && object.domain_parent=='ehr'">
+        <h5> <strong>Vocabularies that are included in {{object.domain_display}}</strong></h5>
+        <li class="vocab-list-item " *ngFor="let vocab of vocabularies">{{vocab.vocabulary_id}}
+          <clr-signpost>
+            <clr-signpost-content *clrIfOpen="openState">
+              <h5 style="margin-top: 0">{{vocab.vocabulary_name}}</h5>
+              <a href="{{vocab.vocabulary_reference}}" target="_blank">More info <clr-icon shape="pop-out"></clr-icon></a>
+            </clr-signpost-content>
+          </clr-signpost>
+        </li>
+      </ul>
+      <!-- <a class="card-link" (click)="routeTo(object)" *ngIf="object.domain_display" class="card-link">Browse <span >{{object.domain_display}}</span> Data <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></a> -->
+    </div>
+  </div>
+  <h2 class= "text-center" id = "ppi" [ngClass]="{'selected-title': 'ppi' == highlight}">PPI</h2>
+
+  <div *ngFor="let object of homeData">
+    <div class = "top-spacing" id="{{object.domain_display}}" *ngIf="object.domain_display  && object.domain_parent=='ppi'" class="">
+      <h3 (click)="routeTo(object)" class="cap" [ngClass]="{'selected': object.domain_display == highlight}">{{object.domain_display}} <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></h3>
+      <p>{{object.domain_desc}}</p>
+      <ul class="vocab-list col-sm-6" *ngIf="object.domain_display && object.domain_parent=='ehr'">
+        <h5> <strong>Vocabularies that are included in {{object.domain_display}}</strong></h5>
+        <li class="vocab-list-item " *ngFor="let vocab of vocabularies">{{vocab.vocabulary_id}}
+          <clr-signpost>
+            <clr-signpost-content *clrIfOpen="openState">
+              <h5 style="margin-top: 0">{{vocab.vocabulary_name}}</h5>
+              <a href="{{vocab.vocabulary_reference}}" target="_blank">More info <clr-icon shape="pop-out"></clr-icon></a>
+            </clr-signpost-content>
+          </clr-signpost>
+        </li>
+      </ul>
+      <!-- <a class="card-link" (click)="routeTo(object)" *ngIf="object.domain_display" class="card-link">Browse <span >{{object.domain_display}}</span> Data <clr-icon style="margin-top:-.2rem" class="is-solid" shape="bar-chart"></clr-icon></a> -->
+    </div>
+  </div>
+</div>
+
+<br><br><br>
+</div>

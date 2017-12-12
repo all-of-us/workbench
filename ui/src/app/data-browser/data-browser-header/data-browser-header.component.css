@@ -1,0 +1,16 @@
+a {
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.top-bar .navbar-nav > li > a, .navbar-brand {
+    padding-top:4px !important;
+    padding-bottom:0 !important;
+    height: 28px;
+}
+.top-bar .navbar {min-height:28px !important;}
+
+
+.survey-nav li a,.ehr-nav li a{
+  /*padding-left: 1.5rem;*/
+  margin-right: 3rem;
+}

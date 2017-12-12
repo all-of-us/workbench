@@ -1,0 +1,69 @@
+<clr-datagrid class="mobile-hide">
+  <clr-dg-placeholder style="transform: translateY(-200%); width: 90%!important; margin:auto!important">
+    <!-- <clr-dg-placeholder> -->
+    <clr-icon shape="bar-chart"></clr-icon>
+    <h3> Click on concepts to the left to analyze them here </h3>
+  </clr-dg-placeholder>
+  <!-- <clr-dg-column style="width:1rem">Concept Id</clr-dg-column> -->
+  <clr-dg-column style="width:20rem; margin-left:1px;">Concept Name</clr-dg-column>
+
+  <clr-dg-column *ngIf="route != 'PPI'">Domain</clr-dg-column>
+  <clr-dg-column *ngIf="route != 'PPI'">Vocabulary</clr-dg-column>
+  <clr-dg-column *ngIf="route != 'PPI'">Code</clr-dg-column>
+
+  <!-- <clr-dg-column>More Information</clr-dg-column> -->
+  <clr-dg-column>Prevalence</clr-dg-column>
+  <clr-dg-column>Participant Count</clr-dg-column>
+  <clr-dg-column>
+    <div class="text-center">Reset</div>
+    <div class="text-center">
+      <button style="margin:auto!important;" class="btn btn-sm btn-icon btn-danger-outline" (click)="reset()">
+        <clr-icon shape="times"></clr-icon>
+      </button>
+    </div>
+  </clr-dg-column>
+
+  <div class="scroll-container" style="min-height: 500px">
+    <clr-dg-row [ngClass]="{'highlighted-row': newConcept==concept}" *ngFor="let concept of conceptsArray">
+      <!-- <clr-dg-cell><strong>{{concept.concept_id}}</strong></clr-dg-cell> -->
+      <clr-dg-cell class="ellipsis">
+        <clr-tooltip>
+          <span clrTooltipTrigger>{{concept.concept_name }}</span>
+          <!-- <span *ngIf="concept.concept_name.length < 40" clrTooltipTrigger>{{concept.concept_name }}</span>
+          <span *ngIf="concept.concept_name.length >= 40" clrTooltipTrigger>{{concept.concept_name | slice:0:40}}...</span> -->
+          <clr-tooltip-content clrSize="md" *clrIfOpen>
+            <span>{{concept.concept_name }} <br><br> <strong>Concept ID:</strong> {{concept.concept_id}}</span>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </clr-dg-cell>
+
+      <clr-dg-cell *ngIf="route != 'PPI'" class="limit-chr">{{concept.domain_id}}</clr-dg-cell>
+      <clr-dg-cell *ngIf="route != 'PPI'" class="limit-chr">{{concept.vocabulary_id}}</clr-dg-cell>
+      <clr-dg-cell *ngIf="route != 'PPI'" class="limit-chr">{{concept.concept_code}}</clr-dg-cell>
+
+      <clr-dg-cell class="limit-chr">{{concept.prevalence | percent}}
+        <div [ngStyle]="{'width': concept.prevalence*100 +'%', 'height': '1rem', 'background':concept.color}"></div>
+      </clr-dg-cell>
+      <clr-dg-cell class="limit-chr">{{concept.count_value | number}} out of total</clr-dg-cell>
+      <!-- <clr-dg-cell class="limit-chr">{{concept.moreInfo()}}</clr-dg-cell> -->
+      <clr-dg-cell class="limit-chr text-center">
+        <button style="margin:auto!important;" class="btn btn-sm btn-icon btn-danger-outline" (click)="sendRemove(concept)"><clr-icon shape="times"></clr-icon></button>
+      </clr-dg-cell>
+      <clr-dg-row-detail>
+         <app-concept-drawer style="width:100%;" *clrIfExpanded (onParentSelected)="drawerParentSelected($event)" [concept]="concept " [analyses]="analyses "></app-concept-drawer>
+      </clr-dg-row-detail>
+
+    </clr-dg-row>
+    <clr-dg-row>
+      <clr-dg-cell>
+        <div *ngIf="countAnalysis && countAnalysis.results && countAnalysis.results.length ">
+          <div style="width:95%; height:14rem!important; margin-top:2rem; " class="count-chart-container ">
+            <app-chart [redraw]="redraw[i] " [analysis]="countAnalysis "></app-chart>
+          </div>
+        </div>
+      </clr-dg-cell>
+    </clr-dg-row>
+
+  </div>
+
+</clr-datagrid>

@@ -1,0 +1,54 @@
+<app-data-browser-header [pageTitle]="pageTitle" (selected)="sectionFromHeader($event)"></app-data-browser-header>
+<br>
+<br>
+<div class="row " [ngClass]="{'page-container': !toggleColumn,'page-container-column-view': toggleColumn}">
+  <div [ngClass]="{'col-xl-6': !toggleColumn && !toggleTree ,'col-xl-3':toggleTree && !toggleColumn }" class="col-lg-12">
+    <div class="search-container">
+
+      <div class="toggle-switch">
+        <input type="checkbox" ngModel [(ngModel)]="toggleTree" id="toggle_2">
+        <label (click)="toggleBind()" for="toggle_2">Toggle Tree</label>
+      </div>
+      <!-- <span *ngIf="showAdvanced"> -->
+
+      <!-- <div *ngIf="!toggleTree" class="toggle-switch"> -->
+      <div class="toggle-switch">
+        <input [disabled]="toggleTree" type="checkbox" ngModel [(ngModel)]="toggleAdv" id="toggle_1">
+        <label for="toggle_1">Toggle Advanced</label>
+      </div>
+
+      <span *ngIf="toggleTree">
+        <app-tree-container (conceptsArrayEvent)="itemSelected($event)"  > </app-tree-container>
+      </span>
+      <span *ngIf="!toggleTree">
+        <app-search-table [domain_id]="pageDomainId" [toggleAdv]= "toggleAdv" [itemFromHeader]="itemFromHeader"  [savedSearchStringAdv]="savedSearchString"  (onItemSelected)="itemSelected($event)" (emittSearchString)="setString($event)"></app-search-table>
+      </span>
+
+    </div>
+  </div>
+  <div [ngClass]="{'col-xl-1':toggleTree && !toggleColumn }"></div>
+  <div [ngClass]="{'right-count' : toggleTree, 'col-xl-6': !toggleColumn && !toggleTree ,'col-xl-8':toggleTree && !toggleColumn}" class="my-concepts-container col-lg-12">
+    <!-- <span *ngIf="toggleTree"> -->
+    <!-- <div *ngFor="let analysis of analyses;let i=index ">
+    <div class="count-chart-container" *ngIf="analysis.results.length>0">
+      <app-chart [redraw]="redraw[i]" [analysis]="analysis"></app-chart>
+    </div>
+  </div> -->
+    <!-- </span> -->
+    <div *ngIf="!conceptsArray.length && !toggleAdv ||!conceptsArray.length && toggleAdv ">
+      <app-placeholder></app-placeholder>
+    </div>
+    <div *ngIf="conceptsArray.length && !toggleAdv">
+      <app-one-concept (removeOneEmit)="removeOne()" [concept]="clickedConcept" ></app-one-concept>
+    </div>
+
+    <div *ngIf="toggleAdv && conceptsArray.length">
+      <app-my-concepts class="mobile-hide" (resetEmit)="reset()" (removalEmit)="remove($event)"  (addEmit)="itemSelected($event)" [newConcept]="clickedConcept" [conceptsArray]="conceptsArray"></app-my-concepts>
+    </div>
+
+
+  </div>
+</div>
+<div [ngClass]="{'page-container': !toggleColumn,'page-container-column-view': toggleColumn}">
+  <button class="btn" [ngClass]="{'btn-primary': toggleColumn}" (click)="columnSwitch()">Column View</button>
+</div>

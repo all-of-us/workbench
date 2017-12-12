@@ -1,0 +1,18 @@
+
+.cap{
+  text-transform: capitalize;
+}
+.top-level {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.tree-label {
+
+}
+
+.selectedRow {
+  background: #daeedc!important;
+  padding: .5rem 1rem;
+  margin-left: -1rem;
+  font-weight: 900;
+}

@@ -1,0 +1,114 @@
+<hr>
+<div class="drawer-container">
+  <div *ngIf="concept">
+    <h4 class="text-center drawer-title"><span >{{concept.concept_name}} </span></h4>
+    <h5 class="text-center drawer-subtitle">
+<span style = "display:flex; justify-content: space-between; max-width: 35rem; margin:auto">
+  <span>
+    <b>{{concept.vocabulary_id}} : </b> {{concept.concept_code}}
+  </span>
+  <span >
+    <b>Participant Count: </b> {{concept.count_value | number}}
+  </span>
+</span>
+
+    <div class="maps-to" *ngIf="concept.parents && concept.parents.length" >
+      <span *ngFor="let p of concept.parents" >
+         <strong> Maps To: </strong>
+         <a class = "pointer" (click)="routeToSurvey('home')" style = "color: #007cbb;text-decoration: underline;">SnoMed</a>
+            <span style = "margin-left:1rem;margin-right:1rem"> – </span>
+           <clr-tooltip>
+             <span (click)="parentClick(p)" class = "pointer" clrTooltipTrigger> <b>Source Code:</b> {{p.concept_code}}</span>
+             <clr-tooltip-content clrSize="sm" *clrIfOpen>
+               <span>{{p.concept_name}}</span>
+             </clr-tooltip-content>
+           </clr-tooltip>
+      </span>
+    </div>
+
+  </h5>
+    <div class="col-sm-12" style="display:flex;justify-content: center">
+      <!-- <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route != 'PPI'" (click)="toggleGraphs(null)">
+        Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
+      </button>
+      <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children && concept.children.length > 0 && route == 'PPI'" (click)="toggleGraphs(null)">
+        Answers <clr-icon size="16" shape="bar-chart"></clr-icon>
+      </button> -->
+
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_table}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null, 'source-table')">
+        Source Details <clr-icon size="16" shape="view-list"></clr-icon>
+      </button>
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id !='PPI'" (click)="toggleGraphs(null,'source-graph')">
+        Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
+      </button>
+      <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0 && concept.domain_id =='PPI'" (click)="toggleGraphs(null, 'ppi-answers')">
+        Answers <clr-icon size="16" shape="bar-chart"></clr-icon>
+      </button>
+      <div *ngFor="let analysis of analyses">
+        <button style="margin-left:12px" class="btn btn-sm btn-outline" [ngClass]="{ 'btn-primary': analysis_show_graph[analysis.analysis_id] }" *ngIf="analysis.results && analysis.results.length>0" (click)="toggleGraphs(analysis)">
+          {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
+        </button>
+      </div>
+    </div>
+
+    <br>
+
+    <!-- Only show break down charts if we have concept counts -->
+    <div class="row break-down-charts">
+      <div *ngIf="concept.count_value"  style="height:100%;" class="col-sm-12">
+        <!-- Children column chart -->
+        <div class="children-chart col-sm-12">
+          <app-chart *ngIf="concept.children && show_source_graph" [analysis]="sourcesCountAnalysis"></app-chart>
+        </div>
+
+        <!-- Analysis break down charts -- gender and age and more maybe -->
+        <div class="col-sm-12" *ngFor=" let analysis of analyses;let i=index ">
+          <app-chart class="col-sm-12" *ngIf="analysis.results && analysis.results.length>0 && analysis_show_graph[analysis.analysis_id] "[concepts]="null" [analysis]="analysis"></app-chart>
+        </div>
+
+      </div>
+    </div>
+
+      <!-- Children Source Concepts -->
+      <div class="row" *ngIf="show_source_table && concept.children && concept.children.length ">
+        <div class="col-xs-12">
+          <h4 *ngIf="concept.vocabulary_id.toLowerCase() != 'ppi'" class="text-center">
+            Source Concepts for <b>{{concept.vocabulary_id}} - {{concept.concept_code}}</b>
+          </h4>
+          <div class="children-grid">
+            <clr-datagrid>
+              <clr-dg-column>Concept Name</clr-dg-column>
+              <clr-dg-column *ngIf="route != 'PPI'" class="standard-column">Domain Id</clr-dg-column>
+              <clr-dg-column *ngIf="route != 'PPI'">Vocabulary Id</clr-dg-column>
+              <clr-dg-column *ngIf="route != 'PPI'">Source Code</clr-dg-column>
+              <clr-dg-column>Participant Count</clr-dg-column>
+              <clr-dg-row *clrDgItems="let item of concept.children">
+                <clr-dg-cell class="ellipsis">
+                  <clr-tooltip>
+                    <span clrTooltipTrigger>{{item.concept_name }}</span>
+                    <clr-tooltip-content clrSize="md" *clrIfOpen>
+                      <span>{{item.concept_name }} <br><br> <strong>Concept ID:</strong> {{item.concept_id}}</span>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
+                </clr-dg-cell>
+                <clr-dg-cell >{{item.domain_id}}</clr-dg-cell>
+                <clr-dg-cell >{{item.vocabulary_id}}</clr-dg-cell>
+                <clr-dg-cell >{{item.concept_code}}</clr-dg-cell>
+                <clr-dg-cell>{{item.count_value}} of of {{achillesService.getTotalParticipants()}}</clr-dg-cell>
+                <clr-dg-row-detail>
+                  <!-- <app-one-concept style="width:100%;" *clrIfExpanded="item.count_value"  [concept]="item" [analyses]="analyses"></app-one-concept>-->
+                  <app-concept-drawer style="width:100%;" *clrIfExpanded="item.count_value"  [concept]="item" [analyses]="analyses"></app-concept-drawer>
+
+                </clr-dg-row-detail>
+              </clr-dg-row>
+            </clr-datagrid>
+          </div>
+        </div>
+      </div>
+
+
+
+  </div>
+
+
+</div>
