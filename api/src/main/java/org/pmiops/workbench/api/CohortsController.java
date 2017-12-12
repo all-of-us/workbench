@@ -1,6 +1,9 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -25,6 +28,7 @@ import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CohortsController implements CohortsApiDelegate {
 
-  private static final int MAX_PAGE_SIZE = 10000;
-  private static final int DEFAULT_PAGE_SIZE = 1000;
+  @VisibleForTesting
+  static final int MAX_PAGE_SIZE = 10000;
+  @VisibleForTesting
+  static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
 
   /**
@@ -190,14 +196,6 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
-    // TODO(danrodney): get list of participant IDs by:
-    // 1. Retrieve participant cohort statuses matching the status filter.
-    // 2. If the status filter does not contain NOT_REVIEWED, or the cohort review contains
-    // all participant IDs in the cohort, return the IDs directly (subject to pagination.)
-    // 3. Otherwise, query BigQuery for participant IDs using SQL constructed from the cohort
-    // criteria, subject to pagination; remove IDs for participants that had a cohort status not
-    // included in the status filter.
-
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
     if (request.getCdrVersionName() != null) {
@@ -219,7 +217,7 @@ public class CohortsController implements CohortsApiDelegate {
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
-    } else {
+    } else if (true){
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
     Integer pageSize = request.getPageSize();
@@ -233,8 +231,15 @@ public class CohortsController implements CohortsApiDelegate {
       }
     }
 
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cdrVersion, cohortSpec, request.getStatusFilter(), pageSize,
+        cdrVersion, searchRequest, request.getStatusFilter(), pageSize,
         request.getPageToken());
     return ResponseEntity.ok(response);
   }

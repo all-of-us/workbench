@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohorts;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.util.HashMap;
@@ -21,6 +22,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortMaterializationService {
 
+  @VisibleForTesting
+  static final String PERSON_ID = "person_id";
+
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
 
@@ -32,17 +36,12 @@ public class CohortMaterializationService {
   }
 
 
-  public MaterializeCohortResponse materializeCohort(CdrVersion cdrVersion, String cohortSpec,
+  public MaterializeCohortResponse materializeCohort(CdrVersion cdrVersion,
+      SearchRequest searchRequest,
       List<CohortStatus> statusFilter, int pageSize, String paginationToken) {
-    SearchRequest searchRequest;
-    try {
-      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
-    } catch (JsonSyntaxException e) {
-      throw new BadRequestException("Invalid cohort spec");
-    }
     long offset = 0L;
     // TODO: add CDR version ID here
-    Object[] paginationParameters = new Object[] { cohortSpec, statusFilter };
+    Object[] paginationParameters = new Object[] { searchRequest, statusFilter };
     if (paginationToken != null) {
       PaginationToken token = PaginationToken.fromBase64(paginationToken);
       if (token.matchesParameters(paginationParameters)) {
@@ -61,9 +60,9 @@ public class CohortMaterializationService {
     int numResults = 0;
     boolean hasMoreResults = false;
     for (List<FieldValue> row : result.iterateAll()) {
-      long personId = bigQueryService.getLong(row, rm.get("person_id"));
+      long personId = bigQueryService.getLong(row, rm.get(PERSON_ID));
       Map<String, Object> resultMap = new HashMap<>(1);
-      resultMap.put("person_id", personId);
+      resultMap.put(PERSON_ID, personId);
       response.addResultsItem(resultMap);
       numResults++;
       if (numResults == pageSize) {
