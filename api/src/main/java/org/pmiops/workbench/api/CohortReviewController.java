@@ -4,21 +4,22 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
-import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CohortSummaryListResponse;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,7 +28,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,11 +46,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
+    private WorkspaceService workspaceService;
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private BigQueryService bigQueryService;
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
-    private WorkspaceDao workspaceDao;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -87,18 +91,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Autowired
     CohortReviewController(CohortReviewDao cohortReviewDao,
                            CohortDao cohortDao,
+                           WorkspaceService workspaceService,
                            ParticipantCohortStatusDao participantCohortStatusDao,
                            BigQueryService bigQueryService,
                            CodeDomainLookupService codeDomainLookupService,
-                           ParticipantCounter participantCounter,
-                           WorkspaceDao workspaceDao) {
+                           ParticipantCounter participantCounter) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
+        this.workspaceService = workspaceService;
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
-        this.workspaceDao = workspaceDao;
     }
 
     /**
@@ -120,37 +124,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                       Long cdrVersionId,
                                                                                       CreateReviewRequest request) {
         if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
-            throw new BadRequestException("Invalid Request: Cohort Review size must be between 0 and " + MAX_REVIEW_SIZE);
+            throw new BadRequestException(
+                    String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
         }
-        CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        if (cohortReview == null) {
-            throw new BadRequestException("Invalid Request: Cohort Review does not exist for cohortId: "
-                    + cohortId + ", cdrVersionId: " + cdrVersionId);
-        }
+        CohortReview cohortReview = findCohortReview(cohortId, cdrVersionId);
         if(cohortReview.getReviewSize() > 0) {
-            throw new BadRequestException("Invalid Request: Cohort Review already created for cohortId: "
-                    + cohortId + ", cdrVersionId: " + cdrVersionId);
+            throw new BadRequestException(
+                    String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
+                            cohortId, cdrVersionId));
         }
 
-        Cohort cohort = cohortDao.findOne(cohortId);
-        String definition = cohort.getCriteria();
-        Workspace workspace = workspaceDao.findOne(cohort.getWorkspaceId());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        if (!workspace.getWorkspaceNamespace().equals(workspaceNamespace) ||
-                !workspace.getFirecloudName().equals(workspaceId)) {
-            throw new BadRequestException("Invalid Request: No workspace matching "
-                    + "workspaceNamespace: " + workspaceNamespace
-                    + ", workspaceId: " + workspaceId);
-        }
-
-        if (definition == null) {
-            throw new BadRequestException("Invalid Request: No Cohort definition matching cohortId: "
-                    + cohortId
-                    + ", workspaceNamespace: " + workspaceNamespace
-                    + ", workspaceId: " + workspaceId);
-        }
-
-        SearchRequest searchRequest = new Gson().fromJson(definition, SearchRequest.class);
+        SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
         /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
@@ -225,25 +213,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         if (cohortReview == null) {
 
-            Cohort cohort = cohortDao.findOne(cohortId);
-            String definition = cohort.getCriteria();
-            Workspace workspace = workspaceDao.findOne(cohort.getWorkspaceId());
+            Cohort cohort = findCohort(cohortId);
+            //this validates that the user is in the proper workspace
+            validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-            if (!workspace.getWorkspaceNamespace().equals(workspaceNamespace) ||
-                    !workspace.getFirecloudName().equals(workspaceId)) {
-                throw new BadRequestException("Invalid Request: No workspace matching "
-                        + "workspaceNamespace: " + workspaceNamespace
-                        + ", workspaceId: " + workspaceId);
-            }
-
-            if (definition == null) {
-                throw new BadRequestException("Invalid Request: No Cohort definition matching cohortId: "
-                        + cohortId
-                        + ", workspaceNamespace: " + workspaceNamespace
-                        + ", workspaceId: " + workspaceId);
-            }
-
-            SearchRequest request = new Gson().fromJson(definition, SearchRequest.class);
+            SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
             /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
             codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
@@ -295,8 +269,69 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                   String workspaceId,
                                   Long cohortId,
                                   Long cdrVersionId,
+                                  Long participantId,
                                   ModifyCohortStatusRequest cohortStatusRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-                .body(new org.pmiops.workbench.model.ParticipantCohortStatus());
+
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        CohortReview cohortReview = findCohortReview(cohortId, cdrVersionId);
+
+        ParticipantCohortStatus participantCohortStatus = participantCohortStatusDao.
+                findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                        cohortReview.getCohortReviewId(), participantId);
+        if (participantCohortStatus == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No participant exists for participantId: %s", participantId));
+        }
+
+        participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
+        participantCohortStatusDao.save(participantCohortStatus);
+
+        cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
+        cohortReview.incrementReviewedCount();
+        cohortReviewDao.save(cohortReview);
+
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
+
+    private Cohort findCohort(long cohortId) {
+        Cohort cohort = cohortDao.findOne(cohortId);
+        if (cohort == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No Cohort exists for cohortId: %s", cohortId));
+        }
+        return cohort;
+    }
+
+    private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
+        Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
+        if (workspace.getWorkspaceId() != workspaceId) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+                            workspaceNamespace, workspaceName));
+        }
+    }
+
+    private CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
+        CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
+
+        if (cohortReview == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: Cohort Review does not exist for cohortId: %s, cdrVersionId: %s",
+                            cohortId, cdrVersionId));
+        }
+        return cohortReview;
+    }
+
+    private String getCohortDefinition(Cohort cohort) {
+        String definition = cohort.getCriteria();
+        if (definition == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
+        }
+        return definition;
+    }
+
 }

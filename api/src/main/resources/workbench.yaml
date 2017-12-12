@@ -826,12 +826,13 @@ paths:
       tags:
         - cohortReview
       description: Modifies the ParticipantCohortStatus status
-      operationId: "updateParticipantCohortStatus"
+      operationId: updateParticipantCohortStatus
       parameters:
         - in: path
           name: workspaceNamespace
           type: string
           required: true
+          description: specifies which workspace namespace
         - in: path
           name: workspaceId
           type: string
@@ -849,6 +850,12 @@ paths:
           format: int64
           required: true
           description: specifies which cdr version
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
         - in: body
           name: cohortStatusRequest
           description: Contains the new review status
