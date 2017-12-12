@@ -28,7 +28,6 @@
   </div>
 
   <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
-    <h6> {{currentUrl}} </h6>
     <div class="sign-in-inner-container" [style.margin-top]="getTopMargin()">
       <div style="height: 2rem; margin: 0.5rem 2rem;">
         <ng-template *ngIf="true; then logoImages"></ng-template>
