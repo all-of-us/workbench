@@ -53,7 +53,7 @@ public class AchillesAnalysisDaoTest {
 
     private AchillesAnalysis createAnalysis(int aid, String name) {
         return new AchillesAnalysis()
-                .analysisId(aid)
+                .analysisId((long)aid)
                 .analysisName(name)
                 .stratum1Name("stratum1 name")
                 .stratum2Name("stratum 2 name")
