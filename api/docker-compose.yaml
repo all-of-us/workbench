@@ -44,7 +44,7 @@ services:
     volumes:
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./run-migrations.sh
+    command: wait-for db:3306 -- ./run-migrations.sh schema
     env_file:
       - db/vars.env
   db-cdr-migration:
