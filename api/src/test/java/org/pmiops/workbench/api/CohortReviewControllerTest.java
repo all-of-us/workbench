@@ -464,6 +464,7 @@ public class CohortReviewControllerTest {
         when(participantCohortStatusDao
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId)).thenReturn(participantCohortStatus);
+        when(cohortReviewDao.save(isA(CohortReview.class))).thenReturn(cohortReview);
 
         org.pmiops.workbench.model.ParticipantCohortStatus expectedPcs =
                 new org.pmiops.workbench.model.ParticipantCohortStatus();
@@ -486,6 +487,7 @@ public class CohortReviewControllerTest {
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
+        verify(cohortReviewDao, times(1)).save(isA(CohortReview.class));
         verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 

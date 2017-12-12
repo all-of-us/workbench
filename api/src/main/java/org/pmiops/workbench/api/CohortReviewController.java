@@ -289,6 +289,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
         participantCohortStatusDao.save(participantCohortStatus);
 
+        cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
+        cohortReview.incrementReviewedCount();
+        cohortReviewDao.save(cohortReview);
+
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
 
