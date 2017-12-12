@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-2" runAlways="true" context="local or cloud">
+
+    <validCheckSum>ANY</validCheckSum>
+
+    <insert tableName="cdr_version">
+      <column name="name" type="varchar(80)" value="version 1"/>
+      <column name="data_access_level" type="tinyint" value="1"/>
+      <column name="release_number" type="smallint" value="1"/>
+      <column name="bigquery_project" type="varchar(80)" value="1"/>
+      <column name="bigquery_dataset" type="varchar(80)" value="1"/>
+      <column name="creation_time" type="datetime" value="sysdate()"/>
+      <column name="num_participants" type="bigint" value="1000"/>
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>
