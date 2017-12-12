@@ -1,22 +1,14 @@
 package org.pmiops.workbench.db.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -131,6 +123,10 @@ public class CohortReview {
     public CohortReview reviewSize(long reviewSize) {
         this.reviewSize = reviewSize;
         return this;
+    }
+
+    public void incrementReviewedCount() {
+        this.reviewedCount = reviewedCount + 1;
     }
 
     @Column(name = "reviewed_count")
