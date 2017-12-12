@@ -45,6 +45,8 @@ export class WorkspaceEditComponent implements OnInit {
       name: '',
       description: '',
       dataAccessLevel: DataAccessLevel.Registered,
+      // TODO - please set this properly
+      cdrVersionId: '1',
       researchPurpose: {
         diseaseFocusedResearch: false,
         methodsDevelopment: false,

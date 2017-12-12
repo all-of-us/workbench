@@ -12,5 +12,8 @@ public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCo
     Slice<ParticipantCohortStatus> findByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId,
                                                                                Pageable pageRequest);
 
-    Long countByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId);
+    ParticipantCohortStatus findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+            @Param("cohortReviewId") long cohortReviewId,
+            @Param("participantId") long participantId);
+
 }
