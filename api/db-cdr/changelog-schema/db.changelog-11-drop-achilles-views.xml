@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="changelog-11-drop achilles_results_view">
+
+    <dropView viewName="achilles_results_view" schemaName="cdr"/>
+
+  </changeSet>
+
+  <changeSet author="biopete" id="changelog-11.1 drop achilles_results_dist_view">
+    <dropView viewName="achilles_results_dist_view" schemaName="cdr"/>
+  </changeSet>
+
+</databaseChangeLog>
+

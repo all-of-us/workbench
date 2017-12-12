@@ -1,0 +1,42 @@
+<clr-tree-node class="top-level">
+  <span class="tree-label"> EHR - Electronic Health Record </span>
+  <ng-template [clrIfExpanded]="true">
+    <clr-tree-node>
+      <span class="tree-label" (click) = "passAnchor('domains')">  Domains </span>
+      <ng-template clrIfExpanded>
+        <clr-tree-node *ngFor="let data of homeData; let i = index">
+          <span class="tree-label" (click)="passData(data, i)" *ngIf="data.domain_parent=='domain'" [ngClass]="{'selectedRow': i==selectedRow }" > {{data.domain_display}}</span>
+        </clr-tree-node>
+      </ng-template>
+    </clr-tree-node>
+    <clr-tree-node>
+      <span class="tree-label" (click) = "passAnchor('standard')"> Standard Vocabularies </span>
+      <ng-template clrIfExpanded>
+        <clr-tree-node *ngFor="let data of homeData; let i = index">
+          <span class="tree-label" (click)="passData(data, i)" *ngIf="data.domain_parent=='standard'" [ngClass]="{'selectedRow': i==selectedRow }"> {{data.domain_display}} </span>
+        </clr-tree-node>
+      </ng-template>
+    </clr-tree-node>
+    <clr-tree-node>
+      <span class="tree-label" (click) = "passAnchor('source')"> Source Vocabularies </span>
+      <ng-template clrIfExpanded>
+        <clr-tree-node *ngFor="let data of homeData; let i = index">
+          <span class="tree-label" (click)="passData(data, i)" *ngIf="data.domain_parent=='source'" [ngClass]="{'selectedRow': i==selectedRow }"> {{data.domain_display}} </span>
+        </clr-tree-node>
+      </ng-template>
+    </clr-tree-node>
+  </ng-template>
+</clr-tree-node>
+
+<clr-tree-node class="top-level">
+  <span class="tree-label" (click) = "passAnchor('ppi')"> PPI - Participant Provided Info </span>
+  <ng-template [clrIfExpanded]="true">
+    <clr-tree-node *ngFor="let data of homeData; let i = index">
+      <span class="tree-label" (click)="passData(data, i)" *ngIf="data.domain_parent=='ppi'" [ngClass]="{'selectedRow': i==selectedRow }"> {{data.domain_display}} </span>
+    </clr-tree-node>
+  </ng-template>
+</clr-tree-node>
+
+<div style="display: flex; justify-content: center;">
+  <!-- <button [routerLink]=" ['/all']" class=" btn btn-primary "> Browsing</button> -->
+</div>

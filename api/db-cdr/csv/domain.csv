@@ -1,0 +1,40 @@
+domain_id,domain_name,domain_concept_id
+Drug/Measurement,Drug/Measurement,51
+Observation,Observation,27
+Gender,Gender,2
+Condition/Procedure,Condition/Procedure,49
+Race,Race,3
+Procedure,Procedure,10
+Metadata,Metadata,7
+Meas Value Operator,Measurement Value Operator,23
+Device,Device,17
+Condition/Meas,Condition/Measurement,47
+Currency,Currency,34
+Obs/Procedure,Observation/Procedure,42
+Condition/Drug,Condition/Drug,53
+Route,Route Of Administration,15
+Provider Specialty,Provider Specialty,33
+Ethnicity,Ethnicity,4
+Device/Obs,Device/Observation,45
+Measurement/Obs,Measurement/Observation,44
+Condition,Condition,19
+Spec Disease Status,Specimen Disease Status,39
+Meas Value,Measurement Value,24
+Place of Service,Place of Service,32
+Specimen,Specimen,36
+Device/Drug,Device/Drug,50
+Meas/Procedure,Measurement/Procedure,43
+Device/Procedure,Device/Procedure,41
+Condition/Obs,Condition/Observation,48
+Type Concept,Type Concept,58
+Condition/Device,Condition/Device,235
+Relationship,Relationship,31
+Visit,Visit,8
+Measurement,Measurement,21
+Drug/Procedure,Drug/Procedure,54
+Drug,Drug,13
+Unit,Unit,16
+Spec Anatomic Site,Specimen Anatomic Site,38
+Revenue Code,Revenue Code,35
+Modifier,Modifier,12
+Drug/Obs,Drug/Observation,52

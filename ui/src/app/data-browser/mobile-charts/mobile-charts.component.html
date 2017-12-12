@@ -1,0 +1,40 @@
+<!-- <h3 class="text-center"> {{concept.concept_name}}</h3>
+<hr> -->
+
+<div class="card">
+  <div class=" text-center card-header">
+    <div class="text-right"><button class="btn btn-sm btn-icon btn-danger-outline" style="margin-right:6px!important" (click)="sendRemove(concept)"><clr-icon shape="times"></clr-icon></button></div>
+    <div class="card-header-text">{{concept.concept_name}}</div>
+  </div>
+  <div style="padding:0!important; padding-top:.5rem !important;" class="card-block">
+    <div class="card-text">
+      <div *ngIf="concept.count_value">
+
+        <div class="col-sm-12" style="display:flex;justify-content: center; padding-bottom: .5rem;">
+          <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': show_source_graph}" *ngIf="concept.children.length > 0" (click)="toggleGraphs(null)">
+            Sources <clr-icon size="16" shape="bar-chart"></clr-icon>
+          </button>
+          <div *ngFor="let analysis of analyses">
+            <button class="btn btn-sm btn-outline right-gutter" [ngClass]="{'btn-primary': analysis.showgraph}" *ngIf="analysis.results.length>0" (click)="toggleGraphs(analysis)">
+              {{analysis.analysis_name }} <clr-icon size="16" shape="bar-chart"></clr-icon>
+            </button>
+          </div>
+        </div>
+
+        <div style="height:100%; width:100%">
+          <div style="width:100%" class="children-chart">
+            <app-chart style="width:100%" *ngIf="concept.children.length>0 && show_source_graph" [redraw]="randNum" [concepts]="concept.children"></app-chart>
+          </div>
+          <div style="width:100%" *ngFor=" let analysis of analyses;let i=index ">
+            <!-- <div [ngClass]="{'biggraph':singleGraph.length==1, 'smallgraph':singleGraph.length>1 }"> -->
+            <div style="width:100%">
+              <app-chart style="width:100%" *ngIf="analysis.results.length>0 && analysis.showgraph" [redraw]="true" [analysis]="analysis"></app-chart>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

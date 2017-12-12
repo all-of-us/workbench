@@ -11,4 +11,14 @@
   <include file="changelog-schema/db.changelog-1.xml"/>
   <include file="changelog-schema/db.changelog-2.xml"/>
   <include file="changelog-schema/db.changelog-3.xml"/>
+  <include file="changelog-schema/db.changelog-4.xml"/>
+  <include file="changelog-schema/db.changelog-5.xml"/>
+  <include file="changelog-schema/db.changelog-6.xml"/>
+  <include file="changelog-schema/db.changelog-7.xml"/>
+  <include file="changelog-schema/db.changelog-8-achilles-indexes.xml"/>
+  <include file="changelog-schema/db.changelog-9-concept-count-cols.xml"/>
+  <include file="changelog-schema/db.changelog-10-concept-count-index.xml"/>
+  <include file="changelog-schema/db.changelog-11-drop-achilles-views.xml"/>
+  <include file="changelog-schema/db.changelog-12-concept-full-text.xml"/>
+
 </databaseChangeLog>

@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
   hasReviewResearchPurpose = false;
   private _showCreateAccount = false;
   private overriddenUrl: string = null;
-
+  currentUrl: string;
   constructor(
       private activatedRoute: ActivatedRoute,
       private errorHandlingService: ErrorHandlingService,
@@ -68,7 +68,9 @@ export class AppComponent implements OnInit {
     // After navigation events, get the "title" value of the current Route and
     // include it in the web page title.
     this.router.events.subscribe((event) => {
+      this.currentUrl = this.router.url;
       if (event instanceof NavigationEnd) {
+
         let currentRoute = this.activatedRoute;
         while (currentRoute.firstChild) {
           currentRoute = currentRoute.firstChild;

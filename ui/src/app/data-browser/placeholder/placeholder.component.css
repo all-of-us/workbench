@@ -1,0 +1,13 @@
+.outer{
+  height:45rem;
+  overflow: hidden;
+}
+.large{
+  width:50%;
+  height:auto;
+  color:#eee;
+  filter: opacity(.6);
+
+}
+clr-icon>svg{
+}

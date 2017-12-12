@@ -1,0 +1,4 @@
+.tree-height {
+  max-height: 64rem;
+  overflow: scroll;
+}
