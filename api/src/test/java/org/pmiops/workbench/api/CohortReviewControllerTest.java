@@ -223,7 +223,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(participantCounter.buildParticipantIdQuery(request, 200)).thenReturn(null);
+        when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
@@ -236,7 +236,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200);
+        verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
         verify(bigQueryService, times(1)).getResultMapper(queryResult);

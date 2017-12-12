@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -72,6 +73,8 @@ public class CohortsControllerTest {
   @Autowired
   UserDao userDao;
   @Mock
+  CohortMaterializationService cohortMaterializationService;
+  @Mock
   Provider<User> userProvider;
   @Autowired
   FireCloudService fireCloudService;
@@ -97,7 +100,8 @@ public class CohortsControllerTest {
         cdrVersionDao, userDao, userProvider, fireCloudService, CLOCK);
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
-        workspaceService, cohortDao, userProvider, CLOCK);
+        workspaceService, cohortDao, cdrVersionDao, cohortMaterializationService,
+        userProvider, CLOCK);
   }
 
   public Cohort createDefaultCohort() {
