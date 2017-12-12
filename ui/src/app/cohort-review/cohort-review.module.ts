@@ -5,13 +5,16 @@ import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
-import {FullpageDirective} from './directives';
-import {CohortResolverGuard, ReviewResolverGuard} from './guards';
 import {OverviewComponent} from './overview/overview.component';
 import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
 
-import {CohortReviewService} from 'generated';
+import {FullPageDirective} from './directives/fullPage.directive';
+import {SidebarDirective} from './directives/sidebar.directive';
 
+import {CohortResolverGuard} from './guards/cohort-resolver.guard';
+import {ReviewResolverGuard} from './guards/review-resolver.guard';
+
+import {CohortReviewService} from 'generated';
 
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
@@ -39,7 +42,8 @@ const routes = [{
     CohortReviewComponent,
     OverviewComponent,
     SubjectDetailComponent,
-    FullpageDirective,
+    FullPageDirective,
+    SidebarDirective,
   ],
   providers: [
     CohortResolverGuard,

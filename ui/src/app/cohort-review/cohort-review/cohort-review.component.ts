@@ -23,6 +23,7 @@ import {
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
+
   readonly CohortStatus = CohortStatus;
 
   reviewParamForm = new FormGroup({
@@ -36,20 +37,10 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   private review: CohortReview;
   private loading = false;
   private subscription: Subscription;
-  private subjectNavOpen = false;
-  private statusBarOpen = false;
 
   @ViewChild('createCohortModal') createCohortModal;
-  @ViewChild('subjectNav') _subjectNav;
-  @ViewChild('openNav') _openNav;
-  @ViewChild('statusBar') _statusBar;
-  @ViewChild('openStatus') _openStatus;
 
   get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
-  get openNav() { return this._openNav.nativeElement; }
-  get subjectNav() { return this._subjectNav.nativeElement; }
-  get openStatus() { return this._openStatus.nativeElement; }
-  get statusBar() { return this._statusBar.nativeElement; }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -82,10 +73,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
       .map(finder => this.review.participantCohortStatuses.find(finder))
       .subscribe(subject => {
         console.log(`DetailView changing to participant: ${subject.participantId}`);
-        this.subjectNavOpen = false;
-        this.activeSubject = subject;
-        this.subjectStatus.enable();
-        this.subjectStatus.setValue(subject.status, {emitEvent: false});
       });
 
     const statusChangerSub = this.subjectStatus.valueChanges
@@ -132,31 +119,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         this.review = review;
         this.createCohortModal.close();
       });
-  }
-
-  selectSubject(subject: ParticipantCohortStatus) {
-    this.subjectNavOpen = false;
-    this.activeSubject = subject;
-    this.subjectStatus.enable();
-    this.subjectStatus.setValue(subject.status, {emitEvent: false});
-  }
-
-  goToOverview() {
-    this.subjectNavOpen = false;
-    this.activeSubject = null;
-    this.subjectStatus.disable();
-  }
-
-  @HostListener('document:click', ['$event'])
-  onClick(event) {
-    if (!(this.subjectNav.contains(event.target)
-        || this.openNav.contains(event.target))) {
-      this.subjectNavOpen = false;
-    }
-    if (!(this.statusBar.contains(event.target)
-        || this.openStatus.contains(event.target))) {
-      this.statusBarOpen = false;
-    }
   }
 
   statusText(stat: CohortStatus): string {

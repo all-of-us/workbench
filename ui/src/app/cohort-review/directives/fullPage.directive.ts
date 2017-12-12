@@ -3,8 +3,9 @@ import {Directive, ElementRef, HostListener, OnInit, Renderer2} from '@angular/c
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
 
-@Directive({selector: '[appFullpage]'})
-export class FullpageDirective implements OnInit {
+@Directive({selector: '[appFullPage]'})
+export class FullPageDirective implements OnInit {
+
   constructor(
     private element: ElementRef,
     private renderer: Renderer2,

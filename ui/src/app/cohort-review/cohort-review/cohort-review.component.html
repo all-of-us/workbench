@@ -1,18 +1,19 @@
-<div appFullpage>
+<div appFullPage>
   <div *ngIf="loading" class="spinner">Loading...</div>
 
   <!-- Main subject navigation sidebar -->
-  <div #subjectNav
-    class="sidebar subject-nav"
-    [class.subject-nav-open]="subjectNavOpen">
-    <a class="closebtn" (click)="subjectNavOpen = false">&times;</a>
-    <a (click)="goToOverview()"
+  <div appSidebar
+    #subjectNav="appSidebar"
+    [controller]="navBtn">
+    <a class="closebtn" (click)="subjectNav.close()">&times;</a>
+    <a (click)="subjectNav.close()"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
     <a *ngFor="let subject of review.participantCohortStatuses"
+      (click)="subjectNav.close()"
       [routerLink]="[subject.participantId]"
       routerLinkActive="active">
       {{ subject.participantId}}
@@ -24,10 +25,11 @@
   </div>
 
   <!-- Annotations & Status sidebar -->
-  <div #statusBar
-    class="sidebar status-bar"
-    [class.status-bar-open]="statusBarOpen">
-    <a class="closebtn" (click)="statusBarOpen = false">&times;</a>
+  <div appSidebar
+    #statusBar="appSidebar"
+    [position]="{top: 0, right: 0}"
+    [controller]="statusBtn">
+    <a class="closebtn" (click)="statusBar.close()">&times;</a>
     <div class="form-group">
       <label>Participant Review Status</label>
       <div class="radio">
@@ -57,15 +59,21 @@
     </div>
   </div>
 
-  <!-- Sidebar-is-active overlay -->
-  <div class="blanket" [class.blanket-active]="subjectNavOpen || statusBarOpen"></div>
+  <!-- Blanket for dimming the background when a sidebar is open -->
+  <div class="blanket" [class.blanket-active]="subjectNav.isOpen || statusBar.isOpen"></div>
 
   <!-- Main content area for the Cohort Review Sub-application -->
   <div class="cohort-review-main"
-    [style.margin-left]="subjectNavOpen ? '300px' : 0"
-    [style.margin-right]="statusBarOpen ? '300px' : 0">
-    <button #openNav (click)="subjectNavOpen = true">Open</button>
-    <button #openStatus (click)="statusBarOpen = true">Open</button>
+    [style.margin-left]="subjectNav.isOpen ? '300px' : 0"
+    [style.margin-right]="statusBar.isOpen ? '300px' : 0">
+    <button #navBtn
+      (click)="subjectNav.open(); $event.stopPropagation()">
+      Subjects
+    </button>
+    <button #statusBtn
+      (click)="statusBar.open(); $event.stopPropagation()">
+      Status
+    </button>
     <router-outlet></router-outlet>
   </div>
 
