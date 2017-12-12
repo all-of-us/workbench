@@ -135,6 +135,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
         findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         String definition = cohort.getCriteria();
@@ -220,6 +221,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         if (cohortReview == null) {
 
             Cohort cohort = findCohort(cohortId);
+            //this validates that the user is in the proper workspace
             findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
             String definition = cohort.getCriteria();
@@ -285,6 +287,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                   ModifyCohortStatusRequest cohortStatusRequest) {
 
         Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
         findWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         CohortReview cohortReview = findCohortReview(cohortId, cdrVersionId);
