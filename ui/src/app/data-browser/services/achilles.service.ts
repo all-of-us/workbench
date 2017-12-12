@@ -115,7 +115,10 @@ export class AchillesService {
 
 
   getConceptResults(args) {
-    const q = {
+
+    /* Todo make object to pass with search params
+    *
+     const q = {
         concept_name: args.search,
         page: args.page,
         page_len: args.page_len,
@@ -173,9 +176,13 @@ export class AchillesService {
       q['domain_id[]'] = domains;
     }
 
-    return this.api.getConceptsSearch(q.concept_name).map(
+    */
+    let search = args.search;
+    if (!search || search === '') {
+      search = null;
+    }
+    return this.api.getConceptsSearch(search).map(
       (response) => {
-
         const  data = response.items.map(item => {
           return new Concept(item);
         });
