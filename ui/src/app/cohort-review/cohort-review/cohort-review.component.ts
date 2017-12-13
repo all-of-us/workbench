@@ -29,16 +29,16 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     numParticipants: new FormControl(),
   });
 
-  subjectStatus = new FormControl();
-
   private cohort: Cohort;
   private review: CohortReview;
-  private loading = false;
+  private participantPage: ParticipantCohortStatus[];
+
   private subscription: Subscription;
+  private _selectedParticipant: ParticipantCohortStatus | null;
+
+  private loading = false;
 
   @ViewChild('createCohortModal') createCohortModal;
-
-  get numParticipants() { return this.reviewParamForm.get('numParticipants'); }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -59,36 +59,10 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         ]));
       }
     });
+  }
 
-    const [detailview, overview] = this.route.firstChild.params
-      .map(params => params.subjectID)
-      .distinctUntilChanged()
-      .partition(id => id);  // undefined means overview, not detail view
-
-    const detailviewSub = detailview
-      .map(id => +id)
-      .map(id => (pstat: ParticipantCohortStatus): boolean => pstat.participantId === id)
-      .map(finder => this.review.participantCohortStatuses.find(finder))
-      .subscribe(subject => {
-        console.log(`DetailView changing to participant: ${subject.participantId}`);
-      });
-
-    // const statusChangerSub = this.subjectStatus.valueChanges
-    //   .switchMap(status) => {
-    //     const request = <ModifyCohortStatusRequest>{status};
-    //     const {ns, wsid, cid} = this.route.snapshot.params;
-    //     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, CDR_VERSION, request);
-    //   })
-    //   .map(resp =>
-    //     this.review.participantCohortStatuses.map(statObj =>
-    //       statObj.participantId === resp.participantId
-    //         ? resp
-    //         : statObj
-    //   ))
-    //   .subscribe(newStatusSet => this.review.participantCohortStatuses = newStatusSet);
-
-    this.subscription.add(detailviewSub);
-    // this.subscription.add(statusChangerSub);
+  get numParticipants() {
+    return this.reviewParamForm.get('numParticipants');
   }
 
   get maxParticipants() {
@@ -96,6 +70,21 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
       return Math.min(10000, this.review.matchedParticipantCount);
     }
     return 10000;
+  }
+
+  get selectedParticipant() {
+    return this._selectedParticipant;
+  }
+
+  set selectedParticipant(selection: ParticipantCohortStatus) {
+    const ind = this.review.participantCohortStatuses.findIndex(
+      ({participantId}) => participantId === selection.participantId
+    );
+    if (ind > 0) {
+      // If the selected ID is on the current page, "optimistically" update the page
+      this.review.participantCohortStatuses.splice(ind, 1, selection);
+    }
+    this._selectedParticipant = selection;
   }
 
   ngOnDestroy() {

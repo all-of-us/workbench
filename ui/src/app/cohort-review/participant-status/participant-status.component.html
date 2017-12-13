@@ -1,38 +1,54 @@
 <div class="form-group">
   <label>Participant Review Status</label>
-  <div class="radio">
+  <span [style.margin-left]="'0.25rem'">
+    <div *ngIf="changingStatus" class="spinner spinner-inline">Loading...</div>
+    <ng-container *ngIf="!changingStatus">
+      <clr-icon
+        *ngIf="statusControl.enabled"
+        shape="success-standard"
+        class="is-success">
+      </clr-icon>
+      <clr-icon
+        *ngIf="statusControl.disabled"
+        shape="warning-standard"
+        class="is-warning">
+      </clr-icon>
+    </ng-container>
+  </span>
+  <div class="radio" [class.disable]="statusControl.disabled">
     <input type="radio"
-      name="subjectStatus"
-      id="subject-included-status"
-      [formControl]="subjectStatus"
-      value="CohortStatus.INCLUDED">
-    <label for="subject-included-status">Include</label>
+      name="statusControl"
+      id="participant-included-status"
+      [checked]="participant?.status === CohortStatus.INCLUDED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.INCLUDED">
+    <label for="participant-included-status">Include</label>
   </div>
-  <div class="radio">
-    <input
-      type="radio"
-      name="subjectStatus"
-      id="subject-excluded-status"
-      [formControl]="subjectStatus"
-      value="CohortStatus.EXCLUDED">
-    <label for="subject-excluded-status">Exclude</label>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-excluded-status"
+      [checked]="participant?.status === CohortStatus.EXCLUDED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.EXCLUDED">
+    <label for="participant-excluded-status">Exclude</label>
   </div>
-  <div class="radio">
-    <input
-      type="radio"
-      name="subjectStatus"
-      id="subject-needs-further-review"
-      [formControl]="subjectStatus"
-      value="CohortStatus.NEEDSFURTHERREVIEW">
-    <label for="subject-needs-further-review">Needs Further Review</label>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-needs-further-review"
+      [checked]="participant?.status === CohortStatus.NEEDSFURTHERREVIEW"
+      [formControl]="statusControl"
+      [value]="CohortStatus.NEEDSFURTHERREVIEW">
+    <label for="participant-needs-further-review">Needs Further Review</label>
   </div>
-  <div class="radio">
-    <input
-      type="radio"
-      name="subjectStatus"
-      id="subject-unreviewed"
-      [formControl]="subjectStatus"
-      value="CohortStatus.NOTREVIEWED">
-    <label for="subject-unreviewed">Unreviewed</label>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-unreviewed"
+      [checked]="participant?.status === CohortStatus.NOTREVIEWED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.NOTREVIEWED">
+    <label for="participant-unreviewed">Unreviewed</label>
   </div>
 </div>

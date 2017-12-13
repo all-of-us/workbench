@@ -2,6 +2,11 @@
   transition: margin-left .5s;
 }
 
+.status-wrapper {
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
 /* Link styles */
 [appSidebar] a {
   padding: .25rem .25rem .25rem 1.25rem;

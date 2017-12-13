@@ -5,11 +5,11 @@ import {Observable} from 'rxjs/Observable';
 import {CohortReviewService} from 'generated';
 
 @Component({
-  selector: 'app-subject-detail',
-  templateUrl: './subject-detail.component.html',
-  styleUrls: ['./subject-detail.component.css']
+  selector: 'app-participant-detail',
+  templateUrl: './participant-detail.component.html',
+  styleUrls: ['./participant-detail.component.css']
 })
-export class SubjectDetailComponent implements OnInit {
+export class ParticipantDetailComponent implements OnInit {
   private subjectId$: Observable<any>;
 
   constructor(
@@ -21,6 +21,6 @@ export class SubjectDetailComponent implements OnInit {
   ngOnInit() {
     // TODO: here we load the subject detail data
     this.subjectId$ = this.route.params
-      .switchMap(params => Observable.of(params.subjectID));
+      .switchMap(params => Observable.of(params.participantId));
   }
 }

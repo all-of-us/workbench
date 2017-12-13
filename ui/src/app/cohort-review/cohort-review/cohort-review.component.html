@@ -6,20 +6,20 @@
     #participantNav="appSidebar"
     [controller]="navBtn">
     <a class="closebtn" (click)="participantNav.close()">&times;</a>
-    <a (click)="participantNav.close()"
+    <a (click)="participantNav.close(); selectedParticipant = null"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
-    <a *ngFor="let statObj of review.participantCohortStatuses"
-      (click)="participantNav.close()"
-      [routerLink]="[statObj.participantId]"
+    <a *ngFor="let participant of review.participantCohortStatuses"
+      (click)="participantNav.close(); selectedParticipant = participant"
+      [routerLink]="[participant.participantId]"
       routerLinkActive="active">
-      {{ statObj.participantId}}
+      {{ participant.participantId}}
       <span class="label"
-        [ngClass]="statusClass(statObj.status)">
-        {{ statusText(statObj.status) }}
+        [ngClass]="statusClass(participant.status)">
+        {{ statusText(participant.status) }}
       </span>
     </a>
   </div>
@@ -30,8 +30,11 @@
     [position]="{top: 0, right: 0}"
     [controller]="statusBtn">
     <a class="closebtn" (click)="statusBar.close()">&times;</a>
-    <app-participant-status>
-    </app-participant-status>
+    <div class="status-wrapper">
+      <app-participant-status
+        [(participant)]="selectedParticipant">
+      </app-participant-status>
+    </div>
   </div>
 
   <!-- Blanket for dimming the background when a sidebar is open -->
