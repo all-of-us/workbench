@@ -226,7 +226,8 @@ public class ParticipantCounterTest {
                 .addIncludesItem(searchGroup2)
                 .addExcludesItem(searchGroup3);
 
-        QueryJobConfiguration actualRequest = participantCounter.buildParticipantIdQuery(request, 200);
+        QueryJobConfiguration actualRequest = participantCounter.buildParticipantIdQuery(request,
+            200, 0);
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {

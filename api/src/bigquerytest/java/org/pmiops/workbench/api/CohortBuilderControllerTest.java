@@ -41,7 +41,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class})
+@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class,
+    CodeDomainLookupService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -52,6 +53,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Autowired
     private ParticipantCounter participantCounter;
+
+    @Autowired
+    private CodeDomainLookupService codeDomainLookupService;
 
     @Autowired
     private Provider<WorkbenchConfig> workbenchConfig;
@@ -79,8 +83,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
-        this.controller = new CohortBuilderController(bigQueryService, participantCounter,
-                mockCriteriaDao);
+        this.controller = new CohortBuilderController(bigQueryService, codeDomainLookupService,
+            participantCounter, mockCriteriaDao);
     }
 
     @Test

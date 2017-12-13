@@ -1,10 +1,12 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.joda.time.DateTime;
 import org.pmiops.workbench.model.DataAccessLevel;
 
@@ -95,5 +97,27 @@ public class CdrVersion {
 
   public void setNumParticipants(int numParticipants) {
     this.numParticipants = numParticipants;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(cdrVersionId, name, dataAccessLevel, releaseNumber, bigqueryProject,
+        bigqueryDataset, creationTime, numParticipants);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof CdrVersion)) {
+      return false;
+    }
+    CdrVersion that = (CdrVersion) obj;
+    return new EqualsBuilder().append(this.cdrVersionId, that.cdrVersionId)
+        .append(this.name, that.name)
+        .append(this.dataAccessLevel, that.dataAccessLevel)
+        .append(this.releaseNumber, that.releaseNumber)
+        .append(this.bigqueryProject, that.bigqueryProject)
+        .append(this.creationTime, that.creationTime)
+        .append(this.numParticipants, that.numParticipants)
+        .build();
   }
 }

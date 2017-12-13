@@ -51,6 +51,8 @@ public class ParticipantCounter {
 
     private static final String ID_SQL_ORDER_BY = "order by person_id\n" + "limit";
 
+    private static final String OFFSET_SUFFIX = " offset ";
+
     private static final String UNION_TEMPLATE = "union distinct\n";
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
@@ -77,8 +79,13 @@ public class ParticipantCounter {
         return buildQuery(request, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
     }
 
-    public QueryJobConfiguration buildParticipantIdQuery(SearchRequest request, long resultSize) {
-        return buildQuery(request, ID_SQL_TEMPLATE, ID_SQL_ORDER_BY + " " + resultSize);
+    public QueryJobConfiguration buildParticipantIdQuery(SearchRequest request, long resultSize,
+        long offset) {
+        String endSql = ID_SQL_ORDER_BY + " " + resultSize;
+        if (offset > 0) {
+            endSql += OFFSET_SUFFIX + offset;
+        }
+        return buildQuery(request, ID_SQL_TEMPLATE, endSql);
     }
 
     public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String endSql) {
