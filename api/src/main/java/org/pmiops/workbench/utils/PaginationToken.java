@@ -17,7 +17,7 @@ public final class PaginationToken {
   @JsonProperty("h")
   private int parameterHash;
 
-  private PaginationToken(long offset, int parameterHash) {
+  public PaginationToken(long offset, int parameterHash) {
     this.offset = offset;
     this.parameterHash = parameterHash;
   }
@@ -28,6 +28,10 @@ public final class PaginationToken {
 
   public long getOffset() {
     return offset;
+  }
+
+  public int getParameterHash() {
+    return parameterHash;
   }
 
   public boolean matchesParameters(Object... parameters) {
@@ -41,7 +45,12 @@ public final class PaginationToken {
   public static PaginationToken fromBase64(String str) {
     String json = new String(Base64.getDecoder().decode(str), UTF_8);
     try {
-      return new Gson().fromJson(json, PaginationToken.class);
+      PaginationToken result = new Gson().fromJson(json, PaginationToken.class);
+      if (result.getOffset() < 0) {
+        throw new BadRequestException(String.format("Invalid pagination offset: %d",
+            result.getOffset()));
+      }
+      return result;
     } catch (JsonSyntaxException e) {
       throw new BadRequestException(String.format("Invalid pagination token: %s", str));
     }

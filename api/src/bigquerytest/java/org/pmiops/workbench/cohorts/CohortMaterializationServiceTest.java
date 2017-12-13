@@ -22,6 +22,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -73,6 +74,17 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
       // Pagination token doesn't match, this should fail.
       cohortMaterializationService.materializeCohort(cdrVersion, SearchRequests.males(),
           null, 2, response.getNextPageToken());
+      fail("Exception expected");
+    } catch (BadRequestException e) {
+      // expected
+    }
+
+    PaginationToken token = PaginationToken.fromBase64(response.getNextPageToken());
+    PaginationToken invalidToken = new PaginationToken(-1L, token.getParameterHash());
+    try {
+      // Pagination token doesn't match, this should fail.
+      cohortMaterializationService.materializeCohort(cdrVersion, SearchRequests.males(),
+          null, 2, invalidToken.toBase64());
       fail("Exception expected");
     } catch (BadRequestException e) {
       // expected

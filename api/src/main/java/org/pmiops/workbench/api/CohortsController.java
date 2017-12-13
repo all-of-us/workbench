@@ -201,7 +201,7 @@ public class CohortsController implements CohortsApiDelegate {
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
       if (cdrVersion == null) {
-        throw new BadRequestException(String.format("Couldn't find CDR version with name %s",
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
             request.getCdrVersionName()));
       }
     }
@@ -210,25 +210,25 @@ public class CohortsController implements CohortsApiDelegate {
       org.pmiops.workbench.db.model.Cohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
       if (cohort == null) {
-        throw new BadRequestException(
+        throw new NotFoundException(
             String.format("Couldn't find cohort with name %s in workspace %s/%s",
                 request.getCohortName(), workspaceNamespace, workspaceId));
       }
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
-    } else if (true){
+    } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
     Integer pageSize = request.getPageSize();
-    if (pageSize == null) {
+    if (pageSize == null || pageSize == 0) {
       pageSize = DEFAULT_PAGE_SIZE;
-    } else {
-      if (pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
+    } else if (pageSize < 0) {
         throw new BadRequestException(
             String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
                 MAX_PAGE_SIZE));
-      }
+    } else if (pageSize > MAX_PAGE_SIZE) {
+      pageSize = MAX_PAGE_SIZE;
     }
 
     SearchRequest searchRequest;
