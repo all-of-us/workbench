@@ -2,7 +2,7 @@ import {Component, Input, NgModule, OnChanges} from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
 import { AchillesService} from '../services/achilles.service';
 
-// This draws a highchart from an analysis object 
+// This draws a highchart from an analysis object
 // import highcharts and highmaps and add highmaps to it.
 // Note, must import the js/modules/map so it can play nice. See highcharts docs
 // https://www.highcharts.com/docs/getting-started/installation
