@@ -1,6 +1,9 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -10,8 +13,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -22,6 +28,7 @@ import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CohortsController implements CohortsApiDelegate {
 
+  @VisibleForTesting
+  static final int MAX_PAGE_SIZE = 10000;
+  @VisibleForTesting
+  static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
 
   /**
@@ -71,6 +82,8 @@ public class CohortsController implements CohortsApiDelegate {
 
   private final WorkspaceService workspaceService;
   private final CohortDao cohortDao;
+  private final CdrVersionDao cdrVersionDao;
+  private final CohortMaterializationService cohortMaterializationService;
   private final Provider<User> userProvider;
   private final Clock clock;
 
@@ -78,10 +91,14 @@ public class CohortsController implements CohortsApiDelegate {
   CohortsController(
       WorkspaceService workspaceService,
       CohortDao cohortDao,
+      CdrVersionDao cdrVersionDao,
+      CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
+    this.cdrVersionDao = cdrVersionDao;
+    this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
   }
@@ -179,19 +196,57 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
-    // TODO(danrodney): get list of participant IDs by:
-    // 1. Retrieve participant cohort statuses matching the status filter.
-    // 2. If the status filter does not contain NOT_REVIEWED, or the cohort review contains
-    // all participant IDs in the cohort, return the IDs directly (subject to pagination.)
-    // 3. Otherwise, query BigQuery for participant IDs using SQL constructed from the cohort
-    // criteria, subject to pagination; remove IDs for participants that had a cohort status not
-    // included in the status filter.
-    return ResponseEntity.ok(new MaterializeCohortResponse());
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+    }
+    String cohortSpec;
+    if (request.getCohortName() != null) {
+      org.pmiops.workbench.db.model.Cohort cohort =
+          cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+      if (cohort == null) {
+        throw new NotFoundException(
+            String.format("Couldn't find cohort with name %s in workspace %s/%s",
+                request.getCohortName(), workspaceNamespace, workspaceId));
+      }
+      cohortSpec = cohort.getCriteria();
+    } else if (request.getCohortSpec() != null) {
+      cohortSpec = request.getCohortSpec();
+    } else {
+      throw new BadRequestException("Must specify either cohortName or cohortSpec");
+    }
+    Integer pageSize = request.getPageSize();
+    if (pageSize == null || pageSize == 0) {
+      pageSize = DEFAULT_PAGE_SIZE;
+    } else if (pageSize < 0) {
+        throw new BadRequestException(
+            String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
+                MAX_PAGE_SIZE));
+    } else if (pageSize > MAX_PAGE_SIZE) {
+      pageSize = MAX_PAGE_SIZE;
+    }
+
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
+        cdrVersion, searchRequest, request.getStatusFilter(), pageSize,
+        request.getPageToken());
+    return ResponseEntity.ok(response);
   }
 
-  private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceName,
+  private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,
       String workspaceId, String cohortId) {
-    Workspace workspace = workspaceService.getRequired(workspaceName, workspaceId);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(convertCohortId(cohortId));

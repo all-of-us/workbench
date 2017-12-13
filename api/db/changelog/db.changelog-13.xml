@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="danrodney" id="changelog-13">
+    <dropNotNullConstraint
+        columnDataType="clob"
+        columnName="description"
+        tableName="cohort"/>
+    <createIndex
+        indexName="idx_cohort_workspace_id_name"
+        tableName="cohort"
+        unique="true">
+      <column name="workspace_id"/>
+      <column name="name"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>
