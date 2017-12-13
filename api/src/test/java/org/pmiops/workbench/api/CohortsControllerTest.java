@@ -197,7 +197,7 @@ public class CohortsControllerTest {
     cohortsController.materializeCohort(WORKSPACE_NAMESPACE, "badWorkspace", request);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = NotFoundException.class)
   public void testMaterializeCohortCdrVersionNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
@@ -208,7 +208,7 @@ public class CohortsControllerTest {
     cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = NotFoundException.class)
   public void testMaterializeCohortCohortNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
@@ -244,11 +244,24 @@ public class CohortsControllerTest {
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
-    request.setPageSize(0);
+    request.setPageSize(-1);
     cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
   }
 
-  @Test(expected = BadRequestException.class)
+  public void testMaterializeCohortPageSizeZero() throws Exception {
+    Cohort cohort = createDefaultCohort();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+
+    MaterializeCohortRequest request = new MaterializeCohortRequest();
+    request.setCohortName(cohort.getName());
+    request.setPageSize(0);
+    MaterializeCohortResponse response = new MaterializeCohortResponse();
+    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+        CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
+    assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        request).getBody()).isEqualTo(response);
+  }
+
   public void testMaterializeCohortPageSizeTooLarge() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
@@ -256,7 +269,11 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     request.setPageSize(CohortsController.MAX_PAGE_SIZE + 1);
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
+    MaterializeCohortResponse response = new MaterializeCohortResponse();
+    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+        CohortsController.MAX_PAGE_SIZE, null)).thenReturn(response);
+    assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        request).getBody()).isEqualTo(response);
   }
 
   @Test
