@@ -216,10 +216,16 @@ CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities a
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema. 
 
 Loading of local data for the criteria trees happens in a manual goal(deletes and inserts tree data into the criteria table):
-```./project.rb run-cdr-data-migrations```
 
-Loading of cloud data for the criteria trees happens in a manual goal(deletes and inserts tree data into the criteria table):
-```./project.rb run-cloud-cdr-data-migrations```
+```./project.rb run-local-data-migrations```
+
+Local tables loaded from the goal are:
+  * **workbench** - cdr_version
+  * **cdr** - criteria, achilles_analysis, concept, concept_relationship, vocabulary, domain, achilles_results, achilles_results_concept and db_domain
+
+Loading of cloud data for the criteria trees and cdr version happens in a manual goal(deletes and inserts tree data into the criteria table):
+
+```./project.rb run-cloud-data-migrations```
 
 CDR Schema - We now have 2 activities in `api/db-cdr/build.gradle` file:
 ```

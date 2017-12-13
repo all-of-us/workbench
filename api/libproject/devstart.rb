@@ -298,10 +298,11 @@ def drop_cloud_cdr(*args)
   end
 end
 
-def run_cdr_data_migrations(*args)
+def run_local_data_migrations(*args)
   common = Common.new
 
   common.run_inline %W{docker-compose run db-cdr-data-migration}
+  common.run_inline %W{docker-compose run db-data-migration}
 end
 
 def run_drop_cdr_db(*args)
@@ -310,19 +311,11 @@ def run_drop_cdr_db(*args)
   common.run_inline %W{docker-compose run drop-cdr-db}
 end
 
-def run_cloud_cdr_data_migrations(*args)
-  GcloudContext.new("run-cloud-cdr-data-migrations", args, true).run do |ctx|
-    puts "Running cdr data migrations..."
-    puts "Creating cdr database if it does not exist..."
-    pw = ENV["MYSQL_ROOT_PASSWORD"]
-    run_with_redirects(
-        "cat db-cdr/create_db.sql | envsubst | " \
-        "mysql -u \"root\" -p\"#{pw}\" --host 127.0.0.1 --port 3307",
-        to_redact=pw)
-    puts "Upgrading cdr database..."
-    Dir.chdir("db-cdr") do
-      ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=data -Pcontexts=cloud")
-    end
+def run_cloud_data_migrations(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) do
+    migrate_cdr_data
+    migrate_workbench_data
   end
 end
 
@@ -603,9 +596,9 @@ Common.register_command({
 })
 
 Common.register_command({
-  :invocation => "run-cdr-data-migrations",
+  :invocation => "run-local-data-migrations",
   :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
-  :fn => lambda { |*args| run_cdr_data_migrations(*args) }
+  :fn => lambda { |*args| run_local_data_migrations(*args) }
 })
 
 Common.register_command({
@@ -615,9 +608,9 @@ Common.register_command({
 })
 
 Common.register_command({
-  :invocation => "run-cloud-cdr-data-migrations",
-  :description => "Runs data migrations in the cdr schema on the Cloud SQL database for the specified project.",
-  :fn => lambda { |*args| run_cloud_cdr_data_migrations(*args) }
+  :invocation => "run-cloud-data-migrations",
+  :description => "Runs data migrations in the cdr and workbench schemas on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
 def connect_to_cloud_db(cmd_name, *args)
@@ -703,7 +696,20 @@ def migrate_database()
     to_redact=ENV["MYSQL_ROOT_PASSWORD"]
   )
   Dir.chdir("db") do
-    common.run_inline(%W{gradle --info update})
+    common.run_inline(%W{gradle --info update -PrunList=main})
+  end
+end
+
+def migrate_workbench_data()
+  common = Common.new
+  common.status "Migrating workbench data..."
+  run_with_redirects(
+    "cat db/create_db.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
+  )
+  Dir.chdir("db") do
+    common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
   end
 end
 
@@ -717,6 +723,19 @@ def migrate_cdr_database()
   )
   Dir.chdir("db-cdr") do
     common.run_inline(%W{gradle --info update -PrunList=schema})
+  end
+end
+
+def migrate_cdr_data()
+  common = Common.new
+  common.status "Migrating CDR data..."
+  run_with_redirects(
+    "cat db-cdr/create_db.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
+  )
+  Dir.chdir("db-cdr") do
+    common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
   end
 end
 
