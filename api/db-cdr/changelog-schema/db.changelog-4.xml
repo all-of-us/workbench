@@ -5,13 +5,21 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="biopete" id="changelog-4" >
+  <changeSet author="biopete" id="changelog-4">
 
-    <renameTable newTableName="achilles_analysis" oldTableName="ACHILLES_analysis" schemaName="cdr"/>
-    <renameTable newTableName="achilles_results" oldTableName="ACHILLES_results" schemaName="cdr"/>
-    <renameTable newTableName="achilles_results_dist" oldTableName="ACHILLES_results_dist" schemaName="cdr"/>
-    <renameView newViewName="achilles_results_view" oldViewName="ACHILLES_results_view" schemaName="cdr"/>
-    <renameView newViewName="achilles_results_dist_view" oldViewName="ACHILLES_results_dist_view" schemaName="cdr"/>
+    <sql dbms="mysql">
+      ALTER TABLE cdr.concept
+      ADD FULLTEXT INDEX concept_name_index
+      (concept_name);
+    </sql>
+
+    <sql dbms="mysql">
+      ALTER TABLE cdr.concept
+      ADD FULLTEXT INDEX concept_code_index
+      (concept_code);
+    </sql>
 
   </changeSet>
+
 </databaseChangeLog>
+

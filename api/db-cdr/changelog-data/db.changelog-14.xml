@@ -5,15 +5,16 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="biopete" id="changelog-11-drop achilles_results_view">
+  <changeSet author="biopete" id="changelog-14">
 
-    <dropView viewName="achilles_results_view" schemaName="cdr"/>
+    <sql>
+      update cdr.concept c join cdr.achilles_results r on r.stratum_1 = c.concept_id and r.analysis_id = 3000 set c.count_value = r.count_value;
+    </sql>
 
-  </changeSet>
+    <sql>
+      update cdr.concept c join cdr.achilles_results r on r.analysis_id = 1 set c.prevalence = round(c.count_value / r.count_value ,2);
+    </sql>
 
-  <changeSet author="biopete" id="changelog-11.1 drop achilles_results_dist_view">
-    <dropView viewName="achilles_results_dist_view" schemaName="cdr"/>
   </changeSet>
 
 </databaseChangeLog>
-
