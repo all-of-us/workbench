@@ -9,6 +9,8 @@
 
     <validCheckSum>ANY</validCheckSum>
 
+    <comment>The build of the icd10 tree is split into 4 csv files to avoid memory issues.</comment>
+
     <loadData tableName="criteria" file="csv/icd10_criteria-2.csv" encoding="UTF-8" quotchar='"'>
       <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
