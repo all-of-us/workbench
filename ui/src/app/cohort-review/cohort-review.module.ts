@@ -6,7 +6,8 @@ import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {OverviewComponent} from './overview/overview.component';
-import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
+import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
+import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
@@ -19,11 +20,11 @@ import {CohortReviewService} from 'generated';
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
-  data: {title: 'Review Cohort Subjects'},
+  data: {title: 'Review Cohort Participants'},
   children: [
     {path: '', redirectTo: 'overview', pathMatch: 'full'},
     {path: 'overview', component: OverviewComponent},
-    {path: ':subjectID', component: SubjectDetailComponent},
+    {path: ':participantId', component: ParticipantDetailComponent},
   ],
   resolve: {
     cohort: CohortResolverGuard,
@@ -40,10 +41,11 @@ const routes = [{
   ],
   declarations: [
     CohortReviewComponent,
-    OverviewComponent,
-    SubjectDetailComponent,
     FullPageDirective,
+    OverviewComponent,
     SidebarDirective,
+    ParticipantDetailComponent,
+    ParticipantStatusComponent,
   ],
   providers: [
     CohortResolverGuard,

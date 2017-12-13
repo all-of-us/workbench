@@ -1,0 +1,38 @@
+<div class="form-group">
+  <label>Participant Review Status</label>
+  <div class="radio">
+    <input type="radio"
+      name="subjectStatus"
+      id="subject-included-status"
+      [formControl]="subjectStatus"
+      value="CohortStatus.INCLUDED">
+    <label for="subject-included-status">Include</label>
+  </div>
+  <div class="radio">
+    <input
+      type="radio"
+      name="subjectStatus"
+      id="subject-excluded-status"
+      [formControl]="subjectStatus"
+      value="CohortStatus.EXCLUDED">
+    <label for="subject-excluded-status">Exclude</label>
+  </div>
+  <div class="radio">
+    <input
+      type="radio"
+      name="subjectStatus"
+      id="subject-needs-further-review"
+      [formControl]="subjectStatus"
+      value="CohortStatus.NEEDSFURTHERREVIEW">
+    <label for="subject-needs-further-review">Needs Further Review</label>
+  </div>
+  <div class="radio">
+    <input
+      type="radio"
+      name="subjectStatus"
+      id="subject-unreviewed"
+      [formControl]="subjectStatus"
+      value="CohortStatus.NOTREVIEWED">
+    <label for="subject-unreviewed">Unreviewed</label>
+  </div>
+</div>

@@ -1,25 +1,25 @@
 <div appFullPage>
   <div *ngIf="loading" class="spinner">Loading...</div>
 
-  <!-- Main subject navigation sidebar -->
+  <!-- Main participant navigation sidebar -->
   <div appSidebar
-    #subjectNav="appSidebar"
+    #participantNav="appSidebar"
     [controller]="navBtn">
-    <a class="closebtn" (click)="subjectNav.close()">&times;</a>
-    <a (click)="subjectNav.close()"
+    <a class="closebtn" (click)="participantNav.close()">&times;</a>
+    <a (click)="participantNav.close()"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
-    <a *ngFor="let subject of review.participantCohortStatuses"
-      (click)="subjectNav.close()"
-      [routerLink]="[subject.participantId]"
+    <a *ngFor="let statObj of review.participantCohortStatuses"
+      (click)="participantNav.close()"
+      [routerLink]="[statObj.participantId]"
       routerLinkActive="active">
-      {{ subject.participantId}}
+      {{ statObj.participantId}}
       <span class="label"
-        [ngClass]="statusClass(subject.status)">
-        {{ statusText(subject.status) }}
+        [ngClass]="statusClass(statObj.status)">
+        {{ statusText(statObj.status) }}
       </span>
     </a>
   </div>
@@ -30,44 +30,19 @@
     [position]="{top: 0, right: 0}"
     [controller]="statusBtn">
     <a class="closebtn" (click)="statusBar.close()">&times;</a>
-    <div class="form-group">
-      <label>Participant Review Status</label>
-      <div class="radio">
-        <input type="radio" name="subjectStatus" id="subject-included-status"
-          [formControl]="subjectStatus"
-          value="CohortStatus.INCLUDED">
-        <label for="subject-included-status">Include</label>
-      </div>
-      <div class="radio">
-        <input type="radio" name="subjectStatus" id="subject-excluded-status"
-          [formControl]="subjectStatus"
-          value="CohortStatus.EXCLUDED">
-        <label for="subject-excluded-status">Exclude</label>
-      </div>
-      <div class="radio">
-        <input type="radio" name="subjectStatus" id="subject-needs-further-review"
-          [formControl]="subjectStatus"
-          value="CohortStatus.NEEDSFURTHERREVIEW">
-        <label for="subject-needs-further-review">Needs Further Review</label>
-      </div>
-      <div class="radio">
-        <input type="radio" name="subjectStatus" id="subject-unreviewed"
-          [formControl]="subjectStatus"
-          value="CohortStatus.NOTREVIEWED">
-        <label for="subject-unreviewed">Unreviewed</label>
-      </div>
-    </div>
+    <app-participant-status>
+    </app-participant-status>
   </div>
 
   <!-- Blanket for dimming the background when a sidebar is open -->
-  <div class="blanket" [class.blanket-active]="subjectNav.isOpen || statusBar.isOpen"></div>
+  <div class="blanket" [class.blanket-active]="participantNav.isOpen || statusBar.isOpen"></div>
 
   <!-- Main content area for the Cohort Review Sub-application -->
   <div class="cohort-review-main"
-    [style.margin-left]="subjectNav.isOpen ? '300px' : 0"
+    [style.margin-left]="participantNav.isOpen ? '300px' : 0"
     [style.margin-right]="statusBar.isOpen ? '300px' : 0">
     <button #navBtn
-      (click)="subjectNav.open(); $event.stopPropagation()">
+      (click)="participantNav.open(); $event.stopPropagation()">
       Subjects
     </button>
     <button #statusBtn

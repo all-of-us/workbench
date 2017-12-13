@@ -12,7 +12,6 @@ import {
   CohortReviewService,
   CohortStatus,
   CreateReviewRequest,
-  ModifyCohortStatusRequest,
   ParticipantCohortStatus,
   ReviewStatus,
 } from 'generated';
@@ -32,7 +31,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
   subjectStatus = new FormControl();
 
-  private activeSubject: ParticipantCohortStatus | null;
   private cohort: Cohort;
   private review: CohortReview;
   private loading = false;
@@ -75,22 +73,22 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         console.log(`DetailView changing to participant: ${subject.participantId}`);
       });
 
-    const statusChangerSub = this.subjectStatus.valueChanges
-      .switchMap(status => {
-        const request = <ModifyCohortStatusRequest>{status};
-        const {ns, wsid, cid} = this.route.snapshot.params;
-        return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, CDR_VERSION, request);
-      })
-      .map(resp =>
-        this.review.participantCohortStatuses.map(statObj =>
-          statObj.participantId === resp.participantId
-            ? resp
-            : statObj
-      ))
-      .subscribe(newStatusSet => this.review.participantCohortStatuses = newStatusSet);
+    // const statusChangerSub = this.subjectStatus.valueChanges
+    //   .switchMap(status) => {
+    //     const request = <ModifyCohortStatusRequest>{status};
+    //     const {ns, wsid, cid} = this.route.snapshot.params;
+    //     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, CDR_VERSION, request);
+    //   })
+    //   .map(resp =>
+    //     this.review.participantCohortStatuses.map(statObj =>
+    //       statObj.participantId === resp.participantId
+    //         ? resp
+    //         : statObj
+    //   ))
+    //   .subscribe(newStatusSet => this.review.participantCohortStatuses = newStatusSet);
 
     this.subscription.add(detailviewSub);
-    this.subscription.add(statusChangerSub);
+    // this.subscription.add(statusChangerSub);
   }
 
   get maxParticipants() {
