@@ -12,7 +12,10 @@
   <include file="changelog-data/db.changelog-2.xml"/>
   <include file="changelog-data/db.changelog-3.xml"/>
   <include file="changelog-data/db.changelog-4.xml"/>
-  <include file="changelog-data/db.changelog-5.xml"/>
+  <include file="changelog-data/db.changelog-5-icd10-1.xml"/>
+  <include file="changelog-data/db.changelog-5-icd10-2.xml"/>
+  <include file="changelog-data/db.changelog-5-icd10-3.xml"/>
+  <include file="changelog-data/db.changelog-5-icd10-4.xml"/>
   <include file="changelog-data/db.changelog-6.xml"/>
   <include file="changelog-data/db.changelog-7.xml"/>
   <include file="changelog-data/db.changelog-8.xml"/>
