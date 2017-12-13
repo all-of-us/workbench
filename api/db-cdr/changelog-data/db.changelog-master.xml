@@ -16,9 +16,9 @@
   <include file="changelog-data/db.changelog-6.xml"/>
   <include file="changelog-data/db.changelog-7.xml"/>
   <include file="changelog-data/db.changelog-8.xml"/>
-  <include file="changelog-data/db.changelog-domain11.xml"/>
-  <include file="changelog-data/db.changelog-vocabulary12.xml"/>
-  <include file="changelog-data/db.changelog-achilles_results13.xml"/>
-  <include file="changelog-data/db.changelog-db_domain14.xml"/>
-  <include file="changelog-data/db.changelog-concept-counts-update15.xml"/>
+  <include file="changelog-data/db.changelog-9.xml"/>
+  <include file="changelog-data/db.changelog-10.xml"/>
+  <include file="changelog-data/db.changelog-12.xml"/>
+  <include file="changelog-data/db.changelog-13.xml"/>
+  <include file="changelog-data/db.changelog-14.xml"/>
 </databaseChangeLog>
