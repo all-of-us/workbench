@@ -38,7 +38,54 @@
       <column name="invalid_reason" type="VARCHAR(1)">
         <constraints nullable="true"/>
       </column>
+      <column name="count_value" defaultValue="0" type="bigint(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="prevalence" defaultValue="0" type="decimal(3,2)">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
+
+    <createIndex
+            indexName="idx_concept_name"
+            schemaName="cdr"
+            tableName="concept"
+            unique="false">
+      <column name="concept_name" type="varchar(255)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_concept_code"
+            schemaName="cdr"
+            tableName="concept"
+            unique="false">
+      <column name="concept_code" type="varchar(50)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_domain_id"
+            schemaName="cdr"
+            tableName="concept"
+            unique="false">
+      <column name="domain_id" type="varchar(20)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_vocabulary_id"
+            schemaName="cdr"
+            tableName="concept"
+            unique="false">
+      <column name="vocabulary_id" type="varchar(20)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_standard_concept"
+            schemaName="cdr"
+            tableName="concept"
+            unique="false">
+      <column name="standard_concept" type="varchar(1)"/>
+    </createIndex>
+
+    <createIndex tableName="concept" schemaName="cdr" indexName="idx-count-value">
+      <column name="count_value" defaultValue="0" type="bigint(20)"/>
+    </createIndex>
 
     <createTable tableName="concept_relationship" schemaName="cdr">
       <column name="concept_id_1" type="INTEGER">
@@ -60,6 +107,18 @@
         <constraints nullable="true"/>
       </column>
     </createTable>
+
+    <createIndex tableName="concept_relationship" indexName="idx-concept-1">
+      <column name="concept_id_1" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="concept_relationship" indexName="idx-concept-2" schemaName="cdr">
+      <column name="concept_id_2" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="concept_relationship" indexName="idx-relationship-id" schemaName="cdr">
+      <column name="relationship_id" type="varchar(20)"></column>
+    </createIndex>
 
     <addPrimaryKey
             columnNames="concept_id_1, concept_id_2, relationship_id"
@@ -97,28 +156,7 @@
       </column>
     </createTable>
 
-    <createTable tableName="relationship">
-      <column name="relationship_id" type="VARCHAR(20)">
-        <constraints primaryKey="true" nullable="false"/>
-      </column>
-      <column name="relationship_name" type="VARCHAR(255)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="is_hierarchical" type="VARCHAR(1)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="defines_ancestry" type="VARCHAR(1)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="reverse_relationship_id" type="VARCHAR(20)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="relationship_concept_id" type="INTEGER">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
-
-    <createTable tableName="ACHILLES_analysis">
+    <createTable tableName="achilles_analysis">
       <column name="analysis_id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -140,17 +178,20 @@
       <column name="stratum_5_name" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
-      <column name="chartType" type="VARCHAR(20)">
+      <column name="chart_type" type="VARCHAR(20)">
         <constraints nullable="true"/>
       </column>
-      <column name="dataType" type="VARCHAR(20)">
+      <column name="data_type" type="VARCHAR(20)">
         <constraints nullable="true"/>
       </column>
     </createTable>
 
-    <createTable tableName="ACHILLES_results">
+    <createTable tableName="achilles_results">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="true"/>
+      </column>
       <column name="analysis_id" type="BIGINT">
-        <constraints primaryKey="true" nullable="false"/>
+        <constraints nullable="true"/>
       </column>
       <column name="stratum_1" type="VARCHAR(255)">
         <constraints nullable="true"/>
@@ -172,109 +213,114 @@
       </column>
     </createTable>
 
-    <createTable tableName="ACHILLES_results_dist">
-      <column name="analysis_id" type="BIGINT">
+    <createIndex
+            indexName="idx_count_value"
+            schemaName="cdr"
+            tableName="achilles_results"
+            unique="false">
+      <column name="count_value" type="bigint(20)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_results_analysis_id"
+            tableName="achilles_results"
+            unique="false">
+      <column name="analysis_id"/>
+      <column name="stratum_1"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_strat2_results_analysis_id"
+            tableName="achilles_results"
+            unique="false">
+      <column name="stratum_2"/>
+    </createIndex>
+
+    <createTable tableName="achilles_results_concept">
+      <column name="id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
       </column>
+      <column name="analysis_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
       <column name="stratum_1" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_1_name" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
       <column name="stratum_2" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
+      <column name="stratum_2_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
       <column name="stratum_3" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3_name" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
       <column name="stratum_4" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
+      <column name="stratum_4_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
       <column name="stratum_5" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5_name" type="VARCHAR(255)">
         <constraints nullable="true"/>
       </column>
       <column name="count_value" type="BIGINT">
         <constraints nullable="true"/>
       </column>
-      <column name="min_value" type="BIGINT">
+    </createTable>
+
+    <createIndex
+            indexName="idx_analysis_id"
+            schemaName="cdr"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="varchar(255)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_analysis_id_stratum_1"
+            schemaName="cdr"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="bigint(20)"/>
+      <column name="stratum_1" type="varchar(255)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_analysis_id_stratum_1_2"
+            schemaName="cdr"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="bigint(20)"/>
+      <column name="stratum_1" type="varchar(255)"/>
+      <column name="stratum_2" type="varchar(255)"/>
+    </createIndex>
+
+    <createTable tableName="db_domain">
+      <column name="domain_id" type="varchar(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_display" type="VARCHAR(30)">
         <constraints nullable="true"/>
       </column>
-      <column name="max_value" type="BIGINT">
+      <column name="domain_desc" type="VARCHAR(4000)">
         <constraints nullable="true"/>
       </column>
-      <column name="avg_value" type="BIGINT">
-        <constraints nullable="true"/>
+      <column name="domain_parent" type="varchar(20)">
+        <constraints nullable="false"/>
       </column>
-      <column name="stdev_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="median_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p10_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p25_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p75_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p90_value" type="BIGINT">
+      <column name="domain_route" type="VARCHAR(80)">
         <constraints nullable="true"/>
       </column>
     </createTable>
-
-    <createView replaceIfExists="true" schemaName="cdr" viewName="ACHILLES_results_view">
-      SELECT
-      `a`.`analysis_id` AS `analysis_id`,
-      `a`.`count_value` AS `count_value`,
-      `a`.`stratum_1` AS `stratum_1`,
-      `c1`.`concept_name` AS `stratum_1_name`,
-      `a`.`stratum_2` AS `stratum_2`,
-      `c2`.`concept_name` AS `stratum_2_name`,
-      `a`.`stratum_3` AS `stratum_3`,
-      `c3`.`concept_name` AS `stratum_3_name`,
-      `a`.`stratum_4` AS `stratum_4`,
-      `c4`.`concept_name` AS `stratum_4_name`,
-      `a`.`stratum_5` AS `stratum_5`,
-      `c5`.`concept_name` AS `stratum_5_name`
-      FROM (((((`ACHILLES_results` `a`
-      left join `concept` `c1` on((`a`.`stratum_1` = `c1`.`concept_id`)))
-      left join `concept` `c2` on((`a`.`stratum_2` = `c2`.`concept_id`)))
-      left join `concept` `c3` on((`a`.`stratum_3` = `c3`.`concept_id`)))
-      left join `concept` `c4` on((`a`.`stratum_4` = `c4`.`concept_id`)))
-      left join `concept` `c5` on((`a`.`stratum_5` = `c5`.`concept_id`)))
-    </createView>
-
-    <createView replaceIfExists="true" schemaName="cdr" viewName="ACHILLES_results_dist_view">
-      SELECT
-      `a`.`analysis_id` AS `analysis_id`,
-      `a`.`count_value` AS `count_value`,
-      `a`.`stratum_1` AS `stratum_1`,
-      `c1`.`concept_name` AS `stratum_1_name`,
-      `a`.`stratum_2` AS `stratum_2`,
-      `c2`.`concept_name` AS `stratum_2_name`,
-      `a`.`stratum_3` AS `stratum_3`,
-      `c3`.`concept_name` AS `stratum_3_name`,
-      `a`.`stratum_4` AS `stratum_4`,
-      `c4`.`concept_name` AS `stratum_4_name`,
-      `a`.`stratum_5` AS `stratum_5`,
-      `c5`.`concept_name` AS `stratum_5_name`,
-      `a`.`min_value` AS `min_value`,
-      `a`.`max_value` AS `max_value`,
-      `a`.`avg_value` AS `avg_value`,
-      `a`.`stdev_value` AS `stdev_value`,
-      `a`.`median_value` AS `median_value`,
-      `a`.`p10_value` AS `p10_value`,
-      `a`.`p25_value` AS `p25_value`,
-      `a`.`p75_value` AS `p75_value`,
-      `a`.`p90_value` AS `p90_value`
-      FROM (((((`ACHILLES_results_dist` `a`
-      left join `concept` `c1` on((`a`.`stratum_1` = `c1`.`concept_id`)))
-      left join `concept` `c2` on((`a`.`stratum_2` = `c2`.`concept_id`)))
-      left join `concept` `c3` on((`a`.`stratum_3` = `c3`.`concept_id`)))
-      left join `concept` `c4` on((`a`.`stratum_4` = `c4`.`concept_id`)))
-      left join `concept` `c5` on((`a`.`stratum_5` = `c5`.`concept_id`)))
-    </createView>
 
   </changeSet>
 </databaseChangeLog>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-5-icd10-4" runAlways="true" context="cloud">
+
+    <validCheckSum>ANY</validCheckSum>
+
+    <comment>The build of the icd10 tree is split into 4 csv files to avoid memory issues.</comment>
+
+    <loadData tableName="criteria" file="csv/icd10_criteria-4.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="est_count" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="domain_id" type="STRING"/>
+    </loadData>
+
+  </changeSet>
+</databaseChangeLog>
