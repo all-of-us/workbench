@@ -66,7 +66,13 @@ From the `api/` directory:
 ```
 
 When the console displays "Dev App Server is now running", you can hit your
-local API server under http://localhost:8081/api/.
+local API server under http://localhost:8081/api/. 
+
+**Note:** If you haven't loaded any data locally for the app, please run the goal below. Also, this will not run while dev-up is running, so please kill dev-up first.
+```Shell
+./project.rb run-local-data-migrations
+```
+
 
 Other available operations may be discovered by running:
 ```Shell
