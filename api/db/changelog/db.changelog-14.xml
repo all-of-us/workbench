@@ -7,8 +7,8 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
     <changeSet author="brianfreeman" id="changelog-14">
 
-        <createTable tableName="cohort_annotation_field">
-            <column name="cohort_annotation_field_id" type="bigint" autoIncrement="true">
+        <createTable tableName="cohort_annotation_definition">
+            <column name="cohort_annotation_definition_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="cohort_id" type="bigint">
@@ -23,7 +23,7 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="cohort_id"
-                                 baseTableName="cohort_annotation_field"
+                                 baseTableName="cohort_annotation_definition"
                                  constraintName="fk_annotation_cohort_id"
                                  referencedColumnNames="cohort_id"
                                  referencedTableName="cohort"/>
@@ -32,7 +32,7 @@
             <column name="annotation_id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="cohort_annotation_field_id" type="bigint">
+            <column name="cohort_annotation_definition_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="cohort_review_id" type="bigint">
@@ -55,11 +55,11 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseColumnNames="cohort_annotation_field_id"
+        <addForeignKeyConstraint baseColumnNames="cohort_annotation_definition_id"
                                  baseTableName="participant_cohort_annotations"
-                                 constraintName="fk_cohort_annotation_field_id"
-                                 referencedColumnNames="cohort_annotation_field_id"
-                                 referencedTableName="cohort_annotation_field"/>
+                                 constraintName="fk_cohort_annotation_definition_id"
+                                 referencedColumnNames="cohort_annotation_definition_id"
+                                 referencedTableName="cohort_annotation_definition"/>
 
         <addForeignKeyConstraint baseColumnNames="cohort_review_id"
                                  baseTableName="participant_cohort_annotations"
