@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -78,6 +79,8 @@ public class ProfileControllerTest {
   private DirectoryService directoryService;
   @Mock
   private CloudStorageService cloudStorageService;
+  @Mock
+  private BlockscoreService blockscoreService;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -116,10 +119,10 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
         Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
-        cloudStorageService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider,
         Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
-        cloudStorageService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
   }
 
 

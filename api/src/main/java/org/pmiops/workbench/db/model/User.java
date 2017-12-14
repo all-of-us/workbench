@@ -37,6 +37,8 @@ public class User {
   private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
+  private String blockscoreId;
+  private Boolean blockscoreVerificationIsValid;
 
   @Id
   @GeneratedValue
@@ -151,5 +153,21 @@ public class User {
    */
   public void setWorkspaceUserRoles(Set<WorkspaceUserRole> userRoles) {
     this.workspaceUserRoles = userRoles;
+  }
+
+  @Column(name = "blockscore_id")
+  public String getBlockscoreId() {
+    return blockscoreId;
+  }
+  public void setBlockscoreId(String blockscoreId) {
+    this.blockscoreId = blockscoreId;
+  }
+
+  @Column(name = "blockscore_verification_is_valid")
+  public Boolean getBlockscoreVerificationIsValid() {
+    return blockscoreVerificationIsValid;
+  }
+  public void setBlockscoreVerificationIsValid(Boolean value) {
+    blockscoreVerificationIsValid = value;
   }
 }

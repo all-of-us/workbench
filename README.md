@@ -66,7 +66,13 @@ From the `api/` directory:
 ```
 
 When the console displays "Dev App Server is now running", you can hit your
-local API server under http://localhost:8081/api/.
+local API server under http://localhost:8081/api/. 
+
+**Note:** If you haven't loaded any data locally for the app, please run the goal below. Also, this will not run while dev-up is running, so please kill dev-up first.
+```Shell
+./project.rb run-local-data-migrations
+```
+
 
 Other available operations may be discovered by running:
 ```Shell
@@ -189,6 +195,14 @@ database with a 10 minute expiration.
 
 ## API Server Database Updates
 
+Loading of local tables/data for both schemas (workbench/cdr) happens in a manual goal(creates tables in both schemas and insert any app data needed for local development):
+
+```./project.rb run-local-all-migrations```
+
+Local tables loaded with data are:
+  * **workbench** - cdr_version
+  * **cdr** - criteria, achilles_analysis, concept, concept_relationship, vocabulary, domain, achilles_results, achilles_results_concept and db_domain
+
 When editing database models, you must write a new changelog XML file. See
 [Liquibase change docs](http://www.liquibase.org/documentation/changes/index.html),
 such as [createTable](http://www.liquibase.org/documentation/changes/create_table.html).
@@ -214,14 +228,6 @@ CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities a
 ## Cohort Builder
 
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema. 
-
-Loading of local data for the criteria trees happens in a manual goal(deletes and inserts tree data into the criteria table):
-
-```./project.rb run-local-data-migrations```
-
-Local tables loaded from the goal are:
-  * **workbench** - cdr_version
-  * **cdr** - criteria, achilles_analysis, concept, concept_relationship, vocabulary, domain, achilles_results, achilles_results_concept and db_domain
 
 Loading of cloud data for the criteria trees and cdr version happens in a manual goal(deletes and inserts tree data into the criteria table):
 
