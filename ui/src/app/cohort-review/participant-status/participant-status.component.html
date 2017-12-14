@@ -1,5 +1,5 @@
 <div class="form-group">
-  <label>Participant Review Status</label>
+  <label>Participant {{ participant?.participantId }} Review Status</label>
   <span [style.margin-left]="'0.25rem'">
     <div *ngIf="changingStatus" class="spinner spinner-inline">Loading...</div>
     <ng-container *ngIf="!changingStatus">

@@ -1,15 +1,9 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+
+import {ReviewStateService} from '../review-state.service';
 
 import {
   CohortReviewService,
@@ -18,8 +12,6 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
-const CDR_VERSION = 1;
-
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
@@ -27,14 +19,14 @@ const CDR_VERSION = 1;
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
+  readonly CohortStatus = CohortStatus;
   statusControl = new FormControl();
 
   private _participant: ParticipantCohortStatus | undefined;
 
-  @Input()
   set participant(value) {
     this._participant = value;
-    if (value) {
+    if (value !== null) {
       this.statusControl.enable({emitEvent: false});
     } else {
       this.statusControl.disable({emitEvent: false});
@@ -45,60 +37,52 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     return this._participant;
   }
 
-  @Output() participantChange = new EventEmitter<ParticipantCohortStatus>();
-
-  readonly CohortStatus = CohortStatus;
   private subscription: Subscription;
   private changingStatus = false;
 
   constructor(
+    private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
-    this.subscription = this.statusControl.valueChanges
+    this.subscription = this.state.participant.subscribe(
+      participant => this.participant = participant
+    );
+
+    const participantId = this.state.participant
+      .filter(participant => participant !== null)
+      .map(participant => participant.participantId);
+
+    const context = this.state.context;
+
+    const statusChanger = this.statusControl.valueChanges
+      .withLatestFrom(participantId, context)
       .switchMap(this._callApi)
       .subscribe(this._emit);
+
+    this.subscription.add(statusChanger);
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  private _emit = (val) => {
+  private _emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
-    this.participantChange.emit(val);
+    this.state.participant.next(newStatus);
   }
 
-  private _callApi = (status: CohortStatus): Observable<ParticipantCohortStatus> => {
+  private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
-
-    const {
-      ns: workspaceNamespace,
-      wsid: workspaceId,
-      cid: cohortId
-    } = this.route.snapshot.params;
-
-    const {participantId} = this.participant;
-
-    // DEBUG calls
-    // console.log(`Calling updateParticipantCohortStatus with`);
-    // console.table([
-    //   {arg: 'workspaceNamespace', value: workspaceNamespace},
-    //   {arg: 'workspaceId', value: workspaceId},
-    //   {arg: 'cohortId', value: cohortId},
-    //   {arg: 'CDR Version', value: CDR_VERSION},
-    //   {arg: 'participantId', value: participantId},
-    //   {arg: 'request', value: JSON.stringify(request)},
-    // ]);
+    const {workspaceNamespace, workspaceId, cohortId, cdrVersion} = context;
 
     return this.reviewAPI.updateParticipantCohortStatus(
       workspaceNamespace,
       workspaceId,
       cohortId,
-      CDR_VERSION,
+      cdrVersion,
       participantId,
       request
     );

@@ -11,9 +11,11 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
+import {ReviewStateService} from './review-state.service';
 
-import {CohortResolverGuard} from './guards/cohort-resolver.guard';
-import {ReviewResolverGuard} from './guards/review-resolver.guard';
+import {CohortResolver} from '../guards/cohort-resolver.guard';
+import {ReviewResolver} from '../guards/review-resolver.guard';
+
 
 import {CohortReviewService} from 'generated';
 
@@ -27,8 +29,8 @@ const routes = [{
     {path: ':participantId', component: ParticipantDetailComponent},
   ],
   resolve: {
-    cohort: CohortResolverGuard,
-    review: ReviewResolverGuard,
+    cohort: CohortResolver,
+    review: ReviewResolver,
   }
 }];
 
@@ -48,9 +50,10 @@ const routes = [{
     ParticipantStatusComponent,
   ],
   providers: [
-    CohortResolverGuard,
-    ReviewResolverGuard,
+    CohortResolver,
+    ReviewResolver,
     CohortReviewService,
+    ReviewStateService,
   ]
 })
 export class CohortReviewModule {}

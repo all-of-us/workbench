@@ -1,19 +1,17 @@
 <div appFullPage>
-  <div *ngIf="loading" class="spinner">Loading...</div>
-
   <!-- Main participant navigation sidebar -->
   <div appSidebar
     #participantNav="appSidebar"
     [controller]="navBtn">
     <a class="closebtn" (click)="participantNav.close()">&times;</a>
-    <a (click)="participantNav.close(); selectedParticipant = null"
+    <a (click)="participantNav.close(); state.participant.next(null)"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
     <a *ngFor="let participant of review.participantCohortStatuses"
-      (click)="participantNav.close(); selectedParticipant = participant"
+      (click)="participantNav.close(); state.participant.next(participant)"
       [routerLink]="[participant.participantId]"
       routerLinkActive="active">
       {{ participant.participantId}}
@@ -31,8 +29,7 @@
     [controller]="statusBtn">
     <a class="closebtn" (click)="statusBar.close()">&times;</a>
     <div class="status-wrapper">
-      <app-participant-status
-        [(participant)]="selectedParticipant">
+      <app-participant-status>
       </app-participant-status>
     </div>
   </div>
@@ -114,6 +111,7 @@
         type="button"
         class="btn btn-primary"
         [disabled]="reviewParamForm.invalid"
+        [clrLoading]="buttonBusy"
         (click)="createReview()">
         Save Review Set
       </button>

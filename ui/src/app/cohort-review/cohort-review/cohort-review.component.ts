@@ -5,6 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 const CDR_VERSION = 1;
+import {ReviewStateService} from '../review-state.service';
 
 import {
   Cohort,
@@ -24,24 +25,18 @@ import {
 export class CohortReviewComponent implements OnInit, OnDestroy {
 
   readonly CohortStatus = CohortStatus;
-
   reviewParamForm = new FormGroup({
     numParticipants: new FormControl(),
   });
-
   private cohort: Cohort;
   private review: CohortReview;
-  private participantPage: ParticipantCohortStatus[];
-
   private subscription: Subscription;
-  private _selectedParticipant: ParticipantCohortStatus | null;
-
-  private loading = false;
-
   @ViewChild('createCohortModal') createCohortModal;
+  private buttonBusy = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
+    private state: ReviewStateService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
@@ -49,46 +44,38 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.route.data.subscribe(({cohort, review}) => {
       this.cohort = cohort;
+      this.state.cohort.next(cohort);
+
       this.review = review;
+      this.state.review.next(review);
+
+      this.state.participant.next(null);
+
+      const {ns, wsid, cid} = this.route.snapshot.params;
+      this.state.context.next({
+        cdrVersion: CDR_VERSION,
+        cohortId: cid,
+        workspaceId: wsid,
+        workspaceNamespace: ns,
+      });
+
       if (review.reviewStatus === ReviewStatus.NONE) {
         this.createCohortModal.open();
         this.numParticipants.setValidators(Validators.compose([
           Validators.required,
           Validators.min(1),
-          Validators.max(this.maxParticipants),
+          Validators.max(Math.min(10000, review.matchedParticipantCount)),
         ]));
       }
     });
   }
 
-  get numParticipants() {
-    return this.reviewParamForm.get('numParticipants');
-  }
-
-  get maxParticipants() {
-    if (this.review && this.review.matchedParticipantCount) {
-      return Math.min(10000, this.review.matchedParticipantCount);
-    }
-    return 10000;
-  }
-
-  get selectedParticipant() {
-    return this._selectedParticipant;
-  }
-
-  set selectedParticipant(selection: ParticipantCohortStatus) {
-    const ind = this.review.participantCohortStatuses.findIndex(
-      ({participantId}) => participantId === selection.participantId
-    );
-    if (ind > 0) {
-      // If the selected ID is on the current page, "optimistically" update the page
-      this.review.participantCohortStatuses.splice(ind, 1, selection);
-    }
-    this._selectedParticipant = selection;
-  }
-
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  get numParticipants() {
+    return this.reviewParamForm.get('numParticipants');
   }
 
   cancelReview() {
@@ -100,10 +87,13 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     console.log('Creating review... ');
     const {ns, wsid, cid} = this.route.snapshot.params;
     const request = <CreateReviewRequest>{size: this.numParticipants.value};
+    const buttonBusy = true;
     this.reviewAPI
       .createCohortReview(ns, wsid, cid, CDR_VERSION, request)
       .subscribe(review => {
         this.review = review;
+        this.buttonBusy = false;
+        this.state.review.next(review);
         this.createCohortModal.close();
       });
   }
