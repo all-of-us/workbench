@@ -159,6 +159,21 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/id-verification:
+    post:
+      tags:
+        - profile
+      description: Accepts identity information for verification.
+      operationId: submitIdVerification
+      parameters:
+        - in: body
+          name: idVerificationRequest
+          schema:
+            $ref: "#/definitions/IdVerificationRequest"
+      responses:
+        "204":
+          description: Request received and validated.
+
   # Notebook clusters ####################################################################
 
   /api/v1/clusters:
@@ -1521,6 +1536,9 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Authority"
+      blockscoreVerificationIsValid:
+        type: boolean
+        description: Result of verification or null if not yet attempted.
 
   ErrorResponse:
     type: object
@@ -1532,6 +1550,42 @@ definitions:
 
   RegistrationRequest:
     type: object
+
+  IdVerificationRequest:
+    type: object
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      streetLine1:
+        type: string
+      streetLine2:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      zip:
+        type: string
+      dob:
+        type: string
+      documentType:
+        description: https://docs.blockscore.com/v4/curl/#documents
+        type: string
+      documentNumber:
+        description: https://docs.blockscore.com/v4/curl/#documents
+        type: string
+    required:
+      - firstName
+      - lastName
+      - addressLine1
+      - city
+      - state
+      - zip
+      - dob
+      - documentType
+      - documentNumber
 
   CriteriaListResponse:
     type: object
