@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import com.blockscore.models.Address;
+import com.blockscore.models.Person;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -28,6 +31,7 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -67,6 +71,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
+  private final BlockscoreService blockscoreService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
 
@@ -74,7 +79,8 @@ public class ProfileController implements ProfileApiDelegate {
   ProfileController(ProfileService profileService, Provider<User> userProvider,
       Provider<Userinfoplus> userinfoplusProvider, UserDao userDao,
       Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
-      CloudStorageService cloudStorageService, Provider<WorkbenchConfig> workbenchConfigProvider,
+      CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
@@ -84,6 +90,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
+    this.blockscoreService = blockscoreService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
   }
@@ -230,8 +237,8 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    User user = initializeUserIfNeeded();
     try {
+      User user = initializeUserIfNeeded();
       return ResponseEntity.ok(profileService.getProfile(user));
     } catch (ApiException e) {
       log.log(Level.INFO, "Error calling FireCloud", e);
@@ -331,5 +338,26 @@ public class ProfileController implements ProfileApiDelegate {
           Level.SEVERE, String.format("Error getting user profile: %s", e.getResponseBody()), e);
       return ResponseEntity.status(e.getCode()).build();
     }
+  }
+
+  @Override
+  public ResponseEntity<Void> submitIdVerification(IdVerificationRequest request) {
+    // TODO(dmohs): Prevent this if the user has already attempted verification?
+    Person person = blockscoreService.createPerson(
+      request.getFirstName(), request.getLastName(),
+      new Address()
+        .setStreet1(request.getStreetLine1()).setStreet2(request.getStreetLine2())
+        .setCity(request.getCity()).setSubdivision(request.getState())
+        .setPostalCode(request.getZip()).setCountryCode("US"),
+      request.getDob(),
+      request.getDocumentType(), request.getDocumentNumber()
+    );
+
+    User user = userProvider.get();
+    user.setBlockscoreId(person.getId());
+    user.setBlockscoreVerificationIsValid(person.isValid());
+    userDao.save(user);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
