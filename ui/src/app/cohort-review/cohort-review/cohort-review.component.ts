@@ -74,11 +74,11 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
     const reviewSub = Observable
       .merge(this.state.review, resolvedReview)
-      .subscribe(review => this.review = <CohortReview>review);
+      .subscribe(_review => this.review = <CohortReview>_review);
 
     const cohortSub = Observable
       .merge(this.state.cohort, resolvedCohort)
-      .subscribe(cohort => this.cohort = <Cohort>cohort);
+      .subscribe(_cohort => this.cohort = <Cohort>_cohort);
 
     this.subscription = reviewSub;
     this.subscription.add(cohortSub);
