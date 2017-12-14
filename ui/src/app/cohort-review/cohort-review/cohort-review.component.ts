@@ -42,32 +42,46 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription = this.route.data.subscribe(({cohort, review}) => {
-      this.cohort = cohort;
-      this.state.cohort.next(cohort);
+    const {cohort, review} = this.route.snapshot.data;
+    const {ns, wsid, cid} = this.route.snapshot.params;
 
-      this.review = review;
-      this.state.review.next(review);
+    /* Set these immediately on init */
+    this.cohort = cohort;
+    this.review = review;
 
-      this.state.participant.next(null);
-
-      const {ns, wsid, cid} = this.route.snapshot.params;
-      this.state.context.next({
-        cdrVersion: CDR_VERSION,
-        cohortId: cid,
-        workspaceId: wsid,
-        workspaceNamespace: ns,
-      });
-
-      if (review.reviewStatus === ReviewStatus.NONE) {
-        this.createCohortModal.open();
-        this.numParticipants.setValidators(Validators.compose([
-          Validators.required,
-          Validators.min(1),
-          Validators.max(Math.min(10000, review.matchedParticipantCount)),
-        ]));
-      }
+    this.state.cohort.next(cohort);
+    this.state.review.next(review);
+    this.state.participant.next(null);
+    this.state.context.next({
+      cdrVersion: CDR_VERSION,
+      cohortId: cid,
+      workspaceId: wsid,
+      workspaceNamespace: ns,
     });
+
+    if (review.reviewStatus === ReviewStatus.NONE) {
+      this.createCohortModal.open();
+      this.numParticipants.setValidators(Validators.compose([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(Math.min(10000, review.matchedParticipantCount)),
+      ]));
+    }
+
+    /* Set up listeners though */
+    const resolvedReview = this.route.data.pluck('review');
+    const resolvedCohort = this.route.data.pluck('cohort');
+
+    const reviewSub = Observable
+      .merge(this.state.review, resolvedReview)
+      .subscribe(review => this.review = <CohortReview>review);
+
+    const cohortSub = Observable
+      .merge(this.state.cohort, resolvedCohort)
+      .subscribe(cohort => this.cohort = <Cohort>cohort);
+
+    this.subscription = reviewSub;
+    this.subscription.add(cohortSub);
   }
 
   ngOnDestroy() {

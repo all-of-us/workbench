@@ -54,10 +54,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       .filter(participant => participant !== null)
       .map(participant => participant.participantId);
 
-    const context = this.state.context;
-
     const statusChanger = this.statusControl.valueChanges
-      .withLatestFrom(participantId, context)
+      .withLatestFrom(participantId, this.state.context)
       .switchMap(this._callApi)
       .subscribe(this._emit);
 
@@ -71,6 +69,18 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   private _emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
     this.state.participant.next(newStatus);
+    this.state.review
+      .take(1)
+      .map(review => {
+        const index = review.participantCohortStatuses.findIndex(
+          ({participantId}) => participantId === newStatus.participantId
+        );
+        if (index >= 0) {
+          review.participantCohortStatuses.splice(index, 1, newStatus);
+        }
+        return review;
+      })
+      .subscribe(this.state.review);
   }
 
   private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {
