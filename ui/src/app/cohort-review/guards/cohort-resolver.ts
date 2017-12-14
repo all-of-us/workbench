@@ -12,7 +12,7 @@ export class CohortResolverGuard implements Resolve<Cohort> {
   resolve(route: ActivatedRouteSnapshot): Observable<Cohort> {
     const wsNamespace = route.paramMap.get('ns');
     const wsID = route.paramMap.get('wsid');
-    const cohortID = route.paramMap.get('cid');
+    const cohortID = +route.paramMap.get('cid');
 
     return this.cohortAPI.getCohort(wsNamespace, wsID, cohortID);
   }

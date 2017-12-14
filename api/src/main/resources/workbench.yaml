@@ -541,7 +541,8 @@ paths:
           description: ID of the workspace containing the cohort definition
         - in: path
           name: cohortId
-          type: string
+          type: integer
+          format: int64
           required: true
           description: ID of the workspace containing the cohort definition
       responses:
@@ -569,7 +570,8 @@ paths:
           description: ID of the workspace containing the cohort definition
         - in: path
           name: cohortId
-          type: string
+          type: integer
+          format: int64
           required: true
           description: ID of the workspace containing the cohort definition
         - in: body
@@ -600,7 +602,8 @@ paths:
           description: ID of the workspace containing the cohort definition
         - in: path
           name: cohortId
-          type: string
+          type: integer
+          format: int64
           required: true
           description: ID of the workspace containing the cohort definition
       responses:
@@ -1369,7 +1372,8 @@ definitions:
       - type
     properties:
       id:
-        type: string
+        type: integer
+        format: int64
       etag:
         type: string
         description: >
