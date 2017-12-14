@@ -15,6 +15,7 @@
     <delete tableName="cdr_version"/>
 
     <insert tableName="cdr_version">
+      <column name="cdr_version_id" type="bigint" value="1"/>
       <column name="name" type="varchar(80)" value="version 1"/>
       <column name="data_access_level" type="tinyint" value="1"/>
       <column name="release_number" type="smallint" value="1"/>

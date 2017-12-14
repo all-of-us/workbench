@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="brianfreeman" id="changelog-14">
+
+        <createTable tableName="cohort_annotation_field">
+            <column name="cohort_annotation_field_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cohort_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="column_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="annotation_type" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_id"
+                                 baseTableName="cohort_annotation_field"
+                                 constraintName="fk_annotation_cohort_id"
+                                 referencedColumnNames="cohort_id"
+                                 referencedTableName="cohort"/>
+
+        <createTable tableName="participant_cohort_annotations">
+            <column name="annotation_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cohort_annotation_field_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cohort_review_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="participant_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="annotation_value_string" type="varchar(4000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="annotation_value_integer" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="annotation_value_timestamp" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_modified_time" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_annotation_field_id"
+                                 baseTableName="participant_cohort_annotations"
+                                 constraintName="fk_cohort_annotation_field_id"
+                                 referencedColumnNames="cohort_annotation_field_id"
+                                 referencedTableName="cohort_annotation_field"/>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_review_id"
+                                 baseTableName="participant_cohort_annotations"
+                                 constraintName="fk_annotation_cohort_review_id"
+                                 referencedColumnNames="cohort_review_id"
+                                 referencedTableName="cohort_review"/>
+
+    </changeSet>
+</databaseChangeLog>
