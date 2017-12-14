@@ -925,6 +925,203 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/annotationdefinitions:
+    post:
+      tags:
+        - cohortReview
+      description: This endpoint will create a CohortAnnotationDefinition.
+      operationId: "createCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: body
+          name: request
+          required: true
+          description: CohortAnnotationDefinition creation request body
+          schema:
+            $ref: "#/definitions/CreateCohortAnnotationDefinitionRequest"
+      responses:
+        "200":
+          description: A CohortAnnotationDefinition.
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinitions"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+      responses:
+        "200":
+          description: A collection of CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/annotationdefinitions/{annotationDefinitionId}:
+    put:
+      tags:
+        - cohortReview
+      description: modify the CohortAnnotationDefinition.
+      operationId: updateCohortAnnotationDefinition
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+        - in: body
+          name: modifyCohortAnnotationDefinitionRequest
+          description: Contains the new CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/ModifyCohortAnnotationDefinitionRequest"
+      responses:
+        "200":
+          description: The updated ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    delete:
+      tags:
+        - cohorts
+      description: Deletes the CohortAnnotationDefinition with the specified ID
+      operationId: "deleteCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+      responses:
+        "202":
+          description: CohortAnnotationDefinition deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/annotations:
+    post:
+      tags:
+        - cohortReview
+      description: This endpoint will create a ParticipantCohortAnnotation.
+      operationId: "createParticipantCohortAnnotation"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: body
+          name: request
+          required: true
+          description: ParticipantCohortAnnotation creation request body
+          schema:
+            $ref: "#/definitions/CreateParticipantCohortAnnotationRequest"
+      responses:
+        "200":
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+
   # Data Browser #######################################################################
   /api/v1/databrowser/search-concepts:
     get:
