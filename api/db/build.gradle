@@ -21,5 +21,15 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
+        data {
+            if (project.hasProperty('contexts')) {
+                contexts contexts
+            }
+            changeLogFile "changelog-data/db.changelog-master.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/workbench"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        runList = project.ext.runList
     }
 }

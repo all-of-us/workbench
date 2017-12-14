@@ -1,0 +1,12 @@
+
+<ng-container [clrLoading]="loading">
+    <clr-tree-node *ngFor="let item of tree_nodes">
+      <!-- Show clickable item if they can click . -->
+      <button *ngIf="canClick(item)" (click)="clickItem(item)" class="clr-treenode-link" [class.active]="active">  {{item.concept_code}}-{{item.concept_name}} </button>
+      <span *ngIf="!canClick(item)" class="clr-treenode-link" >  {{item.concept_code}}-{{item.concept_name}} </span>
+        <!-- Show the exansion arrow if it can expand -->
+        <ng-template *ngIf="canExpand(item)" clrIfExpanded>
+            <app-lazy-tree [parent]="item" [vocabularyId]="vocabularyId" (conceptEmit)="receiveItem($event)"></app-lazy-tree>
+        </ng-template>
+    </clr-tree-node>
+</ng-container>

@@ -1,0 +1,10 @@
+<!-- <li (click)="giveMe(array)">{{array}}</li> -->
+<!-- <div [chart]="chart"></div> -->
+<div style="height:100%" [ngSwitch]="chartType">
+  <chart class="standard-chart" *ngSwitchCase="'map'" type="Map" [options]="chartOptions" (load)="saveInstance($event.context )"></chart>
+  <chart class="standard-chart" *ngSwitchCase="'pie'" [options]="chartOptions" (load)="saveInstance($event.context )"></chart>
+  <chart class="standard-chart" *ngSwitchCase="'boxplot'" [options]="chartOptions" (load)="saveInstance($event.context )"></chart>
+  <chart class="standard-chart" *ngSwitchCase="'column'" [options]="chartOptions" (click)="chartClick($event.context)" (load)="saveInstance($event.context )"></chart>
+  <chart class="standard-chart" *ngSwitchCaseDefault [options]="chartOptions" (load)="saveInstance($event.context )"></chart>
+</div>
+

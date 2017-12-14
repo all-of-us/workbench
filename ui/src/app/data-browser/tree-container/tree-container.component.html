@@ -1,0 +1,18 @@
+
+
+<clr-tree-node *ngFor="let v of vocabs">
+    {{v.name}}
+    <ng-template [clrIfExpanded] >
+      <div class="tree-height">
+        <div *ngIf="v.vocabulary_id != 'PPI'">
+            <clr-tree-node *ngFor="let item of tree_nodes[v.vocabulary_id]">
+
+              {{item.concept_code}}-{{item.concept_name}}
+              <ng-template clrIfExpanded>
+                <app-lazy-tree [parent]="item" [vocabularyId]="v.vocabulary_id" (conceptEmit)='receiveItem($event)'></app-lazy-tree>
+              </ng-template>
+            </clr-tree-node>
+        </div>
+      </div>
+    </ng-template>
+</clr-tree-node>

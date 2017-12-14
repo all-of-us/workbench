@@ -1,0 +1,135 @@
+.page-container {
+    margin-left: 3rem;
+    margin-right: 3rem;
+}
+
+.page-container-column-view {
+    margin-left: 12rem;
+    margin-right: 12rem;
+}
+
+.none {
+    display: none !important;
+}
+
+.search-container {
+    /*margin-right: 3rem;*/
+    padding-bottom: 3rem;
+}
+
+.count-chart-container {
+    border: solid #ccc 1px;
+    margin-top: 1rem;
+    height: 20rem;
+}
+
+.page-title-from-header {
+    text-align: center;
+}
+
+.right-count {
+    /*margin-top: -5rem;*/
+}
+
+.caps {
+    text-transform: uppercase;
+}
+
+@media only screen and (max-width: 1199px) {
+    .page-title {
+        position: static;
+    }
+    .my-concepts-container {
+        margin-top: 0rem;
+    }
+}
+
+/* app.css imports from databrowser app */
+.right-gutter {
+    padding-right: 2.5rem;
+}
+
+.custom-active {
+    background: #6cace4;
+    color: white !important;
+}
+
+.padding-bottom {
+    padding-bottom: 10rem;
+}
+
+.margin-bottom {
+    margin-bottom: 2rem;
+}
+
+.custom-active:hover {
+    background: #6cace4 !important;
+    color: white !important;
+}
+
+.tree {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.tree-node {
+    border-bottom: 1px black solid;
+}
+
+
+text.highcharts-credits {
+    display: none;
+}
+
+.custom-danger {
+    margin-top: .5rem;
+    background: #e62700;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+}
+
+.custom-danger:hover {
+    background: #c92100;
+}
+
+.vocab-list-item clr-icon>svg {
+    width: 70%!important;
+    height: 70%!important;
+    color: #007cbb
+}
+
+.clr-treenode-link {
+    white-space: pre-wrap;
+    border-bottom: 1px #eee solid;
+}
+
+.datagrid-body::-webkit-scrollbar {
+    width: 7px !important;
+    height: 1px !important;
+}
+
+.datagrid-body::-webkit-scrollbar-track {
+    border-radius: 4px !important;
+}
+
+.datagrid-body::-webkit-scrollbar-thumb {
+    border-radius: 4px !important;
+    /*background: rgba(0, 0, 0, 0.4)!important;*/
+    background: #7c7c7c!important;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+.datagrid {
+    margin-top: .5rem !important;
+}
+
+.datagrid-column {
+    border-top: 1px solid #cccccc!important;
+}
+
+
+.highcharts-background[style] {
+    background: transparent!important
+}

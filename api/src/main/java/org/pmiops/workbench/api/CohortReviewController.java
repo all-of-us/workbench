@@ -145,7 +145,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize())));
+                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
@@ -212,7 +212,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
         if (cohortReview == null) {
-
             Cohort cohort = findCohort(cohortId);
             //this validates that the user is in the proper workspace
             validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());

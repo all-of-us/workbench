@@ -1,0 +1,25 @@
+vocabulary_id,vocabulary_name,vocabulary_reference,vocabulary_version,vocabulary_concept_id
+Observation Type,OMOP Observation Type,OMOP generated,,44819129
+Relationship,OMOP Relationship,OMOP generated,,44819235
+Procedure Type,OMOP Procedure Occurrence Type,OMOP generated,,44819128
+Note Type,OMOP Note Type,OMOP generated,,44819146
+Cohort Type,OMOP Cohort Type,OMOP generated,,44819234
+Obs Period Type,OMOP Observation Period Type,OMOP generated,,44819149
+Vocabulary,OMOP Vocabulary,OMOP generated,,44819232
+Visit Type,OMOP Visit Type,OMOP generated,,44819150
+Death Type,OMOP Death Type,OMOP generated,,44819135
+Visit,OMOP Visit,OMOP generated,,44819119
+Device Type,OMOP Device Type,OMOP generated,,44819151
+Cost Type,OMOP Cost Type,OMOP generated,,5029
+Drug Type,OMOP Drug Exposure Type,OMOP generated,,44819126
+Concept Class,OMOP Concept Class,OMOP generated,,44819233
+None,OMOP Standardized Vocabularies,OMOP generated,v5.0 13-SEP-17,44819096
+Domain,OMOP Domain,OMOP generated,,44819147
+Meas Type,OMOP Measurement Type,OMOP generated,,44819152
+Gender,OMOP Gender,OMOP generated,,44819108
+Condition Type,OMOP Condition Occurrence Type,OMOP generated,,44819127
+LOINC,Logical Observation Identifiers Names and Codes (Regenstrief Institute),http://loinc.org/downloads/loinc,LOINC 2.61,44819102
+PPI,PPI,http://terminology.pmi-ops.org/CodeSystem/ppi,Codebook Version 0.2.59,581404
+Race,Race and Ethnicity Code Set (USBC),http://www.cdc.gov/nchs/data/dvs/Race_Ethnicity_CodeSet.pdf,Version 1.0,44819109
+UCUM,Unified Code for Units of Measure (Regenstrief Institute),http://aurora.regenstrief.org/~ucum/ucum.html#section-Alphabetic-Index,Version 1.8.2,44819107
+SNOMED,Systematic Nomenclature of Medicine - Clinical Terms (IHTSDO),http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html,SnomedCT Release 20170401,44819097

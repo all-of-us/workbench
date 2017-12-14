@@ -1,0 +1,37 @@
+.no-results{
+  width:100%;
+  height:400px;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+    }
+    .no-results h1{
+      color:#ccc;
+    }
+.drawer-container{
+  background:white;
+}
+
+hr{
+  border-top: dashed #ccc 1px;
+}
+
+
+.break-down-charts {
+  display: flex;
+  justify-content: center;
+}
+
+.drawer-title {
+  margin-top: 0;
+}
+
+.drawer-subtitle {
+  margin-top: .75rem;
+}
+
+.standard-column {
+  width: 4.5rem
+}
