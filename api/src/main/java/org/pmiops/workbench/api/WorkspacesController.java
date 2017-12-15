@@ -54,6 +54,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String WORKSPACE_NAMESPACE_PREFIX = "allofus-";
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
+  private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -288,6 +289,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return true;
   }
 
+  private void attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
+    try {
+      fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
+          workspaceId.getWorkspaceName());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+
+      if (e.getCode() == 403) {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Error creating FC workspace %s/%s: %s",
+                workspaceId.getWorkspaceNamespace(),
+                workspaceId.getWorkspaceName(),
+                e.getResponseBody()),
+            e);
+        throw new ForbiddenException(e.getResponseBody());
+      } else if (e.getCode() == 409) {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Error creating FC workspace %s/%s: %s",
+                workspaceId.getWorkspaceNamespace(),
+                workspaceId.getWorkspaceName(),
+                e.getResponseBody()));
+        throw new ConflictException(e.getResponseBody());
+      } else {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Error creating FC workspace %s/%s: %s",
+                workspaceId.getWorkspaceNamespace(),
+                workspaceId.getWorkspaceName(),
+                e.getResponseBody()),
+            e);
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+  }
+
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
     if (workspace.getName().equals("")) {
@@ -299,35 +339,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // registration flow is done, so this should never happen.
       throw new BadRequestException("User is not initialized yet; please register");
     }
-    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
-        workspace.getName());
-    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.get(
-        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+    org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
+        workspace.getNamespace(), workspace.getName());
     if (existingWorkspace != null) {
       throw new BadRequestException(String.format(
           "Workspace %s/%s already exists",
-          workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName()));
+          workspace.getNamespace(), workspace.getName()));
     }
-    try {
-      fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
-          workspaceId.getWorkspaceName());
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error creating FC workspace %s/%s: %s",
-              workspaceId.getWorkspaceNamespace(),
-              workspaceId.getWorkspaceName(),
-              e.getResponseBody()),
-          e);
-      // TODO: figure out what happens if the workspace already exists
-      throw new ServerErrorException("Error creating FC workspace", e);
+
+    FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
+        workspace.getName());
+    FirecloudWorkspaceId fcWorkspaceId = workspaceId;
+    for (int attemptValue = 0; attemptValue < this.MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
+      try {
+        attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+        break;
+      } catch (ConflictException e) {
+        if (attemptValue >= 5) {
+          throw e;
+        } else {
+          fcWorkspaceId =
+              new FirecloudWorkspaceId(workspaceId.getWorkspaceNamespace(),
+                  workspaceId.getWorkspaceName() + Integer.toString(attemptValue));
+        }
+      }
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     // TODO: enforce data access level authorization
     org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);

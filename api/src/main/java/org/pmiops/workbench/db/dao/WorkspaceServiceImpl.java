@@ -57,15 +57,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return fireCloudService;
   }
   @Override
-  public Workspace get(String ns, String id) {
-    return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, id);
+  public Workspace get(String ns, String firecloudName) {
+    return workspaceDao.findByWorkspaceNamespaceAndFirecloudName(ns, firecloudName);
   }
 
   @Override
-  public Workspace getRequired(String ns, String id) {
-    Workspace workspace = get(ns, id);
+  public Workspace getByName(String ns, String name) {
+    return workspaceDao.findByWorkspaceNamespaceAndName(ns, name);
+  }
+
+  @Override
+  public Workspace getRequired(String ns, String firecloudName) {
+    Workspace workspace = get(ns, firecloudName);
     if (workspace == null) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, id));
+      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
   }
@@ -91,16 +96,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void setResearchPurposeApproved(String ns, String id, boolean approved) {
-    Workspace workspace = getRequired(ns, id);
+  public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
+    Workspace workspace = getRequired(ns, firecloudName);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException(String.format(
-          "No review requested for workspace %s/%s.", ns, id));
+          "No review requested for workspace %s/%s.", ns, firecloudName));
     }
     if (workspace.getApproved() != null) {
       throw new BadRequestException(String.format(
           "Workspace %s/%s already %s.",
-          ns, id, workspace.getApproved() ? "approved" : "rejected"));
+          ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
