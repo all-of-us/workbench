@@ -22,8 +22,12 @@ import {
 export class ParticipantPagerComponent implements OnInit, OnDestroy {
 
   @Output() onSelection = new EventEmitter<ParticipantCohortStatus>();
-  private pageSize: number;
+
   private page: number;
+  private pageSize: number;
+  private sortOrder: string;
+  private sortColumn: string;
+
   private participants: ParticipantCohortStatus[];
   private sub: Subscription;
 
@@ -33,11 +37,13 @@ export class ParticipantPagerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sub = this.state.review
-      .do(({limit}) => this.pageSize = limit)
-      .do(({page}) => this.page = page)
-      .pluck('participantCohortStatuses')
-      .subscribe(statuses =>
-        this.participants = <ParticipantCohortStatus[]>statuses);
+      .subscribe(review => {
+        this.page = review.page;
+        this.pageSize = review.pageSize;
+        this.sortOrder = review.sortOrder;
+        this.sortColumn = review.sortColumn;
+        this.participants = review.participantCohortStatuses;
+      });
   }
 
   ngOnDestroy() {

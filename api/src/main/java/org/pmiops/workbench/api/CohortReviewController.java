@@ -174,6 +174,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview);
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
+        responseReview.setPage(PAGE);
+        responseReview.setPageSize(LIMIT);
+        responseReview.setSortOrder("ASC");
+        responseReview.setSortColumn(PARTICIPANT_ID);
+
         return ResponseEntity.ok(responseReview);
     }
 
@@ -258,6 +263,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview);
         responseReview.setParticipantCohortStatuses(participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+
+        responseReview.setPage(pageParam);
+        responseReview.setPageSize(limitParam);
+        responseReview.setSortOrder(orderParam.toString());
+        responseReview.setSortColumn(columnParam);
 
         return ResponseEntity.ok(responseReview);
     }

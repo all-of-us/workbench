@@ -1911,6 +1911,15 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantCohortStatus"
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sortOrder:
+        type: string
+      sortColumn:
+        type: string
+
 
   ParticipantCohortStatus:
     type: object
