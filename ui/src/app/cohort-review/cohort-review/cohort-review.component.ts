@@ -1,5 +1,4 @@
 import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -25,14 +24,11 @@ import {
 export class CohortReviewComponent implements OnInit, OnDestroy {
 
   readonly CohortStatus = CohortStatus;
-  reviewParamForm = new FormGroup({
-    numParticipants: new FormControl(),
-  });
   private cohort: Cohort;
   private review: CohortReview;
   private subscription: Subscription;
-  @ViewChild('createCohortModal') createCohortModal;
-  private buttonBusy = false;
+
+  private createReviewModalOpen = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -60,12 +56,7 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     });
 
     if (review.reviewStatus === ReviewStatus.NONE) {
-      this.createCohortModal.open();
-      this.numParticipants.setValidators(Validators.compose([
-        Validators.required,
-        Validators.min(1),
-        Validators.max(Math.min(10000, review.matchedParticipantCount)),
-      ]));
+      this.createReviewModalOpen = true;
     }
 
     /* Set up listeners though */
@@ -86,29 +77,5 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  get numParticipants() {
-    return this.reviewParamForm.get('numParticipants');
-  }
-
-  cancelReview() {
-    const params = this.route.snapshot.params;
-    this.router.navigate(['workspace', params.ns, params.wsid]);
-  }
-
-  createReview() {
-    console.log('Creating review... ');
-    const {ns, wsid, cid} = this.route.snapshot.params;
-    const request = <CreateReviewRequest>{size: this.numParticipants.value};
-    const buttonBusy = true;
-    this.reviewAPI
-      .createCohortReview(ns, wsid, cid, CDR_VERSION, request)
-      .subscribe(review => {
-        this.review = review;
-        this.buttonBusy = false;
-        this.state.review.next(review);
-        this.createCohortModal.close();
-      });
   }
 }

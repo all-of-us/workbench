@@ -1,4 +1,10 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
@@ -13,7 +19,7 @@ import {
   templateUrl: './participant-pager.component.html',
   styleUrls: ['./participant-pager.component.css']
 })
-export class ParticipantPagerComponent implements OnInit {
+export class ParticipantPagerComponent implements OnInit, OnDestroy {
 
   @Output() onSelection = new EventEmitter<ParticipantCohortStatus>();
   private pageSize: number;
@@ -27,6 +33,8 @@ export class ParticipantPagerComponent implements OnInit {
 
   ngOnInit() {
     this.sub = this.state.review
+      .do(({limit}) => this.pageSize = limit)
+      .do(({page}) => this.page = page)
       .pluck('participantCohortStatuses')
       .subscribe(statuses =>
         this.participants = <ParticipantCohortStatus[]>statuses);
