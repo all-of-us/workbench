@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
+    workspace.setId("name");
     workspace.setName("name");
     workspace.setNamespace("namespace");
     workspace.setDescription("description");
@@ -164,7 +166,7 @@ public class WorkspacesControllerTest {
 
     stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
     Workspace workspace2 =
-        workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
+        workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
@@ -195,11 +197,28 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
   }
 
+  @Test
+  public void testCreateMultipleFirecloudSameName() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspacesController.createWorkspace(workspace);
+
+    Workspace workspace2 = createDefaultWorkspace();
+    workspace2.setName(workspace2.getName() + ' ');
+    String namespace = workspace2.getNamespace();
+    String id = workspace2.getId();
+    doThrow(new ConflictException("Conflict")).when(fireCloudService).createWorkspace(workspace2.getNamespace(), workspace2.getId());
+    Workspace workspaceCreated =
+        workspacesController.createWorkspace(workspace2).getBody();
+
+    assertThat(workspaceCreated.getId()).isEqualTo(workspace2.getId() + '0');
+
+  }
+
   @Test(expected = NotFoundException.class)
   public void testDeleteWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
-    verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+    verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getId());
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
 
