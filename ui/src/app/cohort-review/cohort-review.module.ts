@@ -5,25 +5,32 @@ import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
-import {CohortResolverGuard, ReviewResolverGuard} from './guards';
 import {OverviewComponent} from './overview/overview.component';
-import {SubjectDetailComponent} from './subject-detail/subject-detail.component';
+import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
+import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+
+import {FullPageDirective} from './directives/fullPage.directive';
+import {SidebarDirective} from './directives/sidebar.directive';
+import {ReviewStateService} from './review-state.service';
+
+import {CohortResolver} from '../guards/cohort-resolver.guard';
+import {ReviewResolver} from '../guards/review-resolver.guard';
+
 
 import {CohortReviewService} from 'generated';
-
 
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
-  data: {title: 'Review Cohort Subjects'},
+  data: {title: 'Review Cohort Participants'},
   children: [
     {path: '', redirectTo: 'overview', pathMatch: 'full'},
     {path: 'overview', component: OverviewComponent},
-    {path: ':subjectID', component: SubjectDetailComponent},
+    {path: ':participantId', component: ParticipantDetailComponent},
   ],
   resolve: {
-    cohort: CohortResolverGuard,
-    review: ReviewResolverGuard,
+    cohort: CohortResolver,
+    review: ReviewResolver,
   }
 }];
 
@@ -36,13 +43,17 @@ const routes = [{
   ],
   declarations: [
     CohortReviewComponent,
+    FullPageDirective,
     OverviewComponent,
-    SubjectDetailComponent,
+    SidebarDirective,
+    ParticipantDetailComponent,
+    ParticipantStatusComponent,
   ],
   providers: [
-    CohortResolverGuard,
-    ReviewResolverGuard,
+    CohortResolver,
+    ReviewResolver,
     CohortReviewService,
+    ReviewStateService,
   ]
 })
 export class CohortReviewModule {}
