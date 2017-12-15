@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
 import { IAnalysis } from '../AnalysisClasses';
-import { IConcept } from '../ConceptClasses';
+import { Concept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
 
@@ -10,8 +10,8 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./my-concepts.component.css']
 })
 export class MyConceptsComponent implements OnInit, OnChanges {
-  @Input() conceptsArray: IConcept[] = [];
-  @Input() newConcept: IConcept; // Last concept added
+  @Input() conceptsArray: Concept[] = [];
+  @Input() newConcept: Concept; // Last concept added
   @Input() route: string;
   @Output() removalEmit = new EventEmitter();
   @Output() resetConcepts = new EventEmitter();
@@ -48,7 +48,7 @@ export class MyConceptsComponent implements OnInit, OnChanges {
   // Add it to the concept array if it is  the drawer.
   // We do this by just emitting to the component (ie search page ),
     // so it can add to its array too and graph it
-  drawerParentSelected(item: IConcept) {
+  drawerParentSelected(item: Concept) {
     this.addEmit.emit(item);
   }
 

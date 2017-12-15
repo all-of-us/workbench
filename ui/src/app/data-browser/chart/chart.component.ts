@@ -2,6 +2,9 @@ import {Component, Input, NgModule, OnChanges} from '@angular/core';
 import { ChartModule } from 'angular2-highcharts';
 import { AchillesService} from '../services/achilles.service';
 
+import { Analysis } from '../AnalysisClasses';
+import { Concept } from '../ConceptClasses';
+
 // This draws a highchart from an analysis object
 // import highcharts and highmaps and add highmaps to it.
 // Note, must import the js/modules/map so it can play nice. See highcharts docs
@@ -18,12 +21,6 @@ ChartModule.forRoot(
 );
 // highmaps(highcharts);  // Call this to add highmaps functionality to highcharts
 
-
-
-
-import { Analysis } from '../AnalysisClasses';
-import { IConcept } from '../ConceptClasses';
-
 @Component({
   selector: 'app-chart',
   templateUrl: './chart.component.html',
@@ -35,7 +32,7 @@ import { IConcept } from '../ConceptClasses';
 export class ChartComponent implements OnChanges {
   @Input() redraw;
   @Input() analysis: Analysis;
-  @Input() concepts: IConcept[];
+  @Input() concepts: Concept[];
   chartType;
   chartOptions;
   chart;
