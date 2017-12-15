@@ -17,7 +17,11 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
+import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
+import org.pmiops.workbench.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,12 +187,38 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
+    public ResponseEntity<ParticipantCohortAnnotation> createParticipantCohortAnnotation(String workspaceNamespace,
+                                                                                         String workspaceId,
+                                                                                         Long cohortReviewId,
+                                                                                         Long participantId,
+                                                                                         ParticipantCohortAnnotation request) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+    }
+
+    @Override
+    public ResponseEntity<EmptyResponse> deleteParticipantCohortAnnotation(String workspaceNamespace,
+                                                                           String workspaceId,
+                                                                           Long cohortReviewId,
+                                                                           Long participantId,
+                                                                           Long annotationId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
+    }
+
+    @Override
     public ResponseEntity<CohortSummaryListResponse> getCohortSummary(String workspaceNamespace,
                                                                       String workspaceId,
                                                                       Long cohortId,
                                                                       Long cdrVersionId,
                                                                       String domain) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
+    }
+
+    @Override
+    public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
+                                                                                                   String workspaceId,
+                                                                                                   Long cohortReviewId,
+                                                                                                   Long participantId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
 
     /**
@@ -270,6 +300,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         responseReview.setSortColumn(columnParam);
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId, Long annotationId, ModifyParticipantCohortAnnotationRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
     @Override
