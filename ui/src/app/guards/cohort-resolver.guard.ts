@@ -5,7 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {Cohort, CohortsService} from 'generated';
 
 @Injectable()
-export class CohortResolverGuard implements Resolve<Cohort> {
+export class CohortResolver implements Resolve<Cohort> {
 
   constructor(private cohortAPI: CohortsService) {}
 

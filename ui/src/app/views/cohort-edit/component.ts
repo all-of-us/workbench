@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ErrorHandlingService} from '../../services/error-handling.service';
 
 import {Cohort, CohortsService} from 'generated';
 
@@ -9,13 +10,13 @@ import {Cohort, CohortsService} from 'generated';
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class CohortEditComponent implements OnInit {
-  cohort: Cohort = {id: '', name: '', description: '', criteria: '', type: ''};
-  cohortId: string;
-  adding = false;
+export class CohortEditComponent implements OnInit, OnDestroy {
+  cohort: Cohort;
   workspaceNamespace: string;
   workspaceId: string;
-  buttonClicked = false;
+  private sub: Subscription;
+  private loading = false;
+
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -24,51 +25,40 @@ export class CohortEditComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cohortId = this.route.snapshot.params['cid'];
-    this.workspaceId = this.route.snapshot.params['wsid'];
-    this.workspaceNamespace = this.route.snapshot.params['ns'];
-    if (this.route.routeConfig.data.adding) {
-      this.adding = true;
-    } else {
-      this.errorHandlingService.retryApi(this.cohortsService
-          .getCohort(
-              this.workspaceNamespace,
-              this.workspaceId,
-              this.cohortId))
-          .subscribe(cohort => this.cohort = cohort);
-    }
+    this.sub = this.route.params.subscribe(({ns, wsid}) => {
+      this.workspaceId = wsid;
+      this.workspaceNamespace = ns;
+    });
+
+    this.sub.add(this.route.data.subscribe(({cohort}) => {
+      this.cohort = cohort;
+    }));
   }
 
-  saveCohort(): void {
-    if (!this.buttonClicked) {
-      this.buttonClicked = true;
-      this.errorHandlingService.retryApi(this.cohortsService
-          .updateCohort(
-              this.workspaceNamespace,
-              this.workspaceId,
-              this.cohort.id,
-              this.cohort))
-          .subscribe(cohorts => this.router.navigate(['../../..'], {relativeTo : this.route}));
-    }
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 
-  addCohort(): void {
-    if (!this.buttonClicked) {
-      this.buttonClicked = true;
-      this.errorHandlingService.retryApi(this.cohortsService
-          .createCohort(
-              this.workspaceNamespace,
-              this.workspaceId,
-              this.cohort))
-          .subscribe(cohorts => this.router.navigate(['../..'], {relativeTo : this.route}));
-    }
+  save(): void {
+    this.loading = true;
+
+    const call = this.cohortsService.updateCohort(
+      this.workspaceNamespace,
+      this.workspaceId,
+      this.cohort.id,
+      this.cohort
+    );
+
+    const success = ({cohort}) => {
+      this.cohort = cohort;
+      this.loading = false;
+      this.router.navigate(['../../..'], {relativeTo: this.route});
+    };
+
+    this.errorHandlingService.retryApi(call).subscribe(success);
   }
 
-  cancelAdd(): void {
-    this.router.navigate(['../..'], {relativeTo : this.route});
-  }
-
-  cancelSave(): void {
+  cancel(): void {
     this.router.navigate(['../../..'], {relativeTo : this.route});
   }
 }
