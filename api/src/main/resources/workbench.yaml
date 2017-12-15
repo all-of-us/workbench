@@ -1039,44 +1039,44 @@ paths:
           description: A ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotation"
-  delete:
-    tags:
-      - cohortReview
-    description: Deletes the ParticipantCohortAnnotation with the specified ID
-    operationId: "deleteParticipantCohortAnnotation"
-    parameters:
-      - in: path
-        name: workspaceNamespace
-        type: string
-        required: true
-      - in: path
-        name: workspaceId
-        type: string
-        required: true
-        description: specifies which workspace
-      - in: path
-        name: cohortReviewId
-        type: integer
-        format: int64
-        required: true
-        description: specifies which review
-      - in: path
-        name: participantId
-        type: integer
-        format: int64
-        required: true
-        description: specifies which participant
-      - in: path
-        name: annotationId
-        type: integer
-        format: int64
-        required: true
-        description: specifies which annotation
-    responses:
-      "202":
-        description: ParticipantCohortAnnotation deletion request accepted
-        schema:
-          $ref: '#/definitions/EmptyResponse'
+    delete:
+      tags:
+        - cohortReview
+      description: Deletes the ParticipantCohortAnnotation with the specified ID
+      operationId: "deleteParticipantCohortAnnotation"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+        - in: path
+          name: annotationId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which annotation
+      responses:
+        "202":
+          description: ParticipantCohortAnnotation deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
 
   # Cohort Annotation Definition Controller ###################################################
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
