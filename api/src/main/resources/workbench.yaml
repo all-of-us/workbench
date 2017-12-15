@@ -922,10 +922,11 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/annotationdefinitions:
+  # Cohort Annotation Definition Controller ###################################################
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
     post:
       tags:
-        - cohortReview
+        - cohortAnnotationDefinition
       description: This endpoint will create a CohortAnnotationDefinition.
       operationId: "createCohortAnnotationDefinition"
       parameters:
@@ -944,18 +945,12 @@ paths:
           format: int64
           required: true
           description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
         - in: body
           name: request
           required: true
           description: CohortAnnotationDefinition creation request body
           schema:
-            $ref: "#/definitions/CreateCohortAnnotationDefinitionRequest"
+            $ref: "#/definitions/CohortAnnotationDefinition"
       responses:
         "200":
           description: A CohortAnnotationDefinition.
@@ -2019,18 +2014,6 @@ definitions:
         format: int64
         description: the count for this criteria type in the cohort
 
-  CreateCohortAnnotationDefinitionRequest:
-    type: object
-    required:
-      - name
-      - annotationType
-    properties:
-      name:
-        type: string
-        description: the name of this annotation.
-      annotationType:
-        $ref: "#/definitions/AnnotationType"
-
   AnnotationType:
     type: string
     description: possible values representing the type of annotation.
@@ -2039,7 +2022,6 @@ definitions:
   CohortAnnotationDefinition:
     type: object
     required:
-      - cohortAnnotationDefinitionId
       - cohortId
       - name
       - annotationType
@@ -2057,27 +2039,6 @@ definitions:
         description: the name of this annotation.
       annotationType:
         $ref: "#/definitions/AnnotationType"
-      participantCohortAnnotation:
-        $ref: "#/definitions/ParticipantCohortAnnotation"
-
-  ParticipantCohortAnnotation:
-    type: object
-    required:
-      - annotationId
-    properties:
-      annotationId:
-        type: integer
-        format: int64
-        description: the annotation id.
-      annotationValueString:
-        type: string
-        description: the value of this annotation if the type is string
-      annotationValueInteger:
-        type: integer
-        description: the value of this annotation if the type in integer
-      annotationValueTimestamp:
-        type: string
-        description: the value of this annotation if the type is date/timestamp.
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
-import org.pmiops.workbench.model.CreateCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -126,26 +125,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
-    }
-
-    @Override
-    public ResponseEntity<org.pmiops.workbench.model.CohortAnnotationDefinition> createCohortAnnotationDefinition(String workspaceNamespace,
-                                                                                       String workspaceId,
-                                                                                       Long cohortId,
-                                                                                       Long cdrVersionId,
-                                                                                       CreateCohortAnnotationDefinitionRequest request) {
-
-        Cohort cohort = findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
-
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition();
-        cohortAnnotationDefinition.annotationType(request.getAnnotationType());
-        cohortAnnotationDefinition.cohortId(cohortId);
-        cohortAnnotationDefinition.columnName(request.getName());
-        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-
-        return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
     /**
