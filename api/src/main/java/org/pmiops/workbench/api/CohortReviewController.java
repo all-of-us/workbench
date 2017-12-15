@@ -14,18 +14,13 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
-import org.pmiops.workbench.model.CreateCohortAnnotationDefinitionRequest;
-import org.pmiops.workbench.model.CreateParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,15 +108,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         this.participantCounter = participantCounter;
     }
 
-    @Override
-    public ResponseEntity<CohortAnnotationDefinition> createCohortAnnotationDefinition(String workspaceNamespace,
-                                                                                       String workspaceId,
-                                                                                       Long cohortId,
-                                                                                       Long cdrVersionId,
-                                                                                       CreateCohortAnnotationDefinitionRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
-    }
-
     /**
      * Create a cohort review per the specified workspaceId, cohortId, cdrVersionId and size. If participant cohort status
      * data exists for a review or no cohort review exists for cohortReviewId then throw a
@@ -197,27 +183,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Override
     public ResponseEntity<ParticipantCohortAnnotation> createParticipantCohortAnnotation(String workspaceNamespace,
                                                                                          String workspaceId,
-                                                                                         Long cohortId,
-                                                                                         Long cdrVersionId,
-                                                                                         CreateParticipantCohortAnnotationRequest request) {
+                                                                                         Long cohortReviewId,
+                                                                                         Long participantId,
+                                                                                         ParticipantCohortAnnotation request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
-    }
-
-    @Override
-    public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(String workspaceNamespace,
-                                                                          String workspaceId,
-                                                                          Long cohortId,
-                                                                          Long cdrVersionId,
-                                                                          Long annotationDefinitionId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
-    }
-
-    @Override
-    public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
-                                                                                                 String workspaceId,
-                                                                                                 Long cohortId,
-                                                                                                 Long cdrVersionId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinitionListResponse());
     }
 
     @Override
@@ -227,6 +196,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                       Long cdrVersionId,
                                                                       String domain) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
+    }
+
+    @Override
+    public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
+                                                                                                   String workspaceId,
+                                                                                                   Long cohortReviewId,
+                                                                                                   Long participantId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
 
     /**
@@ -306,22 +283,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<CohortAnnotationDefinition> updateCohortAnnotationDefinition(String workspaceNamespace,
-                                                                                       String workspaceId,
-                                                                                       Long cohortId,
-                                                                                       Long cdrVersionId,
-                                                                                       Long annotationDefinitionId,
-                                                                                       ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
-    }
-
-    @Override
-    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
-                                                                                         String workspaceId,
-                                                                                         Long cohortId,
-                                                                                         Long cdrVersionId,
-                                                                                         Long annotationId,
-                                                                                         ModifyParticipantCohortAnnotationRequest request) {
+    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId, Long annotationId, ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
