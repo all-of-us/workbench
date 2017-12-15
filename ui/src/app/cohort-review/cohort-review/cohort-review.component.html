@@ -1,38 +1,56 @@
-<div #wrapper class="cohort-review-wrapper">
-  <div *ngIf="loading" class="spinner">Loading...</div>
-
-  <!-- Main subject navigation sidebar -->
-  <div #subjectNav
-    class="subject-nav"
-    [class.subject-nav-open]="open">
-    <a class="closebtn" (click)="open = false">&times;</a>
-    <a (click)="open = false"
+<div appFullPage>
+  <!-- Main participant navigation sidebar -->
+  <div appSidebar
+    #participantNav="appSidebar"
+    [controller]="navBtn">
+    <a class="closebtn" (click)="participantNav.close()">&times;</a>
+    <a (click)="participantNav.close(); state.participant.next(null)"
       routerLink="overview"
       routerLinkActive="active">
       Overview
     </a>
     <hr />
-    <a *ngFor="let subject of review.participantCohortStatuses"
-      (click)="open = false"
-      [routerLink]="[subject.participantId]"
+    <a *ngFor="let participant of review.participantCohortStatuses"
+      (click)="participantNav.close(); state.participant.next(participant)"
+      [routerLink]="[participant.participantId]"
       routerLinkActive="active">
-      {{ subject.participantId}}
+      {{ participant.participantId}}
       <span class="label"
-        [ngClass]="statusClass(subject.status)">
-        {{ statusText(subject.status) }}
+        [ngClass]="statusClass(participant.status)">
+        {{ statusText(participant.status) }}
       </span>
     </a>
   </div>
 
-  <!-- Main content area for the Cohort Review Sub-application -->
-  <div class="cohort-review-main"
-    [style.margin-left]="open ? '300px' : 0">
-    <button #openNav (click)="open = true">Open</button>
-    <router-outlet></router-outlet>
+  <!-- Annotations & Status sidebar -->
+  <div appSidebar
+    #statusBar="appSidebar"
+    [position]="{top: 0, right: 0}"
+    [controller]="statusBtn">
+    <a class="closebtn" (click)="statusBar.close()">&times;</a>
+    <div class="status-wrapper">
+      <app-participant-status>
+      </app-participant-status>
+    </div>
   </div>
 
-  <!-- Sidebar is active overlay -->
-  <div class="blanket" [class.blanket-active]="open"></div>
+  <!-- Blanket for dimming the background when a sidebar is open -->
+  <div class="blanket" [class.blanket-active]="participantNav.isOpen || statusBar.isOpen"></div>
+
+  <!-- Main content area for the Cohort Review Sub-application -->
+  <div class="cohort-review-main"
+    [style.margin-left]="participantNav.isOpen ? '300px' : 0"
+    [style.margin-right]="statusBar.isOpen ? '300px' : 0">
+    <button #navBtn
+      (click)="participantNav.open(); $event.stopPropagation()">
+      Subjects
+    </button>
+    <button #statusBtn
+      (click)="statusBar.open(); $event.stopPropagation()">
+      Status
+    </button>
+    <router-outlet></router-outlet>
+  </div>
 
   <!-- Cohort creation modal -->
   <clr-modal
@@ -93,6 +111,7 @@
         type="button"
         class="btn btn-primary"
         [disabled]="reviewParamForm.invalid"
+        [clrLoading]="buttonBusy"
         (click)="createReview()">
         Save Review Set
       </button>
