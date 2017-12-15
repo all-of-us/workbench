@@ -925,6 +925,296 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+    post:
+      tags:
+        - cohortReview
+      description: This endpoint will create a ParticipantCohortAnnotation.
+      operationId: "createParticipantCohortAnnotation"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+        - in: body
+          name: request
+          required: true
+          description: ParticipantCohortAnnotation creation request body
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+      responses:
+        "200":
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a collection of ParticipantCohortAnnotations.
+      operationId: "getParticipantCohortAnnotations"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+      responses:
+        "200":
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+    put:
+      tags:
+        - cohortReview
+      description: This endpoint will modify a ParticipantCohortAnnotation.
+      operationId: "updateParticipantCohortAnnotation"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+        - in: path
+          name: annotationId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which annotation
+        - in: body
+          name: request
+          required: true
+          description: ParticipantCohortAnnotation modification request body
+          schema:
+            $ref: "#/definitions/ModifyParticipantCohortAnnotationRequest"
+      responses:
+        "200":
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+    delete:
+      tags:
+        - cohortReview
+      description: Deletes the ParticipantCohortAnnotation with the specified ID
+      operationId: "deleteParticipantCohortAnnotation"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+        - in: path
+          name: annotationId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which annotation
+      responses:
+        "202":
+          description: ParticipantCohortAnnotation deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
+  # Cohort Annotation Definition Controller ###################################################
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+    post:
+      tags:
+        - cohortAnnotationDefinition
+      description: This endpoint will create a CohortAnnotationDefinition.
+      operationId: "createCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: body
+          name: request
+          required: true
+          description: CohortAnnotationDefinition creation request body
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+      responses:
+        "200":
+          description: A CohortAnnotationDefinition.
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    get:
+      tags:
+        - cohortAnnotationDefinition
+      description: Returns a collection of CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinitions"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+      responses:
+        "200":
+          description: A collection of CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+    put:
+      tags:
+        - cohortAnnotationDefinition
+      description: modify the CohortAnnotationDefinition.
+      operationId: updateCohortAnnotationDefinition
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+        - in: body
+          name: modifyCohortAnnotationDefinitionRequest
+          description: Contains the new CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/ModifyCohortAnnotationDefinitionRequest"
+      responses:
+        "200":
+          description: The updated ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    delete:
+      tags:
+        - cohortAnnotationDefinition
+      description: Deletes the CohortAnnotationDefinition with the specified ID
+      operationId: "deleteCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+      responses:
+        "202":
+          description: CohortAnnotationDefinition deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
   # Data Browser #######################################################################
   /api/v1/databrowser/search-concepts:
     get:
@@ -1982,6 +2272,102 @@ definitions:
         type: integer
         format: int64
         description: the count for this criteria type in the cohort
+
+  AnnotationType:
+    type: string
+    description: possible values representing the type of annotation.
+    enum: [STRING, BOOLEAN, INTEGER, DATE, TIMESTAMP]
+
+  CohortAnnotationDefinition:
+    type: object
+    required:
+      - cohortId
+      - name
+      - annotationType
+    properties:
+      cohortAnnotationDefinitionId:
+        type: integer
+        format: int64
+        description: the annotation definition id.
+      cohortId:
+        type: integer
+        format: int64
+        description: the cohort id.
+      name:
+        type: string
+        description: the name of this annotation.
+      annotationType:
+        $ref: "#/definitions/AnnotationType"
+
+  ParticipantCohortAnnotation:
+    type: object
+    required:
+      - cohortReviewId
+      - participantId
+    properties:
+      annotationDefinitionId:
+        type: integer
+        format: int64
+        description: annotation definition id.
+      cohortReviewId:
+        type: integer
+        format: int64
+        description: the cohort reivew id.
+      participantId:
+        type: integer
+        format: int64
+        description: the participant id.
+      annotationValueString:
+        type: string
+        description: the value of this annotation if the type is string
+      annotationValueInteger:
+        type: integer
+        description: the value of this annotation if the type in integer
+      annotationValueTimestamp:
+        type: string
+        description: the value of this annotation if the type is date/timestamp.
+
+  CohortAnnotationDefinitionListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortAnnotationDefinition"
+
+  ModifyCohortAnnotationDefinitionRequest:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: the name of this annotation.
+
+  ParticipantCohortAnnotationListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantCohortAnnotation"
+
+  ModifyParticipantCohortAnnotationRequest:
+    type: object
+    properties:
+      annotationValueString:
+        type: string
+        description: the value of this annotation if the type is string
+      annotationValueInteger:
+        type: integer
+        description: the value of this annotation if the type in integer
+      annotationValueTimestamp:
+        type: string
+        description: the value of this annotation if the type is date/timestamp.
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
