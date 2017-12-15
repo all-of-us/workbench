@@ -7,5 +7,5 @@ import org.springframework.data.repository.query.Param;
 public interface CohortReviewDao extends JpaRepository<CohortReview, Long> {
 
     CohortReview findCohortReviewByCohortIdAndCdrVersionId(@Param("cohortId") long cohortId,
-                                                               @Param("cdrVersionId") long cdrVersionId);
+                                                           @Param("cdrVersionId") long cdrVersionId);
 }

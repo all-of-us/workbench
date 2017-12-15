@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -55,6 +56,9 @@ public class CohortReviewControllerTest {
     CohortDao cohortDao;
 
     @Mock
+    CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+
+    @Mock
     BigQueryService bigQueryService;
 
     @Mock
@@ -90,7 +94,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -107,7 +111,7 @@ public class CohortReviewControllerTest {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
 
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -128,7 +132,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -165,7 +169,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter, workspaceService);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -243,7 +247,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -292,7 +296,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -332,7 +336,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -375,7 +379,7 @@ public class CohortReviewControllerTest {
         verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
         verify(cohortReviewDao, times(1))
                 .findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -427,7 +431,7 @@ public class CohortReviewControllerTest {
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -488,7 +492,7 @@ public class CohortReviewControllerTest {
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
         verify(cohortReviewDao, times(1)).save(isA(CohortReview.class));
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     private void assertFindByCohortIdAndCdrVersionId(String namespace,
@@ -560,7 +564,11 @@ public class CohortReviewControllerTest {
                 .findByParticipantKey_CohortReviewId(
                         cohortId,
                         new PageRequest(pageParam, pageSizeParam, sort));
-        verifyNoMoreInteractions(participantCohortStatusDao);
+        verifyNoMoreMockInteractions();
+    }
+
+    private void verifyNoMoreMockInteractions() {
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter, cohortAnnotationDefinitionDao);
     }
 
 }
