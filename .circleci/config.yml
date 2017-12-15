@@ -31,7 +31,7 @@ jobs:
               api/src/main/webapp/WEB-INF/sa-key.json
       - run:
           working_directory: ~/workbench/api
-          command: gradle test --project-prop verboseTestLogging=yes
+          command: ./project.rb test
       - save_cache:
           paths:
             - ~/.gradle
