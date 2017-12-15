@@ -45,7 +45,7 @@ export class CreateReviewComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.state.review
+    this.state.review$
       .take(1)
       .pluck('matchedParticipantCount')
       .do((count: number) => this.matchedParticipantCount = count)
@@ -57,14 +57,14 @@ export class CreateReviewComponent implements OnInit {
         Validators.max(count)]))
       .subscribe(validators => this.numParticipants.setValidators(validators));
 
-    this.state.cohort
+    this.state.cohort$
       .take(1)
       .pluck('name')
       .subscribe((name: string) => this.cohortName = name);
   }
 
   cancelReview() {
-    this.state.context
+    this.state.context$
       .take(1)
       .map(({workspaceNamespace, workspaceId}) => ['workspace', workspaceNamespace, workspaceId])
       .subscribe(args => this.router.navigate(args));
@@ -73,7 +73,7 @@ export class CreateReviewComponent implements OnInit {
   createReview() {
     this.creating = true;
     Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
-      .withLatestFrom(this.state.context)
+      .withLatestFrom(this.state.context$)
       .mergeMap(([request, context]) =>
         this.reviewAPI.createCohortReview(
           context.workspaceNamespace,
