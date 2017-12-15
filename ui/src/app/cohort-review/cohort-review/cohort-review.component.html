@@ -10,16 +10,9 @@
       Overview
     </a>
     <hr />
-    <a *ngFor="let participant of review.participantCohortStatuses"
-      (click)="participantNav.close(); state.participant.next(participant)"
-      [routerLink]="[participant.participantId]"
-      routerLinkActive="active">
-      {{ participant.participantId}}
-      <span class="label"
-        [ngClass]="statusClass(participant.status)">
-        {{ statusText(participant.status) }}
-      </span>
-    </a>
+    <app-participant-pager
+      (onSelection)="participantNav.close()">
+    </app-participant-pager>
   </div>
 
   <!-- Annotations & Status sidebar -->

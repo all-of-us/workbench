@@ -111,23 +111,4 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
         this.createCohortModal.close();
       });
   }
-
-  statusText(stat: CohortStatus): string {
-    return {
-      [CohortStatus.EXCLUDED]: 'Excluded',
-      [CohortStatus.INCLUDED]: 'Included',
-      [CohortStatus.NEEDSFURTHERREVIEW]: 'Undecided',
-      [CohortStatus.NOTREVIEWED]: 'Unreviewed',
-    }[stat];
-  }
-
-  statusClass(stat: CohortStatus) {
-    if (stat === CohortStatus.INCLUDED) {
-      return {'label-success': true};
-    } else if (stat === CohortStatus.EXCLUDED) {
-      return {'label-warning': true};
-    } else {
-      return {'label-info': true};
-    }
-  }
 }
