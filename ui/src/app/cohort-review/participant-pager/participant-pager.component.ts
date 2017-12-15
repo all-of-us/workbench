@@ -10,6 +10,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
 
 import {
+  CohortReviewService,
   CohortStatus,
   ParticipantCohortStatus,
 } from 'generated';
@@ -25,6 +26,8 @@ export class ParticipantPagerComponent implements OnInit, OnDestroy {
 
   private page: number;
   private pageSize: number;
+  private lastPage: number;
+
   private sortOrder: string;
   private sortColumn: string;
 
@@ -32,6 +35,7 @@ export class ParticipantPagerComponent implements OnInit, OnDestroy {
   private sub: Subscription;
 
   constructor(
+    private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
   ) {}
 
@@ -40,6 +44,7 @@ export class ParticipantPagerComponent implements OnInit, OnDestroy {
       .subscribe(review => {
         this.page = review.page;
         this.pageSize = review.pageSize;
+        this.lastPage = (review.reviewSize / review.pageSize) - 1;
         this.sortOrder = review.sortOrder;
         this.sortColumn = review.sortColumn;
         this.participants = review.participantCohortStatuses;
@@ -48,6 +53,20 @@ export class ParticipantPagerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub.unsubscribe();
+  }
+
+  goToPage(pageNo: number) {
+    this.state.context$
+      .mergeMap(context => this.reviewAPI.getParticipantCohortStatuses(
+        context.workspaceNamespace,
+        context.workspaceId,
+        context.cohortId,
+        context.cdrVersion,
+        pageNo,
+        this.pageSize,
+        this.sortOrder,
+        this.sortColumn))
+      .subscribe(this.state.review);
   }
 
   statusText(stat: CohortStatus): string {

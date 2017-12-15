@@ -16,3 +16,11 @@ a {
 a:hover:not(.closebtn) {
   background-color: rgb(238, 238, 238);
 }
+
+.btn-group-wrapper {
+  display: flex;
+}
+
+.btn-group-wrapper > .btn-group {
+  margin: auto;
+}
