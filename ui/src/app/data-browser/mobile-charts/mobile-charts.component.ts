@@ -6,7 +6,7 @@ import { AchillesService } from '../services/achilles.service';
   styleUrls: ['./mobile-charts.component.css']
 })
 export class MobileChartsComponent implements OnInit {
-  // @Input() newConcept:IConcept; // Last concept added
+  // @Input() newConcept:Concept; // Last concept added
   @Input() redraw;
   @Input() concept;
   @Input() analyses;
