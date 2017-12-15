@@ -4,7 +4,7 @@ import 'rxjs/add/operator/toPromise';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';
 import { AnalysisDist, AnalysisDistResult } from '../AnalysisSubClasses';
-import { Concept, IConcept } from '../ConceptClasses';
+import { Concept} from '../ConceptClasses';
 import { DomainClass } from '../DomainClasses';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class AchillesService {
   }
   // Return an Analysis object with results for the concepts array.
   // This analysis obj can then be passed to app-chart
-  makeConceptsCountAnalysis(concepts: IConcept[]): Analysis {
+  makeConceptsCountAnalysis(concepts: Concept[]): Analysis {
       const obj = {
           analysisId: 3000,
           analysisName: 'Number of Participants',

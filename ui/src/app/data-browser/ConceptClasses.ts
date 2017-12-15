@@ -1,8 +1,7 @@
-
-  // Concept Classes
+// Concept Classes
 import {Criteria} from '../../generated/model/criteria';
 
-  export interface IConcept {
+export class Concept {
   concept_name: string;
   prevalence: string;
   concept_id: number;
@@ -11,45 +10,26 @@ import {Criteria} from '../../generated/model/criteria';
   vocabulary_id: string;
   domain_id: string;
   count_value: number;
-  children: IConcept [];
-  parents: IConcept [];
-  id: number; // icd concepts have id for tree info
-  is_group: boolean;
-  is_selectable: boolean;
-  color: string;
-  moreInfo(): string;
-}
-
-
-export class Concept implements IConcept {
-  concept_name: string;
-  prevalence: string;
-  concept_id: number;
-  concept_class_id: string;
-  concept_code: string;
-  vocabulary_id: string;
-  domain_id: string;
-  count_value: number;
-  children: IConcept[];
-  parents: IConcept[];
+  children: Concept[];
+  parents: Concept[];
   id: number ; // icd concepts have id for tree info
   is_group: boolean;
   is_selectable: boolean;
   color: string;
 
   static conceptFromCriteria(obj: Criteria):  Concept {
-        const concept = new Concept();
-        concept.concept_name = obj.name;
-        concept.concept_id = obj.conceptId;
-        concept.count_value = obj.count;
-        concept.is_group = obj.group;
-        concept.is_selectable = obj.selectable;
-        concept.domain_id = obj.domainId;
-        concept.id = obj.id;
-        concept.concept_code = obj.code;
-        concept.vocabulary_id = obj.type;
-        return concept;
-    }
+    const concept = new Concept();
+    concept.concept_name = obj.name;
+    concept.concept_id = obj.conceptId;
+    concept.count_value = obj.count;
+    concept.is_group = obj.group;
+    concept.is_selectable = obj.selectable;
+    concept.domain_id = obj.domainId;
+    concept.id = obj.id;
+    concept.concept_code = obj.code;
+    concept.vocabulary_id = obj.type;
+    return concept;
+  }
   constructor(obj?: any) {
     this.concept_name = obj && obj.conceptName || '';
     this.concept_class_id = obj && obj.conceptClassId || '';
@@ -66,25 +46,18 @@ export class Concept implements IConcept {
     this.is_selectable = obj && obj.isSelectable || false;
   }
 
-    moreInfo(): string {
-        return 'More information about concept class ' + this.constructor.name;
-    }
-
-
-
-
+  moreInfo(): string {
+    return 'More information about concept class ' + this.constructor.name;
+  }
 }
 
 export class ConceptPpi extends Concept {
   children: Array<any>;
-  // survey: Survey;
-  // Return more info about survey and whatever for this concept
 
   moreInfo(): string {
     return 'ConceptPPI More info on Survey and such';
   }
- // constructing from codebook ppi
- // Todo:
+
   constructor(obj?: any) {
     super(obj);
     this.concept_name = obj && obj.display;
@@ -116,9 +89,8 @@ export class ConceptPpi extends Concept {
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min)) + min;
     }
-  } // End constructor
+  }
 }
-
 
 export class Survey {
   title: string;
