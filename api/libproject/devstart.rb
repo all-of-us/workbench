@@ -298,6 +298,15 @@ def drop_cloud_cdr(*args)
   end
 end
 
+def run_local_all_migrations(*args)
+  common = Common.new
+
+  common.run_inline %W{docker-compose run db-migration}
+  common.run_inline %W{docker-compose run db-cdr-migration}
+  common.run_inline %W{docker-compose run db-cdr-data-migration}
+  common.run_inline %W{docker-compose run db-data-migration}
+end
+
 def run_local_data_migrations(*args)
   common = Common.new
 
@@ -596,8 +605,14 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "run-local-all-migrations",
+  :description => "Runs local data/schema migrations for cdr/workbench schemas.",
+  :fn => lambda { |*args| run_local_all_migrations(*args) }
+})
+
+Common.register_command({
   :invocation => "run-local-data-migrations",
-  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
+  :description => "Runs local data migrations for cdr/workbench schemas.",
   :fn => lambda { |*args| run_local_data_migrations(*args) }
 })
 
