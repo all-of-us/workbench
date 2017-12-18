@@ -94,6 +94,7 @@ public class CohortAnnotationDefinitionControllerTest {
         String name = "test";
         long cohortId = 1;
         long workspaceId = 1;
+        long annotationDefinitionId = 1;
 
         Cohort cohort = new Cohort();
         cohort.setWorkspaceId(workspaceId);
@@ -112,16 +113,26 @@ public class CohortAnnotationDefinitionControllerTest {
         dbCohortAnnotationDefinition.setAnnotationType(request.getAnnotationType());
         dbCohortAnnotationDefinition.setColumnName(request.getName());
         dbCohortAnnotationDefinition.setCohortId(cohortId);
+        dbCohortAnnotationDefinition.setCohortAnnotationDefinitionId(annotationDefinitionId);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition)).thenReturn(dbCohortAnnotationDefinition);
 
-        cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
-                namespace,
-                name,
-                cohortId,
-                request);
+        CohortAnnotationDefinition expectedResponse = new CohortAnnotationDefinition();
+        expectedResponse.setAnnotationType(AnnotationType.STRING);
+        expectedResponse.setName("testing");
+        expectedResponse.setCohortId(cohortId);
+        expectedResponse.setCohortAnnotationDefinitionId(annotationDefinitionId);
+
+        CohortAnnotationDefinition response =
+                cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+                        namespace,
+                        name,
+                        cohortId,
+                        request).getBody();
+        assertEquals(expectedResponse, response);
+
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
