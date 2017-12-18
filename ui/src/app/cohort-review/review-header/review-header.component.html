@@ -1,0 +1,31 @@
+<div class="btn-group">
+  <button
+    class="btn"
+    (click)="state.participant.next(null); goToOverview.emit(true)"
+    routerLink="overview"
+    routerLinkActive="active">
+    <clr-icon shape="line-chart"></clr-icon>
+    Overview
+  </button>
+
+  <button
+    class="btn"
+    (click)="toggleNav.emit(true)">
+    <clr-icon shape="users"></clr-icon>
+    Participants
+  </button>
+
+  <button
+    class="btn"
+    (click)="toggleStatusBar.emit(true)"
+    [disabled]="(state.participant$ | async) === null">
+    <clr-icon shape="info-standard"></clr-icon>
+    <!--
+      TODO (jms) Hover state explaining why this may be disabled;
+      on navigation, automatically close the status sidebar iff open
+    -->
+    Status
+  </button>
+</div>
+
+<!-- TODO (jms) Header Text; basic participant info ? -->

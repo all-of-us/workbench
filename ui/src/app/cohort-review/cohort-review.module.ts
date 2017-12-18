@@ -10,6 +10,7 @@ import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantPagerComponent} from './participant-pager/participant-pager.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+import {ReviewHeaderComponent} from './review-header/review-header.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
@@ -52,6 +53,7 @@ const routes = [{
     ParticipantDetailComponent,
     ParticipantPagerComponent,
     ParticipantStatusComponent,
+    ReviewHeaderComponent,
   ],
   providers: [
     CohortResolver,

@@ -20,8 +20,11 @@
   <div class="cohort-review-main"
     [style.margin-left]="participantNav.isOpen ? '300px' : 0"
     [style.margin-right]="statusBar.isOpen ? '300px' : 0">
-    <button (click)="participantNav.toggle()">Subjects</button>
-    <button (click)="statusBar.toggle()">Status</button>
+    <app-review-header
+      (toggleNav)="participantNav.toggle()"
+      (toggleStatusBar)="statusBar.toggle()"
+      (goToOverview)="statusBar.close()">
+    </app-review-header>
     <router-outlet></router-outlet>
   </div>
 
