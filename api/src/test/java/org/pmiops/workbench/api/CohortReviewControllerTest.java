@@ -253,17 +253,17 @@ public class CohortReviewControllerTest {
         long cohortId = 1L;
         long cdrVersionId = 1L;
         int page = 1;
-        int limit = 22;
-        String order = "desc";
-        String column = "status";
+        int pageSize = 22;
+        String sortOrder = "desc";
+        String sortColumn = "status";
 
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, limit, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, order, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, column);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, "participantId");
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, "participantId");
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     null,      sortColumn);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     sortOrder, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, pageSize, null,      null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, null,     null,      null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     null,      null);
     }
 
     @Test
@@ -496,13 +496,13 @@ public class CohortReviewControllerTest {
                                                      long cohortId,
                                                      long cdrVersionId,
                                                      Integer page,
-                                                     Integer limit,
-                                                     String order,
-                                                     String column) {
+                                                     Integer pageSize,
+                                                     String sortOrder,
+                                                     String sortColumn) {
         Integer pageParam = page == null ? 0 : page;
-        Integer limitParam = limit == null ? 25 : limit;
-        Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        String columnParam = (column == null || column.equals("participantId")) ? "participantKey.participantId" : column;
+        Integer pageSizeParam = pageSize == null ? 25 : pageSize;
+        Sort.Direction orderParam = (sortOrder == null || sortOrder.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
@@ -511,6 +511,7 @@ public class CohortReviewControllerTest {
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED);
+
         org.pmiops.workbench.model.CohortReview respCohortReview =
                 new org.pmiops.workbench.model.CohortReview()
                 .cohortReviewId(1L)
@@ -519,6 +520,10 @@ public class CohortReviewControllerTest {
                         .matchedParticipantCount(1000L)
                         .reviewedCount(0L)
                         .reviewSize(200L)
+                        .page(pageParam)
+                        .pageSize(pageSizeParam)
+                        .sortOrder(orderParam.toString())
+                        .sortColumn(columnParam)
                 .participantCohortStatuses(Arrays.asList(respParticipant));
 
         List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
@@ -540,11 +545,11 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
                 cohortId,
-                new PageRequest(pageParam, limitParam, sort)))
+                new PageRequest(pageParam, pageSizeParam, sort)))
                 .thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
+                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
@@ -554,7 +559,7 @@ public class CohortReviewControllerTest {
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewId(
                         cohortId,
-                        new PageRequest(pageParam, limitParam, sort));
+                        new PageRequest(pageParam, pageSizeParam, sort));
         verifyNoMoreInteractions(participantCohortStatusDao);
     }
 
