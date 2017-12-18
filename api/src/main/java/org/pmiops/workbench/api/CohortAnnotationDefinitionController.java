@@ -13,9 +13,11 @@ import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.function.Function;
 
+@RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
 
     private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
@@ -30,12 +32,25 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             TO_CLIENT_COHORT_ANNOTATION_DEFINITION =
             new Function<org.pmiops.workbench.db.model.CohortAnnotationDefinition, CohortAnnotationDefinition>() {
                 @Override
-                public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
+                public CohortAnnotationDefinition apply(
+                        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
                             .name(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
                             .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+                }
+            };
+
+    private static final Function<CohortAnnotationDefinition, org.pmiops.workbench.db.model.CohortAnnotationDefinition>
+            FROM_CLIENT_COHORT_ANNOTATION_DEFINITION =
+            new Function<CohortAnnotationDefinition, org.pmiops.workbench.db.model.CohortAnnotationDefinition>() {
+                @Override
+                public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
+                    return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
+                            .cohortId(cohortAnnotationDefinition.getCohortId())
+                            .columnName(cohortAnnotationDefinition.getName())
+                            .annotationType(cohortAnnotationDefinition.getAnnotationType());
                 }
             };
 
@@ -56,13 +71,10 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        request.setCohortId(cohortId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                new org.pmiops.workbench.db.model.CohortAnnotationDefinition();
-        cohortAnnotationDefinition.annotationType(request.getAnnotationType());
-        cohortAnnotationDefinition.cohortId(cohortId);
-        cohortAnnotationDefinition.columnName(request.getName());
-        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        cohortAnnotationDefinitionDao.save(FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request));
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
