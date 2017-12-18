@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
 
 import {
+  CohortReview,
   CohortReviewService,
   CohortStatus,
   ModifyCohortStatusRequest,
@@ -46,16 +47,15 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription = this.state.participant.subscribe(
-      participant => this.participant = participant
-    );
+    this.subscription = this.state.participant$
+      .subscribe(participant => this.participant = participant);
 
-    const participantId = this.state.participant
+    const participantId = this.state.participant$
       .filter(participant => participant !== null)
       .map(participant => participant.participantId);
 
     const statusChanger = this.statusControl.valueChanges
-      .withLatestFrom(participantId, this.state.context)
+      .withLatestFrom(participantId, this.state.context$)
       .switchMap(this._callApi)
       .subscribe(this._emit);
 
@@ -69,9 +69,10 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   private _emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
     this.state.participant.next(newStatus);
-    this.state.review
+
+    this.state.review$
       .take(1)
-      .map(review => {
+      .map((review: CohortReview) => {
         const index = review.participantCohortStatuses.findIndex(
           ({participantId}) => participantId === newStatus.participantId
         );
@@ -80,7 +81,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
         }
         return review;
       })
-      .subscribe(this.state.review);
+      .subscribe(r => this.state.review.next(r));
   }
 
   private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {

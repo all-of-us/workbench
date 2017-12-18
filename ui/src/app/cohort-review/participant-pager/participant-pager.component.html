@@ -1,0 +1,50 @@
+<div>
+  <a *ngFor="let participant of participants"
+    (click)="onSelect(participant)"
+    [routerLink]="[participant.participantId]"
+    routerLinkActive="active">
+    {{ participant.participantId}}
+    <span class="label"
+      [ngClass]="statusClass(participant.status)">
+      {{ statusText(participant.status) }}
+    </span>
+  </a>
+  <hr />
+  <div class="btn-group-wrapper">
+    <div class="btn-group">
+      <button
+        class="btn btn-icon"
+        (click)="goToPage(0)"
+        [disabled]="page === 0">
+        <clr-icon shape="angle-double" dir="left"></clr-icon>
+      </button>
+
+      <button
+        class="btn btn-icon"
+        (click)="goToPage(page - 1)"
+        [disabled]="page === 0">
+        <clr-icon shape="angle" dir="left"></clr-icon>
+      </button>
+
+      <button
+        class="btn btn-icon"
+        disabled >
+        {{ page + 1 }} of {{ lastPage + 1 }}
+      </button>
+
+      <button
+        class="btn btn-icon"
+        (click)="goToPage(page + 1)"
+        [disabled]="page === lastPage">
+        <clr-icon shape="angle" dir="right"></clr-icon>
+      </button>
+
+      <button
+        class="btn btn-icon"
+        (click)="goToPage(lastPage)"
+        [disabled]="page === lastPage">
+        <clr-icon shape="angle-double" dir="right"></clr-icon>
+      </button>
+    </div>
+  </div>
+</div>

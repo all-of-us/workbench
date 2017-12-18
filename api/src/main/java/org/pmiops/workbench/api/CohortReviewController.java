@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     public static final String STATUS = "status";
     public static final String PARTICIPANT_ID = "participantKey.participantId";
     public static final Integer PAGE = 0;
-    public static final Integer LIMIT = 25;
+    public static final Integer PAGE_SIZE = 25;
     public static final Integer MAX_REVIEW_SIZE = 10000;
 
     private CohortReviewDao cohortReviewDao;
@@ -169,7 +170,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .reviewStatus(ReviewStatus.CREATED);
         List<ParticipantCohortStatus> paginatedPCS = participantCohortStatuses
                 .stream()
-                .limit(LIMIT)
+                .limit(PAGE_SIZE)
                 .collect(Collectors.toList());
 
         cohortReviewDao.save(cohortReview);
@@ -177,6 +178,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview);
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+
+        responseReview.setPage(PAGE);
+        responseReview.setPageSize(PAGE_SIZE);
+        responseReview.setSortOrder("ASC");
+        responseReview.setSortColumn(PARTICIPANT_ID);
 
         return ResponseEntity.ok(responseReview);
     }
@@ -218,14 +224,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     /**
      * Get all participants for the specified cohortId and cdrVersionId. This endpoint does pagination
-     * based on page, limit, order and column.
+     * based on page, pageSize, sortOrder and sortColumn.
      *
      * @param cohortId
      * @param cdrVersionId
      * @param page
-     * @param limit
-     * @param order
-     * @param column
+     * @param pageSize
+     * @param sortOrder
+     * @param sortColumn
      * @return
      */
     @Override
@@ -235,9 +241,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                  Long cohortId,
                                  Long cdrVersionId,
                                  Integer page,
-                                 Integer limit,
-                                 String order,
-                                 String column) {
+                                 Integer pageSize,
+                                 String sortOrder,
+                                 String sortColumn) {
 
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
@@ -269,16 +275,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
-        int limitParam = Optional.ofNullable(limit).orElse(LIMIT);
-        Sort.Direction orderParam = Sort.Direction.fromString(Optional.ofNullable(order)
+        int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
+        Sort.Direction orderParam = Sort.Direction.fromString(Optional.ofNullable(sortOrder)
                 .filter(o -> o.equalsIgnoreCase("DESC")).orElse("ASC"));
-        String columnParam = Optional.ofNullable(column)
+        String columnParam = Optional.ofNullable(sortColumn)
                 .filter(o -> o.equalsIgnoreCase(STATUS)).orElse(PARTICIPANT_ID);
 
         final Sort sort = (columnParam.equals(PARTICIPANT_ID))
                 ? new Sort(orderParam, columnParam)
                 : new Sort(orderParam, columnParam, PARTICIPANT_ID);
-        final PageRequest pageRequest = new PageRequest(pageParam, limitParam, sort);
+        final PageRequest pageRequest = new PageRequest(pageParam, pageSizeParam, sort);
 
         final List<ParticipantCohortStatus> participantCohortStatuses =
                 participantCohortStatusDao.findByParticipantKey_CohortReviewId(
@@ -288,6 +294,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview);
         responseReview.setParticipantCohortStatuses(participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+
+        responseReview.setPage(pageParam);
+        responseReview.setPageSize(pageSizeParam);
+        responseReview.setSortOrder(orderParam.toString());
+        responseReview.setSortColumn(columnParam);
 
         return ResponseEntity.ok(responseReview);
     }

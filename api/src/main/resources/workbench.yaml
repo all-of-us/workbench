@@ -820,17 +820,17 @@ paths:
           required: false
           description: specific page (default is 0)
         - in: query
-          name: limit
+          name: pageSize
           type: integer
           required: false
           description: page size of results (default is 25)
         - in: query
-          name: order
+          name: sortOrder
           type: string
           required: false
           description: sort order (default is 'asc')
         - in: query
-          name: column
+          name: sortColumn
           type: string
           required: false
           description: column to sort (default is 'participantId', can also be 'status')
@@ -2201,6 +2201,15 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantCohortStatus"
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sortOrder:
+        type: string
+      sortColumn:
+        type: string
+
 
   ParticipantCohortStatus:
     type: object
