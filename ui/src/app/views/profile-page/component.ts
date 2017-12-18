@@ -3,7 +3,7 @@ import {Comparator, StringFilter} from 'clarity-angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {BlockscoreVerificationStatus, Profile, ProfileService} from 'generated';
+import {Profile, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -11,7 +11,7 @@ import {BlockscoreVerificationStatus, Profile, ProfileService} from 'generated';
 })
 export class ProfilePageComponent implements OnInit {
   verifiedStatusIsLoaded: boolean;
-  verifiedStatus: BlockscoreVerificationStatus;
+  verifiedStatusIsValid: boolean;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
@@ -24,8 +24,9 @@ export class ProfilePageComponent implements OnInit {
   }
 
   getVerifiedStatus(): void {
-    this.profileService.getMe().subscribe((profile: Profile) => {
-      this.verifiedStatus = profile.blockscoreVerificationStatus;
+    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
+        (profile: Profile) => {
+      this.verifiedStatusIsValid = profile.blockscoreVerificationIsValid;
       this.verifiedStatusIsLoaded = true;
     });
   }
