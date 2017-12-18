@@ -21,9 +21,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
      */
     private static final Function<org.pmiops.workbench.db.model.CohortAnnotationDefinition, CohortAnnotationDefinition>
             TO_CLIENT_COHORT_ANNOTATION_DEFINITION =
-            new Function<org.pmiops.workbench.db.model.CohortAnnotationDefinition, org.pmiops.workbench.model.CohortAnnotationDefinition>() {
+            new Function<org.pmiops.workbench.db.model.CohortAnnotationDefinition, CohortAnnotationDefinition>() {
                 @Override
-                public org.pmiops.workbench.model.CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
+                public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
                             .name(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
