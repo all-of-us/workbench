@@ -90,7 +90,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -107,7 +107,7 @@ public class CohortReviewControllerTest {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
 
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -128,7 +128,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -165,7 +165,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verifyNoMoreInteractions(cohortReviewDao, cohortDao, bigQueryService, participantCounter, workspaceService);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -207,6 +207,8 @@ public class CohortReviewControllerTest {
 
         cohort.setCriteria(definition);
 
+        SearchRequest searchRequest = new Gson().fromJson(definition, SearchRequest.class);
+
         SearchRequest request = new Gson().fromJson(definition, SearchRequest.class);
         QueryResult queryResult = mock(QueryResult.class);
         Iterable testIterable = new Iterable() {
@@ -223,6 +225,8 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+        doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
+        doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -236,6 +240,8 @@ public class CohortReviewControllerTest {
         verify(cohortReviewDao, times(1)).findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
+        verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
+        verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
         verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -243,7 +249,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -253,17 +259,17 @@ public class CohortReviewControllerTest {
         long cohortId = 1L;
         long cdrVersionId = 1L;
         int page = 1;
-        int limit = 22;
-        String order = "desc";
-        String column = "status";
+        int pageSize = 22;
+        String sortOrder = "desc";
+        String sortColumn = "status";
 
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, null, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, limit, null, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, order, null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null, null, column);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, "participantId");
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, "participantId");
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     null,      sortColumn);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     sortOrder, null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, pageSize, null,      null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, null,     null,      null);
+        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,     null,      null);
     }
 
     @Test
@@ -292,7 +298,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -332,7 +338,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -375,7 +381,7 @@ public class CohortReviewControllerTest {
         verify(workspaceService, times(1)).getRequired(workspaceNamespace, workspaceName);
         verify(cohortReviewDao, times(1))
                 .findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -427,7 +433,7 @@ public class CohortReviewControllerTest {
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -488,7 +494,7 @@ public class CohortReviewControllerTest {
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
         verify(cohortReviewDao, times(1)).save(isA(CohortReview.class));
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
+        verifyNoMoreMockInteractions();
     }
 
     private void assertFindByCohortIdAndCdrVersionId(String namespace,
@@ -496,13 +502,13 @@ public class CohortReviewControllerTest {
                                                      long cohortId,
                                                      long cdrVersionId,
                                                      Integer page,
-                                                     Integer limit,
-                                                     String order,
-                                                     String column) {
+                                                     Integer pageSize,
+                                                     String sortOrder,
+                                                     String sortColumn) {
         Integer pageParam = page == null ? 0 : page;
-        Integer limitParam = limit == null ? 25 : limit;
-        Sort.Direction orderParam = (order == null || order.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        String columnParam = (column == null || column.equals("participantId")) ? "participantKey.participantId" : column;
+        Integer pageSizeParam = pageSize == null ? 25 : pageSize;
+        Sort.Direction orderParam = (sortOrder == null || sortOrder.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
@@ -511,6 +517,7 @@ public class CohortReviewControllerTest {
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED);
+
         org.pmiops.workbench.model.CohortReview respCohortReview =
                 new org.pmiops.workbench.model.CohortReview()
                 .cohortReviewId(1L)
@@ -519,6 +526,10 @@ public class CohortReviewControllerTest {
                         .matchedParticipantCount(1000L)
                         .reviewedCount(0L)
                         .reviewSize(200L)
+                        .page(pageParam)
+                        .pageSize(pageSizeParam)
+                        .sortOrder(orderParam.toString())
+                        .sortColumn(columnParam)
                 .participantCohortStatuses(Arrays.asList(respParticipant));
 
         List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
@@ -540,11 +551,11 @@ public class CohortReviewControllerTest {
         when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
                 cohortId,
-                new PageRequest(pageParam, limitParam, sort)))
+                new PageRequest(pageParam, pageSizeParam, sort)))
                 .thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, limit, order, column);
+                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
@@ -554,8 +565,12 @@ public class CohortReviewControllerTest {
         verify(participantCohortStatusDao, times(1))
                 .findByParticipantKey_CohortReviewId(
                         cohortId,
-                        new PageRequest(pageParam, limitParam, sort));
-        verifyNoMoreInteractions(participantCohortStatusDao);
+                        new PageRequest(pageParam, pageSizeParam, sort));
+        verifyNoMoreMockInteractions();
+    }
+
+    private void verifyNoMoreMockInteractions() {
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter, codeDomainLookupService);
     }
 
 }

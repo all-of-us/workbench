@@ -20,4 +20,9 @@ export class ReviewStateService {
   cohort = new ReplaySubject<Cohort>(1);
   participant = new ReplaySubject<ParticipantCohortStatus | null>(1);
   context = new ReplaySubject<RouteContext>(1);
+
+  review$ = this.review.asObservable();
+  cohort$ = this.cohort.asObservable();
+  participant$ = this.participant.asObservable();
+  context$ = this.context.asObservable();
 }
