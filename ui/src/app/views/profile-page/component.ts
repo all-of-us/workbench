@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {Comparator, StringFilter} from 'clarity-angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';

@@ -1,10 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from 'clarity-angular';
+import {Router} from '@angular/router';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {SignInService} from 'app/services/sign-in.service';
-import {ProfileService, IdVerificationRequest} from 'generated';
+import {IdVerificationRequest, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -20,20 +17,17 @@ export class IdVerificationPageComponent implements OnInit {
   state: string;
   zip: string;
   dob: string;
-  documentType: string = "";
+  documentType = '';
   documentNumber: string;
 
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private router: Router,
-      private route: ActivatedRoute,
-      private signInService: SignInService,
   ) {}
 
   ngOnInit(): void {
     this.request = {
-      firstName: "", lastName: "",
+      firstName: '', lastName: '',
       streetLine1: '', streetLine2: '', city: '', state: '', zip: '',
       dob: '',
       documentType: '', documentNumber: ''
