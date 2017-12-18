@@ -275,6 +275,14 @@ tasks.withType(Test) {
   }
 }
 
+test {
+  // Starting with a smaller minimum seems to help this task use memory more slowly. When Gradle
+  // runs out of memory, it fails with this message:
+  //   Process 'Gradle Test Executor 1' finished with non-zero exit value 137
+  // and literally nothing else in terms of helpful debugging information.
+  minHeapSize = '128m'
+}
+
 integration {
   // These tests should always run when requested since they consume and produce side-effects.
   outputs.upToDateWhen { false }
