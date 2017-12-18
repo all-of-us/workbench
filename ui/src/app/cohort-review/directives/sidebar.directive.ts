@@ -27,10 +27,10 @@ export class SidebarDirective implements OnInit {
     'height': '100%',
     'width': '0',
     'position': 'absolute',
-    'z-index': '2',
+    'z-index': '1',
     'background-color': 'rgb(250, 250, 250)',
     'overflow-x': 'hidden',
-    'padding-top': '60px',
+    'padding-top': '1rem',
     'transition': '0.5s',
   };
 

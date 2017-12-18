@@ -3,15 +3,7 @@
   <div appSidebar
     #participantNav="appSidebar">
     <a class="closebtn" (click)="participantNav.close()">&times;</a>
-    <a (click)="participantNav.close(); state.participant.next(null)"
-      routerLink="overview"
-      routerLinkActive="active">
-      Overview
-    </a>
-    <hr />
-    <app-participant-pager
-      (onSelection)="participantNav.close()">
-    </app-participant-pager>
+    <app-participant-pager></app-participant-pager>
   </div>
 
   <!-- Annotations & Status sidebar -->
@@ -28,14 +20,8 @@
   <div class="cohort-review-main"
     [style.margin-left]="participantNav.isOpen ? '300px' : 0"
     [style.margin-right]="statusBar.isOpen ? '300px' : 0">
-    <button #navBtn
-      (click)="participantNav.toggle(); $event.stopPropagation()">
-      Subjects
-    </button>
-    <button #statusBtn
-      (click)="statusBar.toggle(); $event.stopPropagation()">
-      Status
-    </button>
+    <button (click)="participantNav.toggle()">Subjects</button>
+    <button (click)="statusBar.toggle()">Status</button>
     <router-outlet></router-outlet>
   </div>
 
