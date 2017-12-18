@@ -79,17 +79,27 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     }
 
     @Override
-    public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId) {
+    public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(String workspaceNamespace,
+                                                                          String workspaceId,
+                                                                          Long cohortId,
+                                                                          Long annotationDefinitionId) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
     }
 
     @Override
-    public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace, String workspaceId, Long cohortId) {
+    public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
+                                                                                                 String workspaceId,
+                                                                                                 Long cohortId) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinitionListResponse());
     }
 
     @Override
-    public ResponseEntity<CohortAnnotationDefinition> updateCohortAnnotationDefinition(String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId, ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
+    public ResponseEntity<CohortAnnotationDefinition>
+    updateCohortAnnotationDefinition(String workspaceNamespace,
+                                     String workspaceId,
+                                     Long cohortId,
+                                     Long annotationDefinitionId,
+                                     ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
     }
 
