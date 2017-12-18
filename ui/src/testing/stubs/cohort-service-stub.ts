@@ -4,11 +4,11 @@ import {Cohort, CohortListResponse, Workspace} from 'generated';
 
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-export let DEFAULT_COHORT_ID = '1';
+export let DEFAULT_COHORT_ID = 1;
 
 
 class CohortStub implements Cohort {
-  id?: string;
+  id?: number;
 
   name: string;
 
@@ -41,6 +41,9 @@ class CohortStub implements Cohort {
 
 
 export class CohortsServiceStub {
+  public workspaces: Workspace[];
+  public cohorts: CohortStub[];
+
   constructor() {
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
@@ -48,23 +51,24 @@ export class CohortsServiceStub {
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
     };
 
-    const exampleCohort: CohortStub = {id: '',
-      name: '', description: '', criteria: '', type: '',
-      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID};
-    exampleCohort.id = DEFAULT_COHORT_ID;
-    exampleCohort.name = 'sample name';
-    exampleCohort.description = 'sample description';
-    exampleCohort.creationTime = new Date().getTime();
-    exampleCohort.lastModifiedTime = new Date().getTime();
+    const exampleCohort: CohortStub = {
+      id: DEFAULT_COHORT_ID,
+      name: 'sample name',
+      description: 'sample description',
+      criteria: '',
+      type: '',
+      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      creationTime: new Date().getTime(),
+      lastModifiedTime: new Date().getTime(),
+    };
     this.cohorts = [exampleCohort];
     this.workspaces = [stubWorkspace];
   }
-  public workspaces: Workspace[];
-  public cohorts: CohortStub[];
+
   public getCohort(
       wsNamespace: string,
       wsId: string,
-      cId: string): Observable<Cohort> {
+      cId: number): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {
         observer.next(this.cohorts.find(function(cohort: CohortStub) {
@@ -81,7 +85,7 @@ export class CohortsServiceStub {
   public updateCohort(
       wsNamespace: string,
       wsId: string,
-      cId: string,
+      cId: number,
       newCohort: Cohort): Observable<Cohort> {
     const observable = new Observable(observer => {
       setTimeout(() => {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IConcept } from '../ConceptClasses';
+import { Concept } from '../ConceptClasses';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class SearchComponent {
   routeId: string;
   colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4'];
   loading = true;
-  clickedConcept: IConcept;
+  clickedConcept: Concept;
   toggleTree: boolean;
   vocabulary_id: string;
   savedSearchString: string;

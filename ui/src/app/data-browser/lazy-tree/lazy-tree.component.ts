@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {IConcept} from '../ConceptClasses';
+import {Concept} from '../ConceptClasses';
 import { TreeService } from '../services/tree.service';
 @Component({
   selector: 'app-lazy-tree',
@@ -8,7 +8,7 @@ import { TreeService } from '../services/tree.service';
 })
 export class LazyTreeComponent implements OnInit {
   routeId;
-  tree_nodes: IConcept[] = [];
+  tree_nodes: Concept[] = [];
   loading: boolean;
   // Route domain map -- todo , these can be more than one eventually
   routeDomain = {
@@ -20,11 +20,11 @@ export class LazyTreeComponent implements OnInit {
   pageDomainId = null;
 
   @Input() vocabularyId;
-  @Input() parent: IConcept;
+  @Input() parent: Concept;
   @Output() conceptEmit = new EventEmitter;
 
   // Function to return true if we can expand this
-  canExpand(item: IConcept) {
+  canExpand(item: Concept) {
     if (item.is_group) {
       return true;
     }
@@ -35,7 +35,7 @@ export class LazyTreeComponent implements OnInit {
   }
 
   // Function to return true if we can click this
-  canClick(item: IConcept) {
+  canClick(item: Concept) {
     if (item.is_selectable) {
       return true;
     }

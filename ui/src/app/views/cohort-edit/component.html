@@ -12,15 +12,7 @@
     </textarea>
   </div>
   <div class="button">
-    <div *ngIf="adding; else saveButton">
-      <button class="btn add-button" [clrLoading]="buttonClicked" (click)="addCohort()">Add Cohort</button>
-      <button class="btn" (click)="cancelAdd()">Cancel</button>
-    </div>
-    <ng-template #saveButton>
-      <div>
-        <button class="btn save-button" [clrLoading]="buttonClicked" (click)="saveCohort()">Save Cohort</button>
-        <button class="btn" (click)="cancelSave()">Cancel</button>
-      </div>
-    </ng-template>
+    <button class="btn save-button" [clrLoading]="loading" (click)="save()">Save Cohort</button>
+    <button class="btn" (click)="cancel()">Cancel</button>
   </div>
 </div>

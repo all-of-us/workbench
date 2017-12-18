@@ -1,37 +1,14 @@
-/* Structural Styles */
-.cohort-review-wrapper {
-  background-color: rgb(250, 250, 250);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.subject-nav {
-  height: 100%;
-  width: 0;
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  background-color: rgb(250, 250, 250);
-  overflow-x: hidden;
-  padding-top: 60px;
-  transition: 0.5s;
-}
-
-.subject-nav-open {
-  width: 300px;
-  border: 1px solid rgb(86, 86, 86);
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
-
 .cohort-review-main {
   transition: margin-left .5s;
 }
 
+.status-wrapper {
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+}
+
 /* Link styles */
-.subject-nav a {
+[appSidebar] a {
   padding: .25rem .25rem .25rem 1.25rem;
   text-decoration: none;
   font-size: 1rem;
@@ -45,11 +22,11 @@
   transition: 0.3s;
 }
 
-.subject-nav a:hover:not(.closebtn) {
+[appSidebar] a:hover:not(.closebtn) {
   background-color: rgb(238, 238, 238);
 }
 
-.subject-nav .closebtn {
+[appSidebar] .closebtn {
   position: absolute;
   top: 0;
   right: 1rem;
@@ -58,7 +35,7 @@
   color: rgb(86, 86, 86);
 }
 
-.subject-nav .closebtn:hover {
+[appSidebar] .closebtn:hover {
   color: rgb(166, 166, 166);
 }
 

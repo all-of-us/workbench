@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -21,7 +20,6 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CreateCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -55,9 +53,6 @@ public class CohortReviewControllerTest {
 
     @Mock
     CohortDao cohortDao;
-
-    @Mock
-    CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
 
     @Mock
     BigQueryService bigQueryService;
@@ -248,62 +243,6 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewDao, times(1)).save(cohortReviewAfter);
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void createCohortAnnotationDefinition_BadCohortId() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long cdrVersionId = 1;
-
-        CreateCohortAnnotationDefinitionRequest request = new CreateCohortAnnotationDefinitionRequest();
-
-        when(cohortDao.findOne(cohortId)).thenReturn(null);
-
-        try {
-            reviewController.createCohortAnnotationDefinition(namespace, name, cohortId, cdrVersionId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void createCohortAnnotationDefinition_BadWorkspace() throws Exception {
-        String namespace = "aou-test";
-        String name = "test";
-        long cohortId = 1;
-        long cdrVersionId = 1;
-
-        Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1);
-
-        Workspace workspace = new Workspace();
-        workspace.setWorkspaceId(0);
-        workspace.setWorkspaceNamespace(namespace);
-        workspace.setFirecloudName(name);
-
-        CreateCohortAnnotationDefinitionRequest request = new CreateCohortAnnotationDefinitionRequest();
-
-        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-
-        try {
-            reviewController.createCohortAnnotationDefinition(namespace, name, cohortId, cdrVersionId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort exists for cohortId: " + cohortId, e.getMessage());
-        }
-
-        verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService, times(1)).getRequired(namespace, name);
-
         verifyNoMoreMockInteractions();
     }
 
@@ -620,7 +559,7 @@ public class CohortReviewControllerTest {
     }
 
     private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter, cohortAnnotationDefinitionDao);
+        verifyNoMoreInteractions(cohortReviewDao, bigQueryService, workspaceService, participantCounter);
     }
 
 }

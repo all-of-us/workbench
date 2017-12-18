@@ -1,0 +1,54 @@
+<div class="form-group">
+  <label>Participant {{ participant?.participantId }} Review Status</label>
+  <span [style.margin-left]="'0.25rem'">
+    <div *ngIf="changingStatus" class="spinner spinner-inline">Loading...</div>
+    <ng-container *ngIf="!changingStatus">
+      <clr-icon
+        *ngIf="statusControl.enabled"
+        shape="success-standard"
+        class="is-success">
+      </clr-icon>
+      <clr-icon
+        *ngIf="statusControl.disabled"
+        shape="warning-standard"
+        class="is-warning">
+      </clr-icon>
+    </ng-container>
+  </span>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-included-status"
+      [checked]="participant?.status === CohortStatus.INCLUDED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.INCLUDED">
+    <label for="participant-included-status">Include</label>
+  </div>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-excluded-status"
+      [checked]="participant?.status === CohortStatus.EXCLUDED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.EXCLUDED">
+    <label for="participant-excluded-status">Exclude</label>
+  </div>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-needs-further-review"
+      [checked]="participant?.status === CohortStatus.NEEDSFURTHERREVIEW"
+      [formControl]="statusControl"
+      [value]="CohortStatus.NEEDSFURTHERREVIEW">
+    <label for="participant-needs-further-review">Needs Further Review</label>
+  </div>
+  <div class="radio" [class.disable]="statusControl.disabled">
+    <input type="radio"
+      name="statusControl"
+      id="participant-unreviewed"
+      [checked]="participant?.status === CohortStatus.NOTREVIEWED"
+      [formControl]="statusControl"
+      [value]="CohortStatus.NOTREVIEWED">
+    <label for="participant-unreviewed">Unreviewed</label>
+  </div>
+</div>

@@ -1,53 +1,69 @@
-// Based on the URL mapping in "routes" below, the RouterModule attaches
-// UI Components to the <router-outlet> element in the main AppComponent.
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CohortEditComponent} from 'app/views/cohort-edit/component';
-import {HomePageComponent} from 'app/views/home-page/component';
-import {ReviewComponent} from 'app/views/review/component';
+import {HomeComponent} from './data-browser/home/home.component';
+import {SearchComponent} from './data-browser/search/search.component';
 
-import {WorkspaceEditComponent} from 'app/views/workspace-edit/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {CohortResolver} from './guards/cohort-resolver.guard';
 
-import { HomeComponent } from 'app/data-browser/home/home.component';
-import { SearchComponent } from 'app/data-browser/search/search.component';
+import {CohortEditComponent} from './views/cohort-edit/component';
+import {HomePageComponent} from './views/home-page/component';
+import {ReviewComponent} from './views/review/component';
+import {WorkspaceEditComponent} from './views/workspace-edit/component';
+import {WorkspaceShareComponent} from './views/workspace-share/component';
+import {WorkspaceComponent} from './views/workspace/component';
 
-
+/*
+ * Both of these symbols (the resolver and the route list), which have no
+ * relevance outside this module, MUST be exported. See
+ * https://github.com/angular/angular-cli/issues/3707#issuecomment-332498738
+ */
 const routes: Routes = [
-  {path: '', component: HomePageComponent, data: {title: 'View Workspaces'}},
-  {path: 'workspace/:ns/:wsid',
-          component: WorkspaceComponent,
-          data: {title: 'View Workspace Details'}},
-  {path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
-          component: CohortEditComponent,
-          data: {title: 'Edit Cohort', adding: false}},
-  {path: 'workspace/:ns/:wsid/cohorts/create',
-          component: CohortEditComponent,
-          data: {title: 'Create Cohort', adding: true}},
-  {path: 'workspace/build',
-          component: WorkspaceEditComponent,
-          data: {title: 'Create Workspace', adding: true}},
-  {path: 'workspace/:ns/:wsid/edit',
-          component: WorkspaceEditComponent,
-          data: {title: 'Edit Workspace', adding: false}},
-  {path: 'review',
-          component: ReviewComponent,
-          data: {title: 'Review Research Purposes'}},
-  {path: 'workspace/:ns/:wsid/share',
-          component: WorkspaceShareComponent,
-          data: {title: 'Share Workspace'}},
-    {path: 'data-browser/home',
-        component: HomeComponent,
-        data: {title: 'Data Browser'}},
-    {path: 'data-browser/browse',
-        component: SearchComponent,
-        data: {title: 'Browse'}}
+  {
+    path: '',
+    component: HomePageComponent,
+    data: {title: 'View Workspaces'}
+  }, {
+    path: 'workspace/:ns/:wsid',
+    component: WorkspaceComponent,
+    data: {title: 'View Workspace Details'}
+  }, {
+    path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
+    component: CohortEditComponent,
+    data: {title: 'Edit Cohort'},
+    resolve: {
+      cohort: CohortResolver
+    }
+  }, {
+    path: 'workspace/build',
+    component: WorkspaceEditComponent,
+    data: {title: 'Create Workspace', adding: true}
+  }, {
+    path: 'workspace/:ns/:wsid/edit',
+    component: WorkspaceEditComponent,
+    data: {title: 'Edit Workspace', adding: false}
+  }, {
+    path: 'review',
+    component: ReviewComponent,
+    data: {title: 'Review Research Purposes'}
+  }, {
+    path: 'workspace/:ns/:wsid/share',
+    component: WorkspaceShareComponent,
+    data: {title: 'Share Workspace'}
+  }, {
+    path: 'data-browser/home',
+    component: HomeComponent,
+    data: {title: 'Data Browser'}
+  }, {
+    path: 'data-browser/browse',
+    component: SearchComponent,
+    data: {title: 'Browse'}
+  }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [CohortResolver],
 })
 export class AppRoutingModule {}

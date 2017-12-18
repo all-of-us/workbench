@@ -4,15 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.List;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -33,6 +24,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.List;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortsController implements CohortsApiDelegate {
@@ -57,7 +58,7 @@ public class CohortsController implements CohortsApiDelegate {
               .creationTime(cohort.getCreationTime().getTime())
               .criteria(cohort.getCriteria())
               .description(cohort.getDescription())
-              .id(String.valueOf(cohort.getCohortId()))
+              .id(cohort.getCohortId())
               .name(cohort.getName())
               .type(cohort.getType());
           if (cohort.getCreator() != null) {
@@ -121,7 +122,7 @@ public class CohortsController implements CohortsApiDelegate {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
       throw new BadRequestException(String.format(
-          "Cohort \"/%s/%s/%s\" already exists.",
+          "Cohort \"/%s/%s/%d\" already exists.",
           workspaceNamespace, workspaceId, dbCohort.getCohortId()));
     }
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
@@ -129,7 +130,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(String workspaceNamespace, String workspaceId,
-      String cohortId) {
+      Long cohortId) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     cohortDao.delete(dbCohort);
@@ -138,7 +139,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> getCohort(String workspaceNamespace, String workspaceId,
-      String cohortId) {
+      Long cohortId) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
@@ -158,7 +159,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<Cohort> updateCohort(String workspaceNamespace, String workspaceId,
-      String cohortId, Cohort cohort) {
+      Long cohortId, Cohort cohort) {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     if(Strings.isNullOrEmpty(cohort.getEtag())) {
@@ -245,23 +246,15 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,
-      String workspaceId, String cohortId) {
+      String workspaceId, Long cohortId) {
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.db.model.Cohort cohort =
-        cohortDao.findOne(convertCohortId(cohortId));
+        cohortDao.findOne(cohortId);
     if (cohort == null) {
       throw new NotFoundException(String.format(
           "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }
     return cohort;
-  }
-
-  private static long convertCohortId(String cohortId) {
-    try {
-      return Long.parseLong(cohortId);
-    } catch (NumberFormatException e) {
-      throw new BadRequestException(String.format("Invalid cohort ID: %s", cohortId));
-    }
   }
 }
