@@ -21,7 +21,6 @@ interface Position {
 export class SidebarDirective implements OnInit {
 
   @Input() position: Position = {top: 0, left: 0};
-  @Input() controller: HTMLElement;
   private _open = false;
 
   readonly styles: Object = {
@@ -78,13 +77,8 @@ export class SidebarDirective implements OnInit {
     this._open = false;
   }
 
-  @HostListener('document:click', ['$event'])
-  onClick(event) {
-    const inSidebar = this.element.nativeElement.contains(event.target);
-    const inController = this.controller.contains(event.target);
-    if (this._open && !(inSidebar || inController)) {
-      this.close();
-    }
+  toggle() {
+    this.isOpen ? this.close() : this.open();
   }
 
   get isOpen() {
