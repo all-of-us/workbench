@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface CohortAnnotationDefinitionDao extends JpaRepository<CohortAnnotationDefinition, Long> {
 
-    CohortAnnotationDefinition findByCohortIdAndAndCohortAnnotationDefinitionId(
+    CohortAnnotationDefinition findByCohortIdAndCohortAnnotationDefinitionId(
             @Param("cohortId") long cohortId,
             @Param("cohortAnnotationDefinitionId") long cohortAnnotationDefinitionId);
 }

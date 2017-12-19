@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 
@@ -79,9 +80,9 @@ public class CohortAnnotationDefinitionControllerTest {
 
         try {
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(namespace, name, cohortId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No workspace matching workspaceNamespace: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No workspace matching workspaceNamespace: "
                     + namespace + ", workspaceId: " + name, e.getMessage());
         }
 
@@ -109,12 +110,12 @@ public class CohortAnnotationDefinitionControllerTest {
 
         CohortAnnotationDefinition request = new CohortAnnotationDefinition();
         request.setAnnotationType(AnnotationType.STRING);
-        request.setName("testing");
+        request.setColumnName("testing");
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
                 new org.pmiops.workbench.db.model.CohortAnnotationDefinition();
         dbCohortAnnotationDefinition.setAnnotationType(request.getAnnotationType());
-        dbCohortAnnotationDefinition.setColumnName(request.getName());
+        dbCohortAnnotationDefinition.setColumnName(request.getColumnName());
         dbCohortAnnotationDefinition.setCohortId(cohortId);
         dbCohortAnnotationDefinition.setCohortAnnotationDefinitionId(annotationDefinitionId);
 
@@ -124,7 +125,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         CohortAnnotationDefinition expectedResponse = new CohortAnnotationDefinition();
         expectedResponse.setAnnotationType(AnnotationType.STRING);
-        expectedResponse.setName("testing");
+        expectedResponse.setColumnName("testing");
         expectedResponse.setCohortId(cohortId);
         expectedResponse.setCohortAnnotationDefinitionId(annotationDefinitionId);
 
@@ -199,9 +200,9 @@ public class CohortAnnotationDefinitionControllerTest {
                     cohortId,
                     annotationDefinitionId,
                     request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No workspace matching workspaceNamespace: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No workspace matching workspaceNamespace: "
                     + namespace + ", workspaceId: " + name, e.getMessage());
         }
 
@@ -231,7 +232,9 @@ public class CohortAnnotationDefinitionControllerTest {
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(null);
+        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+                cohortId,
+                annotationDefinitionId)).thenReturn(null);
 
         try {
             cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
@@ -240,15 +243,17 @@ public class CohortAnnotationDefinitionControllerTest {
                     cohortId,
                     annotationDefinitionId,
                     request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort Annotation Definition exists for annotationDefinitionId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
                     + annotationDefinitionId, e.getMessage());
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
+        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(
+                cohortId,
+                annotationDefinitionId);
 
         verifyNoMoreMockInteractions();
     }
@@ -283,12 +288,14 @@ public class CohortAnnotationDefinitionControllerTest {
                 new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.STRING)
                 .cohortId(cohortId)
-                .name(request.getColumnName())
+                .columnName(request.getColumnName())
                 .cohortAnnotationDefinitionId(annotationDefinitionId);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(definition);
+        when(cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+                cohortId,
+                annotationDefinitionId)).thenReturn(definition);
         when(cohortAnnotationDefinitionDao.save(definition)).thenReturn(definition);
 
         CohortAnnotationDefinition responseDefinition =
@@ -303,7 +310,9 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
+        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndCohortAnnotationDefinitionId(
+                cohortId,
+                annotationDefinitionId);
         verify(cohortAnnotationDefinitionDao, times(1)).save(definition);
 
         verifyNoMoreMockInteractions();

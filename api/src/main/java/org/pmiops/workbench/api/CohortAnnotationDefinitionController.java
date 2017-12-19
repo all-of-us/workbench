@@ -41,9 +41,6 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                             .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
                 }
             };
-    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-    private CohortDao cohortDao;
-    private WorkspaceService workspaceService;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -56,6 +53,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 public CohortAnnotationDefinition apply(
                         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
@@ -70,7 +68,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                             .cohortId(cohortAnnotationDefinition.getCohortId())
-                            .columnName(cohortAnnotationDefinition.getName())
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType());
                 }
             };
@@ -95,7 +93,13 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         request.setCohortId(cohortId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-        cohortAnnotationDefinitionDao.save(FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request));
+                FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request);
+
+        try {
+            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
@@ -122,19 +126,12 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                      Long cohortId,
                                      Long annotationDefinitionId,
                                      ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
-    public ResponseEntity<CohortAnnotationDefinition>
-    updateCohortAnnotationDefinition(String workspaceNamespace,
-                                     String workspaceId,
-                                     Long cohortId,
-                                     Long annotationDefinitionId,
-                                     ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.findByCohortIdAndAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+                cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
 
         if (cohortAnnotationDefinition == null) {
             throw new NotFoundException(
@@ -144,8 +141,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
         cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getColumnName());
 
-        cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        try {
+            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(e.getMessage());
+        }
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }

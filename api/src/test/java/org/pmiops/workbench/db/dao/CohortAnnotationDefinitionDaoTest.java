@@ -43,6 +43,19 @@ public class CohortAnnotationDefinitionDaoTest {
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
     }
 
+    @Test
+    public void findByCohortIdAndAndCohortAnnotationDefinitionId() throws Exception {
+        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
+
+        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
+        CohortAnnotationDefinition actualDefinition = cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
+                cohortAnnotationDefinition.getCohortId(),
+                cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+
+        assertEquals(cohortAnnotationDefinition, actualDefinition);
+    }
+
     private CohortAnnotationDefinition createCohortAnnotationDefinition() {
         return new CohortAnnotationDefinition()
                 .cohortId(COHORT_ID)
