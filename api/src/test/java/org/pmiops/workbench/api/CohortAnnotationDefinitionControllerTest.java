@@ -15,8 +15,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
-
-import static org.junit.Assert.*;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 
 import static org.junit.Assert.assertEquals;
