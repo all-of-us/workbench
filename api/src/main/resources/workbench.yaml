@@ -2291,7 +2291,7 @@ definitions:
     type: object
     required:
       - cohortId
-      - name
+      - columnName
       - annotationType
     properties:
       cohortAnnotationDefinitionId:
@@ -2302,7 +2302,7 @@ definitions:
         type: integer
         format: int64
         description: the cohort id.
-      name:
+      columnName:
         type: string
         description: the name of this annotation.
       annotationType:
@@ -2349,9 +2349,9 @@ definitions:
   ModifyCohortAnnotationDefinitionRequest:
     type: object
     required:
-      - name
+      - columnName
     properties:
-      name:
+      columnName:
         type: string
         description: the name of this annotation.
 

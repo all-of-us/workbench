@@ -6,6 +6,8 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -34,7 +36,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 @Override
                 public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
-                            .name(cohortAnnotationDefinition.getColumnName())
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
                             .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
@@ -48,7 +50,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                             .cohortId(cohortAnnotationDefinition.getCohortId())
-                            .columnName(cohortAnnotationDefinition.getName())
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType());
                 }
             };
@@ -73,7 +75,19 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         request.setCohortId(cohortId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-        cohortAnnotationDefinitionDao.save(FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request));
+                FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request);
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
+                cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                        cohortId,
+                        request.getColumnName());
+
+        if (existingDefinition != null) {
+            throw new ConflictException(String.format("Conflict: Cohort Annotation Definition name exists for: %s",
+                    request.getColumnName()));
+        }
+
+        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
@@ -100,7 +114,40 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                      Long cohortId,
                                      Long annotationDefinitionId,
                                      ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
+        String columnName = modifyCohortAnnotationDefinitionRequest.getColumnName();
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+
+        if (cohortAnnotationDefinition == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
+                            annotationDefinitionId));
+        }
+
+        if (cohortAnnotationDefinition.getCohortId() != cohortId) {
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Annotation Definition doesn't exist for cohortId: %s",
+                            cohortId));
+        }
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
+                cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                        cohortId,
+                        columnName);
+
+        if (existingDefinition != null) {
+            throw new ConflictException(String.format("Conflict: Cohort Annotation Definition name exists for: %s",
+                    columnName));
+        }
+
+        cohortAnnotationDefinition.columnName(columnName);
+        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
+        return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
     private Cohort findCohort(long cohortId) {
@@ -115,8 +162,8 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
         if (workspace.getWorkspaceId() != workspaceId) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
         }
     }
