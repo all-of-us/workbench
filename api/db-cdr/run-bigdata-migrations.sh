@@ -26,14 +26,12 @@ echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 
-
-
     # Download data and import
     REMOTE_DATA_LOC=https://storage.googleapis.com/all-of-us-ehr-dev-peter-speltz
     echo "Importing data files from REMOTE_DATA_LOC"
 
     # Add data files to import here
-    DATA_FILES=("concept.csv", "concept_relationship.csv")
+    DATA_FILES=( concept_relationship.csv)
     DROP_INDEXES_FILE=/tmp/drop_indexes.sql
 
 
@@ -42,7 +40,9 @@ mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREAT
       local_fpath=/tmp/$f
       curl -o $local_fpath "$REMOTE_DATA_LOC/$f"
       db_name=cdr
-      table_name=${f%.csv} #remove .csv
+      table_name="${f%\.csv*}"
+      echo $table_name
+
       # Todo , possibly check download works before truncating
       mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} -e "truncate table $db_name.$table_name"
       # Drop indexes on this table
