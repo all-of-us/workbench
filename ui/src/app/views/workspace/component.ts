@@ -179,7 +179,7 @@ export class WorkspaceComponent implements OnInit {
         }
       });
     });
-    return observable;
+    return <Observable<Cluster>>observable;
   }
 
   cancelCluster(): void {
