@@ -5,7 +5,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -83,7 +83,22 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                                                           String workspaceId,
                                                                           Long cohortId,
                                                                           Long annotationDefinitionId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+
+        if (cohortAnnotationDefinition == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
+                            annotationDefinitionId));
+        }
+
+        cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @Override
@@ -100,14 +115,31 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                      Long cohortId,
                                      Long annotationDefinitionId,
                                      ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+
+        if (cohortAnnotationDefinition == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
+                            annotationDefinitionId));
+        }
+        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getName());
+
+        cohortAnnotationDefinition =
+                cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
+        return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
     private Cohort findCohort(long cohortId) {
         Cohort cohort = cohortDao.findOne(cohortId);
         if (cohort == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort exists for cohortId: %s", cohortId));
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
         }
         return cohort;
     }
@@ -115,8 +147,8 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
         if (workspace.getWorkspaceId() != workspaceId) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
         }
     }
