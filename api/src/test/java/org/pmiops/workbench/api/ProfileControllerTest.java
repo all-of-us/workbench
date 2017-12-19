@@ -3,20 +3,15 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.Billing;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
-import com.mysql.fabric.Server;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -29,11 +24,12 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.*;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -41,7 +37,6 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,16 +111,15 @@ public class ProfileControllerTest {
     userInfo.setFamilyName(FAMILY_NAME);
     userInfo.setGivenName(GIVEN_NAME);
 
+    UserService userService = new UserService(userProvider, userDao, clock);
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
-        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
+        Providers.of(userInfo), userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider,
-        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
+        Providers.of(userInfo), userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
   }
-
-
 
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
@@ -269,21 +263,6 @@ public class ProfileControllerTest {
     profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
-  }
-
-  @Test
-  public void testRegister_noUserBeforeSuccess() throws Exception {
-    when(userProvider.get()).thenReturn(null);
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
-
-    Profile profile = profileController.register(new RegistrationRequest()).getBody();
-    String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
-    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.REGISTERED, TIMESTAMP, projectName, true);
-    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
-
-    verify(fireCloudService).createAllOfUsBillingProject(projectName);
-    verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
   }
 
   @Test
