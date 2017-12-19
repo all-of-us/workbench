@@ -561,9 +561,12 @@ public class CohortAnnotationDefinitionControllerTest {
         workspace.setWorkspaceNamespace(namespace);
         workspace.setFirecloudName(name);
 
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                new org.pmiops.workbench.db.model.CohortAnnotationDefinition().cohortId(cohortId);
+
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(new org.pmiops.workbench.db.model.CohortAnnotationDefinition());
+        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
         doNothing().when(cohortAnnotationDefinitionDao).delete(annotationDefinitionId);
 
         EmptyResponse response = cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
