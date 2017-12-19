@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -105,13 +106,14 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+                cohortAnnotationDefinitionDao.findByCohortIdAndAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
 
         if (cohortAnnotationDefinition == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
                             annotationDefinitionId));
         }
+
         cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getColumnName());
 
         cohortAnnotationDefinition =
@@ -132,8 +134,8 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
         if (workspace.getWorkspaceId() != workspaceId) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
         }
     }
