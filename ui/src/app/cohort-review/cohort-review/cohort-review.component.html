@@ -1,47 +1,30 @@
 <div appFullPage>
   <!-- Main participant navigation sidebar -->
   <div appSidebar
-    #participantNav="appSidebar"
-    [controller]="navBtn">
+    #participantNav="appSidebar">
     <a class="closebtn" (click)="participantNav.close()">&times;</a>
-    <a (click)="participantNav.close(); state.participant.next(null)"
-      routerLink="overview"
-      routerLinkActive="active">
-      Overview
-    </a>
-    <hr />
-    <app-participant-pager
-      (onSelection)="participantNav.close()">
-    </app-participant-pager>
+    <app-participant-pager></app-participant-pager>
   </div>
 
   <!-- Annotations & Status sidebar -->
   <div appSidebar
     #statusBar="appSidebar"
-    [position]="{top: 0, right: 0}"
-    [controller]="statusBtn">
+    [position]="{top: 0, right: 0}">
     <a class="closebtn" (click)="statusBar.close()">&times;</a>
     <div class="status-wrapper">
-      <app-participant-status>
-      </app-participant-status>
+      <app-participant-status></app-participant-status>
     </div>
   </div>
-
-  <!-- Blanket for dimming the background when a sidebar is open -->
-  <div class="blanket" [class.blanket-active]="participantNav.isOpen || statusBar.isOpen"></div>
 
   <!-- Main content area for the Cohort Review Sub-application -->
   <div class="cohort-review-main"
     [style.margin-left]="participantNav.isOpen ? '300px' : 0"
     [style.margin-right]="statusBar.isOpen ? '300px' : 0">
-    <button #navBtn
-      (click)="participantNav.open(); $event.stopPropagation()">
-      Subjects
-    </button>
-    <button #statusBtn
-      (click)="statusBar.open(); $event.stopPropagation()">
-      Status
-    </button>
+    <app-review-header
+      (toggleNav)="participantNav.toggle()"
+      (toggleStatusBar)="statusBar.toggle()"
+      (goToOverview)="statusBar.close()">
+    </app-review-header>
     <router-outlet></router-outlet>
   </div>
 
