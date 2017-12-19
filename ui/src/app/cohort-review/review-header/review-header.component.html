@@ -1,6 +1,7 @@
 <div class="btn-group">
   <button
     class="btn"
+    title="Get an overview of the cohort"
     (click)="state.participant.next(null); goToOverview.emit(true)"
     routerLink="overview"
     routerLinkActive="active">
@@ -10,22 +11,18 @@
 
   <button
     class="btn"
+    title="View all participants"
     (click)="toggleNav.emit(true)">
     <clr-icon shape="users"></clr-icon>
     Participants
   </button>
-
-  <button
-    class="btn"
-    (click)="toggleStatusBar.emit(true)"
-    [disabled]="(state.participant$ | async) === null">
-    <clr-icon shape="info-standard"></clr-icon>
-    <!--
-      TODO (jms) Hover state explaining why this may be disabled;
-      on navigation, automatically close the status sidebar iff open
-    -->
-    Status
-  </button>
 </div>
 
-<!-- TODO (jms) Header Text; basic participant info ? -->
+<button
+  class="btn"
+  title="View or set a participant's status"
+  (click)="toggleStatusBar.emit(true)"
+  [disabled]="(state.participant$ | async) === null">
+  <clr-icon shape="info-standard"></clr-icon>
+  Status
+</button>
