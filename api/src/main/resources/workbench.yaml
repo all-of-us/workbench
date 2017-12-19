@@ -175,7 +175,7 @@ paths:
           description: Request received.
 
   # TODO: add signature / other state?
-  /api/v1/account/terms-of-service:
+  /api/v1/account/accept-terms-of-service:
     post:
       tags:
         - profile
@@ -188,7 +188,7 @@ paths:
             $ref: "#/definitions/Profile"
 
   # TODO: add other state pertaining to ethics training?
-  /api/v1/account/ethics-training:
+  /api/v1/account/complete-ethics-training:
     post:
       tags:
         - profile
@@ -201,7 +201,7 @@ paths:
             $ref: "#/definitions/Profile"
 
   # TODO: add demographic survey response data
-  /api/v1/account/demographic-survey:
+  /api/v1/account/submit-demographic-survey:
     post:
       tags:
         - profile
@@ -1994,6 +1994,18 @@ definitions:
       blockscoreVerificationIsValid:
         type: boolean
         description: Result of verification or null if not yet attempted.
+      termsOfServiceCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
+      ethicsTrainingCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
+      demographicSurveyCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
 
   ErrorResponse:
     type: object

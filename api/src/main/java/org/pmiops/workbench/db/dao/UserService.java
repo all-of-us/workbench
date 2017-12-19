@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
@@ -36,7 +37,7 @@ public class UserService {
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  User updateWithRetries(Function<User, User> userModifier) {
+  private User updateWithRetries(Function<User, User> userModifier) {
     User user = userProvider.get();
     int numAttempts = 0;
     while (true) {
@@ -79,30 +80,33 @@ public class UserService {
   }
 
   public User submitTermsOfService() {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setTermsOfServiceCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        user.setTermsOfServiceCompletionTime(timestamp);
         return user;
       }
     });
   }
 
   public User submitEthicsTraining() {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setEthicsTrainingCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        user.setEthicsTrainingCompletionTime(timestamp);
         return user;
       }
     });
   }
 
   public User submitDemographicSurvey() {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setDemographicSurveyCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        user.setDemographicSurveyCompletionTime(timestamp);
         return user;
       }
     });
