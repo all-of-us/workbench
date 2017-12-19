@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -147,7 +146,6 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
-    @NotNull
     private org.pmiops.workbench.db.model.CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortId, Long annotationDefinitionId) {
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
                 cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
