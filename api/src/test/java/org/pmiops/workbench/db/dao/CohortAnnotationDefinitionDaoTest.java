@@ -44,16 +44,17 @@ public class CohortAnnotationDefinitionDaoTest {
     }
 
     @Test
-    public void findByCohortIdAndAndCohortAnnotationDefinitionId() throws Exception {
+    public void findByCohortIdAndColumnName() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
-        CohortAnnotationDefinition actualDefinition = cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(
-                cohortAnnotationDefinition.getCohortId(),
-                cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+        CohortAnnotationDefinition expectedAnnotationDefinition =
+                cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                        cohortAnnotationDefinition.getCohortId(),
+                        cohortAnnotationDefinition.getColumnName());
 
-        assertEquals(cohortAnnotationDefinition, actualDefinition);
+        assertEquals(expectedAnnotationDefinition, cohortAnnotationDefinition);
     }
 
     private CohortAnnotationDefinition createCohortAnnotationDefinition() {

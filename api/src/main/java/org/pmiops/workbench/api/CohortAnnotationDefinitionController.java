@@ -13,7 +13,6 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,11 +77,17 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
                 FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request);
 
-        try {
-            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(e.getMessage());
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
+                cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                        cohortId,
+                        request.getColumnName());
+
+        if (existingDefinition != null) {
+            throw new ConflictException(String.format("Conflict: Cohort Annotation Definition name exists for: %s",
+                    request.getColumnName()));
         }
+
+        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
@@ -109,12 +114,13 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                      Long cohortId,
                                      Long annotationDefinitionId,
                                      ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
+        String columnName = modifyCohortAnnotationDefinitionRequest.getColumnName();
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
+                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
 
         if (cohortAnnotationDefinition == null) {
             throw new NotFoundException(
@@ -122,13 +128,24 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                             annotationDefinitionId));
         }
 
-        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getColumnName());
-
-        try {
-            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(e.getMessage());
+        if (cohortAnnotationDefinition.getCohortId() != cohortId) {
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Annotation Definition doesn't exist for cohortId: %s",
+                            cohortId));
         }
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
+                cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                        cohortId,
+                        columnName);
+
+        if (existingDefinition != null) {
+            throw new ConflictException(String.format("Conflict: Cohort Annotation Definition name exists for: %s",
+                    columnName));
+        }
+
+        cohortAnnotationDefinition.columnName(columnName);
+        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
