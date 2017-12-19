@@ -34,7 +34,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 @Override
                 public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
-                            .name(cohortAnnotationDefinition.getColumnName())
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
                             .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
@@ -48,7 +48,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
                     return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                             .cohortId(cohortAnnotationDefinition.getCohortId())
-                            .columnName(cohortAnnotationDefinition.getName())
+                            .columnName(cohortAnnotationDefinition.getColumnName())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType());
                 }
             };
@@ -127,7 +127,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                     String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
                             annotationDefinitionId));
         }
-        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getName());
+        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getColumnName());
 
         cohortAnnotationDefinition =
                 cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);

@@ -107,12 +107,12 @@ public class CohortAnnotationDefinitionControllerTest {
 
         CohortAnnotationDefinition request = new CohortAnnotationDefinition();
         request.setAnnotationType(AnnotationType.STRING);
-        request.setName("testing");
+        request.setColumnName("testing");
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
                 new org.pmiops.workbench.db.model.CohortAnnotationDefinition();
         dbCohortAnnotationDefinition.setAnnotationType(request.getAnnotationType());
-        dbCohortAnnotationDefinition.setColumnName(request.getName());
+        dbCohortAnnotationDefinition.setColumnName(request.getColumnName());
         dbCohortAnnotationDefinition.setCohortId(cohortId);
         dbCohortAnnotationDefinition.setCohortAnnotationDefinitionId(annotationDefinitionId);
 
@@ -122,7 +122,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         CohortAnnotationDefinition expectedResponse = new CohortAnnotationDefinition();
         expectedResponse.setAnnotationType(AnnotationType.STRING);
-        expectedResponse.setName("testing");
+        expectedResponse.setColumnName("testing");
         expectedResponse.setCohortId(cohortId);
         expectedResponse.setCohortAnnotationDefinitionId(annotationDefinitionId);
 
@@ -268,7 +268,7 @@ public class CohortAnnotationDefinitionControllerTest {
         workspace.setFirecloudName(name);
 
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setName("new-name");
+        request.setColumnName("new-name");
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
                 new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
@@ -281,7 +281,7 @@ public class CohortAnnotationDefinitionControllerTest {
                 new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.STRING)
                 .cohortId(cohortId)
-                .name(request.getName())
+                .columnName(request.getColumnName())
                 .cohortAnnotationDefinitionId(annotationDefinitionId);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
