@@ -1,4 +1,37 @@
-/* Link styles */
+/* Scaffolding */
+hr {
+  height: 1px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.participant-pager {
+  height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  /* border: 1px solid purple; */
+}
+
+.page-header, .page, .page-footer {
+  margin: .25rem;
+}
+
+.page-header {
+  /* border: 1px solid red; */
+}
+
+.page {
+  flex: 1;
+  /* border: 1px solid blue; */
+}
+
+.page-footer {
+  /* border: 1px solid green; */
+  align-self: center;
+}
+
+/* Links */
 a {
   padding: .25rem .25rem .25rem 1.25rem;
   text-decoration: none;
@@ -13,14 +46,6 @@ a {
   transition: 0.3s;
 }
 
-a:hover:not(.closebtn) {
+a:hover {
   background-color: rgb(238, 238, 238);
-}
-
-.btn-group-wrapper {
-  display: flex;
-}
-
-.btn-group-wrapper > .btn-group {
-  margin: auto;
 }

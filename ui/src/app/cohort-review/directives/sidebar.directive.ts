@@ -1,7 +1,6 @@
 import {
   Directive,
   ElementRef,
-  HostListener,
   Input,
   OnInit,
   Renderer2,
@@ -21,17 +20,16 @@ interface Position {
 export class SidebarDirective implements OnInit {
 
   @Input() position: Position = {top: 0, left: 0};
-  @Input() controller: HTMLElement;
   private _open = false;
 
   readonly styles: Object = {
     'height': '100%',
     'width': '0',
     'position': 'absolute',
-    'z-index': '2',
+    'z-index': '1',
     'background-color': 'rgb(250, 250, 250)',
     'overflow-x': 'hidden',
-    'padding-top': '60px',
+    'padding-top': '1rem',
     'transition': '0.5s',
   };
 
@@ -78,13 +76,8 @@ export class SidebarDirective implements OnInit {
     this._open = false;
   }
 
-  @HostListener('document:click', ['$event'])
-  onClick(event) {
-    const inSidebar = this.element.nativeElement.contains(event.target);
-    const inController = this.controller.contains(event.target);
-    if (this._open && !(inSidebar || inController)) {
-      this.close();
-    }
+  toggle() {
+    this.isOpen ? this.close() : this.open();
   }
 
   get isOpen() {
