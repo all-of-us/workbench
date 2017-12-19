@@ -268,7 +268,7 @@ public class CohortAnnotationDefinitionControllerTest {
         workspace.setFirecloudName(name);
 
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
-        request.setName("new-name");
+        request.setColumnName("new-name");
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
                 new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
@@ -281,7 +281,7 @@ public class CohortAnnotationDefinitionControllerTest {
                 new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.STRING)
                 .cohortId(cohortId)
-                .name(request.getName())
+                .name(request.getColumnName())
                 .cohortAnnotationDefinitionId(annotationDefinitionId);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);

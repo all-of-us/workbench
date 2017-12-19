@@ -112,7 +112,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                     String.format("Invalid Request: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
                             annotationDefinitionId));
         }
-        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getName());
+        cohortAnnotationDefinition.columnName(modifyCohortAnnotationDefinitionRequest.getColumnName());
 
         cohortAnnotationDefinition =
                 cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);

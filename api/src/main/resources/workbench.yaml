@@ -2349,9 +2349,9 @@ definitions:
   ModifyCohortAnnotationDefinitionRequest:
     type: object
     required:
-      - name
+      - columnName
     properties:
-      name:
+      columnName:
         type: string
         description: the name of this annotation.
 
