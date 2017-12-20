@@ -32,11 +32,20 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
-        bigdata {
+        add_bigdata_indexes {
             if (project.hasProperty('contexts')) {
                 contexts contexts
             }
-            changeLogFile "changelog-big-data/db.changelog-master.xml"
+            changeLogFile "changelog-bigdata/db.changelog-add-indexes.xml"
+            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            username "liquibase"
+            password "${liquibase_password}"
+        }
+        drop_bigdata_indexes {
+            if (project.hasProperty('contexts')) {
+                contexts contexts
+            }
+            changeLogFile "changelog-bigdata/db.changelog-drop-indexes.xml"
             url "jdbc:mysql://${db_host}:${db_port}/cdr"
             username "liquibase"
             password "${liquibase_password}"
