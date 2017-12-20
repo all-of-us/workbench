@@ -14,6 +14,6 @@ export class BugReportServiceStub {
         observer.complete();
       }, 0);
     });
-    return observable;
+    return <Observable<BugReport>>observable;
   }
 }
