@@ -8,6 +8,8 @@ import {CohortResolver} from './guards/cohort-resolver.guard';
 
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomePageComponent} from './views/home-page/component';
+import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
@@ -23,6 +25,22 @@ const routes: Routes = [
     path: '',
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
+  }, {
+    path: 'data-browser/home',
+    component: HomeComponent,
+    data: {title: 'Data Browser'}
+  }, {
+    path: 'data-browser/browse',
+    component: SearchComponent,
+    data: {title: 'Browse'}
+  }, {
+    path: 'profile/id-verification',
+    component: IdVerificationPageComponent,
+    data: {title: 'ID Verification'}
+  }, {
+    path: 'profile',
+    component: ProfilePageComponent,
+    data: {title: 'Profile'}
   }, {
     path: 'workspace/:ns/:wsid',
     component: WorkspaceComponent,
@@ -50,14 +68,6 @@ const routes: Routes = [
     path: 'workspace/:ns/:wsid/share',
     component: WorkspaceShareComponent,
     data: {title: 'Share Workspace'}
-  }, {
-    path: 'data-browser/home',
-    component: HomeComponent,
-    data: {title: 'Data Browser'}
-  }, {
-    path: 'data-browser/browse',
-    component: SearchComponent,
-    data: {title: 'Browse'}
   }
 ];
 
