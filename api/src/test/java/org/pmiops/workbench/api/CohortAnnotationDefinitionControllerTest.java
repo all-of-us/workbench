@@ -10,11 +10,11 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 
 import static org.junit.Assert.assertEquals;
@@ -48,9 +48,9 @@ public class CohortAnnotationDefinitionControllerTest {
 
         try {
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(namespace, name, cohortId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort exists for cohortId: " + cohortId, e.getMessage());
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
@@ -228,9 +228,9 @@ public class CohortAnnotationDefinitionControllerTest {
                     cohortId,
                     annotationDefinitionId,
                     request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort exists for cohortId: " + cohortId, e.getMessage());
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
@@ -441,6 +441,146 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
         verify(cohortAnnotationDefinitionDao, times(1)).save(definition);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteCohortAnnotationDefinition_BadCohortId() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
+        long cohortId = 1;
+        long annotationDefinitionId = 1;
+
+        when(cohortDao.findOne(cohortId)).thenReturn(null);
+
+        try {
+            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+                    namespace,
+                    name,
+                    cohortId,
+                    annotationDefinitionId);
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
+        }
+
+        verify(cohortDao, times(1)).findOne(cohortId);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteCohortAnnotationDefinition_BadWorkspace() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
+        long cohortId = 1;
+        long annotationDefinitionId = 1;
+
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(1);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(0);
+        workspace.setWorkspaceNamespace(namespace);
+        workspace.setFirecloudName(name);
+
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+
+        try {
+            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+                    namespace,
+                    name,
+                    cohortId,
+                    annotationDefinitionId);
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No workspace matching workspaceNamespace: "
+                    + namespace + ", workspaceId: " + name, e.getMessage());
+        }
+
+        verify(cohortDao, times(1)).findOne(cohortId);
+        verify(workspaceService, times(1)).getRequired(namespace, name);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
+        long cohortId = 1;
+        long workspaceId = 1;
+        long annotationDefinitionId = 1;
+
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(workspaceId);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
+        workspace.setWorkspaceNamespace(namespace);
+        workspace.setFirecloudName(name);
+
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(null);
+
+        try {
+            cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+                    namespace,
+                    name,
+                    cohortId,
+                    annotationDefinitionId);
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+                    + annotationDefinitionId, e.getMessage());
+        }
+
+        verify(cohortDao, times(1)).findOne(cohortId);
+        verify(workspaceService, times(1)).getRequired(namespace, name);
+        verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteCohortAnnotationDefinition() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
+        long cohortId = 1;
+        long workspaceId = 1;
+        long annotationDefinitionId = 1;
+
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(workspaceId);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
+        workspace.setWorkspaceNamespace(namespace);
+        workspace.setFirecloudName(name);
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                new org.pmiops.workbench.db.model.CohortAnnotationDefinition().cohortId(cohortId);
+
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+        when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
+        when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
+        doNothing().when(cohortAnnotationDefinitionDao).delete(annotationDefinitionId);
+
+        EmptyResponse response = cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+                    namespace,
+                    name,
+                    cohortId,
+                    annotationDefinitionId).getBody();
+
+        assertEquals(new EmptyResponse(), response);
+
+        verify(cohortDao, times(1)).findOne(cohortId);
+        verify(workspaceService, times(1)).getRequired(namespace, name);
+        verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
+        verify(cohortAnnotationDefinitionDao, times(1)).delete(annotationDefinitionId);
 
         verifyNoMoreMockInteractions();
     }

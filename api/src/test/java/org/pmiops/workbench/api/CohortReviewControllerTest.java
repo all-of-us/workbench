@@ -122,9 +122,9 @@ public class CohortReviewControllerTest {
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: Cohort Review does not exist for cohortId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Cohort Review does not exist for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
         }
 
@@ -156,9 +156,9 @@ public class CohortReviewControllerTest {
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort definition matching cohortId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort definition matching cohortId: "
                          + cohortId,
                          e.getMessage());
         }
@@ -292,9 +292,9 @@ public class CohortReviewControllerTest {
                     cdrVersionId,
                     participantId,
                     cohortStatusRequest);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No Cohort exists for cohortId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort exists for cohortId: "
                     + cohortId, e.getMessage());
         }
 
@@ -331,9 +331,9 @@ public class CohortReviewControllerTest {
                     cdrVersionId,
                     participantId,
                     cohortStatusRequest);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No workspace matching workspaceNamespace: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No workspace matching workspaceNamespace: "
                     + workspaceNamespace + ", workspaceId: " + workspaceName, e.getMessage());
         }
 
@@ -372,9 +372,9 @@ public class CohortReviewControllerTest {
                     cdrVersionId,
                     participantId,
                     cohortStatusRequest);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: Cohort Review does not exist for cohortId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Cohort Review does not exist for cohortId: "
                     + cohortId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
         }
 
@@ -421,9 +421,9 @@ public class CohortReviewControllerTest {
                     cdrVersionId,
                     participantId,
                     cohortStatusRequest);
-            fail("Should have thrown a BadRequestException!");
-        } catch (BadRequestException e) {
-            assertEquals("Invalid Request: No participant exists for participantId: "
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No participant exists for participantId: "
                     + participantId, e.getMessage());
         }
 
