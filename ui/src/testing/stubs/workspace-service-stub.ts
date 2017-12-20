@@ -147,8 +147,8 @@ export class WorkspacesServiceStub {
           }
         });
         if (updateIndex === -1) {
-          observer.error(new Error(`Error updating. Workspace with `
-                                  + `id: ${workspaceId} does not exist.`));
+          const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
+          observer.error(new Error(msg));
         }
         this.workspaces.splice(updateIndex, 1, newWorkspace);
         observer.complete();
@@ -159,7 +159,7 @@ export class WorkspacesServiceStub {
   shareWorkspace(workspaceNamespace: string,
                  workspaceId: string,
                  request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
-      return new Observable<ShareWorkspaceResponse>(observer => {
+    return new Observable<ShareWorkspaceResponse>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
@@ -167,8 +167,8 @@ export class WorkspacesServiceStub {
           }
         });
         if (updateIndex === -1) {
-          observer.error(new Error(`Error sharing. Workspace with `
-                                  + `id: ${workspaceId} does not exist.`));
+          const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
+          observer.error(new Error(msg));
         }
         this.workspaces[updateIndex].userRoles = request.items;
         observer.next({});
