@@ -106,20 +106,24 @@ public class CohortAnnotationDefinitionControllerTest {
 
         Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        CohortAnnotationDefinition request = createCohortAnnotationDefinition(
+        CohortAnnotationDefinition request = createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 columnName,
                 AnnotationType.STRING);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, request.getAnnotationType(), request.getColumnName());
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        request.getAnnotationType(),
+                        request.getColumnName());
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(existingDefinition);
 
-        CohortAnnotationDefinition expectedResponse = createCohortAnnotationDefinition(
+        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 columnName,
@@ -156,21 +160,25 @@ public class CohortAnnotationDefinitionControllerTest {
 
         Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
-        CohortAnnotationDefinition request = createCohortAnnotationDefinition(
+        CohortAnnotationDefinition request = createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 columnName,
                 AnnotationType.STRING);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, request.getAnnotationType(), request.getColumnName());
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        request.getAnnotationType(),
+                        request.getColumnName());
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition)).thenReturn(dbCohortAnnotationDefinition);
         when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(null);
 
-        CohortAnnotationDefinition expectedResponse = createCohortAnnotationDefinition(
+        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 columnName,
@@ -313,7 +321,11 @@ public class CohortAnnotationDefinitionControllerTest {
         request.setColumnName(columnName);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, AnnotationType.STRING, "name1");
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        AnnotationType.STRING,
+                        "name1");
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
@@ -358,9 +370,13 @@ public class CohortAnnotationDefinitionControllerTest {
         request.setColumnName(columnName);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition definition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, AnnotationType.STRING, "name1");
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        AnnotationType.STRING,
+                        "name1");
 
-        CohortAnnotationDefinition expectedResponse = createCohortAnnotationDefinition(
+        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 request.getColumnName(),
@@ -499,7 +515,11 @@ public class CohortAnnotationDefinitionControllerTest {
         Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, AnnotationType.STRING, columnName);
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        AnnotationType.STRING,
+                        columnName);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
@@ -630,7 +650,11 @@ public class CohortAnnotationDefinitionControllerTest {
         Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                createCohortAnnotationDefinition(cohortId, annotationDefinitionId, AnnotationType.STRING, columnName);
+                createDBCohortAnnotationDefinition(
+                        cohortId,
+                        annotationDefinitionId,
+                        AnnotationType.STRING,
+                        columnName);
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
@@ -643,7 +667,8 @@ public class CohortAnnotationDefinitionControllerTest {
                         cohortId,
                         annotationDefinitionId).getBody();
 
-        CohortAnnotationDefinition expectedResponse = createCohortAnnotationDefinition(annotationDefinitionId,
+        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
+                annotationDefinitionId,
                 cohortId,
                 columnName,
                 AnnotationType.STRING);
@@ -738,10 +763,10 @@ public class CohortAnnotationDefinitionControllerTest {
         verifyNoMoreMockInteractions();
     }
 
-    private CohortAnnotationDefinition createCohortAnnotationDefinition(long annotationDefinitionId,
-                                                                     long cohortId,
-                                                                     String columnName,
-                                                                     AnnotationType annotationType) {
+    private CohortAnnotationDefinition createClientCohortAnnotationDefinition(long annotationDefinitionId,
+                                                                              long cohortId,
+                                                                              String columnName,
+                                                                              AnnotationType annotationType) {
         CohortAnnotationDefinition request = new CohortAnnotationDefinition();
         request.setCohortAnnotationDefinitionId(annotationDefinitionId);
         request.setCohortId(cohortId);
@@ -750,7 +775,7 @@ public class CohortAnnotationDefinitionControllerTest {
         return request;
     }
 
-    private org.pmiops.workbench.db.model.CohortAnnotationDefinition createCohortAnnotationDefinition(long cohortId,
+    private org.pmiops.workbench.db.model.CohortAnnotationDefinition createDBCohortAnnotationDefinition(long cohortId,
                                                                                                       long annotationDefinitionId,
                                                                                                       AnnotationType annotationType,
                                                                                                       String columnName) {
