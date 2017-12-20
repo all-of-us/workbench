@@ -1177,6 +1177,38 @@ paths:
             $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+    get:
+      tags:
+        - cohortAnnotationDefinition
+      description: Returns a CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+      responses:
+        "200":
+          description: A CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
     put:
       tags:
         - cohortAnnotationDefinition

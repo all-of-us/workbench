@@ -12,11 +12,12 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
@@ -109,10 +110,35 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     }
 
     @Override
+    public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(String workspaceNamespace,
+                                                                                    String workspaceId,
+                                                                                    Long cohortId,
+                                                                                    Long annotationDefinitionId) {
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
+
+        return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
+    }
+
+    @Override
     public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinitionListResponse());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        List<org.pmiops.workbench.db.model.CohortAnnotationDefinition> dbList =
+                cohortAnnotationDefinitionDao.findByCohortId(cohortId);
+
+        CohortAnnotationDefinitionListResponse responseList = new CohortAnnotationDefinitionListResponse();
+        responseList.setItems(dbList.stream().map(TO_CLIENT_COHORT_ANNOTATION_DEFINITION).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(responseList);
     }
 
     @Override
