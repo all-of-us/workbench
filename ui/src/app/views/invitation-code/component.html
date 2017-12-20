@@ -1,0 +1,23 @@
+<div style="padding: 5rem;">
+    <div *ngIf="!invitationSucc" class="form-area">
+            <div class="form-section">
+            <label>Enter you Invitation Code:</label>
+            <input type="text" class="input" [(ngModel)]="invitationKey">
+                <div *ngIf="invitationKeyReq" class="error">
+                    Invitation Code is required.
+                </div>
+                <div *ngIf="invitationKeyInvalid" class="error">
+                    Invitation Code is not Valid.
+                </div>
+
+            </div>
+        <div style="display: flex; justify-content: space-around;">
+            <button id="next" (click)="next()" class="btn btn-primary">Next</button>
+        </div>
+    </div>
+    <div *ngIf="invitationSucc">
+        <app-account-creation></app-account-creation>
+    </div>
+
+
+</div>

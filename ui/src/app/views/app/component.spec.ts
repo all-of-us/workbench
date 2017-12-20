@@ -7,6 +7,7 @@ import {ClarityModule} from 'clarity-angular';
 import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
+import {InvitationCodeComponent} from '../invitation-code/component';
 import {AppComponent} from '../app/component';
 
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
@@ -24,7 +25,8 @@ describe('AppComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationComponent,
+          AccountCreationComponent,
+          InvitationCodeComponent,
         AppComponent,
       ],
       providers: [

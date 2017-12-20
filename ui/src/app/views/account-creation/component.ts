@@ -28,7 +28,6 @@ export class AccountCreationComponent {
   username: string;
   password: string;
   passwordAgain: string;
-  invitationKey: string;
   contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
@@ -57,7 +56,7 @@ export class AccountCreationComponent {
     }
 
     const request: CreateAccountRequest = {
-      profile: this.profile, password: this.password, invitationKey: this.invitationKey
+      profile: this.profile, password: this.password
     };
     this.creatingAcccount = true;
     this.profileService.createAccount(request).subscribe(() => {
