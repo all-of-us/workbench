@@ -233,7 +233,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        ParticipantCohortStatus participantCohortStatus = participantCohortStatusDao.findOne(participantId);
+        ParticipantCohortStatus participantCohortStatus =
+                participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                        cohortReviewId,
+                        participantId);
+        if (participantCohortStatus == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Participant Cohort Status does not exist for participantId: %s",
+                            participantId));
+        }
 
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
@@ -368,7 +376,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
-        if (workspace.getWorkspaceId() != workspaceId) {
+        if (workspace == null || workspace.getWorkspaceId() != workspaceId) {
             throw new NotFoundException(
                     String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
