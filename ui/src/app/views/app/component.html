@@ -48,13 +48,20 @@
 </ng-template>
 <ng-template #signedIn>
   <div class="page-container">
-    <div style="height: 3rem;">
+    <div style="height: 2rem;">
       <ng-template *ngIf="true; then logoImages"></ng-template>
     </div>
-    <div>
-      <button (click)="deleteAccount()" class="btn btn-danger-outline">Delete Account</button>
-      <button (click)="signOut()" class="btn">Sign Out</button>
-    </div>
+    <clr-dropdown>
+      <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+        <clr-icon shape="user" size="24"></clr-icon>
+        <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+        <a routerLink="/profile" clrDropdownItem>Profile</a>
+        <div class="dropdown-divider"></div>
+        <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </div>
   <div class="top-nav btn-primary">
     <button class="btn tab-link"
