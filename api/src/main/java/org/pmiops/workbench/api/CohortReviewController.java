@@ -222,6 +222,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
 
+    @Override
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> getParticipantCohortStatus(String workspaceNamespace,
+                                                                                                         String workspaceId,
+                                                                                                         Long cohortReviewId,
+                                                                                                         Long participantId) {
+        CohortReview cohortReview = findCohortReview(cohortReviewId);
+
+        Cohort cohort = findCohort(cohortReview.getCohortId());
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        ParticipantCohortStatus participantCohortStatus =
+                participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                        cohortReviewId,
+                        participantId);
+        if (participantCohortStatus == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Participant Cohort Status does not exist for participantId: %s",
+                            participantId));
+        }
+
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
+    }
+
     /**
      * Get all participants for the specified cohortId and cdrVersionId. This endpoint does pagination
      * based on page, pageSize, sortOrder and sortColumn.
@@ -366,6 +390,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new NotFoundException(
                     String.format("Not Found: Cohort Review does not exist for cohortId: %s, cdrVersionId: %s",
                             cohortId, cdrVersionId));
+        }
+        return cohortReview;
+    }
+
+    private CohortReview findCohortReview(Long cohortReviewId) {
+        CohortReview cohortReview = cohortReviewDao.findOne(cohortReviewId);
+        
+        if (cohortReview == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Review does not exist for cohortReviewId: %s",
+                            cohortReviewId));
         }
         return cohortReview;
     }
