@@ -109,15 +109,12 @@ export class AppComponent implements OnInit {
     return this._showCreateAccount ? '10vh' : '30vh';
   }
 
-  showTabs(): boolean {
-    return !(new Set(['/profile', '/id-verification'])).has(this.router.url);
-  }
-
   get reviewActive(): boolean {
     return this.locationService.path().startsWith('/review');
   }
 
   get workspacesActive(): boolean {
-    return !this.reviewActive;
+    return this.locationService.path() === ''
+      || this.locationService.path().startsWith('/workspace');
   }
 }

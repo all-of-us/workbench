@@ -2,6 +2,7 @@
 <div>
   <h3>Identity Verification</h3>
   <div *ngIf="!verifiedStatusIsLoaded; else verifiedStatus">
+    <!-- TODO(dmohs): Spinner. -->
     Checking verification status...
   </div>
   <ng-template #verifiedStatus>
@@ -17,7 +18,7 @@
         </div>
       </div>
       <div style="margin-top: 1rem;">
-        <a routerLink="/id-verification">Verify your identity</a>
+        <a routerLink="id-verification">Verify your identity</a>
       </div>
     </div>
     <div class="alert alert-success" *ngIf="verifiedStatusIsValid">

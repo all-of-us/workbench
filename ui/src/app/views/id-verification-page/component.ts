@@ -9,16 +9,6 @@ import {IdVerificationRequest, ProfileService} from 'generated';
 })
 export class IdVerificationPageComponent implements OnInit {
   request: IdVerificationRequest;
-  firstName: string;
-  lastName: string;
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  state: string;
-  zip: string;
-  dob: string;
-  documentType = '';
-  documentNumber: string;
 
   constructor(
       private profileService: ProfileService,

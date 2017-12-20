@@ -34,7 +34,7 @@ const routes: Routes = [
     component: SearchComponent,
     data: {title: 'Browse'}
   }, {
-    path: 'id-verification',
+    path: 'profile/id-verification',
     component: IdVerificationPageComponent,
     data: {title: 'ID Verification'}
   }, {
