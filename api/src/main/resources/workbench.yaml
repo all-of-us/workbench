@@ -955,7 +955,7 @@ paths:
           description: specifies which participant
       responses:
         "200":
-          description: The updated ParticipantCohortStatus definition
+          description: The ParticipantCohortStatus definition
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
 

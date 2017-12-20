@@ -376,7 +376,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
-        if (workspace == null || workspace.getWorkspaceId() != workspaceId) {
+        if (workspace.getWorkspaceId() != workspaceId) {
             throw new NotFoundException(
                     String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));

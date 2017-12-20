@@ -554,15 +554,20 @@ public class CohortReviewControllerTest {
         long cohortReviewId = 1;
         long participantId = 1;
         long cohortId = 1;
+        long workspaceId = 1;
 
         CohortReview cohortReview = new CohortReview().cohortId(cohortId);
 
         Cohort cohort = new Cohort();
         cohort.setCohortId(cohortId);
+        cohort.setWorkspaceId(2L);
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
 
         when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(cohortReview);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
-        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(null);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
 
         try {
             reviewController.getParticipantCohortStatus(workspaceNamespace, workspaceName, cohortReviewId, participantId);
