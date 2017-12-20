@@ -109,6 +109,19 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     }
 
     @Override
+    public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(String workspaceNamespace,
+                                                                                    String workspaceId,
+                                                                                    Long cohortId,
+                                                                                    Long annotationDefinitionId) {
+
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinition());
+    }
+
+    @Override
     public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId) {
