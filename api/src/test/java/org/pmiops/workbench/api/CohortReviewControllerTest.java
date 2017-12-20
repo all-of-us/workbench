@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
@@ -494,6 +495,28 @@ public class CohortReviewControllerTest {
                 .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
         verify(cohortReviewDao, times(1)).save(isA(CohortReview.class));
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void getParticipantCohortStatus_NotFoundCohortReview() throws Exception {
+        String workspaceNamespace = "aou-test";
+        String workspaceName = "test";
+        long cohortReviewId = 1;
+        long participantId = 1;
+
+        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(null);
+
+        try {
+            reviewController.getParticipantCohortStatus(workspaceNamespace, workspaceName, cohortReviewId, participantId);
+            fail("Should have thrown a NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Cohort Review does not exist for cohortReviewId: "
+                    + cohortReviewId, e.getMessage());
+        }
+
+        verify(cohortReviewDao, times(1)).findOne(cohortReviewId);
+
         verifyNoMoreMockInteractions();
     }
 
