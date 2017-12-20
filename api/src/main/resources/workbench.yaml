@@ -1596,6 +1596,35 @@ paths:
             schema:
               $ref: "#/definitions/ConceptListResponse"
 
+  /api/v1/create-registered-group:
+    post:
+      tags:
+        - authDomain
+      description: This endpoint will create the registered auth domain.
+      operationId: "createRegisteredGroup"
+      responses:
+        "200":
+          description: Successfully created group
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+  /api/v1/add-to-registered:
+    post:
+      tags:
+        - authDomain
+      description: Adds a specified user to the registered auth domain.
+      operationId: "addToRegistered"
+      parameters:
+        - in: body
+          name: email
+          required: true
+          description: the user's email to add
+          schema:
+            $ref: "#/definitions/RegisteredDomainRequest"
+      responses:
+        "200":
+          description: Successfully added to group.
+          schema:
+            $ref: "#/definitions/EmptyResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -2885,3 +2914,14 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/DbDomain"
+<<<<<<< HEAD
+=======
+
+  RegisteredDomainRequest:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+>>>>>>> Initial auth domain work

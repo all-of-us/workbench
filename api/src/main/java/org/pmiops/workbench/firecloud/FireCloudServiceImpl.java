@@ -11,10 +11,12 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.Profile;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
@@ -29,19 +31,24 @@ import org.springframework.stereotype.Service;
 public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
+  private static final String REGISTERED_GROUP_NAME = "ALL-OF-US-REGISTERED";
+
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
+  private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
+      Provider<GroupsApi> groupsApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
+    this.groupsApiProvider = groupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
   }
 
@@ -166,5 +173,17 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     workspacesApi.deleteWorkspace(projectName, workspaceName);
+  }
+
+  @Override
+  public ManagedGroupWithMembers createRegisteredGroup() throws ApiException {
+    GroupsApi groupsApi = groupsApiProvider.get();
+    return groupsApi.createGroup(REGISTERED_GROUP_NAME);
+  }
+
+  @Override
+  public void addUserToRegisteredGroup(String email) throws ApiException {
+    GroupsApi groupsApi = groupsApiProvider.get();
+    groupsApi.addUserToGroup(REGISTERED_GROUP_NAME, "member", email);
   }
 }

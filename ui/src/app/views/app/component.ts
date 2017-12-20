@@ -11,7 +11,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {Authority, ProfileService} from 'generated';
+import {AuthDomainService, Authority, ProfileService} from 'generated';
 
 /* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
@@ -29,11 +29,13 @@ export class AppComponent implements OnInit {
   private _showCreateAccount = false;
   private overriddenUrl: string = null;
   currentUrl: string;
+  email: string;
   constructor(
       private activatedRoute: ActivatedRoute,
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private profileService: ProfileService,
+      private authDomainService: AuthDomainService,
       private router: Router,
       private signInService: SignInService,
       private titleService: Title
@@ -88,6 +90,7 @@ export class AppComponent implements OnInit {
         this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
           this.hasReviewResearchPurpose =
             profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+          // this.email = profile.username;
         });
       }
     });
@@ -116,5 +119,10 @@ export class AppComponent implements OnInit {
   get workspacesActive(): boolean {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
+  }
+
+  addToRegistered(): void {
+    this.authDomainService.addToRegistered({email: this.email}).subscribe(() => {
+    });
   }
 }

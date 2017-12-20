@@ -33,6 +33,7 @@ import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
 import {
+  AuthDomainService,
   BugReportService,
   ClusterService,
   CohortsService,
@@ -89,6 +90,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent
   ],
   providers: [
+    AuthDomainService,
     BugReportService,
     ClusterService,
     CohortsService,
