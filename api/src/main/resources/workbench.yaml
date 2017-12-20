@@ -1645,7 +1645,7 @@ definitions:
     type: object
     properties:
       workspace:
-        $ref: "#/definitions/DataAccessLevel"
+        $ref: "#/definitions/Workspace"
         description: The newly created workspace clone.
 
   WorkspaceAccessLevel:
