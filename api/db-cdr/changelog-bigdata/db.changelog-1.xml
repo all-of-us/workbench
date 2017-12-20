@@ -98,7 +98,6 @@
     </createIndex>
   </changeSet>
 
-
   <changeSet id="add concept_name_index full_text" author="biopete" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
