@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed,tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
 
@@ -10,27 +10,26 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationCodeComponent} from '../invitation-code/component';
 
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
-import {ProfileServiceStub} from 'testing/stubs/profile-invitation-code-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
-import {CohortsService, ProfileService} from 'generated';
+import { ProfileService} from 'generated';
 import {
-    queryAllByCss, queryByCss, simulateClick,
+     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
-import {WorkspacesService} from '../../../generated';
+
 import {DebugElement} from '@angular/core';
 import {UrlSegment} from '@angular/router';
-import {HomePageComponent} from '../home-page/component';
 
 
 
 class InvitationCodePage {
-    fixture: ComponentFixture<HomePageComponent>;
+    fixture: ComponentFixture<InvitationCodeComponent>;
     route: UrlSegment[];
     nextButton: DebugElement;
 
     constructor(testBed: typeof TestBed) {
-        this.fixture = testBed.createComponent(HomePageComponent);
+        this.fixture = testBed.createComponent(InvitationCodeComponent);
         this.readPageData();
     }
 
@@ -42,8 +41,9 @@ class InvitationCodePage {
     }
 }
 describe('InvitationCodeComponent', () => {
-let bugReportPage : InvitationCodePage;
-  beforeEach(async(() => {
+    let invitationCodePage: InvitationCodePage;
+
+    beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -58,26 +58,52 @@ let bugReportPage : InvitationCodePage;
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: SignInService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
-      ] }).compileComponents(
-        bugReportPage = new InvitationCodePage(TestBed);
-    );
+      ] }).compileComponents().then(() =>{
+        invitationCodePage = new InvitationCodePage(TestBed);
+    });
+    tick();
   }));
 
-  it('should create the app', async(() => {
+  it('should create the app', fakeAsync(() => {
     const fixture = TestBed.createComponent(InvitationCodeComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
     expect(app.invitationSucc).toBeFalsy();
-
-      expect(app.invitationKeyReq).toBeFalsy();
-
-      expect(app.invitationKeyInvalid).toBeFalsy();
+    expect(app.invitationKeyReq).toBeFalsy();
+    expect(app.invitationKeyInvalid).toBeFalsy();
 
   }));
 
-    /*it('submits a bug report', fakeAsync(() => {
-        simulateClick(bugReportPage.fixture, bugReportPage.nextButton);
 
+    it('required invitation code', fakeAsync(() => {
+
+        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
+        const app = invitationCodePage.fixture.debugElement.componentInstance;
+
+        expect(app.invitationSucc).toBeFalsy();
+        expect(app.invitationKeyReq).toBeTruthy();
+        expect(app.invitationKeyInvalid).toBeFalsy();
     }));
-*/
+    it('invalid invitation code', fakeAsync(() => {
+
+        const app = invitationCodePage.fixture.debugElement.componentInstance;
+        app.invitationKey = "invalid";
+
+        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
+        expect(app.invitationSucc).toBeFalsy();
+        expect(app.invitationKeyReq).toBeFalsy();
+        expect(app.invitationKeyInvalid).toBeTruthy();
+    }));
+
+    it('correct invitation code', fakeAsync(() => {
+
+        const app = invitationCodePage.fixture.debugElement.componentInstance;
+        app.invitationKey = "dummy";
+
+        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
+        expect(app.invitationSucc).toBeTruthy();
+        expect(app.invitationKeyReq).toBeFalsy();
+        expect(app.invitationKeyInvalid).toBeFalsy();
+    }));
+
 });

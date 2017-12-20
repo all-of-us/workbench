@@ -14,7 +14,7 @@ function isBlank(s: string) {
 
 export class InvitationCodeComponent {
 
- invitationKey: string;
+    invitationKey: string;
     invitationSucc:boolean;
     invitationKeyReq:boolean;
     invitationKeyInvalid:boolean;
