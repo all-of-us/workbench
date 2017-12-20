@@ -98,22 +98,6 @@
     </createIndex>
   </changeSet>
 
-  <changeSet id="add idx_count_value" author="biopete" runAlways="true">
-    <validCheckSum>ANY</validCheckSum>
-    <preConditions onFail="MARK_RAN">
-      <not>
-        <indexExists
-          indexName="idx_count_value"
-          schemaName="cdr"
-          tableName="concept"
-        />
-      </not>
-    </preConditions>
-    <createIndex tableName="concept" schemaName="cdr" indexName="idx_count_value">
-      <column name="count_value" />
-    </createIndex>
-  </changeSet>
-
 
   <changeSet id="add concept_name_index full_text" author="biopete" runAlways="true">
     <validCheckSum>ANY</validCheckSum>

@@ -83,10 +83,6 @@
       <column name="standard_concept" type="varchar(1)"/>
     </createIndex>
 
-    <createIndex tableName="concept" schemaName="cdr" indexName="idx_count_value">
-      <column name="count_value" defaultValue="0" type="bigint(20)"/>
-    </createIndex>
-
     <createTable tableName="concept_relationship" schemaName="cdr">
       <column name="concept_id_1" type="INTEGER">
         <constraints  nullable="false"/>
