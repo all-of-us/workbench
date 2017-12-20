@@ -36,15 +36,11 @@ const routes: Routes = [
   }, {
     path: 'id-verification',
     component: IdVerificationPageComponent,
-    data: {
-      title: 'ID Verification'
-    }
+    data: {title: 'ID Verification'}
   }, {
     path: 'profile',
     component: ProfilePageComponent,
-    data: {
-      title: 'Profile'
-    }
+    data: {title: 'Profile'}
   }, {
     path: 'workspace/:ns/:wsid',
     component: WorkspaceComponent,
