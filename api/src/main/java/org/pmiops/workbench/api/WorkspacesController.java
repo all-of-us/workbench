@@ -29,6 +29,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -42,6 +44,7 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -484,6 +487,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+  }
+
+  @Override
+  public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(String workspaceNamespace,
+      String workspaceId, CloneWorkspaceRequest body) {
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
   }
 
   @Override
