@@ -111,6 +111,27 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
+  /api/v1/google-invitation:
+    post:
+      tags:
+        - profile
+      description: Verifies invitation code.
+      operationId: invitationCodeVerification
+      security: []
+      parameters:
+        - in: body
+          name: invitationVerRequest
+          schema:
+            $ref: "#/definitions/InvitationVerRequest"
+      responses:
+        "200":
+          description: Account created successfully.
+        "400":
+          description: Error occurred while creating account.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
   /api/v1/google-account:
     post:
       tags:
@@ -1895,9 +1916,14 @@ definitions:
         $ref: '#/definitions/Profile'
       password:
         type: string
-      invitationKey:
-        type: string
-        description: Invitation key. Necessary when creating account before public launch.
+
+  InvitationVerRequest:
+      type: object
+      required:
+        - invitationKey
+      properties:
+        invitationKey:
+           type: string
 
   BugReport:
     type: object

@@ -20,7 +20,7 @@ import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
-
+import {InvitationCodeComponent} from './views/invitation-code/component';
 import {environment} from 'environments/environment';
 
 /* Our Modules */
@@ -80,7 +80,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ReviewComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
-    WorkspaceShareComponent
+    WorkspaceShareComponent,
+      InvitationCodeComponent
   ],
   providers: [
     BugReportService,

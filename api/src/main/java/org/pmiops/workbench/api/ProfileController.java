@@ -32,6 +32,7 @@ import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
+import org.pmiops.workbench.model.InvitationVerRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -258,11 +259,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    if (request.getInvitationKey() == null
-        || !request.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
-      throw new BadRequestException(
-          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
-    }
+
     com.google.api.services.admin.directory.model.User googleUser;
     try {
       googleUser = directoryService.createUser(request.getProfile().getGivenName(),
@@ -358,6 +355,16 @@ public class ProfileController implements ProfileApiDelegate {
     user.setBlockscoreVerificationIsValid(person.isValid());
     userDao.save(user);
 
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> invitationCodeVerification(InvitationVerRequest invitationVerRequest){
+    if (invitationVerRequest.getInvitationKey() == null
+            || !invitationVerRequest.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
+      throw new BadRequestException(
+              "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+    }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
