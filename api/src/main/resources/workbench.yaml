@@ -1206,7 +1206,7 @@ paths:
           description: specifies which CohortAnnotationDefinition.
       responses:
         "200":
-          description: A collection of CohortAnnotationDefinition
+          description: A CohortAnnotationDefinition
           schema:
             $ref: "#/definitions/CohortAnnotationDefinition"
     put:
