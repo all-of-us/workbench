@@ -18,17 +18,17 @@ export class ProfileStubVariables {
 
 export class ProfileServiceStub {
   public profile: Profile;
+
   constructor() {
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
-  public getMe(): Observable<Profile> {
-    const observable = new Observable(observer => {
+  getMe(): Observable<Profile> {
+    return new Observable<Profile>(observer => {
       setTimeout(() => {
         observer.next(this.profile);
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 }

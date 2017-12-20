@@ -1,12 +1,14 @@
+import {Observable} from 'rxjs/Observable';
+
 import {
+  EmptyResponse,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceListResponse,
-  WorkspaceResponse
+  WorkspaceResponse,
+  WorkspaceResponseListResponse,
 } from 'generated';
-import {Observable} from 'rxjs/Observable';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -17,6 +19,9 @@ export class WorkspaceStubVariables {
 }
 
 export class WorkspacesServiceStub {
+  workspaces: Workspace[];
+  workspaceResponses: WorkspaceResponse[];
+
   constructor() {
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
@@ -61,11 +66,9 @@ export class WorkspacesServiceStub {
       }
     ];
   }
-  public workspaces: Workspace[];
-  public workspaceResponses: WorkspaceResponse[];
 
-  public createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
-    const observable = new Observable(observer => {
+  createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
+    return new Observable<Workspace>(observer => {
       setTimeout(() => {
         observer.next(this.workspaces.find(function(workspace: Workspace) {
           if (workspace.id === newWorkspace.id) {
@@ -78,11 +81,10 @@ export class WorkspacesServiceStub {
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<{}> {
-    const observable = new Observable(observer => {
+  deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<EmptyResponse> {
+    return new Observable<EmptyResponse>(observer => {
       setTimeout(() => {
         const deletionIndex = this.workspaces.findIndex(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
@@ -91,17 +93,16 @@ export class WorkspacesServiceStub {
         });
         if (deletionIndex === -1) {
           observer.error(new Error(`Error deleting. Workspace with `
-                                  + `id: ${workspaceId} does not exist.`));
+            + `id: ${workspaceId} does not exist.`));
         }
         this.workspaces.splice(deletionIndex, 1);
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<Workspace> {
-    const observable = new Observable(observer => {
+  getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<WorkspaceResponse> {
+    return new Observable<WorkspaceResponse>(observer => {
       setTimeout(() => {
         const workspaceReceived = this.workspaces.find(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
@@ -116,11 +117,10 @@ export class WorkspacesServiceStub {
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public getWorkspaces(): Observable<WorkspaceListResponse> {
-    const observable = new Observable(observer => {
+  getWorkspaces(): Observable<WorkspaceResponseListResponse> {
+    return new Observable<WorkspaceResponseListResponse>(observer => {
       setTimeout(() => {
         this.workspaceResponses = [];
         this.workspaces.forEach((workspace) => {
@@ -134,13 +134,12 @@ export class WorkspacesServiceStub {
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public updateWorkspace(workspaceNamespace: string,
-      workspaceId: string,
-      newWorkspace: Workspace): Observable<Workspace> {
-    const observable = new Observable(observer => {
+  updateWorkspace(workspaceNamespace: string,
+                  workspaceId: string,
+                  newWorkspace: Workspace): Observable<Workspace> {
+    return new Observable<Workspace>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
           if (workspace.id === workspaceId) {
@@ -148,35 +147,33 @@ export class WorkspacesServiceStub {
           }
         });
         if (updateIndex === -1) {
-          observer.error(new Error(`Error updating. Workspace with `
-                                  + `id: ${workspaceId} does not exist.`));
+          const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
+          observer.error(new Error(msg));
         }
         this.workspaces.splice(updateIndex, 1, newWorkspace);
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public shareWorkspace(workspaceNamespace: string,
-      workspaceId: string,
-      request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
-        const observable = new Observable(observer => {
-          setTimeout(() => {
-            const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
-              if (workspace.id === workspaceId) {
-                return true;
-              }
-            });
-            if (updateIndex === -1) {
-              observer.error(new Error(`Error sharing. Workspace with `
-                                      + `id: ${workspaceId} does not exist.`));
-            }
-            this.workspaces[updateIndex].userRoles = request.items;
-            observer.next({});
-            observer.complete();
-          }, 0);
+  shareWorkspace(workspaceNamespace: string,
+                 workspaceId: string,
+                 request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
+    return new Observable<ShareWorkspaceResponse>(observer => {
+      setTimeout(() => {
+        const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+          if (workspace.id === workspaceId) {
+            return true;
+          }
         });
-        return observable;
+        if (updateIndex === -1) {
+          const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
+          observer.error(new Error(msg));
+        }
+        this.workspaces[updateIndex].userRoles = request.items;
+        observer.next({});
+        observer.complete();
+      }, 0);
+    });
   }
 }
