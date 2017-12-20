@@ -13,7 +13,6 @@ fi
 drop_index_activity="-PrunList=drop_bigdata_indexes"
 add_index_activity="-PrunList=add_bigdata_indexes"
 
-
 echo "Running big data migrations"
 # Ruby is not installed in our dev container and this script is short, so bash is fine.
 
@@ -25,39 +24,42 @@ function finish {
 trap finish EXIT
 
 cat create_db.sql | envsubst > $CREATE_DB_FILE
-
 echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
-echo "Dropping indexes on big tables to speed up insert dramatically"
-../gradlew update $drop_index_activity $context
 
 # Download data and import
 REMOTE_DATA_LOC=https://storage.googleapis.com/all-of-us-ehr-dev-peter-speltz
+REMOTE_DATA_BUCKET="gs://all-of-us-ehr-dev-peter-speltz"
 echo "Importing data files from REMOTE_DATA_LOC"
 
 # Add data files to import here
-DATA_FILES=( concept_relationship.csv concept.csv)
-#DROP_INDEXES_FILE=/tmp/drop_indexes.sql
+DATA_FILES=(concept.csv concept_relationship.csv)
 
+# Download data and truncate tables before dropping indexes
 for f in "${DATA_FILES[@]}"
 do
   local_fpath=/tmp/$f
   curl -o $local_fpath "$REMOTE_DATA_LOC/$f"
+  #gsutil cp $REMOTE_DATA_BUCKET/$f $f  # todo maybe , gives error now
   db_name=cdr
   table_name="${f%\.csv*}"
-
-  # Todo , possibly check download works before truncating
   mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} -e "truncate table $db_name.$table_name"
-  # Drop indexes on the table to speed up inserts. It is much faster dropping on big tables in liquibase
-  #cat drop_indexes_$table_name.sql | envsubst > $DROP_INDEXES_FILE
-  #mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${DROP_INDEXES_FILE}
-  mysqlimport --ignore-lines=1 --fields-terminated-by=, --verbose --local -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} cdr $local_fpath
+done
+
+echo "Dropping indexes on big tables to speed up insert (dramatically) "
+../gradlew update $drop_index_activity $context
+
+# Import the data
+for f in "${DATA_FILES[@]}"
+do
+  local_fpath=/tmp/$f
+  db_name=cdr
+  table_name="${f%\.csv*}"
+  mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-enclosed-by='"' --verbose --local -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} cdr $local_fpath
   rm $local_fpath
 done
 
-
-
-# Add the indexes back
-echo "Adding indexes back ..."
+# Add the indexes back and any other queries with data
+echo "Adding indexes back, finalizing data ..."
 ../gradlew update $add_index_activity $context
