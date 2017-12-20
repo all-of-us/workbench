@@ -4,15 +4,15 @@
     <clr-button-group class="permissions-group">
       <clr-button [disabled]="!writePermission" (click)="edit()"
           class="btn btn-icon">
-        <img src="assets/icons/edit@2x.png" alt="Edit" class="icon">
+        <img src="assets/icons/edit.svg" alt="Edit" class="icon">
       </clr-button>
       <clr-button (click)="share()" class="btn btn-icon">
-        <img src="assets/icons/share@2x.png" alt="Share" class="icon">
+        <img src="assets/icons/share.svg" alt="Share" class="icon">
       </clr-button>
       <clr-button [disabled]="!ownerPermission"
           (click)="delete()" class="btn btn-icon btn-danger-outline btn-deleting"
           [clrLoading]="deleting">
-        <img src="assets/icons/trash@2x.png" alt="Delete" class="icon">
+        <img src="assets/icons/trash.svg" alt="Delete" class="icon">
       </clr-button>
     </clr-button-group>
   </div>
