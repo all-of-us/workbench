@@ -1,7 +1,7 @@
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {Observable} from 'rxjs/Observable';
-import {InvitationVerRequest} from "../../generated/model/invitationVerRequest";
+import {InvitationVerRequest} from '../../generated/model/invitationVerRequest';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -35,13 +35,13 @@ export class ProfileServiceStub {
   }
 
   public invitationCodeVerification(invitationVerRequest?: InvitationVerRequest, extraHttpRequestParams?: any): Observable<{}> {
-      if(invitationVerRequest.invitationKey==='dummy'){
+      if (invitationVerRequest.invitationKey === 'dummy') {
           const observable = new Observable(observer => {
               observer.next(this.profile);
           });
           return observable;
           }
-      else{
+      else {
           const observable = new Observable(observer => {
               observer.error(new Error(`Invalid invitation code`));
           });

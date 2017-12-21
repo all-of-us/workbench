@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {CreateAccountRequest, InvitationVerRequest} from '../../../generated';
+import {InvitationVerRequest} from '../../../generated';
 import {ProfileService} from 'generated';
 
 
@@ -15,23 +15,23 @@ function isBlank(s: string) {
 export class InvitationCodeComponent {
 
     invitationKey: string;
-    invitationSucc:boolean;
-    invitationKeyReq:boolean;
-    invitationKeyInvalid:boolean;
+    invitationSucc: boolean;
+    invitationKeyReq: boolean;
+    invitationKeyInvalid: boolean;
     constructor(private profileService: ProfileService) {
         this.invitationSucc = false;
         this.invitationKeyReq = false;
         this.invitationKeyInvalid = false;
     }
 
-    next():void{
-        if(isBlank(this.invitationKey)){
-            this.invitationKeyReq=true;
+    next(): void {
+        if (isBlank(this.invitationKey)) {
+            this.invitationKeyReq = true;
             this.invitationKeyInvalid = false;
             return;
         }
-        this.invitationKeyReq=false;
-        this.invitationKeyInvalid=false;
+        this.invitationKeyReq = false;
+        this.invitationKeyInvalid = false;
 
         const request: InvitationVerRequest = {
             invitationKey: this.invitationKey
