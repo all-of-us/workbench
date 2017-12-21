@@ -360,4 +360,14 @@ public class ProfileController implements ProfileApiDelegate {
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
+
+  @Override
+  public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    // TODO: Implement.
+    User user = userProvider.get();
+    user.setGivenName(updatedProfile.getGivenName());
+    user.setFamilyName(updatedProfile.getFamilyName());
+    userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
 }

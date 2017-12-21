@@ -1,11 +1,10 @@
 <h2>Profile</h2>
-<button routerLink="edit" class="btn">
-  <clr-icon class="is-solid" shape="pencil"></clr-icon>
-</button>
 <h5>Given Name:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.givenName}}</div>
+<input *ngIf="profileLoaded else loading" type="text" autofocus
+    [(ngModel)]="profile.givenName">
 <h5>Family Name:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.familyName}}</div>
+<input *ngIf="profileLoaded else loading" type="text" autofocus
+    [(ngModel)]="profile.familyName">
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>
@@ -32,9 +31,6 @@
           </div>
         </div>
       </div>
-      <div style="margin-top: 1rem;">
-        <a routerLink="id-verification">Verify your identity</a>
-      </div>
     </div>
     <div class="alert alert-success" *ngIf="verifiedStatusIsValid">
       <div class="alert-items">
@@ -57,4 +53,8 @@
       </div>
     </div>
   </ng-template>
+  <button (click)="submitChanges()" class="btn">Update Profile</button>
+  <button routerLink="/profile" class="btn">Cancel</button>
+  <h3>Account Deletion</h3>
+  <button (click)="deleteAccount()" class="btn btn-danger-outline">Delete Account</button>
 </div>
