@@ -94,7 +94,7 @@ describe('InvitationCodeComponent', () => {
         expect(app.invitationKeyInvalid).toBeTruthy();
     }));
 
-    it('should continue to next page on entering correct/verified invitation code', fakeAsync(() => {
+    it('should continue to next page on entering correct invitation code', fakeAsync(() => {
 
         const app = invitationCodePage.fixture.debugElement.componentInstance;
         app.invitationKey = 'dummy';
