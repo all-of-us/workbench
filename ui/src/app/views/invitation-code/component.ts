@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {InvitationVerRequest,ProfileService} from 'generated';
+import {InvitationVerRequest, ProfileService} from 'generated';
 
 
 function isBlank(s: string) {
