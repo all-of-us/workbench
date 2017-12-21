@@ -1,8 +1,8 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {RouterTestingModule} from '@angular/router/testing';
 import {UrlSegment} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
 import {
     queryByCss, simulateClick,
     updateAndTick
@@ -13,8 +13,8 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationCodeComponent} from '../invitation-code/component';
 import {ClarityModule} from 'clarity-angular';
 import {ProfileService} from 'generated';
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
 
 
