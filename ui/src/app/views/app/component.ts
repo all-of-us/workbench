@@ -109,17 +109,12 @@ export class AppComponent implements OnInit {
     return this._showCreateAccount ? '10vh' : '30vh';
   }
 
-  deleteAccount(): void {
-    this.profileService.deleteAccount().subscribe(() => {
-      this.signInService.signOut();
-    });
-  }
-
   get reviewActive(): boolean {
     return this.locationService.path().startsWith('/review');
   }
 
   get workspacesActive(): boolean {
-    return !this.reviewActive;
+    return this.locationService.path() === ''
+      || this.locationService.path().startsWith('/workspace');
   }
 }

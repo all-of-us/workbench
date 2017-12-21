@@ -5,7 +5,6 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -13,11 +12,12 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
@@ -97,14 +97,48 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                                                           String workspaceId,
                                                                           Long cohortId,
                                                                           Long annotationDefinitionId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
+
+        cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
+
+        return ResponseEntity.ok(new EmptyResponse());
+    }
+
+    @Override
+    public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(String workspaceNamespace,
+                                                                                    String workspaceId,
+                                                                                    Long cohortId,
+                                                                                    Long annotationDefinitionId) {
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
+
+        return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
     @Override
     public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortAnnotationDefinitionListResponse());
+        Cohort cohort = findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        List<org.pmiops.workbench.db.model.CohortAnnotationDefinition> dbList =
+                cohortAnnotationDefinitionDao.findByCohortId(cohortId);
+
+        CohortAnnotationDefinitionListResponse responseList = new CohortAnnotationDefinitionListResponse();
+        responseList.setItems(dbList.stream().map(TO_CLIENT_COHORT_ANNOTATION_DEFINITION).collect(Collectors.toList()));
+
+        return ResponseEntity.ok(responseList);
     }
 
     @Override
@@ -120,19 +154,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
-
-        if (cohortAnnotationDefinition == null) {
-            throw new NotFoundException(
-                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
-                            annotationDefinitionId));
-        }
-
-        if (cohortAnnotationDefinition.getCohortId() != cohortId) {
-            throw new NotFoundException(
-                    String.format("Not Found: Cohort Annotation Definition doesn't exist for cohortId: %s",
-                            cohortId));
-        }
+                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
                 cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
@@ -150,11 +172,29 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
+    private org.pmiops.workbench.db.model.CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortId, Long annotationDefinitionId) {
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+
+        if (cohortAnnotationDefinition == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
+                            annotationDefinitionId));
+        }
+
+        if (cohortAnnotationDefinition.getCohortId() != cohortId) {
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Annotation Definition doesn't exist for cohortId: %s",
+                            cohortId));
+        }
+        return cohortAnnotationDefinition;
+    }
+
     private Cohort findCohort(long cohortId) {
         Cohort cohort = cohortDao.findOne(cohortId);
         if (cohort == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort exists for cohortId: %s", cohortId));
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
         }
         return cohort;
     }

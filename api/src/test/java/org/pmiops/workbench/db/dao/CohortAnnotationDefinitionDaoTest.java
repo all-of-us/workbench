@@ -13,6 +13,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -55,6 +57,19 @@ public class CohortAnnotationDefinitionDaoTest {
                         cohortAnnotationDefinition.getColumnName());
 
         assertEquals(expectedAnnotationDefinition, cohortAnnotationDefinition);
+    }
+
+    @Test
+    public void findByCohortId() throws Exception {
+        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
+
+        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
+        List<CohortAnnotationDefinition> expectedDBList =
+                cohortAnnotationDefinitionDao.findByCohortId(
+                        cohortAnnotationDefinition.getCohortId());
+
+        assertEquals(expectedDBList.get(0), cohortAnnotationDefinition);
     }
 
     private CohortAnnotationDefinition createCohortAnnotationDefinition() {

@@ -26,7 +26,7 @@ class CohortStub implements Cohort {
 
   workspaceId: string;
 
-  constructor(cohort: Cohort, wsId: string) {
+  constructor(cohort: Cohort, wsid: string) {
     this.creationTime = cohort.creationTime;
     this.creator = cohort.creator;
     this.criteria = cohort.criteria;
@@ -35,7 +35,7 @@ class CohortStub implements Cohort {
     this.lastModifiedTime = cohort.lastModifiedTime;
     this.name = cohort.name;
     this.type = cohort.type;
-    this.workspaceId = wsId;
+    this.workspaceId = wsid;
   }
 }
 
@@ -65,55 +65,43 @@ export class CohortsServiceStub {
     this.workspaces = [stubWorkspace];
   }
 
-  public getCohort(
-      wsNamespace: string,
-      wsId: string,
-      cId: number): Observable<Cohort> {
-    const observable = new Observable(observer => {
+  getCohort(_: string, wsid: string, cid: number): Observable<Cohort> {
+    return new Observable<Cohort>(observer => {
       setTimeout(() => {
         observer.next(this.cohorts.find(function(cohort: CohortStub) {
-          if (cohort.id === cId && cohort.workspaceId === wsId) {
+          if (cohort.id === cid && cohort.workspaceId === wsid) {
             return true;
           }
         }));
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public updateCohort(
-      wsNamespace: string,
-      wsId: string,
-      cId: number,
-      newCohort: Cohort): Observable<Cohort> {
-    const observable = new Observable(observer => {
+  updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Observable<Cohort> {
+    return new Observable<Cohort>(observer => {
       setTimeout(() => {
 
         const index = this.cohorts.findIndex(function(cohort: CohortStub) {
-          if (cohort.id === cId && cohort.workspaceId) {
+          if (cohort.id === cid && cohort.workspaceId) {
             return true;
           }
           return false;
         });
         if (index !== -1) {
-          this.cohorts[index] = new CohortStub(newCohort, wsId);
+          this.cohorts[index] = new CohortStub(newCohort, wsid);
           observer.complete();
         } else {
-          observer.error(new Error(`Error updating. No cohort with id: ${cId} `
-                                  + `exists in workspace ${wsNamespace}, ${wsId} `
+          observer.error(new Error(`Error updating. No cohort with id: ${cid} `
+                                  + `exists in workspace ${ns}, ${wsid} `
                                   + `in cohort service stub`));
         }
       }, 0);
     });
-    return observable;
   }
 
-  public createCohort(
-      wsNamespace: string,
-      wsId: string,
-      newCohort: Cohort): Observable<Cohort> {
-    const observable = new Observable(observer => {
+  createCohort(_: string, wsid: string, newCohort: Cohort): Observable<Cohort> {
+    return new Observable<Cohort>(observer => {
       setTimeout(() => {
         observer.next(this.cohorts.find(function(cohort: Cohort) {
           if (cohort.id === newCohort.id) {
@@ -122,21 +110,18 @@ export class CohortsServiceStub {
             return true;
           }
         }));
-        this.cohorts.push(new CohortStub(newCohort, wsId));
+        this.cohorts.push(new CohortStub(newCohort, wsid));
         observer.complete();
       }, 0);
     });
-    return observable;
   }
 
-  public getCohortsInWorkspace(
-      wsNamespace: string,
-      wsId: string): Observable<CohortListResponse> {
-    const observable = new Observable(observer => {
+  getCohortsInWorkspace(ns: string, wsid: string): Observable<CohortListResponse> {
+    return new Observable<CohortListResponse>(observer => {
       setTimeout(() => {
         const cohortsInWorkspace: Cohort[] = [];
         this.cohorts.forEach(cohort => {
-          if (cohort.workspaceId === wsId) {
+          if (cohort.workspaceId === wsid) {
             cohortsInWorkspace.push(cohort);
           }
         });
@@ -148,6 +133,5 @@ export class CohortsServiceStub {
         }
       }, 0);
     });
-    return observable;
   }
 }

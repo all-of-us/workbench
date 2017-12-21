@@ -1,0 +1,47 @@
+<h2>Profile</h2>
+<div>
+  <h3>Identity Verification</h3>
+  <div *ngIf="!verifiedStatusIsLoaded; else verifiedStatus">
+    <!-- TODO(dmohs): Spinner. -->
+    Checking verification status...
+  </div>
+  <ng-template #verifiedStatus>
+    <div *ngIf="verifiedStatusIsValid == null">
+      <div class="alert alert-warning">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+            </div>
+            <span class="alert-text">Your identity has not been verified.</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 1rem;">
+        <a routerLink="id-verification">Verify your identity</a>
+      </div>
+    </div>
+    <div class="alert alert-success" *ngIf="verifiedStatusIsValid">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+          </div>
+          <span class="alert-text">Your identity has been verified.</span>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-danger" *ngIf="verifiedStatusIsValid == false">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+          </div>
+          <span class="alert-text">Your identity cannot be validated.</span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <h3>Account Deletion</h3>
+  <button (click)="deleteAccount()" class="btn btn-danger-outline">Delete Account</button>
+</div>

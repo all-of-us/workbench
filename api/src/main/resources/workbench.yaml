@@ -925,6 +925,40 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will return a ParticipantCohortStatus
+      operationId: "getParticipantCohortStatus"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortReviewId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which review
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+      responses:
+        "200":
+          description: The ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
+
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
     post:
       tags:
@@ -1143,6 +1177,38 @@ paths:
             $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+    get:
+      tags:
+        - cohortAnnotationDefinition
+      description: Returns a CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinition"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: annotationDefinitionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which CohortAnnotationDefinition.
+      responses:
+        "200":
+          description: A CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
     put:
       tags:
         - cohortAnnotationDefinition

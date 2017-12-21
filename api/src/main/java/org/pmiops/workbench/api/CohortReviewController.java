@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.CreateReviewRequest;
@@ -221,6 +222,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
 
+    @Override
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> getParticipantCohortStatus(String workspaceNamespace,
+                                                                                                         String workspaceId,
+                                                                                                         Long cohortReviewId,
+                                                                                                         Long participantId) {
+        CohortReview cohortReview = findCohortReview(cohortReviewId);
+
+        Cohort cohort = findCohort(cohortReview.getCohortId());
+        //this validates that the user is in the proper workspace
+        validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        ParticipantCohortStatus participantCohortStatus =
+                participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                        cohortReviewId,
+                        participantId);
+        if (participantCohortStatus == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Participant Cohort Status does not exist for participantId: %s",
+                            participantId));
+        }
+
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
+    }
+
     /**
      * Get all participants for the specified cohortId and cdrVersionId. This endpoint does pagination
      * based on page, pageSize, sortOrder and sortColumn.
@@ -326,8 +351,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                         cohortReview.getCohortReviewId(), participantId);
         if (participantCohortStatus == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No participant exists for participantId: %s", participantId));
+            throw new NotFoundException(
+                    String.format("Not Found: No participant exists for participantId: %s", participantId));
         }
 
         participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
@@ -343,8 +368,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private Cohort findCohort(long cohortId) {
         Cohort cohort = cohortDao.findOne(cohortId);
         if (cohort == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort exists for cohortId: %s", cohortId));
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
         }
         return cohort;
     }
@@ -352,8 +377,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
         Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
         if (workspace.getWorkspaceId() != workspaceId) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                             workspaceNamespace, workspaceName));
         }
     }
@@ -362,9 +387,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
         if (cohortReview == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: Cohort Review does not exist for cohortId: %s, cdrVersionId: %s",
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Review does not exist for cohortId: %s, cdrVersionId: %s",
                             cohortId, cdrVersionId));
+        }
+        return cohortReview;
+    }
+
+    private CohortReview findCohortReview(Long cohortReviewId) {
+        CohortReview cohortReview = cohortReviewDao.findOne(cohortReviewId);
+        
+        if (cohortReview == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Cohort Review does not exist for cohortReviewId: %s",
+                            cohortReviewId));
         }
         return cohortReview;
     }
@@ -372,8 +408,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private String getCohortDefinition(Cohort cohort) {
         String definition = cohort.getCriteria();
         if (definition == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
+            throw new NotFoundException(
+                    String.format("Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
         }
         return definition;
     }

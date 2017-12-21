@@ -106,6 +106,7 @@ export class WorkspaceComponent implements OnInit {
   deleting = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
+
   constructor(
       private router: Router,
       private route: ActivatedRoute,
@@ -116,6 +117,7 @@ export class WorkspaceComponent implements OnInit {
       /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
   ) {}
+
   ngOnInit(): void {
     this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.params['ns'];
@@ -160,7 +162,7 @@ export class WorkspaceComponent implements OnInit {
 
   pollCluster(): Observable<Cluster> {
     // Polls for cluster startup every minute.
-    const observable = new Observable(observer => {
+    return new Observable<Cluster>(observer => {
       this.errorHandlingService.retryApi(this.clusterService.getCluster(
           this.workspace.namespace, this.workspace.id)).subscribe((cluster) => {
         if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
@@ -179,7 +181,6 @@ export class WorkspaceComponent implements OnInit {
         }
       });
     });
-    return observable;
   }
 
   cancelCluster(): void {
