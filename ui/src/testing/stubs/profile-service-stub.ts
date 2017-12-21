@@ -34,7 +34,7 @@ export class ProfileServiceStub {
     });
   }
 
-  public invitationCodeVerification(invitationVerRequest?: InvitationVerRequest, extraHttpRequestParams?: any): Observable<{}> {
+  public invitationCodeVerification(invitationVerRequest?: InvitationVerRequest): Observable<{}> {
       if (invitationVerRequest.invitationKey === 'dummy') {
           const observable = new Observable(observer => {
               observer.next(this.profile);
