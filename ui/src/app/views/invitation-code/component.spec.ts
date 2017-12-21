@@ -1,20 +1,21 @@
-import {AccountCreationComponent} from '../account-creation/component';
-import {ClarityModule} from 'clarity-angular';
-import {ComponentFixture, fakeAsync, TestBed,tick} from '@angular/core/testing';
 import {DebugElement} from '@angular/core';
-import {ErrorHandlingService} from '../../services/error-handling.service';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {InvitationCodeComponent} from '../invitation-code/component';
-import {ProfileService} from 'generated';
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {RouterTestingModule} from '@angular/router/testing';
+import {UrlSegment} from '@angular/router';
 import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
-import {RouterTestingModule} from '@angular/router/testing';
+import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
-import {UrlSegment} from '@angular/router';
+import {AccountCreationComponent} from '../account-creation/component';
+import {InvitationCodeComponent} from '../invitation-code/component';
+import {ClarityModule} from 'clarity-angular';
+import {ProfileService} from 'generated';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+
 
 
 
