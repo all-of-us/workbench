@@ -4,6 +4,7 @@ import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
+import {environment} from 'environments/environment';
 
 import {ErrorHandlingService} from './services/error-handling.service';
 import {SignInService} from './services/sign-in.service';
@@ -28,7 +29,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
-import {environment} from 'environments/environment';
 
 import {
   BugReportService,
