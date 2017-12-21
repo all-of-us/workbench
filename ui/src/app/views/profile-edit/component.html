@@ -5,6 +5,9 @@
 <h5>Family Name:</h5>
 <input *ngIf="profileLoaded else loading" type="text" autofocus
     [(ngModel)]="profile.familyName">
+<h5>Contact Email:</h5>
+<input *ngIf="profileLoaded else loading" type="text" autofocus
+    [(ngModel)]="profile.contactEmail">
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>

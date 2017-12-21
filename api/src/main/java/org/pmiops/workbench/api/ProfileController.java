@@ -367,6 +367,7 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setContactEmail(updatedProfile.getContactEmail());
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

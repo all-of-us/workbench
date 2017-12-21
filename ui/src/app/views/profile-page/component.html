@@ -6,6 +6,8 @@
 <div *ngIf="profileLoaded else loading">{{profile.givenName}}</div>
 <h5>Family Name:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.familyName}}</div>
+<h5>Contact Email:</h5>
+<div *ngIf="profileLoaded else loading">{{profile.contactEmail}}</div>
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>
