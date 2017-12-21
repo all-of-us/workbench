@@ -51,7 +51,7 @@ public class CohortReviewServiceImplTest {
             cohortReviewService.findCohort(cohortId);
             fail("Should have thrown NotFoundException!");
         } catch (NotFoundException e) {
-            assertEquals("Not Found: No Cohort exists for cohortId:" + cohortId, e.getMessage());
+            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
         }
 
         verify(cohortDao).findOne(cohortId);
