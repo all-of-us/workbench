@@ -46,7 +46,7 @@ export class ProfileEditComponent implements OnInit {
     this.errorHandlingService.retryApi(
         this.profileService.updateProfile(this.profile)).subscribe(
       () => {
-        this.router.navigate(['../'], {relativeTo : this.route})
+        this.router.navigate(['../'], {relativeTo : this.route});
       }
     );
   }
