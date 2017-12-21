@@ -40,6 +40,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.InvitationVerRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.test.FakeClock;
@@ -85,6 +86,7 @@ public class ProfileControllerTest {
   private ProfileController profileController;
   private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
+  private InvitationVerRequest invitationCodeVerRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
 
@@ -97,14 +99,15 @@ public class ProfileControllerTest {
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
+    invitationCodeVerRequest = new InvitationVerRequest();
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USERNAME);
     createAccountRequest.setProfile(profile);
-    createAccountRequest.setInvitationKey(INVITATION_KEY);
     createAccountRequest.setPassword(PASSWORD);
+    invitationCodeVerRequest.setInvitationKey(INVITATION_KEY);
 
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
@@ -130,7 +133,7 @@ public class ProfileControllerTest {
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
-    profileController.createAccount(createAccountRequest);
+    profileController.invitationCodeVerification(invitationCodeVerRequest);
   }
 
   @Test
@@ -142,7 +145,6 @@ public class ProfileControllerTest {
 
   @Test(expected = ServerErrorException.class)
   public void testCreateAccount_directoryServiceFail() throws Exception {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
 
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
         .thenThrow(new IOException());
@@ -314,7 +316,6 @@ public class ProfileControllerTest {
   }
 
   private Profile createUser() throws Exception {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
         .thenReturn(googleUser);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);

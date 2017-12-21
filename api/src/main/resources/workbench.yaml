@@ -125,9 +125,9 @@ paths:
             $ref: "#/definitions/InvitationVerRequest"
       responses:
         "200":
-          description: Account created successfully.
+          description: Invitation Code verified.
         "400":
-          description: Error occurred while creating account.
+          description: Error occurred while verifying Invitation Code .
           schema:
             $ref: "#/definitions/ErrorResponse"
 
