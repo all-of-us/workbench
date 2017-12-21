@@ -14,7 +14,7 @@ export class ProfileStubVariables {
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
-      invitationKey : 'dummyKey'
+    invitationKey : 'dummyKey'
   };
 }
 

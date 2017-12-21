@@ -74,7 +74,7 @@ describe('InvitationCodeComponent', () => {
   }));
 
 
-    it('required invitation code', fakeAsync(() => {
+    it('should not accept blank invitation code', fakeAsync(() => {
 
         simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
         const app = invitationCodePage.fixture.debugElement.componentInstance;
@@ -83,7 +83,7 @@ describe('InvitationCodeComponent', () => {
         expect(app.invitationKeyReq).toBeTruthy();
         expect(app.invitationKeyInvalid).toBeFalsy();
     }));
-    it('invalid invitation code', fakeAsync(() => {
+    it('should throw an error with invalid invitation code', fakeAsync(() => {
 
         const app = invitationCodePage.fixture.debugElement.componentInstance;
         app.invitationKey = 'invalid';
@@ -94,7 +94,7 @@ describe('InvitationCodeComponent', () => {
         expect(app.invitationKeyInvalid).toBeTruthy();
     }));
 
-    it('correct invitation code', fakeAsync(() => {
+    it('should continue to next page on entering correct/verified invitation code', fakeAsync(() => {
 
         const app = invitationCodePage.fixture.debugElement.componentInstance;
         app.invitationKey = 'dummy';

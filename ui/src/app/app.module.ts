@@ -82,7 +82,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,
-      InvitationCodeComponent
+    InvitationCodeComponent
   ],
   providers: [
     BugReportService,
