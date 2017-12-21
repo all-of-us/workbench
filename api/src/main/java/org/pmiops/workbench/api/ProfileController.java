@@ -361,7 +361,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> invitationCodeVerification(InvitationVerRequest invitationVerRequest){
     if (invitationVerRequest.getInvitationKey() == null
-            || !invitationVerRequest.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
+        || !invitationVerRequest.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
               "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }

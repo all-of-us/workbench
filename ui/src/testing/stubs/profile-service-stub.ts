@@ -35,17 +35,15 @@ export class ProfileServiceStub {
   }
 
   public invitationCodeVerification(invitationVerRequest?: InvitationVerRequest): Observable<{}> {
-          if (invitationVerRequest.invitationKey === 'dummy') {
-              const observable = new Observable(observer => {
-                  observer.next(this.profile);
-              });
-              return observable;
-              }
-          const observable = new Observable(observer => {
-                  observer.error(new Error(`Invalid invitation code`));
-          });
-          return observable;
-
-
-    }
+    if (invitationVerRequest.invitationKey === 'dummy') {
+      const observable = new Observable(observer => {
+          observer.next(this.profile);
+      });
+      return observable;
+      }
+    const observable = new Observable(observer => {
+          observer.error(new Error(`Invalid invitation code`));
+    });
+    return observable;
+   }
 }

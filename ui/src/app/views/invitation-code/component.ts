@@ -17,7 +17,9 @@ export class InvitationCodeComponent {
     invitationSucc: boolean;
     invitationKeyReq: boolean;
     invitationKeyInvalid: boolean;
-    constructor(private profileService: ProfileService) {
+    constructor(
+        private profileService: ProfileService
+    ) {
         this.invitationSucc = false;
         this.invitationKeyReq = false;
         this.invitationKeyInvalid = false;
