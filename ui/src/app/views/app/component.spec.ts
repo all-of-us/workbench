@@ -25,8 +25,8 @@ describe('AppComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-          AccountCreationComponent,
-          InvitationCodeComponent,
+        AccountCreationComponent,
+        InvitationCodeComponent,
         AppComponent,
       ],
       providers: [
