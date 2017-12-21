@@ -11,7 +11,8 @@ import {Profile, ProfileService} from 'generated';
 export class ProfilePageComponent implements OnInit {
   verifiedStatusIsLoaded: boolean;
   verifiedStatusIsValid: boolean;
-
+  profile: Profile;
+  profileLoaded = false;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
@@ -27,6 +28,8 @@ export class ProfilePageComponent implements OnInit {
         (profile: Profile) => {
       this.verifiedStatusIsValid = profile.blockscoreVerificationIsValid;
       this.verifiedStatusIsLoaded = true;
+      this.profile = profile;
+      this.profileLoaded = true;
     });
   }
 
