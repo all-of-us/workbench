@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.Cohort;
@@ -169,7 +168,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.ok(responseReview);
     }
 
-    @NotNull
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
                                                                               QueryResult result,
                                                                               Map<String, Integer> rm) {

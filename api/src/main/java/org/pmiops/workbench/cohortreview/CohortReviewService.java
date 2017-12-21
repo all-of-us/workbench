@@ -5,11 +5,9 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface CohortReviewService {
 
     /**

@@ -12,9 +12,11 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CohortReviewServiceImpl implements CohortReviewService {
 
     private CohortReviewDao cohortReviewDao;
@@ -100,8 +102,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         participantId);
         if (participantCohortStatus == null) {
             throw new NotFoundException(
-                    String.format("Not Found: Participant Cohort Status does not exist for participantId: %s",
-                            participantId));
+                    String.format("Not Found: Participant Cohort Status does not exist for cohortReviewId: %s, participantId: %s",
+                            cohortReviewId, participantId));
         }
         return participantCohortStatus;
     }
