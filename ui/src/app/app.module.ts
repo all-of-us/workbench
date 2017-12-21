@@ -12,7 +12,6 @@ import {AccountCreationComponent} from './views/account-creation/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
-import {environment} from 'environments/environment';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
 
@@ -29,6 +28,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
+import {environment} from 'environments/environment';
 
 import {
   BugReportService,
