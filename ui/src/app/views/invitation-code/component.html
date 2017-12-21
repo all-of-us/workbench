@@ -3,11 +3,11 @@
             <div class="form-section">
             <label>Enter you Invitation Code:</label>
             <input type="text" class="input" [(ngModel)]="invitationKey">
-                <div *ngIf="invitationKeyReq" class="error">
-                    Invitation Code is required.
+                <div *ngIf="invitationKeyReq" class="alert alert-danger">
+                   <strong> Invitation Code is required.</strong>
                 </div>
-                <div *ngIf="invitationKeyInvalid" class="error">
-                    Invitation Code is not Valid.
+                <div *ngIf="invitationKeyInvalid" class="alert alert-danger">
+                    <strong> Invitation Code is not Valid.</strong>
                 </div>
 
             </div>

@@ -12,16 +12,17 @@ import {AccountCreationComponent} from './views/account-creation/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {environment} from 'environments/environment';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
+
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {InvitationCodeComponent} from './views/invitation-code/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
-import {InvitationCodeComponent} from './views/invitation-code/component';
-import {environment} from 'environments/environment';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
