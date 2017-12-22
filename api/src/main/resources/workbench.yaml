@@ -486,6 +486,37 @@ paths:
           schema:
             $ref: "#/definitions/ShareWorkspaceResponse"
 
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/clone:
+    post:
+      tags:
+        - workspaces
+      description: >
+        Clone an existing workspace, with given modifications to workspace metadata. Caller will own
+        the newly cloned workspace, and must have read access to the source workspace. In
+        addition to workspace metadata, the following will also be cloned:
+          - the associated Firecloud workspace
+          - cohorts, along with reviews and annotations
+          - notebooks located in the default notebook directory for this workspace
+      operationId: cloneWorkspace
+      parameters:
+          - in: path
+            name: workspaceNamespace
+            type: string
+            required: true
+          - in: path
+            name: workspaceId
+            type: string
+            required: true
+          - in: body
+            name: body
+            schema:
+              $ref: "#/definitions/CloneWorkspaceRequest"
+      responses:
+        "200":
+          description: Successful clone response
+          schema:
+            $ref: "#/definitions/CloneWorkspaceResponse"
+
   # Cohorts ##############################################################################
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -1657,6 +1688,31 @@ definitions:
         type: string
         description: >
           Updated workspace etag after the share request has been applied.
+
+  CloneWorkspaceRequest:
+    type: object
+    required:
+     - workspace
+    properties:
+      workspace:
+        $ref: "#/definitions/Workspace"
+        description: >
+          Workspace metadata to be applied to the cloned workspace upon creation. The following
+          workspace fields are accepted:
+            - name (required)
+            - namespace (required)
+            - researchPurpose (required)
+            - description: defaults to the cloned workspace description
+
+          All other fields will be ignored and are generated server-side or are copied from the
+          cloned workspace.
+
+  CloneWorkspaceResponse:
+    type: object
+    properties:
+      workspace:
+        $ref: "#/definitions/Workspace"
+        description: The newly created workspace clone.
 
   WorkspaceAccessLevel:
     type: string
