@@ -16,22 +16,9 @@ add_index_activity="-PrunList=add_bigdata_indexes"
 echo "Running big data migrations"
 # Ruby is not installed in our dev container and this script is short, so bash is fine.
 
-CREATE_DB_FILE=/tmp/create_db.sql
-
-function finish {
-  rm -f ${CREATE_DB_FILE}
-}
-trap finish EXIT
-
-cat create_db.sql | envsubst > $CREATE_DB_FILE
-echo "Creating database if it does not exist..."
-mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
-
-
 # Download data and import
-REMOTE_DATA_LOC=https://storage.googleapis.com/all-of-us-ehr-dev-peter-speltz
-REMOTE_DATA_BUCKET="gs://all-of-us-ehr-dev-peter-speltz"
-echo "Importing data files from REMOTE_DATA_LOC"
+REMOTE_DATA_LOC=https://storage.googleapis.com/all-of-us-workbench-cdr-init
+echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add data files to import here
 DATA_FILES=(concept.csv concept_relationship.csv)
@@ -41,7 +28,6 @@ for f in "${DATA_FILES[@]}"
 do
   local_fpath=/tmp/$f
   curl -o $local_fpath "$REMOTE_DATA_LOC/$f"
-  #gsutil cp $REMOTE_DATA_BUCKET/$f $f  # todo maybe , gives error now
   db_name=cdr
   table_name="${f%\.csv*}"
   mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} -e "truncate table $db_name.$table_name"
