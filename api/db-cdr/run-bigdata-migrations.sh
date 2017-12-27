@@ -42,7 +42,9 @@ do
   local_fpath=/tmp/$f
   db_name=cdr
   table_name="${f%\.csv*}"
-  mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-enclosed-by='"' --verbose --local -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} cdr $local_fpath
+  mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-enclosed-by='"' \
+    --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
+    -u root -p${MYSQL_ROOT_PASSWORD} cdr $local_fpath
   rm $local_fpath
 done
 
