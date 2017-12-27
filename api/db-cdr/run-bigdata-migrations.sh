@@ -28,7 +28,6 @@ for f in "${DATA_FILES[@]}"
 do
   local_fpath=/tmp/$f
   curl -o $local_fpath "$REMOTE_DATA_LOC/$f"
-  #gsutil cp $REMOTE_DATA_BUCKET/$f $f  # todo maybe , gives error now
   db_name=cdr
   table_name="${f%\.csv*}"
   mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} -e "truncate table $db_name.$table_name"
