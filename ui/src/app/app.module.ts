@@ -17,11 +17,7 @@ import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
 
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
-<<<<<<< HEAD
-import {InvitationCodeComponent} from './views/invitation-code/component';
-=======
 import {InvitationKeyComponent} from './views/invitation-key/component';
->>>>>>> 9bbb110eacea1e308ed70543bf9b691c105ccb6a
 import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
