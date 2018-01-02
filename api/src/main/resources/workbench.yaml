@@ -111,12 +111,12 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
-  /api/v1/google-invitation:
+  /api/v1/verifyInvitationKey:
     post:
       tags:
         - profile
-      description: Verifies invitation code.
-      operationId: invitationCodeVerification
+      description: Verifies invitation key.
+      operationId: invitationKeyVerification
       security: []
       parameters:
         - in: body
@@ -1915,6 +1915,14 @@ definitions:
       profile:
         $ref: '#/definitions/Profile'
       password:
+        type: string
+
+  InvitationVerRequest:
+    type: object
+    required:
+      - invitationKey
+    properties:
+      invitationKey:
         type: string
 
   InvitationVerRequest:

@@ -262,6 +262,10 @@ public class ProfileController implements ProfileApiDelegate {
 
     com.google.api.services.admin.directory.model.User googleUser;
     try {
+      if (!verifyInvitationKey(request.getInvitationKey())) {
+        throw new BadRequestException(
+                "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+      }
       googleUser = directoryService.createUser(request.getProfile().getGivenName(),
           request.getProfile().getFamilyName(), request.getProfile().getUsername(),
           request.getPassword());
@@ -359,12 +363,17 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> invitationCodeVerification(InvitationVerRequest invitationVerRequest){
-    if (invitationVerRequest.getInvitationKey() == null
-        || !invitationVerRequest.getInvitationKey().equals(cloudStorageService.readInvitationKey())) {
-      throw new BadRequestException(
-              "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+
+  public ResponseEntity<Void> invitationKeyVerification(InvitationVerRequest invitationVerRequest){
+    if (!verifyInvitationKey(invitationVerRequest.getInvitationKey())) {
+        throw new BadRequestException(
+          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private boolean verifyInvitationKey(String invitationKey){
+    return invitationKey != null && !invitationKey.equals("")
+      && invitationKey.equals(cloudStorageService.readInvitationKey());
   }
 }

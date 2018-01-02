@@ -14,7 +14,7 @@ export class ProfileStubVariables {
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
-    invitationKey : 'dummyKey'
+    invitationKey: 'dummyKey'
   };
 }
 
@@ -34,7 +34,7 @@ export class ProfileServiceStub {
     });
   }
 
-  public invitationCodeVerification(invitationVerRequest?: InvitationVerRequest): Observable<{}> {
+  public invitationKeyVerification(invitationVerRequest?: InvitationVerRequest): Observable<{}> {
     if (invitationVerRequest.invitationKey === 'dummy') {
       const observable = new Observable(observer => {
           observer.next(this.profile);

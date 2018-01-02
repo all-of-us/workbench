@@ -4,6 +4,7 @@ import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
+import {InvitationKeyComponent} from '../invitation-key/component';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
