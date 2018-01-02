@@ -95,7 +95,7 @@ buildscript {    // Configuration for building
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.9.0'
-    classpath 'io.swagger:swagger-codegen:+'
+    classpath 'io.swagger:swagger-codegen:2.2.3'
   }
 }
 
@@ -220,14 +220,17 @@ dependencies {
   testCompile 'org.liquibase:liquibase-core:+'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
-  // For Swagger generation
+  // For Swagger generation. These should include dependencies found in the Swagger codegen
+  // example here:
+  // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
   generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
-  generatedCompile 'io.springfox:springfox-swagger2:2.5.0'
-  generatedCompile 'io.springfox:springfox-swagger-ui:2.5.0'
+  generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
+  generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:+'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:+'
   generatedCompile 'com.google.code.gson:gson:+'
   generatedCompile 'joda-time:joda-time:+'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
 
 }
 
