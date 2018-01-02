@@ -28,6 +28,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
+import {IconsModule} from './icons/icons.module';
 
 import {
   BugReportService,
@@ -62,6 +63,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
+    IconsModule,
     ClarityModule.forRoot(),
     CohortSearchModule,
     CohortReviewModule,

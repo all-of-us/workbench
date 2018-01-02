@@ -3,11 +3,11 @@
     <h2>{{workspace.name}}</h2>
     <clr-button-group class="permissions-group">
       <clr-button [disabled]="!writePermission" (click)="edit()"
-          class="btn btn-icon tooltip tooltip-sm">
-        <img src="assets/icons/edit.svg" alt="Edit" class="icon">
+          class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+        <app-edit></app-edit>
         <span class="tooltip-content">Edit Workspace</span>
       </clr-button>
-      <clr-button (click)="share()" class="btn btn-icon tooltip tooltip-sm">
+      <clr-button (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
         <img src="assets/icons/share.svg" alt="Share" class="icon">
         <span class="tooltip-content">Share Workspace</span>
       </clr-button>
