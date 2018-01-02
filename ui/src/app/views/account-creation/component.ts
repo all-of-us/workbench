@@ -38,7 +38,7 @@ export class AccountCreationComponent {
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
-    private invitationKeyService : InvitationKeyComponent
+    private invitationKeyService: InvitationKeyComponent
   ) {}
 
   createAccount(): void {
@@ -58,7 +58,8 @@ export class AccountCreationComponent {
     }
 
     const request: CreateAccountRequest = {
-      profile: this.profile, password: this.password, invitationKey:this.invitationKeyService.invitationKey
+      profile: this.profile, password: this.password,
+      invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAcccount = true;
     this.profileService.createAccount(request).subscribe(() => {
