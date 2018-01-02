@@ -6,7 +6,11 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.any;
 
+import com.blockscore.models.Address;
+import com.blockscore.models.Person;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -36,6 +40,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -76,12 +81,16 @@ public class ProfileControllerTest {
   private CloudStorageService cloudStorageService;
   @Mock
   private BlockscoreService blockscoreService;
+  @Mock
+  private Person person;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
+  private IdVerificationRequest idVerificationRequest;
+  private User user;
 
   @Before
   public void setUp() {
@@ -111,6 +120,9 @@ public class ProfileControllerTest {
     userInfo.setFamilyName(FAMILY_NAME);
     userInfo.setGivenName(GIVEN_NAME);
 
+    idVerificationRequest = new IdVerificationRequest();
+    idVerificationRequest.setFirstName("Bob");
+
     UserService userService = new UserService(userProvider, userDao, clock);
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
@@ -132,6 +144,100 @@ public class ProfileControllerTest {
     createUser();
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
+    assertThat(user.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSubmitIdVerification_notFound() throws Exception {
+    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
+        eq(null), eq(null), eq(null))).thenReturn(person);
+    when(person.getId()).thenReturn("id");
+    when(person.isValid()).thenReturn(true);
+    profileController.submitIdVerification(idVerificationRequest);
+  }
+
+  @Test
+  public void testSubmitIdVerification_success() throws Exception {
+    createUser();
+    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
+        eq(null), eq(null), eq(null))).thenReturn(person);
+    when(person.getId()).thenReturn("id");
+    when(person.isValid()).thenReturn(true);
+    Profile profile = profileController.submitIdVerification(idVerificationRequest).getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(profile.getBlockscoreVerificationIsValid()).isTrue();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
+    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
+    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSubmitDemographicSurvey_notFound() throws Exception {
+    profileController.submitDemographicsSurvey();
+  }
+
+  @Test
+  public void testSubmitDemographicSurvey_success() throws Exception {
+    createUser();
+    Profile profile = profileController.submitDemographicsSurvey().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(profile.getBlockscoreVerificationIsValid()).isNull();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
+    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSubmitTermsOfService_notFound() throws Exception {
+    profileController.submitTermsOfService();
+  }
+
+  @Test
+  public void testSubmitTermsOfService_success() throws Exception {
+    createUser();
+    Profile profile = profileController.submitTermsOfService().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(profile.getBlockscoreVerificationIsValid()).isNull();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
+    assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSubmitEthicsTraining_notFound() throws Exception {
+    profileController.submitEthicsTraining();
+  }
+
+  @Test
+  public void testSubmitEthicsTraining_success() throws Exception {
+    createUser();
+    Profile profile = profileController.submitEthicsTraining().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(profile.getBlockscoreVerificationIsValid()).isNull();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
+    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
+    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+  }
+
+  @Test
+  public void testSubmitEverything_success() throws Exception {
+    createUser();
+    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
+        eq(null), eq(null), eq(null))).thenReturn(person);
+    when(person.getId()).thenReturn("id");
+    when(person.isValid()).thenReturn(true);
+    Profile profile = profileController.submitEthicsTraining().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    profile = profileController.submitDemographicsSurvey().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    profile = profileController.submitTermsOfService().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    profile = profileController.submitIdVerification(idVerificationRequest).getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
+    assertThat(profile.getBlockscoreVerificationIsValid()).isTrue();
+    assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
   @Test(expected = ServerErrorException.class)
@@ -161,7 +267,6 @@ public class ProfileControllerTest {
 
   @Test
   public void testMe_noUserBeforeSuccessDevProjectConflict() throws Exception {
-    when(userProvider.get()).thenReturn(null);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     Profile profile = profileController.getMe().getBody();
@@ -181,8 +286,6 @@ public class ProfileControllerTest {
   @Test
   public void testMe_userBeforeSuccessCloudProjectConflict() throws Exception {
     createUser();
-    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    when(userProvider.get()).thenReturn(user);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
@@ -207,8 +310,6 @@ public class ProfileControllerTest {
   @Test
   public void testMe_userBeforeSuccessCloudProjectTooManyConflicts() throws Exception {
     createUser();
-    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    when(userProvider.get()).thenReturn(user);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
@@ -246,7 +347,6 @@ public class ProfileControllerTest {
   @Test
   public void testMe_userBeforeNotLoggedInSuccess() throws Exception {
     createUser();
-    when(userProvider.get()).thenReturn(userDao.findUserByEmail(PRIMARY_EMAIL));
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     Profile profile = profileController.getMe().getBody();
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
@@ -297,9 +397,11 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
         .thenReturn(googleUser);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
-    return profileController.createAccount(createAccountRequest).getBody();
+    Profile result = profileController.createAccount(createAccountRequest).getBody();
+    user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    when(userProvider.get()).thenReturn(user);
+    return result;
   }
-
 
   private void assertProfile(Profile profile, String primaryEmail, String contactEmail,
       String familyName, String givenName, DataAccessLevel dataAccessLevel,

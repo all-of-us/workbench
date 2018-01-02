@@ -7,6 +7,7 @@ import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -39,6 +40,9 @@ public class UserService {
    */
   private User updateWithRetries(Function<User, User> userModifier) {
     User user = userProvider.get();
+    if (user == null) {
+      throw new NotFoundException("Could not find record for authenticated user");
+    }
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -59,10 +63,11 @@ public class UserService {
 
   private void updateDataAccessLevel(User user) {
     if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
-      if (user.getBlockscoreVerificationIsValid()
-        && user.getDemographicSurveyCompletionTime() != null
-        && user.getEthicsTrainingCompletionTime() != null
-        && user.getTermsOfServiceCompletionTime() != null) {
+      if (user.getBlockscoreVerificationIsValid() != null
+          && user.getBlockscoreVerificationIsValid()
+          && user.getDemographicSurveyCompletionTime() != null
+          && user.getEthicsTrainingCompletionTime() != null
+          && user.getTermsOfServiceCompletionTime() != null) {
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
     }
