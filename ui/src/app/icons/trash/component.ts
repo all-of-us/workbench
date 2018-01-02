@@ -3,11 +3,11 @@ import {Component, Input} from '@angular/core';
 
 
 @Component({
-  selector: 'app-edit',
+  selector: 'app-trash',
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class EditComponent {
-  @Input() editHover: boolean;
+export class TrashComponent {
+  @Input() trashHover: boolean;
   constructor() {}
 }

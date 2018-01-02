@@ -1,14 +1,20 @@
 import {NgModule} from '@angular/core';
 
 import {EditComponent} from './edit/component';
+import {ShareComponent} from './share/component';
+import {TrashComponent} from './trash/component';
 
 @NgModule({
   imports: [],
   declarations: [
-    EditComponent
+    TrashComponent,
+    EditComponent,
+    ShareComponent
   ],
   exports: [
-    EditComponent
+    TrashComponent,
+    EditComponent,
+    ShareComponent
   ],
   providers: []
 })

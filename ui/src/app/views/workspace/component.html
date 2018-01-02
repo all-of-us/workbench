@@ -1,23 +1,26 @@
 <div *ngIf="!notFound else notFoundMessage">
   <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
     <h2>{{workspace.name}}</h2>
-    <clr-button-group class="permissions-group">
-      <clr-button [disabled]="!writePermission" (click)="edit()"
+    <div class="btn-group btn-primary-outline permissions-group">
+      <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
+          [disabled]="!writePermission" (click)="edit()"
           class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-        <app-edit></app-edit>
+        <app-edit [editHover]="editHover"></app-edit>
         <span class="tooltip-content">Edit Workspace</span>
-      </clr-button>
-      <clr-button (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-        <img src="assets/icons/share.svg" alt="Share" class="icon">
+      </button>
+      <button (mouseover)="shareHover=true" (mouseleave)="shareHover=false"
+          (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+        <app-share [shareHover]="shareHover"></app-share>
         <span class="tooltip-content">Share Workspace</span>
-      </clr-button>
-      <clr-button [disabled]="!ownerPermission"
+      </button>
+      <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
+          [disabled]="!ownerPermission"
           class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
           (click)="delete()" [clrLoading]="deleting">
-        <img src="assets/icons/trash.svg" alt="Delete" class="icon">
+        <app-trash [trashHover]="trashHover"></app-trash>
         <span class="tooltip-content">Delete Workspace</span>
-      </clr-button>
-    </clr-button-group>
+      </button>
+    </div>
   </div>
   <ng-template #workspacePageLoading>
     <div class="loading-area">
