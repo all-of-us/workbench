@@ -3,16 +3,19 @@
     <h2>{{workspace.name}}</h2>
     <clr-button-group class="permissions-group">
       <clr-button [disabled]="!writePermission" (click)="edit()"
-          class="btn btn-icon">
+          class="btn btn-icon tooltip tooltip-sm">
         <img src="assets/icons/edit.svg" alt="Edit" class="icon">
+        <span class="tooltip-content">Edit Workspace</span>
       </clr-button>
-      <clr-button (click)="share()" class="btn btn-icon">
+      <clr-button (click)="share()" class="btn btn-icon tooltip tooltip-sm">
         <img src="assets/icons/share.svg" alt="Share" class="icon">
+        <span class="tooltip-content">Share Workspace</span>
       </clr-button>
       <clr-button [disabled]="!ownerPermission"
-          (click)="delete()" class="btn btn-icon btn-danger-outline btn-deleting"
-          [clrLoading]="deleting">
+          class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
+          (click)="delete()" [clrLoading]="deleting">
         <img src="assets/icons/trash.svg" alt="Delete" class="icon">
+        <span class="tooltip-content">Delete Workspace</span>
       </clr-button>
     </clr-button-group>
   </div>
