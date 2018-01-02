@@ -11,16 +11,16 @@ function isBlank(s: string) {
     templateUrl: './component.html'
 })
 
-export class InvitationCodeComponent {
+export class InvitationKeyComponent {
 
     invitationKey: string;
-    invitationSucc: boolean;
+    invitationKeyVerifed: boolean;
     invitationKeyReq: boolean;
     invitationKeyInvalid: boolean;
     constructor(
         private profileService: ProfileService
     ) {
-        this.invitationSucc = false;
+        this.invitationKeyVerifed = false;
         this.invitationKeyReq = false;
         this.invitationKeyInvalid = false;
     }
@@ -37,8 +37,8 @@ export class InvitationCodeComponent {
         const request: InvitationVerRequest = {
             invitationKey: this.invitationKey
         };
-        this.profileService.invitationCodeVerification(request).subscribe(() => {
-            this.invitationSucc = true;
+        this.profileService.invitationKeyVerification(request).subscribe(() => {
+            this.invitationKeyVerifed = true;
         }, () => {
             this.invitationKeyInvalid = true;
         });

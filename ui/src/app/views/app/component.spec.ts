@@ -12,7 +12,7 @@ import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
-import {InvitationCodeComponent} from '../invitation-code/component';
+import {InvitationKeyComponent} from '../invitation-key/component';
 
 
 describe('AppComponent', () => {
@@ -26,7 +26,7 @@ describe('AppComponent', () => {
       ],
       declarations: [
         AccountCreationComponent,
-        InvitationCodeComponent,
+        InvitationKeyComponent,
         AppComponent,
       ],
       providers: [

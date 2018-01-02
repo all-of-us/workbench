@@ -16,19 +16,19 @@ import {
 import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
-import {InvitationCodeComponent} from '../invitation-code/component';
+import {InvitationKeyComponent} from './/component';
 
 
 
 
 
-class InvitationCodePage {
-    fixture: ComponentFixture<InvitationCodeComponent>;
+class InvitationKeyPage {
+    fixture: ComponentFixture<InvitationKeyComponent>;
     route: UrlSegment[];
     nextButton: DebugElement;
 
     constructor(testBed: typeof TestBed) {
-        this.fixture = testBed.createComponent(InvitationCodeComponent);
+        this.fixture = testBed.createComponent(InvitationKeyComponent);
         this.readPageData();
     }
 
@@ -39,8 +39,8 @@ class InvitationCodePage {
 
     }
 }
-describe('InvitationCodeComponent', () => {
-    let invitationCodePage: InvitationCodePage;
+describe('InvitationKeyComponent', () => {
+    let invitationKeyPage: InvitationKeyPage;
 
     beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
@@ -51,23 +51,23 @@ describe('InvitationCodeComponent', () => {
       ],
       declarations: [
           AccountCreationComponent,
-          InvitationCodeComponent
+          InvitationKeyComponent
       ],
       providers: [
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: SignInService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
-        invitationCodePage = new InvitationCodePage(TestBed);
+        invitationKeyPage = new InvitationKeyPage(TestBed);
     });
     tick();
   }));
 
   it('should create the app', fakeAsync(() => {
-    const fixture = TestBed.createComponent(InvitationCodeComponent);
+    const fixture = TestBed.createComponent(InvitationKeyComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
-    expect(app.invitationSucc).toBeFalsy();
+    expect(app.invitationKeyVerifed).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
 
@@ -76,31 +76,31 @@ describe('InvitationCodeComponent', () => {
 
     it('should not accept blank invitation code', fakeAsync(() => {
 
-        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
-        const app = invitationCodePage.fixture.debugElement.componentInstance;
+        simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+        const app = invitationKeyPage.fixture.debugElement.componentInstance;
 
-        expect(app.invitationSucc).toBeFalsy();
+        expect(app.invitationKeyVerifed).toBeFalsy();
         expect(app.invitationKeyReq).toBeTruthy();
         expect(app.invitationKeyInvalid).toBeFalsy();
     }));
     it('should throw an error with invalid invitation code', fakeAsync(() => {
 
-        const app = invitationCodePage.fixture.debugElement.componentInstance;
+        const app = invitationKeyPage.fixture.debugElement.componentInstance;
         app.invitationKey = 'invalid';
 
-        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
-        expect(app.invitationSucc).toBeFalsy();
+        simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+        expect(app.invitationKeyVerifed).toBeFalsy();
         expect(app.invitationKeyReq).toBeFalsy();
         expect(app.invitationKeyInvalid).toBeTruthy();
     }));
 
     it('should continue to next page on entering correct invitation code', fakeAsync(() => {
 
-        const app = invitationCodePage.fixture.debugElement.componentInstance;
+        const app = invitationKeyPage.fixture.debugElement.componentInstance;
         app.invitationKey = 'dummy';
 
-        simulateClick(invitationCodePage.fixture, invitationCodePage.nextButton);
-        expect(app.invitationSucc).toBeTruthy();
+        simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+        expect(app.invitationKeyVerifed).toBeTruthy();
         expect(app.invitationKeyReq).toBeFalsy();
         expect(app.invitationKeyInvalid).toBeFalsy();
     }));
