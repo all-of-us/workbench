@@ -1927,14 +1927,6 @@ definitions:
       invitationKey:
         type: string
 
-  InvitationVerRequest:
-    type: object
-    required:
-      - invitationKey
-    properties:
-      invitationKey:
-        type: string
-
   BugReport:
     type: object
     required:
