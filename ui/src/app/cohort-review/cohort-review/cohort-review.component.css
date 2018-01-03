@@ -21,3 +21,9 @@
 [appSidebar] .closebtn:hover {
   color: rgb(166, 166, 166);
 }
+
+.contents-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
