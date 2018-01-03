@@ -73,6 +73,12 @@ local API server under http://localhost:8081/api/.
 ./project.rb run-local-data-migrations
 ```
 
+**Big data such as concept and concept_relationship required for some functionality can be populated by  
+```Shell
+./project.rb run-local-bigdata-migrations
+```
+
+
 
 Other available operations may be discovered by running:
 ```Shell
