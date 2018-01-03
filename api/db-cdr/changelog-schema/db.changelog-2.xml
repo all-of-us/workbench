@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="biopete" id="changelog-2">
-
+    <validCheckSum>ANY</validCheckSum>
     <createTable tableName="concept" schemaName="cdr">
       <column name="concept_id" type="INTEGER">
         <constraints primaryKey="true" nullable="false"/>
@@ -45,7 +45,6 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-
     <createIndex
             indexName="idx_concept_name"
             schemaName="cdr"
