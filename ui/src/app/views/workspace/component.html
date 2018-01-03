@@ -1,20 +1,26 @@
 <div *ngIf="!notFound else notFoundMessage">
   <div *ngIf="!workspaceLoading; else workspacePageLoading" style="display: flex;">
     <h2>{{workspace.name}}</h2>
-    <clr-button-group class="permissions-group btn-primary">
-      <clr-button [disabled]="!writePermission" (click)="edit()"
-          class="btn btn-icon">
-        <clr-icon class="is-solid" shape="pencil"></clr-icon>
-      </clr-button>
-      <clr-button (click)="share()" class="btn btn-icon">
-        <clr-icon class="is-solid" shape="users"></clr-icon>
-      </clr-button>
-      <clr-button [disabled]="!ownerPermission"
-          (click)="delete()" class="btn btn-icon btn-danger btn-deleting"
-          [clrLoading]="deleting">
-        <clr-icon class="is-solid" shape="trash"></clr-icon>
-      </clr-button>
-    </clr-button-group>
+    <div class="btn-group btn-primary-outline permissions-group">
+      <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
+          [disabled]="!writePermission" (click)="edit()"
+          class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+        <app-edit-icon [editHover]="editHover"></app-edit-icon>
+        <span class="tooltip-content">Edit Workspace</span>
+      </button>
+      <button (mouseover)="shareHover=true" (mouseleave)="shareHover=false"
+          (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+        <app-share-icon [shareHover]="shareHover"></app-share-icon>
+        <span class="tooltip-content">Share Workspace</span>
+      </button>
+      <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
+          [disabled]="!ownerPermission"
+          class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
+          (click)="delete()" [clrLoading]="deleting">
+        <app-trash-icon [trashHover]="trashHover"></app-trash-icon>
+        <span class="tooltip-content">Delete Workspace</span>
+      </button>
+    </div>
   </div>
   <ng-template #workspacePageLoading>
     <div class="loading-area">
