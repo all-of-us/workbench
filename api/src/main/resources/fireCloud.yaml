@@ -262,6 +262,34 @@ paths:
           description: Workspace not found
         500:
           description: Internal Server Error
+
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/clone:
+    post:
+      tags:
+        - Workspaces
+      operationId: cloneWorkspace
+      summary: Clone Workspace
+      parameters:
+        - $ref: '#/parameters/workspaceNamespaceParam'
+        - $ref: '#/parameters/workspaceNameParam'
+        - name: workspace
+          description: Cloned workspace information
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/WorkspaceIngest'
+      responses:
+        201:
+          description: Successful Request
+        400:
+          description: Unable to create resources for workspace
+        404:
+          description: Source workspace not found
+        409:
+          description: Destination workspace already exists
+        500:
+          description: Internal Server Error
+
   /me:
     get:
       tags:
