@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 
 
 @Component({
-  selector: 'app-share',
+  selector: 'app-share-icon',
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })

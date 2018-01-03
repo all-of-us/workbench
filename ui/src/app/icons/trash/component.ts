@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 
 
 @Component({
-  selector: 'app-trash',
+  selector: 'app-trash-icon',
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })

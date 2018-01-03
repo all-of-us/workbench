@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 
 
 @Component({
-  selector: 'app-edit',
+  selector: 'app-edit-icon',
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
