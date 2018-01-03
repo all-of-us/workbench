@@ -290,8 +290,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private void checkWorkspaceWriteAccess(String workspaceNamespace, String workspaceId) {
     WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!WorkspaceAccessLevel.OWNER.equals(userAccess) &&
-        !WorkspaceAccessLevel.WRITER.equals(userAccess)) {
+    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
+          WorkspaceAccessLevel.WRITER.equals(userAccess))) {
       throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
           workspaceNamespace, workspaceId));
     }
@@ -299,9 +299,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private void checkWorkspaceReadAccess(String workspaceNamespace, String workspaceId) {
     WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!WorkspaceAccessLevel.OWNER.equals(userAccess) &&
-        !WorkspaceAccessLevel.WRITER.equals(userAccess) &&
-        !WorkspaceAccessLevel.READER.equals(userAccess)) {
+    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
+          WorkspaceAccessLevel.WRITER.equals(userAccess) ||
+          WorkspaceAccessLevel.READER.equals(userAccess))) {
       throw new ForbiddenException(String.format("Insufficient permissions to read workspace %s/%s",
           workspaceNamespace, workspaceId));
     }
@@ -508,9 +508,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(String workspaceNamespace,
       String workspaceId, CloneWorkspaceRequest body) {
     Workspace workspace = body.getWorkspace();
-    if (workspace.getNamespace().equals("")) {
+    if (Strings.isNullOrEmpty(workspace.getNamespace())) {
       throw new BadRequestException("missing required field 'workspace.namespace'");
-    } else if (workspace.getName().equals("")) {
+    } else if (Strings.isNullOrEmpty(workspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
