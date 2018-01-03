@@ -13,6 +13,7 @@ export class ProfilePageComponent implements OnInit {
   verifiedStatusIsValid: boolean;
   profile: Profile;
   profileLoaded = false;
+  editHover = false;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
