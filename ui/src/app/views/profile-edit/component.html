@@ -4,10 +4,10 @@
 <input *ngIf="profileLoaded else loading" type="text" autofocus
     [(ngModel)]="profile.givenName">
 <h5>Family Name:</h5>
-<input *ngIf="profileLoaded else loading" type="text" autofocus
+<input *ngIf="profileLoaded else loading" type="text"
     [(ngModel)]="profile.familyName">
 <h5>Contact Email:</h5>
-<input *ngIf="profileLoaded else loading" type="text" autofocus
+<input *ngIf="profileLoaded else loading" type="text"
     [(ngModel)]="profile.contactEmail">
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
