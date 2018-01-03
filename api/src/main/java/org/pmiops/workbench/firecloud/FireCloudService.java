@@ -41,6 +41,11 @@ public interface FireCloudService {
   void createWorkspace(String projectName, String workspaceName) throws ApiException;
 
   /**
+   * Clones an existing workspace.
+   */
+  void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
+
+  /**
    * Retrieves all billing project memberships for the user from FireCloud.
    */
   List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;

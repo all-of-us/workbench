@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -29,9 +31,11 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -106,26 +110,17 @@ public class WorkspacesControllerTest {
 
   }
 
-  private void stubGetWorkspaceOwner(String ns, String name, String creator) throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
+  private void stubGetWorkspace(String ns, String name, String creator,
+      WorkspaceAccessLevel access) throws Exception {
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        new org.pmiops.workbench.firecloud.model.Workspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse = new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
-      fcResponse
-    );
-  }
-  private void stubGetWorkspaceReader(String ns, String name, String creator) throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
-    fcWorkspace.setNamespace(ns);
-    fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse = new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
       fcResponse
     );
@@ -164,7 +159,8 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
-    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
@@ -222,7 +218,8 @@ public class WorkspacesControllerTest {
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
 
-    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -240,7 +237,7 @@ public class WorkspacesControllerTest {
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
     request.setApproved(true);
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getName(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     ws = workspacesController.getWorkspace(ws.getNamespace(), ws.getName()).getBody().getWorkspace();
     researchPurpose = ws.getResearchPurpose();
 
@@ -254,18 +251,20 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getId(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(),
+        ws.getCreator(), WorkspaceAccessLevel.OWNER);
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(),
+        ws.getCreator(), WorkspaceAccessLevel.OWNER);
     updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getId(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     Workspace got = workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
   }
@@ -276,7 +275,7 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
-    stubGetWorkspaceReader(ws.getNamespace(), ws.getId(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
   }
@@ -285,12 +284,14 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(),
+        ws.getCreator(), WorkspaceAccessLevel.OWNER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
         new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
 
     // Still using the initial now-stale etag; this should throw.
-    stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
+    stubGetWorkspace(ws.getNamespace(), ws.getId(),
+        ws.getCreator(), WorkspaceAccessLevel.OWNER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
         new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
   }
@@ -304,7 +305,8 @@ public class WorkspacesControllerTest {
     List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
     for (String etag : cases) {
       try {
-        stubGetWorkspaceOwner(ws.getNamespace(), ws.getName(), ws.getCreator());
+        stubGetWorkspace(ws.getNamespace(), ws.getId(),
+            ws.getCreator(), WorkspaceAccessLevel.OWNER);
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
             new Workspace().name("updated-name").etag(etag));
         fail(String.format("expected BadRequestException for etag: %s", etag));
@@ -366,6 +368,157 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testCloneWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    // The original workspace is shared with one other user.
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+
+    writerUser = userDao.save(writerUser);
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole creator = new UserRole();
+    creator.setEmail(this.loggedInUserEmail);
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail(writerUser.getEmail());
+    writer.setRole(WorkspaceAccessLevel.WRITER);
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(),
+        anyListOf(WorkspaceACLUpdate.class))).thenReturn(new WorkspaceACLUpdateResponseList());
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+    Workspace workspace2 =
+        workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody().getWorkspace();
+
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    assertWithMessage("get and clone responses are inconsistent")
+        .that(workspace2)
+        .isEqualTo(
+          workspacesController.getWorkspace(workspace2.getNamespace(),
+              workspace2.getId()).getBody().getWorkspace());
+
+    assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
+    assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
+    assertThat(workspace2.getResearchPurpose()).isEqualTo(modPurpose);
+
+    // Original description should have been copied.
+    assertThat(workspace2.getDescription()).isEqualTo(workspace.getDescription());
+
+    // User roles should *not* be copied.
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
+    assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+  }
+
+  @Test
+  public void testCloneWorkspaceDifferentOwner() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    User cloner = new User();
+    cloner.setEmail("cloner@gmail.com");
+    cloner.setUserId(456L);
+    cloner.setFreeTierBillingProjectName("TestBillingProject1");
+    cloner = userDao.save(cloner);
+    when(userProvider.get()).thenReturn(cloner);
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.READER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+    Workspace workspace2 =
+        workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody().getWorkspace();
+
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
+    assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+    assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspaceBadRequest() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    req.setWorkspace(modWorkspace);
+    // Missing research purpose.
+    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testCloneNotFound() throws Exception {
+    doThrow(new ApiException(404, "")).when(fireCloudService).getWorkspace("doesnot", "exist");
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    req.setWorkspace(modWorkspace);
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    workspacesController.cloneWorkspace("doesnot", "exist", req);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testClonePermissionDenied() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    // Clone with a different user.
+    User cloner = new User();
+    cloner.setEmail("cloner@gmail.com");
+    cloner.setUserId(456L);
+    cloner.setFreeTierBillingProjectName("TestBillingProject1");
+    cloner = userDao.save(cloner);
+    when(userProvider.get()).thenReturn(cloner);
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.NO_ACCESS);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    req.setWorkspace(modWorkspace);
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+  }
+
+  @Test
   public void testShareWorkspace() throws Exception{
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
@@ -401,7 +554,7 @@ public class WorkspacesControllerTest {
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -465,7 +618,8 @@ public class WorkspacesControllerTest {
     CLOCK.increment(1000);
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspaceOwner(workspace.getNamespace(), workspace.getId(), workspace.getCreator());
+    stubGetWorkspace(workspace.getNamespace(), workspace.getId(),
+        workspace.getCreator(), WorkspaceAccessLevel.OWNER);
     Workspace workspace2 = workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
