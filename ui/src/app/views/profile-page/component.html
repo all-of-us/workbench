@@ -1,7 +1,8 @@
 <h2>Profile</h2>
-<button routerLink="edit" class="btn">
+<button routerLink="edit" class="btn btn-icon">
   <clr-icon class="is-solid" shape="pencil"></clr-icon>
 </button>
+<span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
 <h5>Given Name:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.givenName}}</div>
 <h5>Family Name:</h5>
@@ -12,7 +13,6 @@
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>
   <div class="loading-area">
-    <span class="spinner spinner-sm"></span>
     <span class="loading-text">Loading...</span>
   </div>
 </ng-template>

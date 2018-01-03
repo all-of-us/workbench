@@ -1,4 +1,5 @@
 <h2>Profile</h2>
+<span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
 <h5>Given Name:</h5>
 <input *ngIf="profileLoaded else loading" type="text" autofocus
     [(ngModel)]="profile.givenName">
@@ -12,7 +13,6 @@
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>
   <div class="loading-area">
-    <span class="spinner spinner-sm"></span>
     <span class="loading-text">Loading...</span>
   </div>
 </ng-template>
