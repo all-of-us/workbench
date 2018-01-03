@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -8,15 +9,16 @@ import {Profile, ProfileService} from 'generated';
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class ProfilePageComponent implements OnInit {
+export class ProfileEditComponent implements OnInit {
   verifiedStatusIsLoaded: boolean;
   verifiedStatusIsValid: boolean;
   profile: Profile;
   profileLoaded = false;
-  editHover = false;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
+      private route: ActivatedRoute,
+      private router: Router,
       private signInService: SignInService,
   ) {}
 
@@ -38,5 +40,13 @@ export class ProfilePageComponent implements OnInit {
     this.profileService.deleteAccount().subscribe(() => {
       this.signInService.signOut();
     });
+  }
+
+  submitChanges(): void {
+    this.errorHandlingService.retryApi(
+        this.profileService.updateProfile(this.profile)).subscribe(() => {
+        this.router.navigate(['../'], {relativeTo : this.route});
+      }
+    );
   }
 }

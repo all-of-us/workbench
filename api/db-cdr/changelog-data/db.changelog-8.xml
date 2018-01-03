@@ -9,7 +9,7 @@
 
     <validCheckSum>ANY</validCheckSum>
 
-    <loadData tableName="criteria" file="csv/phecodes_criteria.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="criteria" file="csv/measurements_criteria.csv" encoding="UTF-8" quotchar='"'>
       <column name="id" type="NUMERIC"/>
       <column name="parent_id" type="NUMERIC"/>
       <column name="type" type="STRING"/>
