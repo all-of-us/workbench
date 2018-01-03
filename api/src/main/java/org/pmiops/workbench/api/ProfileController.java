@@ -367,6 +367,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     user.setContactEmail(updatedProfile.getContactEmail());
+    // This does not update the name in Google.
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
