@@ -10,6 +10,7 @@ import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantPagerComponent} from './participant-pager/participant-pager.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {ReviewHeaderComponent} from './review-header/review-header.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
@@ -27,9 +28,20 @@ const routes = [{
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Participants'},
   children: [
-    {path: '', redirectTo: 'overview', pathMatch: 'full'},
-    {path: 'overview', component: OverviewComponent},
-    {path: ':participantId', component: ParticipantDetailComponent},
+    {
+      path: '',
+      redirectTo: 'overview',
+      pathMatch: 'full',
+    }, {
+      path: 'overview',
+      component: OverviewComponent,
+    }, {
+      path: 'participants',
+      component: ParticipantTableComponent,
+    }, {
+      path: 'participants/:participantId',
+      component: ParticipantDetailComponent,
+    },
   ],
   resolve: {
     cohort: CohortResolver,
@@ -53,6 +65,7 @@ const routes = [{
     ParticipantDetailComponent,
     ParticipantPagerComponent,
     ParticipantStatusComponent,
+    ParticipantTableComponent,
     ReviewHeaderComponent,
   ],
   providers: [

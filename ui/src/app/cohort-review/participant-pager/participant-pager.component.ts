@@ -15,6 +15,7 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
+
 @Component({
   selector: 'app-participant-pager',
   templateUrl: './participant-pager.component.html',
