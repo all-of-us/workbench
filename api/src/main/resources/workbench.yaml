@@ -125,9 +125,9 @@ paths:
             $ref: "#/definitions/InvitationVerRequest"
       responses:
         "200":
-          description: Invitation Code verified.
+          description: Invitation Key verified.
         "400":
-          description: Error occurred while verifying Invitation Code .
+          description: Error occurred while verifying Invitation Key .
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -1916,6 +1916,8 @@ definitions:
         $ref: '#/definitions/Profile'
       password:
         type: string
+      invitationKey:
+              type: string
 
   InvitationVerRequest:
     type: object

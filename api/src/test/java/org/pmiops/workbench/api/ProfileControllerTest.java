@@ -7,16 +7,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import com.google.api.Billing;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
-import com.mysql.fabric.Server;
+
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -86,7 +82,7 @@ public class ProfileControllerTest {
   private ProfileController profileController;
   private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
-  private InvitationVerRequest invitationCodeVerRequest;
+  private InvitationVerRequest invitationKeyVerRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
 
@@ -99,7 +95,7 @@ public class ProfileControllerTest {
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
-    invitationCodeVerRequest = new InvitationVerRequest();
+    invitationKeyVerRequest = new InvitationVerRequest();
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -107,7 +103,7 @@ public class ProfileControllerTest {
     profile.setUsername(USERNAME);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setPassword(PASSWORD);
-    invitationCodeVerRequest.setInvitationKey(INVITATION_KEY);
+    invitationKeyVerRequest.setInvitationKey(INVITATION_KEY);
 
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
@@ -133,7 +129,7 @@ public class ProfileControllerTest {
   @Test(expected = BadRequestException.class)
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
-    profileController.invitationCodeVerification(invitationCodeVerRequest);
+    profileController.invitationCodeVerification(invitationKeyVerRequest);
   }
 
   @Test

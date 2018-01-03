@@ -6,7 +6,7 @@ function isBlank(s: string) {
     return (!s || /^\s*$/.test(s));
 }
 @Component ({
-    selector : 'app-invitation-code',
+    selector : 'app-invitation-key',
     styleUrls: ['./component.css'],
     templateUrl: './component.html'
 })
