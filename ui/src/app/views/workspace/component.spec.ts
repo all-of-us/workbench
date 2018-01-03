@@ -4,6 +4,7 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
 
+import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
@@ -75,6 +76,7 @@ describe('WorkspaceComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
+        IconsModule,
         ClarityModule.forRoot()
       ],
       declarations: [

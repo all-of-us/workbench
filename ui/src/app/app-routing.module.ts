@@ -9,6 +9,7 @@ import {CohortResolver} from './guards/cohort-resolver.guard';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
@@ -40,6 +41,10 @@ const routes: Routes = [
   }, {
     path: 'profile',
     component: ProfilePageComponent,
+    data: {title: 'Profile'}
+  }, {
+    path: 'profile/edit',
+    component: ProfileEditComponent,
     data: {title: 'Profile'}
   }, {
     path: 'workspace/:ns/:wsid',
