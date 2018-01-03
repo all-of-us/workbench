@@ -540,7 +540,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.cloneWorkspace(workspaceNamespace, workspaceId,
         fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName());
 
-    // TODO(calbach): Copy GCS scratch files.
+    // TODO(calbach): Determine whether we need to copy GCS notebooks here.
 
     org.pmiops.workbench.db.model.Workspace toWorkspace =
         FROM_CLIENT_WORKSPACE.apply(body.getWorkspace());
