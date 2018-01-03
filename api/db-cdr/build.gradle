@@ -32,7 +32,6 @@ liquibase {
             username "liquibase"
             password "${liquibase_password}"
         }
-
         add_bigdata_indexes {
             if (project.hasProperty('contexts')) {
                 contexts contexts
