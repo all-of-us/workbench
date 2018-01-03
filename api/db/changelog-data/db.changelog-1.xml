@@ -12,6 +12,10 @@
 
     <validCheckSum>ANY</validCheckSum>
 
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="0">select count(*) from cdr_version</sqlCheck>
+    </preConditions>
+
     <delete tableName="cdr_version"/>
 
     <insert tableName="cdr_version">

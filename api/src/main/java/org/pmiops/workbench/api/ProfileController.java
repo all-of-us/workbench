@@ -363,7 +363,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-
   public ResponseEntity<Void> invitationKeyVerification(InvitationVerRequest invitationVerRequest){
     if (!verifyInvitationKey(invitationVerRequest.getInvitationKey())) {
         throw new BadRequestException(
@@ -375,5 +374,14 @@ public class ProfileController implements ProfileApiDelegate {
   private boolean verifyInvitationKey(String invitationKey){
     return invitationKey != null && !invitationKey.equals("")
       && invitationKey.equals(cloudStorageService.readInvitationKey());
+  }
+  public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    User user = userProvider.get();
+    user.setGivenName(updatedProfile.getGivenName());
+    user.setFamilyName(updatedProfile.getFamilyName());
+    user.setContactEmail(updatedProfile.getContactEmail());
+    // This does not update the name in Google.
+    userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

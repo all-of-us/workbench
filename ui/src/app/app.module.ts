@@ -18,6 +18,7 @@ import {HomePageComponent} from './views/home-page/component';
 
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
+import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
@@ -29,6 +30,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {CohortReviewModule} from './cohort-review/cohort-review.module';
 import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
+import {IconsModule} from './icons/icons.module';
 
 import {
   BugReportService,
@@ -63,6 +65,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
+    IconsModule,
     ClarityModule.forRoot(),
     CohortSearchModule,
     CohortReviewModule,
@@ -77,6 +80,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ErrorHandlerComponent,
     HomePageComponent,
     IdVerificationPageComponent,
+    ProfileEditComponent,
     ProfilePageComponent,
     ReviewComponent,
     WorkspaceComponent,
