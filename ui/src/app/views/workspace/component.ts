@@ -106,9 +106,6 @@ export class WorkspaceComponent implements OnInit {
   deleting = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
-  editHover = false;
-  shareHover = false;
-  trashHover = false;
 
   constructor(
       private router: Router,
@@ -238,5 +235,4 @@ export class WorkspaceComponent implements OnInit {
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
-
 }

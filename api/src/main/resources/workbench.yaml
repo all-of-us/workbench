@@ -159,6 +159,22 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/update-profile:
+    post:
+      tags:
+        - profile
+      description: Updates a users profile
+      operationId: updateProfile
+      parameters:
+        - in: body
+          name: updatedProfile
+          description: the new profile to use
+          schema:
+            $ref: "#/definitions/Profile"
+      responses:
+        "204":
+          description: Request received.
+
   /api/v1/id-verification:
     post:
       tags:
@@ -2803,4 +2819,3 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/DbDomain"
-
