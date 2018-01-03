@@ -1,3 +1,4 @@
+
 package org.pmiops.workbench.api;
 
 
@@ -204,14 +205,14 @@ public class ProfileControllerTest {
   }
 
   @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSubmitEthicsTraining_notFound() throws Exception {
-    profileController.submitEthicsTraining();
+  public void testCompleteEthicsTraining_notFound() throws Exception {
+    profileController.completeEthicsTraining();
   }
 
   @Test
   public void testSubmitEthicsTraining_success() throws Exception {
     createUser();
-    Profile profile = profileController.submitEthicsTraining().getBody();
+    Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getBlockscoreVerificationIsValid()).isNull();
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
@@ -226,7 +227,7 @@ public class ProfileControllerTest {
         eq(null), eq(null), eq(null))).thenReturn(person);
     when(person.getId()).thenReturn("id");
     when(person.isValid()).thenReturn(true);
-    Profile profile = profileController.submitEthicsTraining().getBody();
+    Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);

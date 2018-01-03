@@ -73,7 +73,7 @@ public class UserService {
     }
   }
 
-  public User setIdVerification(String blockscoreId, boolean blockscoreVerificationIsValid) {
+  public User setBlockscoreIdVerification(String blockscoreId, boolean blockscoreVerificationIsValid) {
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {

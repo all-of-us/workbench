@@ -334,7 +334,7 @@ public class ProfileController implements ProfileApiDelegate {
       request.getDocumentType(), request.getDocumentNumber()
     );
 
-    User user = userService.setIdVerification(person.getId(), person.isValid());
+    User user = userService.setBlockscoreIdVerification(person.getId(), person.isValid());
     return getProfileResponse(user);
   }
 
@@ -345,7 +345,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitEthicsTraining() {
+  public ResponseEntity<Profile> completeEthicsTraining() {
     User user = userService.submitEthicsTraining();
     return getProfileResponse(user);
   }
