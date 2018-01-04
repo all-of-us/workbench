@@ -35,7 +35,7 @@ export class ProfileServiceStub {
   }
 
   public invitationKeyVerification(invitationVerificationRequest?: InvitationVerificationRequest)
-                                    : Observable<{}> {
+      : Observable<{}> {
     if (invitationVerificationRequest.invitationKey === 'dummy') {
       const observable = new Observable(observer => {
           observer.next(this.profile);

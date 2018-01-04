@@ -112,11 +112,11 @@ public class ProfileControllerTest {
 
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
-      Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
-      cloudStorageService, blockscoreService, Providers.of(config), environment);
+        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
+        cloudStorageService, blockscoreService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider,
-      Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
-      cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
+        Providers.of(userInfo), userDao, clock, fireCloudService, directoryService,
+        cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
   }
 
 
@@ -145,7 +145,7 @@ public class ProfileControllerTest {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
 
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
-      .thenThrow(new IOException());
+        .thenThrow(new IOException());
     profileController.createAccount(createAccountRequest);
   }
 
@@ -158,7 +158,7 @@ public class ProfileControllerTest {
 
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
@@ -174,11 +174,11 @@ public class ProfileControllerTest {
 
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName);
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
 
     // When a conflict occurs in dev, log the exception but continue.
     assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
@@ -193,15 +193,15 @@ public class ProfileControllerTest {
 
     String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName);
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
 
     Profile profile = cloudProfileController.getMe().getBody();
 
     // When a conflict occurs in dev, log the exception but continue.
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName + "-2",
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName + "-2",
       true);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
@@ -219,15 +219,15 @@ public class ProfileControllerTest {
 
     String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName);
+        .when(fireCloudService).createAllOfUsBillingProject(projectName);
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
     doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
-      .when(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
+        .when(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
 
     try {
       cloudProfileController.getMe();
@@ -239,7 +239,7 @@ public class ProfileControllerTest {
     // When too many conflicts occur, the user doesn't have their project name set or first
     // sign in time.
     assertUser(PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, null, null);
+        DataAccessLevel.UNREGISTERED, null, null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-1");
@@ -256,7 +256,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
@@ -266,7 +266,7 @@ public class ProfileControllerTest {
     clock.increment(1);
     profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
   }
 
   @Test
@@ -277,7 +277,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.register(new RegistrationRequest()).getBody();
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
     assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
-      DataAccessLevel.REGISTERED, TIMESTAMP, projectName, true);
+        DataAccessLevel.REGISTERED, TIMESTAMP, projectName, true);
     verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
@@ -287,22 +287,22 @@ public class ProfileControllerTest {
   @Test
   public void testGetBillingProjects_empty() throws Exception {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(
-      ImmutableList.<org.pmiops.workbench.firecloud.model.BillingProjectMembership>of());
+        ImmutableList.<org.pmiops.workbench.firecloud.model.BillingProjectMembership>of());
     assertThat(profileController.getBillingProjects().getBody()).isEmpty();
   }
 
   @Test
   public void testGetBillingProjects_notEmpty() throws Exception {
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
-      new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setProjectName("a");
     membership.setMessage("b");
     membership.setRole("c");
     membership.setStatus(StatusEnum.CREATING);
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(
-      ImmutableList.of(membership));
+        ImmutableList.of(membership));
     List<BillingProjectMembership> memberships =
-      profileController.getBillingProjects().getBody();
+        profileController.getBillingProjects().getBody();
     assertThat(memberships.size()).isEqualTo(1);
     BillingProjectMembership result = memberships.get(0);
     assertThat(result.getProjectName()).isEqualTo("a");
@@ -314,15 +314,15 @@ public class ProfileControllerTest {
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
-      .thenReturn(googleUser);
+        .thenReturn(googleUser);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     return profileController.createAccount(createAccountRequest).getBody();
   }
 
 
   private void assertProfile(Profile profile, String primaryEmail, String contactEmail,
-                             String familyName, String givenName, DataAccessLevel dataAccessLevel,
-                             Timestamp firstSignInTime, String freeTierBillingProject, boolean enabledInFirecloud) {
+      String familyName, String givenName, DataAccessLevel dataAccessLevel,
+      Timestamp firstSignInTime, String freeTierBillingProject, boolean enabledInFirecloud) {
     assertThat(profile).isNotNull();
     assertThat(profile.getContactEmail()).isEqualTo(contactEmail);
     assertThat(profile.getFamilyName()).isEqualTo(familyName);
@@ -331,12 +331,12 @@ public class ProfileControllerTest {
     assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(freeTierBillingProject);
     assertThat(profile.getEnabledInFireCloud()).isEqualTo(enabledInFirecloud);
     assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime,
-      freeTierBillingProject);
+        freeTierBillingProject);
   }
 
   private void assertUser(String primaryEmail, String contactEmail,
-                          String familyName, String givenName, DataAccessLevel dataAccessLevel,
-                          Timestamp firstSignInTime, String freeTierBillingProject) {
+      String familyName, String givenName, DataAccessLevel dataAccessLevel,
+      Timestamp firstSignInTime, String freeTierBillingProject) {
     User user = userDao.findUserByEmail(primaryEmail);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
