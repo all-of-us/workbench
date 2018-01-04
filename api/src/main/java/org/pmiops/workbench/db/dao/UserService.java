@@ -40,9 +40,6 @@ public class UserService {
    */
   private User updateWithRetries(Function<User, User> userModifier) {
     User user = userProvider.get();
-    if (user == null) {
-      throw new NotFoundException("Could not find record for authenticated user");
-    }
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);

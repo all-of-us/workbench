@@ -6,6 +6,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.services.oauth2.Oauth2.Userinfo;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.springframework.web.method.HandlerMethod;
 
@@ -69,7 +72,10 @@ public class AuthInterceptorTest {
 
   @Before
   public void setup() {
-    this.interceptor = new AuthInterceptor(userInfoService, userProvider, userDao);
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
+    workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
+    this.interceptor = new AuthInterceptor(userInfoService, userProvider, workbenchConfig, userDao);
     this.user = new User();
     user.setUserId(USER_ID);
   }
@@ -118,11 +124,25 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void preHandleGet_userInfoWrongDomain() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    verify(response).sendError(HttpServletResponse.SC_FORBIDDEN);
+  }
+
+  @Test
   public void preHandleGet_userInfoSuccess() throws Exception {
     when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
     when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
-    when(userInfoService.getUserInfo("foo")).thenReturn(new Userinfoplus());
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@fake-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 

@@ -17,8 +17,10 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -51,14 +53,17 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
   private final UserInfoService userInfoService;
   private final Provider<User> userProvider;
+  private final String gsuiteDomainSuffix;
   private final UserDao userDao;
 
   @Autowired
   public AuthInterceptor(UserInfoService userInfoService, Provider<User> userProvider,
-      UserDao userDao) {
+      WorkbenchConfig workbenchConfig, UserDao userDao) {
     this.userInfoService = userInfoService;
     // Note that this provider isn't usable until after we publish the security context below.
     this.userProvider = userProvider;
+    // We cache this so we don't have to retrieve the config and parse it every request.
+    this.gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
     this.userDao = userDao;
   }
 
@@ -112,7 +117,12 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
 
-    // TODO: get token info and check that as well
+    if (!userInfo.getEmail().endsWith(gsuiteDomainSuffix)) {
+      log.log(Level.INFO, "{0} isn't in {1}, can't access the workbench",
+          new Object[] { userInfo.getEmail(), gsuiteDomainSuffix });
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return false;
+    }
 
     // TODO: check Google group membership to ensure user is in registered user group
 
@@ -122,7 +132,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
     if (!hasRequiredAuthority(method.getMethod(), userProvider.get())) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
 

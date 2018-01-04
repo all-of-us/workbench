@@ -6,6 +6,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,6 @@ public class UserInfoService {
     GoogleCredential credential = new GoogleCredential().setAccessToken(token);
     Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential)
         .setApplicationName(APPLICATION_NAME).build();
-    return oauth2.userinfo().get().execute();
+    return ExceptionUtils.executeWithRetries(oauth2.userinfo().get());
   }
 }
