@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="biopete" id="changelog-2">
-
+    <validCheckSum>ANY</validCheckSum>
     <createTable tableName="concept" schemaName="cdr">
       <column name="concept_id" type="INTEGER">
         <constraints primaryKey="true" nullable="false"/>
@@ -45,7 +45,6 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-
     <createIndex
             indexName="idx_concept_name"
             schemaName="cdr"
@@ -83,10 +82,6 @@
       <column name="standard_concept" type="varchar(1)"/>
     </createIndex>
 
-    <createIndex tableName="concept" schemaName="cdr" indexName="idx-count-value">
-      <column name="count_value" defaultValue="0" type="bigint(20)"/>
-    </createIndex>
-
     <createTable tableName="concept_relationship" schemaName="cdr">
       <column name="concept_id_1" type="INTEGER">
         <constraints  nullable="false"/>
@@ -108,15 +103,15 @@
       </column>
     </createTable>
 
-    <createIndex tableName="concept_relationship" indexName="idx-concept-1">
+    <createIndex tableName="concept_relationship" indexName="idx_concept_1">
       <column name="concept_id_1" type="bigint"></column>
     </createIndex>
 
-    <createIndex tableName="concept_relationship" indexName="idx-concept-2" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_concept_2" schemaName="cdr">
       <column name="concept_id_2" type="bigint"></column>
     </createIndex>
 
-    <createIndex tableName="concept_relationship" indexName="idx-relationship-id" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_relationship_id" schemaName="cdr">
       <column name="relationship_id" type="varchar(20)"></column>
     </createIndex>
 
