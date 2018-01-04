@@ -39,6 +39,9 @@ public class User {
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
   private String blockscoreId;
   private Boolean blockscoreVerificationIsValid;
+  private Timestamp termsOfServiceCompletionTime;
+  private Timestamp ethicsTrainingCompletionTime;
+  private Timestamp demographicSurveyCompletionTime;
 
   @Id
   @GeneratedValue
@@ -169,5 +172,32 @@ public class User {
   }
   public void setBlockscoreVerificationIsValid(Boolean value) {
     blockscoreVerificationIsValid = value;
+  }
+
+  @Column(name = "terms_of_service_completion_time")
+  public Timestamp getTermsOfServiceCompletionTime() {
+    return termsOfServiceCompletionTime;
+  }
+
+  public void setTermsOfServiceCompletionTime(Timestamp termsOfServiceCompletionTime) {
+    this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
+  }
+
+  @Column(name = "ethics_training_completion_time")
+  public Timestamp getEthicsTrainingCompletionTime() {
+    return ethicsTrainingCompletionTime;
+  }
+
+  public void setEthicsTrainingCompletionTime(Timestamp ethicsTrainingCompletionTime) {
+    this.ethicsTrainingCompletionTime = ethicsTrainingCompletionTime;
+  }
+
+  @Column(name = "demographic_survey_completion_time")
+  public Timestamp getDemographicSurveyCompletionTime() {
+    return demographicSurveyCompletionTime;
+  }
+
+  public void setDemographicSurveyCompletionTime(Timestamp demographicSurveyCompletionTime) {
+    this.demographicSurveyCompletionTime = demographicSurveyCompletionTime;
   }
 }

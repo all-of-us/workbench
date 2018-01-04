@@ -18,6 +18,7 @@ import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -33,7 +34,6 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,6 +68,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<Userinfoplus> userinfoplusProvider;
   private final UserDao userDao;
   private final Clock clock;
+  private final UserService userService;
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
@@ -78,7 +79,8 @@ public class ProfileController implements ProfileApiDelegate {
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
       Provider<Userinfoplus> userinfoplusProvider, UserDao userDao,
-      Clock clock, FireCloudService fireCloudService, DirectoryService directoryService,
+      Clock clock, UserService userService, FireCloudService fireCloudService,
+      DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment) {
@@ -87,6 +89,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.userinfoplusProvider = userinfoplusProvider;
     this.userDao = userDao;
     this.clock = clock;
+    this.userService = userService;
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
@@ -229,6 +232,15 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
+  private ResponseEntity<Profile> getProfileResponse(User user) {
+    try {
+      return ResponseEntity.ok(profileService.getProfile(user));
+    } catch (ApiException e) {
+      log.log(Level.INFO, "Error calling FireCloud", e);
+      return ResponseEntity.status(e.getCode()).build();
+    }
+  }
+
   @Override
   public ResponseEntity<Profile> getMe() {
     // Record that the user signed in, and create the user's FireCloud user and free tier billing
@@ -237,13 +249,8 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    try {
-      User user = initializeUserIfNeeded();
-      return ResponseEntity.ok(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
+    User user = initializeUserIfNeeded();
+    return getProfileResponse(user);
   }
 
   @Override
@@ -315,33 +322,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> register(RegistrationRequest registrationRequest) {
-    User user = initializeUserIfNeeded();
-    if (user.getDataAccessLevel() != DataAccessLevel.UNREGISTERED) {
-      throw new BadRequestException(String.format(
-          "User %s is already registered", user.getEmail()));
-    }
-    // TODO: add user to authorization domain for registered access; add pet SA to
-    // Google group for CDR access
-    user.setDataAccessLevel(DataAccessLevel.REGISTERED);
-    try {
-      userDao.save(user);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for user update", e);
-      throw new ConflictException("Failed due to concurrent modification");
-    }
-
-    try {
-      return ResponseEntity.ok(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(
-          Level.SEVERE, String.format("Error getting user profile: %s", e.getResponseBody()), e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
-  }
-
-  @Override
-  public ResponseEntity<Void> submitIdVerification(IdVerificationRequest request) {
+  public ResponseEntity<Profile> submitIdVerification(IdVerificationRequest request) {
     // TODO(dmohs): Prevent this if the user has already attempted verification?
     Person person = blockscoreService.createPerson(
       request.getFirstName(), request.getLastName(),
@@ -353,12 +334,26 @@ public class ProfileController implements ProfileApiDelegate {
       request.getDocumentType(), request.getDocumentNumber()
     );
 
-    User user = userProvider.get();
-    user.setBlockscoreId(person.getId());
-    user.setBlockscoreVerificationIsValid(person.isValid());
-    userDao.save(user);
+    User user = userService.setBlockscoreIdVerification(person.getId(), person.isValid());
+    return getProfileResponse(user);
+  }
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  @Override
+  public ResponseEntity<Profile> submitDemographicsSurvey() {
+    User user = userService.submitDemographicSurvey();
+    return getProfileResponse(user);
+  }
+
+  @Override
+  public ResponseEntity<Profile> completeEthicsTraining() {
+    User user = userService.submitEthicsTraining();
+    return getProfileResponse(user);
+  }
+
+  @Override
+  public ResponseEntity<Profile> submitTermsOfService() {
+    User user = userService.submitTermsOfService();
+    return getProfileResponse(user);
   }
 
   @Override
