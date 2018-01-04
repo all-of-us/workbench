@@ -11,7 +11,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {AuthDomainService, Authority, ProfileService} from 'generated';
+import {Authority, ProfileService} from 'generated';
 
 /* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
@@ -35,7 +35,6 @@ export class AppComponent implements OnInit {
       private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private profileService: ProfileService,
-      private authDomainService: AuthDomainService,
       private router: Router,
       private signInService: SignInService,
       private titleService: Title

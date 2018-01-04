@@ -41,22 +41,16 @@ export class ProfilePageComponent implements OnInit {
   }
 
   submitTermsOfService(): void {
-    this.profileService.submitTermsOfService().subscribe(() => {
-      console.log("Successfully submitted terms of service.");
-    });
+    this.profileService.submitTermsOfService();
   }
 
 
   completeEthicsTraining(): void {
-    this.profileService.completeEthicsTraining().subscribe(() => {
-      console.log("Successfully completed ethics training.");
-    });
+    this.profileService.completeEthicsTraining();
   }
 
 
   submitDemographicSurvey(): void {
-    this.profileService.submitDemographicsSurvey().subscribe(() => {
-      console.log("Successfully submitted demographics survey.");
-    });
+    this.profileService.submitDemographicsSurvey();
   }
 }
