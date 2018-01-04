@@ -2914,8 +2914,6 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/DbDomain"
-<<<<<<< HEAD
-=======
 
   RegisteredDomainRequest:
     type: object
@@ -2924,4 +2922,3 @@ definitions:
     properties:
       email:
         type: string
->>>>>>> Initial auth domain work
