@@ -205,18 +205,53 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> getParticipantCohortStatus(String workspaceNamespace,
-                                                                                                         String workspaceId,
-                                                                                                         Long cohortReviewId,
-                                                                                                         Long participantId) {
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
+    getParticipantCohortStatus(String workspaceNamespace,
+                               String workspaceId,
+                               Long cohortId,
+                               Long cdrVersionId,
+                               Long participantId) {
+        Cohort cohort;
+        CohortReview review;
+        ParticipantCohortStatus status;
 
-        Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+        cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
+                                                      workspaceId,
+                                                      cohort.getWorkspaceId());
+        review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        status = cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(),
+                                                                 participantId);
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status));
+    }
+
+    @Override
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
+    updateParticipantCohortStatus(String workspaceNamespace,
+                                  String workspaceId,
+                                  Long cohortId,
+                                  Long cdrVersionId,
+                                  Long participantId,
+                                  ModifyCohortStatusRequest cohortStatusRequest) {
+
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(
-                cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)));
+        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        ParticipantCohortStatus participantCohortStatus = cohortReviewService.findParticipantCohortStatus(
+                        cohortReview.getCohortReviewId(), participantId);
+
+        participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
+        cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
+
+        cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
+        cohortReview.incrementReviewedCount();
+        cohortReviewService.saveCohortReview(cohortReview);
+
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
 
     /**
@@ -233,7 +268,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     @Override
     public ResponseEntity<org.pmiops.workbench.model.CohortReview>
-        getParticipantCohortStatuses(String workspaceNamespace,
+    getParticipantCohortStatuses(String workspaceNamespace,
                                  String workspaceId,
                                  Long cohortId,
                                  Long cdrVersionId,
@@ -285,34 +320,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long annotationId,
                                                                                          ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
-    }
-
-    @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    updateParticipantCohortStatus(String workspaceNamespace,
-                                  String workspaceId,
-                                  Long cohortId,
-                                  Long cdrVersionId,
-                                  Long participantId,
-                                  ModifyCohortStatusRequest cohortStatusRequest) {
-
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
-
-        ParticipantCohortStatus participantCohortStatus = cohortReviewService.findParticipantCohortStatus(
-                        cohortReview.getCohortReviewId(), participantId);
-
-        participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
-        cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
-
-        cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
-        cohortReview.incrementReviewedCount();
-        cohortReviewService.saveCohortReview(cohortReview);
-
-        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
 
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
