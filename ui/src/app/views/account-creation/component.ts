@@ -4,6 +4,7 @@ import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
+import {InvitationKeyComponent} from '../invitation-key/component';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -28,7 +29,6 @@ export class AccountCreationComponent {
   username: string;
   password: string;
   passwordAgain: string;
-  invitationKey: string;
   contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
@@ -38,6 +38,7 @@ export class AccountCreationComponent {
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
+    private invitationKeyService: InvitationKeyComponent
   ) {}
 
   createAccount(): void {
@@ -57,7 +58,8 @@ export class AccountCreationComponent {
     }
 
     const request: CreateAccountRequest = {
-      profile: this.profile, password: this.password, invitationKey: this.invitationKey
+      profile: this.profile, password: this.password,
+      invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAcccount = true;
     this.profileService.createAccount(request).subscribe(() => {
