@@ -2,21 +2,28 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {ReviewStateService} from '../review-state.service';
+
 import {CohortReview, CohortReviewService} from 'generated';
 
 @Injectable()
 export class ReviewResolver implements Resolve<CohortReview> {
 
-  constructor(private reviewAPI: CohortReviewService) {}
+  constructor(
+    private state: ReviewStateService,
+    private reviewAPI: CohortReviewService,
+  ) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<CohortReview> {
-    const wsNamespace = route.paramMap.get('ns');
-    const wsID = route.paramMap.get('wsid');
-    const cohortID = +route.paramMap.get('cid');
+    const ns = route.paramMap.get('ns');
+    const wsid = route.paramMap.get('wsid');
+    const cid = +route.paramMap.get('cid');
 
     /* TODO use a real CDR version */
     const CDR_VERSION = 1;
 
-    return this.reviewAPI.getParticipantCohortStatuses(wsNamespace, wsID, cohortID, CDR_VERSION);
+    return this.reviewAPI
+      .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION)
+      .do(review => this.state.review.next(review));
   }
 }

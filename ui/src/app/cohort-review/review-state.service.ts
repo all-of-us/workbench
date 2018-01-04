@@ -2,10 +2,11 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
+import {Participant} from './participant.model';
+
 import {
   Cohort,
   CohortReview,
-  ParticipantCohortStatus
 } from 'generated';
 
 interface RouteContext {
@@ -19,7 +20,7 @@ interface RouteContext {
 export class ReviewStateService {
   review = new ReplaySubject<CohortReview>(1);
   cohort = new ReplaySubject<Cohort>(1);
-  participant = new ReplaySubject<ParticipantCohortStatus | null>(1);
+  participant = new ReplaySubject<Participant | null>(1);
   context = new ReplaySubject<RouteContext>(1);
   sidebarOpen = new BehaviorSubject<boolean>(false);
 

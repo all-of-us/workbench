@@ -25,11 +25,9 @@ export class CohortReviewComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const {cohort, review} = this.route.snapshot.data;
+    const {review} = this.route.snapshot.data;
     const {ns, wsid, cid} = this.route.snapshot.params;
 
-    this.state.cohort.next(cohort);
-    this.state.review.next(review);
     this.state.participant.next(null);
     this.state.context.next({
       cdrVersion: CDR_VERSION,

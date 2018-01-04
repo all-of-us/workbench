@@ -64,4 +64,10 @@ export class Participant implements ParticipantCohortStatus {
     p.status = choice(statusOpts);
     return p;
   }
+
+  static makeRandomFromExisting(obj: ParticipantCohortStatus) {
+    const p = Participant.makeRandom(obj.participantId);
+    p.status = obj.status;
+    return p;
+  }
 }
