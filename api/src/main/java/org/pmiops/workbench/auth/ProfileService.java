@@ -43,6 +43,16 @@ public class ProfileService {
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setBlockscoreVerificationIsValid(user.getBlockscoreVerificationIsValid());
+    if (user.getTermsOfServiceCompletionTime() != null) {
+      profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
+    }
+    if (user.getEthicsTrainingCompletionTime() != null) {
+      profile.setEthicsTrainingCompletionTime(user.getEthicsTrainingCompletionTime().getTime());
+    }
+    if (user.getDemographicSurveyCompletionTime() != null) {
+      profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
+          .getTime());
+    }
     if (user.getDataAccessLevel() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }

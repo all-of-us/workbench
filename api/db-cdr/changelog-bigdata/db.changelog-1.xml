@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="add concept_id pk" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <primaryKeyExists />
+      </not>
+    </preConditions>
+    <addPrimaryKey
+      schemaName="cdr"
+      tableName="concept"
+      columnNames="concept_id"/>
+  </changeSet>
+  <changeSet author="biopete" id="add idx_concept_name" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_concept_name"/>
+      </not>
+    </preConditions>
+
+    <createIndex
+      indexName="idx_concept_name"
+      schemaName="cdr"
+      tableName="concept"
+      unique="false">
+      <column name="concept_name" type="varchar(255)"/>
+    </createIndex>
+  </changeSet>
+  <changeSet id="add idx_concept_code" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_concept_code"/>
+      </not>
+    </preConditions>
+    <createIndex
+      indexName="idx_concept_code"
+      schemaName="cdr"
+      tableName="concept"
+      unique="false">
+      <column name="concept_code" type="varchar(50)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_domain_id"  author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_domain_id"/>
+      </not>
+    </preConditions>
+    <createIndex
+      indexName="idx_domain_id"
+      schemaName="cdr"
+      tableName="concept"
+      unique="false">
+      <column name="domain_id" type="varchar(20)"/>
+    </createIndex>
+
+  </changeSet>
+
+  <changeSet id="add idx_vocabulary_id" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_vocabulary_id"/>
+      </not>
+    </preConditions>
+    <createIndex
+      indexName="idx_vocabulary_id"
+      schemaName="cdr"
+      tableName="concept"
+      unique="false">
+      <column name="vocabulary_id" type="varchar(20)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_standard_concept" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_standard_concept"/>
+      </not>
+    </preConditions>
+    <createIndex
+      indexName="idx_standard_concept"
+      schemaName="cdr"
+      tableName="concept"
+      unique="false">
+      <column name="standard_concept" type="varchar(1)"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add concept_name_index full_text" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="concept_name_index"/>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE cdr.concept
+      ADD FULLTEXT INDEX concept_name_index
+      (concept_name);
+    </sql>
+  </changeSet>
+
+  <changeSet id="add concept_code_index full_text" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="concept_code_index"/>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE cdr.concept
+      ADD FULLTEXT INDEX concept_code_index
+      (concept_code);
+    </sql>
+  </changeSet>
+
+  <changeSet id="add idx_concept_1" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_concept_1"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_relationship" indexName="idx_concept_1">
+      <column name="concept_id_1" type="bigint"></column>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_concept_2" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_concept_2"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_relationship" indexName="idx_concept_2" schemaName="cdr">
+      <column name="concept_id_2" type="bigint"></column>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_relationship_id" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_relationship_id"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_relationship" indexName="idx_relationship_id" schemaName="cdr">
+      <column name="relationship_id" type="varchar(20)"></column>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add concept_relationship primary key" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="PRIMARY"/>
+      </not>
+    </preConditions>
+    <addPrimaryKey
+      columnNames="concept_id_1, concept_id_2, relationship_id"
+      constraintName="pk_concept_rel"
+      schemaName="cdr"
+      tableName="concept_relationship"/>
+  </changeSet>
+
+</databaseChangeLog>
