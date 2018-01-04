@@ -8,6 +8,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -17,7 +18,7 @@ public class ParticipantCohortStatus {
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
     private Long genderConceptId;
-    private Timestamp birthDateTime;
+    private Date birthDateTime;
     private Long raceConceptId;
     private Long ethnicityConceptId;
 
@@ -64,15 +65,15 @@ public class ParticipantCohortStatus {
     }
 
     @Column(name = "birth_datetime")
-    public Timestamp getBirthDateTime() {
+    public Date getBirthDateTime() {
         return birthDateTime;
     }
 
-    public void setBirthDateTime(Timestamp birthDateTime) {
+    public void setBirthDateTime(Date birthDateTime) {
         this.birthDateTime = birthDateTime;
     }
 
-    public ParticipantCohortStatus birthDateTime(Timestamp birthDateTime) {
+    public ParticipantCohortStatus birthDateTime(Date birthDateTime) {
         this.birthDateTime = birthDateTime;
         return this;
     }

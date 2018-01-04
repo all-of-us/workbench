@@ -206,7 +206,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
         when(queryResult.iterateAll()).thenReturn(testIterable);
         when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-        when(bigQueryService.getTimestamp(null, 1)).thenReturn(System.currentTimeMillis());
+        when(bigQueryService.getString(null, 1)).thenReturn("1");
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
@@ -225,7 +225,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).executeQuery(null);
         verify(bigQueryService, times(1)).getResultMapper(queryResult);
         verify(bigQueryService, times(1)).getLong(null, 0);
-        verify(bigQueryService, times(1)).getTimestamp(null, 1);
+        verify(bigQueryService, times(1)).getString(null, 1);
         verify(bigQueryService, times(1)).getLong(null, 2);
         verify(bigQueryService, times(1)).getLong(null, 3);
         verify(bigQueryService, times(1)).getLong(null, 4);
