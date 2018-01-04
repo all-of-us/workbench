@@ -151,7 +151,7 @@ export class WorkspaceComponent implements OnInit {
               .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
                   FileList => {
-                    for(const fileDetail of FileList){
+                    for (const fileDetail of FileList){
                       this.notebookList.push(fileDetail);
                     }
                   },

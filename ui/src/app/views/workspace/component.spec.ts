@@ -134,7 +134,6 @@ describe('WorkspaceComponent', () => {
 
     it('displays correct notebook information', fakeAsync(() => {
       let noteBookSize: number;
-      let items;
       workspacePage.workspacesService.getNoteBookList(
           workspacePage.workspaceNamespace,
         workspacePage.workspaceId).subscribe((noteBookList) => {
