@@ -234,6 +234,43 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/create-registered-group:
+    post:
+      tags:
+        - authDomain
+      description: This endpoint will create the registered auth domain.
+      operationId: "createRegisteredGroup"
+      responses:
+        "200":
+          description: Successfully created group
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+  /api/v1/registered-group/delete:
+    delete:
+      responses:
+        204:
+          description: Successfully Removed User From Group
+        403:
+          description: You must be an admin of this group in order to remove members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/RegisteredDomainRemoveRequest"
+      tags:
+        - authDomain
+      summary: remove a user from a group the caller owns
+      operationId: removeUserFromRegisteredGroup
   # Notebook clusters ####################################################################
 
   /api/v1/clusters:
@@ -1596,35 +1633,7 @@ paths:
             schema:
               $ref: "#/definitions/ConceptListResponse"
 
-  /api/v1/create-registered-group:
-    post:
-      tags:
-        - authDomain
-      description: This endpoint will create the registered auth domain.
-      operationId: "createRegisteredGroup"
-      responses:
-        "200":
-          description: Successfully created group
-          schema:
-            $ref: "#/definitions/EmptyResponse"
-  /api/v1/add-to-registered:
-    post:
-      tags:
-        - authDomain
-      description: Adds a specified user to the registered auth domain.
-      operationId: "addToRegistered"
-      parameters:
-        - in: body
-          name: email
-          required: true
-          description: the user's email to add
-          schema:
-            $ref: "#/definitions/RegisteredDomainRequest"
-      responses:
-        "200":
-          description: Successfully added to group.
-          schema:
-            $ref: "#/definitions/EmptyResponse"
+
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1667,7 +1676,7 @@ definitions:
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
-    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
   EmptyResponse:
     type: object
@@ -1680,6 +1689,7 @@ definitions:
     description: actions a user can have authority/permission to perform
     enum: [
         REVIEW_RESEARCH_PURPOSE,
+        REVOKE_REGISTERED_ACCESS,
         # Swagger trims any common prefix from enum values' corresponding Java
         # fields by default; include a bogus sentinel value to prevent that.
         # https://github.com/swagger-api/swagger-codegen/issues/4261
@@ -2915,7 +2925,7 @@ definitions:
           items:
             $ref: "#/definitions/DbDomain"
 
-  RegisteredDomainRequest:
+  RegisteredDomainRemoveRequest:
     type: object
     required:
       - email

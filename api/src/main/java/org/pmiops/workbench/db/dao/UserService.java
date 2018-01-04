@@ -6,8 +6,13 @@ import java.time.Instant;
 import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,12 +30,17 @@ public class UserService {
   private final Provider<User> userProvider;
   private final UserDao userDao;
   private final Clock clock;
+  private final FireCloudService fireCloudService;
 
   @Autowired
-  public UserService(Provider<User> userProvider, UserDao userDao, Clock clock) {
+  public UserService(Provider<User> userProvider,
+      UserDao userDao,
+      Clock clock,
+      FireCloudService fireCloudService) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.clock = clock;
+    this.fireCloudService = fireCloudService;
   }
 
   /**
@@ -66,6 +76,17 @@ public class UserService {
           && user.getDemographicSurveyCompletionTime() != null
           && user.getEthicsTrainingCompletionTime() != null
           && user.getTermsOfServiceCompletionTime() != null) {
+        try {
+          this.fireCloudService.addUserToRegisteredGroup(user.getEmail());
+        } catch (ApiException e) {
+          if (e.getCode() == 403) {
+            throw new ForbiddenException(e.getResponseBody());
+          } else if (e.getCode() == 404) {
+            throw new NotFoundException(e.getResponseBody());
+          } else {
+            throw new ServerErrorException(e.getResponseBody());
+          }
+        }
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
     }

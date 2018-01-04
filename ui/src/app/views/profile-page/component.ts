@@ -39,4 +39,24 @@ export class ProfilePageComponent implements OnInit {
       this.signInService.signOut();
     });
   }
+
+  submitTermsOfService(): void {
+    this.profileService.submitTermsOfService().subscribe(() => {
+      console.log("Successfully submitted terms of service.");
+    });
+  }
+
+
+  completeEthicsTraining(): void {
+    this.profileService.completeEthicsTraining().subscribe(() => {
+      console.log("Successfully completed ethics training.");
+    });
+  }
+
+
+  submitDemographicSurvey(): void {
+    this.profileService.submitDemographicsSurvey().subscribe(() => {
+      console.log("Successfully submitted demographics survey.");
+    });
+  }
 }

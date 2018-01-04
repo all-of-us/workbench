@@ -70,7 +70,8 @@ sourceSets {
                    'org/pmiops/workbench/model/ParticipantCohortStatus.java',
                    'org/pmiops/workbench/model/ReviewStatus.java',
                    'org/pmiops/workbench/model/AnnotationType.java']
-       excludes = ['org/pmiops/workbench/db/dao/WorkspaceService.java',
+       excludes = ['org/pmiops/workbench/db/dao/UserService.java',
+                   'org/pmiops/workbench/db/dao/WorkspaceService.java',
                    'org/pmiops/workbench/db/dao/WorkspaceServiceImpl.java']
     }
   }

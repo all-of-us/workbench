@@ -68,10 +68,6 @@
         [class.active]="workspacesActive"
         routerLink="/">My Workspaces</button>
     <button class="btn tab-link"
-        (click)="addToRegistered()"
-        [disabled]="email===null">
-        Add to registered group</button>
-    <button class="btn tab-link"
         [class.active]="reviewActive"
         *ngIf="hasReviewResearchPurpose"
         routerLink="/review">Review Research Purposes</button>

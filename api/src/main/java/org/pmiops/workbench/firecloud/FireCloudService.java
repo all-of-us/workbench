@@ -64,4 +64,6 @@ public interface FireCloudService {
   ManagedGroupWithMembers createRegisteredGroup() throws ApiException;
 
   void addUserToRegisteredGroup(String email) throws ApiException;
+
+  void removeUserFromRegisteredGroup(String email) throws ApiException;
 }

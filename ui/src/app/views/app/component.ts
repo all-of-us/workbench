@@ -120,9 +120,4 @@ export class AppComponent implements OnInit {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
   }
-
-  addToRegistered(): void {
-    this.authDomainService.addToRegistered({email: this.email}).subscribe(() => {
-    });
-  }
 }

@@ -61,3 +61,18 @@
     </div>
   </ng-template>
 </div>
+<div>
+  <button class="btn" (click)="submitTermsOfService()" [disabled]="email===null">
+    Submit Terms of Service
+  </button>
+</div>
+<div>
+  <button class="btn" (click)="completeEthicsTraining()" [disabled]="email===null">
+    Complete Ethics Training
+  </button>
+</div>
+<div>
+  <button class="btn" (click)="submitDemographicSurvey()" [disabled]="email===null">
+    Submit Demographics Survey
+  </button>
+</div>

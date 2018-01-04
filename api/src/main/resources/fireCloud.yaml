@@ -406,6 +406,49 @@ paths:
           - openid
           - email
           - profile
+    delete:
+      responses:
+        204:
+          description: Successfully Removed User From Group
+        403:
+          description: You must be an admin of this group in order to remove members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+        - in: path
+          description: role of user for group
+          name: role
+          required: true
+          type: string
+          enum: ["member", "admin"]
+        - in: path
+          description: email of user or group to add
+          name: email
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: remove a user from a group the caller owns
+      operationId: removeUserFromGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
+
 
 ##########################################################################################
 ## PARAMETERS
