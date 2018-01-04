@@ -1,7 +1,7 @@
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {Observable} from 'rxjs/Observable';
-import {InvitationVerRequest} from '../../generated/model/invitationVerRequest';
+import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -34,8 +34,8 @@ export class ProfileServiceStub {
     });
   }
 
-  public invitationKeyVerification(invitationVerRequest?: InvitationVerRequest): Observable<{}> {
-    if (invitationVerRequest.invitationKey === 'dummy') {
+  public invitationKeyVerification(invitationVerificationRequest?: InvitationVerificationRequest): Observable<{}> {
+    if (invitationVerificationRequest.invitationKey === 'dummy') {
       const observable = new Observable(observer => {
           observer.next(this.profile);
       });

@@ -32,7 +32,7 @@ import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
-import org.pmiops.workbench.model.InvitationVerRequest;
+import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.RegistrationRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -262,14 +262,12 @@ public class ProfileController implements ProfileApiDelegate {
 
     com.google.api.services.admin.directory.model.User googleUser;
     try {
-      if (!verifyInvitationKey(request.getInvitationKey())) {
-        throw new BadRequestException(
-                "Missing or incorrect invitationKey (this API is not yet publicly launched)");
-      }
+      verifyInvitationKey(request.getInvitationKey());
       googleUser = directoryService.createUser(request.getProfile().getGivenName(),
-          request.getProfile().getFamilyName(), request.getProfile().getUsername(),
-          request.getPassword());
-    } catch (IOException e) {
+      request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+      request.getPassword());
+    }
+    catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
 
@@ -363,17 +361,16 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> invitationKeyVerification(InvitationVerRequest invitationVerRequest){
-    if (!verifyInvitationKey(invitationVerRequest.getInvitationKey())) {
-        throw new BadRequestException(
-          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
-    }
+  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest){
+    verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private boolean verifyInvitationKey(String invitationKey){
-    return invitationKey != null && !invitationKey.equals("")
-      && invitationKey.equals(cloudStorageService.readInvitationKey());
+  private void verifyInvitationKey(String invitationKey){
+    if(invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
+      throw new BadRequestException(
+        "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+    }
   }
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     User user = userProvider.get();

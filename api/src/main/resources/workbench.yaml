@@ -120,14 +120,14 @@ paths:
       security: []
       parameters:
         - in: body
-          name: invitationVerRequest
+          name: invitationVerificationRequest
           schema:
-            $ref: "#/definitions/InvitationVerRequest"
+            $ref: "#/definitions/InvitationVerificationRequest"
       responses:
         "200":
           description: Invitation Key verified.
         "400":
-          description: Error occurred while verifying Invitation Key .
+          description: Error occurred while verifying Invitation Key.
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -1933,15 +1933,16 @@ definitions:
       password:
         type: string
       invitationKey:
-              type: string
+        type: string
 
-  InvitationVerRequest:
+  InvitationVerificationRequest:
     type: object
     required:
       - invitationKey
     properties:
       invitationKey:
         type: string
+        description: Invitation key for verification
 
   BugReport:
     type: object
