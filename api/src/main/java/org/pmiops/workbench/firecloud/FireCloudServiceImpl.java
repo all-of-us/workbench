@@ -3,8 +3,13 @@ package org.pmiops.workbench.firecloud;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
+  private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<ProfileApi> profileApiProvider;
@@ -101,6 +107,34 @@ public class FireCloudServiceImpl implements FireCloudService {
     // TODO: set authorization domain here
     workspacesApi.createWorkspace(workspaceIngest);
   }
+
+  @Override
+  public void cloneWorkspace(String fromProject, String fromName, String toProject, String toName) {
+    WorkspacesApi workspacesApi = workspacesApiProvider.get();
+    WorkspaceIngest workspaceIngest = new WorkspaceIngest();
+    workspaceIngest.setNamespace(toProject);
+    workspaceIngest.setName(toName);
+    try {
+      workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Error cloning FC workspace %s/%s: %s",
+              fromProject,
+              fromName,
+              e.getResponseBody()),
+          e);
+      if (e.getCode() == 403) {
+        throw new ForbiddenException(e.getResponseBody());
+      } else if (e.getCode() == 409) {
+        throw new ConflictException(e.getResponseBody());
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+  }
+
 
   @Override
   public List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException {
