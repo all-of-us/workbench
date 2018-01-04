@@ -9,7 +9,7 @@ import {
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
-import {FileDetail} from "../../generated/model/fileDetail";
+import {FileDetail} from '../../generated/model/fileDetail';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -179,7 +179,8 @@ export class WorkspacesServiceStub {
   }
 
   getNoteBookList(workspaceNamespace: string,
-                  workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
+                  workspaceId: string, extraHttpRequestParams?: any)
+                  : Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(()=>{
         if(workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)
@@ -187,8 +188,9 @@ export class WorkspacesServiceStub {
           const fileDetailsList = [{'name':'FileDetails','url':'//URK'}];
           observer.next(fileDetailsList);
         }
-        else
+        else{
           observer.next([]);
+        }
         observer.complete();
       });
     });

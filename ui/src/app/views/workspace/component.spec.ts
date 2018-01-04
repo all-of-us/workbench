@@ -20,7 +20,6 @@ import {
 import {ClusterService} from 'generated';
 import {CohortsService} from 'generated';
 import {WorkspacesService} from 'generated';
-import {itemList} from "../../cohort-search/redux/store";
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -138,7 +137,7 @@ describe('WorkspaceComponent', () => {
       let items;
       workspacePage.workspacesService.getNoteBookList(
           workspacePage.workspaceNamespace,
-        workspacePage.workspaceId).subscribe((noteBookList)=>{
+        workspacePage.workspaceId).subscribe((noteBookList) => {
           noteBookSize = noteBookList.length;
       });
       tick();
@@ -146,7 +145,7 @@ describe('WorkspaceComponent', () => {
 
       workspacePage.workspacesService.getNoteBookList(
         'MockNamespace',
-        workspacePage.workspaceId).subscribe((noteBookList)=>{
+        workspacePage.workspaceId).subscribe((noteBookList) => {
           noteBookSize = noteBookList.length;
         });
       tick();

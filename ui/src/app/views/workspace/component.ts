@@ -11,7 +11,6 @@ import {
   ClusterService,
   Cohort,
   CohortsService,
-  FileDetail,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
