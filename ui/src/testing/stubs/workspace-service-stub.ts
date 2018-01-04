@@ -185,7 +185,7 @@ export class WorkspacesServiceStub {
       setTimeout(() => {
         if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
             && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
-          const fileDetailsList = [{'name': 'FileDetails','url': '//URK'}];
+          const fileDetailsList = [{'name': 'FileDetails', 'url': '//URK'}];
           observer.next(fileDetailsList);
         }else {
           observer.next([]);
