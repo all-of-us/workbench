@@ -140,9 +140,10 @@ public class AuthInterceptorTest {
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    when(fireCloudService.getMe()).thenThrow(new ApiException());
+    when(fireCloudService.getMe()).thenThrow(
+        new ApiException(HttpServletResponse.SC_NOT_FOUND, "blah"));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_FORBIDDEN);
+    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
   }
 
   @Test
@@ -177,7 +178,7 @@ public class AuthInterceptorTest {
     when(fireCloudService.getMe()).thenReturn(me);
     when(userDao.findUserByEmail("bob@also-bad-domain.org")).thenReturn(null);
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
   }
 
   @Test

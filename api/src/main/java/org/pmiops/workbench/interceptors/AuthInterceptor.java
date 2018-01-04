@@ -123,35 +123,33 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     // TODO: check Google group membership to ensure user is in registered user group
 
-    String userEmail;
+    String userEmail = userInfo.getEmail();
     String gsuiteDomainSuffix =
         "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
-    if (!userInfo.getEmail().endsWith(gsuiteDomainSuffix)) {
+    if (!userEmail.endsWith(gsuiteDomainSuffix)) {
       try {
         // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
         // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
         // the user it was created for.
         userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
       } catch (ApiException e) {
-        log.log(Level.INFO, "FireCloud lookup for {0} failed, can't access the workbench: {2}",
+        log.log(Level.INFO, "FireCloud lookup for {0} failed, can't access the workbench: {1}",
             new Object[]{userInfo.getEmail(), e.getMessage()});
-        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        response.sendError(e.getCode());
         return false;
       }
-    } else {
-      userEmail = userInfo.getEmail();
+      if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+        log.log(Level.INFO, "User {0} isn't in domain {1}, can't access the workbench",
+            new Object[] { userEmail, gsuiteDomainSuffix });
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        return false;
+      }
     }
     User user = userDao.findUserByEmail(userEmail);
     if (user == null) {
-      if (userEmail.endsWith(gsuiteDomainSuffix)) {
-        // TODO(danrodney): start populating contact email in Google account, use it here.
-        user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
+      // TODO(danrodney): start populating contact email in Google account, use it here.
+      user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
             userInfo.getEmail(), null);
-      } else {
-        log.log(Level.INFO, "No user record found for {0}", userEmail);
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        return false;
-      }
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
