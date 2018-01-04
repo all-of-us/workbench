@@ -6,9 +6,8 @@ import org.pmiops.workbench.model.CohortStatus;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
@@ -17,6 +16,10 @@ public class ParticipantCohortStatus {
 
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
+    private Long genderConceptId;
+    private Timestamp birthDateTime;
+    private Long raceConceptId;
+    private Long ethnicityConceptId;
 
     @EmbeddedId
     public ParticipantCohortStatusKey getParticipantKey() {
@@ -43,6 +46,62 @@ public class ParticipantCohortStatus {
 
     public ParticipantCohortStatus status(CohortStatus status) {
         this.status = status;
+        return this;
+    }
+
+    @Column(name = "gender_concept_id")
+    public Long getGenderConceptId() {
+        return genderConceptId;
+    }
+
+    public void setGenderConceptId(Long genderConceptId) {
+        this.genderConceptId = genderConceptId;
+    }
+
+    public ParticipantCohortStatus genderConceptId(Long genderConceptId) {
+        this.genderConceptId = genderConceptId;
+        return this;
+    }
+
+    @Column(name = "birth_datetime")
+    public Timestamp getBirthDateTime() {
+        return birthDateTime;
+    }
+
+    public void setBirthDateTime(Timestamp birthDateTime) {
+        this.birthDateTime = birthDateTime;
+    }
+
+    public ParticipantCohortStatus birthDateTime(Timestamp birthDateTime) {
+        this.birthDateTime = birthDateTime;
+        return this;
+    }
+
+    @Column(name = "race_concept_id")
+    public Long getRaceConceptId() {
+        return raceConceptId;
+    }
+
+    public void setRaceConceptId(Long raceConceptId) {
+        this.raceConceptId = raceConceptId;
+    }
+
+    public ParticipantCohortStatus raceConceptId(Long raceConceptId) {
+        this.raceConceptId = raceConceptId;
+        return this;
+    }
+
+    @Column(name = "ethnicity_concept_id")
+    public Long getEthnicityConceptId() {
+        return ethnicityConceptId;
+    }
+
+    public void setEthnicityConceptId(Long ethnicityConceptId) {
+        this.ethnicityConceptId = ethnicityConceptId;
+    }
+
+    public ParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
+        this.ethnicityConceptId = ethnicityConceptId;
         return this;
     }
 
