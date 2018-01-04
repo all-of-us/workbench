@@ -15,8 +15,8 @@ import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
-import {CohortResolver} from '../guards/cohort-resolver.guard';
-import {ReviewResolver} from '../guards/review-resolver.guard';
+import {CohortResolver} from './guards/cohort-resolver.guard';
+import {ReviewResolver} from './guards/review-resolver.guard';
 
 import {CohortReviewService} from 'generated';
 
