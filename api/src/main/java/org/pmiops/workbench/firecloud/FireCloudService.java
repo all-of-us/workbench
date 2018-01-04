@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -16,6 +17,11 @@ public interface FireCloudService {
    * @return true if the user making the current request is enabled in FireCloud, false otherwise.
    */
   boolean isRequesterEnabledInFirecloud() throws ApiException;
+
+  /**
+   * @return the FireCloud profile for the requesting user.
+   */
+  Me getMe() throws ApiException;
 
   /**
    * Registers the user in Firecloud.

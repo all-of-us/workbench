@@ -26,6 +26,11 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.UserInfo;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.web.method.HandlerMethod;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -53,7 +58,7 @@ public class AuthInterceptorTest {
   @Mock
   private UserInfoService userInfoService;
   @Mock
-  private Provider<User> userProvider;
+  private FireCloudService fireCloudService;
   @Mock
   private UserDao userDao;
   @Mock
@@ -75,7 +80,8 @@ public class AuthInterceptorTest {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
-    this.interceptor = new AuthInterceptor(userInfoService, userProvider, workbenchConfig, userDao);
+    this.interceptor = new AuthInterceptor(userInfoService, fireCloudService,
+        Providers.of(workbenchConfig), userDao);
     this.user = new User();
     user.setUserId(USER_ID);
   }
@@ -124,15 +130,51 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandleGet_userInfoWrongDomain() throws Exception {
+  public void preHandleGet_firecloudLookupFails() throws Exception {
     when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
     when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(fireCloudService.getMe()).thenThrow(new ApiException());
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
     verify(response).sendError(HttpServletResponse.SC_FORBIDDEN);
+  }
+
+  @Test
+  public void preHandleGet_firecloudLookupSucceeds() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    UserInfo fcUserInfo = new UserInfo();
+    fcUserInfo.setUserEmail("bob@fake-domain.org");
+    Me me = new Me();
+    me.setUserInfo(fcUserInfo);
+    when(fireCloudService.getMe()).thenReturn(me);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+  }
+
+  @Test
+  public void preHandleGet_firecloudLookupSucceedsNoUserRecord() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    UserInfo fcUserInfo = new UserInfo();
+    fcUserInfo.setUserEmail("bob@fake-domain.org");
+    Me me = new Me();
+    me.setUserInfo(fcUserInfo);
+    when(fireCloudService.getMe()).thenReturn(me);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(null);
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test
@@ -143,7 +185,21 @@ public class AuthInterceptorTest {
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail("bob@fake-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+  }
+
+  @Test
+  public void preHandleGet_noUserRecord() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@fake-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(null);
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   private Method getProfileApiMethod(String methodName) {

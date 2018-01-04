@@ -56,7 +56,6 @@ public class FireCloudConfig {
     return apiClient;
   }
 
-
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ProfileApi profileApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {

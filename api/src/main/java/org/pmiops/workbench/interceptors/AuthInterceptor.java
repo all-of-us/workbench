@@ -21,6 +21,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -52,18 +54,16 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
-  private final Provider<User> userProvider;
-  private final String gsuiteDomainSuffix;
+  private final FireCloudService fireCloudService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
 
   @Autowired
-  public AuthInterceptor(UserInfoService userInfoService, Provider<User> userProvider,
-      WorkbenchConfig workbenchConfig, UserDao userDao) {
+  public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
+      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao) {
     this.userInfoService = userInfoService;
-    // Note that this provider isn't usable until after we publish the security context below.
-    this.userProvider = userProvider;
-    // We cache this so we don't have to retrieve the config and parse it every request.
-    this.gsuiteDomainSuffix = "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
+    this.fireCloudService = fireCloudService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
   }
 
@@ -117,21 +117,40 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
 
+    // TODO: check Google group membership to ensure user is in registered user group
+
+    String userEmail;
+    String gsuiteDomainSuffix =
+        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     if (!userInfo.getEmail().endsWith(gsuiteDomainSuffix)) {
-      log.log(Level.INFO, "{0} isn't in {1}, can't access the workbench",
-          new Object[] { userInfo.getEmail(), gsuiteDomainSuffix });
-      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      try {
+        // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
+        // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
+        // the user it was created for.
+        userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
+      } catch (ApiException e) {
+        log.log(Level.INFO, "FireCloud lookup for {0} failed, can't access the workbench: {2}",
+            new Object[]{userInfo.getEmail(), e.getMessage()});
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        return false;
+      }
+    } else {
+      userEmail = userInfo.getEmail();
+    }
+    User user = userDao.findUserByEmail(userEmail);
+    if (user == null) {
+      log.log(Level.INFO, "No user record found for {0}", userEmail);
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
 
-    // TODO: check Google group membership to ensure user is in registered user group
-
-    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(userInfo, token));
+    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
+        token));
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
-    if (!hasRequiredAuthority(method.getMethod(), userProvider.get())) {
+    if (!hasRequiredAuthority(method.getMethod(), user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }

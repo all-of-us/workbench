@@ -49,13 +49,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public User user(Userinfoplus userInfo, UserDao userDao) {
-    User user = userDao.findUserByEmail(userInfo.getEmail());
-    if (user == null) {
-      throw new NotFoundException(String.format("No user record found for %s",
-          userInfo.getEmail()));
-    }
-    return user;
+  public User user(UserAuthentication userAuthentication) {
+    return userAuthentication.getUser();
   }
 
   @Bean
