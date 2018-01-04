@@ -74,4 +74,8 @@ public class BigQueryService {
     public Boolean getBoolean(List<FieldValue> row, int index) {
         return row.get(index).getBooleanValue();
     }
+
+    public Long getTimestamp(List<FieldValue> row, int index) {
+        return row.get(index).getTimestampValue();
+    }
 }

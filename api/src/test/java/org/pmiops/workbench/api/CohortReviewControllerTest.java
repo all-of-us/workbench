@@ -190,6 +190,10 @@ public class CohortReviewControllerTest {
         };
         Map<String, Integer> rm = new HashMap<>();
         rm.put("person_id", 0);
+        rm.put("birth_datetime", 1);
+        rm.put("gender_concept_id", 2);
+        rm.put("race_concept_id", 3);
+        rm.put("ethnicity_concept_id", 4);
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
@@ -202,6 +206,10 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
         when(queryResult.iterateAll()).thenReturn(testIterable);
         when(bigQueryService.getLong(null, 0)).thenReturn(0L);
+        when(bigQueryService.getTimestamp(null, 1)).thenReturn(System.currentTimeMillis());
+        when(bigQueryService.getLong(null, 2)).thenReturn(0L);
+        when(bigQueryService.getLong(null, 3)).thenReturn(0L);
+        when(bigQueryService.getLong(null, 4)).thenReturn(0L);
         when(cohortReviewService.saveCohortReview(cohortReviewAfter)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.saveParticipantCohortStatuses(isA(List.class))).thenReturn(new ArrayList<>());
 
@@ -217,6 +225,10 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).executeQuery(null);
         verify(bigQueryService, times(1)).getResultMapper(queryResult);
         verify(bigQueryService, times(1)).getLong(null, 0);
+        verify(bigQueryService, times(1)).getTimestamp(null, 1);
+        verify(bigQueryService, times(1)).getLong(null, 2);
+        verify(bigQueryService, times(1)).getLong(null, 3);
+        verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveCohortReview(cohortReviewAfter);
         verify(cohortReviewService, times(1)).saveParticipantCohortStatuses(isA(List.class));
@@ -257,12 +269,23 @@ public class CohortReviewControllerTest {
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
-        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
+        final Timestamp dob = new Timestamp(System.currentTimeMillis());
+        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
+                .participantKey(key)
+                .status(CohortStatus.INCLUDED)
+                .birthDateTime(dob)
+                .ethnicityConceptId(1L)
+                .genderConceptId(1L)
+                .raceConceptId(1L);
 
         org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
                         .participantId(1L)
-                        .status(CohortStatus.INCLUDED);
+                        .status(CohortStatus.INCLUDED)
+                        .birthDatetime(dob.getTime())
+                        .ethnicityConceptId(1L)
+                        .genderConceptId(1L)
+                        .raceConceptId(1L);
 
         org.pmiops.workbench.model.CohortReview respCohortReview =
                 new org.pmiops.workbench.model.CohortReview()

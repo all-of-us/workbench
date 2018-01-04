@@ -64,7 +64,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
-                            .status(participant.getStatus());
+                            .status(participant.getStatus())
+                            .birthDatetime(participant.getBirthDateTime().getTime())
+                            .ethnicityConceptId(participant.getEthnicityConceptId())
+                            .genderConceptId(participant.getGenderConceptId())
+                            .raceConceptId(participant.getRaceConceptId());
                 }
             };
 
@@ -241,28 +245,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                  Integer pageSize,
                                  String sortOrder,
                                  String sortColumn) {
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
-
-        if (cohortReview == null) {
-            Cohort cohort = cohortReviewService.findCohort(cohortId);
-            //this validates that the user is in the proper workspace
-            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
-
-            SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
-
-            /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-            codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-            codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
-            QueryResult result = bigQueryService.executeQuery(
-                    bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
-            Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-            List<FieldValue> row = result.iterateAll().iterator().next();
-            long cohortCount = bigQueryService.getLong(row, rm.get("count"));
-
-            cohortReview = createNewCohortReview(cohortId, cdrVersionId, cohortCount);
-            cohortReviewService.saveCohortReview(cohortReview);
+        CohortReview cohortReview = null;
+        try {
+            cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        } catch (NotFoundException nfe) {
+            cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
         }
 
         PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
@@ -315,18 +302,53 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
 
+    /**
+     * Helper method to create a new {@link CohortReview} and persist it to the workbench database.
+     *
+     * @param workspaceNamespace
+     * @param workspaceId
+     * @param cohortId
+     * @param cdrVersionId
+     * @return
+     */
+    private CohortReview initializeAndSaveCohortReview(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
+
+        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
+        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
+
+        QueryResult result = bigQueryService.executeQuery(
+                bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+        List<FieldValue> row = result.iterateAll().iterator().next();
+        long cohortCount = bigQueryService.getLong(row, rm.get("count"));
+
+        CohortReview cohortReview = createNewCohortReview(cohortId, cdrVersionId, cohortCount);
+        return cohortReviewService.saveCohortReview(cohortReview);
+    }
+
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
                                                                               QueryResult result,
                                                                               Map<String, Integer> rm) {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
+            long 
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
                             .participantKey(
                                     new ParticipantCohortStatusKey(
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
-                            .status(CohortStatus.NOT_REVIEWED));
+                            .status(CohortStatus.NOT_REVIEWED)
+                            .birthDateTime(new Timestamp(bigQueryService.getTimestamp(row, rm.get("birth_datetime"))))
+                            .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
+                            .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
+                            .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
         }
         return participantCohortStatuses;
     }

@@ -2380,7 +2380,6 @@ definitions:
       sortColumn:
         type: string
 
-
   ParticipantCohortStatus:
     type: object
     required:
@@ -2392,6 +2391,18 @@ definitions:
         format: int64
       status:
         $ref: "#/definitions/CohortStatus"
+      genderConceptId:
+        type: integer
+        format: int64
+      birthDatetime:
+        type: integer
+        format: int64
+      raceConceptId:
+        type: integer
+        format: int64
+      ethnicityConceptId:
+        type: integer
+        format: int64
 
   CohortStatus:
     type: string

@@ -110,13 +110,17 @@ public class ParticipantCohortStatus {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantCohortStatus that = (ParticipantCohortStatus) o;
-        return Objects.equals(participantKey.getParticipantId(), that.participantKey.getParticipantId()) &&
-                status == that.status;
+        return Objects.equals(participantKey, that.participantKey) &&
+                status == that.status &&
+                Objects.equals(genderConceptId, that.genderConceptId) &&
+                Objects.equals(birthDateTime, that.birthDateTime) &&
+                Objects.equals(raceConceptId, that.raceConceptId) &&
+                Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participantKey.getParticipantId(), status);
+        return Objects.hash(participantKey, status, genderConceptId, birthDateTime, raceConceptId, ethnicityConceptId);
     }
 
     @Override
@@ -124,6 +128,10 @@ public class ParticipantCohortStatus {
         return new ToStringBuilder(this)
                 .append("participantKey", participantKey)
                 .append("status", status)
+                .append("genderConceptId", genderConceptId)
+                .append("birthDateTime", birthDateTime)
+                .append("raceConceptId", raceConceptId)
+                .append("ethnicityConceptId", ethnicityConceptId)
                 .toString();
     }
 }

@@ -1,7 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +19,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -39,10 +46,21 @@ public class ParticipantCohortStatusDaoTest {
     public void onSetup() {
         ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1);
         ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2);
-        participant1 = new ParticipantCohortStatus().participantKey(key1).status(CohortStatus.INCLUDED);
-        participant2 = new ParticipantCohortStatus().participantKey(key2).status(CohortStatus.EXCLUDED);
-        participantCohortStatusDao.save(participant2);
-        participantCohortStatusDao.save(participant1);
+        participant1 = new ParticipantCohortStatus()
+                .participantKey(key1)
+                .status(CohortStatus.INCLUDED)
+                .birthDateTime(new Timestamp(-852058800000000L))
+                .ethnicityConceptId(1L)
+                .genderConceptId(2L)
+                .raceConceptId(3L);
+        participant2 = new ParticipantCohortStatus()
+                .participantKey(key2)
+                .status(CohortStatus.EXCLUDED)
+                .birthDateTime(new Timestamp(-852058800000000L))
+                .ethnicityConceptId(1L)
+                .genderConceptId(2L)
+                .raceConceptId(3L);
+        participantCohortStatusDao.save(Arrays.asList(participant1, participant2));
     }
 
     @After
@@ -70,6 +88,13 @@ public class ParticipantCohortStatusDaoTest {
         assertParticipant(new PageRequest(0, 1, sortParticipantDesc), participant2);
         assertParticipant(new PageRequest(0, 1, sortStatusAsc), participant2);
         assertParticipant(new PageRequest(0, 1, sortStatusDesc), participant1);
+
+        SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Date myDate = dateFormatUTC.parse(dateFormatUTC.format(new Date(Double.valueOf("-1.4728428E9").longValue() * 1000)));
+        Date newDate = Date.from(Instant.ofEpochMilli(Double.valueOf("-1.4728428E9").longValue() * 1000));
+        System.out.println("time: " + newDate.toString());
     }
 
     @Test

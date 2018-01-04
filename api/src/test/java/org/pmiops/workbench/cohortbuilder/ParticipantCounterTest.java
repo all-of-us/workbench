@@ -358,9 +358,9 @@ public class ParticipantCounterTest {
 
         final String expectedSql = "select concept1.concept_code as gender, \n" +
                 "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
-                "case when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 0 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 18 then '0-18'\n" +
-                "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 19 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 44 then '19-44'\n" +
-                "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= 45 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 64 then '45-64'\n" +
+                "case when CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) >= 0 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 18 then '0-18'\n" +
+                "when CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) >= 19 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 44 then '19-44'\n" +
+                "when CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) >= 45 and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= 64 then '45-64'\n" +
                 "else '> 65'\n" +
                 "end as ageRange,\n" +
                 "count(*) as count\n" +

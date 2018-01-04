@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.Attribute;
@@ -48,7 +47,7 @@ public class DemoQueryBuilderTest {
                 "union distinct\n" +
                 "select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), YEAR) =\n" +
+                "where CAST(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12 as INT64) =\n" +
                 "@" + ageNamedParameter + "\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());
