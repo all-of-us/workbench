@@ -33,7 +33,7 @@
     <span class="label">{{ participant.race }} (Race)</span>
     <span class="label">{{ participant.ethnicity }} (Ethnicity)</span>
     <span
-      (click)="openSideBar()"
+      (click)="toggleSidebar()"
       class="label clickable"
       [ngClass]="participant.statusLabelClass">
       {{ participant.formattedStatusText }} (Status)</span>

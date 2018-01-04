@@ -1,21 +1,30 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 import {Participant} from '../participant.model';
+import {ReviewStateService} from '../review-state.service';
 
-const dummy_data = () =>
-  Array.from(new Array(100).keys())
-    .map(i => Participant.makeRandom(i));
+import {ParticipantCohortStatus} from 'generated';
 
 @Component({
   selector: 'app-participant-table',
   templateUrl: './participant-table.component.html',
 })
-export class ParticipantTableComponent {
+export class ParticipantTableComponent implements OnInit {
+  DUMMY_DATA: Participant[];
+  reviewSize: number;
+  matchedParticipantCount: number;
+  pageSize: number;
 
-  // private loading = false;
+  constructor(private state: ReviewStateService) {}
 
-  DUMMY_DATA: Participant[] = dummy_data();
-  total = this.DUMMY_DATA.length;
-
-  refresh() {}
+  ngOnInit() {
+    this.state.review$
+      .do(({reviewSize}) => this.reviewSize = reviewSize)
+      .do(({matchedParticipantCount}) => this.matchedParticipantCount = matchedParticipantCount)
+      .do(({pageSize}) => this.pageSize = pageSize)
+      .pluck('participantCohortStatuses')
+      .map(statusSet =>
+        (<ParticipantCohortStatus[]>statusSet).map(Participant.makeRandomFromExisting))
+      .subscribe(val => this.DUMMY_DATA = <Participant[]>val);
+  }
 }

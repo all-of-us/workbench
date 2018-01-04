@@ -54,7 +54,7 @@ export class Participant implements ParticipantCohortStatus {
     }
   }
 
-  static makeRandom(id: number) {
+  static makeRandom(id: number): Participant {
     const p = new Participant();
     p.id = id;
     p.dob = randomDate();
@@ -65,7 +65,7 @@ export class Participant implements ParticipantCohortStatus {
     return p;
   }
 
-  static makeRandomFromExisting(obj: ParticipantCohortStatus) {
+  static makeRandomFromExisting(obj: ParticipantCohortStatus): Participant {
     const p = Participant.makeRandom(obj.participantId);
     p.status = obj.status;
     return p;

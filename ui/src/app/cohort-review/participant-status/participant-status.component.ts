@@ -3,6 +3,7 @@ import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
+import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
 import {
@@ -19,7 +20,21 @@ import {
   styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
+  participant$: Observable<Participant>;
 
+  constructor(
+    private state: ReviewStateService,
+    private reviewAPI: CohortReviewService,
+  ) {}
+
+  ngOnInit() {
+    this.participant$ = this.state.participant$;
+  }
+
+  ngOnDestroy() {
+  }
+
+  /*
   readonly CohortStatus = CohortStatus;
   statusControl = new FormControl();
 
@@ -40,11 +55,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   private changingStatus = false;
-
-  constructor(
-    private state: ReviewStateService,
-    private reviewAPI: CohortReviewService,
-  ) {}
 
   ngOnInit() {
     this.subscription = this.state.participant$
@@ -98,4 +108,5 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       request
     );
   }
+*/
 }

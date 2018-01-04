@@ -31,7 +31,9 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  openSideBar() {
-    this.state.sidebarOpen.next(true);
+  toggleSidebar() {
+    this.state.sidebarOpen$
+      .take(1)
+      .subscribe(val => this.state.sidebarOpen.next(!val));
   }
 }
