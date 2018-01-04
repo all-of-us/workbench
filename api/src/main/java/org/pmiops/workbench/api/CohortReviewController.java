@@ -337,7 +337,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                               Map<String, Integer> rm) {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
-            long 
+            long
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
                             .participantKey(
