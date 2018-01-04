@@ -67,7 +67,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
-                            .status(participant.getStatus());
+                            .status(participant.getStatus())
+                            .birthDatetime(participant.getBirthDateTime().getTime())
+                            .ethnicityConceptId(participant.getEthnicityConceptId())
+                            .genderConceptId(participant.getGenderConceptId())
+                            .raceConceptId(participant.getRaceConceptId());
                 }
             };
 
@@ -352,7 +356,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                     new ParticipantCohortStatusKey(
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
-                            .status(CohortStatus.NOT_REVIEWED));
+                            .status(CohortStatus.NOT_REVIEWED)
+                            .birthDateTime(new Timestamp(bigQueryService.getTimestamp(row, rm.get("birth_datetime"))))
+                            .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
+                            .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
+                            .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
         }
         return participantCohortStatuses;
     }
