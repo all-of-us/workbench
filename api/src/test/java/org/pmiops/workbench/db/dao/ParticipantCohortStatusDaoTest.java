@@ -20,11 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 
@@ -88,13 +84,6 @@ public class ParticipantCohortStatusDaoTest {
         assertParticipant(new PageRequest(0, 1, sortParticipantDesc), participant2);
         assertParticipant(new PageRequest(0, 1, sortStatusAsc), participant2);
         assertParticipant(new PageRequest(0, 1, sortStatusDesc), participant1);
-
-        SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        Date myDate = dateFormatUTC.parse(dateFormatUTC.format(new Date(Double.valueOf("-1.4728428E9").longValue() * 1000)));
-        Date newDate = Date.from(Instant.ofEpochMilli(Double.valueOf("-1.4728428E9").longValue() * 1000));
-        System.out.println("time: " + newDate.toString());
     }
 
     @Test

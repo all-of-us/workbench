@@ -29,7 +29,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -273,16 +275,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.CohortReview> getParticipantCohortStatuses(String workspaceNamespace,
-                                                                                                String workspaceId,
-                                                                                                Long cohortId,
-                                                                                                Long cdrVersionId,
-                                                                                                Integer page,
-                                                                                                Integer pageSize,
-                                                                                                String sortOrder,
-                                                                                                String sortColumn,
-                                                                                                List<String> filterColumns,
-                                                                                                List<String> filterValues) {
+    public ResponseEntity<org.pmiops.workbench.model.CohortReview>
+        getParticipantCohortStatuses(String workspaceNamespace,
+                                 String workspaceId,
+                                 Long cohortId,
+                                 Long cdrVersionId,
+                                 Integer page,
+                                 Integer pageSize,
+                                 String sortOrder,
+                                 String sortColumn) {
         CohortReview cohortReview = null;
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
@@ -350,6 +351,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                               Map<String, Integer> rm) {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
+            String birthDateTimeString = bigQueryService.getString(row, rm.get("birth_datetime"));
+            Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
                             .participantKey(
@@ -357,7 +360,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
                             .status(CohortStatus.NOT_REVIEWED)
-                            .birthDateTime(new Timestamp(bigQueryService.getTimestamp(row, rm.get("birth_datetime"))))
+                            .birthDateTime(birthDate)
                             .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
                             .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
                             .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
