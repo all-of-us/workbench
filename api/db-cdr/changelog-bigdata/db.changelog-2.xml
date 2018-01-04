@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="drop concept pk" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <primaryKeyExists tableName="concept" schemaName="cdr"/>
+    </preConditions>
+    <dropPrimaryKey
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+
+  <changeSet author="biopete" id="drop idx_concept_name" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_concept_name"/>
+    </preConditions>
+
+    <dropIndex
+      indexName="idx_concept_name"
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+  <changeSet id="drop idx_concept_code" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_concept_code"/>
+    </preConditions>
+    <dropIndex
+      indexName="idx_concept_code"
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+
+  <changeSet id="drop idx_domain_id"  author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_domain_id"/>
+    </preConditions>
+    <dropIndex
+      indexName="idx_domain_id"
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+
+  <changeSet id="drop idx_vocabulary_id" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+
+        <indexExists indexName="idx_vocabulary_id"/>
+
+    </preConditions>
+    <dropIndex
+      indexName="idx_vocabulary_id"
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+
+  <changeSet id="drop idx_standard_concept" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_standard_concept"/>
+    </preConditions>
+    <dropIndex
+      indexName="idx_standard_concept"
+      schemaName="cdr"
+      tableName="concept"/>
+  </changeSet>
+
+  <changeSet id="drop concept_name_index full_text" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="concept_name_index"/>
+    </preConditions>
+    <dropIndex tableName="concept" indexName="concept_name_index"/>
+  </changeSet>
+
+  <changeSet id="drop concept_code_index full_text" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="concept_code_index"/>
+    </preConditions>
+    <dropIndex tableName="concept" indexName="concept_code_index"/>
+  </changeSet>
+
+  <changeSet id="drop idx_concept_1" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_concept_1"/>
+    </preConditions>
+    <dropIndex tableName="concept_relationship" indexName="idx_concept_1" schemaName="cdr"/>
+  </changeSet>
+
+  <changeSet id="drop idx_concept_2" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_concept_2"/>
+    </preConditions>
+    <dropIndex
+      tableName="concept_relationship"
+      indexName="idx_concept_2"
+      schemaName="cdr"/>
+  </changeSet>
+
+  <changeSet id="drop idx_relationship_id" author="biopete" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+        <indexExists indexName="idx_relationship_id"/>
+    </preConditions>
+    <dropIndex
+      tableName="concept_relationship"
+      indexName="idx_relationship_id"
+      schemaName="cdr"/>
+  </changeSet>
+
+  <changeSet author="biopete" id="drop concept_relationship pk" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <primaryKeyExists tableName="concept_relationship" schemaName="cdr"/>
+    </preConditions>
+    <dropPrimaryKey
+      schemaName="cdr"
+      tableName="concept_relationship"/>
+  </changeSet>
+
+</databaseChangeLog>

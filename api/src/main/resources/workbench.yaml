@@ -162,18 +162,17 @@ paths:
         "204":
           description: Account deleted successfully.
 
-  /api/v1/register:
+  /api/v1/id-verification:
     post:
       tags:
         - profile
-      description: Registers a profile for the user in AllOfUs and Firecloud; called after the user has consented to the terms of use
-      operationId: register
+      description: Accepts identity information for verification.
+      operationId: submitIdVerification
       parameters:
         - in: body
-          name: registrationRequest
-          description: registration request
+          name: idVerificationRequest
           schema:
-            $ref: "#/definitions/RegistrationRequest"
+            $ref: "#/definitions/IdVerificationRequest"
       responses:
         "200":
           description: The user's profile.
@@ -196,20 +195,44 @@ paths:
         "204":
           description: Request received.
 
-  /api/v1/id-verification:
+  # TODO: add signature / other state?
+  /api/v1/account/accept-terms-of-service:
     post:
       tags:
         - profile
-      description: Accepts identity information for verification.
-      operationId: submitIdVerification
-      parameters:
-        - in: body
-          name: idVerificationRequest
-          schema:
-            $ref: "#/definitions/IdVerificationRequest"
+      description: Submits consent to the terms of service for researchers.
+      operationId: submitTermsOfService
       responses:
-        "204":
-          description: Request received and validated.
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+  # TODO: add other state pertaining to ethics training?
+  /api/v1/account/complete-ethics-training:
+    post:
+      tags:
+        - profile
+      description: Completes ethics training.
+      operationId: completeEthicsTraining
+      responses:
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+  # TODO: add demographic survey response data
+  /api/v1/account/submit-demographic-survey:
+    post:
+      tags:
+        - profile
+      description: Submits demographic survey responses.
+      operationId: submitDemographicsSurvey
+      responses:
+        "200":
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
 
   # Notebook clusters ####################################################################
 
@@ -909,6 +932,45 @@ paths:
             $ref: "#/definitions/CohortReview"
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will return a ParticipantCohortStatus
+      operationId: "getParticipantCohortStatus"
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          type: string
+          required: true
+          description: specifies which workspace namespace
+        - in: path
+          name: workspaceId
+          type: string
+          required: true
+          description: specifies which workspace
+        - in: path
+          name: cohortId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cohort
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which cdr version
+        - in: path
+          name: participantId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which participant
+      responses:
+        "200":
+          description: The ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
     put:
       tags:
         - cohortReview
@@ -992,40 +1054,6 @@ paths:
           description: A collection of CohortSummary
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
-
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
-    get:
-      tags:
-        - cohortReview
-      description: This endpoint will return a ParticipantCohortStatus
-      operationId: "getParticipantCohortStatus"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortReviewId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which review
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
-      responses:
-        "200":
-          description: The ParticipantCohortStatus definition
-          schema:
-            $ref: "#/definitions/ParticipantCohortStatus"
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
     post:
@@ -2000,6 +2028,18 @@ definitions:
       blockscoreVerificationIsValid:
         type: boolean
         description: Result of verification or null if not yet attempted.
+      termsOfServiceCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
+      ethicsTrainingCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
+      demographicSurveyCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
 
   ErrorResponse:
     type: object
@@ -2008,9 +2048,6 @@ definitions:
         description: General error message for the response.
         type: string
       # TODO: add list of field-level error messages with field names.
-
-  RegistrationRequest:
-    type: object
 
   IdVerificationRequest:
     type: object
