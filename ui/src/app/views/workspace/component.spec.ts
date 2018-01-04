@@ -20,6 +20,7 @@ import {
 import {ClusterService} from 'generated';
 import {CohortsService} from 'generated';
 import {WorkspacesService} from 'generated';
+import {itemList} from "../../cohort-search/redux/store";
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -71,7 +72,6 @@ const activatedRouteStub  = {
 
 describe('WorkspaceComponent', () => {
   let workspacePage: WorkspacePage;
-
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -105,7 +105,7 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
-    expect(workspacePage.notebookTableRows.length).toEqual(0);
+    expect(workspacePage.notebookTableRows.length).toEqual(1);
   }));
 
   it('fetches the correct workspace', fakeAsync(() => {
@@ -132,6 +132,26 @@ describe('WorkspaceComponent', () => {
     expect(workspaceLength).toBe(originalWorkspaceLength - 1);
 
   }));
+
+    it('displays correct notebook information', fakeAsync(() => {
+      let noteBookSize: number;
+      let items;
+      workspacePage.workspacesService.getNoteBookList(
+          workspacePage.workspaceNamespace,
+        workspacePage.workspaceId).subscribe((noteBookList)=>{
+          noteBookSize = noteBookList.length;
+      });
+      tick();
+      expect(noteBookSize).toBe(1);
+
+      workspacePage.workspacesService.getNoteBookList(
+        'MockNamespace',
+        workspacePage.workspaceId).subscribe((noteBookList)=>{
+          noteBookSize = noteBookList.length;
+        });
+      tick();
+      expect(noteBookSize).toBe(0);
+    }));
 
 
 

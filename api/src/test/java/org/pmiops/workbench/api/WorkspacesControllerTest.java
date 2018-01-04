@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
@@ -37,6 +39,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -44,6 +47,7 @@ import org.pmiops.workbench.model.ShareWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -73,6 +77,7 @@ public class WorkspacesControllerTest {
   @TestConfiguration
   @Import(WorkspaceServiceImpl.class)
   @MockBean(FireCloudService.class)
+  @MockBean(CloudStorageService.class)
   static class Configuration {
     @Bean
     Clock clock() {
@@ -88,6 +93,8 @@ public class WorkspacesControllerTest {
   CdrVersionDao cdrVersionDao;
   @Autowired
   UserDao userDao;
+  @Autowired
+  CloudStorageService cloudStorageService;
   @Mock
   Provider<User> userProvider;
 
@@ -106,7 +113,7 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userDao, userProvider, fireCloudService, CLOCK);
+        userDao, userProvider, fireCloudService, CLOCK,cloudStorageService);
 
   }
 
@@ -703,5 +710,36 @@ public class WorkspacesControllerTest {
     writer.setRole(WorkspaceAccessLevel.WRITER);
     shareWorkspaceRequest.addItemsItem(writer);
     workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+  }
+
+  @Test
+  public void testNoteBookList() throws Exception {
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+      new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    org.pmiops.workbench.firecloud.model.Workspace mockWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
+    mockWorkspace.setBucketName("MockBucketName");
+    fcResponse.setWorkspace(mockWorkspace);
+    when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
+      fcResponse
+    );
+    List<FileDetail> fileDetailsList = new ArrayList<FileDetail>();
+    FileDetail mockFileDetail1 = new FileDetail();
+    mockFileDetail1.setName("File1.py");
+    mockFileDetail1.setUrl("//URL");
+
+    FileDetail mockFileDetail2 = new FileDetail();
+    mockFileDetail2.setName("File1.txt");
+    mockFileDetail2.setUrl("//URL");
+
+    fileDetailsList.add(mockFileDetail1);
+    fileDetailsList.add(mockFileDetail2);
+    when(cloudStorageService.getBucketFileList("MockBucketName")).thenReturn(fileDetailsList);
+
+    //Will return 1 entry as only python files are filtered out
+    List<FileDetail> result =workspacesController.getNoteBookList("mockProjectName","mockWorkspaceName").getBody();
+    assertEquals(result.size(),1);
+
+    result =workspacesController.getNoteBookList("mockProject","mockWorkspace").getBody();
+    assertEquals(result.size(),0);
   }
 }

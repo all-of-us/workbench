@@ -129,7 +129,7 @@
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
-          <clr-dg-cell>{{document.location.href}}{{notebook.url}}</clr-dg-cell>
+          <clr-dg-cell><a href={{notebook.url}}>{{notebook.url}}</a></clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>

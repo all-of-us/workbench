@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -98,6 +99,7 @@ public class CohortsControllerTest {
   FireCloudService fireCloudService;
 
   private CohortsController cohortsController;
+  private CloudStorageService cloudStorageService;
 
   @Before
   public void setUp() {
@@ -123,7 +125,7 @@ public class CohortsControllerTest {
 
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
-        cdrVersionDao, userDao, userProvider, fireCloudService, CLOCK);
+        cdrVersionDao, userDao, userProvider, fireCloudService, CLOCK,cloudStorageService);
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortMaterializationService,

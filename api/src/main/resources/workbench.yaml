@@ -359,7 +359,39 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list/:
+    get:
+      summary: Get details of Python files from google Bucket
+      description: Returns list of name and url of python files from google bucket.
+      operationId: getNoteBookList
+      tags:
+        - workspaces
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+      responses:
+        "200":
+          description: List of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileDetail'
+        "404":
+          description: Google bucket not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
   # Billing projects #####################################################################
 
   /api/v1/billingProjects:
@@ -2658,6 +2690,21 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+      bucket:
+        type: string
+        description: Saves the google bucket information
+
+
+  FileDetail:
+    type: object
+    required:
+      - name
+      - url
+    properties:
+      name:
+        type: string
+      url:
+        type: string
 
   ClusterListResponse:
     type: object

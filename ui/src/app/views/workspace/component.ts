@@ -11,10 +11,12 @@ import {
   ClusterService,
   Cohort,
   CohortsService,
+  FileDetail,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
+
 
 // TODO: use a real swagger generated class for this.
 class Notebook {
@@ -146,7 +148,22 @@ export class WorkspaceComponent implements OnInit {
                       this.cohortsLoading = false;
                       this.cohortsError = true;
                     });
-          },
+            this.errorHandlingService.retryApi(this.workspacesService
+              .getNoteBookList(this.wsNamespace, this.wsId))
+                .subscribe(
+                  FileList => {
+                    for(const fileDetail of FileList){
+                      this.notebookList.push(fileDetail);
+                    }
+                  },
+                  error => {
+                    if (error.status === 404) {
+                      this.notFound = true;
+                    } else {
+                      this.workspaceLoading = false;
+                    }
+                  });
+            },
           error => {
             if (error.status === 404) {
               this.notFound = true;

@@ -43,6 +43,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -219,6 +221,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
   private final Clock clock;
+  private final CloudStorageService cloudStorageService;
+
 
   @Autowired
   WorkspacesController(
@@ -227,13 +231,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
-      Clock clock) {
+      Clock clock,
+      CloudStorageService cloudStorageService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.clock = clock;
+    this.cloudStorageService=cloudStorageService;
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -423,6 +429,35 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace, String workspaceId) {
+    List<FileDetail> bucketFileList = new ArrayList<FileDetail>();
+    try {
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+      if(workspaceResponse!=null) {
+        org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = workspaceResponse.getWorkspace();
+        if (fireCloudWorkspace != null) {
+          String bucketName = fireCloudWorkspace.getBucketName();
+          bucketFileList = cloudStorageService.getBucketFileList(bucketName);
+          if (bucketFileList != null && bucketFileList.size() > 0) {
+            bucketFileList = bucketFileList.stream()
+              .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(py))$)"))
+              .collect(Collectors.toList());
+          }
+        }
+      }
+    }
+    catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+        workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+     }
+    }
+    return ResponseEntity.ok(bucketFileList);
   }
 
   @Override
