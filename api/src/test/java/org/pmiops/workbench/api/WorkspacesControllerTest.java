@@ -184,13 +184,25 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getAdditionalNotes()).isEqualTo("additional notes");
     assertThat(workspace2.getNamespace()).isEqualTo("namespace");
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
-    assertThat(workspace2.getResearchPurpose().getApproved()).isFalse();
-    assertThat(workspace2.getResearchPurpose().getTimeReviewed()).isEqualTo(new Long(1500));
-    assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(new Long(1000));
+    assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
 
     //Test that the correct owner is added.
     assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
     assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+  }
+
+  @Test
+  public void testCreateWorkspaceAlreadyApproved() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace.getResearchPurpose().setApproved(true);
+    workspacesController.createWorkspace(workspace);
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    Workspace workspace2 =
+        workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
+            .getBody().getWorkspace();
+    assertThat(workspace2.getResearchPurpose().getApproved()).isNotEqualTo(true);
   }
 
   @Test
@@ -233,7 +245,6 @@ public class WorkspacesControllerTest {
     researchPurpose.setTimeReviewed(null);
     workspacesController.createWorkspace(ws);
 
-    // TODO(RW-216) Inject Clock and verify timestamps.
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
     request.setApproved(true);
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
@@ -242,7 +253,7 @@ public class WorkspacesControllerTest {
     researchPurpose = ws.getResearchPurpose();
 
     assertThat(researchPurpose.getApproved()).isTrue();
-    assertThat(researchPurpose.getTimeReviewed()).isNotNull();
+    assertThat(researchPurpose.getTimeReviewed()).isEqualTo(NOW_TIME);
   }
 
   @Test
@@ -320,12 +331,13 @@ public class WorkspacesControllerTest {
   public void testRejectAfterApproveThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ResearchPurpose researchPurpose = ws.getResearchPurpose();
-    researchPurpose.setApproved(true);
     workspacesController.createWorkspace(ws);
 
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
-    request.setApproved(false);
+    request.setApproved(true);
+    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
 
+    request.setApproved(false);
     workspacesController.reviewWorkspace(ws.getNamespace(), ws.getName(), request);
   }
 
@@ -349,8 +361,11 @@ public class WorkspacesControllerTest {
     ws = createDefaultWorkspace();
     ws.setName("alreadyApproved");
     researchPurpose = ws.getResearchPurpose();
-    researchPurpose.setApproved(true);
-    workspacesController.createWorkspace(ws);
+    ws = workspacesController.createWorkspace(ws).getBody();
+    ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
+    request.setApproved(true);
+    workspacesController.reviewWorkspace(ws.getNamespace(), ws.getId(), request);
+
     // no approval requested
     ws = createDefaultWorkspace();
     ws.setName("noApprovalRequested");
@@ -359,7 +374,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setTimeRequested(null);
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
-    workspacesController.createWorkspace(ws);
+    ws = workspacesController.createWorkspace(ws).getBody();
 
     forApproval = workspacesController.getWorkspacesForReview().getBody().getItems();
     assertThat(forApproval.size()).isEqualTo(1);

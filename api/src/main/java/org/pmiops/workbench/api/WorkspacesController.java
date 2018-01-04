@@ -53,7 +53,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
-  private static final String WORKSPACE_NAMESPACE_PREFIX = "allofus-";
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
@@ -176,23 +175,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           }
           result.setDescription(workspace.getDescription());
           result.setName(workspace.getName());
-          result.setDiseaseFocusedResearch(workspace.getResearchPurpose().getDiseaseFocusedResearch());
-          result.setDiseaseOfFocus(workspace.getResearchPurpose().getDiseaseOfFocus());
-          result.setMethodsDevelopment(workspace.getResearchPurpose().getMethodsDevelopment());
-          result.setControlSet(workspace.getResearchPurpose().getControlSet());
-          result.setAggregateAnalysis(workspace.getResearchPurpose().getAggregateAnalysis());
-          result.setAncestry(workspace.getResearchPurpose().getAncestry());
-          result.setCommercialPurpose(workspace.getResearchPurpose().getCommercialPurpose());
-          result.setPopulation(workspace.getResearchPurpose().getPopulation());
-          result.setPopulationOfFocus(workspace.getResearchPurpose().getPopulationOfFocus());
-          result.setAdditionalNotes(workspace.getResearchPurpose().getAdditionalNotes());
-          result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-          if(workspace.getResearchPurpose().getTimeRequested() != null){
-            result.setTimeRequested(new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
-          }
-          result.setApproved(workspace.getResearchPurpose().getApproved());
-          if(workspace.getResearchPurpose().getTimeReviewed() != null){
-            result.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+          if (workspace.getResearchPurpose() != null) {
+            setResearchPurposeDetails(result, workspace.getResearchPurpose());
+            if (workspace.getResearchPurpose().getTimeReviewed() != null) {
+              result
+                  .setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+            }
+            result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+            if (workspace.getResearchPurpose().getTimeRequested() != null) {
+              result.setTimeRequested(
+                  new Timestamp(workspace.getResearchPurpose().getTimeRequested()));
+            }
+            result.setApproved(workspace.getResearchPurpose().getApproved());
           }
           return result;
         }
@@ -264,7 +258,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   /**
    * Sets user-editable research purpose detail fields.
    */
-  private void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
+  private static void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
       ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
@@ -348,8 +342,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (workspace.getName().equals("")) {
-      throw new BadRequestException("Cannot create a workspace with no name.");
+    if (Strings.isNullOrEmpty(workspace.getNamespace())) {
+      throw new BadRequestException("missing required field 'namespace'");
+    } else if (Strings.isNullOrEmpty(workspace.getName())) {
+      throw new BadRequestException("missing required field 'name'");
+    } else if (workspace.getResearchPurpose() == null) {
+      throw new BadRequestException("missing required field 'researchPurpose'");
+    } else if (workspace.getDataAccessLevel() == null) {
+      throw new BadRequestException("missing required field 'dataAccessLevel'");
     }
     User user = userProvider.get();
     if (user == null) {
@@ -360,7 +360,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
         workspace.getNamespace(), workspace.getName());
     if (existingWorkspace != null) {
-      throw new BadRequestException(String.format(
+      throw new ConflictException(String.format(
           "Workspace %s/%s already exists",
           workspace.getNamespace(), workspace.getName()));
     }
@@ -383,8 +383,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    // TODO: enforce data access level authorization
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        new org.pmiops.workbench.db.model.Workspace();
     dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
@@ -392,6 +392,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+
+    org.pmiops.workbench.db.model.Workspace reqWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
+    // TODO: enforce data access level authorization
+    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
+    dbWorkspace.setName(reqWorkspace.getName());
+    dbWorkspace.setDescription(reqWorkspace.getDescription());
+
+    // Ignore incoming fields pertaining to review status; clients can only request a review.
+    setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    if (reqWorkspace.getReviewRequested()) {
+      // Use a consistent timestamp.
+      dbWorkspace.setTimeRequested(now);
+    }
+    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
     permissions.setRole(WorkspaceAccessLevel.OWNER);
@@ -560,7 +574,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
-      dbWorkspace.setTimeReviewed(now);
+      dbWorkspace.setTimeRequested(now);
     }
     dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
