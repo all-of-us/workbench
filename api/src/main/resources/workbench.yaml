@@ -111,6 +111,27 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
+  /api/v1/invitation-key-verification:
+    post:
+      tags:
+        - profile
+      description: Verifies invitation key.
+      operationId: invitationKeyVerification
+      security: []
+      parameters:
+        - in: body
+          name: invitationVerificationRequest
+          schema:
+            $ref: "#/definitions/InvitationVerificationRequest"
+      responses:
+        "200":
+          description: Invitation Key verified.
+        "400":
+          description: Error occurred while verifying Invitation Key.
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
   /api/v1/google-account:
     post:
       tags:
@@ -1941,7 +1962,15 @@ definitions:
         type: string
       invitationKey:
         type: string
-        description: Invitation key. Necessary when creating account before public launch.
+
+  InvitationVerificationRequest:
+    type: object
+    required:
+      - invitationKey
+    properties:
+      invitationKey:
+        type: string
+        description: Invitation key for verification
 
   BugReport:
     type: object

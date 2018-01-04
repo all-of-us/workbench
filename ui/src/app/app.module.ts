@@ -4,6 +4,7 @@ import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
+import {environment} from 'environments/environment';
 
 import {ErrorHandlingService} from './services/error-handling.service';
 import {SignInService} from './services/sign-in.service';
@@ -14,15 +15,15 @@ import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
+
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
-
-import {environment} from 'environments/environment';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -84,7 +85,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ReviewComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
-    WorkspaceShareComponent
+    WorkspaceShareComponent,
+    InvitationKeyComponent
   ],
   providers: [
     BugReportService,
