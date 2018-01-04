@@ -8,7 +8,6 @@ import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
-import {ParticipantPagerComponent} from './participant-pager/participant-pager.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
 
@@ -19,10 +18,10 @@ import {ReviewStateService} from './review-state.service';
 import {CohortResolver} from '../guards/cohort-resolver.guard';
 import {ReviewResolver} from '../guards/review-resolver.guard';
 
-
 import {CohortReviewService} from 'generated';
 
-const routes = [{
+
+const mainRoutes = {
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Participants'},
@@ -40,20 +39,22 @@ const routes = [{
     }, {
       path: 'participants/:participantId',
       component: ParticipantDetailComponent,
-    },
+    }
   ],
   resolve: {
     cohort: CohortResolver,
     review: ReviewResolver,
   }
-}];
+};
 
 @NgModule({
   imports: [
     ClarityModule,
     CommonModule,
     ReactiveFormsModule,
-    RouterModule.forChild(routes),
+    RouterModule.forChild([
+      mainRoutes,
+    ]),
   ],
   declarations: [
     CohortReviewComponent,
@@ -62,7 +63,6 @@ const routes = [{
     OverviewComponent,
     SidebarDirective,
     ParticipantDetailComponent,
-    ParticipantPagerComponent,
     ParticipantStatusComponent,
     ParticipantTableComponent,
   ],

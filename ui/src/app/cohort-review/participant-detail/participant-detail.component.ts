@@ -1,26 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
+import {Component} from '@angular/core';
 
-import {CohortReviewService} from 'generated';
+import {Participant} from '../participant.model';
+import {ReviewStateService} from '../review-state.service';
 
 @Component({
   selector: 'app-participant-detail',
   templateUrl: './participant-detail.component.html',
   styleUrls: ['./participant-detail.component.css']
 })
-export class ParticipantDetailComponent implements OnInit {
-  private subjectId$: Observable<any>;
+export class ParticipantDetailComponent {
+  participant: Participant = Participant.makeRandom(123);
 
-  constructor(
-    private route: ActivatedRoute,
-    /* tslint:disable-next-line:no-unused-variable */
-    private reviewApi: CohortReviewService,
-  ) {}
+  constructor(private state: ReviewStateService) {}
 
-  ngOnInit() {
-    // TODO: here we load the subject detail data
-    this.subjectId$ = this.route.params
-      .switchMap(params => Observable.of(params.participantId));
+  openSideBar() {
+    this.state.sidebarOpen.next(true);
   }
 }

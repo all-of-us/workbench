@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 import {
@@ -20,9 +21,11 @@ export class ReviewStateService {
   cohort = new ReplaySubject<Cohort>(1);
   participant = new ReplaySubject<ParticipantCohortStatus | null>(1);
   context = new ReplaySubject<RouteContext>(1);
+  sidebarOpen = new BehaviorSubject<boolean>(false);
 
   review$ = this.review.asObservable();
   cohort$ = this.cohort.asObservable();
   participant$ = this.participant.asObservable();
   context$ = this.context.asObservable();
+  sidebarOpen$ = this.sidebarOpen.asObservable();
 }

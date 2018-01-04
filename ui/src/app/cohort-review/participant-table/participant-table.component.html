@@ -1,3 +1,26 @@
+<!-- Cohort Review header -->
+<div class="btn-group"
+  [style.display]="'flex'"
+  [style.align-items]="'center'"
+  [style.justify-content]="'center'">
+  <button
+    class="btn"
+    title="Go to Cohort Overview"
+    routerLink="../overview">
+    <clr-icon shape="line-chart"></clr-icon>
+    Overview
+  </button>
+
+  <button
+    disabled
+    class="btn"
+    title="Go to Participant Browser"
+    routerLink="../participants">
+    <clr-icon shape="users"></clr-icon>
+    Participants
+  </button>
+</div>
+
 <clr-datagrid>
   <!-- (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading"> -->
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
@@ -9,22 +32,20 @@
   <clr-dg-column>Ethnicity</clr-dg-column>
   <clr-dg-column>Review Status</clr-dg-column>
 
-  <clr-dg-row *ngFor="let datum of DUMMY_DATA">
+  <clr-dg-row *ngFor="let participant of DUMMY_DATA">
     <clr-dg-cell>
-      <a (click)="onSelect(participant)"
-        [routerLink]="[datum.id]"
-        routerLinkActive="active">
-        {{ datum.id }}
+      <a routerLink="{{ participant.id }}">
+        {{ participant.id }}
       </a>
     </clr-dg-cell>
-    <clr-dg-cell>{{ datum.dob }}</clr-dg-cell>
-    <clr-dg-cell>{{ datum.gender }}</clr-dg-cell>
-    <clr-dg-cell>{{ datum.race }}</clr-dg-cell>
-    <clr-dg-cell>{{ datum.ethnicity }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.dob }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.gender }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.race }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.ethnicity }}</clr-dg-cell>
     <clr-dg-cell>
       <span class="label"
-        [ngClass]="statusClass(datum.status)">
-        {{ statusText(datum.status) }}
+        [ngClass]="participant.statusLabelClass">
+        {{ participant.formattedStatusText }}
       </span>
     </clr-dg-cell>
   </clr-dg-row>

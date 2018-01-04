@@ -1,6 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
+import {SidebarDirective} from '../directives/sidebar.directive';
 import {ReviewStateService} from '../review-state.service';
 
 import {ReviewStatus} from 'generated';
@@ -14,6 +16,8 @@ const CDR_VERSION = 1;
 })
 export class CohortReviewComponent implements OnInit {
   private createReviewModalOpen = false;
+  private subscription: Subscription;
+  @ViewChild('sidebar') sidebar: SidebarDirective;
 
   constructor(
     private state: ReviewStateService,
@@ -37,5 +41,10 @@ export class CohortReviewComponent implements OnInit {
     if (review.reviewStatus === ReviewStatus.NONE) {
       this.createReviewModalOpen = true;
     }
+
+    this.subscription = this.state.sidebarOpen$.subscribe(val => val
+      ? this.sidebar.open()
+      : this.sidebar.close()
+    );
   }
 }
