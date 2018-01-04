@@ -271,13 +271,9 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-    user.setEmail(googleUser.getPrimaryEmail());
-    user.setContactEmail(request.getProfile().getContactEmail());
-    user.setFamilyName(request.getProfile().getFamilyName());
-    user.setGivenName(request.getProfile().getGivenName());
-    userDao.save(user);
+    User user = userService.createUser(request.getProfile().getGivenName(),
+        request.getProfile().getFamilyName(),
+        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.

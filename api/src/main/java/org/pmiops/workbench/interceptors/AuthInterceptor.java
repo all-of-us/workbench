@@ -19,10 +19,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -57,14 +59,16 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final UserService userService;
 
   @Autowired
   public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao) {
+      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
+    this.userService = userService;
   }
 
   /**
@@ -139,9 +143,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
     User user = userDao.findUserByEmail(userEmail);
     if (user == null) {
-      log.log(Level.INFO, "No user record found for {0}", userEmail);
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      return false;
+      if (userEmail.endsWith(gsuiteDomainSuffix)) {
+        // TODO(danrodney): start populating contact email in Google account, use it here.
+        user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
+            userInfo.getEmail(), null);
+      } else {
+        log.log(Level.INFO, "No user record found for {0}", userEmail);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return false;
+      }
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
