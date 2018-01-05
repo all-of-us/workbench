@@ -85,12 +85,8 @@ public class UserService {
       if (user == null) {
         throw e;
       }
-      // If a user already existed, update it in place.
-      user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-      user.setContactEmail(contactEmail);
-      user.setFamilyName(familyName);
-      user.setGivenName(givenName);
-      userDao.save(user);
+      // If a user already existed (due to multiple requests trying to create a user simultaneously)
+      // just return it.
     }
     return user;
   }
