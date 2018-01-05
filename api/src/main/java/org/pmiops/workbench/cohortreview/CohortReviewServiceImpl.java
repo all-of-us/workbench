@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantInfo;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +112,15 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
+    }
+
+    @Override
+    public ParticipantInfo findParticipantInfo(Long id) {
+        return null;
+    }
+
+    @Override
+    public Slice<ParticipantInfo> findParticipantInfos(List<Long> ids, PageRequest pageRequest) {
+        return null;
     }
 }
