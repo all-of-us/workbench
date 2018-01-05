@@ -1,39 +1,39 @@
 id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id
-316289,0,PM,,01,Approximate pre-pregnancy weight,0,1,0,903131,Measurement
-316290,0,PM,,02,Blood Pressure,1,0,,,Measurement
-316291,0,PM,,03,BMI,0,1,0,903124,Measurement
-316292,0,PM,,04,Heart Rate,1,0,,,Measurement
-316293,0,PM,,05,Height,0,1,0,903133,Measurement
-316294,0,PM,,06,Hip Circumference,1,0,,,Measurement
-316295,0,PM,,07,Participant is a wheelchair user,0,1,0,903111,Measurement
-316296,0,PM,,08,Participant is pregnant,0,1,0,903120,Measurement
-316297,0,PM,,09,Weight,0,1,0,903121,Measurement
-316298,0,PM,,10,Waist Circumference,1,0,,,Measurement
-316299,316290,PM,,11,BP Mean,0,1,0,903107,Measurement
-316300,316290,PM,,12,BP Mean Systolic,0,1,0,903118,Measurement
-316301,316290,PM,,13,BP Mean Diastolic,0,1,0,903115,Measurement
-316302,316290,PM,,14,BP Detail,1,0,,,Measurement
-316303,316290,PM,,15,BP Location,0,1,0,903119,Measurement
-316304,316302,PM,,16,BP Systolic 1,0,1,0,903109,Measurement
-316305,316302,PM,,17,BP Diastolic 1,0,1,0,903110,Measurement
-316306,316302,PM,,18,BP Systolic 2,0,1,0,903114,Measurement
-316307,316302,PM,,19,BP Diastolic 2,0,1,0,903129,Measurement
-316308,316302,PM,,20,BP Systolic 3,0,1,0,903130,Measurement
-316309,316302,PM,,21,BP Diastolic 3,0,1,0,903106,Measurement
-316310,316292,PM,,22,Heart Rate Mean,0,1,0,903126,Measurement
-316311,316292,PM,,23,Heart Rate Detail,1,0,,,Measurement
-316312,316311,PM,,24,Heart Rate 1,0,1,0,903112,Measurement
-316313,316311,PM,,25,Heart Rate 2,0,1,0,903105,Measurement
-316314,316311,PM,,26,Heart Rate 3,0,1,0,903108,Measurement
-316315,316311,PM,,27,Heart Rhythm Status,0,1,0,1586218,Measurement
-316316,316294,PM,,28,Hip Circumference Mean,0,1,0,903136,Measurement
-316317,316294,PM,,29,Hip Circumference Detail,1,0,,,Measurement
-316318,316317,PM,,30,Hip Circumference 1,0,1,0,903117,Measurement
-316319,316317,PM,,31,Hip Circumference 2,0,1,0,903125,Measurement
-316320,316317,PM,,32,Hip Circumference 3,0,1,0,903123,Measurement
-316321,316298,PM,,33,Waist Circumference Mean,0,1,0,903135,Measurement
-316322,316298,PM,,34,WC Detail,1,0,,,Measurement
-316323,316298,PM,,35,Waist Circumference Location,0,1,0,903122,Measurement
-316324,316322,PM,,36,Waist Circumference 1,0,1,0,903127,Measurement
-316325,316322,PM,,37,Waist Circumference 2,0,1,0,903134,Measurement
-316326,316322,PM,,38,Waist Circumference 3,0,1,0,903128,Measurement
+316289,0,PM,,01,Blood Pressure,1,0,,,Measurement
+316290,0,PM,,02,BMI,0,1,0,903124,Measurement
+316291,0,PM,,03,Heart Rate,1,0,,,Measurement
+316292,0,PM,,04,Height,0,1,0,903133,Measurement
+316293,0,PM,,05,Hip Circumference,1,0,,,Measurement
+316294,0,PM,,06,Participant is a wheelchair user,0,1,0,903111,Measurement
+316295,0,PM,,07,Participant is pregnant,0,1,0,903120,Measurement
+316296,0,PM,,08,Waist Circumference,1,0,,,Measurement
+316297,0,PM,,09,Weight,1,0,,,Measurement
+316298,316289,PM,,10,BP Mean Systolic,0,1,0,903118,Measurement
+316299,316289,PM,,11,BP Mean Diastolic,0,1,0,903115,Measurement
+316300,316289,PM,,12,BP Detail,1,0,,,Measurement
+316301,316289,PM,,13,BP Location,0,1,0,903119,Measurement
+316302,316300,PM,,14,BP Systolic 1,0,1,0,903109,Measurement
+316303,316300,PM,,15,BP Diastolic 1,0,1,0,903110,Measurement
+316304,316300,PM,,16,BP Systolic 2,0,1,0,903114,Measurement
+316305,316300,PM,,17,BP Diastolic 2,0,1,0,903129,Measurement
+316306,316300,PM,,18,BP Systolic 3,0,1,0,903130,Measurement
+316307,316300,PM,,19,BP Diastolic 3,0,1,0,903106,Measurement
+316308,316291,PM,,20,Heart Rate Mean,0,1,0,903126,Measurement
+316309,316291,PM,,21,Heart Rate Detail,1,0,,,Measurement
+316310,316309,PM,,22,Heart Rate 1,0,1,0,903112,Measurement
+316311,316309,PM,,23,Heart Rate 2,0,1,0,903105,Measurement
+316312,316309,PM,,24,Heart Rate 3,0,1,0,903108,Measurement
+316313,316309,PM,,25,Heart Rhythm Status,0,1,0,1586218,Measurement
+316314,316293,PM,,26,Hip Circumference Mean,0,1,0,903136,Measurement
+316315,316293,PM,,27,Hip Circumference Detail,1,0,,,Measurement
+316316,316315,PM,,28,Hip Circumference 1,0,1,0,903117,Measurement
+316317,316315,PM,,29,Hip Circumference 2,0,1,0,903125,Measurement
+316318,316315,PM,,30,Hip Circumference 3,0,1,0,903123,Measurement
+316319,316296,PM,,31,Waist Circumference Mean,0,1,0,903135,Measurement
+316320,316296,PM,,32,WC Detail,1,0,,,Measurement
+316321,316296,PM,,33,Waist Circumference Location,0,1,0,903122,Measurement
+316322,316320,PM,,34,Waist Circumference 1,0,1,0,903127,Measurement
+316323,316320,PM,,35,Waist Circumference 2,0,1,0,903134,Measurement
+316324,316320,PM,,36,Waist Circumference 3,0,1,0,903128,Measurement
+316325,316297,PM,,37,Current Weight,0,1,0,903121,Measurement
+316326,316297,PM,,38,Approximate Pre-pregnancy Weight,0,1,0,903131,Measurement
