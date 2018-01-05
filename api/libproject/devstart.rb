@@ -53,6 +53,7 @@ def dev_up(*args)
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
   common.run_inline %W{docker-compose run db-cdr-migration}
+  common.run_inline %W{docker-compose run db-data-migration}
 
   common.status "Updating configuration..."
   common.run_inline %W{docker-compose run update-config}

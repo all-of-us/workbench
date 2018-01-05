@@ -66,7 +66,6 @@ public class ProfileController implements ProfileApiDelegate {
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
-  private final Provider<Userinfoplus> userinfoplusProvider;
   private final UserDao userDao;
   private final Clock clock;
   private final UserService userService;
@@ -79,7 +78,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
-      Provider<Userinfoplus> userinfoplusProvider, UserDao userDao,
+      UserDao userDao,
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
@@ -87,7 +86,6 @@ public class ProfileController implements ProfileApiDelegate {
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
-    this.userinfoplusProvider = userinfoplusProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.userService = userService;
@@ -198,24 +196,6 @@ public class ProfileController implements ProfileApiDelegate {
 
   private User initializeUserIfNeeded() {
     User user = userProvider.get();
-    if (user == null) {
-      // For now, this will happen with any account that you sign in with (since we're not
-      // creating Google accounts yet.) Create a user record for the account.
-
-      // After we start requiring that user accounts are in our GSuite domain, this should only
-      // happen if a Google account was created but we failed to write to our
-      // database right after that.
-      // TODO: remove this logic when we start using Gsuite account info, or start storing the
-      // contact email in Google account info so we can use it here. (We don't want User records
-      // without contact emails.)
-      Userinfoplus userInfo = userinfoplusProvider.get();
-      user = new User();
-      user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-      user.setEmail(userInfo.getEmail());
-      user.setGivenName(userInfo.getGivenName());
-      user.setFamilyName(userInfo.getFamilyName());
-    }
-
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       if (user.getFreeTierBillingProjectName() == null) {
@@ -224,13 +204,14 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      try {
+        return userDao.save(user);
+      } catch (ObjectOptimisticLockingFailureException e) {
+        log.log(Level.WARNING, "version conflict for user update", e);
+        throw new ConflictException("Failed due to concurrent modification");
+      }
     }
-    try {
-      return userDao.save(user);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for user update", e);
-      throw new ConflictException("Failed due to concurrent modification");
-    }
+    return user;
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
@@ -290,13 +271,9 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
-    user.setEmail(googleUser.getPrimaryEmail());
-    user.setContactEmail(request.getProfile().getContactEmail());
-    user.setFamilyName(request.getProfile().getFamilyName());
-    user.setGivenName(request.getProfile().getGivenName());
-    userDao.save(user);
+    User user = userService.createUser(request.getProfile().getGivenName(),
+        request.getProfile().getFamilyName(),
+        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.

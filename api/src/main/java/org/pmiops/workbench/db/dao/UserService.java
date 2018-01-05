@@ -10,6 +10,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
@@ -40,9 +41,6 @@ public class UserService {
    */
   private User updateWithRetries(Function<User, User> userModifier) {
     User user = userProvider.get();
-    if (user == null) {
-      throw new NotFoundException("Could not find record for authenticated user");
-    }
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -71,6 +69,26 @@ public class UserService {
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
     }
+  }
+
+  public User createUser(String givenName, String familyName, String email, String contactEmail) {
+    User user = new User();
+    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
+    user.setEmail(email);
+    user.setContactEmail(contactEmail);
+    user.setFamilyName(familyName);
+    user.setGivenName(givenName);
+    try {
+      userDao.save(user);
+    } catch (DataIntegrityViolationException e) {
+      user = userDao.findUserByEmail(email);
+      if (user == null) {
+        throw e;
+      }
+      // If a user already existed (due to multiple requests trying to create a user simultaneously)
+      // just return it.
+    }
+    return user;
   }
 
   public User setBlockscoreIdVerification(String blockscoreId, boolean blockscoreVerificationIsValid) {

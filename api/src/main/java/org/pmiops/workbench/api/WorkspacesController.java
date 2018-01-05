@@ -352,11 +352,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'dataAccessLevel'");
     }
     User user = userProvider.get();
-    if (user == null) {
-      // You won't be able to create workspaces prior to creating a user record once our
-      // registration flow is done, so this should never happen.
-      throw new BadRequestException("User is not initialized yet; please register");
-    }
     org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
         workspace.getNamespace(), workspace.getName());
     if (existingWorkspace != null) {
@@ -530,11 +525,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
     User user = userProvider.get();
-    if (user == null) {
-      // You won't be able to create workspaces prior to creating a user record once our
-      // registration flow is done, so this should never happen.
-      throw new BadRequestException("User is not initialized yet; please register");
-    }
     if (workspaceService.getByName(workspace.getNamespace(), workspace.getName()) != null) {
       throw new ConflictException(String.format(
           "Workspace %s/%s already exists",
