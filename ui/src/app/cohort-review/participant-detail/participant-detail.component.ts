@@ -35,43 +35,38 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const participant$ = this.state.participant$.merge(this.route.data.pluck('participant'));
+    this.subscription = this.state.participant$
+      .merge(this.route.data.pluck('participant'))
+      .do(participant => this.participant = <Participant>participant)
+      .withLatestFrom(this.state.review$)
+      .subscribe(([participant, review]: [Participant, CohortReview]) => {
+        const statuses = review.participantCohortStatuses;
+        const id = participant && participant.participantId;
+        const index = statuses.findIndex(({participantId}) => participantId === id);
 
-    this.subscription = participant$
-      .subscribe(participant => this.participant = <Participant>participant);
+        // The participant is not on the current page... for now, just log it and ignore it
+        // We get here by URL (when a direct link to a detail page is shared, for example)
+        if (index < 0) {
+          console.log('Participant not on page');
+          // For now, disable next / prev entirely
+          this.isFirstParticipant = true;
+          this.isLastParticipant = true;
+          return;
+        }
 
-    const sub = Observable.combineLatest(participant$, this.state.review$)
-      .subscribe(
-        ([participant, review]: [Participant, CohortReview]) => {
-          const statuses = review.participantCohortStatuses;
-          const id = participant && participant.participantId;
-          const index = statuses.findIndex(({participantId}) => participantId === id);
+        const totalPages = Math.floor(review.reviewSize / review.pageSize);
 
-          // The participant is not on the current page... for now, just log it and ignore it
-          // We get here by URL (when a direct link to a detail page is shared, for example)
-          if (index < 0) {
-            console.log('Participant not on page');
-            // For now, disable next / prev entirely
-            this.isFirstParticipant = true;
-            this.isLastParticipant = true;
-            return;
-          }
+        this.isFirstParticipant =
+          review.page === 0   // first page
+          && index === 0;     // first person on page
 
-          const totalPages = Math.floor(review.reviewSize / review.pageSize);
+        this.isLastParticipant =
+          (review.page + 1) === totalPages    // last page
+          && (index + 1) === statuses.length; // last person on page
 
-          this.isFirstParticipant =
-            review.page === 0   // first page
-            && index === 0;     // first person on page
-
-          this.isLastParticipant =
-            (review.page + 1) === totalPages    // last page
-            && (index + 1) === statuses.length; // last person on page
-
-          this.priorId = statuses[index - 1] && statuses[index - 1]['participantId'];
-          this.afterId = statuses[index + 1] && statuses[index + 1]['participantId'];
+        this.priorId = statuses[index - 1] && statuses[index - 1]['participantId'];
+        this.afterId = statuses[index + 1] && statuses[index + 1]['participantId'];
       });
-
-    this.subscription.add(sub);
   }
 
   ngOnDestroy() {
@@ -91,38 +86,46 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   previous() {
-    if (this.priorId !== undefined) {
-      this.router.navigate(['..', this.priorId], {relativeTo: this.route});
-    } else if (!this.isFirstParticipant) {
-      const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    this._navigate(true);
+  }
+
+  next() {
+    this._navigate(false);
+  }
+
+  private _navigate(left: boolean) {
+    const id = left ? this.priorId : this.afterId;
+    const hasNext = !(left ? this.isFirstParticipant : this.isLastParticipant);
+
+    if (id !== undefined) {
+      this._navigateById(id);
+    } else if (hasNext) {
+      const statusGetter = (statuses: ParticipantCohortStatus[]) => left
+        ? statuses[statuses.length - 1]
+        : statuses[0];
+
+      const adjustPage = (page: number) => left
+        ? page - 1
+        : page + 1;
+
       this.state.review$
         .take(1)
-        .mergeMap(({page, pageSize}) => this.reviewAPI.getParticipantCohortStatuses(
-          ns, wsid, cid, CDR_VERSION, page - 1, pageSize
-        ))
+        .map(({page, pageSize}) => ({page: adjustPage(page), size: pageSize}))
+        .mergeMap(({page, size}) => this._callAPI(page, size))
         .subscribe(review => {
           this.state.review.next(review);
-          const lastStatus = review.participantCohortStatuses.pop();
-          this.router.navigate(['..', lastStatus.participantId], {relativeTo: this.route});
+          const stat = statusGetter(review.participantCohortStatuses);
+          this._navigateById(stat.participantId);
         });
     }
   }
 
-  next() {
-    if (this.afterId !== undefined) {
-      this.router.navigate(['..', this.afterId], {relativeTo: this.route});
-    } else if (!this.isLastParticipant) {
-      const {ns, wsid, cid} = this.route.parent.snapshot.params;
-      this.state.review$
-        .take(1)
-        .mergeMap(({page, pageSize}) => this.reviewAPI.getParticipantCohortStatuses(
-          ns, wsid, cid, CDR_VERSION, page + 1, pageSize
-        ))
-        .subscribe(review => {
-          this.state.review.next(review);
-          const firstStatus = review.participantCohortStatuses[0];
-          this.router.navigate(['..', firstStatus.participantId], {relativeTo: this.route});
-        });
-    }
+  private _callAPI = (page: number, size: number): Observable<CohortReview> => {
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, page, size);
+  }
+
+  private _navigateById = (id: number): void => {
+    this.router.navigate(['..', id], {relativeTo: this.route});
   }
 }
