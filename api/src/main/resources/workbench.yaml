@@ -931,7 +931,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}:
     get:
       tags:
         - cohortReview
