@@ -20,25 +20,14 @@ import {
   styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
-  participant$: Observable<Participant>;
 
-  constructor(
-    private state: ReviewStateService,
-    private reviewAPI: CohortReviewService,
-  ) {}
-
-  ngOnInit() {
-    this.participant$ = this.state.participant$;
-  }
-
-  ngOnDestroy() {
-  }
-
-  /*
   readonly CohortStatus = CohortStatus;
-  statusControl = new FormControl();
 
-  private _participant: ParticipantCohortStatus | undefined;
+  statusControl = new FormControl();
+  subscription: Subscription;
+  changingStatus = false;
+
+  private _participant: Participant | null;
 
   set participant(value) {
     this._participant = value;
@@ -53,8 +42,10 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     return this._participant;
   }
 
-  private subscription: Subscription;
-  private changingStatus = false;
+  constructor(
+    private state: ReviewStateService,
+    private reviewAPI: CohortReviewService,
+  ) {}
 
   ngOnInit() {
     this.subscription = this.state.participant$
@@ -62,7 +53,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
     const participantId = this.state.participant$
       .filter(participant => participant !== null)
-      .map(participant => participant.participantId);
+      .map(participant => participant.id);
 
     const statusChanger = this.statusControl.valueChanges
       .withLatestFrom(participantId, this.state.context$)
@@ -74,24 +65,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  private _emit = (newStatus: ParticipantCohortStatus) => {
-    this.changingStatus = false;
-    this.state.participant.next(newStatus);
-
-    this.state.review$
-      .take(1)
-      .map((review: CohortReview) => {
-        const index = review.participantCohortStatuses.findIndex(
-          ({participantId}) => participantId === newStatus.participantId
-        );
-        if (index >= 0) {
-          review.participantCohortStatuses.splice(index, 1, newStatus);
-        }
-        return review;
-      })
-      .subscribe(r => this.state.review.next(r));
   }
 
   private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {
@@ -108,5 +81,24 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       request
     );
   }
-*/
+
+  private _emit = (newStatus: ParticipantCohortStatus) => {
+    this.changingStatus = false;
+    const participant = Participant.makeRandomFromExisting(newStatus);
+    this.state.participant.next(participant);
+
+    /* TODO (jms) replace this with an action to refresh the table? */
+    this.state.review$
+      .take(1)
+      .map((review: CohortReview) => {
+        const index = review.participantCohortStatuses.findIndex(
+          ({participantId}) => participantId === newStatus.participantId
+        );
+        if (index >= 0) {
+          review.participantCohortStatuses.splice(index, 1, newStatus);
+        }
+        return review;
+      })
+      .subscribe(r => this.state.review.next(r));
+  }
 }

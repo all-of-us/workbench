@@ -21,8 +21,8 @@
   </button>
 </div>
 
-<clr-datagrid>
-  <!-- (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading"> -->
+<clr-datagrid
+  (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
   <clr-dg-column>Participant ID</clr-dg-column>
@@ -52,9 +52,13 @@
 
   <clr-dg-footer>
     {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-    {{ reviewSize }} Selected for Review from
-    {{ matchedParticipantCount }} Participants
-    <clr-dg-pagination #pagination [clrDgTotalItems]="reviewSize" [clrDgPageSize]="pageSize"></clr-dg-pagination>
+    {{ review.reviewSize }} Selected for Review from
+    {{ review.matchedParticipantCount }} Participants
+    <clr-dg-pagination #pagination
+      [clrDgTotalItems]="review.reviewSize"
+      [clrDgPageSize]="review.pageSize"
+      [clrDgPage]="review.page + 1">
+    </clr-dg-pagination>
   </clr-dg-footer>
 
 </clr-datagrid>

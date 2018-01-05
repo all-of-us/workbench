@@ -22,6 +22,7 @@ export class ReviewResolver implements Resolve<CohortReview> {
     /* TODO use a real CDR version */
     const CDR_VERSION = 1;
 
+    console.log('Loading review from resolver');
     return this.reviewAPI
       .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION)
       .do(review => this.state.review.next(review));
