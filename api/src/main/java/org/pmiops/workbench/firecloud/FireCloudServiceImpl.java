@@ -62,6 +62,11 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public Me getMe() throws ApiException {
+    return profileApiProvider.get().me();
+  }
+
+  @Override
   public void registerUser(String contactEmail, String firstName, String lastName)
       throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();

@@ -198,7 +198,9 @@ dependencies {
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
   compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
-  compile 'com.google.cloud:google-cloud-storage:1.8.0'
+  compile ('com.google.cloud:google-cloud-storage:1.8.0') {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
   compile 'com.google.code.gson:gson:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
   compile 'com.squareup.okhttp:okhttp:2.4.0'
@@ -208,6 +210,7 @@ dependencies {
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.blockscore:blockscore-java:4.0.2'
+  compile 'com.google.guava:guava:22.0'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'

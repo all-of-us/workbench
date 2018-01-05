@@ -119,21 +119,16 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    Userinfoplus userInfo = new Userinfoplus();
-    userInfo.setEmail(PRIMARY_EMAIL);
-    userInfo.setFamilyName(FAMILY_NAME);
-    userInfo.setGivenName(GIVEN_NAME);
-
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
 
     UserService userService = new UserService(userProvider, userDao, clock);
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
-        Providers.of(userInfo), userDao, clock, userService, fireCloudService, directoryService,
+        userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider,
-        Providers.of(userInfo), userDao, clock, userService, fireCloudService, directoryService,
+        userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
   }
 
@@ -156,15 +151,6 @@ public class ProfileControllerTest {
     assertThat(user.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSubmitIdVerification_notFound() throws Exception {
-    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
-        eq(null), eq(null), eq(null))).thenReturn(person);
-    when(person.getId()).thenReturn("id");
-    when(person.isValid()).thenReturn(true);
-    profileController.submitIdVerification(idVerificationRequest);
-  }
-
   @Test
   public void testSubmitIdVerification_success() throws Exception {
     createUser();
@@ -180,11 +166,6 @@ public class ProfileControllerTest {
     assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSubmitDemographicSurvey_notFound() throws Exception {
-    profileController.submitDemographicsSurvey();
-  }
-
   @Test
   public void testSubmitDemographicSurvey_success() throws Exception {
     createUser();
@@ -196,11 +177,6 @@ public class ProfileControllerTest {
     assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSubmitTermsOfService_notFound() throws Exception {
-    profileController.submitTermsOfService();
-  }
-
   @Test
   public void testSubmitTermsOfService_success() throws Exception {
     createUser();
@@ -210,11 +186,6 @@ public class ProfileControllerTest {
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
-  }
-
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testCompleteEthicsTraining_notFound() throws Exception {
-    profileController.completeEthicsTraining();
   }
 
   @Test
@@ -260,23 +231,24 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_noUserBeforeSuccess() throws Exception {
-    when(userProvider.get()).thenReturn(null);
+  public void testMe_success() throws Exception {
+    createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     Profile profile = profileController.getMe().getBody();
 
     String projectName = BILLING_PROJECT_PREFIX + PRIMARY_EMAIL.hashCode();
-    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
+    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
-    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
   }
 
   @Test
-  public void testMe_noUserBeforeSuccessDevProjectConflict() throws Exception {
+  public void testMe_successDevProjectConflict() throws Exception {
+    createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     Profile profile = profileController.getMe().getBody();
@@ -286,9 +258,9 @@ public class ProfileControllerTest {
         .when(fireCloudService).createAllOfUsBillingProject(projectName);
 
     // When a conflict occurs in dev, log the exception but continue.
-    assertProfile(profile, PRIMARY_EMAIL, null, FAMILY_NAME, GIVEN_NAME,
+    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName, true);
-    verify(fireCloudService).registerUser(null, GIVEN_NAME, FAMILY_NAME);
+    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
   }
