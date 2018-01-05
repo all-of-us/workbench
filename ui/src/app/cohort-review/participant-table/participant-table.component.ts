@@ -1,6 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {State} from 'clarity-angular';
+import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
@@ -15,11 +16,12 @@ import {
   selector: 'app-participant-table',
   templateUrl: './participant-table.component.html',
 })
-export class ParticipantTableComponent implements OnInit {
+export class ParticipantTableComponent implements OnInit, OnDestroy {
   DUMMY_DATA: Participant[];
 
   review: CohortReview;
   loading: boolean;
+  subscription: Subscription;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -30,12 +32,16 @@ export class ParticipantTableComponent implements OnInit {
   ngOnInit() {
     this.loading = false;
 
-    this.state.review$
+    this.subscription = this.state.review$
       .do(review => this.review = review)
       .pluck('participantCohortStatuses')
       .map(statusSet =>
         (<ParticipantCohortStatus[]>statusSet).map(Participant.makeRandomFromExisting))
       .subscribe(val => this.DUMMY_DATA = <Participant[]>val);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   refresh(state: State) {
@@ -48,6 +54,7 @@ export class ParticipantTableComponent implements OnInit {
     console.dir(this.route);
 
     setTimeout(() => this.loading = true, 0);
+
     this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, page, size)
       .do(r => this.loading = false)
       .subscribe(review => this.state.review.next(review));

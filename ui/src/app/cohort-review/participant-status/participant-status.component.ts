@@ -1,5 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -45,6 +46,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   constructor(
     private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -56,7 +58,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       .map(participant => participant.id);
 
     const statusChanger = this.statusControl.valueChanges
-      .withLatestFrom(participantId, this.state.context$)
+      .withLatestFrom(participantId)
       .switchMap(this._callApi)
       .subscribe(this._emit);
 
@@ -67,18 +69,14 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {
+  private _callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
-    const {workspaceNamespace, workspaceId, cohortId, cdrVersion} = context;
+    const CDR_VERSION = 1;
+    const {ns, wsid, cid} = this.route.snapshot.params;
 
     return this.reviewAPI.updateParticipantCohortStatus(
-      workspaceNamespace,
-      workspaceId,
-      cohortId,
-      cdrVersion,
-      participantId,
-      request
+      ns, wsid, cid, CDR_VERSION, participantId, request
     );
   }
 

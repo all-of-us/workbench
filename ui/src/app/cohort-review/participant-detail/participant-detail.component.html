@@ -6,19 +6,21 @@
     <button
       class="btn"
       title="Prior Participant"
-      routerLink="..">
+      [disabled]="isFirstParticipant"
+      (click)="previous()">
       <clr-icon shape="caret" dir="left"></clr-icon>
     </button>
     <button
       class="btn"
       title="Participant Browser"
-      routerLink="..">
+      (click)="up()">
       <clr-icon shape="caret" dir="up"></clr-icon>
     </button>
     <button
       class="btn"
       title="Next Participant"
-      routerLink="..">
+      [disabled]="isLastParticipant"
+      (click)="next()">
       <clr-icon shape="caret" dir="right"></clr-icon>
     </button>
   </div>

@@ -9,24 +9,15 @@ import {
   CohortReview,
 } from 'generated';
 
-interface RouteContext {
-  workspaceNamespace?: string;
-  workspaceId?: string;
-  cohortId?: number;
-  cdrVersion?: number;
-}
-
 @Injectable()
 export class ReviewStateService {
   review = new ReplaySubject<CohortReview>(1);
   cohort = new ReplaySubject<Cohort>(1);
   participant = new ReplaySubject<Participant | null>(1);
-  context = new ReplaySubject<RouteContext>(1);
   sidebarOpen = new BehaviorSubject<boolean>(false);
 
   review$ = this.review.asObservable();
   cohort$ = this.cohort.asObservable();
   participant$ = this.participant.asObservable();
-  context$ = this.context.asObservable();
   sidebarOpen$ = this.sidebarOpen.asObservable();
 }
