@@ -91,6 +91,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
+    // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
