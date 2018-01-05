@@ -10,6 +10,7 @@ public class WorkbenchConfig {
     public boolean debugEndpoints;
     public String billingAccountId;
     public String billingProjectPrefix;
+    public String registeredDomainName;
   }
 
   public FireCloudConfig firecloud;

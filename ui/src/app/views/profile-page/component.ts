@@ -27,6 +27,7 @@ export class ProfilePageComponent implements OnInit {
   getVerifiedStatus(): void {
     this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
         (profile: Profile) => {
+      console.log(profile);
       this.verifiedStatusIsValid = profile.blockscoreVerificationIsValid;
       this.verifiedStatusIsLoaded = true;
       this.profile = profile;
@@ -38,5 +39,19 @@ export class ProfilePageComponent implements OnInit {
     this.profileService.deleteAccount().subscribe(() => {
       this.signInService.signOut();
     });
+  }
+
+  submitTermsOfService(): void {
+    this.profileService.submitTermsOfService().subscribe();
+  }
+
+
+  completeEthicsTraining(): void {
+    this.profileService.completeEthicsTraining().subscribe();
+  }
+
+
+  submitDemographicSurvey(): void {
+    this.profileService.submitDemographicsSurvey().subscribe();
   }
 }

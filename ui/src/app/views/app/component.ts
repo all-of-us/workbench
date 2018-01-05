@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
   private _showCreateAccount = false;
   private overriddenUrl: string = null;
   currentUrl: string;
+  email: string;
   constructor(
       private activatedRoute: ActivatedRoute,
       private errorHandlingService: ErrorHandlingService,
@@ -88,6 +89,7 @@ export class AppComponent implements OnInit {
         this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
           this.hasReviewResearchPurpose =
             profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+          // this.email = profile.username;
         });
       }
     });

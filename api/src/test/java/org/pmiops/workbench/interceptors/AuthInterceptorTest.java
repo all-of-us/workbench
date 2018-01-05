@@ -6,6 +6,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.services.oauth2.Oauth2.Userinfo;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -22,7 +23,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.UserInfo;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.web.method.HandlerMethod;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -50,7 +59,7 @@ public class AuthInterceptorTest {
   @Mock
   private UserInfoService userInfoService;
   @Mock
-  private Provider<User> userProvider;
+  private FireCloudService fireCloudService;
   @Mock
   private UserDao userDao;
   @Mock
@@ -59,6 +68,8 @@ public class AuthInterceptorTest {
   private HttpServletResponse response;
   @Mock
   private HandlerMethod handler;
+  @Mock
+  private UserService userService;
 
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -69,7 +80,11 @@ public class AuthInterceptorTest {
 
   @Before
   public void setup() {
-    this.interceptor = new AuthInterceptor(userInfoService, userProvider, userDao);
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
+    workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
+    this.interceptor = new AuthInterceptor(userInfoService, fireCloudService,
+        Providers.of(workbenchConfig), userDao, userService);
     this.user = new User();
     user.setUserId(USER_ID);
   }
@@ -118,11 +133,79 @@ public class AuthInterceptorTest {
   }
 
   @Test
+  public void preHandleGet_firecloudLookupFails() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(fireCloudService.getMe()).thenThrow(
+        new ApiException(HttpServletResponse.SC_NOT_FOUND, "blah"));
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+  }
+
+  @Test
+  public void preHandleGet_firecloudLookupSucceeds() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    UserInfo fcUserInfo = new UserInfo();
+    fcUserInfo.setUserEmail("bob@fake-domain.org");
+    Me me = new Me();
+    me.setUserInfo(fcUserInfo);
+    when(fireCloudService.getMe()).thenReturn(me);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+  }
+
+  @Test
+  public void preHandleGet_firecloudLookupSucceedsNoUserRecordWrongDomain() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@bad-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    UserInfo fcUserInfo = new UserInfo();
+    fcUserInfo.setUserEmail("bob@also-bad-domain.org");
+    Me me = new Me();
+    me.setUserInfo(fcUserInfo);
+    when(fireCloudService.getMe()).thenReturn(me);
+    when(userDao.findUserByEmail("bob@also-bad-domain.org")).thenReturn(null);
+    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
+    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+  }
+
+  @Test
   public void preHandleGet_userInfoSuccess() throws Exception {
     when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
     when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
-    when(userInfoService.getUserInfo("foo")).thenReturn(new Userinfoplus());
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setEmail("bob@fake-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+  }
+
+  @Test
+  public void preHandleGet_noUserRecord() throws Exception {
+    when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
+    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
+    Userinfoplus userInfo = new Userinfoplus();
+    userInfo.setGivenName("Bob");
+    userInfo.setFamilyName("Jones");
+    userInfo.setEmail("bob@fake-domain.org");
+    when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(null);
+    when(userService.createUser("Bob", "Jones", "bob@fake-domain.org", null))
+        .thenReturn(user);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 
