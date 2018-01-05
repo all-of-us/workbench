@@ -1,6 +1,19 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.base.Strings;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -15,24 +28,24 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -339,11 +352,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'dataAccessLevel'");
     }
     User user = userProvider.get();
-    if (user == null) {
-      // You won't be able to create workspaces prior to creating a user record once our
-      // registration flow is done, so this should never happen.
-      throw new BadRequestException("User is not initialized yet; please register");
-    }
     org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
         workspace.getNamespace(), workspace.getName());
     if (existingWorkspace != null) {
@@ -517,11 +525,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
     User user = userProvider.get();
-    if (user == null) {
-      // You won't be able to create workspaces prior to creating a user record once our
-      // registration flow is done, so this should never happen.
-      throw new BadRequestException("User is not initialized yet; please register");
-    }
     if (workspaceService.getByName(workspace.getNamespace(), workspace.getName()) != null) {
       throw new ConflictException(String.format(
           "Workspace %s/%s already exists",
