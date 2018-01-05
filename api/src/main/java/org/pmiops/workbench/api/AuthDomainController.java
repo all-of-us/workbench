@@ -59,12 +59,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
-  public ResponseEntity<Void> removeUserFromAuthDomain(AuthDomainRequest body) {
-    User user = userDao.findUserByEmail(body.getEmail());
-
+  public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
+    User user = userDao.findUserByEmail(request.getEmail());
     try {
-      fireCloudService.removeUserFromGroup(body.getEmail(), body.getGroupName());
-
+      fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
       if (e.getCode() == 403) {
         throw new ForbiddenException(e.getResponseBody());
@@ -80,11 +78,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
-  public ResponseEntity<Void> addUserToAuthDomain(AuthDomainRequest body) {
-    User user = userDao.findUserByEmail(body.getEmail());
+  public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
+    User user = userDao.findUserByEmail(request.getEmail());
     try {
-      fireCloudService.addUserToGroup(body.getEmail(), body.getGroupName());
-
+      fireCloudService.addUserToGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
       if (e.getCode() == 403) {
         throw new ForbiddenException(e.getResponseBody());

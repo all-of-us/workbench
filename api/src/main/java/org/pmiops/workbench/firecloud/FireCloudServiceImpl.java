@@ -31,8 +31,6 @@ import org.springframework.stereotype.Service;
 public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
-  private static final String REGISTERED_GROUP_NAME = "ALL-OF-US-REGISTERED";
-
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
@@ -183,16 +181,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void addUserToGroup(String email, String groupName) throws ApiException {
-    System.out.println(email);
-    System.out.println(groupName);
     GroupsApi groupsApi = groupsApiProvider.get();
     groupsApi.addUserToGroup(groupName, "member", email);
   }
 
   @Override
   public void removeUserFromGroup(String email, String groupName) throws ApiException {
-    System.out.println(email);
-    System.out.println(groupName);
     GroupsApi groupsApi = groupsApiProvider.get();
     groupsApi.removeUserFromGroup(groupName, "member", email);
   }

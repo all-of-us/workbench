@@ -234,7 +234,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /api/v1/create-auth-domain/{groupName}:
+  /api/v1/auth-domain/{groupName}:
     post:
       tags:
         - authDomain
@@ -251,7 +251,7 @@ paths:
           description: Successfully created group
           schema:
             $ref: "#/definitions/EmptyResponse"
-  /api/v1/auth-domain:
+  /api/v1/auth-domain/{groupName}/users:
     post:
       tags:
         - authDomain
@@ -271,8 +271,13 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
       parameters:
+        - in: path
+          name: groupName
+          required: true
+          type: string
         - in: body
-          name: body
+          name: request
+          description: request carrying user email to add
           schema:
             $ref: "#/definitions/AuthDomainRequest"
       tags:
@@ -296,8 +301,13 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
       parameters:
+        - in: path
+          name: groupName
+          required: true
+          type: string
         - in: body
-          name: body
+          name: request
+          description: request carrying user email to add
           schema:
             $ref: "#/definitions/AuthDomainRequest"
       tags:
@@ -2962,9 +2972,6 @@ definitions:
     type: object
     required:
       - email
-      - groupName
     properties:
       email:
-        type: string
-      groupName:
         type: string
