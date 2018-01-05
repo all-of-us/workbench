@@ -1,0 +1,20 @@
+<div style="padding: 5rem;">
+  <div *ngIf="!invitationKeyVerifed" class="form-area">
+    <div class="form-section">
+      <label>Enter your Invitation Key:</label>
+      <input type="text" class="input" [(ngModel)]="invitationKey">
+      <div *ngIf="invitationKeyReq" class="alert alert-danger">
+        <strong> Invitation Key is required.</strong>
+      </div>
+      <div *ngIf="invitationKeyInvalid" class="alert alert-danger">
+        <strong> Invitation Key is not Valid.</strong>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: space-around;">
+      <button id="next" (click)="next()" class="btn btn-primary">Next</button>
+    </div>
+  </div>
+  <div *ngIf="invitationKeyVerifed">
+    <app-account-creation></app-account-creation>
+  </div>
+</div>

@@ -267,37 +267,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.CohortReview>
-    getParticipantCohortStatuses(String workspaceNamespace,
-                                 String workspaceId,
-                                 Long cohortId,
-                                 Long cdrVersionId,
-                                 Integer page,
-                                 Integer pageSize,
-                                 String sortOrder,
-                                 String sortColumn) {
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
-
-        if (cohortReview == null) {
-            Cohort cohort = cohortReviewService.findCohort(cohortId);
-            //this validates that the user is in the proper workspace
-            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
-
-            SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
-
-            /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-            codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-            codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
-            QueryResult result = bigQueryService.executeQuery(
-                    bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
-            Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-            List<FieldValue> row = result.iterateAll().iterator().next();
-            long cohortCount = bigQueryService.getLong(row, rm.get("count"));
-
-            cohortReview = createNewCohortReview(cohortId, cdrVersionId, cohortCount);
-            cohortReviewService.saveCohortReview(cohortReview);
+    public ResponseEntity<org.pmiops.workbench.model.CohortReview> getParticipantCohortStatuses(String workspaceNamespace,
+                                                                                                String workspaceId,
+                                                                                                Long cohortId,
+                                                                                                Long cdrVersionId,
+                                                                                                Integer page,
+                                                                                                Integer pageSize,
+                                                                                                String sortOrder,
+                                                                                                String sortColumn) {
+        CohortReview cohortReview = null;
+        try {
+            cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        } catch (NotFoundException nfe) {
+            cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
         }
 
         PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
@@ -320,6 +302,39 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long annotationId,
                                                                                          ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+    }
+
+    /**
+     * Helper method to create a new {@link CohortReview} and persist it to the workbench database.
+     *
+     * @param workspaceNamespace
+     * @param workspaceId
+     * @param cohortId
+     * @param cdrVersionId
+     * @return
+     */
+    private CohortReview initializeAndSaveCohortReview(String workspaceNamespace,
+                                                       String workspaceId,
+                                                       Long cohortId,
+                                                       Long cdrVersionId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+
+        SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
+
+        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
+        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
+
+        QueryResult result = bigQueryService.executeQuery(
+                bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+        List<FieldValue> row = result.iterateAll().iterator().next();
+        long cohortCount = bigQueryService.getLong(row, rm.get("count"));
+
+        CohortReview cohortReview = createNewCohortReview(cohortId, cdrVersionId, cohortCount);
+        return cohortReviewService.saveCohortReview(cohortReview);
     }
 
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,

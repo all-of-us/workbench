@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
+import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -88,6 +89,7 @@ public class ProfileControllerTest {
   private ProfileController profileController;
   private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
+  private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
   private IdVerificationRequest idVerificationRequest;
@@ -102,6 +104,7 @@ public class ProfileControllerTest {
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
+    invitationVerificationRequest = new InvitationVerificationRequest();
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
     profile.setFamilyName(FAMILY_NAME);
@@ -110,7 +113,7 @@ public class ProfileControllerTest {
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
     createAccountRequest.setPassword(PASSWORD);
-
+    invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
 
@@ -138,6 +141,11 @@ public class ProfileControllerTest {
   public void testCreateAccount_invitationKeyMismatch() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testInvitationKeyVerification_invitationKeyMismatch() throws Exception {
+    profileController.invitationKeyVerification(invitationVerificationRequest);
   }
 
   @Test
@@ -241,6 +249,7 @@ public class ProfileControllerTest {
     assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
+
   @Test(expected = ServerErrorException.class)
   public void testCreateAccount_directoryServiceFail() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
@@ -342,7 +351,6 @@ public class ProfileControllerTest {
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-2");
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-3");
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-4");
-
   }
 
   @Test
@@ -357,7 +365,6 @@ public class ProfileControllerTest {
 
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
-
 
     // An additional call to getMe() should have no effect.
     clock.increment(1);

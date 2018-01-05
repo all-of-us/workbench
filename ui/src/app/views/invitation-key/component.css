@@ -1,0 +1,20 @@
+.input {
+  width: 100%;
+}
+
+.error {
+  background-color: #ffeeee;
+  padding: 0 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.label{
+  width:3rem;
+}
+.form-section {
+  margin-top: 4rem;
+}
+
+.form-section:first-child {
+  margin-top: 0;
+}
