@@ -22,7 +22,7 @@ setup(
 
         # TODO(markfickett) Automatically provide a version string here, bumped when publishing
         # (maybe from swagger-regen).
-        version='0.1.2',
+        version='0.1.3',
 
         long_description=readme_contents,
         url='https://github.com/all-of-us/workbench',
