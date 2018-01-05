@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -173,6 +174,7 @@ public class CohortReviewControllerTest {
         ParticipantCohortStatus pcs = new ParticipantCohortStatus();
         pcs.setParticipantKey(new ParticipantCohortStatusKey(1, 0));
         pcs.status(CohortStatus.NOT_REVIEWED);
+        pcs.setBirthDateTime(new Date());
 
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
                             "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
@@ -326,8 +328,7 @@ public class CohortReviewControllerTest {
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(
-                        namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn, filterColumns, filterValues);
+                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());

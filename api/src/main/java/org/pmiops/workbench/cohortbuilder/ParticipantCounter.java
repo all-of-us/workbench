@@ -29,7 +29,7 @@ public class ParticipantCounter {
                     "where\n";
 
     private static final String ID_SQL_TEMPLATE =
-            "select distinct person_id, gender_concept_id, birth_datetime, race_concept_id, ethnicity_concept_id\n" +
+            "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 

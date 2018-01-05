@@ -213,24 +213,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    getParticipantCohortStatus(String workspaceNamespace,
-                               String workspaceId,
-                               Long cohortId,
-                               Long cdrVersionId,
-                               Long participantId) {
-        Cohort cohort;
-        CohortReview review;
-        ParticipantCohortStatus status;
-
-        cohort = cohortReviewService.findCohort(cohortId);
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> getParticipantCohortStatus(String workspaceNamespace,
+                                                                                                         String workspaceId,
+                                                                                                         Long cohortId,
+                                                                                                         Long cdrVersionId,
+                                                                                                         Long participantId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
-                                                      workspaceId,
-                                                      cohort.getWorkspaceId());
-        review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
-        status = cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(),
-                                                                 participantId);
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        ParticipantCohortStatus status =
+                cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status));
     }
 
