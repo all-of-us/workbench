@@ -6,8 +6,8 @@
     "billingProjectPrefix": "aou-test-free1-"
   },
   "bigquery": {
-    "dataSetId": "synpuf",
-    "projectId": "pmi-drc-api-test"
+    "dataSetId": "test_merge_dec26",
+    "projectId": "all-of-us-ehr-dev"
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-workbench-test-credentials"
