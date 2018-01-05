@@ -8,6 +8,8 @@ import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
+import {InvitationKeyComponent} from '../invitation-key/component';
+
 
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
@@ -26,6 +28,7 @@ describe('AppComponent', () => {
       declarations: [
         AccountCreationComponent,
         AppComponent,
+        InvitationKeyComponent
       ],
       providers: [
         { provide: AuthDomainService, useValue: {} },
