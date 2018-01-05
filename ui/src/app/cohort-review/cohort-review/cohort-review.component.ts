@@ -23,7 +23,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.state.participant.next(null);
     const {reviewStatus} = this.route.snapshot.data.review;
     this.createReviewModalOpen = reviewStatus === ReviewStatus.NONE;
     this.subscription = this.state.sidebarOpen$.subscribe(val => val

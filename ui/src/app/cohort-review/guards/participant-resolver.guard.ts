@@ -7,6 +7,8 @@ import {ReviewStateService} from '../review-state.service';
 
 import {CohortReviewService} from 'generated';
 
+const CDR_VERSION = 1;
+
 @Injectable()
 export class ParticipantResolver implements Resolve<Participant> {
 
@@ -23,7 +25,6 @@ export class ParticipantResolver implements Resolve<Participant> {
     console.dir(route);
 
     /* TODO use a real CDR version */
-    const CDR_VERSION = 1;
 
     return <Observable<Participant>>this.reviewAPI
       .getParticipantCohortStatus(ns, wsid, +cid, CDR_VERSION, +pid)

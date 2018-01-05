@@ -12,6 +12,8 @@ import {
   ParticipantCohortStatus
 } from 'generated';
 
+const CDR_VERSION = 1;
+
 @Component({
   selector: 'app-participant-detail',
   templateUrl: './participant-detail.component.html',
@@ -44,6 +46,16 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
           const statuses = review.participantCohortStatuses;
           const id = participant && participant.participantId;
           const index = statuses.findIndex(({participantId}) => participantId === id);
+
+          // The participant is not on the current page... for now, just log it and ignore it
+          // We get here by URL (when a direct link to a detail page is shared, for example)
+          if (index < 0) {
+            console.log('Participant not on page');
+            // For now, disable next / prev entirely
+            this.isFirstParticipant = true;
+            this.isLastParticipant = true;
+            return;
+          }
 
           const totalPages = Math.floor(review.reviewSize / review.pageSize);
 
@@ -82,7 +94,6 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
     if (this.priorId !== undefined) {
       this.router.navigate(['..', this.priorId], {relativeTo: this.route});
     } else if (!this.isFirstParticipant) {
-      const CDR_VERSION = 1;
       const {ns, wsid, cid} = this.route.parent.snapshot.params;
       this.state.review$
         .take(1)
@@ -101,7 +112,6 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
     if (this.afterId !== undefined) {
       this.router.navigate(['..', this.afterId], {relativeTo: this.route});
     } else if (!this.isLastParticipant) {
-      const CDR_VERSION = 1;
       const {ns, wsid, cid} = this.route.parent.snapshot.params;
       this.state.review$
         .take(1)
