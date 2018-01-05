@@ -2695,9 +2695,7 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
-      bucket:
-        type: string
-        description: Saves the google bucket information
+
 
 
   FileDetail:
