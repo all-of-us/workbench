@@ -154,7 +154,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
+                participantCounter.buildParticipantStatusQuery(searchRequest, request.getSize(), 0L)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses =
