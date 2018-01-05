@@ -61,9 +61,9 @@ public interface FireCloudService {
 
   void deleteWorkspace(String projectName, String workspaceName) throws ApiException;
 
-  ManagedGroupWithMembers createRegisteredGroup() throws ApiException;
+  ManagedGroupWithMembers createGroup(String groupName) throws ApiException;
 
-  void addUserToRegisteredGroup(String email) throws ApiException;
+  void addUserToGroup(String email, String groupName) throws ApiException;
 
-  void removeUserFromRegisteredGroup(String email) throws ApiException;
+  void removeUserFromGroup(String email, String groupName) throws ApiException;
 }

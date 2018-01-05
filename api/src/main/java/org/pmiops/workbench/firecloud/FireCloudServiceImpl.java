@@ -176,20 +176,24 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public ManagedGroupWithMembers createRegisteredGroup() throws ApiException {
+  public ManagedGroupWithMembers createGroup(String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    return groupsApi.createGroup(REGISTERED_GROUP_NAME);
+    return groupsApi.createGroup(groupName);
   }
 
   @Override
-  public void addUserToRegisteredGroup(String email) throws ApiException {
+  public void addUserToGroup(String email, String groupName) throws ApiException {
+    System.out.println(email);
+    System.out.println(groupName);
     GroupsApi groupsApi = groupsApiProvider.get();
-    groupsApi.addUserToGroup(REGISTERED_GROUP_NAME, "member", email);
+    groupsApi.addUserToGroup(groupName, "member", email);
   }
 
   @Override
-  public void removeUserFromRegisteredGroup(String email) throws ApiException {
+  public void removeUserFromGroup(String email, String groupName) throws ApiException {
+    System.out.println(email);
+    System.out.println(groupName);
     GroupsApi groupsApi = groupsApiProvider.get();
-    groupsApi.removeUserFromGroup(REGISTERED_GROUP_NAME, "member", email);
+    groupsApi.removeUserFromGroup(groupName, "member", email);
   }
 }

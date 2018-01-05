@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -20,7 +21,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.RegisteredDomainRemoveRequest;
+import org.pmiops.workbench.model.AuthDomainRequest;
 import org.springframework.http.HttpStatus;
 
 
@@ -30,22 +31,23 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
   private final FireCloudService fireCloudService;
   private final UserDao userDao;
-  private final Provider<User> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
       UserDao userDao,
-      Provider<User> userProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.fireCloudService = fireCloudService;
     this.userDao = userDao;
-    this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
+  @AuthorityRequired({Authority.MANAGE_GROUP})
   @Override
-  public ResponseEntity<EmptyResponse> createRegisteredGroup() {
+  public ResponseEntity<EmptyResponse> createAuthDomain(String groupName) {
     try {
-      fireCloudService.createRegisteredGroup();
+      fireCloudService.createGroup(groupName);
     } catch (ApiException e) {
       if (e.getCode() == 409) {
         throw new ConflictException(e.getResponseBody());
@@ -56,13 +58,12 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  @AuthorityRequired({Authority.REVOKE_REGISTERED_ACCESS})
-  public ResponseEntity<Void> removeUserFromRegisteredGroup(
-      RegisteredDomainRemoveRequest body) {
-    User user = userProvider.get();
+  @AuthorityRequired({Authority.MANAGE_GROUP})
+  public ResponseEntity<Void> removeUserFromAuthDomain(AuthDomainRequest body) {
+    User user = userDao.findUserByEmail(body.getEmail());
 
     try {
-      fireCloudService.removeUserFromRegisteredGroup(body.getEmail());
+      fireCloudService.removeUserFromGroup(body.getEmail(), body.getGroupName());
 
     } catch (ApiException e) {
       if (e.getCode() == 403) {
@@ -74,6 +75,26 @@ public class AuthDomainController implements AuthDomainApiDelegate {
       }
     }
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
+    userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @AuthorityRequired({Authority.MANAGE_GROUP})
+  public ResponseEntity<Void> addUserToAuthDomain(AuthDomainRequest body) {
+    User user = userDao.findUserByEmail(body.getEmail());
+    try {
+      fireCloudService.addUserToGroup(body.getEmail(), body.getGroupName());
+
+    } catch (ApiException e) {
+      if (e.getCode() == 403) {
+        throw new ForbiddenException(e.getResponseBody());
+      } else if (e.getCode() == 404) {
+        throw new NotFoundException(e.getResponseBody());
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+    user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

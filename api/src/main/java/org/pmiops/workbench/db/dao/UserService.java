@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.function.Function;
 import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -31,16 +32,19 @@ public class UserService {
   private final UserDao userDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public UserService(Provider<User> userProvider,
       UserDao userDao,
       Clock clock,
-      FireCloudService fireCloudService) {
+      FireCloudService fireCloudService,
+      Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
+    this.configProvider = configProvider;
   }
 
   /**
@@ -77,7 +81,8 @@ public class UserService {
           && user.getEthicsTrainingCompletionTime() != null
           && user.getTermsOfServiceCompletionTime() != null) {
         try {
-          this.fireCloudService.addUserToRegisteredGroup(user.getEmail());
+          this.fireCloudService.addUserToGroup(user.getEmail(),
+              configProvider.get().firecloud.registeredDomainName);
         } catch (ApiException e) {
           if (e.getCode() == 403) {
             throw new ForbiddenException(e.getResponseBody());
