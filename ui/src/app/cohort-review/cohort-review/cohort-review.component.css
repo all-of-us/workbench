@@ -1,5 +1,10 @@
 .cohort-review-main {
-  transition: margin .5s;
+  transition: margin-left .5s;
+}
+
+.status-wrapper {
+  padding: 0.25rem;
+  margin-left: 0.5rem;
 }
 
 [appSidebar] .closebtn {
@@ -15,9 +20,4 @@
 
 [appSidebar] .closebtn:hover {
   color: rgb(166, 166, 166);
-}
-
-.status-wrapper {
-  padding: 0.25rem;
-  margin-left: 0.5rem;
 }
