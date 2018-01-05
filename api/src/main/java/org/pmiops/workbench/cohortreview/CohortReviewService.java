@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortreview;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantInfo;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -86,21 +85,4 @@ public interface CohortReviewService {
      * @return
      */
     Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest);
-
-    /**
-     * Find the {@link ParticipantInfo} for the specified id.
-     *
-     * @param id
-     * @return
-     */
-    ParticipantInfo findParticipantInfo(Long id);
-
-    /**
-     * Find all {@link ParticipantInfo} for the specified list of ids and pageRequest.
-     *
-     * @param ids
-     * @param pageRequest
-     * @return
-     */
-    Slice<ParticipantInfo> findParticipantInfos(List<Long> ids, PageRequest pageRequest);
 }

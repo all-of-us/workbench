@@ -113,14 +113,4 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
     }
-
-    @Override
-    public ParticipantInfo findParticipantInfo(Long id) {
-        return null;
-    }
-
-    @Override
-    public Slice<ParticipantInfo> findParticipantInfos(List<Long> ids, PageRequest pageRequest) {
-        return null;
-    }
 }
