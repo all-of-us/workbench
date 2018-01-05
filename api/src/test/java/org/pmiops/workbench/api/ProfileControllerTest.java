@@ -85,6 +85,8 @@ public class ProfileControllerTest {
   private BlockscoreService blockscoreService;
   @Mock
   private Person person;
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -121,8 +123,7 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-
-    UserService userService = new UserService(userProvider, userDao, clock);
+    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
         userDao, clock, userService, fireCloudService, directoryService,
@@ -206,6 +207,11 @@ public class ProfileControllerTest {
         eq(null), eq(null), eq(null))).thenReturn(person);
     when(person.getId()).thenReturn("id");
     when(person.isValid()).thenReturn(true);
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.firecloud = new FireCloudConfig();
+    testConfig.firecloud.registeredDomainName = "";
+
+    when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     profile = profileController.submitDemographicsSurvey().getBody();
@@ -214,6 +220,8 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     profile = profileController.submitIdVerification(idVerificationRequest).getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
+    verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
+
     assertThat(profile.getBlockscoreVerificationIsValid()).isTrue();
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());

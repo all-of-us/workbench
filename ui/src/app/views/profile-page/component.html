@@ -61,3 +61,21 @@
     </div>
   </ng-template>
 </div>
+<div *ngIf="profileLoaded">
+  <button class="btn" (click)="submitTermsOfService()"
+      [disabled]="email===null || this.profile.termsOfServiceCompletionTime !== null">
+    Submit Terms of Service
+  </button>
+</div>
+<div *ngIf="profileLoaded">
+  <button class="btn" (click)="completeEthicsTraining()"
+      [disabled]="email===null || this.profile.ethicsTrainingCompletionTime !== null">
+    Complete Ethics Training
+  </button>
+</div>
+<div *ngIf="profileLoaded">
+  <button class="btn" (click)="submitDemographicSurvey()"
+      [disabled]="email===null || this.profile.demographicSurveyCompletionTime !== null">
+    Submit Demographics Survey
+  </button>
+</div>

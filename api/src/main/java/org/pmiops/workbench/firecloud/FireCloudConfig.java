@@ -8,6 +8,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,6 +79,15 @@ public class FireCloudConfig {
     // Billing calls are made by the AllOfUs service account, rather than using the end user's
     // credentials.
     BillingApi api = new BillingApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public GroupsApi groupsApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
+    // Group/Auth Domain creation and addition are made by the AllOfUs service account
+    GroupsApi api = new GroupsApi();
     api.setApiClient(apiClient);
     return api;
   }
