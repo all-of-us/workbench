@@ -1,6 +1,7 @@
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {Observable} from 'rxjs/Observable';
+import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -12,7 +13,8 @@ export class ProfileStubVariables {
     fullName:  'Tester MacTesterson><script>alert("hello");</script>',
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
-    phoneNumber: '999-999-9999'
+    phoneNumber: '999-999-9999',
+    invitationKey: 'dummyKey'
   };
 }
 
@@ -31,4 +33,18 @@ export class ProfileServiceStub {
       }, 0);
     });
   }
+
+  public invitationKeyVerification(invitationVerificationRequest?: InvitationVerificationRequest)
+      : Observable<{}> {
+    if (invitationVerificationRequest.invitationKey === 'dummy') {
+      const observable = new Observable(observer => {
+          observer.next(this.profile);
+      });
+      return observable;
+      }
+    const observable = new Observable(observer => {
+          observer.error(new Error(`Invalid invitation code`));
+    });
+    return observable;
+   }
 }
