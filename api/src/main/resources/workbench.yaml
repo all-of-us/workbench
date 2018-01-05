@@ -234,6 +234,86 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /api/v1/auth-domain/{groupName}:
+    post:
+      tags:
+        - authDomain
+      description: This endpoint will create the registered auth domain.
+      operationId: "createAuthDomain"
+      parameters:
+        - in: path
+          name: groupName
+          description: groupName
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successfully created group
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+  /api/v1/auth-domain/{groupName}/users:
+    post:
+      tags:
+        - authDomain
+      responses:
+        204:
+          description: Successfully Added User To Group
+        403:
+          description: You must be an admin of this group in order to remove members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          name: groupName
+          required: true
+          type: string
+        - in: body
+          name: request
+          description: request carrying user email to add
+          schema:
+            $ref: "#/definitions/AuthDomainRequest"
+      tags:
+        - authDomain
+      summary: add a user to an auth domain if you have manage groups permission
+      operationId: addUserToAuthDomain
+    delete:
+      responses:
+        204:
+          description: Successfully Removed User From Group
+        403:
+          description: You must be an admin of this group in order to remove members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          name: groupName
+          required: true
+          type: string
+        - in: body
+          name: request
+          description: request carrying user email to add
+          schema:
+            $ref: "#/definitions/AuthDomainRequest"
+      tags:
+        - authDomain
+      summary: remove a user from an auth domain if you have manage groups permission
+      operationId: removeUserFromAuthDomain
   # Notebook clusters ####################################################################
 
   /api/v1/clusters:
@@ -1597,6 +1677,7 @@ paths:
               $ref: "#/definitions/ConceptListResponse"
 
 
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1638,7 +1719,7 @@ definitions:
   DataAccessLevel:
     type: string
     description: levels of access to data in the curated data repository
-    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
   EmptyResponse:
     type: object
@@ -1651,6 +1732,7 @@ definitions:
     description: actions a user can have authority/permission to perform
     enum: [
         REVIEW_RESEARCH_PURPOSE,
+        MANAGE_GROUP,
         # Swagger trims any common prefix from enum values' corresponding Java
         # fields by default; include a bogus sentinel value to prevent that.
         # https://github.com/swagger-api/swagger-codegen/issues/4261
@@ -2885,3 +2967,11 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/DbDomain"
+
+  AuthDomainRequest:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
