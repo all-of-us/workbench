@@ -15,8 +15,6 @@ import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
-// TODO (jms) Do I need a cohort resolver?
-import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
 import {ReviewResolver} from './guards/review-resolver.guard';
 
@@ -71,7 +69,6 @@ const mainRoutes = {
     ParticipantTableComponent,
   ],
   providers: [
-    CohortResolver,
     ReviewResolver,
     ParticipantResolver,
     CohortReviewService,

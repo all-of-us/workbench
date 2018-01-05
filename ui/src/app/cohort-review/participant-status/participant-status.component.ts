@@ -15,6 +15,8 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
+const CDR_VERSION = 1;
+
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
@@ -72,7 +74,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   private _callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
-    const CDR_VERSION = 1;
     const {ns, wsid, cid} = this.route.snapshot.params;
 
     return this.reviewAPI.updateParticipantCohortStatus(

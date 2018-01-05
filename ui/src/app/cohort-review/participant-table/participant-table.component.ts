@@ -6,6 +6,8 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+const CDR_VERSION = 1;
+
 import {
   CohortReview,
   CohortReviewService,
@@ -45,7 +47,6 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   }
 
   refresh(state: State) {
-    const CDR_VERSION = 1;
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const size = state.page.size;
     const page = Math.floor(state.page.from / size);

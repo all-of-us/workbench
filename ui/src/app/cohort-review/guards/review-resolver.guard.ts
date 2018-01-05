@@ -6,6 +6,9 @@ import {ReviewStateService} from '../review-state.service';
 
 import {CohortReview, CohortReviewService} from 'generated';
 
+/* TODO use a real CDR version */
+const CDR_VERSION = 1;
+
 @Injectable()
 export class ReviewResolver implements Resolve<CohortReview> {
 
@@ -18,9 +21,6 @@ export class ReviewResolver implements Resolve<CohortReview> {
     const ns = route.paramMap.get('ns');
     const wsid = route.paramMap.get('wsid');
     const cid = +route.paramMap.get('cid');
-
-    /* TODO use a real CDR version */
-    const CDR_VERSION = 1;
 
     console.log('Loading review from resolver');
     return this.reviewAPI
