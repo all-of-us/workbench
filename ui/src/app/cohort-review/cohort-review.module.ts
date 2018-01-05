@@ -21,7 +21,7 @@ import {ReviewResolver} from './guards/review-resolver.guard';
 import {CohortReviewService} from 'generated';
 
 
-const mainRoutes = {
+const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Participants'},
@@ -47,16 +47,14 @@ const mainRoutes = {
   resolve: {
     review: ReviewResolver,
   }
-};
+}];
 
 @NgModule({
   imports: [
     ClarityModule,
     CommonModule,
     ReactiveFormsModule,
-    RouterModule.forChild([
-      mainRoutes,
-    ]),
+    RouterModule.forChild(routes),
   ],
   declarations: [
     CohortReviewComponent,
