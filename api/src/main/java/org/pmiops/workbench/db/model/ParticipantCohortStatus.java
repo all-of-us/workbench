@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 
@@ -17,10 +16,10 @@ public class ParticipantCohortStatus {
 
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
-    private Long genderConceptId;
+    private String gender;
     private Date birthDateTime;
-    private Long raceConceptId;
-    private Long ethnicityConceptId;
+    private String race;
+    private String ethnicity;
 
     @EmbeddedId
     public ParticipantCohortStatusKey getParticipantKey() {
@@ -50,17 +49,17 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Column(name = "gender_concept_id")
-    public Long getGenderConceptId() {
-        return genderConceptId;
+    @Column(name = "gender")
+    public String getGender() {
+        return gender;
     }
 
-    public void setGenderConceptId(Long genderConceptId) {
-        this.genderConceptId = genderConceptId;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
-    public ParticipantCohortStatus genderConceptId(Long genderConceptId) {
-        this.genderConceptId = genderConceptId;
+    public ParticipantCohortStatus gender(String gender) {
+        this.gender = gender;
         return this;
     }
 
@@ -78,31 +77,31 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Column(name = "race_concept_id")
-    public Long getRaceConceptId() {
-        return raceConceptId;
+    @Column(name = "race")
+    public String getRace() {
+        return race;
     }
 
-    public void setRaceConceptId(Long raceConceptId) {
-        this.raceConceptId = raceConceptId;
+    public void setRace(String race) {
+        this.race = race;
     }
 
-    public ParticipantCohortStatus raceConceptId(Long raceConceptId) {
-        this.raceConceptId = raceConceptId;
+    public ParticipantCohortStatus race(String race) {
+        this.race = race;
         return this;
     }
 
-    @Column(name = "ethnicity_concept_id")
-    public Long getEthnicityConceptId() {
-        return ethnicityConceptId;
+    @Column(name = "ethnicity")
+    public String getEthnicity() {
+        return ethnicity;
     }
 
-    public void setEthnicityConceptId(Long ethnicityConceptId) {
-        this.ethnicityConceptId = ethnicityConceptId;
+    public void setEthnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
     }
 
-    public ParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
-        this.ethnicityConceptId = ethnicityConceptId;
+    public ParticipantCohortStatus ethnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
         return this;
     }
 
@@ -113,15 +112,15 @@ public class ParticipantCohortStatus {
         ParticipantCohortStatus that = (ParticipantCohortStatus) o;
         return Objects.equals(participantKey, that.participantKey) &&
                 status == that.status &&
-                Objects.equals(genderConceptId, that.genderConceptId) &&
+                Objects.equals(gender, that.gender) &&
                 Objects.equals(birthDateTime, that.birthDateTime) &&
-                Objects.equals(raceConceptId, that.raceConceptId) &&
-                Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
+                Objects.equals(race, that.race) &&
+                Objects.equals(ethnicity, that.ethnicity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participantKey, status, genderConceptId, birthDateTime, raceConceptId, ethnicityConceptId);
+        return Objects.hash(participantKey, status, gender, birthDateTime, race, ethnicity);
     }
 
     @Override
@@ -129,10 +128,10 @@ public class ParticipantCohortStatus {
         return new ToStringBuilder(this)
                 .append("participantKey", participantKey)
                 .append("status", status)
-                .append("genderConceptId", genderConceptId)
+                .append("gender", gender)
                 .append("birthDateTime", birthDateTime)
-                .append("raceConceptId", raceConceptId)
-                .append("ethnicityConceptId", ethnicityConceptId)
+                .append("race", race)
+                .append("ethnicity", ethnicity)
                 .toString();
     }
 }

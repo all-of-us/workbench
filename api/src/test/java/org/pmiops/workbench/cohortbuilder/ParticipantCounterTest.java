@@ -247,7 +247,7 @@ public class ParticipantCounterTest {
             }
         }
 
-        final String expectedSql = "select distinct person_id, gender_concept_id, birth_datetime, race_concept_id, ethnicity_concept_id\n" +
+        final String expectedSql = "select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` person\n" +
                 "where\n" +
                 "person.person_id in (select person_id\n" +
