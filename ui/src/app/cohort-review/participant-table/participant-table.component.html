@@ -1,0 +1,64 @@
+<!-- Cohort Review header -->
+<div class="btn-group"
+  [style.display]="'flex'"
+  [style.align-items]="'center'"
+  [style.justify-content]="'center'">
+  <button
+    class="btn"
+    title="Go to Cohort Overview"
+    routerLink="../overview">
+    <clr-icon shape="line-chart"></clr-icon>
+    Overview
+  </button>
+
+  <button
+    disabled
+    class="btn"
+    title="Go to Participant Browser"
+    routerLink="../participants">
+    <clr-icon shape="users"></clr-icon>
+    Participants
+  </button>
+</div>
+
+<clr-datagrid
+  (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
+  <clr-dg-placeholder>No Participants</clr-dg-placeholder>
+
+  <clr-dg-column>Participant ID</clr-dg-column>
+  <clr-dg-column>Date of Birth</clr-dg-column>
+  <clr-dg-column>Gender</clr-dg-column>
+  <clr-dg-column>Race</clr-dg-column>
+  <clr-dg-column>Ethnicity</clr-dg-column>
+  <clr-dg-column>Review Status</clr-dg-column>
+
+  <clr-dg-row *ngFor="let participant of DUMMY_DATA">
+    <clr-dg-cell>
+      <a routerLink="{{ participant.id }}">
+        {{ participant.id }}
+      </a>
+    </clr-dg-cell>
+    <clr-dg-cell>{{ participant.dob }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.gender }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.race }}</clr-dg-cell>
+    <clr-dg-cell>{{ participant.ethnicity }}</clr-dg-cell>
+    <clr-dg-cell>
+      <span class="label"
+        [ngClass]="participant.statusLabelClass">
+        {{ participant.formattedStatusText }}
+      </span>
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>
+    {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+    {{ review.reviewSize }} Selected for Review from
+    {{ review.matchedParticipantCount }} Participants
+    <clr-dg-pagination #pagination
+      [clrDgTotalItems]="review.reviewSize"
+      [clrDgPageSize]="review.pageSize"
+      [clrDgPage]="review.page + 1">
+    </clr-dg-pagination>
+  </clr-dg-footer>
+
+</clr-datagrid>

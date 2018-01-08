@@ -1,19 +1,21 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
+import {SidebarDirective} from '../directives/sidebar.directive';
 import {ReviewStateService} from '../review-state.service';
 
 import {ReviewStatus} from 'generated';
-
-const CDR_VERSION = 1;
 
 @Component({
   selector: 'app-cohort-review',
   templateUrl: './cohort-review.component.html',
   styleUrls: ['./cohort-review.component.css']
 })
-export class CohortReviewComponent implements OnInit {
+export class CohortReviewComponent implements OnInit, OnDestroy {
   private createReviewModalOpen = false;
+  private subscription: Subscription;
+  @ViewChild('sidebar') sidebar: SidebarDirective;
 
   constructor(
     private state: ReviewStateService,
@@ -21,21 +23,15 @@ export class CohortReviewComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const {cohort, review} = this.route.snapshot.data;
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {reviewStatus} = this.route.snapshot.data.review;
+    this.createReviewModalOpen = reviewStatus === ReviewStatus.NONE;
+    this.subscription = this.state.sidebarOpen$.subscribe(val => val
+      ? this.sidebar.open()
+      : this.sidebar.close()
+    );
+  }
 
-    this.state.cohort.next(cohort);
-    this.state.review.next(review);
-    this.state.participant.next(null);
-    this.state.context.next({
-      cdrVersion: CDR_VERSION,
-      cohortId: cid,
-      workspaceId: wsid,
-      workspaceNamespace: ns,
-    });
-
-    if (review.reviewStatus === ReviewStatus.NONE) {
-      this.createReviewModalOpen = true;
-    }
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

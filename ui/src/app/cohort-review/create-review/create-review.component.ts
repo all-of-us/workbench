@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
@@ -15,6 +15,8 @@ import {
   CohortReviewService,
   CreateReviewRequest,
 } from 'generated';
+
+const CDR_VERSION = 1;
 
 @Component({
   selector: 'app-create-review',
@@ -38,6 +40,7 @@ export class CreateReviewComponent implements OnInit {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private router: Router,
+    private route: ActivatedRoute,
   ) { }
 
   get numParticipants() {
@@ -64,23 +67,16 @@ export class CreateReviewComponent implements OnInit {
   }
 
   cancelReview() {
-    this.state.context$
-      .take(1)
-      .map(({workspaceNamespace, workspaceId}) => ['workspace', workspaceNamespace, workspaceId])
-      .subscribe(args => this.router.navigate(args));
+    const {ns, wsid} = this.route.parent.snapshot.params;
+    this.router.navigate(['workspace', ns, wsid]);
   }
 
   createReview() {
     this.creating = true;
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+
     Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
-      .withLatestFrom(this.state.context$)
-      .mergeMap(([request, context]) =>
-        this.reviewAPI.createCohortReview(
-          context.workspaceNamespace,
-          context.workspaceId,
-          context.cohortId,
-          context.cdrVersion,
-          request))
+      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, CDR_VERSION, request))
       .subscribe(review => {
         this.creating = false;
         this.state.review.next(review);
