@@ -12,6 +12,7 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
+import {LoremIpsumDirective} from './directives/lorem.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
@@ -67,6 +68,7 @@ const routes = [{
     ParticipantDetailComponent,
     ParticipantStatusComponent,
     ParticipantTableComponent,
+    LoremIpsumDirective,
   ],
   providers: [
     CohortResolver,

@@ -6,9 +6,6 @@ import {ReviewStateService} from '../review-state.service';
 
 import {Cohort, CohortsService} from 'generated';
 
-/* TODO use a real CDR version */
-const CDR_VERSION = 1;
-
 @Injectable()
 export class CohortResolver implements Resolve<Cohort> {
 
