@@ -392,6 +392,46 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
+
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebook/:
+    post:
+      summary: Localize files from workspace to notebook cluster
+      description: localize files
+      operationId: localizeNotebook
+      tags:
+        - cluster
+      parameters:
+      - in: path
+        name: workspaceNamespace
+        description: workspaceNamespace
+        required: true
+        type: string
+      - in: path
+        name: workspaceId
+        description: workspaceId
+        required: true
+        type: string
+      - in: body
+        name: fileList
+        description: List of file to be transfered
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/FileDetail'
+      responses:
+        "200":
+          description: List of files
+        "404":
+          description: Google bucket not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+
   # Billing projects #####################################################################
 
   /api/v1/billingProjects:

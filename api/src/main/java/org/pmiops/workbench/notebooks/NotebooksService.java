@@ -1,9 +1,10 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.HashMap;
 import java.util.List;
+
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
-import org.springframework.http.ResponseEntity;
 
 /**
  * Encapsulate Notebooks API interaction details and provide a simple/mockable interface
@@ -33,4 +34,9 @@ public interface NotebooksService {
    * Gets information about a notebook cluster
    */
   Cluster getCluster(String googleProject, String clusterName) throws ApiException;
+
+  /**
+   * Send files over to notebook Cluster
+   */
+  void localize(String googleProject,String clusterName,HashMap fileList) throws ApiException;
 }

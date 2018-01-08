@@ -115,7 +115,9 @@
       <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
     </div>
     <div class="indented">
+      <button class="btn" (click)="pushToNotebookServer(notebookList)">PUSH TO NOTEBOOK SERVER</button>
       <clr-datagrid [clrDgLoading]="notebooksLoading">
+        <clr-dg-column>Push to NoteBook Server</clr-dg-column>
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
@@ -127,6 +129,7 @@
         <clr-dg-column>URL</clr-dg-column>
         <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
+          <clr-dg-cell><input type="checkbox" [(ngModel)]="notebook.push"/></clr-dg-cell>
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
           <clr-dg-cell><a href={{notebook.url}}>{{notebook.url}}</a></clr-dg-cell>

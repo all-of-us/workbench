@@ -1,15 +1,15 @@
 package org.pmiops.workbench.notebooks;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.inject.Provider;
+
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -68,5 +68,16 @@ public class NotebooksServiceImpl implements NotebooksService {
       // TODO: Handle get cluster exceptions cleanly
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void localize(String googleProject,String clusterName,HashMap fileList) throws ApiException {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    try{
+      clusterApi.localizeFiles(googleProject,clusterName,fileList);
+    }catch (ApiException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 }
