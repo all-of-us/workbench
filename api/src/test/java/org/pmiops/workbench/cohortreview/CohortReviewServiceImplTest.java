@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class CohortReviewServiceImplTest {
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private CohortReviewServiceImpl cohortReviewService;
@@ -193,13 +197,16 @@ public class CohortReviewServiceImplTest {
     @Test
     public void saveParticipantCohortStatuses() throws Exception {
         List<ParticipantCohortStatus> pcsList = new ArrayList<>();
-        pcsList.add(new ParticipantCohortStatus());
+        final ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus();
+        pcsList.add(participantCohortStatus);
 
         when(participantCohortStatusDao.save(pcsList)).thenReturn(null);
+        doNothing().when(entityManager).persist(participantCohortStatus);
 
         cohortReviewService.saveParticipantCohortStatuses(pcsList);
 
         verify(participantCohortStatusDao).save(pcsList);
+        verify(entityManager).persist(participantCohortStatus);
         verifyNoMoreMockInteractions();
     }
 
