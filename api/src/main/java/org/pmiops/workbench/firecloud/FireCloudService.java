@@ -2,6 +2,9 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+
+import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -16,6 +19,11 @@ public interface FireCloudService {
    * @return true if the user making the current request is enabled in FireCloud, false otherwise.
    */
   boolean isRequesterEnabledInFirecloud() throws ApiException;
+
+  /**
+   * @return the FireCloud profile for the requesting user.
+   */
+  Me getMe() throws ApiException;
 
   /**
    * Registers the user in Firecloud.
@@ -39,7 +47,7 @@ public interface FireCloudService {
    * Creates a new FC workspace.
    */
   void createWorkspace(String projectName, String workspaceName) throws ApiException;
-  
+
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 
   /**
@@ -52,4 +60,10 @@ public interface FireCloudService {
   WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException;
 
   void deleteWorkspace(String projectName, String workspaceName) throws ApiException;
+
+  ManagedGroupWithMembers createGroup(String groupName) throws ApiException;
+
+  void addUserToGroup(String email, String groupName) throws ApiException;
+
+  void removeUserFromGroup(String email, String groupName) throws ApiException;
 }

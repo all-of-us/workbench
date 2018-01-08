@@ -332,6 +332,124 @@ paths:
           500:
             description: Internal server error
 
+  /api/groups/{groupName}:
+    post:
+      responses:
+        201:
+          description: Successfully created group
+          schema:
+            $ref: '#/definitions/ManagedGroupWithMembers'
+        409:
+          description: Group already exists
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: create a new group
+      operationId: createGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
+
+  /api/groups/{groupName}/{role}/{email}:
+    put:
+      responses:
+        204:
+          description: Successfully Added User To Group
+        403:
+          description: You must be an admin of this group in order to add members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+        - in: path
+          description: role of user for group
+          name: role
+          required: true
+          type: string
+          enum: ["member", "admin"]
+        - in: path
+          description: email of user or group to add
+          name: email
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: add a user to a group the caller owns
+      operationId: addUserToGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
+    delete:
+      responses:
+        204:
+          description: Successfully Removed User From Group
+        403:
+          description: You must be an admin of this group in order to remove members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+        - in: path
+          description: role of user for group
+          name: role
+          required: true
+          type: string
+          enum: ["member", "admin"]
+        - in: path
+          description: email of user or group to add
+          name: email
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: remove a user from a group the caller owns
+      operationId: removeUserFromGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
+
+
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################
@@ -713,3 +831,36 @@ definitions:
         description: the users or groups who were not found
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
+
+  ManagedGroupWithMembers:
+    description: a group with all of its members
+    type: object
+    required:
+      - membersGroup
+      - adminsGroup
+      - membersEmails
+      - adminsEmails
+    properties:
+      membersGroup:
+        $ref: '#/definitions/RawlsGroupShort'
+      adminsGroup:
+        $ref: '#/definitions/RawlsGroupShort'
+      membersEmails:
+        type: array
+        items:
+          type: string
+      adminsEmails:
+        type: array
+        items:
+          type: string
+
+  RawlsGroupShort:
+    type: object
+    description: a reference to a group
+    properties:
+      groupName:
+        type: string
+        description: 'the name of the group'
+      groupEmail:
+        type: string
+        description: 'the email associated with the group'

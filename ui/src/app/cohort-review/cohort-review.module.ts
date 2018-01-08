@@ -8,32 +8,47 @@ import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
-import {ParticipantPagerComponent} from './participant-pager/participant-pager.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
-import {ReviewHeaderComponent} from './review-header/review-header.component';
+import {ParticipantTableComponent} from './participant-table/participant-table.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
+import {LoremIpsumDirective} from './directives/lorem.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
-import {CohortResolver} from '../guards/cohort-resolver.guard';
-import {ReviewResolver} from '../guards/review-resolver.guard';
-
+import {CohortResolver} from './guards/cohort-resolver.guard';
+import {ParticipantResolver} from './guards/participant-resolver.guard';
+import {ReviewResolver} from './guards/review-resolver.guard';
 
 import {CohortReviewService} from 'generated';
+
 
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
   component: CohortReviewComponent,
   data: {title: 'Review Cohort Participants'},
   children: [
-    {path: '', redirectTo: 'overview', pathMatch: 'full'},
-    {path: 'overview', component: OverviewComponent},
-    {path: ':participantId', component: ParticipantDetailComponent},
+    {
+      path: '',
+      redirectTo: 'overview',
+      pathMatch: 'full',
+    }, {
+      path: 'overview',
+      component: OverviewComponent,
+    }, {
+      path: 'participants',
+      component: ParticipantTableComponent,
+    }, {
+      path: 'participants/:pid',
+      component: ParticipantDetailComponent,
+      resolve: {
+        participant: ParticipantResolver,
+      }
+    }
   ],
   resolve: {
-    cohort: CohortResolver,
     review: ReviewResolver,
+    cohort: CohortResolver,
   }
 }];
 
@@ -51,13 +66,14 @@ const routes = [{
     OverviewComponent,
     SidebarDirective,
     ParticipantDetailComponent,
-    ParticipantPagerComponent,
     ParticipantStatusComponent,
-    ReviewHeaderComponent,
+    ParticipantTableComponent,
+    LoremIpsumDirective,
   ],
   providers: [
     CohortResolver,
     ReviewResolver,
+    ParticipantResolver,
     CohortReviewService,
     ReviewStateService,
   ]

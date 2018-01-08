@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Enabled;
@@ -30,6 +31,8 @@ public class FireCloudServiceImplTest {
   private BillingApi billingApi;
   @Mock
   private WorkspacesApi workspacesApi;
+  @Mock
+  private GroupsApi groupsApi;
 
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -37,7 +40,8 @@ public class FireCloudServiceImplTest {
   @Before
   public void setup() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
-        Providers.of(profileApi), Providers.of(billingApi), Providers.of(workspacesApi));
+        Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
+        Providers.of(workspacesApi));
   }
 
   @Test(expected = ApiException.class)

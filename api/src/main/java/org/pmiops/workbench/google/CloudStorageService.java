@@ -13,4 +13,5 @@ public interface CloudStorageService {
   public String readInvitationKey();
   public String readBlockscoreApiKey();
   public List<FileDetail> getBucketFileList(String bucketName);
+  public void writeFile(String bucketName, String fileName, byte[] bytes);
 }

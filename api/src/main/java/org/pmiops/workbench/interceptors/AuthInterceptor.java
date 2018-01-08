@@ -17,8 +17,14 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -50,16 +56,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final String authName = "aou_oauth";
 
   private final UserInfoService userInfoService;
-  private final Provider<User> userProvider;
+  private final FireCloudService fireCloudService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
+  private final UserService userService;
 
   @Autowired
-  public AuthInterceptor(UserInfoService userInfoService, Provider<User> userProvider,
-      UserDao userDao) {
+  public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
+      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService) {
     this.userInfoService = userInfoService;
-    // Note that this provider isn't usable until after we publish the security context below.
-    this.userProvider = userProvider;
+    this.fireCloudService = fireCloudService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
+    this.userService = userService;
   }
 
   /**
@@ -112,17 +121,45 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       return false;
     }
 
-    // TODO: get token info and check that as well
-
     // TODO: check Google group membership to ensure user is in registered user group
 
-    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(userInfo, token));
+    String userEmail = userInfo.getEmail();
+    String gsuiteDomainSuffix =
+        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+    if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+      try {
+        // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
+        // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
+        // the user it was created for.
+        userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
+      } catch (ApiException e) {
+        log.log(Level.INFO, "FireCloud lookup for {0} failed, can't access the workbench: {1}",
+            new Object[]{userInfo.getEmail(), e.getMessage()});
+        response.sendError(e.getCode());
+        return false;
+      }
+      if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+        log.log(Level.INFO, "User {0} isn't in domain {1}, can't access the workbench",
+            new Object[] { userEmail, gsuiteDomainSuffix });
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        return false;
+      }
+    }
+    User user = userDao.findUserByEmail(userEmail);
+    if (user == null) {
+      // TODO(danrodney): start populating contact email in Google account, use it here.
+      user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
+            userInfo.getEmail(), null);
+    }
+
+    SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
+        token));
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
-    if (!hasRequiredAuthority(method.getMethod(), userProvider.get())) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    if (!hasRequiredAuthority(method.getMethod(), user)) {
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
 

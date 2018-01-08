@@ -25,14 +25,13 @@ export class CohortEditComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.route.params.subscribe(({ns, wsid}) => {
-      this.workspaceId = wsid;
-      this.workspaceNamespace = ns;
-    });
-
-    this.sub.add(this.route.data.subscribe(({cohort}) => {
-      this.cohort = cohort;
-    }));
+    this.sub = this.route.params
+      .do(({ns, wsid}) => {
+        this.workspaceNamespace = ns;
+        this.workspaceId = wsid;
+      })
+      .switchMap(({ns, wsid, cid}) => this.cohortsService.getCohort(ns, wsid, +cid))
+      .subscribe(cohort => this.cohort = cohort);
   }
 
   ngOnDestroy() {

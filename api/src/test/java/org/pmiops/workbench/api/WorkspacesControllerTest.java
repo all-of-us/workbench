@@ -37,6 +37,7 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.FileDetail;
@@ -113,7 +114,8 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userDao, userProvider, fireCloudService, CLOCK,cloudStorageService);
+        userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
+        "https://api.blah.com");
 
   }
 
@@ -133,7 +135,7 @@ public class WorkspacesControllerTest {
     );
   }
 
-  public Workspace createDefaultWorkspace() {
+  public Workspace createDefaultWorkspace() throws Exception {
     ResearchPurpose researchPurpose = new ResearchPurpose();
     researchPurpose.setDiseaseFocusedResearch(true);
     researchPurpose.setDiseaseOfFocus("cancer");
@@ -157,6 +159,7 @@ public class WorkspacesControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
+    stubGetWorkspace("namespace", "name", this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
     return workspace;
   }
 
@@ -219,9 +222,10 @@ public class WorkspacesControllerTest {
 
     Workspace workspace2 = createDefaultWorkspace();
     workspace2.setName(workspace2.getName() + ' ');
-    String namespace = workspace2.getNamespace();
-    String id = workspace2.getId();
-    doThrow(new ConflictException("Conflict")).when(fireCloudService).createWorkspace(workspace2.getNamespace(), workspace2.getId());
+    doThrow(new ConflictException("Conflict")).when(fireCloudService)
+        .createWorkspace(workspace2.getNamespace(), workspace2.getId());
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getId() + '0',
+        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
     Workspace workspaceCreated =
         workspacesController.createWorkspace(workspace2).getBody();
 
@@ -363,10 +367,14 @@ public class WorkspacesControllerTest {
     researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+        WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(ws);
     // already approved
     ws = createDefaultWorkspace();
     ws.setName("alreadyApproved");
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+        WorkspaceAccessLevel.OWNER);
     researchPurpose = ws.getResearchPurpose();
     ws = workspacesController.createWorkspace(ws).getBody();
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();
@@ -381,6 +389,8 @@ public class WorkspacesControllerTest {
     researchPurpose.setTimeRequested(null);
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+        WorkspaceAccessLevel.OWNER);
     ws = workspacesController.createWorkspace(ws).getBody();
 
     forApproval = workspacesController.getWorkspacesForReview().getBody().getItems();

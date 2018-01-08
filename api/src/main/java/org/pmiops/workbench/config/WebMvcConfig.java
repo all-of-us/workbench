@@ -3,12 +3,14 @@ package org.pmiops.workbench.config;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,8 +50,14 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public User user(Userinfoplus userInfo, UserDao userDao) {
-    return userDao.findUserByEmail(userInfo.getEmail());
+  public User user(UserAuthentication userAuthentication) {
+    return userAuthentication.getUser();
+  }
+
+  @Bean("apiHostName")
+  public String getHostName() {
+    ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
+    return (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
   }
 
   @Bean
