@@ -1,12 +1,16 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -26,6 +30,7 @@ public class Cohort {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+  private List<CohortReview> cohortReviews;
 
   @Id
   @GeneratedValue
@@ -117,5 +122,15 @@ public class Cohort {
 
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @OneToMany(mappedBy = "cohortId")
+  @OrderBy("cohort_review_id ASC")
+  public List<CohortReview> getCohortReviews() {
+    return cohortReviews;
+  }
+
+  public void setCohortReviews(List<CohortReview> cohortReviews) {
+    this.cohortReviews = cohortReviews;
   }
 }

@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -26,6 +29,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -40,6 +44,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
+  @Autowired private CohortService cohortService;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private Clock clock;
@@ -188,5 +193,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
     return this.saveWithLastModified(workspace);
+  }
+
+  @Override
+  @Transactional
+  public Workspace saveAndCloneCohorts(Workspace from, Workspace to) {
+    // Save the workspace first to allocate an ID.
+    Workspace saved = workspaceDao.save(to);
+    for (Cohort fromCohort : from.getCohorts()) {
+      Cohort c = new Cohort();
+      c.setCriteria(fromCohort.getCriteria());
+      c.setDescription(fromCohort.getDescription());
+      c.setName(fromCohort.getName());
+      c.setType(fromCohort.getType());
+      c.setCreator(saved.getCreator());
+      c.setWorkspaceId(saved.getWorkspaceId());
+      c.setCreationTime(saved.getCreationTime());
+      c.setLastModifiedTime(saved.getLastModifiedTime());
+      c.setVersion(1);
+      cohortService.saveAndCloneReviews(fromCohort, c);
+    }
+    return saved;
   }
 }

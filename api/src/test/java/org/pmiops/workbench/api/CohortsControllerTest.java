@@ -1,16 +1,23 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.fail;
+
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@Transactional(propagation = Propagation.SUPPORTS)
 public class CohortsControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -166,6 +173,22 @@ public class CohortsControllerTest {
     cohort.setName(COHORT_NAME);
     cohort.setCriteria(cohortCriteria);
     return cohort;
+  }
+
+  @Test
+  public void testGetCohortsInWorkspace() throws Exception {
+    Cohort c1 = createDefaultCohort();
+    c1.setName("c1");
+    c1 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c1).getBody();
+    Cohort c2 = createDefaultCohort();
+    c2.setName("c2");
+    c2 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c2).getBody();
+
+    List<Cohort> cohorts = cohortsController
+        .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems();
+    assertThat(cohorts).containsExactlyElementsIn(ImmutableSet.of(c1, c2));
   }
 
   @Test
