@@ -257,14 +257,14 @@ export class WorkspaceComponent implements OnInit {
   }
 
   pushToNotebookServer(notebook): void {
-    let fileList: Array<FileDetail> = [];
+    const fileList: Array<FileDetail> = [];
     for (const file of notebook){
       if (file.push) {
         fileList.push(file);
       }
     }
     this.clusterService
-    .localizeNotebook(this.workspace.namespace,this.workspace.id,fileList).subscribe( () => {
+    .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList).subscribe( () => {
       console.log('all set');
       }, () => {
         console.log('error');
