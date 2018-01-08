@@ -4,6 +4,7 @@
 import json
 
 # Constants for keys in the configuration
+ALL_OF_US_CONFIG_FILE = 'all_of_us_config.json'
 WORKSPACE_NAMESPACE_KEY = 'WORKSPACE_NAMESPACE'
 WORKSPACE_ID_KEY = 'WORKSPACE_ID'
 API_HOST_KEY = 'API_HOST'
@@ -11,7 +12,7 @@ BUCKET_NAME_KEY = 'BUCKET_NAME'
 
 class AllOfUsConfig(object):
     def __init__(self):
-        with open('all_of_us_config.json') as config_file:
+        with open(ALL_OF_US_CONFIG_FILE) as config_file:
             self.config_json = json.load(config_file)
             self.workspace_namespace = self.config_json[WORKSPACE_NAMESPACE_KEY]
             self.workspace_id = self.config_json[WORKSPACE_ID_KEY]
