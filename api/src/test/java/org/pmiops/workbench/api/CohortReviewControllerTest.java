@@ -255,6 +255,8 @@ public class CohortReviewControllerTest {
         Integer pageSizeParam = pageSize == null ? 25 : pageSize;
         Sort.Direction orderParam = (sortOrder == null || sortOrder.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
+        List<String> filterColumns = new ArrayList<String>();
+        List<String> filterValues = new ArrayList<String>();
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus().participantKey(key).status(CohortStatus.INCLUDED);
@@ -299,7 +301,8 @@ public class CohortReviewControllerTest {
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
+                reviewController.getParticipantCohortStatuses(
+                        namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn, filterColumns, filterValues);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
