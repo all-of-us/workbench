@@ -67,13 +67,13 @@ export class CreateReviewComponent implements OnInit {
   }
 
   cancelReview() {
-    const {ns, wsid} = this.route.parent.snapshot.params;
+    const {ns, wsid} = this.route.snapshot.params;
     this.router.navigate(['workspace', ns, wsid]);
   }
 
   createReview() {
     this.creating = true;
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.params;
 
     Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
       .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, CDR_VERSION, request))
