@@ -111,6 +111,7 @@ export class WorkspaceComponent implements OnInit {
   editHover = false;
   shareHover = false;
   trashHover = false;
+  listenerAdded = false;
 
   constructor(
       private route: ActivatedRoute,
@@ -195,6 +196,7 @@ export class WorkspaceComponent implements OnInit {
   }
 
   openCluster(): void {
+    // TODO (blrubenstein): Make this configurable by environment
     const leoBaseUrl = 'https://leonardo.dsde-dev.broadinstitute.org';
     const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + this.cluster.clusterNamespace + '/'
@@ -209,23 +211,27 @@ export class WorkspaceComponent implements OnInit {
     }).subscribe(() => {
       const notebook = window.open(leoNotebookUrl, '_blank');
       this.clusterPulled = false;
-      window.addEventListener('message', (e) => {
-        if (e.source !== notebook) {
-          return;
-        }
-        if (e.origin !== leoBaseUrl) {
-          return;
-        }
-        if (e.data.type !== 'bootstrap-auth.request') {
-          return;
-        }
-        notebook.postMessage({
-          'type': 'bootstrap-auth.response',
-          'body': {
-              'googleClientId': this.signInService.clientId
+
+      if (!this.listenerAdded) {
+        window.addEventListener('message', (e) => {
+          if (e.source !== notebook) {
+            return;
           }
-        }, leoBaseUrl);
-      });
+          if (e.origin !== leoBaseUrl) {
+            return;
+          }
+          if (e.data.type !== 'bootstrap-auth.request') {
+            return;
+          }
+          notebook.postMessage({
+            'type': 'bootstrap-auth.response',
+            'body': {
+                'googleClientId': this.signInService.clientId
+            }
+          }, leoBaseUrl);
+        });
+        this.listenerAdded = true;
+      }
     });
   }
 
