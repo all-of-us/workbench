@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,11 +98,13 @@ public class CohortsControllerTest {
   Provider<User> userProvider;
   @Autowired
   FireCloudService fireCloudService;
+  @Mock
+  CloudStorageService cloudStorageService;
 
   private CohortsController cohortsController;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
@@ -123,11 +127,30 @@ public class CohortsControllerTest {
 
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
-        cdrVersionDao, userDao, userProvider, fireCloudService, CLOCK);
+        cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
+        "https://api.blah.com");
+    stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
+        WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortMaterializationService,
         userProvider, CLOCK);
+  }
+
+  private void stubGetWorkspace(String ns, String name, String creator,
+      WorkspaceAccessLevel access) throws Exception {
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    fcWorkspace.setNamespace(ns);
+    fcWorkspace.setName(name);
+    fcWorkspace.setCreatedBy(creator);
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setWorkspace(fcWorkspace);
+    fcResponse.setAccessLevel(access.toString());
+    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
+        fcResponse
+    );
   }
 
   public Cohort createDefaultCohort() {

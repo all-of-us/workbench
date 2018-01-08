@@ -3,6 +3,7 @@ package org.pmiops.workbench.config;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
@@ -51,6 +52,12 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public User user(UserAuthentication userAuthentication) {
     return userAuthentication.getUser();
+  }
+
+  @Bean("apiHostName")
+  public String getHostName() {
+    ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
+    return (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
   }
 
   @Bean

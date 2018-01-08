@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -226,6 +227,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
+  private final String apiHostName;
 
   @Autowired
   WorkspacesController(
@@ -235,7 +237,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<User> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Clock clock) {
+      Clock clock,
+      @Qualifier("apiHostName") String apiHostName) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -243,6 +246,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
+    this.apiHostName = apiHostName;
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -368,10 +372,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
-    ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
-    String apiHost =
-        (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
-    config.put(API_HOST_KEY, apiHost);
+    config.put(API_HOST_KEY, this.apiHostName);
     cloudStorageService.writeFile(fcWorkspace.getBucketName(), CONFIG_FILENAME,
         config.toString().getBytes(Charsets.UTF_8));
   }
