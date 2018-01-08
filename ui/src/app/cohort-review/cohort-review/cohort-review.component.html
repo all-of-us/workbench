@@ -1,34 +1,21 @@
 <div appFullPage>
-  <!-- Main participant navigation sidebar -->
-  <div appSidebar
-    #participantNav="appSidebar">
-    <a class="closebtn" (click)="participantNav.close()">&times;</a>
-    <app-participant-pager></app-participant-pager>
-  </div>
-
   <!-- Annotations & Status sidebar -->
   <div appSidebar
-    #statusBar="appSidebar"
+    #sidebar="appSidebar"
     [position]="{top: 0, right: 0}">
-    <a class="closebtn" (click)="statusBar.close()">&times;</a>
+    <a class="closebtn" (click)="sidebar.close()">&times;</a>
     <div class="status-wrapper">
       <app-participant-status></app-participant-status>
     </div>
   </div>
 
-  <!-- Main content area for the Cohort Review Sub-application -->
+  <!-- CohortReview main content -->
   <div class="cohort-review-main"
-    [style.margin-left]="participantNav.isOpen ? '300px' : 0"
-    [style.margin-right]="statusBar.isOpen ? '300px' : 0">
-    <app-review-header
-      (toggleNav)="participantNav.toggle()"
-      (toggleStatusBar)="statusBar.toggle()"
-      (goToOverview)="statusBar.close()">
-    </app-review-header>
+    [style.margin-right]="sidebar.isOpen ? '300px' : 0">
     <router-outlet></router-outlet>
   </div>
 
-  <!-- Cohort creation modal -->
+  <!-- CohortReview first time creation modal -->
   <app-create-review [(open)]="createReviewModalOpen">
   </app-create-review>
 </div>

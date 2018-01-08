@@ -4,8 +4,6 @@ import {RouterModule, Routes} from '@angular/router';
 import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
 
-import {CohortResolver} from './guards/cohort-resolver.guard';
-
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
@@ -16,11 +14,6 @@ import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
-/*
- * Both of these symbols (the resolver and the route list), which have no
- * relevance outside this module, MUST be exported. See
- * https://github.com/angular/angular-cli/issues/3707#issuecomment-332498738
- */
 const routes: Routes = [
   {
     path: '',
@@ -54,9 +47,6 @@ const routes: Routes = [
     path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
     component: CohortEditComponent,
     data: {title: 'Edit Cohort'},
-    resolve: {
-      cohort: CohortResolver
-    }
   }, {
     path: 'workspace/build',
     component: WorkspaceEditComponent,
@@ -79,6 +69,5 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  providers: [CohortResolver],
 })
 export class AppRoutingModule {}

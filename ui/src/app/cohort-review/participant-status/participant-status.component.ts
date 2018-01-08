@@ -1,8 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
+import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
 import {
@@ -13,6 +15,8 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
+const CDR_VERSION = 1;
+
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
@@ -21,9 +25,12 @@ import {
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   readonly CohortStatus = CohortStatus;
-  statusControl = new FormControl();
 
-  private _participant: ParticipantCohortStatus | undefined;
+  statusControl = new FormControl();
+  subscription: Subscription;
+  changingStatus = false;
+
+  private _participant: Participant | null;
 
   set participant(value) {
     this._participant = value;
@@ -38,12 +45,10 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     return this._participant;
   }
 
-  private subscription: Subscription;
-  private changingStatus = false;
-
   constructor(
     private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -52,10 +57,10 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
     const participantId = this.state.participant$
       .filter(participant => participant !== null)
-      .map(participant => participant.participantId);
+      .map(participant => participant.id);
 
     const statusChanger = this.statusControl.valueChanges
-      .withLatestFrom(participantId, this.state.context$)
+      .withLatestFrom(participantId)
       .switchMap(this._callApi)
       .subscribe(this._emit);
 
@@ -66,10 +71,22 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  private _callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
+    this.changingStatus = true;
+    const request = <ModifyCohortStatusRequest>{status};
+    const {ns, wsid, cid} = this.route.snapshot.params;
+
+    return this.reviewAPI.updateParticipantCohortStatus(
+      ns, wsid, cid, CDR_VERSION, participantId, request
+    );
+  }
+
   private _emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
-    this.state.participant.next(newStatus);
+    const participant = Participant.makeRandomFromExisting(newStatus);
+    this.state.participant.next(participant);
 
+    /* TODO (jms) replace this with an action to refresh the table? */
     this.state.review$
       .take(1)
       .map((review: CohortReview) => {
@@ -82,20 +99,5 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
         return review;
       })
       .subscribe(r => this.state.review.next(r));
-  }
-
-  private _callApi = ([status, participantId, context]): Observable<ParticipantCohortStatus> => {
-    this.changingStatus = true;
-    const request = <ModifyCohortStatusRequest>{status};
-    const {workspaceNamespace, workspaceId, cohortId, cdrVersion} = context;
-
-    return this.reviewAPI.updateParticipantCohortStatus(
-      workspaceNamespace,
-      workspaceId,
-      cohortId,
-      cdrVersion,
-      participantId,
-      request
-    );
   }
 }

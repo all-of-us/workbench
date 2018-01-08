@@ -1,38 +1,73 @@
-<clr-tabs>
+<div
+  [style.display]="'flex'"
+  [style.align-items]="'center'"
+  [style.justify-content]="flex-start">
+  <div class="btn-group btn-sm btn-icon">
+    <button
+      class="btn"
+      title="Prior Participant"
+      [disabled]="isFirstParticipant"
+      (click)="previous()">
+      <clr-icon shape="caret" dir="left"></clr-icon>
+    </button>
+    <button
+      class="btn"
+      title="Participant Browser"
+      (click)="up()">
+      <clr-icon shape="caret" dir="up"></clr-icon>
+    </button>
+    <button
+      class="btn"
+      title="Next Participant"
+      [disabled]="isLastParticipant"
+      (click)="next()">
+      <clr-icon shape="caret" dir="right"></clr-icon>
+    </button>
+  </div>
 
+  <h3
+    [style.margin]="'0'"
+    [style.flex]="'1'">
+    Participant {{ participant.id }}</h3>
+  <span>
+    <span class="label">{{ participant.dob }} (DOB)</span>
+    <span class="label">{{ participant.gender }} (Gender)</span>
+    <span class="label">{{ participant.race }} (Race)</span>
+    <span class="label">{{ participant.ethnicity }} (Ethnicity)</span>
+    <span
+      (click)="toggleSidebar()"
+      class="label clickable"
+      [ngClass]="participant.statusLabelClass">
+      {{ participant.formattedStatusText }} (Status)</span>
+  </span>
+</div>
+
+<clr-tabs>
   <clr-tab>
     <button clrTabLink id="detail-overview-tab">Participant Overview</button>
     <clr-tab-content id="detail-overview-content" *clrIfActive>
-      <p>Participant {{ subjectId$ | async }} Overview</p>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-cpt-tab">CPT Codes</button>
-    <clr-tab-content id="detail-cpt-content" *clrIfActive>
-      <p>Participant {{ subjectId$ | async }} CPT Codes</p>
+      <p>Participant {{ participant.id }} Overview</p>
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
     <button clrTabLink id="detail-conditions-tab">Conditions</button>
     <clr-tab-content id="detail-conditions-content" *clrIfActive>
-      <p>Participant {{ subjectId$ | async }} Conditions</p>
+      <p>Participant {{ participant.id }} Conditions</p>
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
     <button clrTabLink id="detail-measurements-tab">Measurements</button>
     <clr-tab-content id="detail-measurements-content" *clrIfActive>
-      <p>Participant {{ subjectId$ | async }} Measurements</p>
+      <p>Participant {{ participant.id }} Measurements</p>
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
     <button clrTabLink id="detail-meds-tab">Medications</button>
     <clr-tab-content id="detail-meds-content" *clrIfActive>
-      <p>Participant {{ subjectId$ | async }} Medications</p>
+      <p>Participant {{ participant.id }} Medications</p>
     </clr-tab-content>
   </clr-tab>
-
 </clr-tabs>
