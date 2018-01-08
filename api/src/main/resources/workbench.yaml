@@ -996,15 +996,35 @@ paths:
           required: false
           description: page size of results (default is 25)
         - in: query
-          name: sortOrder
-          type: string
-          required: false
-          description: sort order (default is 'asc')
-        - in: query
           name: sortColumn
           type: string
+          enum: [participantId, status, gender, birthDate, race, ethnicity]
+          default: 'participantId'
           required: false
-          description: column to sort (default is 'participantId', can also be 'status')
+          description: Column upon which to sort (default is 'participantId')
+        - in: query
+          name: sortOrder
+          type: string
+          enum: ['asc', 'desc']
+          default: 'asc'
+          required: false
+          description: Sort direction (default is ascending)
+        - in: query
+          name: filterColumn
+          type: array
+          collectionFormat: csv
+          required: false
+          uniqueItems: true
+          items:
+            type: string
+            enum: [participantId, status, gender, birthDate, race, ethnicity]
+        - in: query
+          name: filterValue
+          type: array
+          collectionFormat: csv
+          required: false
+          items:
+            type: string
       responses:
         "200":
           description: A collection of participants

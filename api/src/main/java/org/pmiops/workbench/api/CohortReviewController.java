@@ -274,7 +274,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 Integer page,
                                                                                                 Integer pageSize,
                                                                                                 String sortOrder,
-                                                                                                String sortColumn) {
+                                                                                                String sortColumn,
+                                                                                                List<String> filterColumns,
+                                                                                                List<String> filterValues) {
         CohortReview cohortReview = null;
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);

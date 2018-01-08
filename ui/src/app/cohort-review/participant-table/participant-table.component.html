@@ -25,12 +25,12 @@
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
-  <clr-dg-column>Participant ID</clr-dg-column>
-  <clr-dg-column>Date of Birth</clr-dg-column>
-  <clr-dg-column>Gender</clr-dg-column>
-  <clr-dg-column>Race</clr-dg-column>
-  <clr-dg-column>Ethnicity</clr-dg-column>
-  <clr-dg-column>Review Status</clr-dg-column>
+  <clr-dg-column [clrDgField]="'participantId'">Participant ID</clr-dg-column>
+  <clr-dg-column [clrDgField]="'birthDate'">Date of Birth</clr-dg-column>
+  <clr-dg-column [clrDgField]="'gender'">Gender</clr-dg-column>
+  <clr-dg-column [clrDgField]="'race'">Race</clr-dg-column>
+  <clr-dg-column [clrDgField]="'ethnicity'">Ethnicity</clr-dg-column>
+  <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
 
   <clr-dg-row *ngFor="let participant of DUMMY_DATA">
     <clr-dg-cell>
