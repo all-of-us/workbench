@@ -1,6 +1,10 @@
 package org.pmiops.workbench.api;
 
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -14,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -28,6 +33,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
@@ -44,6 +50,7 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,6 +63,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
+
+  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
+  private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
+  private static final String API_HOST_KEY = "API_HOST";
+  private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
+  private static final String CONFIG_FILENAME = "all_of_us_config.json";
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -212,7 +225,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserDao userDao;
   private final Provider<User> userProvider;
   private final FireCloudService fireCloudService;
+  private final CloudStorageService cloudStorageService;
   private final Clock clock;
+  private final String apiHostName;
 
   @Autowired
   WorkspacesController(
@@ -221,13 +236,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
-      Clock clock) {
+      CloudStorageService cloudStorageService,
+      Clock clock,
+      @Qualifier("apiHostName") String apiHostName) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
+    this.cloudStorageService = cloudStorageService;
     this.clock = clock;
+    this.apiHostName = apiHostName;
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -317,10 +336,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return WorkspaceAccessLevel.fromValue(userAccess);
   }
 
-  private void attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
+  private org.pmiops.workbench.firecloud.model.Workspace
+      attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     try {
       fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
           workspaceId.getWorkspaceName());
+      return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
+          workspaceId.getWorkspaceName()).getWorkspace();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       log.log(
           Level.SEVERE,
@@ -338,6 +360,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
+  }
+
+  /**
+   * Creates a JSON configuration file in GCS with properties that can be used in notebooks.
+   * This file will be localized when launching a notebook.
+   */
+  private void createConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+    JSONObject config = new JSONObject();
+
+    config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
+    config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
+    config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
+    config.put(API_HOST_KEY, this.apiHostName);
+    cloudStorageService.writeFile(fcWorkspace.getBucketName(), CONFIG_FILENAME,
+        config.toString().getBytes(Charsets.UTF_8));
   }
 
   @Override
@@ -363,9 +400,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
     for (int attemptValue = 0; attemptValue < this.MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
       try {
-        attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+         fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
         break;
       } catch (ConflictException e) {
         if (attemptValue >= 5) {
@@ -377,6 +415,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       }
     }
+    createConfigFile(fcWorkspace);
+
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
