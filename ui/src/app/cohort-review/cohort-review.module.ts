@@ -12,9 +12,11 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
+import {LoremIpsumDirective} from './directives/lorem.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
+import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
 import {ReviewResolver} from './guards/review-resolver.guard';
 
@@ -46,6 +48,7 @@ const routes = [{
   ],
   resolve: {
     review: ReviewResolver,
+    cohort: CohortResolver,
   }
 }];
 
@@ -65,8 +68,10 @@ const routes = [{
     ParticipantDetailComponent,
     ParticipantStatusComponent,
     ParticipantTableComponent,
+    LoremIpsumDirective,
   ],
   providers: [
+    CohortResolver,
     ReviewResolver,
     ParticipantResolver,
     CohortReviewService,
