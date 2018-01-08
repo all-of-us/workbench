@@ -1,6 +1,10 @@
 *.pyc
 *.swp
 *~
+.classpath
+.project
+.externalToolBuilders
+.settings
 .idea/*
 /.gradle/*
 /api/?/
