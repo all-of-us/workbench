@@ -8,7 +8,7 @@
     <changeSet author="brianfreeman" id="changelog-18">
         <addColumn tableName="participant_cohort_status">
             <column name="gender" type="varchar(200)"/>
-            <column name="birth_datetime" type="date"/>
+            <column name="birth_date" type="date"/>
             <column name="race" type="varchar(200)"/>
             <column name="ethnicity" type="varchar(200)"/>
         </addColumn>

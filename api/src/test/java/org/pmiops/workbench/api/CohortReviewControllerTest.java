@@ -173,7 +173,7 @@ public class CohortReviewControllerTest {
 
         ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus();
         participantCohortStatus.status(CohortStatus.NOT_REVIEWED);
-        participantCohortStatus.setBirthDateTime(new Date());
+        participantCohortStatus.setBirthDate(new Date());
 
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
                             "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
@@ -278,7 +278,7 @@ public class CohortReviewControllerTest {
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
                 .participantKey(key)
                 .status(CohortStatus.INCLUDED)
-                .birthDateTime(dob)
+                .birthDate(dob)
                 .ethnicity("eth")
                 .gender("gen")
                 .race("race");

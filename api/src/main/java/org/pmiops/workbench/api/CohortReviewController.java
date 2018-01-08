@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
@@ -67,7 +68,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
                             .status(participant.getStatus())
-                            .birthDatetime(participant.getBirthDateTime().getTime())
+                            .birthDatetime(participant.getBirthDate().getTime())
                             .ethnicity(participant.getEthnicity())
                             .gender(participant.getGender())
                             .race(participant.getRace());
@@ -341,6 +342,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
             String birthDateTimeString = bigQueryService.getString(row, rm.get("birth_datetime"));
+            if (birthDateTimeString == null) {
+                throw new BigQueryException(500, "birth_datetime is null at position: " + rm.get("birth_datetime"));
+            }
             Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
@@ -349,7 +353,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
                             .status(CohortStatus.NOT_REVIEWED)
-                            .birthDateTime(birthDate)
+                            .birthDate(birthDate)
                             .gender(bigQueryService.getString(row, rm.get("gender")))
                             .race(bigQueryService.getString(row, rm.get("race")))
                             .ethnicity(bigQueryService.getString(row, rm.get("ethnicity"))));
