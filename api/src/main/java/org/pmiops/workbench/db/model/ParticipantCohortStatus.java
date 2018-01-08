@@ -17,7 +17,7 @@ public class ParticipantCohortStatus {
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
     private String gender;
-    private Date birthDateTime;
+    private Date birthDate;
     private String race;
     private String ethnicity;
 
@@ -63,17 +63,17 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Column(name = "birth_datetime")
-    public Date getBirthDateTime() {
-        return birthDateTime;
+    @Column(name = "birth_date")
+    public Date getBirthDate() {
+        return birthDate;
     }
 
-    public void setBirthDateTime(Date birthDateTime) {
-        this.birthDateTime = birthDateTime;
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
-    public ParticipantCohortStatus birthDateTime(Date birthDateTime) {
-        this.birthDateTime = birthDateTime;
+    public ParticipantCohortStatus birthDate(Date birthDate) {
+        this.birthDate = birthDate;
         return this;
     }
 
@@ -113,14 +113,14 @@ public class ParticipantCohortStatus {
         return Objects.equals(participantKey, that.participantKey) &&
                 status == that.status &&
                 Objects.equals(gender, that.gender) &&
-                Objects.equals(birthDateTime, that.birthDateTime) &&
+                Objects.equals(birthDate, that.birthDate) &&
                 Objects.equals(race, that.race) &&
                 Objects.equals(ethnicity, that.ethnicity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participantKey, status, gender, birthDateTime, race, ethnicity);
+        return Objects.hash(participantKey, status, gender, birthDate, race, ethnicity);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class ParticipantCohortStatus {
                 .append("participantKey", participantKey)
                 .append("status", status)
                 .append("gender", gender)
-                .append("birthDateTime", birthDateTime)
+                .append("birthDate", birthDate)
                 .append("race", race)
                 .append("ethnicity", ethnicity)
                 .toString();

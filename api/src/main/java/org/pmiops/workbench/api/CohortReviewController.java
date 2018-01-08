@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
@@ -242,8 +243,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        ParticipantCohortStatus participantCohortStatus = cohortReviewService.findParticipantCohortStatus(
-                        cohortReview.getCohortReviewId(), participantId);
+        ParticipantCohortStatus participantCohortStatus
+                = cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
 
         participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
         cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
@@ -345,6 +346,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
             String birthDateTimeString = bigQueryService.getString(row, rm.get("birth_datetime"));
+            if (birthDateTimeString == null) {
+                throw new BigQueryException(500, "birth_datetime is null at position: " + rm.get("birth_datetime"));
+            }
             Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
