@@ -275,7 +275,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 Integer pageSize,
                                                                                                 String sortOrder,
                                                                                                 String sortColumn,
-                                                                                                List<String> filterProperties,
+                                                                                                List<String> filterColumns,
                                                                                                 List<String> filterValues) {
         CohortReview cohortReview = null;
         try {
