@@ -256,11 +256,12 @@ export class WorkspaceComponent implements OnInit {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-    pushToNotebookServer(notebook): void{
-    var fileList: Array<FileDetail>=[];
+  pushToNotebookServer(notebook): void {
+    let fileList: Array<FileDetail> = [];
     for (const file of notebook){
-      if(file.push)
+      if (file.push) {
         fileList.push(file);
+      }
     }
     this.clusterService
     .localizeNotebook(this.workspace.namespace,this.workspace.id,fileList).subscribe( () => {
