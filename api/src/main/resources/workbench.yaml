@@ -27,6 +27,7 @@ securityDefinitions:
     flow: accessCode
 schemes:
   - "https"
+basePath: /api/v1
 produces:
   - "application/json"
 # Establish the fact that all endpoints are protected: this annotation
@@ -41,9 +42,54 @@ security:
 ##########################################################################################
 ## PATHS
 ##########################################################################################
+
+## Common Path Parameters
+parameters:
+  workspaceNamespace:
+    in: path
+    name: workspaceNamespace
+    type: string
+    description: The Workspace namespace
+    required: true
+  workspaceId:
+    in: path
+    name: workspaceId
+    type: string
+    description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+    required: true
+  cohortId:
+    in: path
+    name: cohortId
+    type: integer
+    format: int64
+    required: true
+    description: Cohort ID
+  cohortReviewId:
+    in: path
+    name: cohortId
+    type: integer
+    format: int64
+    required: true
+    description: Cohort Review ID
+  cdrVersionId:
+    in: path
+    name: cdrVersionId
+    type: integer
+    format: int64
+    required: true
+    description: specifies which cdr version
+  participantId:
+    in: path
+    name: participantId
+    type: integer
+    format: int64
+    required: true
+    description: specifies which participant
+
+
 paths:
 
-  /api/v1/config:
+  /config:
     get:
       tags:
         - config
@@ -51,7 +97,7 @@ paths:
       operationId: getConfig
       security: []
       responses:
-        "200":
+        200:
           description: Configuration data
           schema:
             $ref: "#/definitions/ConfigResponse"
@@ -59,19 +105,19 @@ paths:
 
    # User methods ########################################################################
 
-  /api/v1/me:
+  /me:
     get:
       tags:
         - profile
       description: Returns the user's profile information
       operationId: getMe
       responses:
-        "200":
+        200:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
-  /api/v1/sendBugReport:
+  /sendBugReport:
     post:
       tags:
         - bugReport
@@ -86,14 +132,14 @@ paths:
           schema:
             $ref: "#/definitions/BugReport"
       responses:
-        "200":
+        200:
           description: Success message
           schema:
             $ref: "#/definitions/BugReport"
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
-  /api/v1/is-username-taken:
+  /is-username-taken:
     get:
       tags:
         - profile
@@ -106,12 +152,12 @@ paths:
           type: string
           required: true
       responses:
-        "200":
+        200:
           description: The answer.
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
-  /api/v1/invitation-key-verification:
+  /invitation-key-verification:
     post:
       tags:
         - profile
@@ -124,15 +170,15 @@ paths:
           schema:
             $ref: "#/definitions/InvitationVerificationRequest"
       responses:
-        "200":
+        200:
           description: Invitation Key verified.
-        "400":
+        400:
           description: Error occurred while verifying Invitation Key.
           schema:
             $ref: "#/definitions/ErrorResponse"
 
 
-  /api/v1/google-account:
+  /google-account:
     post:
       tags:
         - profile
@@ -145,11 +191,11 @@ paths:
           schema:
             $ref: "#/definitions/CreateAccountRequest"
       responses:
-        "201":
+        201:
           description: Account created successfully.
           schema:
             $ref: "#/definitions/Profile"
-        "400":
+        400:
           description: Error occurred while creating account.
           schema:
             $ref: "#/definitions/ErrorResponse"
@@ -159,10 +205,10 @@ paths:
       description: Deletes your account in the researchallofus.org domain.
       operationId: deleteAccount
       responses:
-        "204":
+        204:
           description: Account deleted successfully.
 
-  /api/v1/id-verification:
+  /id-verification:
     post:
       tags:
         - profile
@@ -174,12 +220,12 @@ paths:
           schema:
             $ref: "#/definitions/IdVerificationRequest"
       responses:
-        "200":
+        200:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
-  /api/v1/update-profile:
+  /update-profile:
     post:
       tags:
         - profile
@@ -192,49 +238,49 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
       responses:
-        "204":
+        204:
           description: Request received.
 
   # TODO: add signature / other state?
-  /api/v1/account/accept-terms-of-service:
+  /account/accept-terms-of-service:
     post:
       tags:
         - profile
       description: Submits consent to the terms of service for researchers.
       operationId: submitTermsOfService
       responses:
-        "200":
+        200:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
   # TODO: add other state pertaining to ethics training?
-  /api/v1/account/complete-ethics-training:
+  /account/complete-ethics-training:
     post:
       tags:
         - profile
       description: Completes ethics training.
       operationId: completeEthicsTraining
       responses:
-        "200":
+        200:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
   # TODO: add demographic survey response data
-  /api/v1/account/submit-demographic-survey:
+  /account/submit-demographic-survey:
     post:
       tags:
         - profile
       description: Submits demographic survey responses.
       operationId: submitDemographicsSurvey
       responses:
-        "200":
+        200:
           description: The user's profile.
           schema:
             $ref: "#/definitions/Profile"
 
-  /api/v1/auth-domain/{groupName}:
+  /auth-domain/{groupName}:
     post:
       tags:
         - authDomain
@@ -247,11 +293,12 @@ paths:
           required: true
           type: string
       responses:
-        "200":
+        200:
           description: Successfully created group
           schema:
             $ref: "#/definitions/EmptyResponse"
-  /api/v1/auth-domain/{groupName}/users:
+
+  /auth-domain/{groupName}/users:
     post:
       tags:
         - authDomain
@@ -314,9 +361,10 @@ paths:
         - authDomain
       summary: remove a user from an auth domain if you have manage groups permission
       operationId: removeUserFromAuthDomain
+
   # Notebook clusters ####################################################################
 
-  /api/v1/clusters:
+  /clusters:
     get:
       summary: List all clusters
       description: List all clusters, optionally filtering on a set of labels
@@ -335,46 +383,39 @@ paths:
           required: false
           type: string
       responses:
-        "200":
+        200:
           description: A list of cluster definitions.
           schema:
             $ref: "#/definitions/ClusterListResponse"
-        "400":
+        400:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorReport'
-        "500":
+        500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
+
+  /workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     get:
       summary: Get details of a dataproc cluster
       description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
       operationId: getCluster
       tags:
         - cluster
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          description: workspaceNamespace
-          required: true
-          type: string
-        - in: path
-          name: workspaceId
-          description: workspaceId
-          required: true
-          type: string
       responses:
-        "200":
+        200:
           description: Cluster found, here are the details
           schema:
             $ref: '#/definitions/Cluster'
-        "404":
+        404:
           description: Cluster not found
           schema:
             $ref: '#/definitions/ErrorReport'
-        "500":
+        500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
@@ -384,27 +425,16 @@ paths:
       operationId: createCluster
       tags:
         - cluster
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          description: workspaceNamespace
-          required: true
-          type: string
-        - in: path
-          name: workspaceId
-          description: workspaceId
-          required: true
-          type: string
       responses:
-        "200":
+        200:
           description: Cluster creation successful
           schema:
             $ref: '#/definitions/Cluster'
-        "400":
+        400:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorReport'
-        "500":
+        500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
@@ -414,27 +444,16 @@ paths:
       operationId: deleteCluster
       tags:
         - cluster
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          description: workspaceNamespace
-          required: true
-          type: string
-        - in: path
-          name: workspaceId
-          description: workspaceId
-          required: true
-          type: string
       responses:
-        "202":
+        202:
           description: Cluster deletion request accepted
           schema:
             $ref: '#/definitions/EmptyResponse'
-        "404":
+        404:
           description: Cluster not found
           schema:
             $ref: '#/definitions/ErrorReport'
-        "500":
+        500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
@@ -442,7 +461,7 @@ paths:
 
   # Billing projects #####################################################################
 
-  /api/v1/billingProjects:
+  /billingProjects:
     get:
       tags:
         - Profile
@@ -462,14 +481,14 @@ paths:
 
   # Workspaces ###########################################################################
 
-  /api/v1/workspaces:
+  /workspaces:
     get:
       tags:
         - workspaces
       description: Returns all workspaces that a user has access to
       operationId: getWorkspaces
       responses:
-        "200":
+        200:
           description: A list of workspace definitions.
           schema:
             $ref: "#/definitions/WorkspaceResponseListResponse"
@@ -485,29 +504,22 @@ paths:
           schema:
             $ref: "#/definitions/Workspace"
       responses:
-        "200":
+        200:
           description: The workspace that was created.
           schema:
             $ref: "#/definitions/Workspace"
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}:
+
+  /workspaces/{workspaceNamespace}/{workspaceId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     get:
       tags:
         - workspaces
       description: Returns the workspace definition with the specified ID and namespace
       operationId: getWorkspace
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
       responses:
-        "200":
+        200:
           description: A workspace response containing workspace and access level
           schema:
             $ref: "#/definitions/WorkspaceResponse"
@@ -519,23 +531,13 @@ paths:
         fields that are omitted will not be modified
       operationId: updateWorkspace
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
         - in: body
           name: workspace
           description: workspace definition
           schema:
             $ref: "#/definitions/Workspace"
       responses:
-        "200":
+        200:
           description: The updated workspace definition
           schema:
             $ref: "#/definitions/Workspace"
@@ -544,24 +546,14 @@ paths:
         - workspaces
       description: Deletes the workspace definition with the specified ID and namespace
       operationId: deleteWorkspace
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
       responses:
-        "202":
+        202:
           description: Workspace deletion request accepted
           schema:
+
             $ref: '#/definitions/EmptyResponse'
 
-  /api/v1/workspaces/review:
+  /workspaces/review:
     get:
       tags:
         - workspaces
@@ -570,63 +562,57 @@ paths:
           REVIEW_RESEARCH_PURPOSE authority.
       operationId: getWorkspacesForReview
       responses:
-        "200":
+        200:
           description: A list of workspaces
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
+
+  /workspaces/{workspaceNamespace}/{workspaceId}/review:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       description: Sets a research purpose review result.
       operationId: reviewWorkspace
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
         - in: body
           name: review
           description: result of the research purpose review
           schema:
             $ref: "#/definitions/ResearchPurposeReviewRequest"
       responses:
-        "200":
+        200:
           description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+  /workspaces/{workspaceNamespace}/{workspaceId}/share:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       description: Shares a workspace with users
       operationId: shareWorkspace
       parameters:
-          - in: path
-            name: workspaceNamespace
-            type: string
-            required: true
-          - in: path
-            name: workspaceId
-            type: string
-            required: true
           - in: body
             name: body
             description: users to share the workspace with
             schema:
               $ref: "#/definitions/ShareWorkspaceRequest"
       responses:
-        "200":
+        200:
           description: Successful share response
           schema:
             $ref: "#/definitions/ShareWorkspaceResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/clone:
+  /workspaces/{workspaceNamespace}/{workspaceId}/clone:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
@@ -639,45 +625,29 @@ paths:
           - notebooks located in the default notebook directory for this workspace
       operationId: cloneWorkspace
       parameters:
-          - in: path
-            name: workspaceNamespace
-            type: string
-            required: true
-          - in: path
-            name: workspaceId
-            type: string
-            required: true
           - in: body
             name: body
             schema:
               $ref: "#/definitions/CloneWorkspaceRequest"
       responses:
-        "200":
+        200:
           description: Successful clone response
           schema:
             $ref: "#/definitions/CloneWorkspaceResponse"
 
   # Cohorts ##############################################################################
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     get:
       tags:
         - cohorts
       description: Returns all cohort definitions in a workspace
       operationId: "getCohortsInWorkspace"
-      parameters:
-       - in: path
-         name: workspaceNamespace
-         type: string
-         required: true
-         description: namespace containing the workspace to retrieve cohort definitions from
-       - in: path
-         name: workspaceId
-         type: string
-         required: true
-         description: ID of the workspace to retrieve cohort definitions from.
       responses:
-        "200":
+        200:
           description: A list of cohort definitions.
           schema:
             $ref: "#/definitions/CohortListResponse"
@@ -687,52 +657,29 @@ paths:
       description: Creates a cohort definition in a workspace.
       operationId: "createCohort"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace containing the workspace to create a cohort definition in
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace to create a cohort definition in
         - in: body
           name: cohort
           description: cohort definition
           schema:
             $ref: "#/definitions/Cohort"
       responses:
-        "200":
+        200:
           description: The cohort definition that was created.
           schema:
             $ref: "#/definitions/Cohort"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
     get:
       tags:
         - cohorts
       description: Returns the cohort definition with the specified ID
       operationId: "getCohort"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: ID of the workspace containing the cohort definition
       responses:
-        "200":
+        200:
           description: A cohort definition
           schema:
             $ref: "#/definitions/Cohort"
@@ -744,29 +691,13 @@ paths:
         will not be modified
       operationId: "updateCohort"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: ID of the workspace containing the cohort definition
         - in: body
           name: cohort
           description: cohort definition
           schema:
             $ref: "#/definitions/Cohort"
       responses:
-        "200":
+        200:
           description: The updated cohort definition
           schema:
             $ref: "#/definitions/Cohort"
@@ -775,59 +706,35 @@ paths:
         - cohorts
       description: Deletes the cohort definition with the specified ID
       operationId: "deleteCohort"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: namespace of the workspace containing the cohort definition
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: ID of the workspace containing the cohort definition
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: ID of the workspace containing the cohort definition
       responses:
-        "202":
-          description: Cluster deletion request accepted
+        202:
+          description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
+  /workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - cohorts
       description: Materializes a cohort for a given CDR version to specified output
       operationId: "materializeCohort"
       parameters:
-       - in: path
-         name: workspaceNamespace
-         type: string
-         required: true
-         description: namespace of the workspace that the cohort will be materialized in the context of
-       - in: path
-         name: workspaceId
-         type: string
-         required: true
-         description: ID of the workspace that the cohort will be materialized in the context of
        - in: body
          name: request
          description: cohort materialization request
          schema:
            $ref: "#/definitions/MaterializeCohortRequest"
       responses:
-        "200":
+        200:
           description: The results of materializing the cohort
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
   # Cohort Builder #######################################################################
-  /api/v1/cohortbuilder/criteria/{type}/{parentId}:
+  /cohortbuilder/criteria/{type}/{parentId}:
     get:
       tags:
         - cohortBuilder
@@ -846,12 +753,12 @@ paths:
           required: true
           description: fetch children of parentId
       responses:
-        "200":
+        200:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /api/v1/cohortbuilder/search:
+  /cohortbuilder/search:
     post:
       tags:
         - cohortBuilder
@@ -865,13 +772,13 @@ paths:
             $ref: "#/definitions/SearchRequest"
           required: true
       responses:
-        "200":
+        200:
           description: A count of subjects
           schema:
             type: integer
             format: int64
 
-  /api/v1/cohortbuilder/chartinfo:
+  /cohortbuilder/chartinfo:
     post:
       tags:
         - cohortBuilder
@@ -885,13 +792,13 @@ paths:
             $ref: "#/definitions/SearchRequest"
           required: true
       responses:
-        "200":
+        200:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
 
-  /api/v1/cohortbuilder/quicksearch/{type}/{value}:
+  /cohortbuilder/quicksearch/{type}/{value}:
     get:
       tags:
         - cohortBuilder
@@ -909,13 +816,18 @@ paths:
           required: true
           description: value that should match code or name
       responses:
-        "200":
+        200:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
         - cohortReview
@@ -924,27 +836,6 @@ paths:
         specified by the review size parameter.
       operationId: "createCohortReview"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
         - in: body
           name: request
           required: true
@@ -952,7 +843,7 @@ paths:
           schema:
             $ref: "#/definitions/CreateReviewRequest"
       responses:
-        "200":
+        200:
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReview"
@@ -964,27 +855,6 @@ paths:
         does pagination based on page, limit, order and column.
       operationId: "getParticipantCohortStatuses"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
         - in: query
           name: page
           type: integer
@@ -1026,48 +896,25 @@ paths:
           items:
             type: string
       responses:
-        "200":
+        200:
           description: A collection of participants
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
     get:
       tags:
         - cohortReview
       description: This endpoint will return a ParticipantCohortStatus
       operationId: "getParticipantCohortStatus"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: specifies which workspace namespace
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
       responses:
-        "200":
+        200:
           description: The ParticipantCohortStatus definition
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
@@ -1077,46 +924,23 @@ paths:
       description: Modifies the ParticipantCohortStatus status
       operationId: updateParticipantCohortStatus
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: specifies which workspace namespace
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
         - in: body
           name: cohortStatusRequest
           description: Contains the new review status
           schema:
             $ref: "#/definitions/ModifyCohortStatusRequest"
       responses:
-        "200":
+        200:
           description: The updated ParticipantCohortStatus definition
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortReview
@@ -1124,65 +948,28 @@ paths:
       operationId: "getCohortSummary"
       parameters:
         - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: cdrVersionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cdr version
-        - in: path
           name: domain
           type: string
           required: true
           description: specifies which domain the CohortSummary should belong to.
       responses:
-        "200":
+        200:
           description: A collection of CohortSummary
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
     post:
       tags:
         - cohortReview
       description: This endpoint will create a ParticipantCohortAnnotation.
       operationId: "createParticipantCohortAnnotation"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortReviewId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which review
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
         - in: body
           name: request
           required: true
@@ -1190,7 +977,7 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotation"
       responses:
-        "200":
+        200:
           description: A ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotation"
@@ -1199,68 +986,30 @@ paths:
         - cohortReview
       description: This endpoint will get a collection of ParticipantCohortAnnotations.
       operationId: "getParticipantCohortAnnotations"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortReviewId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which review
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
       responses:
-        "200":
+        200:
           description: A ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+      - in: path
+        name: annotationId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which annotation
     put:
       tags:
         - cohortReview
       description: This endpoint will modify a ParticipantCohortAnnotation.
       operationId: "updateParticipantCohortAnnotation"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortReviewId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which review
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
-        - in: path
-          name: annotationId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which annotation
         - in: body
           name: request
           required: true
@@ -1268,7 +1017,7 @@ paths:
           schema:
             $ref: "#/definitions/ModifyParticipantCohortAnnotationRequest"
       responses:
-        "200":
+        200:
           description: A ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotation"
@@ -1277,63 +1026,24 @@ paths:
         - cohortReview
       description: Deletes the ParticipantCohortAnnotation with the specified ID
       operationId: "deleteParticipantCohortAnnotation"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortReviewId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which review
-        - in: path
-          name: participantId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which participant
-        - in: path
-          name: annotationId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which annotation
       responses:
-        "202":
+        202:
           description: ParticipantCohortAnnotation deletion request accepted
           schema:
             $ref: '#/definitions/EmptyResponse'
 
   # Cohort Annotation Definition Controller ###################################################
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
     post:
       tags:
         - cohortAnnotationDefinition
       description: This endpoint will create a CohortAnnotationDefinition.
       operationId: "createCohortAnnotationDefinition"
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
         - in: body
           name: request
           required: true
@@ -1341,7 +1051,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortAnnotationDefinition"
       responses:
-        "200":
+        200:
           description: A CohortAnnotationDefinition.
           schema:
             $ref: "#/definitions/CohortAnnotationDefinition"
@@ -1350,58 +1060,30 @@ paths:
         - cohortAnnotationDefinition
       description: Returns a collection of CohortAnnotationDefinition.
       operationId: "getCohortAnnotationDefinitions"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
       responses:
-        "200":
+        200:
           description: A collection of CohortAnnotationDefinition
           schema:
             $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - in: path
+        name: annotationDefinitionId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which CohortAnnotationDefinition.
     get:
       tags:
         - cohortAnnotationDefinition
       description: Returns a CohortAnnotationDefinition.
       operationId: "getCohortAnnotationDefinition"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: annotationDefinitionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which CohortAnnotationDefinition.
       responses:
-        "200":
+        200:
           description: A CohortAnnotationDefinition
           schema:
             $ref: "#/definitions/CohortAnnotationDefinition"
@@ -1411,35 +1093,13 @@ paths:
       description: modify the CohortAnnotationDefinition.
       operationId: updateCohortAnnotationDefinition
       parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: specifies which workspace namespace
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: annotationDefinitionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which CohortAnnotationDefinition.
         - in: body
           name: modifyCohortAnnotationDefinitionRequest
           description: Contains the new CohortAnnotationDefinition
           schema:
             $ref: "#/definitions/ModifyCohortAnnotationDefinitionRequest"
       responses:
-        "200":
+        200:
           description: The updated ParticipantCohortStatus definition
           schema:
             $ref: "#/definitions/CohortAnnotationDefinition"
@@ -1448,37 +1108,14 @@ paths:
         - cohortAnnotationDefinition
       description: Deletes the CohortAnnotationDefinition with the specified ID
       operationId: "deleteCohortAnnotationDefinition"
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          type: string
-          required: true
-          description: specifies which workspace namespace
-        - in: path
-          name: workspaceId
-          type: string
-          required: true
-          description: specifies which workspace
-        - in: path
-          name: cohortId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which cohort
-        - in: path
-          name: annotationDefinitionId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which CohortAnnotationDefinition.
       responses:
-        "202":
+        202:
           description: CohortAnnotationDefinition deletion request accepted
           schema:
             $ref: '#/definitions/EmptyResponse'
 
   # Data Browser #######################################################################
-  /api/v1/databrowser/search-concepts:
+  /databrowser/search-concepts:
     get:
       security: []
       tags:
@@ -1513,12 +1150,12 @@ paths:
           required: false
           description: vocabulary id filter
       responses:
-        "200":
+        200:
           description: A collection of concepts
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /api/v1/databrowser/analysis-results:
+  /databrowser/analysis-results:
     get:
       security: []
       tags:
@@ -1544,12 +1181,12 @@ paths:
           required: false
           description: stratum 2
       responses:
-        "200":
+        200:
           description: A collection of analysis results from achilles_results_view
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /api/v1/databrowser/analyses:
+  /databrowser/analyses:
     get:
       security: []
       tags:
@@ -1559,12 +1196,12 @@ paths:
       operationId: "getAnalyses"
       parameters: []
       responses:
-        "200":
+        200:
           description: A collection of analysis definitions
           schema:
             $ref: "#/definitions/AnalysisListResponse"
 
-  /api/v1/databrowser/participant-count:
+  /databrowser/participant-count:
     get:
       security: []
       tags:
@@ -1574,12 +1211,12 @@ paths:
       operationId: "getParticipantCount"
       parameters: []
       responses:
-        "200":
+        200:
           description: A collection of analysis results from achilles_results_view
           schema:
             $ref: "#/definitions/AnalysisResult"
 
-  /api/v1/databrowser/concept-count:
+  /databrowser/concept-count:
     get:
       security: []
       tags:
@@ -1594,12 +1231,12 @@ paths:
          required: true
          description: concept id to get count for
       responses:
-        "200":
+        200:
           description: A collection with concept count for concept id
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /api/v1/databrowser/concept-count-by-gender:
+  /databrowser/concept-count-by-gender:
     get:
       security: []
       tags:
@@ -1614,12 +1251,12 @@ paths:
          required: true
          description: concept id to get count for
       responses:
-        "200":
+        200:
           description: A collection with count for concept by gender
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /api/v1/databrowser/concept-count-by-age:
+  /databrowser/concept-count-by-age:
     get:
       security: []
       tags:
@@ -1634,12 +1271,12 @@ paths:
          required: true
          description: concept id to get count for
       responses:
-        "200":
+        200:
           description: A collection with count for concept by age decile
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /api/v1/databrowser/db-domains:
+  /databrowser/db-domains:
     get:
       security: []
       tags:
@@ -1649,12 +1286,12 @@ paths:
       operationId: "getDbDomains"
       parameters: []
       responses:
-        "200":
+        200:
           description: A collection of databrowser domains
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
-  /api/v1/databrowser/child-concepts:
+  /databrowser/child-concepts:
     get:
       security: []
       tags:
@@ -1670,12 +1307,12 @@ paths:
           required: true
           description: concept id to get maps to concepts
       responses:
-        "200":
+        200:
           description: a collection of concepts
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /api/v1/databrowser/parent-concepts:
+  /databrowser/parent-concepts:
       get:
         security: []
         tags:
@@ -1691,7 +1328,7 @@ paths:
             required: true
             description: concept id to get maps to concepts
         responses:
-          "200":
+          200:
             description: A collection of databrowser domains
             schema:
               $ref: "#/definitions/ConceptListResponse"
