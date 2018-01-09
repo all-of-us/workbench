@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -102,14 +101,19 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Override
     @Transactional
-    public Iterable<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
+    public void saveFullCohortReview(CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
+        cohortReview = saveCohortReview(cohortReview);
+        participantCohortStatuses = saveParticipantCohortStatuses(participantCohortStatuses);
+    }
+
+    @Override
+    public List<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
         int i = 0;
         for (ParticipantCohortStatus participantCohortStatus : participantCohortStatuses) {
             entityManager.persist(participantCohortStatus);
             i++;
             if (i % batchSize == 0) {
                 entityManager.flush();
-                log.log(Level.INFO, "flushing index: " + i);
                 entityManager.clear();
             }
         }
