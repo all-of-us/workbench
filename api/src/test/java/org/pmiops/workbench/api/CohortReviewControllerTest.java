@@ -170,6 +170,10 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
         cohortReviewAfter.setReviewStatus(ReviewStatus.CREATED);
 
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+        pcs.setParticipantKey(new ParticipantCohortStatusKey(1, 0));
+        pcs.status(CohortStatus.NOT_REVIEWED);
+
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
                             "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
                             "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
@@ -202,8 +206,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
         when(queryResult.iterateAll()).thenReturn(testIterable);
         when(bigQueryService.getLong(null, 0)).thenReturn(0L);
-        when(cohortReviewService.saveCohortReview(cohortReviewAfter)).thenReturn(cohortReviewAfter);
-        when(cohortReviewService.saveParticipantCohortStatuses(isA(List.class))).thenReturn(new ArrayList<>());
+        doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, new ArrayList<>());
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
@@ -218,8 +221,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getResultMapper(queryResult);
         verify(bigQueryService, times(1)).getLong(null, 0);
         verify(queryResult, times(1)).iterateAll();
-        verify(cohortReviewService, times(1)).saveCohortReview(cohortReviewAfter);
-        verify(cohortReviewService, times(1)).saveParticipantCohortStatuses(isA(List.class));
+        verify(cohortReviewService, times(1)).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
         verifyNoMoreMockInteractions();
     }
 
