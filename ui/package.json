@@ -35,6 +35,7 @@
     "enhanced-resolve": "3.3.0",
     "highcharts": "^6.0.3",
     "immutable": "^4.0.0-rc.9",
+    "moment": "^2.20.1",
     "mutationobserver-shim": "^0.3.2",
     "ngx-popper": "^1.4.2",
     "popper.js": "^1.12.9",

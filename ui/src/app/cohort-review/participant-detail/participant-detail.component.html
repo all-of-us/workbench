@@ -44,8 +44,8 @@
 
 <clr-tabs>
   <clr-tab>
-    <button clrTabLink id="detail-overview-tab">Participant Overview</button>
-    <clr-tab-content id="detail-overview-content" *clrIfActive>
+    <button clrTabLink id="detail-summary-tab">Summary</button>
+    <clr-tab-content id="detail-summary-content" *clrIfActive>
       <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
@@ -53,24 +53,62 @@
   <clr-tab>
     <button clrTabLink id="detail-conditions-tab">Conditions</button>
     <clr-tab-content id="detail-conditions-content" *clrIfActive>
-      <clr-datagrid>
-        <clr-dg-column [clrDgField]="'name'">Name</clr-dg-column>
-        <clr-dg-column [clrDgField]="'standard'">Standard Concept</clr-dg-column>
-        <clr-dg-column [clrDgField]="'source'">Source Concept</clr-dg-column>
-        <clr-dg-column [clrDgField]="'value'">Value</clr-dg-column>
-        <clr-dg-column [clrDgField]="'dateOfDiagnosis'">Date of Diagnosis</clr-dg-column>
-        <clr-dg-column [clrDgField]="'ageAtEvent'">Age at Event</clr-dg-column>
 
+      <clr-datagrid>
+        <clr-dg-column [clrDgField]="'description'">
+          Description
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'standard'">
+          Standard Vocabulary (SNOMED)
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'source'">
+          Source Vocabulary (ICD9CM, ICD10CM, HCPCS, SNOMED)
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'value'">
+          Source Value
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'date'">
+          Date
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'ageAtEvent'">
+          Age at Event
+        </clr-dg-column>
         <clr-dg-row *clrDgItems="let condition of DUMMY_CONDITIONS">
-          <clr-dg-cell>{{ condition.name }}</clr-dg-cell>
-          <clr-dg-cell>{{ condition.standard }}</clr-dg-cell>
-          <clr-dg-cell>{{ condition.source }}</clr-dg-cell>
-          <clr-dg-cell>{{ condition.value }}</clr-dg-cell>
-          <clr-dg-cell>{{ condition.dateOfDiagnosis }}</clr-dg-cell>
-          <clr-dg-cell>{{ condition.ageAtEvent }}</clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.description }}
+          </clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.standard }}
+          </clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.source }}
+          </clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.value }}
+          </clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.date | date:'fullDate' }}
+          </clr-dg-cell>
+          <clr-dg-cell>
+            {{ condition.ageAtEvent }}
+          </clr-dg-cell>
         </clr-dg-row>
-        <clr-dg-footer></clr-dg-footer>
       </clr-datagrid>
+
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-procedures-tab">Procedures</button>
+    <clr-tab-content id="detail-procedures-content" *clrIfActive>
+      <em>Charts go here</em>
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-drugs-tab">Drugs</button>
+    <clr-tab-content id="detail-drugs-content" *clrIfActive>
+      <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
 
@@ -82,8 +120,36 @@
   </clr-tab>
 
   <clr-tab>
-    <button clrTabLink id="detail-meds-tab">Medications</button>
-    <clr-tab-content id="detail-meds-content" *clrIfActive>
+    <button clrTabLink id="detail-observations-tab">Observations</button>
+    <clr-tab-content id="detail-observations-content" *clrIfActive>
+      <em>Charts go here</em>
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-visits-tab">Visits</button>
+    <clr-tab-content id="detail-visits-content" *clrIfActive>
+      <em>Charts go here</em>
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-physical-measurements-tab">Physical Measurements</button>
+    <clr-tab-content id="detail-physical-measurements-content" *clrIfActive>
+      <em>Charts go here</em>
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-ppi-tab">PPI</button>
+    <clr-tab-content id="detail-ppi-content" *clrIfActive>
+      <em>Charts go here</em>
+    </clr-tab-content>
+  </clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="detail-device-tab">Device</button>
+    <clr-tab-content id="detail-device-content" *clrIfActive>
       <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
