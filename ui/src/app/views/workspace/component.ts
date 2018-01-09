@@ -1,10 +1,12 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Headers, Http} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from 'clarity-angular';
 import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {SignInService} from 'app/services/sign-in.service';
 
 import {
   Cluster,
@@ -76,7 +78,7 @@ class NotebookDescriptionComparator implements Comparator<Notebook> {
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceComponent implements OnInit {
+export class WorkspaceComponent implements OnInit, OnDestroy {
 
   /* tslint:disable:no-unused-variable */
   /* All these are used in the template, not the class */
@@ -109,13 +111,17 @@ export class WorkspaceComponent implements OnInit {
   editHover = false;
   shareHover = false;
   trashHover = false;
+  listenerAdded = false;
+  notebookAuthListener: EventListenerOrEventListenerObject;
 
   constructor(
-      private router: Router,
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
       private errorHandlingService: ErrorHandlingService,
+      private http: Http,
+      private router: Router,
+      private signInService: SignInService,
       private workspacesService: WorkspacesService,
       /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
@@ -156,6 +162,10 @@ export class WorkspaceComponent implements OnInit {
           });
   }
 
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.notebookAuthListener);
+  }
+
   launchNotebook(): void {
     this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
       this.cluster = cluster;
@@ -191,10 +201,45 @@ export class WorkspaceComponent implements OnInit {
   }
 
   openCluster(): void {
-    const url = 'https://leonardo.dsde-dev.broadinstitute.org/notebooks/'
+    // TODO (blrubenstein): Make this configurable by environment
+    const leoBaseUrl = 'https://leonardo.dsde-dev.broadinstitute.org';
+    const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + this.cluster.clusterNamespace + '/'
         + this.cluster.clusterName;
-    window.location.href = url;
+    const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
+
+    const headers = new Headers();
+    headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
+    this.http.get(leoSetCookieUrl, {
+      headers: headers,
+      withCredentials: true
+    }).subscribe(() => {
+      const notebook = window.open(leoNotebookUrl, '_blank');
+      this.clusterPulled = false;
+      // TODO (blrubenstein): Make the notebook page a list of pages, and
+      //    move this to component scope.
+      if (!this.listenerAdded) {
+        this.notebookAuthListener = (e: MessageEvent) => {
+          if (e.source !== notebook) {
+            return;
+          }
+          if (e.origin !== leoBaseUrl) {
+            return;
+          }
+          if (e.data.type !== 'bootstrap-auth.request') {
+            return;
+          }
+          notebook.postMessage({
+            'type': 'bootstrap-auth.response',
+            'body': {
+                'googleClientId': this.signInService.clientId
+            }
+          }, leoBaseUrl);
+        };
+        window.addEventListener('message', this.notebookAuthListener);
+        this.listenerAdded = true;
+      }
+    });
   }
 
   createAndLaunchNotebook(): void {
