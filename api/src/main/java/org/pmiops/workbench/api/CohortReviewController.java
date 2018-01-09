@@ -135,6 +135,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
         }
         stopWatch.start();
+        log.log(Level.INFO, "starting findCohortReview()");
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         stopWatch.stop();
         log.log(Level.INFO, "findCohortReview() time:" + stopWatch.getTotalTimeSeconds());
@@ -145,12 +146,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting findCohort()");
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         stopWatch.stop();
         log.log(Level.INFO, "findCohort() time:" + stopWatch.getTotalTimeSeconds());
         //this validates that the user is in the proper workspace
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting validateMatchingWorkspace()");
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
         stopWatch.stop();
         log.log(Level.INFO, "validateMatchingWorkspace() time:" + stopWatch.getTotalTimeSeconds());
@@ -163,6 +166,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting buildParticipantIdQuery()");
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
                 participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
         stopWatch.stop();
@@ -171,6 +175,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting createParticipantCohortStatusesList()");
         List<ParticipantCohortStatus> participantCohortStatuses =
                 createParticipantCohortStatusesList(cohortReview.getCohortReviewId(), result, rm);
         stopWatch.stop();
@@ -187,22 +192,26 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting saveCohortReview()");
         cohortReviewService.saveCohortReview(cohortReview);
         stopWatch.stop();
         log.log(Level.INFO, "saveCohortReview() time:" + stopWatch.getTotalTimeSeconds());
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting saveParticipantCohortStatuses()");
         cohortReviewService.saveParticipantCohortStatuses(participantCohortStatuses);
         stopWatch.stop();
         log.log(Level.INFO, "saveParticipantCohortStatuses() time:" + stopWatch.getTotalTimeSeconds());
 
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting TO_CLIENT_COHORTREVIEW.apply()");
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         stopWatch.stop();
         log.log(Level.INFO, "TO_CLIENT_COHORTREVIEW.apply() time:" + stopWatch.getTotalTimeSeconds());
         stopWatch = new StopWatch();
         stopWatch.start();
+        log.log(Level.INFO, "starting TO_CLIENT_PARTICIPANT.apply()");
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
         stopWatch.stop();
         log.log(Level.INFO, "TO_CLIENT_PARTICIPANT.apply() time:" + stopWatch.getTotalTimeSeconds());
