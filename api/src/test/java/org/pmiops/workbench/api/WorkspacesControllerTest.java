@@ -749,7 +749,7 @@ public class WorkspacesControllerTest {
     );
     List<FileDetail> fileDetailsList = new ArrayList<FileDetail>();
     FileDetail mockFileDetail1 = new FileDetail();
-    mockFileDetail1.setName("File1.py");
+    mockFileDetail1.setName("File1.ipynb");
     mockFileDetail1.setPath("//URL");
 
     FileDetail mockFileDetail2 = new FileDetail();
@@ -764,7 +764,12 @@ public class WorkspacesControllerTest {
     List<FileDetail> result =workspacesController.getNoteBookList("mockProjectName","mockWorkspaceName").getBody();
     assertEquals(result.size(),1);
 
-    result =workspacesController.getNoteBookList("mockProject","mockWorkspace").getBody();
-    assertEquals(result.size(),0);
+    try {
+      result =workspacesController.getNoteBookList("mockProject","mockWorkspace").getBody();
+      assertTrue(false);
+    }
+    catch(NullPointerException|NotFoundException ex) {
+      assertTrue(true);
+    }
   }
 }
