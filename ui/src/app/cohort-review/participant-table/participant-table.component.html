@@ -12,10 +12,10 @@
   <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
 
   <clr-dg-row *ngFor="let participant of DUMMY_DATA">
-    <clr-dg-cell>
-      <a routerLink="{{ participant.id }}">
-        {{ participant.id }}
-      </a>
+    <clr-dg-cell
+      [style.cursor]="'pointer'"
+      routerLink="{{ participant.id }}">
+      {{ participant.id }}
     </clr-dg-cell>
     <clr-dg-cell>{{ participant.dob }}</clr-dg-cell>
     <clr-dg-cell>{{ participant.gender }}</clr-dg-cell>
