@@ -480,27 +480,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace, String workspaceId) {
     List<FileDetail> bucketFileList = new ArrayList<FileDetail>();
     try {
-      org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-      if(workspaceResponse!=null) {
-        org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = workspaceResponse.getWorkspace();
-        if (fireCloudWorkspace != null) {
-          String bucketName = fireCloudWorkspace.getBucketName();
-          bucketFileList = cloudStorageService.getBucketFileList(bucketName);
-          if (bucketFileList != null && bucketFileList.size() > 0) {
-            bucketFileList = bucketFileList.stream()
-              .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-              .collect(Collectors.toList());
-          }
-        }
+      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+                                                                          .getWorkspace();
+      String bucketName = fireCloudWorkspace.getBucketName();
+      bucketFileList = cloudStorageService.getBucketFileList(bucketName);
+      if (bucketFileList != null && bucketFileList.size() > 0) {
+        bucketFileList = bucketFileList.stream()
+          .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+          .collect(Collectors.toList());
       }
     }
     catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
-        workspaceNamespace, workspaceId));
+          workspaceNamespace, workspaceId));
       } else {
         throw new ServerErrorException(e.getResponseBody());
-     }
+      }
+    }
+    catch(NullPointerException ex){
+      throw new NotFoundException(String.format("Workspace %s/%s not found",
+        workspaceNamespace, workspaceId));
     }
     return ResponseEntity.ok(bucketFileList);
   }
