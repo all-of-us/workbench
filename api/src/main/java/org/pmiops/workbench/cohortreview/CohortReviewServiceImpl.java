@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
@@ -33,6 +35,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Value("${hibernate.jdbc.batch_size}")
     private int batchSize;
+
+    private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
     @Autowired
     CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
@@ -105,6 +109,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             i++;
             if (i % batchSize == 0) {
                 entityManager.flush();
+                log.log(Level.INFO, "flushing index: " + i);
                 entityManager.clear();
             }
         }

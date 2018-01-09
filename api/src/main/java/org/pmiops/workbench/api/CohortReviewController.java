@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -57,7 +56,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
 
-    private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
+    private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
     /**
      * Converter function from backend representation (used with Hibernate) to
