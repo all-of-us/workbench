@@ -136,6 +136,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
                             cohortId, cdrVersionId));
         }
+
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
