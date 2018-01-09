@@ -14,7 +14,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Provider;
 
@@ -43,8 +42,6 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -70,7 +67,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Transactional(propagation = Propagation.SUPPORTS)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortsControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
