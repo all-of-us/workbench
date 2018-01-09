@@ -184,35 +184,11 @@ const dummyData = () => [
     },
     {
         "ageAtEvent": 46,
-        "date": moment("2002-10-08"),
-        "description": "Inflammatory disease of liver",
-        "source": "ICD9CM",
-        "standard": "SNOMED",
-        "value": "573.3"
-    },
-    {
-        "ageAtEvent": 46,
         "date": moment("2002-10-22"),
         "description": "Chronic hepatitis C",
         "source": "ICD9CM",
         "standard": "SNOMED",
         "value": "070.54"
-    },
-    {
-        "ageAtEvent": 46,
-        "date": moment("2002-10-22"),
-        "description": "Chronic hepatitis C",
-        "source": "ICD9CM",
-        "standard": "SNOMED",
-        "value": "070.54"
-    },
-    {
-        "ageAtEvent": 46,
-        "date": moment("2002-10-25"),
-        "description": "Shoulder joint pain",
-        "source": "ICD9CM",
-        "standard": "SNOMED",
-        "value": "719.41"
     },
     {
         "ageAtEvent": 46,
@@ -269,14 +245,6 @@ const dummyData = () => [
         "source": "ICD9CM",
         "standard": "SNOMED",
         "value": "682.6"
-    },
-    {
-        "ageAtEvent": 47,
-        "date": moment("2003-08-26"),
-        "description": "Inflammatory disease of liver",
-        "source": "ICD9CM",
-        "standard": "SNOMED",
-        "value": "573.3"
     },
     {
         "ageAtEvent": 47,
