@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -12,10 +13,12 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,9 @@ public class CohortReviewServiceImplTest {
 
     @Mock
     private WorkspaceService workspaceService;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private CohortReviewServiceImpl cohortReviewService;
@@ -192,14 +198,20 @@ public class CohortReviewServiceImplTest {
 
     @Test
     public void saveParticipantCohortStatuses() throws Exception {
-        List<ParticipantCohortStatus> pcsList = new ArrayList<>();
-        pcsList.add(new ParticipantCohortStatus());
+        Whitebox.setInternalState(cohortReviewService, "entityManager", entityManager);
+        Whitebox.setInternalState(cohortReviewService, "batchSize", 50);
 
-        when(participantCohortStatusDao.save(pcsList)).thenReturn(null);
+        List<ParticipantCohortStatus> pcsList = new ArrayList<>();
+        final ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus();
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey(1, 1);
+        participantCohortStatus.setParticipantKey(key);
+        pcsList.add(participantCohortStatus);
+
+        doNothing().when(entityManager).persist(participantCohortStatus);
 
         cohortReviewService.saveParticipantCohortStatuses(pcsList);
 
-        verify(participantCohortStatusDao).save(pcsList);
+        verify(entityManager).persist(participantCohortStatus);
         verifyNoMoreMockInteractions();
     }
 

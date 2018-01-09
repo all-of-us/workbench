@@ -39,7 +39,7 @@ export class SignInService {
   // Expose "current user details" as an Observable
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
-
+  public clientId = '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com';
   constructor(private zone: NgZone, configService: ConfigService) {
     this.zone = zone;
     this.user = this.makeUserSubject();
@@ -62,7 +62,7 @@ export class SignInService {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
-            client_id: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
+            client_id: this.clientId,
             hosted_domain: config.gsuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         });
