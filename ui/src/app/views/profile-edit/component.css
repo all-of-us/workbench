@@ -2,24 +2,24 @@ h2 {
   display: inline-block;
 }
 
-fieldset {
-	margin: 0.5rem 0 1.5rem 0;
+.field-wrapper {
+  margin: 0.5rem 0 1.5rem 0;
 }
 
 label {
-	display: block;
+  display: block;
 }
 
 label clr-icon {
-	margin-left: 0.25rem;
+  margin-left: 0.25rem;
 }
 
 input[type='text'] {
-	display: block;
-	width: 10rem;
+  display: block;
+  width: 10rem;
 }
 
 div.field {
-	display: inline-block;
-	margin-right: 2rem;
+  display: inline-block;
+  margin-right: 2rem;
 }
