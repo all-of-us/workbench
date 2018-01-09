@@ -1,11 +1,13 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
@@ -86,6 +88,8 @@ describe('WorkspaceComponent', () => {
         { provide: ClusterService, useValue: ClusterService },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
+        { provide: Http, useValue: Http },
+        { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ] }).compileComponents().then(() => {
