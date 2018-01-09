@@ -10,11 +10,17 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
@@ -23,6 +29,14 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private WorkspaceService workspaceService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Value("${hibernate.jdbc.batch_size}")
+    private int batchSize;
+
+    private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
     @Autowired
     CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
@@ -34,6 +48,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.workspaceService = workspaceService;
     }
+
+    public CohortReviewServiceImpl() {}
 
     @Override
     public Cohort findCohort(long cohortId) {
@@ -85,8 +101,19 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
+    @Transactional
     public Iterable<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-        return participantCohortStatusDao.save(participantCohortStatuses);
+        int i = 0;
+        for (ParticipantCohortStatus participantCohortStatus : participantCohortStatuses) {
+            entityManager.persist(participantCohortStatus);
+            i++;
+            if (i % batchSize == 0) {
+                entityManager.flush();
+                log.log(Level.INFO, "flushing index: " + i);
+                entityManager.clear();
+            }
+        }
+        return participantCohortStatuses;
     }
 
     @Override
