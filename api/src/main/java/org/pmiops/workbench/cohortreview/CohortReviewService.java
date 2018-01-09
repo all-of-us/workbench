@@ -53,6 +53,14 @@ public interface CohortReviewService {
     CohortReview saveCohortReview(CohortReview cohortReview);
 
     /**
+     * Save the {@link CohortReview} as well as the collection of {@link ParticipantCohortStatus}.
+     *
+     * @param cohortReview
+     * @param participantCohortStatuses
+     */
+    void saveFullCohortReview(CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses);
+
+    /**
      * Save the specified {@link ParticipantCohortStatus}.
      *
      * @param participantCohortStatuses
