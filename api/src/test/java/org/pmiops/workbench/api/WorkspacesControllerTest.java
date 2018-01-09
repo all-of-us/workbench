@@ -750,11 +750,11 @@ public class WorkspacesControllerTest {
     List<FileDetail> fileDetailsList = new ArrayList<FileDetail>();
     FileDetail mockFileDetail1 = new FileDetail();
     mockFileDetail1.setName("File1.py");
-    mockFileDetail1.setUrl("//URL");
+    mockFileDetail1.setPath("//URL");
 
     FileDetail mockFileDetail2 = new FileDetail();
     mockFileDetail2.setName("File1.txt");
-    mockFileDetail2.setUrl("//URL");
+    mockFileDetail2.setPath("//URL");
 
     fileDetailsList.add(mockFileDetail1);
     fileDetailsList.add(mockFileDetail2);

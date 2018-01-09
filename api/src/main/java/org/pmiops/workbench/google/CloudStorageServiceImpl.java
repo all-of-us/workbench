@@ -42,7 +42,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     blobList.forEach(blobItem->{
       FileDetail fileDetail = new FileDetail();
       fileDetail.setName(blobItem.getName());
-      fileDetail.setUrl(blobItem.getMediaLink());
+      fileDetail.setPath("gs://"+bucketName+"/"+blobItem.getName());
       fileList.add(fileDetail);
     });
     return fileList;

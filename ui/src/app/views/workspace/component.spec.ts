@@ -1,5 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from 'clarity-angular';
@@ -74,6 +75,7 @@ describe('WorkspaceComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        FormsModule,
         RouterTestingModule,
         IconsModule,
         ClarityModule.forRoot()
@@ -132,24 +134,24 @@ describe('WorkspaceComponent', () => {
 
   }));
 
-    it('displays correct notebook information', fakeAsync(() => {
-      let noteBookSize: number;
-      workspacePage.workspacesService.getNoteBookList(
-          workspacePage.workspaceNamespace,
-        workspacePage.workspaceId).subscribe((noteBookList) => {
-          noteBookSize = noteBookList.length;
-      });
-      tick();
-      expect(noteBookSize).toBe(1);
+  it('displays correct notebook information', fakeAsync(() => {
+    let noteBookSize: number;
+    workspacePage.workspacesService.getNoteBookList(
+    workspacePage.workspaceNamespace,
+    workspacePage.workspaceId).subscribe((noteBookList) => {
+      noteBookSize = noteBookList.length;
+    });
+    tick();
+    expect(noteBookSize).toBe(1);
 
-      workspacePage.workspacesService.getNoteBookList(
-        'MockNamespace',
-        workspacePage.workspaceId).subscribe((noteBookList) => {
-          noteBookSize = noteBookList.length;
-        });
-      tick();
-      expect(noteBookSize).toBe(0);
-    }));
+    workspacePage.workspacesService.getNoteBookList(
+      'MockNamespace',
+      workspacePage.workspaceId).subscribe((noteBookList) => {
+        noteBookSize = noteBookList.length;
+    });
+    tick();
+    expect(noteBookSize).toBe(0);
+  }));
 
 
 

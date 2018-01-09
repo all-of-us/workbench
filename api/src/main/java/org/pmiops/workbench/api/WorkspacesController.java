@@ -488,7 +488,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           bucketFileList = cloudStorageService.getBucketFileList(bucketName);
           if (bucketFileList != null && bucketFileList.size() > 0) {
             bucketFileList = bucketFileList.stream()
-              .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(py))$)"))
+              .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
               .collect(Collectors.toList());
           }
         }

@@ -1,20 +1,15 @@
 package org.pmiops.workbench.api;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 
-import org.json.JSONObject;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Cluster;
@@ -23,6 +18,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -142,52 +138,33 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId, List<FileDetail> fileList) {
-    try{
+    try {
       String clusterName = convertClusterName(workspaceId);
-      this.notebooksService.localize(workspaceNamespace, clusterName, convertfileDetailsToJson(workspaceNamespace, workspaceId, fileList));
-      } catch (ApiException e) {
-        throw new RuntimeException(e);
-      }catch(Exception e) {
+      this.notebooksService.localize(workspaceNamespace, clusterName, convertfileDetailsToMap(workspaceNamespace, workspaceId, fileList));
+    } catch (ApiException e) {
         throw new RuntimeException(e);
     }
-    return null;
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   /**
-   * Create a map with key as ~/workspaceName/workspaceID/fileName and value as the gs://firecloudBucket name/filename
+   * Create a map with key as ~/workspaceName/workspaceID/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
    * @param workspaceNamespace
    * @param workspaceId
    * @param fileList
    * @return
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
-  private HashMap convertfileDetailsToJson(String workspaceNamespace, String workspaceId,List<FileDetail> fileList) throws org.pmiops.workbench.firecloud.ApiException {
+  private HashMap convertfileDetailsToMap(String workspaceNamespace, String workspaceId, List<FileDetail> fileList) {
     HashMap fileDetailsMap = new HashMap();
-    try {
-      org.pmiops.workbench.firecloud.model.WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
-      if (workspaceResponse != null) {
-        org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = workspaceResponse.getWorkspace();
-        if (fireCloudWorkspace != null) {
-          String bucketName = fireCloudWorkspace.getBucketName();
-          for (FileDetail fileDetails : fileList) {
-            StringBuffer key = new StringBuffer("~/");
-            key.append(workspaceNamespace);
-            key.append("/");
-            key.append(workspaceId).append("/").append(fileDetails.getName());
-
-            StringBuffer value = new StringBuffer();
-            value.append("gs://");
-            value.append(bucketName);
-            value.append("/");
-            value.append(fileDetails.getName());
-            fileDetailsMap.put(key.toString(), value);
-          }
-        }
-      }
-    }catch(org.pmiops.workbench.firecloud.ApiException ex)
-    {
-      throw ex;
+    for (FileDetail fileDetails : fileList) {
+      StringBuffer key = new StringBuffer("~/");
+      key.append(workspaceNamespace);
+      key.append("/");
+      key.append(workspaceId).append("/").append(fileDetails.getName());
+      fileDetailsMap.put(key, fileDetails.getPath());
     }
+
     return fileDetailsMap;
   }
 }

@@ -18,9 +18,8 @@ import {
 } from 'generated';
 
 
-// TODO: use a real swagger generated class for this.
 class Notebook {
-  constructor(public name: string, public description: string, public url: string) {}
+  constructor(public name: string, public description: string, public path: string,public push: boolean) {}
 }
 /*
 * Search filters used by the cohort and notebook data tables to
@@ -106,6 +105,9 @@ export class WorkspaceComponent implements OnInit {
   notFound = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
+  saveSuccess = false;
+  saveError = false;
+  notebookSelected = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   editHover = false;
@@ -153,7 +155,9 @@ export class WorkspaceComponent implements OnInit {
                 .subscribe(
                   FileList => {
                     for (const fileDetail of FileList){
+                      fileDetail.push = false;
                       this.notebookList.push(fileDetail);
+
                     }
                   },
                   error => {
@@ -239,6 +243,20 @@ export class WorkspaceComponent implements OnInit {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
+  checkBoxEvent(notebook): void{
+    if(notebook.push===true){
+      this.notebookSelected = true;
+    } else {
+        this.notebookSelected = false;
+        for (const file of this.notebookList){
+          if (file.push === true) {
+            this.notebookSelected = true;
+            break;
+          }
+        }
+    }
+  }
+  
   delete(): void {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
@@ -265,9 +283,11 @@ export class WorkspaceComponent implements OnInit {
     }
     this.clusterService
     .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList).subscribe( () => {
-      console.log('all set');
-      }, () => {
-        console.log('error');
-      });
+      this.saveSuccess = true;
+      this.saveError = false;
+    }, () => {
+      this.saveError = true;
+      this.saveSuccess = false;
+    });
   }
 }

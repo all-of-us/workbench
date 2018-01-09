@@ -75,7 +75,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     ClusterApi clusterApi = clusterApiProvider.get();
     try{
       clusterApi.localizeFiles(googleProject,clusterName,fileList);
-    }catch (ApiException e) {
+    } catch (ApiException e) {
       throw new RuntimeException(e);
     }
 

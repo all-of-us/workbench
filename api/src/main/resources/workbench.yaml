@@ -2844,11 +2844,11 @@ definitions:
     type: object
     required:
       - name
-      - url
+      - path
     properties:
       name:
         type: string
-      url:
+      path:
         type: string
 
   ClusterListResponse:
