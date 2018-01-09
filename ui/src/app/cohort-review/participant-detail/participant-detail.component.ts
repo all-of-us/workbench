@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
-import dummyData from './dummyData';
+import {dummyData} from './dummy-data';
 
 import {
   CohortReview,
