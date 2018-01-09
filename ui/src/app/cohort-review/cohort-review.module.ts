@@ -10,6 +10,7 @@ import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
+import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {LoremIpsumDirective} from './directives/lorem.directive';
@@ -68,6 +69,7 @@ const routes = [{
     ParticipantDetailComponent,
     ParticipantStatusComponent,
     ParticipantTableComponent,
+    ReviewNavComponent,
     LoremIpsumDirective,
   ],
   providers: [
