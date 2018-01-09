@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Headers, Http} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -78,7 +78,7 @@ class NotebookDescriptionComparator implements Comparator<Notebook> {
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceComponent implements OnInit {
+export class WorkspaceComponent implements OnInit, OnDestroy {
 
   /* tslint:disable:no-unused-variable */
   /* All these are used in the template, not the class */
@@ -112,6 +112,7 @@ export class WorkspaceComponent implements OnInit {
   shareHover = false;
   trashHover = false;
   listenerAdded = false;
+  notebookAuthListener: EventListenerOrEventListenerObject;
 
   constructor(
       private route: ActivatedRoute,
@@ -159,6 +160,10 @@ export class WorkspaceComponent implements OnInit {
               this.workspaceLoading = false;
             }
           });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('message', this.notebookAuthListener);
   }
 
   launchNotebook(): void {
@@ -213,7 +218,7 @@ export class WorkspaceComponent implements OnInit {
       this.clusterPulled = false;
 
       if (!this.listenerAdded) {
-        window.addEventListener('message', (e) => {
+        this.notebookAuthListener = (e: MessageEvent) => {
           if (e.source !== notebook) {
             return;
           }
@@ -229,7 +234,8 @@ export class WorkspaceComponent implements OnInit {
                 'googleClientId': this.signInService.clientId
             }
           }, leoBaseUrl);
-        });
+        };
+        window.addEventListener('message', this.notebookAuthListener);
         this.listenerAdded = true;
       }
     });
