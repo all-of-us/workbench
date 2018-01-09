@@ -216,7 +216,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }).subscribe(() => {
       const notebook = window.open(leoNotebookUrl, '_blank');
       this.clusterPulled = false;
-
+      // TODO (blrubenstein): Make the notebook page a list of pages, and
+      //    move this to component scope.
       if (!this.listenerAdded) {
         this.notebookAuthListener = (e: MessageEvent) => {
           if (e.source !== notebook) {
