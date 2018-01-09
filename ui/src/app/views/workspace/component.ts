@@ -19,7 +19,8 @@ import {
 
 
 class Notebook {
-  constructor(public name: string, public description: string, public path: string, public push: boolean) {}
+  constructor(public name: string, public description: string, public path: string,
+              public push: boolean) {}
 }
 /*
 * Search filters used by the cohort and notebook data tables to
@@ -256,7 +257,6 @@ export class WorkspaceComponent implements OnInit {
         }
     }
   }
-  
   delete(): void {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
