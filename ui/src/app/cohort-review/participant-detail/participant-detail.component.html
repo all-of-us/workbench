@@ -46,26 +46,13 @@
   <clr-tab>
     <button clrTabLink id="detail-overview-tab">Participant Overview</button>
     <clr-tab-content id="detail-overview-content" *clrIfActive>
-      <h4>Participant {{ participant.id }} Overview</h4>
-      <div class="row">
-        <div class="col-md">
-          <p appLorem></p>
-          <p appLorem></p>
-          <p appLorem></p>
-        </div>
-        <div class="col-md">
-          Here be a chart mebbe
-        </div>
-      </div>
+      <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
     <button clrTabLink id="detail-conditions-tab">Conditions</button>
     <clr-tab-content id="detail-conditions-content" *clrIfActive>
-      <h4>Participant {{ participant.id }} Conditions</h4>
-      <h5>Table of Nonsense: </h5>
-
       <clr-datagrid>
         <clr-dg-column [clrDgField]="'name'">Name</clr-dg-column>
         <clr-dg-column [clrDgField]="'standard'">Standard Concept</clr-dg-column>
@@ -84,21 +71,20 @@
         </clr-dg-row>
         <clr-dg-footer></clr-dg-footer>
       </clr-datagrid>
-
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
-    <button disabled clrTabLink id="detail-measurements-tab">Measurements</button>
+    <button clrTabLink id="detail-measurements-tab">Measurements</button>
     <clr-tab-content id="detail-measurements-content" *clrIfActive>
-      <h4>Participant {{ participant.id }} Measurements</h4>
+      <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
 
   <clr-tab>
-    <button disabled clrTabLink id="detail-meds-tab">Medications</button>
+    <button clrTabLink id="detail-meds-tab">Medications</button>
     <clr-tab-content id="detail-meds-content" *clrIfActive>
-      <h4>Participant {{ participant.id }} Medications</h4>
+      <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
 </clr-tabs>
