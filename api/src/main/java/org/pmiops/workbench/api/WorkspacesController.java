@@ -564,7 +564,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     checkWorkspaceReadAccess(workspaceNamespace, workspaceId);
-    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequired(
+    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(

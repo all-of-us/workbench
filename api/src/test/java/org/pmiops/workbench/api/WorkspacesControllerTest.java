@@ -5,11 +5,9 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static junit.framework.TestCase.fail;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +29,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
@@ -40,10 +40,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -55,6 +52,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -75,20 +73,18 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.annotation.RequestScope;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Transactional(propagation = Propagation.SUPPORTS)
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
   private static final Instant NOW = Instant.now();
   private static final long NOW_TIME = Timestamp.from(NOW).getTime();
@@ -98,12 +94,19 @@ public class WorkspacesControllerTest {
   @TestConfiguration
   @Import({
     WorkspacesController.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
+    CohortsController.class,
+    CohortService.class,
+    CohortReviewController.class
   })
   @MockBean({
     FireCloudService.class,
-    CohortService.class,
-    CloudStorageService.class
+    CohortMaterializationService.class,
+    CohortReviewService.class,
+    CloudStorageService.class,
+    BigQueryService.class,
+    CodeDomainLookupService.class,
+    ParticipantCounter.class
   })
   static class Configuration {
     @Bean
@@ -128,6 +131,8 @@ public class WorkspacesControllerTest {
 
     @Bean
     User user() {
+      // Allows for wiring of the initial Provider<User>; actual mocking of the
+      // user is achieved via setUserProvider().
       return null;
     }
   }
@@ -135,15 +140,15 @@ public class WorkspacesControllerTest {
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
-  CohortService cohortService;
-  @Autowired
   WorkspaceDao workspaceDao;
-  @Autowired
-  CohortDao cohortDao;
   @Autowired
   UserDao userDao;
   @Mock
   Provider<User> userProvider;
+  @Autowired
+  CohortsController cohortsController;
+  @Autowired
+  CohortReviewController cohortReviewController;
   @Autowired
   WorkspacesController workspacesController;
 
@@ -204,11 +209,8 @@ public class WorkspacesControllerTest {
     return workspace;
   }
 
-  public Cohort createDefaultCohort(Workspace ws, String name) {
-    long wsId = workspaceDao.findByWorkspaceNamespaceAndName(
-        ws.getNamespace(), ws.getName()).getWorkspaceId();
+  public Cohort createDefaultCohort(String name) {
     Cohort cohort = new Cohort();
-    cohort.setWorkspaceId(wsId);
     cohort.setName(name);
     cohort.setCriteria(new Gson().toJson(SearchRequests.males()));
     return cohort;
@@ -519,10 +521,10 @@ public class WorkspacesControllerTest {
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    Cohort c1 = createDefaultCohort(workspace, "c1");
-    c1 = cohortDao.save(c1);
-    Cohort c2 = createDefaultCohort(workspace, "c2");
-    c2 = cohortDao.save(c2);
+    Cohort c1 = createDefaultCohort("c1");
+    c1 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c1).getBody();
+    Cohort c2 = createDefaultCohort("c2");
+    c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
@@ -536,7 +538,13 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
         .getBody().getWorkspace();
-    verify(cohortService, times(2)).saveAndCloneReviews(any(), any());
+
+    List<String> cohortNames = cohortsController
+        .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems()
+        .stream()
+        .map(c -> c.getName())
+        .collect(Collectors.toList());
+    assertThat(cohortNames).containsExactlyElementsIn(ImmutableSet.of("c1", "c2"));
   }
 
   @Test
@@ -664,7 +672,7 @@ public class WorkspacesControllerTest {
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), this.LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -676,7 +684,7 @@ public class WorkspacesControllerTest {
     int numReaders = 0;
     for (UserRole userRole : workspace2.getUserRoles()) {
       if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-        assertThat(userRole.getEmail()).isEqualTo(this.LOGGED_IN_USER_EMAIL);
+        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
         numOwners++;
       } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
         assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
@@ -709,7 +717,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.LOGGED_IN_USER_EMAIL);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
@@ -751,7 +759,7 @@ public class WorkspacesControllerTest {
     int numReaders = 0;
     for (UserRole userRole : workspace3.getUserRoles()) {
       if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-        assertThat(userRole.getEmail()).isEqualTo(this.LOGGED_IN_USER_EMAIL);
+        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
         numOwners++;
       } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
         assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
@@ -775,7 +783,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.LOGGED_IN_USER_EMAIL);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
 
@@ -805,7 +813,7 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     UserRole creator = new UserRole();
-    creator.setEmail(this.LOGGED_IN_USER_EMAIL);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();

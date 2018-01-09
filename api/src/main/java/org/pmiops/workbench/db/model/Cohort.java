@@ -23,8 +23,6 @@ public class Cohort {
   private String name;
   private String type;
   private String description;
-  private String externalId;
-  private Workspace workspace;
   private long workspaceId;
   private String criteria;
   private User creator;
