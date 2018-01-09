@@ -26,6 +26,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -78,7 +79,7 @@ public class CohortsControllerTest {
 
 
   @TestConfiguration
-  @Import(WorkspaceServiceImpl.class)
+  @Import({WorkspaceServiceImpl.class, CohortService.class})
   @MockBean(FireCloudService.class)
   static class Configuration {
     @Bean
