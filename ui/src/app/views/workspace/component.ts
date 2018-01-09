@@ -19,7 +19,7 @@ import {
 
 
 class Notebook {
-  constructor(public name: string, public description: string, public path: string,public push: boolean) {}
+  constructor(public name: string, public description: string, public path: string, public push: boolean) {}
 }
 /*
 * Search filters used by the cohort and notebook data tables to
@@ -243,8 +243,8 @@ export class WorkspaceComponent implements OnInit {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
-  checkBoxEvent(notebook): void{
-    if(notebook.push===true){
+  checkBoxEvent(notebook): void {
+    if (notebook.push === true) {
       this.notebookSelected = true;
     } else {
         this.notebookSelected = false;
