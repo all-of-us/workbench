@@ -117,11 +117,13 @@ public class FireCloudServiceImpl implements FireCloudService {
     workspaceIngest.setName(workspaceName);
     workspaceIngest.setNamespace(projectName);
     // TODO: add concept of controlled auth domain.
-    ArrayList<ManagedGroupRef> authDomain = new ArrayList<ManagedGroupRef>();
-    ManagedGroupRef registeredDomain = new ManagedGroupRef();
-    registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
-    authDomain.add(registeredDomain);
-    workspaceIngest.setAuthorizationDomain(authDomain);
+    if (configProvider.get().firecloud.enforceRegistered) {
+      ArrayList<ManagedGroupRef> authDomain = new ArrayList<ManagedGroupRef>();
+      ManagedGroupRef registeredDomain = new ManagedGroupRef();
+      registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
+      authDomain.add(registeredDomain);
+      workspaceIngest.setAuthorizationDomain(authDomain);
+    }
     workspacesApi.createWorkspace(workspaceIngest);
   }
 

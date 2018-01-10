@@ -11,6 +11,7 @@ public class WorkbenchConfig {
     public String billingAccountId;
     public String billingProjectPrefix;
     public String registeredDomainName;
+    public boolean enforceRegistered;
   }
 
   public FireCloudConfig firecloud;
