@@ -1,5 +1,5 @@
 .cohort-review-main {
-  transition: margin-left .5s;
+  transition: margin .5s;
 }
 
 .status-wrapper {
@@ -20,4 +20,8 @@
 
 [appSidebar] .closebtn:hover {
   color: rgb(166, 166, 166);
+}
+
+[appSidebar] > * {
+  white-space: nowrap;
 }

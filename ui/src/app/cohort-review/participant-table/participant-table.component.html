@@ -1,25 +1,4 @@
-<!-- Cohort Review header -->
-<div class="btn-group"
-  [style.display]="'flex'"
-  [style.align-items]="'center'"
-  [style.justify-content]="'center'">
-  <button
-    class="btn"
-    title="Go to Cohort Overview"
-    routerLink="../overview">
-    <clr-icon shape="line-chart"></clr-icon>
-    Overview
-  </button>
-
-  <button
-    disabled
-    class="btn"
-    title="Go to Participant Browser"
-    routerLink="../participants">
-    <clr-icon shape="users"></clr-icon>
-    Participants
-  </button>
-</div>
+<app-review-nav></app-review-nav>
 
 <clr-datagrid
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
@@ -33,10 +12,10 @@
   <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
 
   <clr-dg-row *ngFor="let participant of DUMMY_DATA">
-    <clr-dg-cell>
-      <a routerLink="{{ participant.id }}">
-        {{ participant.id }}
-      </a>
+    <clr-dg-cell
+      [style.cursor]="'pointer'"
+      routerLink="{{ participant.id }}">
+      {{ participant.id }}
     </clr-dg-cell>
     <clr-dg-cell>{{ participant.dob }}</clr-dg-cell>
     <clr-dg-cell>{{ participant.gender }}</clr-dg-cell>
