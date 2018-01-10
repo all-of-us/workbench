@@ -14,10 +14,13 @@ export class ReviewStateService {
   review = new ReplaySubject<CohortReview>(1);
   cohort = new ReplaySubject<Cohort>(1);
   participant = new ReplaySubject<Participant | null>(1);
-  sidebarOpen = new BehaviorSubject<boolean>(false);
 
   review$ = this.review.asObservable();
   cohort$ = this.cohort.asObservable();
   participant$ = this.participant.asObservable();
+
+  sidebarOpen = new BehaviorSubject<boolean>(false);
   sidebarOpen$ = this.sidebarOpen.asObservable();
+  annotationsOpen = new BehaviorSubject<boolean>(false);
+  annotationsOpen$ = this.annotationsOpen.asObservable();
 }

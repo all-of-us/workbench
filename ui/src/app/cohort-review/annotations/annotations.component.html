@@ -18,3 +18,8 @@
   <label>Date</label>
   <input type="date">
 </div>
+
+<p>{{ annotations$ | async }}</p>
+<button (click)="state.annotationsOpen.next(true)">
+  Add New Annotation
+</button>

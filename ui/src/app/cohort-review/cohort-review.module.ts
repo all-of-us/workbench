@@ -7,6 +7,7 @@ import {ClarityModule} from 'clarity-angular';
 import {AnnotationsComponent} from './annotations/annotations.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
+import {CreateSetAnnotationComponent} from './create-set-annotation/create-set-annotation.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
@@ -21,7 +22,10 @@ import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
 import {ReviewResolver} from './guards/review-resolver.guard';
 
-import {CohortReviewService} from 'generated';
+import {
+  CohortAnnotationDefinitionService,
+  CohortReviewService,
+} from 'generated';
 
 
 const routes = [{
@@ -64,6 +68,7 @@ const routes = [{
     AnnotationsComponent,
     CohortReviewComponent,
     CreateReviewComponent,
+    CreateSetAnnotationComponent,
     FullPageDirective,
     OverviewComponent,
     SidebarDirective,
@@ -71,8 +76,10 @@ const routes = [{
     ParticipantStatusComponent,
     ParticipantTableComponent,
     ReviewNavComponent,
+    CreateSetAnnotationComponent,
   ],
   providers: [
+    CohortAnnotationDefinitionService,
     CohortResolver,
     ReviewResolver,
     ParticipantResolver,
