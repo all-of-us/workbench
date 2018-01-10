@@ -21,11 +21,11 @@ class AllOfUsConfig(object):
             self.api_host = self.config_json[API_HOST_KEY]
             self.bucket_name = self.config_json[BUCKET_NAME_KEY]
             self.cdr_version_project = self.config_json[CDR_VERSION_PROJECT]
-            self.cdr_version_dataset = self.config_json[CDR_VERSION_DATASET]            
+            self.cdr_version_dataset = self.config_json[CDR_VERSION_DATASET]
 
 all_of_us_config = AllOfUsConfig()
 
 def cdr_table(table_name):
-  return '`%s.%s.%s`' % (all_of_us_config.cdr_version_project, 
-                         all_of_us_config.cdr_version_dataset,
-                         table_name)
+    return '`%s.%s.%s`' % (all_of_us_config.cdr_version_project,
+                           all_of_us_config.cdr_version_dataset,
+                           table_name)
