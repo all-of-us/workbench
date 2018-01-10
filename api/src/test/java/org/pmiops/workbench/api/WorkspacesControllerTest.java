@@ -2,35 +2,37 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-
 import static junit.framework.TestCase.fail;
-
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryResult;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
@@ -41,6 +43,7 @@ import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -53,6 +56,8 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -97,7 +102,8 @@ public class WorkspacesControllerTest {
     WorkspaceServiceImpl.class,
     CohortsController.class,
     CohortService.class,
-    CohortReviewController.class
+    CohortReviewController.class,
+    CohortReviewServiceImpl.class
   })
   @MockBean({
     FireCloudService.class,
@@ -140,9 +146,13 @@ public class WorkspacesControllerTest {
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
+  BigQueryService bigQueryService;
+  @Autowired
   WorkspaceDao workspaceDao;
   @Autowired
   UserDao userDao;
+  @Autowired
+  CdrVersionDao cdrVersionDao;
   @Mock
   Provider<User> userProvider;
   @Autowired
@@ -152,6 +162,9 @@ public class WorkspacesControllerTest {
   @Autowired
   WorkspacesController workspacesController;
 
+  private CdrVersion cdrVersion;
+  private String cdrVersionId;
+
   @Before
   public void setUp() {
     User user = new User();
@@ -160,6 +173,11 @@ public class WorkspacesControllerTest {
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+
+    cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
+    cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     CLOCK.setInstant(NOW);
     workspacesController.setUserProvider(userProvider);
@@ -179,6 +197,24 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
       fcResponse
     );
+  }
+
+  private void stubBigQueryCohortCalls() {
+    QueryResult queryResult = mock(QueryResult.class);
+    Iterable testIterable = new Iterable() {
+        @Override
+        public Iterator iterator() {
+          List<FieldValue> list = new ArrayList<>();
+          list.add(null);
+          return list.iterator();
+        }
+      };
+    Map<String, Integer> rm = ImmutableMap.of("person_id", 1, "count", 2);
+    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
+    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
+    when(queryResult.iterateAll()).thenReturn(testIterable);
+    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
   }
 
   public Workspace createDefaultWorkspace() throws Exception {
@@ -206,6 +242,7 @@ public class WorkspacesControllerTest {
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
     stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    workspace.setCdrVersionId(cdrVersionId);
     return workspace;
   }
 
@@ -231,7 +268,7 @@ public class WorkspacesControllerTest {
             .getBody().getWorkspace();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
-    assertThat(workspace2.getCdrVersionId()).isNull();
+    assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
     assertThat(workspace2.getDescription()).isEqualTo("description");
@@ -496,7 +533,7 @@ public class WorkspacesControllerTest {
         workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody().getWorkspace();
 
-    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(),
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getId(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     assertWithMessage("get and clone responses are inconsistent")
         .that(workspace2)
@@ -526,6 +563,17 @@ public class WorkspacesControllerTest {
     Cohort c2 = createDefaultCohort("c2");
     c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
 
+    stubBigQueryCohortCalls();
+    CreateReviewRequest reviewReq = new CreateReviewRequest();
+    reviewReq.setSize(1);
+    CohortReview cr1 = cohortReviewController.createCohortReview(
+        workspace.getNamespace(), workspace.getId(), c1.getId(),
+        cdrVersion.getCdrVersionId(), reviewReq).getBody();
+    reviewReq.setSize(2);
+    CohortReview cr2 = cohortReviewController.createCohortReview(
+        workspace.getNamespace(), workspace.getId(), c2.getId(),
+        cdrVersion.getCdrVersionId(), reviewReq).getBody();
+
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -536,15 +584,30 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
-        .getBody().getWorkspace();
+    Workspace cloned = workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
 
-    List<String> cohortNames = cohortsController
-        .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems()
-        .stream()
-        .map(c -> c.getName())
-        .collect(Collectors.toList());
-    assertThat(cohortNames).containsExactlyElementsIn(ImmutableSet.of("c1", "c2"));
+    List<Cohort> cohorts = cohortsController
+        .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
+    Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
+    assertThat(cohortsByName.keySet()).containsExactlyElementsIn(ImmutableSet.of("c1", "c2"));
+    assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
+        .containsNoneOf(c1.getId(), c2.getId());
+
+    CohortReview gotCr1 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null).getBody();
+    assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
+    assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
+
+    CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null).getBody();
+    assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
+    assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
+
+    assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
+        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
   }
 
   @Test
@@ -559,7 +622,7 @@ public class WorkspacesControllerTest {
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+    stubGetWorkspace(workspace.getNamespace(), workspace.getId(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();

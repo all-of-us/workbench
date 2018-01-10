@@ -137,7 +137,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
         }
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = null;
+        try {
+            cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        } catch (NotFoundException nfe) {
+            cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
+        }
         if(cohortReview.getReviewSize() > 0) {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
