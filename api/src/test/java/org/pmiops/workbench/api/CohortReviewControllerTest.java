@@ -174,7 +174,10 @@ public class CohortReviewControllerTest {
         ParticipantCohortStatus pcs = new ParticipantCohortStatus();
         pcs.setParticipantKey(new ParticipantCohortStatusKey(1, 0));
         pcs.status(CohortStatus.NOT_REVIEWED);
-        pcs.setBirthDateTime(new Date());
+        pcs.setBirthDate(new Date());
+        pcs.setEthnicityConceptId(0L);
+        pcs.setGenderConceptId(0L);
+        pcs.setRaceConceptId(0L);
 
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
                             "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
@@ -216,7 +219,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-        doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, new ArrayList<>());
+        doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
@@ -235,7 +238,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 3);
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
-        verify(cohortReviewService, times(1)).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
+        verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
         verifyNoMoreMockInteractions();
     }
 
@@ -279,7 +282,7 @@ public class CohortReviewControllerTest {
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
                 .participantKey(key)
                 .status(CohortStatus.INCLUDED)
-                .birthDateTime(dob)
+                .birthDate(dob)
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
                 .raceConceptId(1L);
@@ -328,7 +331,8 @@ public class CohortReviewControllerTest {
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn);
+                reviewController.getParticipantCohortStatuses(
+                        namespace, name, cohortId, cdrVersionId, page, pageSize, sortOrder, sortColumn, filterColumns, filterValues);
 
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());

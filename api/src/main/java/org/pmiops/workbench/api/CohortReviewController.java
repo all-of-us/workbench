@@ -71,7 +71,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
                             .status(participant.getStatus())
-                            .birthDatetime(participant.getBirthDateTime().getTime())
+                            .birthDatetime(participant.getBirthDate().getTime())
                             .ethnicityConceptId(participant.getEthnicityConceptId())
                             .genderConceptId(participant.getGenderConceptId())
                             .raceConceptId(participant.getRaceConceptId());
@@ -275,7 +275,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 Integer page,
                                                                                                 Integer pageSize,
                                                                                                 String sortOrder,
-                                                                                                String sortColumn) {
+                                                                                                String sortColumn,
+                                                                                                List<String> filterColumns,
+                                                                                                List<String> filterValues) {
         CohortReview cohortReview = null;
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
@@ -356,7 +358,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
                             .status(CohortStatus.NOT_REVIEWED)
-                            .birthDateTime(birthDate)
+                            .birthDate(birthDate)
                             .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
                             .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
                             .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
