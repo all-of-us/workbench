@@ -206,7 +206,7 @@ public class CohortReviewControllerTest {
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
-        when(participantCounter.buildParticipantStatusQuery(request, 200, 0L)).thenReturn(null);
+        when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
@@ -225,7 +225,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
-        verify(participantCounter, times(1)).buildParticipantStatusQuery(request, 200, 0L);
+        verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
         verify(bigQueryService, times(1)).getResultMapper(queryResult);

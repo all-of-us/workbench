@@ -16,10 +16,10 @@ public class ParticipantCohortStatus {
 
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
-    private String gender;
+    private Long genderConceptId;
     private Date birthDate;
-    private String race;
-    private String ethnicity;
+    private Long raceConceptId;
+    private Long ethnicityConceptId;
 
     @EmbeddedId
     public ParticipantCohortStatusKey getParticipantKey() {
@@ -49,17 +49,17 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Column(name = "gender")
-    public String getGender() {
-        return gender;
+    @Column(name = "gender_concept_id")
+    public Long getGenderConceptId() {
+        return genderConceptId;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setGenderConceptId(Long genderConceptId) {
+        this.genderConceptId = genderConceptId;
     }
 
-    public ParticipantCohortStatus gender(String gender) {
-        this.gender = gender;
+    public ParticipantCohortStatus genderConceptId(Long genderConceptId) {
+        this.genderConceptId = genderConceptId;
         return this;
     }
 
@@ -77,31 +77,31 @@ public class ParticipantCohortStatus {
         return this;
     }
 
-    @Column(name = "race")
-    public String getRace() {
-        return race;
+    @Column(name = "race_concept_id")
+    public Long getRaceConceptId() {
+        return raceConceptId;
     }
 
-    public void setRace(String race) {
-        this.race = race;
+    public void setRaceConceptId(Long raceConceptId) {
+        this.raceConceptId = raceConceptId;
     }
 
-    public ParticipantCohortStatus race(String race) {
-        this.race = race;
+    public ParticipantCohortStatus raceConceptId(Long raceConceptId) {
+        this.raceConceptId = raceConceptId;
         return this;
     }
 
-    @Column(name = "ethnicity")
-    public String getEthnicity() {
-        return ethnicity;
+    @Column(name = "ethnicity_concept_id")
+    public Long getEthnicityConceptId() {
+        return ethnicityConceptId;
     }
 
-    public void setEthnicity(String ethnicity) {
-        this.ethnicity = ethnicity;
+    public void setEthnicityConceptId(Long ethnicityConceptId) {
+        this.ethnicityConceptId = ethnicityConceptId;
     }
 
-    public ParticipantCohortStatus ethnicity(String ethnicity) {
-        this.ethnicity = ethnicity;
+    public ParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
+        this.ethnicityConceptId = ethnicityConceptId;
         return this;
     }
 
@@ -112,15 +112,15 @@ public class ParticipantCohortStatus {
         ParticipantCohortStatus that = (ParticipantCohortStatus) o;
         return Objects.equals(participantKey, that.participantKey) &&
                 status == that.status &&
-                Objects.equals(gender, that.gender) &&
+                Objects.equals(genderConceptId, that.genderConceptId) &&
                 Objects.equals(birthDate, that.birthDate) &&
-                Objects.equals(race, that.race) &&
-                Objects.equals(ethnicity, that.ethnicity);
+                Objects.equals(raceConceptId, that.raceConceptId) &&
+                Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participantKey, status, gender, birthDate, race, ethnicity);
+        return Objects.hash(participantKey, status, genderConceptId, birthDate, raceConceptId, ethnicityConceptId);
     }
 
     @Override
@@ -128,10 +128,10 @@ public class ParticipantCohortStatus {
         return new ToStringBuilder(this)
                 .append("participantKey", participantKey)
                 .append("status", status)
-                .append("gender", gender)
+                .append("genderConceptId", genderConceptId)
                 .append("birthDate", birthDate)
-                .append("race", race)
-                .append("ethnicity", ethnicity)
+                .append("raceConceptId", raceConceptId)
+                .append("ethnicityConceptId", ethnicityConceptId)
                 .toString();
     }
 }

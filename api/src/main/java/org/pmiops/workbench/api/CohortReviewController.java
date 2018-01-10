@@ -155,7 +155,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantStatusQuery(searchRequest, request.getSize(), 0L)));
+                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses =
@@ -229,13 +229,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    updateParticipantCohortStatus(String workspaceNamespace,
-                                  String workspaceId,
-                                  Long cohortId,
-                                  Long cdrVersionId,
-                                  Long participantId,
-                                  ModifyCohortStatusRequest cohortStatusRequest) {
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> updateParticipantCohortStatus(String workspaceNamespace,
+                                                                                                            String workspaceId,
+                                                                                                            Long cohortId,
+                                                                                                            Long cdrVersionId,
+                                                                                                            Long participantId,
+                                                                                                            ModifyCohortStatusRequest cohortStatusRequest) {
 
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
@@ -269,15 +268,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.CohortReview>
-        getParticipantCohortStatuses(String workspaceNamespace,
-                                 String workspaceId,
-                                 Long cohortId,
-                                 Long cdrVersionId,
-                                 Integer page,
-                                 Integer pageSize,
-                                 String sortOrder,
-                                 String sortColumn) {
+    public ResponseEntity<org.pmiops.workbench.model.CohortReview> getParticipantCohortStatuses(String workspaceNamespace,
+                                                                                                String workspaceId,
+                                                                                                Long cohortId,
+                                                                                                Long cdrVersionId,
+                                                                                                Integer page,
+                                                                                                Integer pageSize,
+                                                                                                String sortOrder,
+                                                                                                String sortColumn) {
         CohortReview cohortReview = null;
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);

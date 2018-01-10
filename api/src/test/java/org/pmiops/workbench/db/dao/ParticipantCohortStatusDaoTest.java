@@ -46,16 +46,16 @@ public class ParticipantCohortStatusDaoTest {
                 .participantKey(key1)
                 .status(CohortStatus.INCLUDED)
                 .birthDate(new Timestamp(-852058800000000L))
-                .ethnicity("eth")
-                .gender("gen")
-                .race("race");
+                .ethnicityConceptId(1L)
+                .genderConceptId(1L)
+                .raceConceptId(1L);
         participant2 = new ParticipantCohortStatus()
                 .participantKey(key2)
                 .status(CohortStatus.EXCLUDED)
                 .birthDate(new Timestamp(-852058800000000L))
-                .ethnicity("eth")
-                .gender("gen")
-                .race("race");
+                .ethnicityConceptId(1L)
+                .genderConceptId(1L)
+                .raceConceptId(1L);
         participantCohortStatusDao.save(Arrays.asList(participant1, participant2));
     }
 

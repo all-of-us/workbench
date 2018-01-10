@@ -29,23 +29,7 @@ public class ParticipantCounter {
                     "where\n";
 
     private static final String ID_SQL_TEMPLATE =
-            "select distinct person_id\n" +
-                    "from `${projectId}.${dataSetId}.person` person\n" +
-                    "where\n";
-
-    private static final String PARTICIPANT_STATUS_SQL_TEMPLATE =
-            "with race as\n" +
-                    "(select concept_id, concept_name FROM `${projectId}.${dataSetId}.concept` where domain_id = 'Race' or concept_id = 0),\n" +
-            "gender as\n" +
-                    "(select concept_id, concept_name FROM `${projectId}.${dataSetId}.concept` where domain_id = 'Gender' or concept_id = 0),\n" +
-            "ethnicity as\n" +
-                    "(select concept_id, concept_name FROM `${projectId}.${dataSetId}.concept` where domain_id = 'Ethnicity' or concept_id = 0)\n" +
-            "select distinct\n" +
-                    "person_id,\n" +
-                    "birth_datetime,\n" +
-                    "(select concept_name from race where concept_id = person.race_concept_id) as race,\n" +
-                    "(select concept_name from gender where concept_id = person.gender_concept_id) as gender,\n" +
-                    "(select concept_name from ethnicity where concept_id = person.ethnicity_concept_id) as ethnicity\n" +
+            "select distinct person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
@@ -102,15 +86,6 @@ public class ParticipantCounter {
             endSql += OFFSET_SUFFIX + offset;
         }
         return buildQuery(request, ID_SQL_TEMPLATE, endSql);
-    }
-
-    public QueryJobConfiguration buildParticipantStatusQuery(SearchRequest request, long resultSize,
-        long offset) {
-        String endSql = ID_SQL_ORDER_BY + " " + resultSize;
-        if (offset > 0) {
-            endSql += OFFSET_SUFFIX + offset;
-        }
-        return buildQuery(request, PARTICIPANT_STATUS_SQL_TEMPLATE, endSql);
     }
 
     public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String endSql) {
