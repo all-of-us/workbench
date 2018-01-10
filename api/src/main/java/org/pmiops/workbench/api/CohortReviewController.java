@@ -69,9 +69,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .participantId(participant.getParticipantKey().getParticipantId())
                             .status(participant.getStatus())
                             .birthDatetime(participant.getBirthDate().getTime())
-                            .ethnicity(participant.getEthnicity())
-                            .gender(participant.getGender())
-                            .race(participant.getRace());
+                            .ethnicityConceptId(participant.getEthnicityConceptId())
+                            .genderConceptId(participant.getGenderConceptId())
+                            .raceConceptId(participant.getRaceConceptId());
                 }
             };
 
@@ -152,7 +152,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantStatusQuery(searchRequest, request.getSize(), 0L)));
+                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses =
@@ -355,9 +355,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                             bigQueryService.getLong(row, rm.get("person_id"))))
                             .status(CohortStatus.NOT_REVIEWED)
                             .birthDate(birthDate)
-                            .gender(bigQueryService.getString(row, rm.get("gender")))
-                            .race(bigQueryService.getString(row, rm.get("race")))
-                            .ethnicity(bigQueryService.getString(row, rm.get("ethnicity"))));
+                            .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
+                            .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
+                            .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
         }
         return participantCohortStatuses;
     }

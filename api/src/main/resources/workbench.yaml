@@ -2507,15 +2507,18 @@ definitions:
         format: int64
       status:
         $ref: "#/definitions/CohortStatus"
-      gender:
-        type: string
+      genderConceptId:
+        type: integer
+        format: int64
       birthDatetime:
         type: integer
         format: int64
-      race:
-        type: string
-      ethnicity:
-        type: string
+      raceConceptId:
+        type: integer
+        format: int64
+      ethnicityConceptId:
+        type: integer
+        format: int64
 
   CohortStatus:
     type: string

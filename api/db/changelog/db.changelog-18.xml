@@ -7,10 +7,10 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
     <changeSet author="brianfreeman" id="changelog-18">
         <addColumn tableName="participant_cohort_status">
-            <column name="gender" type="varchar(200)"/>
+            <column name="gender_concept_id" type="bigint"/>
             <column name="birth_date" type="date"/>
-            <column name="race" type="varchar(200)"/>
-            <column name="ethnicity" type="varchar(200)"/>
+            <column name="race_concept_id" type="bigint"/>
+            <column name="ethnicity_concept_id" type="bigint"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>
