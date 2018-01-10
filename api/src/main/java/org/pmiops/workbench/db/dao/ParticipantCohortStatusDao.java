@@ -16,7 +16,7 @@ public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCo
   @Query(
       value="INSERT INTO participant_cohort_status" +
       " (cohort_review_id, participant_id, status)" +
-      " SELECT :toCrId, participant_id, pcs.status" +
+      " SELECT (:toCrId), participant_id, pcs.status" +
       " FROM participant_cohort_status pcs" +
       " WHERE pcs.cohort_review_id = (:fromCrId)",
       nativeQuery=true)
