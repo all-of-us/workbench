@@ -2,9 +2,7 @@ package org.pmiops.workbench.exceptions;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
-import com.mysql.fabric.Server;
 import java.io.IOException;
-import java.rmi.ServerError;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
