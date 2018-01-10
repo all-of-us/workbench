@@ -18,6 +18,7 @@ import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
+import {AnnotationDefnResolver} from './guards/annotation-defn-resolver.guard';
 import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
 import {ReviewResolver} from './guards/review-resolver.guard';
@@ -54,6 +55,7 @@ const routes = [{
   resolve: {
     review: ReviewResolver,
     cohort: CohortResolver,
+    annotations: AnnotationDefnResolver,
   }
 }];
 
@@ -80,11 +82,13 @@ const routes = [{
   ],
   providers: [
     CohortAnnotationDefinitionService,
+    CohortReviewService,
+    ReviewStateService,
+
+    AnnotationDefnResolver,
     CohortResolver,
     ReviewResolver,
     ParticipantResolver,
-    CohortReviewService,
-    ReviewStateService,
   ]
 })
 export class CohortReviewModule {}
