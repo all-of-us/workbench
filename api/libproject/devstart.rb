@@ -354,7 +354,7 @@ def do_create_db_creds(project, account, creds_file)
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
     begin
-      db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench"
+      db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench?rewriteBatchedStatements=true"
       db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
       db_creds_file.puts "DB_HOST=127.0.0.1"
       db_creds_file.puts "DB_NAME=workbench"

@@ -6,6 +6,8 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+import {dummyData} from './dummy-data';
+
 import {
   CohortReview,
   CohortReviewService,
@@ -13,43 +15,6 @@ import {
 } from 'generated';
 
 const CDR_VERSION = 1;
-
-/* Dummy data generation */
-const choice = (arr) => {
-  const index = Math.floor(Math.random() * arr.length);
-  return arr[index];
-};
-const AZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const zero9 = '0123456789';
-
-const randomIdent = () =>
-  choice(AZ) + choice(zero9) + choice(zero9) + choice(zero9);
-
-const randomNumber = (min, max) =>
-  Math.floor(Math.random() * (max - min) + min);
-
-const start = new Date(1960, 0, 1);
-const end = new Date();
-const randomDate = () =>
-  new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-
-const generateDummyCondition = () => ({
-  name: choice(['Things', 'Stuff', 'Ouch']),
-  standard: randomIdent(),
-  source: randomIdent(),
-  value: randomIdent(),
-  dateOfDiagnosis: randomDate(),
-  ageAtEvent: randomNumber(1, 100),
-});
-
-const generateDummyConditions = () => {
-  const entries = [];
-  for (let i = 0; i < 20; i++) {
-    entries.push(generateDummyCondition());
-  }
-  return entries;
-};
-
 
 @Component({
   selector: 'app-participant-detail',
@@ -64,7 +29,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   afterId: number;
   subscription: Subscription;
 
-  DUMMY_CONDITIONS = generateDummyConditions();
+  DUMMY_CONDITIONS = dummyData;
 
   constructor(
     private reviewAPI: CohortReviewService,
