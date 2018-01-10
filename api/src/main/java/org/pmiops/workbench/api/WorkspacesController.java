@@ -342,14 +342,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
           workspaceId.getWorkspaceName()).getWorkspace();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error creating FC workspace %s/%s: %s",
-              workspaceId.getWorkspaceNamespace(),
-              workspaceId.getWorkspaceName(),
-              e.getResponseBody()),
-          e);
       throw ExceptionUtils.convertFirecloudException(e);
     }
   }

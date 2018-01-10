@@ -56,6 +56,7 @@ public class ExceptionUtils {
   }
 
   public static RuntimeException convertFirecloudException(ApiException e) {
+    log.log(Level.INFO, "Exception calling FireCloud", e);
     if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
       throw new NotFoundException();
     } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
