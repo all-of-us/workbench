@@ -203,7 +203,7 @@ dependencies {
   }
   compile 'com.google.code.gson:gson:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:2.4.0'
+  compile 'com.squareup.okhttp:okhttp:+'
   compile 'com.squareup.okhttp:logging-interceptor:+'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'

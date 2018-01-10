@@ -2,9 +2,13 @@ package org.pmiops.workbench.exceptions;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import com.mysql.fabric.Server;
 import java.io.IOException;
+import java.rmi.ServerError;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.firecloud.ApiException;
 
 /**
  * Utility methods related to exceptions.
@@ -49,6 +53,18 @@ public class ExceptionUtils {
       throw new BadRequestException(e);
     }
     throw new ServerErrorException(e);
+  }
+
+  public static RuntimeException convertFirecloudException(ApiException e) {
+    if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
+      throw new NotFoundException();
+    } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
+      throw new ForbiddenException();
+    } else if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+      throw new ServerUnavailableException();
+    } else {
+      throw new ServerErrorException();
+    }
   }
 
   public static <T> T executeWithRetries(AbstractGoogleClientRequest<T> request)
