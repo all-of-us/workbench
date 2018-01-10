@@ -1,5 +1,5 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {Headers, Http} from '@angular/http';
+import {Headers, Http, Response} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from 'clarity-angular';
@@ -191,7 +191,25 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   launchNotebook(): void {
     this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
       this.cluster = cluster;
-      this.clusterPulled = true;
+      this.initializeNotebookCookies().subscribe(() => {
+        this.clusterPulled = true;
+      });
+    });
+  }
+
+  initializeNotebookCookies(): Observable<Response> {
+    // TODO (blrubenstein): Make this configurable by environment
+    const leoBaseUrl = 'https://leonardo.dsde-dev.broadinstitute.org';
+    const leoNotebookUrl = leoBaseUrl + '/notebooks/'
+        + this.cluster.clusterNamespace + '/'
+        + this.cluster.clusterName;
+    const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
+
+    const headers = new Headers();
+    headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
+    return this.http.get(leoSetCookieUrl, {
+      headers: headers,
+      withCredentials: true
     });
   }
 
@@ -228,40 +246,32 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + this.cluster.clusterNamespace + '/'
         + this.cluster.clusterName;
-    const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
 
-    const headers = new Headers();
-    headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
-    this.http.get(leoSetCookieUrl, {
-      headers: headers,
-      withCredentials: true
-    }).subscribe(() => {
-      const notebook = window.open(leoNotebookUrl, '_blank');
-      this.clusterPulled = false;
-      // TODO (blrubenstein): Make the notebook page a list of pages, and
-      //    move this to component scope.
-      if (!this.listenerAdded) {
-        this.notebookAuthListener = (e: MessageEvent) => {
-          if (e.source !== notebook) {
-            return;
+    const notebook = window.open(leoNotebookUrl, '_blank');
+    this.clusterPulled = false;
+    // TODO (blrubenstein): Make the notebook page a list of pages, and
+    //    move this to component scope.
+    if (!this.listenerAdded) {
+      this.notebookAuthListener = (e: MessageEvent) => {
+        if (e.source !== notebook) {
+          return;
+        }
+        if (e.origin !== leoBaseUrl) {
+          return;
+        }
+        if (e.data.type !== 'bootstrap-auth.request') {
+          return;
+        }
+        notebook.postMessage({
+          'type': 'bootstrap-auth.response',
+          'body': {
+              'googleClientId': this.signInService.clientId
           }
-          if (e.origin !== leoBaseUrl) {
-            return;
-          }
-          if (e.data.type !== 'bootstrap-auth.request') {
-            return;
-          }
-          notebook.postMessage({
-            'type': 'bootstrap-auth.response',
-            'body': {
-                'googleClientId': this.signInService.clientId
-            }
-          }, leoBaseUrl);
-        };
-        window.addEventListener('message', this.notebookAuthListener);
-        this.listenerAdded = true;
-      }
-    });
+        }, leoBaseUrl);
+      };
+      window.addEventListener('message', this.notebookAuthListener);
+      this.listenerAdded = true;
+    }
   }
 
   createAndLaunchNotebook(): void {
@@ -271,7 +281,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.errorHandlingService.retryApi(this.pollCluster()).subscribe(polledCluster => {
         this.clusterLoading = false;
         this.cluster = polledCluster;
-        this.clusterPulled = true;
+        this.initializeNotebookCookies().subscribe(() => {
+          this.clusterPulled = true;
+        });
       });
     });
   }

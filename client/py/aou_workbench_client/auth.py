@@ -19,20 +19,16 @@ See https://www.googleapis.com/oauth2/v3/tokeninfo?access_token= for debugging.
 
 import time
 
+from config import all_of_us_config
 from oauth2client.client import GoogleCredentials
 
 from .swagger_client.api_client import ApiClient
-
 
 # These are sometimes ignored, see module doc.
 CLIENT_OAUTH_SCOPES = (
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
 )
-
-
-# TODO(markfickett) Get workbench host dynamically based on environment.
-_WORKBENCH_API_HOST = 'https://api-dot-all-of-us-workbench-test.appspot.com/'
 
 
 # We use custom cache management because cachetools.TTLCache (for example) uses a
@@ -51,7 +47,7 @@ def get_authenticated_swagger_client(force=False):
     global _token_expiration
     if _cached_client is None:
         _cached_client = ApiClient()
-        _cached_client.configuration.host = _WORKBENCH_API_HOST
+        _cached_client.configuration.host = all_of_us_config.api_host
     if force or (time.time() >= _token_expiration):
         token, _token_expiration = _get_bearer_token_and_expiration()
         _cached_client.configuration.access_token = token
