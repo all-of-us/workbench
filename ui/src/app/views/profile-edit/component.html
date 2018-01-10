@@ -18,9 +18,11 @@
   </div>
 </div>
 <div class="field-wrapper">
-  <label for="contactEmail">Contact Email:</label>
-  <input *ngIf="profileLoaded else loading" type="text"
+  <div class="field">
+    <label for="contactEmail">Contact Email:</label>
+    <input *ngIf="profileLoaded else loading" type="text"
       [(ngModel)]="profile.contactEmail" id="contactEmail">
+  </div>
 </div>
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
