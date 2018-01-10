@@ -27,7 +27,6 @@ securityDefinitions:
     flow: accessCode
 schemes:
   - "https"
-basePath: /api/v1
 produces:
   - "application/json"
 # Establish the fact that all endpoints are protected: this annotation
@@ -89,7 +88,7 @@ parameters:
 
 paths:
 
-  /config:
+  /api/v1/config:
     get:
       tags:
         - config
@@ -105,7 +104,7 @@ paths:
 
    # User methods ########################################################################
 
-  /me:
+  /api/v1/me:
     get:
       tags:
         - profile
@@ -117,7 +116,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /sendBugReport:
+  /api/v1/sendBugReport:
     post:
       tags:
         - bugReport
@@ -139,7 +138,7 @@ paths:
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
-  /is-username-taken:
+  /api/v1/is-username-taken:
     get:
       tags:
         - profile
@@ -157,7 +156,7 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
-  /invitation-key-verification:
+  /api/v1/invitation-key-verification:
     post:
       tags:
         - profile
@@ -178,7 +177,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 
 
-  /google-account:
+  /api/v1/google-account:
     post:
       tags:
         - profile
@@ -208,7 +207,7 @@ paths:
         204:
           description: Account deleted successfully.
 
-  /id-verification:
+  /api/v1/id-verification:
     post:
       tags:
         - profile
@@ -225,7 +224,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /update-profile:
+  /api/v1/update-profile:
     post:
       tags:
         - profile
@@ -242,7 +241,7 @@ paths:
           description: Request received.
 
   # TODO: add signature / other state?
-  /account/accept-terms-of-service:
+  /api/v1/account/accept-terms-of-service:
     post:
       tags:
         - profile
@@ -255,7 +254,7 @@ paths:
             $ref: "#/definitions/Profile"
 
   # TODO: add other state pertaining to ethics training?
-  /account/complete-ethics-training:
+  /api/v1/account/complete-ethics-training:
     post:
       tags:
         - profile
@@ -268,7 +267,7 @@ paths:
             $ref: "#/definitions/Profile"
 
   # TODO: add demographic survey response data
-  /account/submit-demographic-survey:
+  /api/v1/account/submit-demographic-survey:
     post:
       tags:
         - profile
@@ -280,7 +279,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /auth-domain/{groupName}:
+  /api/v1/auth-domain/{groupName}:
     post:
       tags:
         - authDomain
@@ -298,7 +297,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /auth-domain/{groupName}/users:
+  /api/v1/auth-domain/{groupName}/users:
     post:
       tags:
         - authDomain
@@ -364,7 +363,7 @@ paths:
 
   # Notebook clusters ####################################################################
 
-  /clusters:
+  /api/v1/clusters:
     get:
       summary: List all clusters
       description: List all clusters, optionally filtering on a set of labels
@@ -396,7 +395,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -461,7 +460,7 @@ paths:
 
   # Billing projects #####################################################################
 
-  /billingProjects:
+  /api/v1/billingProjects:
     get:
       tags:
         - Profile
@@ -481,7 +480,7 @@ paths:
 
   # Workspaces ###########################################################################
 
-  /workspaces:
+  /api/v1/workspaces:
     get:
       tags:
         - workspaces
@@ -509,7 +508,7 @@ paths:
           schema:
             $ref: "#/definitions/Workspace"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -553,7 +552,7 @@ paths:
 
             $ref: '#/definitions/EmptyResponse'
 
-  /workspaces/review:
+  /api/v1/workspaces/review:
     get:
       tags:
         - workspaces
@@ -567,7 +566,7 @@ paths:
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/review:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -588,7 +587,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/share:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -609,7 +608,7 @@ paths:
           schema:
             $ref: "#/definitions/ShareWorkspaceResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/clone:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/clone:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -637,7 +636,7 @@ paths:
 
   # Cohorts ##############################################################################
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -668,7 +667,7 @@ paths:
           schema:
             $ref: "#/definitions/Cohort"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -712,7 +711,7 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -734,7 +733,7 @@ paths:
             $ref: "#/definitions/MaterializeCohortResponse"
 
   # Cohort Builder #######################################################################
-  /cohortbuilder/criteria/{type}/{parentId}:
+  /api/v1/cohortbuilder/criteria/{type}/{parentId}:
     get:
       tags:
         - cohortBuilder
@@ -758,7 +757,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /cohortbuilder/search:
+  /api/v1/cohortbuilder/search:
     post:
       tags:
         - cohortBuilder
@@ -778,7 +777,7 @@ paths:
             type: integer
             format: int64
 
-  /cohortbuilder/chartinfo:
+  /api/v1/cohortbuilder/chartinfo:
     post:
       tags:
         - cohortBuilder
@@ -798,7 +797,7 @@ paths:
             $ref: "#/definitions/ChartInfoListResponse"
 
 
-  /cohortbuilder/quicksearch/{type}/{value}:
+  /api/v1/cohortbuilder/quicksearch/{type}/{value}:
     get:
       tags:
         - cohortBuilder
@@ -822,7 +821,7 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -901,7 +900,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -935,7 +934,7 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -958,7 +957,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -992,7 +991,7 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1033,7 +1032,7 @@ paths:
             $ref: '#/definitions/EmptyResponse'
 
   # Cohort Annotation Definition Controller ###################################################
-  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1066,7 +1065,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
 
-  /workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1115,7 +1114,7 @@ paths:
             $ref: '#/definitions/EmptyResponse'
 
   # Data Browser #######################################################################
-  /databrowser/search-concepts:
+  /api/v1/databrowser/search-concepts:
     get:
       security: []
       tags:
@@ -1155,7 +1154,7 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /databrowser/analysis-results:
+  /api/v1/databrowser/analysis-results:
     get:
       security: []
       tags:
@@ -1186,7 +1185,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /databrowser/analyses:
+  /api/v1/databrowser/analyses:
     get:
       security: []
       tags:
@@ -1201,7 +1200,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisListResponse"
 
-  /databrowser/participant-count:
+  /api/v1/databrowser/participant-count:
     get:
       security: []
       tags:
@@ -1216,7 +1215,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResult"
 
-  /databrowser/concept-count:
+  /api/v1/databrowser/concept-count:
     get:
       security: []
       tags:
@@ -1236,7 +1235,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /databrowser/concept-count-by-gender:
+  /api/v1/databrowser/concept-count-by-gender:
     get:
       security: []
       tags:
@@ -1256,7 +1255,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /databrowser/concept-count-by-age:
+  /api/v1/databrowser/concept-count-by-age:
     get:
       security: []
       tags:
@@ -1276,7 +1275,7 @@ paths:
           schema:
             $ref: "#/definitions/AnalysisResultListResponse"
 
-  /databrowser/db-domains:
+  /api/v1/databrowser/db-domains:
     get:
       security: []
       tags:
@@ -1291,7 +1290,7 @@ paths:
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
-  /databrowser/child-concepts:
+  /api/v1/databrowser/child-concepts:
     get:
       security: []
       tags:
@@ -1312,7 +1311,7 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /databrowser/parent-concepts:
+  /api/v1/databrowser/parent-concepts:
       get:
         security: []
         tags:
