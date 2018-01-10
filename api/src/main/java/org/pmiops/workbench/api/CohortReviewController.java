@@ -294,12 +294,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
-                                                                                         String workspaceId,
-                                                                                         Long cohortReviewId,
-                                                                                         Long participantId,
-                                                                                         Long annotationId,
-                                                                                         ModifyParticipantCohortAnnotationRequest request) {
+    public ResponseEntity<ParticipantCohortAnnotation>
+    updateParticipantCohortAnnotation(String workspaceNamespace,
+                                      String workspaceId,
+                                      Long cohortReviewId,
+                                      Long participantId,
+                                      Long annotationId,
+                                      ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
