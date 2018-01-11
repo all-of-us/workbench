@@ -87,9 +87,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
-    // TODO(calbach): Use a NamedEntityGraph rather than this hacky populate approach.
-    // Force an eager load of all cohort reviews while we have a session still open.
-    workspace.getCohorts().stream().forEach(c -> c.getCohortReviews().size());
     return workspace;
   }
 

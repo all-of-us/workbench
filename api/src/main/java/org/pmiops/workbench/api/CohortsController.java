@@ -6,7 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.List;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,6 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
@@ -159,9 +159,12 @@ public class CohortsController implements CohortsApiDelegate {
       String workspaceId) {
     Workspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
-    List<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
+    Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
-      response.setItems(cohorts.stream().map(TO_CLIENT_COHORT).collect(Collectors.toList()));
+      response.setItems(cohorts.stream()
+          .map(TO_CLIENT_COHORT)
+          .sorted(Comparator.comparing(c -> c.getName()))
+          .collect(Collectors.toList()));
     }
     return ResponseEntity.ok(response);
   }

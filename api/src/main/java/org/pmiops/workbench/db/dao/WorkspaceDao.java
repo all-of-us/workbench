@@ -19,7 +19,7 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   Workspace findByWorkspaceNamespaceAndFirecloudName(
       String workspaceNamespace, String firecloudName);
   Workspace findByWorkspaceNamespaceAndName(String workspaceNamespace, String name);
-  @Query("SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts" +
+  @Query("SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews" +
       " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)")
   Workspace findByFirecloudWithEagerCohorts(
       @Param("ns") String workspaceNamespace, @Param("fcName") String fcName);
