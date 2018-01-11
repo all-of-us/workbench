@@ -1,11 +1,9 @@
 import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
 
 import {
-  CohortReviewService,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
 } from 'generated';
@@ -16,11 +14,14 @@ import {
   styleUrls: ['./annotations.component.css'],
 })
 export class AnnotationsComponent {
+  /* tslint:disable-next-line:no-unused-variable */
   private annotations$: Observable<CohortAnnotationDefinition[]> =
     this.state.annotationDefinitions$;
 
   constructor(
     private state: ReviewStateService,
+    // TODO(jms) - plug in per-participant annotation updates
+    /* tslint:disable-next-line:no-unused-variable */
     private annotationAPI: CohortAnnotationDefinitionService,
   ) {}
 }

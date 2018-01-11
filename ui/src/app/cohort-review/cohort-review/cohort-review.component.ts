@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
+
 import {ReviewStatus} from 'generated';
 
 @Component({
@@ -36,17 +37,17 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     .map(status => status === ReviewStatus.NONE)
     .subscribe(val => val
       ? this.createReviewModal.modal.open()
-      : this.createReviewModal.modal.close());
+      : this.createReviewModal.modal.close())
 
   private _sidebarSub = () =>
     this.state.sidebarOpen$.subscribe(val => val
       ? this.sidebar.open()
-      : this.sidebar.close());
+      : this.sidebar.close())
 
   private _annotationsManagerSub = () =>
     this.state.isEditingAnnotations$.subscribe(val => val
       ? this.annotationsManager.modal.open()
-      : this.annotationsManager.modal.close());
+      : this.annotationsManager.modal.close())
 
   closeSidebar() {
     this.state.sidebarOpen.next(false);

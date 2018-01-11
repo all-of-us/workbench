@@ -20,6 +20,7 @@ export class EditSetAnnotationsComponent {
   private selected: CohortAnnotationDefinition[] = [];
   private posting = false;
 
+  /* tslint:disable-next-line:no-unused-variable */
   private annotations$: Observable<CohortAnnotationDefinition[]> =
     this.state.annotationDefinitions$;
 
@@ -48,6 +49,6 @@ export class EditSetAnnotationsComponent {
       .forkJoin(..._deleteCalls)
       .switchMap(_ => allDefns$)
       .do(broadcast)
-      .subscribe(_ => this.posting = false)
+      .subscribe(_ => this.posting = false);
   }
 }
