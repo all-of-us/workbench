@@ -1,91 +1,82 @@
-<clr-modal #modal
-  [clrModalStaticBackdrop]="false"
-  [clrModalSize]="'lg'">
-  <h3 class="modal-title">Create New Annotation</h3>
-  <div class="modal-body">
-    <form [formGroup]="form" ngSubmit="submit()">
-      <section class="form-block">
-        <label>Create a new Cohort-wide Annotation</label>
+<form [formGroup]="form" ngSubmit="submit()">
+  <section class="form-block">
+    <label>Create a new Cohort-wide Annotation</label>
 
-        <div class="form-group">
-          <label for="name" class="required">Annotation Name</label>
-          <label
-            aria-haspopup="true"
-            role="tooltip"
-            class="tooltip tooltip-validation tooltip-sm"
-            [class.invalid]="name.invalid && (name.dirty || name.touched)">
-            <input id="name"
-              name="name"
-              formControlName="name"
-              type="text"
-              autofocus >
-            <span class="tooltip-content">
-              A Name is required
-            </span>
-          </label>
-        </div>
+    <div class="form-group">
+      <label for="name" class="required">Annotation Name</label>
+      <label
+        aria-haspopup="true"
+        role="tooltip"
+        class="tooltip tooltip-validation tooltip-sm"
+        [class.invalid]="name.invalid && (name.dirty || name.touched)">
+        <input id="name"
+          name="name"
+          formControlName="name"
+          type="text"
+          autofocus >
+        <span class="tooltip-content">
+          A Name is required
+        </span>
+      </label>
+    </div>
 
-        <div class="form-group">
-          <label for="kind">Annotation Type</label>
-          <div class="radio">
-            <input type="radio"
-              name="kind"
-              id="kind-string"
-              formControlName="kind"
-              [value]="kinds.STRING">
-            <label for="kind-string">String</label>
-          </div>
-          <div class="radio">
-            <input type="radio"
-              name="kind"
-              id="kind-boolean"
-              formControlName="kind"
-              [value]="kinds.BOOLEAN">
-            <label for="kind-boolean">Boolean</label>
-          </div>
-          <div class="radio">
-            <input type="radio"
-              name="kind"
-              id="kind-integer"
-              formControlName="kind"
-              [value]="kinds.INTEGER">
-            <label for="kind-integer">Integer</label>
-          </div>
-          <div class="radio">
-            <input type="radio"
-              name="kind"
-              id="kind-date"
-              formControlName="kind"
-              [value]="kinds.DATE">
-            <label for="kind-date">Date</label>
-          </div>
-          <div class="radio">
-            <input type="radio"
-              name="kind"
-              id="kind-timestamp"
-              formControlName="kind"
-              [value]="kinds.TIMESTAMP">
-            <label for="kind-timestamp">Timestamp</label>
-          </div>
-        </div>
+    <div class="form-group">
+      <label for="kind">Annotation Type</label>
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-string"
+          formControlName="kind"
+          [value]="kinds.STRING">
+        <label for="kind-string">String</label>
+      </div>
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-boolean"
+          formControlName="kind"
+          [value]="kinds.BOOLEAN">
+        <label for="kind-boolean">Boolean</label>
+      </div>
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-integer"
+          formControlName="kind"
+          [value]="kinds.INTEGER">
+        <label for="kind-integer">Integer</label>
+      </div>
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-date"
+          formControlName="kind"
+          [value]="kinds.DATE">
+        <label for="kind-date">Date</label>
+      </div>
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-timestamp"
+          formControlName="kind"
+          [value]="kinds.TIMESTAMP">
+        <label for="kind-timestamp">Timestamp</label>
+      </div>
+    </div>
 
-      </section>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-outline"
-      (click)="close()">
-      Cancel
-    </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="finish()"
-      [clrLoading]="posting"
-      [disabled]="!form.valid">
-      Finish
-    </button>
-  </div>
-</clr-modal>
+  </section>
+  <button
+    type="button"
+    class="btn btn-outline"
+    (click)="clear()">
+    Clear
+  </button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    (click)="finish()"
+    [clrLoading]="posting"
+    [disabled]="!form.valid">
+    Create
+  </button>
+</form>

@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -17,7 +17,6 @@ import {
   styleUrls: ['./create-set-annotation.component.css']
 })
 export class CreateSetAnnotationComponent {
-  @ViewChild('modal') modal;
   readonly kinds = AnnotationType;
   private posting = false;
 
@@ -35,9 +34,8 @@ export class CreateSetAnnotationComponent {
     private route: ActivatedRoute,
   ) { }
 
-  close(): void {
-    this.modal.close();
-    this.state.isAddingAnnotation.next(false);
+  clear(): void {
+    this.form.reset();
   }
 
   finish(): void {
@@ -62,6 +60,6 @@ export class CreateSetAnnotationComponent {
       .switchMap(_ => allDefns$)
       .do(broadcast)
       .do(_ => this.posting = false)
-      .subscribe(_ => this.close());
+      .subscribe(_ => this.clear());
   }
 }

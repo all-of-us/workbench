@@ -1,5 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
@@ -17,25 +16,38 @@ import {
   styleUrls: ['./edit-set-annotations.component.css']
 })
 export class EditSetAnnotationsComponent {
-  @ViewChild('modal') modal;
   readonly kinds = AnnotationType;
+  private selected: CohortAnnotationDefinition[] = [];
   private posting = false;
 
-  form = new FormGroup({});
+  private annotations$: Observable<CohortAnnotationDefinition[]> =
+    this.state.annotationDefinitions$;
 
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-  ) { }
+  ) {}
 
-  close(): void {
-    this.modal.close();
-    this.state.isEditingAnnotations.next(false);
-  }
+  delete(): void {
+    const {ns, wsid, cid} = this.route.snapshot.params;
 
-  finish(): void {
-    if (!this.form.valid) { return; }
-    this.close();
+    const _deleteCalls = this.selected.map(({cohortAnnotationDefinitionId: id}) =>
+      this.annotationAPI.deleteCohortAnnotationDefinition(ns, wsid, cid, id)
+    );
+
+    const allDefns$ = this.annotationAPI
+      .getCohortAnnotationDefinitions(ns, wsid, cid)
+      .pluck('items');
+
+    const broadcast = (defns: CohortAnnotationDefinition[]) =>
+      this.state.annotationDefinitions.next(defns);
+
+    this.posting = true;
+    Observable
+      .forkJoin(..._deleteCalls)
+      .switchMap(_ => allDefns$)
+      .do(broadcast)
+      .subscribe(_ => this.posting = false)
   }
 }

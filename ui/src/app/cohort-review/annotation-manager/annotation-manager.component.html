@@ -1,0 +1,29 @@
+<clr-modal #modal [clrModalSize]="'xl'">
+  <h3 class="modal-title">Cohort Annotations</h3>
+  <div class="modal-body" [style.min-height]="twoThirds">
+    <clr-tabs>
+
+      <clr-tab>
+        <button clrTabLink>Add</button>
+        <clr-tab-content *clrIfActive>
+          <app-create-set-annotation>
+          </app-create-set-annotation>
+        </clr-tab-content>
+      </clr-tab>
+
+      <clr-tab>
+        <button clrTabLink>Edit</button>
+        <clr-tab-content *clrIfActive>
+          <app-edit-set-annotations>
+          </app-edit-set-annotations>
+        </clr-tab-content>
+      </clr-tab>
+
+    </clr-tabs>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">
+      Close
+    </button>
+  </div>
+</clr-modal>

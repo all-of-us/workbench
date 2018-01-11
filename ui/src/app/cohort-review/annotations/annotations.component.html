@@ -1,18 +1,14 @@
+<div>
+  <h4>Annotations</h4>
+  <button
+    type="button"
+    class="btn btn-icon btn-link"
+    (click)="state.isEditingAnnotations.next(true)">
+    <clr-icon shape="cog" size="24" title="Manage Annotations"></clr-icon>
+  </button>
+</div>
+
 <app-annotation-form
   *ngFor="let defn of (annotations$ | async)"
   [definition]="defn">
 </app-annotation-form>
-
-<button
-  class="btn btn-primary"
-  [style.display]="'block'"
-  (click)="state.isAddingAnnotation.next(true)">
-  Add New Annotation
-</button>
-
-<button
-  class="btn btn-outline"
-  [style.display]="'block'"
-  (click)="state.isEditingAnnotations.next(true)">
-  Edit Annotations
-</button>

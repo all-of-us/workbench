@@ -29,6 +29,7 @@ import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
 } from 'generated';
+import { AnnotationManagerComponent } from './annotation-manager/annotation-manager.component';
 
 
 const routes = [{
@@ -82,6 +83,7 @@ const routes = [{
     ParticipantStatusComponent,
     ParticipantTableComponent,
     ReviewNavComponent,
+    AnnotationManagerComponent,
   ],
   providers: [
     CohortAnnotationDefinitionService,

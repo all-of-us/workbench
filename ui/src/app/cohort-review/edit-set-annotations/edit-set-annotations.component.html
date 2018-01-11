@@ -1,24 +1,25 @@
-<clr-modal #modal
-  [clrModalStaticBackdrop]="false"
-  [clrModalSize]="'lg'">
-  <h3 class="modal-title">Edit Annotations</h3>
-  <div class="modal-body">
-    Existence
-  </div>
-  <div class="modal-footer">
+<clr-datagrid [(clrDgSelected)]="selected" class="datagrid-compact">
+  <!-- Actions -->
+  <clr-dg-action-bar>
     <button
-      type="button"
-      class="btn btn-outline"
-      (click)="close()">
-      Cancel
+      class="btn btn-danger-outline"
+      (click)="delete()"
+      [disabled]="selected.length === 0"
+      [clrLoading]="posting">
+      <clr-icon shape="close"></clr-icon>
+      Delete
     </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="finish()"
-      [clrLoading]="posting"
-      [disabled]="!form.valid">
-      Finish
-    </button>
-  </div>
-</clr-modal>
+  </clr-dg-action-bar>
+
+  <!-- Column defns -->
+  <clr-dg-column [clrDgField]="'columnName'">Name</clr-dg-column>
+  <clr-dg-column [clrDgField]="'annotationType'">Type</clr-dg-column>
+
+  <!-- Row iteration -->
+  <clr-dg-row
+    *clrDgItems="let annotation of (annotations$ | async)"
+    [clrDgItem]="annotation">
+    <clr-dg-cell>{{ annotation.columnName }}</clr-dg-cell>
+    <clr-dg-cell>{{ annotation.annotationType }}</clr-dg-cell>
+  </clr-dg-row>
+</clr-datagrid>

@@ -5,10 +5,8 @@
     [position]="{top: 0, right: 0}">
     <a class="closebtn" (click)="closeSidebar()">&times;</a>
     <div class="status-wrapper">
-      <h4>Status</h4>
       <app-participant-status></app-participant-status>
       <hr />
-      <h4>Annotations</h4>
       <app-annotations></app-annotations>
     </div>
   </div>
@@ -23,9 +21,6 @@
   <app-create-review #createReviewModal>
   </app-create-review>
 
-  <app-create-set-annotation #createSetAnnotationModal>
-  </app-create-set-annotation>
-
-  <app-edit-set-annotations #editSetAnnotationsModal>
-  </app-edit-set-annotations>
+  <app-annotation-manager #annotationsManager>
+  </app-annotation-manager>
 </div>

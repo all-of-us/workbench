@@ -27,10 +27,6 @@ export class ReviewStateService {
   /* Flags */
   sidebarOpen = new BehaviorSubject<boolean>(false);
   sidebarOpen$ = this.sidebarOpen.asObservable();
-
-  isAddingAnnotation = new BehaviorSubject<boolean>(false);
-  isAddingAnnotation$ = this.isAddingAnnotation.asObservable();
-
   isEditingAnnotations = new BehaviorSubject<boolean>(false);
   isEditingAnnotations$ = this.isEditingAnnotations.asObservable();
 }

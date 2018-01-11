@@ -11,8 +11,7 @@ import {ReviewStatus} from 'generated';
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
-  @ViewChild('createSetAnnotationModal') createSetAnnotationModal;
-  @ViewChild('editSetAnnotationsModal') editSetAnnotationsModal;
+  @ViewChild('annotationsManager') annotationsManager;
   @ViewChild('createReviewModal') createReviewModal;
   @ViewChild('sidebar') sidebar;
   private subscription: Subscription;
@@ -25,8 +24,7 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this._newReviewSub();
     this.subscription.add(this._sidebarSub());
-    this.subscription.add(this._isAddingAnnotationSub());
-    this.subscription.add(this._isEditingAnnotationsSub());
+    this.subscription.add(this._annotationsManagerSub());
   }
 
   ngOnDestroy() {
@@ -45,15 +43,10 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
       ? this.sidebar.open()
       : this.sidebar.close());
 
-  private _isAddingAnnotationSub = () =>
-    this.state.isAddingAnnotation$.subscribe(val => val
-      ? this.createSetAnnotationModal.modal.open()
-      : this.createSetAnnotationModal.modal.close());
-
-  private _isEditingAnnotationsSub = () =>
+  private _annotationsManagerSub = () =>
     this.state.isEditingAnnotations$.subscribe(val => val
-      ? this.editSetAnnotationsModal.modal.open()
-      : this.editSetAnnotationsModal.modal.close());
+      ? this.annotationsManager.modal.open()
+      : this.annotationsManager.modal.close());
 
   closeSidebar() {
     this.state.sidebarOpen.next(false);
