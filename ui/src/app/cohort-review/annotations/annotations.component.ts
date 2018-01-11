@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {FormArray, FormBuilder} from '@angular/forms';
 
 import {ReviewStateService} from '../review-state.service';
 
 import {
   CohortReviewService,
   CohortAnnotationDefinitionService,
-  CohortAnnotationDefinitionListResponse,
 } from 'generated';
 
 @Component({
@@ -15,18 +15,15 @@ import {
 })
 export class AnnotationsComponent implements OnInit {
   private annotations$;
+  private form;
 
   constructor(
     private state: ReviewStateService,
-    private reviewAPI: CohortReviewService,
     private annotationAPI: CohortAnnotationDefinitionService,
-    private route: ActivatedRoute,
+    private formBuilder: FormBuilder,
   ) {}
 
   ngOnInit() {
-    this.annotations$ = this.route.params
-      .switchMap(({ns, wsid, cid}) =>
-        this.annotationAPI.getCohortAnnotationDefinitions(ns, wsid, cid))
-      .pluck('items');
+    this.annotations$ = this.state.annotationDefinitions$;
   }
 }

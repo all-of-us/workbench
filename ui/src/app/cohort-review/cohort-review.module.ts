@@ -27,6 +27,7 @@ import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
 } from 'generated';
+import { AnnotationFormComponent } from './annotation-form/annotation-form.component';
 
 
 const routes = [{
@@ -79,6 +80,7 @@ const routes = [{
     ParticipantTableComponent,
     ReviewNavComponent,
     CreateSetAnnotationComponent,
+    AnnotationFormComponent,
   ],
   providers: [
     CohortAnnotationDefinitionService,

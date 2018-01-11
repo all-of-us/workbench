@@ -19,7 +19,11 @@
   <input type="date">
 </div>
 
-<p>{{ annotations$ | async }}</p>
+<app-annotation-form
+  *ngFor="let defn of (annotations$ | async)"
+  [definition]="defn">
+</app-annotation-form>
+
 <button (click)="state.annotationsOpen.next(true)">
   Add New Annotation
 </button>
