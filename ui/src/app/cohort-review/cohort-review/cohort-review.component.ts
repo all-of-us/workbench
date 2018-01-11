@@ -31,20 +31,24 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  _newReviewSub = () => this.route.data
+  private _newReviewSub = () => this.route.data
     .map(({review}) => review.reviewStatus)
     .map(status => status === ReviewStatus.NONE)
     .subscribe(val => val
       ? this.createReviewModal.modal.open()
       : this.createReviewModal.modal.close());
 
-  _annotationSub = () =>
+  private _annotationSub = () =>
     this.state.annotationsOpen$.subscribe(val => val
       ? this.createSetAnnotationModal.modal.open()
       : this.createSetAnnotationModal.modal.close());
 
-  _sidebarSub = () =>
+  private _sidebarSub = () =>
     this.state.sidebarOpen$.subscribe(val => val
       ? this.sidebar.open()
       : this.sidebar.close());
+
+  closeSidebar() {
+    this.state.sidebarOpen.next(false);
+  }
 }
