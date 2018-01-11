@@ -16,6 +16,7 @@ import {
 export class AnnotationFormComponent {
   @Input() definition: CohortAnnotationDefinition;
   control = new FormControl();
+  AnnotationType = AnnotationType;
 
   constructor(
     private state: ReviewStateService,
@@ -24,15 +25,5 @@ export class AnnotationFormComponent {
 
   get name() {
     return this.definition.columnName.split(' ').join('-');
-  }
-
-  get kind() {
-    return {
-      [AnnotationType.STRING]:    'text',
-      [AnnotationType.BOOLEAN]:   'checkbox',
-      [AnnotationType.INTEGER]:   'number',
-      [AnnotationType.DATE]:      'date',
-      [AnnotationType.TIMESTAMP]: 'text',  // what should this be?
-    }[this.definition.annotationType];
   }
 }

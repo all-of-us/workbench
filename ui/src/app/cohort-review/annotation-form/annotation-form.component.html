@@ -1,6 +1,27 @@
-<section class="form-block">
-  <div class="form-group">
+<ng-container [ngSwitch]="definition.annotationType">
+  <div *ngSwitchCase="AnnotationType.STRING">
     <label [for]="name">{{ definition.columnName }}</label>
-    <input [type]="kind" [name]="name" [id]="name">
+    <input type="text" [name]="name" [id]="name">
   </div>
-</section>
+
+  <div *ngSwitchCase="AnnotationType.BOOLEAN">
+    <clr-checkbox [clrInline]="true" [name]="name">
+      {{ definition.columnName }}
+    </clr-checkbox>
+  </div>
+
+  <div *ngSwitchCase="AnnotationType.INTEGER">
+    <label [for]="name">{{ definition.columnName }}</label>
+    <input type="number" [name]="name" [id]="name">
+  </div>
+
+  <div *ngSwitchCase="AnnotationType.DATE">
+    <label [for]="name">{{ definition.columnName }}</label>
+    <input type="date" [name]="name" [id]="name">
+  </div>
+
+  <div *ngSwitchCase="AnnotationType.TIMESTAMP">
+    <label [for]="name">{{ definition.columnName }}</label>
+    <input type="text" [name]="name" [id]="name">
+  </div>
+</ng-container>

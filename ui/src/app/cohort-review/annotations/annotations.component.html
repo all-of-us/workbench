@@ -1,29 +1,10 @@
-<div class="form-group">
-  <label>Has Neck Pain?</label>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-yes" value="yes">
-    <label for="radio-yes">Yes</label>
-  </div>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-no" value="no">
-    <label for="radio-no">No</label>
-  </div>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-na" value="na">
-    <label for="radio-na">N/A</label>
-  </div>
-</div>
-
-<div class="form-group">
-  <label>Date</label>
-  <input type="date">
-</div>
-
 <app-annotation-form
   *ngFor="let defn of (annotations$ | async)"
   [definition]="defn">
 </app-annotation-form>
 
-<button (click)="state.annotationsOpen.next(true)">
+<button
+  class="btn btn-primary"
+  (click)="state.annotationsOpen.next(true)">
   Add New Annotation
 </button>

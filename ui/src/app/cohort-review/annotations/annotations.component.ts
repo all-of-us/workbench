@@ -25,5 +25,6 @@ export class AnnotationsComponent implements OnInit {
 
   ngOnInit() {
     this.annotations$ = this.state.annotationDefinitions$;
+    this.form = this.formBuilder.group({});
   }
 }
