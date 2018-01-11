@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {FormArray, FormBuilder} from '@angular/forms';
 
 import {ReviewStateService} from '../review-state.service';
 
@@ -15,16 +14,13 @@ import {
 })
 export class AnnotationsComponent implements OnInit {
   private annotations$;
-  private form;
 
   constructor(
     private state: ReviewStateService,
     private annotationAPI: CohortAnnotationDefinitionService,
-    private formBuilder: FormBuilder,
   ) {}
 
   ngOnInit() {
     this.annotations$ = this.state.annotationDefinitions$;
-    this.form = this.formBuilder.group({});
   }
 }

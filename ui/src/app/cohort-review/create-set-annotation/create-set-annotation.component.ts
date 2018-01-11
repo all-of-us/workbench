@@ -37,7 +37,7 @@ export class CreateSetAnnotationComponent {
 
   close(): void {
     this.modal.close();
-    this.state.annotationsOpen.next(false);
+    this.state.isAddingAnnotation.next(false);
   }
 
   finish(): void {

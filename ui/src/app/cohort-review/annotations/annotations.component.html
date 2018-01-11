@@ -5,6 +5,14 @@
 
 <button
   class="btn btn-primary"
-  (click)="state.annotationsOpen.next(true)">
+  [style.display]="'block'"
+  (click)="state.isAddingAnnotation.next(true)">
   Add New Annotation
+</button>
+
+<button
+  class="btn btn-outline"
+  [style.display]="'block'"
+  (click)="state.isEditingAnnotations.next(true)">
+  Edit Annotations
 </button>

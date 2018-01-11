@@ -5,9 +5,11 @@ import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
 import {AnnotationsComponent} from './annotations/annotations.component';
+import {AnnotationFormComponent} from './annotation-form/annotation-form.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {CreateSetAnnotationComponent} from './create-set-annotation/create-set-annotation.component';
+import {EditSetAnnotationsComponent} from './edit-set-annotations/edit-set-annotations.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
@@ -27,7 +29,6 @@ import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
 } from 'generated';
-import { AnnotationFormComponent } from './annotation-form/annotation-form.component';
 
 
 const routes = [{
@@ -68,10 +69,12 @@ const routes = [{
     RouterModule.forChild(routes),
   ],
   declarations: [
+    AnnotationFormComponent,
     AnnotationsComponent,
     CohortReviewComponent,
     CreateReviewComponent,
     CreateSetAnnotationComponent,
+    EditSetAnnotationsComponent,
     FullPageDirective,
     OverviewComponent,
     SidebarDirective,
@@ -79,8 +82,6 @@ const routes = [{
     ParticipantStatusComponent,
     ParticipantTableComponent,
     ReviewNavComponent,
-    CreateSetAnnotationComponent,
-    AnnotationFormComponent,
   ],
   providers: [
     CohortAnnotationDefinitionService,

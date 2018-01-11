@@ -1,0 +1,24 @@
+<clr-modal #modal
+  [clrModalStaticBackdrop]="false"
+  [clrModalSize]="'lg'">
+  <h3 class="modal-title">Edit Annotations</h3>
+  <div class="modal-body">
+    Existence
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="finish()"
+      [clrLoading]="posting"
+      [disabled]="!form.valid">
+      Finish
+    </button>
+  </div>
+</clr-modal>
