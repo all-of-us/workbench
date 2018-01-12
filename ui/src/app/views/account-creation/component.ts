@@ -34,6 +34,8 @@ export class AccountCreationComponent {
   showPasswordsDoNotMatchError: boolean;
   creatingAcccount: boolean;
   accountCreated: boolean;
+  conflictError = false;
+  usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
     private profileService: ProfileService,
@@ -73,4 +75,15 @@ export class AccountCreationComponent {
   signIn(): void {
     this.signInService.signIn();
   }
+
+  usernameChanged(): void {
+    this.conflictError = false;
+    clearTimeout(this.usernameCheckTimeout);
+    this.usernameCheckTimeout = setTimeout(() => {
+      this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
+        this.conflictError = response.isTaken;
+      });
+    }, 300);
+  }
+
 }
