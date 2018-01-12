@@ -35,6 +35,7 @@ export class AccountCreationComponent {
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
+  usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
     private profileService: ProfileService,
@@ -80,13 +81,12 @@ export class AccountCreationComponent {
 
   usernameChanged(): void {
     this.conflictError = false;
-    const username = this.profile.username;
-    setTimeout(() => {
-      if (this.profile.username === username) {
-        this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
-          this.conflictError = response.isTaken;
-        });
-      }
+    clearTimeout(this.usernameCheckTimeout);
+    this.usernameCheckTimeout = setTimeout(() => {
+      this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
+        this.conflictError = response.isTaken;
+      });
     }, 300);
   }
+
 }
