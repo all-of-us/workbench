@@ -67,11 +67,8 @@ export class AccountCreationComponent {
     this.profileService.createAccount(request).subscribe(() => {
       this.creatingAcccount = false;
       this.accountCreated = true;
-    }, (e) => {
+    }, () => {
       this.creatingAcccount = false;
-      if (e.status === 409) {
-        this.conflictError = true;
-      }
     });
   }
 
