@@ -749,7 +749,7 @@ public class WorkspacesControllerTest {
     );
     List<FileDetail> fileDetailsList = new ArrayList<FileDetail>();
     FileDetail mockFileDetail1 = new FileDetail();
-    mockFileDetail1.setName("File1.ipynb");
+    mockFileDetail1.setName("notebook/File.ipynb");
     mockFileDetail1.setPath("//URL");
 
     FileDetail mockFileDetail2 = new FileDetail();
@@ -758,7 +758,7 @@ public class WorkspacesControllerTest {
 
     fileDetailsList.add(mockFileDetail1);
     fileDetailsList.add(mockFileDetail2);
-    when(cloudStorageService.getBucketFileList("MockBucketName")).thenReturn(fileDetailsList);
+    when(cloudStorageService.getBucketFileList("MockBucketName","notebook")).thenReturn(fileDetailsList);
 
     //Will return 1 entry as only python files are filtered out
     List<FileDetail> result =workspacesController.getNoteBookList("mockProjectName","mockWorkspaceName").getBody();

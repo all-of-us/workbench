@@ -159,9 +159,7 @@ public class ClusterController implements ClusterApiDelegate {
     HashMap fileDetailsMap = new HashMap();
     for (FileDetail fileDetails : fileList) {
       StringBuffer key = new StringBuffer("~/");
-      key.append(workspaceNamespace);
-      key.append("/");
-      key.append(workspaceId).append("/").append(fileDetails.getName());
+      key.append(fileDetails.getName());
       fileDetailsMap.put(key, fileDetails.getPath());
     }
 

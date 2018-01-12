@@ -483,7 +483,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
                                                                           .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
-      bucketFileList = cloudStorageService.getBucketFileList(bucketName);
+      bucketFileList = cloudStorageService.getBucketFileList(bucketName,"notebook");
+
       if (bucketFileList != null && bucketFileList.size() > 0) {
         bucketFileList = bucketFileList.stream()
           .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
