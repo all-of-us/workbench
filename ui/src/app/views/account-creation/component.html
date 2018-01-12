@@ -12,6 +12,9 @@
       <label>Username:</label>
       <input type="text" class="input" [(ngModel)]="profile.username">
     </div>
+    <div *ngIf="conflictError" class="error">
+      Username is already taken.
+    </div>
     <div class="form-section">
       <label>Contact Email:</label>
       <input type="text" class="input" [(ngModel)]="profile.contactEmail">

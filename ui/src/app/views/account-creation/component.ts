@@ -34,6 +34,7 @@ export class AccountCreationComponent {
   showPasswordsDoNotMatchError: boolean;
   creatingAcccount: boolean;
   accountCreated: boolean;
+  conflictError = false;
 
   constructor(
     private profileService: ProfileService,
@@ -65,8 +66,11 @@ export class AccountCreationComponent {
     this.profileService.createAccount(request).subscribe(() => {
       this.creatingAcccount = false;
       this.accountCreated = true;
-    }, () => {
+    }, (e) => {
       this.creatingAcccount = false;
+      if (e.status === 409) {
+        this.conflictError = true;
+      }
     });
   }
 
