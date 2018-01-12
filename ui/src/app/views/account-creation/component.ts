@@ -77,4 +77,16 @@ export class AccountCreationComponent {
   signIn(): void {
     this.signInService.signIn();
   }
+
+  usernameChanged(): void {
+    this.conflictError = false;
+    const username = this.profile.username;
+    setTimeout(() => {
+      if (this.profile.username === username) {
+        this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
+          this.conflictError = response.isTaken;
+        });
+      }
+    }, 300);
+  }
 }
