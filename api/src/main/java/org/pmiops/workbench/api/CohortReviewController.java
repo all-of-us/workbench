@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
@@ -29,7 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +70,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
-                            .status(participant.getStatus());
+                            .status(participant.getStatus())
+                            .birthDatetime(participant.getBirthDate().getTime())
+                            .ethnicityConceptId(participant.getEthnicityConceptId())
+                            .genderConceptId(participant.getGenderConceptId())
+                            .raceConceptId(participant.getRaceConceptId());
                 }
             };
 
@@ -207,35 +214,27 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    getParticipantCohortStatus(String workspaceNamespace,
-                               String workspaceId,
-                               Long cohortId,
-                               Long cdrVersionId,
-                               Long participantId) {
-        Cohort cohort;
-        CohortReview review;
-        ParticipantCohortStatus status;
-
-        cohort = cohortReviewService.findCohort(cohortId);
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> getParticipantCohortStatus(String workspaceNamespace,
+                                                                                                         String workspaceId,
+                                                                                                         Long cohortId,
+                                                                                                         Long cdrVersionId,
+                                                                                                         Long participantId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
-                                                      workspaceId,
-                                                      cohort.getWorkspaceId());
-        review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
-        status = cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(),
-                                                                 participantId);
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        ParticipantCohortStatus status =
+                cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status));
     }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus>
-    updateParticipantCohortStatus(String workspaceNamespace,
-                                  String workspaceId,
-                                  Long cohortId,
-                                  Long cdrVersionId,
-                                  Long participantId,
-                                  ModifyCohortStatusRequest cohortStatusRequest) {
+    public ResponseEntity<org.pmiops.workbench.model.ParticipantCohortStatus> updateParticipantCohortStatus(String workspaceNamespace,
+                                                                                                            String workspaceId,
+                                                                                                            Long cohortId,
+                                                                                                            Long cdrVersionId,
+                                                                                                            Long participantId,
+                                                                                                            ModifyCohortStatusRequest cohortStatusRequest) {
 
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
@@ -243,8 +242,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        ParticipantCohortStatus participantCohortStatus = cohortReviewService.findParticipantCohortStatus(
-                        cohortReview.getCohortReviewId(), participantId);
+        ParticipantCohortStatus participantCohortStatus
+                = cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
 
         participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
         cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
@@ -299,12 +298,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
-                                                                                         String workspaceId,
-                                                                                         Long cohortReviewId,
-                                                                                         Long participantId,
-                                                                                         Long annotationId,
-                                                                                         ModifyParticipantCohortAnnotationRequest request) {
+    public ResponseEntity<ParticipantCohortAnnotation>
+    updateParticipantCohortAnnotation(String workspaceNamespace,
+                                      String workspaceId,
+                                      Long cohortReviewId,
+                                      Long participantId,
+                                      Long annotationId,
+                                      ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
@@ -346,13 +346,22 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                               Map<String, Integer> rm) {
         List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
         for (List<FieldValue> row : result.iterateAll()) {
+            String birthDateTimeString = bigQueryService.getString(row, rm.get("birth_datetime"));
+            if (birthDateTimeString == null) {
+                throw new BigQueryException(500, "birth_datetime is null at position: " + rm.get("birth_datetime"));
+            }
+            Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
                             .participantKey(
                                     new ParticipantCohortStatusKey(
                                             cohortReviewId,
                                             bigQueryService.getLong(row, rm.get("person_id"))))
-                            .status(CohortStatus.NOT_REVIEWED));
+                            .status(CohortStatus.NOT_REVIEWED)
+                            .birthDate(birthDate)
+                            .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
+                            .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
+                            .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
         }
         return participantCohortStatuses;
     }
