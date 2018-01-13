@@ -30,7 +30,6 @@ public class ClusterController implements ClusterApiDelegate {
   // This will currently only work inside the Broad's network.
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
 
-  private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
 
@@ -71,10 +70,8 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Autowired
-  ClusterController(FireCloudService fireCloudService,
-      NotebooksService notebooksService,
+  ClusterController(NotebooksService notebooksService,
       Provider<User> userProvider) {
-    this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
   }
