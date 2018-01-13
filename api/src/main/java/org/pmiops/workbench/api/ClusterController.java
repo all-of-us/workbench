@@ -13,9 +13,12 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ public class ClusterController implements ClusterApiDelegate {
   // This will currently only work inside the Broad's network.
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
 
+  private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
 
@@ -67,14 +71,26 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Autowired
-  ClusterController(NotebooksService notebooksService,
+  ClusterController(FireCloudService fireCloudService,
+      NotebooksService notebooksService,
       Provider<User> userProvider) {
+    this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
   }
 
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // TODO: enforce access level.
+    // This also enforces registered auth domain.
+    WorkspaceAccessLevel accessLevel;
+    try {
+      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (Exception e) {
+      throw e;
+    }
+
     Cluster createdCluster;
 
     String clusterName = this.convertClusterName(workspaceId);
@@ -91,6 +107,16 @@ public class ClusterController implements ClusterApiDelegate {
 
   public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // TODO: enforce access level.
+    // This also enforces registered auth domain.
+    WorkspaceAccessLevel accessLevel;
+    try {
+      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (Exception e) {
+      throw e;
+    }
+
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
@@ -106,6 +132,16 @@ public class ClusterController implements ClusterApiDelegate {
 
   public ResponseEntity<Cluster> getCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // TODO: enforce access level.
+    // This also enforces registered auth domain.
+    WorkspaceAccessLevel accessLevel;
+    try {
+      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (Exception e) {
+      throw e;
+    }
+
     String clusterName = this.convertClusterName(workspaceId);
     Cluster cluster;
     try {

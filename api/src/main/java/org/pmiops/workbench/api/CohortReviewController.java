@@ -133,6 +133,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                       Long cohortId,
                                                                                       Long cdrVersionId,
                                                                                       CreateReviewRequest request) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
+
         if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
@@ -189,6 +198,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long cohortReviewId,
                                                                                          Long participantId,
                                                                                          ParticipantCohortAnnotation request) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
@@ -198,6 +215,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                            Long cohortReviewId,
                                                                            Long participantId,
                                                                            Long annotationId) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
     }
 
@@ -207,6 +232,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                       Long cohortId,
                                                                       Long cdrVersionId,
                                                                       String domain) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
     }
 
@@ -215,6 +248,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                    String workspaceId,
                                                                                                    Long cohortReviewId,
                                                                                                    Long participantId) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
 
@@ -224,6 +265,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                          Long cohortId,
                                                                                                          Long cdrVersionId,
                                                                                                          Long participantId) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -240,7 +289,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                             Long cdrVersionId,
                                                                                                             Long participantId,
                                                                                                             ModifyCohortStatusRequest cohortStatusRequest) {
-
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -283,6 +339,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 String sortColumn,
                                                                                                 List<String> filterColumns,
                                                                                                 List<String> filterValues) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         CohortReview cohortReview = null;
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
@@ -310,6 +374,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                       Long participantId,
                                       Long annotationId,
                                       ModifyParticipantCohortAnnotationRequest request) {
+        // TODO: enforce access level.
+        // This also enforces registered auth domain.
+        WorkspaceAccessLevel accessLevel;
+        try {
+          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+        } catch (Exception e) {
+          throw e;
+        }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 

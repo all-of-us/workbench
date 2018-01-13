@@ -330,7 +330,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
   }
 
-  private WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
+  public static WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
     String userAccess;
     try {
       userAccess = fireCloudService.getWorkspace(
