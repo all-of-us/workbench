@@ -1,28 +1,68 @@
-<ng-container [ngSwitch]="definition.annotationType">
-  <div *ngSwitchCase="AnnotationType.STRING">
-    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
-    <input type="text" [name]="machineName" [id]="machineName" [formControl]="control">
-  </div>
+<div class="wrapper">
+  <ng-container [ngSwitch]="definition.annotationType">
 
-  <div *ngSwitchCase="AnnotationType.BOOLEAN"
-    class="is-checkbox">
-    <clr-checkbox [clrInline]="true" [name]="machineName">
-      {{ definition.columnName }}<em>{{ datatype | titlecase }}</em>
-    </clr-checkbox>
-  </div>
+    <div *ngSwitchCase="AnnotationType.STRING">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatype | titlecase }}</em>
+        </span>
+        <clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>
+        <clr-icon shape="pencil" (click)="edit()"></clr-icon>
+      </label>
+      <input type="text" *ngIf="!expandText" [name]="machineName" [id]="machineName" [formControl]="control">
+      <textarea *ngIf="expandText" [name]="machineName" [id]="machineName" [formControl]="control"></textarea>
+    </div>
 
-  <div *ngSwitchCase="AnnotationType.INTEGER">
-    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
-    <input type="number" [name]="machineName" [id]="machineName" [formControl]="control">
-  </div>
+    <div *ngSwitchCase="AnnotationType.ENUM">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatype | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="edit()"></clr-icon>
+      </label>
+      <div class="select">
+        <select [name]="machineName" [id]="machineName" [formControl]="control">
+          <option *ngFor="let value of definition.enumValues">
+            {{ value | titlecase }}
+          </option>
+        </select>
+      </div>
+    </div>
 
-  <div *ngSwitchCase="AnnotationType.DATE">
-    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
-    <input type="date" [name]="machineName" [id]="machineName" [formControl]="control">
-  </div>
+    <div *ngSwitchCase="AnnotationType.DATE">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatype | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="edit()"></clr-icon>
+      </label>
+      <input type="date" [name]="machineName" [id]="machineName" [formControl]="control">
+    </div>
 
-  <div *ngSwitchCase="AnnotationType.TIMESTAMP">
-    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
-    <input type="text" [name]="machineName" [id]="machineName" [formControl]="control">
-  </div>
-</ng-container>
+    <!-- Provisional data types -->
+    <div *ngSwitchCase="AnnotationType.BOOLEAN">
+      <div class="checkbox-inline flex-container">
+        <input type="checkbox" [name]="machineName" [id]="machineName" [formControl]="control">
+        <label [for]="machineName" class="flex-content-main">
+          {{ definition.columnName }}<em>{{ datatype | titlecase }}</em>
+        </label>
+        <clr-icon shape="pencil" (click)="edit()"></clr-icon>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="AnnotationType.INTEGER">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatype | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="edit()"></clr-icon>
+      </label>
+      <input type="number" [name]="machineName" [id]="machineName" [formControl]="control">
+    </div>
+
+  </ng-container>
+</div>

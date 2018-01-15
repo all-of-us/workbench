@@ -21,6 +21,7 @@ export class AnnotationFormComponent {
 
   private control = new FormControl();
   private subscription: Subscription;
+  private expandText = false;
   readonly AnnotationType = AnnotationType;
 
   constructor(
@@ -36,5 +37,13 @@ export class AnnotationFormComponent {
     return this.verbose
       ? ` (${this.definition.annotationType})`
       : '';
+  }
+
+  toggleExpandText() {
+    this.expandText = !this.expandText;
+  }
+
+  edit() {
+    console.log(`Editing ${this.definition.cohortAnnotationDefinitionId}`);
   }
 }

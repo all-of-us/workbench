@@ -22,30 +22,28 @@
 
     <div class="form-group">
       <label for="kind">Annotation Type</label>
+
+      <!-- STRING -->
       <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-string"
           formControlName="kind"
           [value]="kinds.STRING">
-        <label for="kind-string">String</label>
+        <label for="kind-string">Text</label>
       </div>
+
+      <!-- ENUM -->
       <div class="radio">
         <input type="radio"
           name="kind"
-          id="kind-boolean"
+          id="kind-enum"
           formControlName="kind"
-          [value]="kinds.BOOLEAN">
-        <label for="kind-boolean">Boolean</label>
+          [value]="kinds.ENUM">
+        <label for="kind-enum">Enumeration</label>
       </div>
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-integer"
-          formControlName="kind"
-          [value]="kinds.INTEGER">
-        <label for="kind-integer">Integer</label>
-      </div>
+
+      <!-- DATE -->
       <div class="radio">
         <input type="radio"
           name="kind"
@@ -54,14 +52,28 @@
           [value]="kinds.DATE">
         <label for="kind-date">Date</label>
       </div>
+
+      <!-- Provisional Datatypes -->
+      <!-- BOOLEAN -->
       <div class="radio">
         <input type="radio"
           name="kind"
-          id="kind-timestamp"
+          id="kind-boolean"
           formControlName="kind"
-          [value]="kinds.TIMESTAMP">
-        <label for="kind-timestamp">Timestamp</label>
+          [value]="kinds.BOOLEAN">
+        <label for="kind-boolean">Boolean</label>
       </div>
+
+      <!-- INTEGER -->
+      <div class="radio">
+        <input type="radio"
+          name="kind"
+          id="kind-integer"
+          formControlName="kind"
+          [value]="kinds.INTEGER">
+        <label for="kind-integer">Integer</label>
+      </div>
+
     </div>
 
   </section>

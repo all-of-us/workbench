@@ -2238,7 +2238,7 @@ definitions:
   AnnotationType:
     type: string
     description: possible values representing the type of annotation.
-    enum: [STRING, BOOLEAN, INTEGER, DATE, TIMESTAMP]
+    enum: [STRING, ENUM, DATE, BOOLEAN, INTEGER]
 
   CohortAnnotationDefinition:
     type: object
@@ -2260,6 +2260,11 @@ definitions:
         description: the name of this annotation.
       annotationType:
         $ref: "#/definitions/AnnotationType"
+      enumValues:
+        type: array
+        items:
+          type: string
+
 
   ParticipantCohortAnnotation:
     type: object
