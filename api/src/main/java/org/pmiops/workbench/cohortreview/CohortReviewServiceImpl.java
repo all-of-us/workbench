@@ -10,15 +10,12 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -35,11 +32,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private WorkspaceService workspaceService;
     private JdbcTemplate jdbcTemplate;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Value("${hibernate.jdbc.batch_size}")
-    private int batchSize;
+//    @PersistenceContext
+//    private EntityManager entityManager;
+//
+//    @Value("${hibernate.jdbc.batch_size}")
+//    private int batchSize;
 
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
@@ -126,7 +123,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 //            }
 //        }
 //        return participantCohortStatuses;
-        PreparedStatement preparedStatement;
+        PreparedStatement preparedStatement = null;
         Connection connection = null;
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
@@ -163,14 +160,18 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             }
 
             preparedStatement.executeBatch();
-
-            preparedStatement.close();
-            connection.close();
-
         } catch (SQLException ex) {
             log.log(Level.INFO, "SQLException: " + ex.getMessage());
             throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
         } finally {
+            if(preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    log.log(Level.INFO, "Problem closing prepared statement: " + e.getMessage());
+                    throw new RuntimeException("SQLException: " + e.getMessage(), e);
+                }
+            }
             if(connection != null) {
                 try {
                     connection.close();

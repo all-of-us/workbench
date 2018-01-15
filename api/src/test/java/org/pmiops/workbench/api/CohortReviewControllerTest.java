@@ -30,7 +30,7 @@ import org.springframework.http.ResponseEntity;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -174,7 +174,7 @@ public class CohortReviewControllerTest {
         ParticipantCohortStatus pcs = new ParticipantCohortStatus();
         pcs.setParticipantKey(new ParticipantCohortStatusKey(1, 0));
         pcs.status(CohortStatus.NOT_REVIEWED);
-        pcs.setBirthDate(new Date());
+        pcs.setBirthDate(new Date(System.currentTimeMillis()));
         pcs.setEthnicityConceptId(0L);
         pcs.setGenderConceptId(0L);
         pcs.setRaceConceptId(0L);
@@ -278,7 +278,7 @@ public class CohortReviewControllerTest {
         List<String> filterValues = new ArrayList<String>();
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
-        final Timestamp dob = new Timestamp(System.currentTimeMillis());
+        final Date dob = new Date(System.currentTimeMillis());
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
                 .participantKey(key)
                 .status(CohortStatus.INCLUDED)
