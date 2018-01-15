@@ -1,27 +1,28 @@
 <ng-container [ngSwitch]="definition.annotationType">
   <div *ngSwitchCase="AnnotationType.STRING">
-    <label [for]="name">{{ definition.columnName }}</label>
-    <input type="text" [name]="name" [id]="name">
+    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
+    <input type="text" [name]="machineName" [id]="machineName" [formControl]="control">
   </div>
 
-  <div *ngSwitchCase="AnnotationType.BOOLEAN">
-    <clr-checkbox [clrInline]="true" [name]="name">
-      {{ definition.columnName }}
+  <div *ngSwitchCase="AnnotationType.BOOLEAN"
+    class="is-checkbox">
+    <clr-checkbox [clrInline]="true" [name]="machineName">
+      {{ definition.columnName }}<em>{{ datatype | titlecase }}</em>
     </clr-checkbox>
   </div>
 
   <div *ngSwitchCase="AnnotationType.INTEGER">
-    <label [for]="name">{{ definition.columnName }}</label>
-    <input type="number" [name]="name" [id]="name">
+    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
+    <input type="number" [name]="machineName" [id]="machineName" [formControl]="control">
   </div>
 
   <div *ngSwitchCase="AnnotationType.DATE">
-    <label [for]="name">{{ definition.columnName }}</label>
-    <input type="date" [name]="name" [id]="name">
+    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
+    <input type="date" [name]="machineName" [id]="machineName" [formControl]="control">
   </div>
 
   <div *ngSwitchCase="AnnotationType.TIMESTAMP">
-    <label [for]="name">{{ definition.columnName }}</label>
-    <input type="text" [name]="name" [id]="name">
+    <label [for]="machineName">{{ definition.columnName }}<em>{{ datatype | titlecase }}</em></label>
+    <input type="text" [name]="machineName" [id]="machineName" [formControl]="control">
   </div>
 </ng-container>

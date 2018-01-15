@@ -1,9 +1,13 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {FormControl} from '@angular/forms';
+import {Subscription} from 'rxjs/Subscription';
+
+import {ReviewStateService} from '../review-state.service';
 
 import {
   AnnotationType,
   CohortAnnotationDefinition,
+  CohortReviewService,
 } from 'generated';
 
 @Component({
@@ -13,10 +17,24 @@ import {
 })
 export class AnnotationFormComponent {
   @Input() definition: CohortAnnotationDefinition;
-  control = new FormControl();
-  AnnotationType = AnnotationType;
+  @Input() verbose: boolean;
 
-  get name() {
+  private control = new FormControl();
+  private subscription: Subscription;
+  readonly AnnotationType = AnnotationType;
+
+  constructor(
+    private state: ReviewStateService,
+    private reviewAPI: CohortReviewService,
+  ) {}
+
+  get machineName() {
     return this.definition.columnName.split(' ').join('-');
+  }
+
+  get datatype() {
+    return this.verbose
+      ? ` (${this.definition.annotationType})`
+      : '';
   }
 }

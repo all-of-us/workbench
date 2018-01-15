@@ -5,6 +5,10 @@ div {
   background: #eee;
 }
 
+div.is-checkbox {
+  padding: 0.125rem;
+}
+
 div > label {
   display: block;
 }

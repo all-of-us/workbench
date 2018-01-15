@@ -18,6 +18,8 @@ export class AnnotationsComponent {
   private annotations$: Observable<CohortAnnotationDefinition[]> =
     this.state.annotationDefinitions$;
 
+  private verbosity = false;
+
   constructor(
     private state: ReviewStateService,
     // TODO(jms) - plug in per-participant annotation updates

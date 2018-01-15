@@ -1,5 +1,8 @@
 <div>
   <h4>Annotations</h4>
+  <clr-checkbox [clrInline]="true" [(clrChecked)]="verbosity" [name]="'verbosity'">
+    Verbose
+  </clr-checkbox>
   <button
     type="button"
     class="btn btn-icon btn-link"
@@ -10,5 +13,6 @@
 
 <app-annotation-form
   *ngFor="let defn of (annotations$ | async)"
-  [definition]="defn">
+  [definition]="defn"
+  [verbose]="verbosity">
 </app-annotation-form>
