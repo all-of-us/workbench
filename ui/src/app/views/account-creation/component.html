@@ -10,7 +10,10 @@
     </div>
     <div class="form-section">
       <label>Username:</label>
-      <input type="text" class="input" [(ngModel)]="profile.username">
+      <input type="text" class="input" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()">
+    </div>
+    <div *ngIf="conflictError" class="error">
+      Username is already taken.
     </div>
     <div class="form-section">
       <label>Contact Email:</label>

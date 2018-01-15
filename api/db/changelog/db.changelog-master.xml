@@ -25,4 +25,6 @@
   <include file="changelog/db.changelog-15-blockscore.xml"/>
   <include file="changelog/db.changelog-16.xml"/>
   <include file="changelog/db.changelog-17.xml"/>
+  <include file="changelog/db.changelog-18.xml"/>
+  <include file="changelog/db.changelog-19.xml"/>
 </databaseChangeLog>
