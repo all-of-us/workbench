@@ -10,7 +10,7 @@ import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {CreateSetAnnotationComponent
 } from './create-set-annotation/create-set-annotation.component';
-import {EditSetAnnotationsComponent} from './edit-set-annotations/edit-set-annotations.component';
+import {SetAnnotationsMasterComponent} from './set-annotations-master/set-annotations-master.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
@@ -76,7 +76,7 @@ const routes = [{
     CohortReviewComponent,
     CreateReviewComponent,
     CreateSetAnnotationComponent,
-    EditSetAnnotationsComponent,
+    SetAnnotationsMasterComponent,
     FullPageDirective,
     OverviewComponent,
     SidebarDirective,
