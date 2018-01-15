@@ -12,7 +12,6 @@ import {ReviewStatus} from 'generated';
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
-  @ViewChild('annotationsManager') annotationsManager;
   @ViewChild('createReviewModal') createReviewModal;
   @ViewChild('sidebar') sidebar;
   private subscription: Subscription;
@@ -25,7 +24,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this._newReviewSub();
     this.subscription.add(this._sidebarSub());
-    this.subscription.add(this._annotationsManagerSub());
   }
 
   ngOnDestroy() {
@@ -43,11 +41,6 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     this.state.sidebarOpen$.subscribe(val => val
       ? this.sidebar.open()
       : this.sidebar.close())
-
-  private _annotationsManagerSub = () =>
-    this.state.isEditingAnnotations$.subscribe(val => val
-      ? this.annotationsManager.modal.open()
-      : this.annotationsManager.modal.close())
 
   closeSidebar() {
     this.state.sidebarOpen.next(false);

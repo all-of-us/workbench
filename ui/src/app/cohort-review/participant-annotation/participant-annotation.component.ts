@@ -44,6 +44,10 @@ export class ParticipantAnnotationComponent {
   }
 
   edit() {
-    console.log(`Editing ${this.definition.cohortAnnotationDefinitionId}`);
+    this.state.annotationMgrState.next({
+      open: true,
+      mode: 'edit',
+      defn: this.definition
+    });
   }
 }

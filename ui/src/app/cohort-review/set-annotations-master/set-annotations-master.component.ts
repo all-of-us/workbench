@@ -30,6 +30,19 @@ export class SetAnnotationsMasterComponent {
     private route: ActivatedRoute,
   ) {}
 
+  add() {
+    const open = true;
+    const mode = 'create';
+    this.state.annotationMgrState.next({open, mode});
+  }
+
+  edit() {
+    const open = true;
+    const mode = 'edit';
+    const [defn] = this.selected;
+    this.state.annotationMgrState.next({open, mode, defn});
+  }
+
   delete(): void {
     const {ns, wsid, cid} = this.route.snapshot.params;
 

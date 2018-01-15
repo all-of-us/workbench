@@ -6,7 +6,10 @@
   <button
     type="button"
     class="btn btn-icon btn-link"
-    (click)="state.isEditingAnnotations.next(true)">
+    (click)="state.annotationMgrState.next({
+      open: true,
+      mode: 'overview'
+    })">
     <clr-icon shape="cog" size="24" title="Manage Annotations"></clr-icon>
   </button>
 </div>
