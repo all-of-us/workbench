@@ -11,11 +11,11 @@ import {
 } from 'generated';
 
 @Component({
-  selector: 'app-annotation-form',
-  templateUrl: './annotation-form.component.html',
-  styleUrls: ['./annotation-form.component.css']
+  selector: 'app-participant-annotation',
+  templateUrl: './participant-annotation.component.html',
+  styleUrls: ['./participant-annotation.component.css']
 })
-export class AnnotationFormComponent {
+export class ParticipantAnnotationComponent {
   @Input() definition: CohortAnnotationDefinition;
   @Input() verbose: boolean;
 

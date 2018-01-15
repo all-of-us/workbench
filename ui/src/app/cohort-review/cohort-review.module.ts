@@ -4,7 +4,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
-import {AnnotationFormComponent} from './annotation-form/annotation-form.component';
+import {ParticipantAnnotationComponent} from './participant-annotation/participant-annotation.component';
 import {AnnotationsComponent} from './annotations/annotations.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
@@ -71,7 +71,7 @@ const routes = [{
     RouterModule.forChild(routes),
   ],
   declarations: [
-    AnnotationFormComponent,
+    ParticipantAnnotationComponent,
     AnnotationsComponent,
     CohortReviewComponent,
     CreateReviewComponent,

@@ -11,8 +11,8 @@
   </button>
 </div>
 
-<app-annotation-form
+<app-participant-annotation
   *ngFor="let defn of (annotations$ | async)"
   [definition]="defn"
   [verbose]="verbosity">
-</app-annotation-form>
+</app-participant-annotation>
