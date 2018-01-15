@@ -19,7 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -45,14 +45,14 @@ public class ParticipantCohortStatusDaoTest {
         participant1 = new ParticipantCohortStatus()
                 .participantKey(key1)
                 .status(CohortStatus.INCLUDED)
-                .birthDate(new Timestamp(-852058800000000L))
+                .birthDate(new Date(-852058800000000L))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
                 .raceConceptId(1L);
         participant2 = new ParticipantCohortStatus()
                 .participantKey(key2)
                 .status(CohortStatus.EXCLUDED)
-                .birthDate(new Timestamp(-852058800000000L))
+                .birthDate(new Date(-852058800000000L))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
                 .raceConceptId(1L);
