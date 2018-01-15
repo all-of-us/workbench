@@ -128,7 +128,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
 
-            connection.setAutoCommit(true);
+            connection.setAutoCommit(false);
 
             String compiledQuery = "insert into participant_cohort_status(" +
                     "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
@@ -152,6 +152,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                 if(++index % batchSize == 0) {
                     long start = System.currentTimeMillis();
                     preparedStatement.executeBatch();
+                    connection.commit();
                     long end = System.currentTimeMillis();
 
                     log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
