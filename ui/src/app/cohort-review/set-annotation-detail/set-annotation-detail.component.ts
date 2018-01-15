@@ -12,11 +12,11 @@ import {
 } from 'generated';
 
 @Component({
-  selector: 'app-create-set-annotation',
-  templateUrl: './create-set-annotation.component.html',
-  styleUrls: ['./create-set-annotation.component.css']
+  selector: 'app-set-annotation-detail',
+  templateUrl: './set-annotation-detail.component.html',
+  styleUrls: ['./set-annotation-detail.component.css']
 })
-export class CreateSetAnnotationComponent {
+export class SetAnnotationDetailComponent {
   readonly kinds = AnnotationType;
   private posting = false;
 
