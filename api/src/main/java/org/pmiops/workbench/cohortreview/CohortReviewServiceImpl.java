@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +53,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public CohortReviewServiceImpl() {}
+    public CohortReviewServiceImpl() {
+    }
 
     @Override
     public Cohort findCohort(long cohortId) {
@@ -123,57 +124,72 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 //            }
 //        }
 //        return participantCohortStatuses;
-        PreparedStatement preparedStatement = null;
+        Statement statement = null;
         Connection connection = null;
+
+        String sqlTemplate = "insert into participant_cohort_status(" +
+                "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
+                "status, cohort_review_id, participant_id) " +
+                "values ('%s', %d, %d, %d, %d, %d, %d)";
+
+        String nextInsert = ", ('%s', %d, %d, %d, %d, %d, %d)";
+        int index = 0;
+        long participantId = 0L;
+        int batchSize = 50;
+        String sqlStatement = sqlTemplate;
+
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
-
+            statement = connection.createStatement();
             connection.setAutoCommit(false);
 
-            String compiledQuery = "insert into participant_cohort_status(" +
-                    "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
-                    "status, cohort_review_id, participant_id)" +
-                    " values (?, ?, ?, ?, ?, ?, ?)";
-            preparedStatement = connection.prepareStatement(compiledQuery);
-
-            final int batchSize = 5000;
-            int index = 0;
-
-            for(ParticipantCohortStatus pcs : participantCohortStatuses) {
-                preparedStatement.setDate(1, pcs.getBirthDate());
-                preparedStatement.setLong(2, pcs.getEthnicityConceptId());
-                preparedStatement.setLong(3, pcs.getGenderConceptId());
-                preparedStatement.setLong(4, pcs.getRaceConceptId());
-                preparedStatement.setInt(5, 0);
-                preparedStatement.setLong(6, pcs.getParticipantKey().getCohortReviewId());
-                preparedStatement.setLong(7, pcs.getParticipantKey().getParticipantId());
-                preparedStatement.addBatch();
-
-                if(++index % batchSize == 0) {
-                    long start = System.currentTimeMillis();
-                    preparedStatement.executeBatch();
-                    connection.commit();
-                    long end = System.currentTimeMillis();
-
-                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
-                    log.log(Level.INFO, "total time taken = " + (end - start)/batchSize + " s");
+            for (ParticipantCohortStatus pcs : participantCohortStatuses) {
+                if (index != 0) {
+                    sqlStatement = sqlStatement + nextInsert;
                 }
+                participantId = pcs.getParticipantKey().getParticipantId();
+                sqlStatement = String.format(sqlStatement,
+                        pcs.getBirthDate().toString(),
+                        pcs.getEthnicityConceptId(),
+                        pcs.getGenderConceptId(),
+                        pcs.getRaceConceptId(),
+                        0,
+                        pcs.getParticipantKey().getCohortReviewId(),
+                        pcs.getParticipantKey().getParticipantId());
+                index++;
+
+//                if(++index % batchSize == 0) {
+//                    long start = System.currentTimeMillis();
+//                    statement.execute(sqlStatement);
+//                    connection.commit();
+//                    long end = System.currentTimeMillis();
+//
+//                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
+//                    log.log(Level.INFO, "total time taken = " + (end - start)/batchSize + " s");
+//                    sqlStatement = sqlTemplate;
+//                }
             }
 
-            preparedStatement.executeBatch();
+            long start = System.currentTimeMillis();
+            statement.execute(sqlStatement);
+            connection.commit();
+            long end = System.currentTimeMillis();
+
+            log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
+            log.log(Level.INFO, "total time taken = " + (end - start) / batchSize + " s");
         } catch (SQLException ex) {
-            log.log(Level.INFO, "SQLException: " + ex.getMessage());
+            log.log(Level.INFO, "SQLException at personPid: " + participantId + " " + ex.getMessage());
             throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
         } finally {
-            if(preparedStatement != null) {
+            if (statement != null) {
                 try {
-                    preparedStatement.close();
+                    statement.close();
                 } catch (SQLException e) {
                     log.log(Level.INFO, "Problem closing prepared statement: " + e.getMessage());
                     throw new RuntimeException("SQLException: " + e.getMessage(), e);
                 }
             }
-            if(connection != null) {
+            if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
