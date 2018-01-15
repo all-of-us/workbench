@@ -222,7 +222,7 @@ public class CohortReviewServiceImplTest {
 
         when(jdbcTemplate.getDataSource()).thenReturn(mockDatasource);
         when(mockDatasource.getConnection()).thenReturn(mockConnection);
-        doNothing().when(mockConnection).setAutoCommit(true);
+        doNothing().when(mockConnection).setAutoCommit(false);
         when(mockConnection.prepareStatement(compiledQuery)).thenReturn(mockPreparedStatement);
         doNothing().when(mockPreparedStatement).setDate(1, participantCohortStatus.getBirthDate());
         doNothing().when(mockPreparedStatement).setLong(2, participantCohortStatus.getEthnicityConceptId());
@@ -240,7 +240,7 @@ public class CohortReviewServiceImplTest {
 
         verify(jdbcTemplate).getDataSource();
         verify(mockDatasource).getConnection();
-        verify(mockConnection).setAutoCommit(true);
+        verify(mockConnection).setAutoCommit(false);
         verify(mockConnection).prepareStatement(compiledQuery);
         verify(mockPreparedStatement).setDate(1, participantCohortStatus.getBirthDate());
         verify(mockPreparedStatement).setLong(2, participantCohortStatus.getEthnicityConceptId());
