@@ -1,15 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
   AnnotationManagerMode,
   ReviewStateService
 } from '../review-state.service';
-
-import {
-  CohortAnnotationDefinition,
-} from 'generated';
 
 @Component({
   selector: 'app-annotation-manager',

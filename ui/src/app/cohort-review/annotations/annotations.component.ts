@@ -1,3 +1,5 @@
+/* tslint:disable:no-unused-variable */
+// TODO (jms) - this is a stub, when written, make sure it fully passes linting
 import {Component} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
@@ -14,7 +16,6 @@ import {
   styleUrls: ['./annotations.component.css'],
 })
 export class AnnotationsComponent {
-  /* tslint:disable-next-line:no-unused-variable */
   private annotations$: Observable<CohortAnnotationDefinition[]> =
     this.state.annotationDefinitions$;
 
@@ -22,8 +23,6 @@ export class AnnotationsComponent {
 
   constructor(
     private state: ReviewStateService,
-    // TODO(jms) - plug in per-participant annotation updates
-    /* tslint:disable-next-line:no-unused-variable */
     private annotationAPI: CohortAnnotationDefinitionService,
   ) {}
 }

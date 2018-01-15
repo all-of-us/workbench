@@ -1,21 +1,22 @@
+/* tslint:disable:max-line-length */
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
-import {ParticipantAnnotationComponent} from './participant-annotation/participant-annotation.component';
+import {AnnotationManagerComponent} from './annotation-manager/annotation-manager.component';
 import {AnnotationsComponent} from './annotations/annotations.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
-import {SetAnnotationDetailComponent
-} from './set-annotation-detail/set-annotation-detail.component';
-import {SetAnnotationsMasterComponent} from './set-annotations-master/set-annotations-master.component';
 import {OverviewComponent} from './overview/overview.component';
+import {ParticipantAnnotationComponent} from './participant-annotation/participant-annotation.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {ReviewNavComponent} from './review-nav/review-nav.component';
+import {SetAnnotationDetailComponent} from './set-annotation-detail/set-annotation-detail.component';
+import {SetAnnotationsMasterComponent} from './set-annotations-master/set-annotations-master.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
@@ -25,12 +26,12 @@ import {AnnotationDefnResolver} from './guards/annotation-defn-resolver.guard';
 import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
 import {ReviewResolver} from './guards/review-resolver.guard';
+/* tslint:enable:max-line-length */
 
 import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
 } from 'generated';
-import { AnnotationManagerComponent } from './annotation-manager/annotation-manager.component';
 
 
 const routes = [{
@@ -71,20 +72,20 @@ const routes = [{
     RouterModule.forChild(routes),
   ],
   declarations: [
-    ParticipantAnnotationComponent,
+    AnnotationManagerComponent,
     AnnotationsComponent,
     CohortReviewComponent,
     CreateReviewComponent,
-    SetAnnotationDetailComponent,
-    SetAnnotationsMasterComponent,
     FullPageDirective,
     OverviewComponent,
-    SidebarDirective,
+    ParticipantAnnotationComponent,
     ParticipantDetailComponent,
     ParticipantStatusComponent,
     ParticipantTableComponent,
     ReviewNavComponent,
-    AnnotationManagerComponent,
+    SetAnnotationDetailComponent,
+    SetAnnotationsMasterComponent,
+    SidebarDirective,
   ],
   providers: [
     CohortAnnotationDefinitionService,
