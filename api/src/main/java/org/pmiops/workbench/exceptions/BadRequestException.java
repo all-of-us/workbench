@@ -18,6 +18,10 @@ public class BadRequestException extends RuntimeException {
     this.errorResponse = errorResponse;
   }
 
+  public BadRequestException(Throwable t) {
+    super(t);
+  }
+
   public ErrorResponse getErrorResponse() {
     return errorResponse;
   }
