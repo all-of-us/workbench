@@ -1,9 +1,5 @@
 package org.pmiops.workbench.cohortreview;
 
-import org.hibernate.Session;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.internal.SessionImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -27,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -130,8 +127,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 //        }
 //        return participantCohortStatuses;
         PreparedStatement preparedStatement;
+        Connection connection = null;
         try {
-            Connection connection = jdbcTemplate.getDataSource().getConnection();
+            connection = jdbcTemplate.getDataSource().getConnection();
 
             connection.setAutoCommit(true);
 
@@ -141,7 +139,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                     " values (?, ?, ?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(compiledQuery);
 
-            final int batchSize = 50;
+            final int batchSize = 5000;
             int index = 0;
 
             for(ParticipantCohortStatus pcs : participantCohortStatuses) {
@@ -159,8 +157,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                     preparedStatement.executeBatch();
                     long end = System.currentTimeMillis();
 
-                    System.out.println("total time taken to insert the batch = " + (end - start) + " ms");
-                    System.out.println("total time taken = " + (end - start)/batchSize + " s");
+                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
+                    log.log(Level.INFO, "total time taken = " + (end - start)/batchSize + " s");
                 }
             }
 
@@ -170,12 +168,17 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             connection.close();
 
         } catch (SQLException ex) {
-            System.err.println("SQLException information");
-            while (ex != null) {
-                System.err.println("Error msg: " + ex.getMessage());
-                ex = ex.getNextException();
+            log.log(Level.INFO, "SQLException: " + ex.getMessage());
+            throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
+        } finally {
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.log(Level.INFO, "Problem closing connection: " + e.getMessage());
+                    throw new RuntimeException("SQLException: " + e.getMessage(), e);
+                }
             }
-            throw new RuntimeException("Error");
         }
         return participantCohortStatuses;
     }
