@@ -41,14 +41,14 @@ public class CohortReviewDaoTest {
     JdbcTemplate jdbcTemplate;
 
     private long cohortId;
-    
+
     @Before
     public void setup() throws Exception {
       Cohort cohort = new Cohort();
       cohort.setWorkspaceId(workspaceDao.save(new Workspace()).getWorkspaceId());
       cohortId = cohortDao.save(cohort).getCohortId();
     }
-    
+
     @Test
     public void save() throws Exception {
         CohortReview cohortReview = createCohortReview();
