@@ -312,7 +312,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void checkWorkspaceWriteAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    WorkspaceAccessLevel userAccess = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
           WorkspaceAccessLevel.WRITER.equals(userAccess))) {
       throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
@@ -321,24 +321,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void checkWorkspaceReadAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    WorkspaceAccessLevel userAccess = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
           WorkspaceAccessLevel.WRITER.equals(userAccess) ||
           WorkspaceAccessLevel.READER.equals(userAccess))) {
       throw new ForbiddenException(String.format("Insufficient permissions to read workspace %s/%s",
           workspaceNamespace, workspaceId));
     }
-  }
-
-  public static WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
-    String userAccess;
-    try {
-      userAccess = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId).getAccessLevel();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
-    return WorkspaceAccessLevel.fromValue(userAccess);
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace

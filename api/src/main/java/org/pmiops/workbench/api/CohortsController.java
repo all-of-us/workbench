@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -119,7 +120,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -151,7 +152,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -168,7 +169,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -184,7 +185,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -207,7 +208,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -252,7 +253,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }

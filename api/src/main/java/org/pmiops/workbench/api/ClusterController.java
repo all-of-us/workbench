@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -32,6 +33,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
+  private final WorkspaceService workspaceService;
 
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
     new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
@@ -71,9 +73,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
-      Provider<User> userProvider) {
+      Provider<User> userProvider,
+      WorkspaceService workspaceService) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
+    this.workspaceService = workspaceService;
   }
 
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
@@ -83,7 +87,7 @@ public class ClusterController implements ClusterApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -109,7 +113,7 @@ public class ClusterController implements ClusterApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }
@@ -134,7 +138,7 @@ public class ClusterController implements ClusterApiDelegate {
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (Exception e) {
       throw e;
     }

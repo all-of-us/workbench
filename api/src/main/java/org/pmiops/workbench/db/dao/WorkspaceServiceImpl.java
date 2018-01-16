@@ -204,7 +204,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return this.saveWithLastModified(workspace);
   }
-
   @Override
   @Transactional
   public Workspace saveAndCloneCohorts(Workspace from, Workspace to) {
@@ -224,5 +223,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       cohortService.saveAndCloneReviews(fromCohort, c);
     }
     return saved;
+  }
+  @Override
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
+    String userAccess;
+    try {
+      userAccess = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId).getAccessLevel();
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+    return WorkspaceAccessLevel.fromValue(userAccess);
   }
 }

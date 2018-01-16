@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +74,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -109,7 +110,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -134,7 +135,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -156,7 +157,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -184,7 +185,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }

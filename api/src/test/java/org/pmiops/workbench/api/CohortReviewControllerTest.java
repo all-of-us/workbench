@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +57,9 @@ public class CohortReviewControllerTest {
     @Mock
     CodeDomainLookupService codeDomainLookupService;
 
+    @Mock
+    WorkspaceService workspaceService;
+
     @InjectMocks
     CohortReviewController reviewController;
 
@@ -68,6 +73,9 @@ public class CohortReviewControllerTest {
         CohortReview cohortReview = new CohortReview();
         cohortReview.setReviewSize(1);
 
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
 
         try {
@@ -79,6 +87,7 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
+        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
@@ -89,12 +98,17 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
 
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
             fail("Should have thrown a BadRequestException!");
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
+
+        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
 
         verifyNoMoreMockInteractions();
     }
@@ -118,6 +132,9 @@ public class CohortReviewControllerTest {
         workspace.setWorkspaceNamespace(namespace);
         workspace.setFirecloudName(name);
 
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
@@ -134,6 +151,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
         verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
+        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
@@ -218,7 +236,9 @@ public class CohortReviewControllerTest {
         List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
         participants.add(dbParticipant);
         Page expectedPage = new PageImpl(participants);
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
+        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
@@ -256,6 +276,7 @@ public class CohortReviewControllerTest {
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
         verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
+        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
@@ -293,6 +314,9 @@ public class CohortReviewControllerTest {
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
         List<String> filterColumns = new ArrayList<String>();
         List<String> filterValues = new ArrayList<String>();
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         final Date dob = new Date(System.currentTimeMillis());
@@ -358,11 +382,12 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
+        verify(workspaceService, atLeast(1)).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
     private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, codeDomainLookupService);
+        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, codeDomainLookupService, workspaceService);
     }
 
 }

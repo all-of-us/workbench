@@ -238,10 +238,18 @@ public class CohortsControllerTest {
   public void testMaterializeCohortWorkspaceNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
-
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    String workspaceName = "badWorkspace";
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setAccessLevel(owner.toString());
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(
+        fcResponse
+    );
+    when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName)).thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, "badWorkspace", request);
+    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, workspaceName, request);
   }
 
   @Test(expected = NotFoundException.class)

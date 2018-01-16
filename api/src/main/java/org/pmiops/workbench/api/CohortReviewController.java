@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -22,6 +23,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -56,7 +58,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private BigQueryService bigQueryService;
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
-
+    private WorkspaceService workspaceService;
     private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
     /**
@@ -108,11 +110,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            CodeDomainLookupService codeDomainLookupService,
-                           ParticipantCounter participantCounter) {
+                           ParticipantCounter participantCounter,
+                           WorkspaceService workspaceService) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
+        this.workspaceService = workspaceService;
     }
 
     /**
@@ -137,7 +141,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -202,7 +206,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -219,7 +223,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -236,7 +240,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -252,7 +256,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -269,7 +273,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -293,7 +297,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -343,7 +347,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
@@ -378,7 +382,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         // This also enforces registered auth domain.
         WorkspaceAccessLevel accessLevel;
         try {
-          accessLevel = WorkspacesController.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
         } catch (Exception e) {
           throw e;
         }
