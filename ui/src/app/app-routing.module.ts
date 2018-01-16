@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
+import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
 import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
@@ -13,6 +13,9 @@ import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+
+declare let gtag: Function;
+declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
@@ -70,4 +73,13 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule {
+
+ constructor(public router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        gtag('config', ga_tracking_id, { 'page_path': event.urlAfterRedirects });
+      }
+    });
+  }
+}
