@@ -137,7 +137,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         pcs.getEthnicityConceptId(),
                         pcs.getGenderConceptId(),
                         pcs.getRaceConceptId(),
-                        0,
+                        3,
                         pcs.getParticipantKey().getCohortReviewId(),
                         pcs.getParticipantKey().getParticipantId());
                 sqlStatement = sqlStatement.equals(SQL_TEMPLATE)
