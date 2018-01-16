@@ -5,7 +5,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from 'clarity-angular';
 import {environment} from 'environments/environment';
-import {GoogleAnalyticsEventsService} from "./google-analytics-events.service";
+import {GoogleAnalyticsEventsService} from './google-analytics-events.service';
 
 import {ErrorHandlingService} from './services/error-handling.service';
 import {SignInService} from './services/sign-in.service';
