@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
@@ -41,4 +42,22 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     List<Concept> findConceptsMapsToParents(@Param("conceptId") long conceptId);
 
     List<Concept> findByConceptName(String conceptName);
+
+    @Query(value = "select c.* from cdr.concept c " +
+            "where c.vocabulary_id = 'Gender'",
+            nativeQuery = true)
+    @Cacheable("concept.gender")
+    List<Concept> findGenderConcepts();
+
+    @Query(value = "select c.* from cdr.concept c " +
+            "where c.vocabulary_id = 'Race'",
+            nativeQuery = true)
+    @Cacheable("concept.race")
+    List<Concept> findRaceConcepts();
+
+    @Query(value = "select c.* from cdr.concept c " +
+            "where c.vocabulary_id = 'Ethnicity'",
+            nativeQuery = true)
+    @Cacheable("concept.ethnicity")
+    List<Concept> findEthnicityConcepts();
 }
