@@ -27,17 +27,19 @@ import java.util.logging.Logger;
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
 
+    private static final String SQL_TEMPLATE = "insert into participant_cohort_status(" +
+            "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
+            "status, cohort_review_id, participant_id) " +
+            "values (%s, %d, %d, %d, %d, %d, %d)";
+    private static final String NEXT_INSERT = ", (%s, %d, %d, %d, %d, %d, %d)";
+    private static final int BATCH_SIZE = 50;
+    private static final String EMPTY_STRING = "";
+
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private WorkspaceService workspaceService;
     private JdbcTemplate jdbcTemplate;
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
-//
-//    @Value("${hibernate.jdbc.batch_size}")
-//    private int batchSize;
 
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
@@ -110,33 +112,30 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Transactional
     public void saveFullCohortReview(CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
         cohortReview = saveCohortReview(cohortReview);
-        participantCohortStatuses = saveParticipantCohortStatuses(participantCohortStatuses);
+        saveParticipantCohortStatuses(participantCohortStatuses);
     }
 
-    @Override
-    public List<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
+    /**
+     * This implementation manually creates batched sql statements. For unknown reasons Spring JPA nor
+     * JDBC batching works in appengine running in the cloud. It's old school but it solves our batching
+     * issue and can handle inserts up to 10,000 participants.
+     */
+    protected void saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
         Statement statement = null;
         Connection connection = null;
-
-        String sqlTemplate = "insert into participant_cohort_status(" +
-                "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
-                "status, cohort_review_id, participant_id) " +
-                "values ('%s', %d, %d, %d, %d, %d, %d)";
-
-        String nextInsert = ", ('%s', %d, %d, %d, %d, %d, %d)";
         int index = 0;
-        int batchSize = 50;
-        String sqlStatement = "";
+        String sqlStatement = EMPTY_STRING;
 
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
             statement = connection.createStatement();
-            connection.setAutoCommit(true);
+            connection.setAutoCommit(false);
 
             for (ParticipantCohortStatus pcs : participantCohortStatuses) {
-                sqlStatement = StringUtils.isEmpty(sqlStatement) ? sqlTemplate : sqlStatement + nextInsert;
+                sqlStatement = StringUtils.isEmpty(sqlStatement) ? SQL_TEMPLATE : sqlStatement + NEXT_INSERT;
+                String birthDate = pcs.getBirthDate() == null ? "NULL" : "'" + pcs.getBirthDate().toString() + "'";
                 sqlStatement = String.format(sqlStatement,
-                        pcs.getBirthDate().toString(),
+                        birthDate,
                         pcs.getEthnicityConceptId(),
                         pcs.getGenderConceptId(),
                         pcs.getRaceConceptId(),
@@ -144,46 +143,27 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         pcs.getParticipantKey().getCohortReviewId(),
                         pcs.getParticipantKey().getParticipantId());
 
-                if(++index % batchSize == 0) {
-                    long start = System.currentTimeMillis();
+                if(++index % BATCH_SIZE == 0) {
                     statement.execute(sqlStatement);
-                    long end = System.currentTimeMillis();
-
-                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
-                    sqlStatement = "";
+                    sqlStatement = EMPTY_STRING;
                 }
             }
 
             if (!StringUtils.isEmpty(sqlStatement)) {
-                long start = System.currentTimeMillis();
                 statement.execute(sqlStatement);
-                long end = System.currentTimeMillis();
-
-                log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
             }
+
+            connection.commit();
+            connection.setAutoCommit(true);
 
         } catch (SQLException ex) {
             log.log(Level.INFO, "SQLException: " + ex.getMessage());
+            rollback(connection);
             throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
         } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    log.log(Level.INFO, "Problem closing prepared statement: " + e.getMessage());
-                    throw new RuntimeException("SQLException: " + e.getMessage(), e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    log.log(Level.INFO, "Problem closing connection: " + e.getMessage());
-                    throw new RuntimeException("SQLException: " + e.getMessage(), e);
-                }
-            }
+            close(statement);
+            close(connection);
         }
-        return participantCohortStatuses;
     }
 
     @Override
@@ -208,5 +188,38 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
+    }
+
+    private void close(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                log.log(Level.INFO, "Problem closing connection: " + e.getMessage());
+                throw new RuntimeException("SQLException: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private void close(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                log.log(Level.INFO, "Problem closing prepared statement: " + e.getMessage());
+                throw new RuntimeException("SQLException: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private void rollback(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException e) {
+                log.log(Level.INFO, "Problem on rollback: " + e.getMessage());
+                throw new RuntimeException("SQLException: " + e.getMessage(), e);
+            }
+        }
     }
 }
