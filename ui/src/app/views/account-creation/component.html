@@ -27,9 +27,6 @@
       <label>Password Again:</label>
       <input type="password" class="input" [(ngModel)]="passwordAgain">
     </div>
-    <div *ngIf="showPasswordLengthError" class="error">
-      Password must be between 8 and 100 characters long.
-    </div>
    <div class="form-section">
       <button (click)="createAccount()" class="btn btn-primary">Create Account</button>
       <span class="spinner spinner-inline" *ngIf="creatingAcccount">
@@ -41,6 +38,9 @@
     </div>
     <div *ngIf="showPasswordsDoNotMatchError" class="error">
       Passwords do not match.
+    </div>
+    <div *ngIf="showPasswordLengthError" class="error">
+      Password must be between 8 and 100 characters long.
     </div>
     <div style="margin-top: 2rem; text-align: center;">Already have an account?</div>
     <div style="display: flex; justify-content: space-around;">

@@ -32,10 +32,10 @@ export class AccountCreationComponent {
   contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
+  showPasswordLengthError: boolean;
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
-  showPasswordLengthError = false;
   usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
@@ -47,20 +47,21 @@ export class AccountCreationComponent {
   createAccount(): void {
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;
+    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
           this.profile.username, this.password, this.passwordAgain];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
-    }
-    if (!(this.password === this.passwordAgain)) {
+      return;
+    } else if (!(this.password === this.passwordAgain)) {
       this.showPasswordsDoNotMatchError = true;
-    }
-    // check password length (see https://developers.google.com/admin-sdk/directory/v1/reference/users#password)
-    else if (this.password.length < 8 || this.password.length > 100) {
+      return;
+    } else if (this.password.length < 8 || this.password.length > 100) {
       this.showPasswordLengthError = true;
-    }
-    if (this.showAllFieldsRequiredError || this.showPasswordsDoNotMatchError || this.showPasswordLengthError) {
+      return;
+    } else if (this.passwordAgain.length < 8 || this.passwordAgain.length > 100) {
+      this.showPasswordLengthError = true;
       return;
     }
 
