@@ -66,8 +66,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
   private static final String API_HOST_KEY = "API_HOST";
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
-  private static final String CDR_VERSION_PROJECT = "CDR_VERSION_PROJECT";
-  private static final String CDR_VERSION_DATASET = "CDR_VERSION_DATASET";
+  private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
+  private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
 
   /**
@@ -360,8 +360,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     config.put(API_HOST_KEY, this.apiHostName);
     // TODO: make these based on the CDR version for the workspace; update this file if the
     // CDR version changes.
-    config.put(CDR_VERSION_PROJECT, workbenchConfig.bigquery.projectId);
-    config.put(CDR_VERSION_DATASET, workbenchConfig.bigquery.dataSetId);
+    config.put(CDR_VERSION_CLOUD_PROJECT, workbenchConfig.bigquery.projectId);
+    config.put(CDR_VERSION_BIGQUERY_DATASET, workbenchConfig.bigquery.dataSetId);
     cloudStorageService.writeFile(fcWorkspace.getBucketName(), CONFIG_FILENAME,
         config.toString().getBytes(Charsets.UTF_8));
   }
