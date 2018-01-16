@@ -2,7 +2,9 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static junit.framework.TestCase.fail;
+
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -17,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +43,6 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -68,7 +71,6 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.Providers;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -173,6 +175,7 @@ public class WorkspacesControllerTest {
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+    workspacesController.setUserProvider(userProvider);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -180,7 +183,6 @@ public class WorkspacesControllerTest {
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     CLOCK.setInstant(NOW);
-    workspacesController.setUserProvider(userProvider);
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -254,7 +256,6 @@ public class WorkspacesControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
-    stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspace.setCdrVersionId(cdrVersionId);
     stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     return workspace;
@@ -271,8 +272,6 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
-    verify(fireCloudService).grantGoogleRoleToUser(workspace.getNamespace(),
-        FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, LOGGED_IN_USER_EMAIL);
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
@@ -580,14 +579,14 @@ public class WorkspacesControllerTest {
     stubBigQueryCohortCalls();
     CreateReviewRequest reviewReq = new CreateReviewRequest();
     reviewReq.setSize(1);
-    cohortReviewController.createCohortReview(
+    CohortReview cr1 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c1.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
     reviewReq.setSize(2);
-    cohortReviewController.createCohortReview(
+    CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-
+    
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -608,8 +607,23 @@ public class WorkspacesControllerTest {
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
 
-    // TODO(calbach): Verify cohort reviews were copied. There seem to be issues
-    // currently with copying review due to direct SQL in CohortReviewServiceImpl.
+    CohortReview gotCr1 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
+    assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
+    // TODO(calbach): Compare actual statuses, once fully supported.
+    assertThat(gotCr1.getParticipantCohortStatuses().size())
+        .isEqualTo(cr1.getParticipantCohortStatuses().size());
+
+    CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
+    assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
+    assertThat(gotCr2.getParticipantCohortStatuses().size())
+        .isEqualTo(cr2.getParticipantCohortStatuses().size());
+
+    assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
+        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
   }
 
   @Test
