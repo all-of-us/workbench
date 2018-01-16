@@ -5,15 +5,10 @@ declare let gtag: Function;
 export class GoogleAnalyticsEventsService {
 
   public emitEvent(eventName: string,
-    eventCategory: string,
-    eventAction: string,
-    eventLabel: string = null,
-    eventValue: number = null) {
-    gtag('event', eventName, {
-      eventCategory: eventCategory,
-      eventLabel: eventLabel,
-      eventAction: eventAction,
-      eventValue: eventValue
-    });
+                   eventCategory: string,
+                   eventAction: string,
+                   eventLabel: string = null,
+                   eventValue: number = null) {
+    gtag('event', eventName, { eventCategory, eventLabel, eventAction, eventValue });
   }
 }
