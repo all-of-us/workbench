@@ -15,7 +15,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,10 +29,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private static final String SQL_TEMPLATE = "insert into participant_cohort_status(" +
             "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
             "status, cohort_review_id, participant_id) " +
-            "values (%s, %d, %d, %d, %d, %d, %d)";
-    private static final String NEXT_INSERT = ", (%s, %d, %d, %d, %d, %d, %d)";
+            "values";
+    private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d)";
     private static final int BATCH_SIZE = 50;
-    private static final String EMPTY_STRING = "";
 
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
@@ -124,7 +122,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         Statement statement = null;
         Connection connection = null;
         int index = 0;
-        String sqlStatement = EMPTY_STRING;
+        String sqlStatement = SQL_TEMPLATE;
 
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
@@ -132,9 +130,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             connection.setAutoCommit(false);
 
             for (ParticipantCohortStatus pcs : participantCohortStatuses) {
-                sqlStatement = StringUtils.isEmpty(sqlStatement) ? SQL_TEMPLATE : sqlStatement + NEXT_INSERT;
-                String birthDate = pcs.getBirthDate() == null ? "NULL" : "'" + pcs.getBirthDate().toString() + "'";
-                sqlStatement = String.format(sqlStatement,
+                String birthDate = pcs.getBirthDate() == null
+                        ? "NULL" : "'" + pcs.getBirthDate().toString() + "'";
+                String nextSql = String.format(NEXT_INSERT,
                         birthDate,
                         pcs.getEthnicityConceptId(),
                         pcs.getGenderConceptId(),
@@ -142,14 +140,16 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         0,
                         pcs.getParticipantKey().getCohortReviewId(),
                         pcs.getParticipantKey().getParticipantId());
+                sqlStatement = sqlStatement.equals(SQL_TEMPLATE)
+                        ? sqlStatement + nextSql : sqlStatement + ", " + nextSql;
 
                 if(++index % BATCH_SIZE == 0) {
                     statement.execute(sqlStatement);
-                    sqlStatement = EMPTY_STRING;
+                    sqlStatement = SQL_TEMPLATE;
                 }
             }
 
-            if (!StringUtils.isEmpty(sqlStatement)) {
+            if (!sqlStatement.equals(SQL_TEMPLATE)) {
                 statement.execute(sqlStatement);
             }
 
@@ -190,6 +190,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
     }
 
+    /**
+     * This doesn't actually close the pooled connection, but is more likely to return this connection
+     * back to the connection pool for reuse.
+     *
+     * @param connection
+     */
     private void close(Connection connection) {
         if (connection != null) {
             try {
