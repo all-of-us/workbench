@@ -216,7 +216,7 @@ public class CohortReviewServiceImplMockTest {
         String sqlStatement = "insert into participant_cohort_status(" +
                 "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
                 "status, cohort_review_id, participant_id)" +
-                " values ('" + participantCohortStatus.getBirthDate().toString() + "', 1, 1, 1, 0, 1, 1)";
+                " values ('" + participantCohortStatus.getBirthDate().toString() + "', 1, 1, 1, 3, 1, 1)";
 
         when(jdbcTemplate.getDataSource()).thenReturn(mockDatasource);
         when(mockDatasource.getConnection()).thenReturn(mockConnection);
@@ -262,7 +262,7 @@ public class CohortReviewServiceImplMockTest {
         String sqlStatement = "insert into participant_cohort_status(" +
                 "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
                 "status, cohort_review_id, participant_id)" +
-                " values ('" + participantCohortStatus.getBirthDate().toString() + "', 1, 1, 1, 0, 1, 1)";
+                " values ('" + participantCohortStatus.getBirthDate().toString() + "', 1, 1, 1, 3, 1, 1)";
 
         when(jdbcTemplate.getDataSource()).thenReturn(mockDatasource);
         when(mockDatasource.getConnection()).thenReturn(mockConnection);

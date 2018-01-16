@@ -137,6 +137,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         pcs.getEthnicityConceptId(),
                         pcs.getGenderConceptId(),
                         pcs.getRaceConceptId(),
+                        //this represents NOT_REVIEWED
                         3,
                         pcs.getParticipantKey().getCohortReviewId(),
                         pcs.getParticipantKey().getParticipantId());
