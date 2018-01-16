@@ -15,6 +15,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -114,16 +115,6 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Override
     public List<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses) {
-//        int i = 0;
-//        for (ParticipantCohortStatus participantCohortStatus : participantCohortStatuses) {
-//            entityManager.persist(participantCohortStatus);
-//            i++;
-//            if (i % batchSize == 0) {
-//                entityManager.flush();
-//                entityManager.clear();
-//            }
-//        }
-//        return participantCohortStatuses;
         Statement statement = null;
         Connection connection = null;
 
@@ -134,20 +125,16 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
         String nextInsert = ", ('%s', %d, %d, %d, %d, %d, %d)";
         int index = 0;
-        long participantId = 0L;
         int batchSize = 50;
-        String sqlStatement = sqlTemplate;
+        String sqlStatement = "";
 
         try {
             connection = jdbcTemplate.getDataSource().getConnection();
             statement = connection.createStatement();
-            connection.setAutoCommit(false);
+            connection.setAutoCommit(true);
 
             for (ParticipantCohortStatus pcs : participantCohortStatuses) {
-                if (index != 0) {
-                    sqlStatement = sqlStatement + nextInsert;
-                }
-                participantId = pcs.getParticipantKey().getParticipantId();
+                sqlStatement = StringUtils.isEmpty(sqlStatement) ? sqlTemplate : sqlStatement + nextInsert;
                 sqlStatement = String.format(sqlStatement,
                         pcs.getBirthDate().toString(),
                         pcs.getEthnicityConceptId(),
@@ -156,29 +143,27 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         0,
                         pcs.getParticipantKey().getCohortReviewId(),
                         pcs.getParticipantKey().getParticipantId());
-                index++;
 
-//                if(++index % batchSize == 0) {
-//                    long start = System.currentTimeMillis();
-//                    statement.execute(sqlStatement);
-//                    connection.commit();
-//                    long end = System.currentTimeMillis();
-//
-//                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
-//                    log.log(Level.INFO, "total time taken = " + (end - start)/batchSize + " s");
-//                    sqlStatement = sqlTemplate;
-//                }
+                if(++index % batchSize == 0) {
+                    long start = System.currentTimeMillis();
+                    statement.execute(sqlStatement);
+                    long end = System.currentTimeMillis();
+
+                    log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
+                    sqlStatement = "";
+                }
             }
 
-            long start = System.currentTimeMillis();
-            statement.execute(sqlStatement);
-            connection.commit();
-            long end = System.currentTimeMillis();
+            if (!StringUtils.isEmpty(sqlStatement)) {
+                long start = System.currentTimeMillis();
+                statement.execute(sqlStatement);
+                long end = System.currentTimeMillis();
 
-            log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
-            log.log(Level.INFO, "total time taken = " + (end - start) / batchSize + " s");
+                log.log(Level.INFO, "total time taken to insert the batch = " + (end - start) + " ms");
+            }
+
         } catch (SQLException ex) {
-            log.log(Level.INFO, "SQLException at personPid: " + participantId + " " + ex.getMessage());
+            log.log(Level.INFO, "SQLException: " + ex.getMessage());
             throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
         } finally {
             if (statement != null) {
