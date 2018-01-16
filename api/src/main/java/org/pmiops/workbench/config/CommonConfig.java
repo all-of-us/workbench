@@ -1,7 +1,7 @@
 package org.pmiops.workbench.config;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import java.time.Clock;
@@ -18,7 +18,7 @@ public class CommonConfig {
 
   @Bean
   HttpTransport httpTransport() {
-    return new ApacheHttpTransport();
+    return UrlFetchTransport.getDefaultInstance();
   }
 
   @Bean

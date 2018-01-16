@@ -29,7 +29,7 @@ public class ParticipantCounter {
                     "where\n";
 
     private static final String ID_SQL_TEMPLATE =
-            "select distinct person_id\n" +
+            "select distinct person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
@@ -143,7 +143,7 @@ public class ParticipantCounter {
      * @return
      */
     private static String getAgeRangeSql(int lo, int hi) {
-        return "when DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) >= " + lo +
-                " and DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), YEAR) <= " + hi + " then '" + lo + "-" + hi + "'";
+        return "when CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) >= " + lo +
+                " and CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }

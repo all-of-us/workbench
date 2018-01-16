@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.ManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.Profile;
@@ -114,7 +116,14 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setName(workspaceName);
     workspaceIngest.setNamespace(projectName);
-    // TODO: set authorization domain here
+    // TODO: add concept of controlled auth domain.
+    if (configProvider.get().firecloud.enforceRegistered) {
+      ArrayList<ManagedGroupRef> authDomain = new ArrayList<ManagedGroupRef>();
+      ManagedGroupRef registeredDomain = new ManagedGroupRef();
+      registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
+      authDomain.add(registeredDomain);
+      workspaceIngest.setAuthorizationDomain(authDomain);
+    }
     workspacesApi.createWorkspace(workspaceIngest);
   }
 

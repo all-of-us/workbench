@@ -1,8 +1,8 @@
 package org.pmiops.workbench.google;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
-import static com.google.api.client.googleapis.util.Utils.getDefaultTransport;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.admin.directory.Directory;
@@ -52,7 +52,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     GoogleCredential googleCredential = googleCredentialProvider.get();
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return new GoogleCredential.Builder()
-        .setTransport(getDefaultTransport())
+        .setTransport(UrlFetchTransport.getDefaultInstance())
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
         .setServiceAccountUser("directory-service@"+gSuiteDomain)
@@ -65,7 +65,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private Directory getGoogleDirectoryService() {
-    return new Directory.Builder(getDefaultTransport(), getDefaultJsonFactory(),
+    return new Directory.Builder(UrlFetchTransport.getDefaultInstance(), getDefaultJsonFactory(),
           createCredentialWithImpersonation())
         .setApplicationName(APPLICATION_NAME)
         .build();
