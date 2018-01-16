@@ -35,6 +35,7 @@ export class AccountCreationComponent {
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
+  showPasswordLengthError = false;
   usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
@@ -55,7 +56,11 @@ export class AccountCreationComponent {
     if (!(this.password === this.passwordAgain)) {
       this.showPasswordsDoNotMatchError = true;
     }
-    if (this.showAllFieldsRequiredError || this.showPasswordsDoNotMatchError) {
+    // check password length (see https://developers.google.com/admin-sdk/directory/v1/reference/users#password)
+    else if (this.password.length < 8 || this.password.length > 100) {
+      this.showPasswordLengthError = true;
+    }
+    if (this.showAllFieldsRequiredError || this.showPasswordsDoNotMatchError || this.showPasswordLengthError) {
       return;
     }
 
