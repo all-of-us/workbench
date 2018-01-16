@@ -1,10 +1,7 @@
 package org.pmiops.workbench.api;
 
-import com.google.apphosting.api.ApiProxy;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -20,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -29,9 +27,9 @@ import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -68,7 +66,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
   private static final String API_HOST_KEY = "API_HOST";
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
-  private static final String CONFIG_FILENAME = "all_of_us_config.json";
+  private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
+  private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
+  private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -228,6 +228,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final String apiHostName;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -238,7 +239,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      @Qualifier("apiHostName") String apiHostName) {
+      @Qualifier("apiHostName") String apiHostName,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -247,6 +249,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.apiHostName = apiHostName;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -326,12 +329,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       userAccess = fireCloudService.getWorkspace(
           workspaceNamespace, workspaceId).getAccessLevel();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      throw ExceptionUtils.convertFirecloudException(e);
     }
     return WorkspaceAccessLevel.fromValue(userAccess);
   }
@@ -344,21 +342,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
           workspaceId.getWorkspaceName()).getWorkspace();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error creating FC workspace %s/%s: %s",
-              workspaceId.getWorkspaceNamespace(),
-              workspaceId.getWorkspaceName(),
-              e.getResponseBody()),
-          e);
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 409) {
-        throw new ConflictException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      throw ExceptionUtils.convertFirecloudException(e);
     }
   }
 
@@ -369,10 +353,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private void createConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     JSONObject config = new JSONObject();
 
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
     config.put(API_HOST_KEY, this.apiHostName);
+    // TODO: make these based on the CDR version for the workspace; update this file if the
+    // CDR version changes.
+    config.put(CDR_VERSION_CLOUD_PROJECT, workbenchConfig.bigquery.projectId);
+    config.put(CDR_VERSION_BIGQUERY_DATASET, workbenchConfig.bigquery.dataSetId);
     cloudStorageService.writeFile(fcWorkspace.getBucketName(), CONFIG_FILENAME,
         config.toString().getBytes(Charsets.UTF_8));
   }
@@ -395,6 +384,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ConflictException(String.format(
           "Workspace %s/%s already exists",
           workspace.getNamespace(), workspace.getName()));
+    }
+
+    // If the user has not been granted the BQ job user Google role on the billing project yet,
+    // give it to them (so they can run BQ queries from notebooks.)
+    try {
+      fireCloudService.grantGoogleRoleToUser(workspace.getNamespace(),
+          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      throw ExceptionUtils.convertFirecloudException(e);
     }
 
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
@@ -460,15 +458,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(String.format("Insufficient permissions to delete workspace %s/%s",
-            workspaceNamespace, workspaceId));
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      throw ExceptionUtils.convertFirecloudException(e);
     }
     workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
@@ -488,12 +478,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceNamespace, workspaceId);
       fcWorkspace = fcResponse.getWorkspace();
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      throw ExceptionUtils.convertFirecloudException(e);
     }
 
     response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
