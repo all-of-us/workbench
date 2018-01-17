@@ -114,7 +114,7 @@
       <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
     </div>
     <div class="indented">
-      <button class="btn" (click)="pushToNotebookServer(notebookList)" [ngClass]="{disabled: !notebookSelected}">PUSH TO NOTEBOOK SERVER</button>
+      <button class="btn" (click)="pushToNotebookServer(notebookList)" [ngClass]="{disabled: !pushNotebookEnable}">PUSH TO NOTEBOOK SERVER</button>
       <div class="alert alert-success" *ngIf="saveSuccess">
         <div class="alert-items">
           <div class="alert-item static">
@@ -136,26 +136,28 @@
         </div>
       </div>
       <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column>Push to NoteBook Server</clr-dg-column>
+        <clr-dg-column><input type="checkbox" (change)="columnHeaderNotebookHandler()" [(ngModel)]="columnHeaderNotebook"/></clr-dg-column>
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
-        <clr-dg-column [clrDgField]="'notebook.description'" [clrDgSortBy]="notebookDescriptionComparator">
-          Description
-          <clr-dg-string-filter [clrDgStringFilter]="notebookDescriptionFilter" [(clrFilterValue)]="a"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>PATH</clr-dg-column>
+        <clr-dg-column>Path</clr-dg-column>
         <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
-          <clr-dg-cell><input type="checkbox" (change)="checkBoxEvent(notebook)" [(ngModel)]="notebook.push"/></clr-dg-cell>
+          <clr-dg-cell><input type="checkbox" (change)="checkNotebookHandlerEvent(notebook)" [(ngModel)]="notebook.push"/></clr-dg-cell>
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
-          <clr-dg-cell>{{notebook.description}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
         </clr-dg-row>
       </clr-datagrid>
     </div>
   </div>
+  <clr-modal [(clrModalOpen)]="notebookError">
+    <h3 class="modal-title">Error:</h3>
+    <div class="modal-body">Could not fetch notebooks from workspace.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
+    </div>
+  </clr-modal>
 </div>
 <!-- TODO: Factor out to component -->
 <ng-template #notFoundMessage>

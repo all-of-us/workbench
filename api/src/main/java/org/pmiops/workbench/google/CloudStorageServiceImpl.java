@@ -1,20 +1,14 @@
 package org.pmiops.workbench.google;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import java.util.Map;
-import java.util.Properties;
+import com.google.cloud.storage.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class CloudStorageServiceImpl implements CloudStorageService {
@@ -38,14 +32,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   public List<FileDetail> getBucketFileList(String bucketName,String directory) {
     List<FileDetail> fileList = new ArrayList<FileDetail>();
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    Iterable<Blob> blobList =storage.get(bucketName).list().getValues();
-    blobList.forEach(blobItem->{
-      if(blobItem.getName().matches(directory+"/.+")) {
+    Iterable<Blob> blobList = storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
+    blobList.forEach(blobItem -> {
         FileDetail fileDetail = new FileDetail();
         fileDetail.setName(blobItem.getName());
         fileDetail.setPath("gs://" + bucketName +"/"+ blobItem.getName());
         fileList.add(fileDetail);
-      }
     });
     return fileList;
   }

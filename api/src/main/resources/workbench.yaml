@@ -483,7 +483,7 @@ paths:
             items:
               $ref: '#/definitions/FileDetail'
         "404":
-          description: Google bucket not found
+          description: Workspace not found
           schema:
             $ref: '#/definitions/ErrorReport'
         "500":
@@ -521,7 +521,7 @@ paths:
         "200":
           description: List of files
         "404":
-          description: Google bucket not found
+          description: Cluster not found
           schema:
             $ref: '#/definitions/ErrorReport'
         "500":

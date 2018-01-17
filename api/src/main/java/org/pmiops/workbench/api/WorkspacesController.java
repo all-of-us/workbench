@@ -485,10 +485,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
           workspaceNamespace, workspaceId));
     }
-    catch(NullPointerException ex){
-      throw new NotFoundException(String.format("Workspace %s/%s not found",
-        workspaceNamespace, workspaceId));
-    }
     return ResponseEntity.ok(bucketFileList);
   }
 
