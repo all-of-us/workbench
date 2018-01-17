@@ -165,12 +165,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .reviewSize(participantCohortStatuses.size())
                 .reviewedCount(0L)
                 .reviewStatus(ReviewStatus.CREATED);
-        List<ParticipantCohortStatus> paginatedPCS = participantCohortStatuses
-                .stream()
-                .limit(PAGE_SIZE)
-                .collect(Collectors.toList());
 
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
+
+        List<ParticipantCohortStatus> paginatedPCS =
+                cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID)).getContent();
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
