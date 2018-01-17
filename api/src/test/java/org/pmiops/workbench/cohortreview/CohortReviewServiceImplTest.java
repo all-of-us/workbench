@@ -2,74 +2,276 @@ package org.pmiops.workbench.cohortreview;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.testconfig.TestWorkbenchJpaConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.Date;
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
-import static org.junit.Assert.*;
-
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestWorkbenchJpaConfig.class})
-@ActiveProfiles("test-workbench")
+@RunWith(MockitoJUnitRunner.class)
 public class CohortReviewServiceImplTest {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    @Mock
+    private CohortReviewDao cohortReviewDao;
+
+    @Mock
+    private CohortDao cohortDao;
+
+    @Mock
+    private ParticipantCohortStatusDao participantCohortStatusDao;
+
+    @Mock
+    private WorkspaceService workspaceService;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
+
+    @InjectMocks
+    private CohortReviewServiceImpl cohortReviewService;
 
     @Test
-    public void saveParticipantCohortStatuses() throws Exception {
-        ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey(1L, 1L);
-        ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey(1L, 2L);
+    public void findCohort_NotFound() throws Exception {
+        long cohortId = 1;
 
-        ParticipantCohortStatus pcs1 = createParticipantCohortStatus(
-                key1,
-                1L,
-                2L,
-                3L);
-        ParticipantCohortStatus pcs2 = createParticipantCohortStatus(
-                key2,
-                1L,
-                2L,
-                3L);
+        when(cohortDao.findOne(cohortId)).thenReturn(null);
 
-        CohortReviewServiceImpl cohortReviewService = new CohortReviewServiceImpl(null,
-                null,
-                null,
-                null,
-                jdbcTemplate);
-        cohortReviewService.saveParticipantCohortStatuses(Arrays.asList(pcs1, pcs2));
+        try {
+            cohortReviewService.findCohort(cohortId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, e.getMessage());
+        }
 
-        String sql = "select count(*) from participant_cohort_status where cohort_review_id = ? " +
-                "and participant_id = ? and ethnicity_concept_id = ? and gender_concept_id = ? " +
-                "and race_concept_id = ?";
-        final Object[] sqlParams1 = { 1, 1, 1, 2, 3 };
-        final Object[] sqlParams2 = { 1, 2, 1, 2, 3 };
-        final Integer expectedCount = new Integer("1");
-
-        assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams1, Integer.class));
-        assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams2, Integer.class));
+        verify(cohortDao).findOne(cohortId);
+        verifyNoMoreMockInteractions();
     }
 
-    private ParticipantCohortStatus createParticipantCohortStatus(ParticipantCohortStatusKey key,
-                                                 Long ethnicityConceptId,
-                                                 Long genderConceptId,
-                                                 Long raceConceptId) {
-        return new ParticipantCohortStatus()
-                .birthDate(new Date(System.currentTimeMillis()))
-                .ethnicityConceptId(ethnicityConceptId)
-                .genderConceptId(genderConceptId)
-                .raceConceptId(raceConceptId)
-                .status(CohortStatus.INCLUDED)
-                .participantKey(key);
+    @Test
+    public void findCohort() throws Exception {
+        long cohortId = 1;
+
+        Cohort cohort = new Cohort();
+        when(cohortDao.findOne(cohortId)).thenReturn(cohort);
+
+        assertEquals(cohort, cohortReviewService.findCohort(cohortId));
+
+        verify(cohortDao).findOne(cohortId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void validateMatchingWorkspace_NotFound() throws Exception {
+        String workspaceNamespace = "test-workspace";
+        String workspaceName = "test";
+        long workspaceId = 1;
+        long badWorkspaceId = 99;
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(badWorkspaceId);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
+
+        try {
+            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No workspace matching workspaceNamespace: "
+                    + workspaceNamespace + ", workspaceId: " + workspaceName, e.getMessage());
+        }
+
+        verify(workspaceService).getRequired(workspaceNamespace, workspaceName);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void validateMatchingWorkspace() throws Exception {
+        String workspaceNamespace = "test-workspace";
+        String workspaceName = "test";
+        long workspaceId = 1;
+
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(workspaceId);
+        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
+
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId);
+
+        verify(workspaceService).getRequired(workspaceNamespace, workspaceName);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortReview_CohortIdAndCdrVersionId_NotFound() throws Exception {
+        long cohortReviewId = 1;
+        long cdrVersionId = 1;
+
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReviewId, cdrVersionId)).thenReturn(null);
+
+        try {
+            cohortReviewService.findCohortReview(cohortReviewId, cdrVersionId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Cohort Review does not exist for cohortId: "
+                    + cohortReviewId + ", cdrVersionId: " + cdrVersionId, e.getMessage());
+        }
+
+        verify(cohortReviewDao).findCohortReviewByCohortIdAndCdrVersionId(cohortReviewId, cdrVersionId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortReview_CohortIdAndCdrVersionId() throws Exception {
+        long cohortReviewId = 1;
+        long cdrVersionId = 1;
+
+        CohortReview cohortReview = new CohortReview();
+        when(cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortReviewId, cdrVersionId)).thenReturn(cohortReview);
+
+        CohortReview actualCohortReview = cohortReviewService.findCohortReview(cohortReviewId, cdrVersionId);
+
+        assertEquals(cohortReview, actualCohortReview);
+
+        verify(cohortReviewDao).findCohortReviewByCohortIdAndCdrVersionId(cohortReviewId, cdrVersionId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortReview_CohortReviewId_NotFound() throws Exception {
+        long cohortReviewId = 1;
+
+        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(null);
+
+        try {
+            cohortReviewService.findCohortReview(cohortReviewId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Cohort Review does not exist for cohortReviewId: "
+                    + cohortReviewId, e.getMessage());
+        }
+
+        verify(cohortReviewDao).findOne(cohortReviewId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortReview_CohortReviewId() throws Exception {
+        long cohortReviewId = 1;
+
+        CohortReview cohortReview = new CohortReview();
+        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(cohortReview);
+
+        CohortReview actualCohortReview = cohortReviewService.findCohortReview(cohortReviewId);
+
+        assertEquals(cohortReview, actualCohortReview);
+
+        verify(cohortReviewDao).findOne(cohortReviewId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void saveCohortReview() throws Exception {
+        CohortReview cohortReview = new CohortReview();
+
+        when(cohortReviewDao.save(cohortReview)).thenReturn(cohortReview);
+
+        assertEquals(cohortReview, cohortReviewService.saveCohortReview(cohortReview));
+
+        verify(cohortReviewDao).save(cohortReview);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void saveParticipantCohortStatus() throws Exception {
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+
+        when(participantCohortStatusDao.save(pcs)).thenReturn(pcs);
+
+        ParticipantCohortStatus actualPcs = cohortReviewService.saveParticipantCohortStatus(pcs);
+
+        assertEquals(pcs, actualPcs);
+
+        verify(participantCohortStatusDao).save(pcs);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findParticipantCohortStatus_NotFound() throws Exception {
+        long cohortReviewId = 1;
+        long participantId = 1;
+
+        when(participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                cohortReviewId,
+                participantId)).thenReturn(null);
+
+        try {
+            cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: Participant Cohort Status does not exist for cohortReviewId: "
+                    + cohortReviewId + ", participantId: " + participantId, e.getMessage());
+        }
+
+        verify(participantCohortStatusDao).findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                cohortReviewId,
+                participantId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findParticipantCohortStatus() throws Exception {
+        long cohortReviewId = 1;
+        long participantId = 1;
+
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+        when(participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                cohortReviewId,
+                participantId)).thenReturn(pcs);
+
+        ParticipantCohortStatus actualpcs = cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
+
+        assertEquals(pcs, actualpcs);
+
+        verify(participantCohortStatusDao).findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
+                cohortReviewId,
+                participantId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findParticipantCohortStatuses() throws Exception {
+        long cohortReviewId = 1;
+        PageRequest pageRequest = new PageRequest(0, 1);
+
+        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
+        when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
+                cohortReviewId,
+                pageRequest)).thenReturn(null);
+
+        cohortReviewService.findParticipantCohortStatuses(cohortReviewId, pageRequest);
+
+        verify(participantCohortStatusDao).findByParticipantKey_CohortReviewId(
+                cohortReviewId,
+                pageRequest);
+        verifyNoMoreMockInteractions();
+    }
+
+    private void verifyNoMoreMockInteractions() {
+        verifyNoMoreInteractions(
+                cohortDao,
+                cohortReviewDao,
+                participantCohortStatusDao,
+                workspaceService);
     }
 
 }
