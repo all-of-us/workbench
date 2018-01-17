@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cohortreview;
 
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
@@ -24,6 +28,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
+    private ConceptDao conceptDao;
     private WorkspaceService workspaceService;
 
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
@@ -32,10 +37,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
                             CohortDao cohortDao,
                             ParticipantCohortStatusDao participantCohortStatusDao,
+                            ConceptDao conceptDao,
                             WorkspaceService workspaceService) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
+        this.conceptDao = conceptDao;
         this.workspaceService = workspaceService;
     }
 
@@ -120,5 +127,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
+    }
+
+    @Override
+    public Map<Long, String> findGenderRaceEthnicityFromConcept() {
+        List<Concept> conceptList = conceptDao.findGenderRaceEthnicityFromConcept();
+        return conceptList.stream().collect(Collectors.toMap(Concept::getConceptId, Concept::getConceptName));
     }
 }

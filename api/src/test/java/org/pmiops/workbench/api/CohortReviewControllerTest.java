@@ -204,6 +204,9 @@ public class CohortReviewControllerTest {
         rm.put("race_concept_id", 3);
         rm.put("ethnicity_concept_id", 4);
 
+        HashMap<Long, String> concepts = new HashMap<>();
+        concepts.put(1L, "race");
+
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
@@ -219,6 +222,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(concepts);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -239,6 +243,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
+        verify(cohortReviewService, times(1)).findGenderRaceEthnicityFromConcept();
         verifyNoMoreMockInteractions();
     }
 
@@ -329,6 +334,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
+        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(new HashMap<Long, String>());
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -341,6 +347,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
+        verify(cohortReviewService, times(1)).findGenderRaceEthnicityFromConcept();
         verifyNoMoreMockInteractions();
     }
 

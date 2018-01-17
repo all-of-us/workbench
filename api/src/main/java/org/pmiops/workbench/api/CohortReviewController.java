@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +74,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .status(participant.getStatus())
                             .birthDatetime(participant.getBirthDate().getTime())
                             .ethnicityConceptId(participant.getEthnicityConceptId())
+                            .ethnicity(participant.getEthnicity())
                             .genderConceptId(participant.getGenderConceptId())
-                            .raceConceptId(participant.getRaceConceptId());
+                            .gender(participant.getGender())
+                            .raceConceptId(participant.getRaceConceptId())
+                            .race(participant.getRace());
                 }
             };
 
@@ -170,6 +174,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .limit(PAGE_SIZE)
                 .collect(Collectors.toList());
 
+        lookupGenderRaceEthnicityValues(paginatedPCS);
+
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
@@ -225,6 +231,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         ParticipantCohortStatus status =
                 cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+        lookupGenderRaceEthnicityValues(Arrays.asList(status));
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(status));
     }
 
@@ -287,8 +294,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
 
-        final List<ParticipantCohortStatus> participantCohortStatuses =
+        List<ParticipantCohortStatus> participantCohortStatuses =
                 cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), pageRequest).getContent();
+
+        lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
         responseReview.setParticipantCohortStatuses(
@@ -407,6 +416,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReview.reviewedCount(0L);
         cohortReview.reviewStatus(ReviewStatus.NONE);
         return cohortReview;
+    }
+
+    private void lookupGenderRaceEthnicityValues(List<ParticipantCohortStatus> participantCohortStatuses) {
+        Map<Long, String> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
+        participantCohortStatuses.forEach(pcs -> {
+            pcs.setRace(concepts.get(pcs.getRaceConceptId()));
+            pcs.setGender(concepts.get(pcs.getGenderConceptId()));
+            pcs.setEthnicity(concepts.get(pcs.getEthnicityConceptId()));
+        });
     }
 
 }

@@ -5,6 +5,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -16,6 +18,10 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -38,6 +44,9 @@ public class CohortReviewServiceImplTest {
 
     @Mock
     private JdbcTemplate jdbcTemplate;
+
+    @Mock
+    private ConceptDao conceptDao;
 
     @InjectMocks
     private CohortReviewServiceImpl cohortReviewService;
@@ -264,6 +273,32 @@ public class CohortReviewServiceImplTest {
                 cohortReviewId,
                 pageRequest);
         verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findGenderRaceEthnicityFromConcept() throws Exception {
+        Concept ethnicityConcept = new Concept()
+                .conceptId(1L)
+                .conceptName("ethnicity");
+        Concept genderConcept = new Concept()
+                .conceptId(2L)
+                .conceptName("gender");
+        Concept raceConcept = new Concept()
+                .conceptId(3L)
+                .conceptName("race");
+
+        List<Concept> conceptsList = new ArrayList<>();
+        conceptsList.add(ethnicityConcept);
+        conceptsList.add(genderConcept);
+        conceptsList.add(raceConcept);
+
+        when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(conceptsList);
+
+        Map<Long, String> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
+
+        assertEquals("ethnicity", concepts.get(ethnicityConcept.getConceptId()));
+        assertEquals("gender", concepts.get(genderConcept.getConceptId()));
+        assertEquals("race", concepts.get(raceConcept.getConceptId()));
     }
 
     private void verifyNoMoreMockInteractions() {

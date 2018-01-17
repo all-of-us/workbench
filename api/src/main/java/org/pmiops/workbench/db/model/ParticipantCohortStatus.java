@@ -14,9 +14,12 @@ public class ParticipantCohortStatus {
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
     private Long genderConceptId;
+    private String gender;
     private Date birthDate;
     private Long raceConceptId;
+    private String race;
     private Long ethnicityConceptId;
+    private String ethnicity;
 
     @EmbeddedId
     @AttributeOverrides({
@@ -66,6 +69,20 @@ public class ParticipantCohortStatus {
         return this;
     }
 
+    @Transient
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public ParticipantCohortStatus gender(String gender) {
+        this.gender = gender;
+        return this;
+    }
+
     @Column(name = "birth_date")
     public Date getBirthDate() {
         return birthDate;
@@ -94,6 +111,20 @@ public class ParticipantCohortStatus {
         return this;
     }
 
+    @Transient
+    public String getRace() {
+        return race;
+    }
+
+    public void setRace(String race) {
+        this.race = race;
+    }
+
+    public ParticipantCohortStatus race(String race) {
+        this.race = race;
+        return this;
+    }
+
     @Column(name = "ethnicity_concept_id")
     public Long getEthnicityConceptId() {
         return ethnicityConceptId;
@@ -105,6 +136,20 @@ public class ParticipantCohortStatus {
 
     public ParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
         this.ethnicityConceptId = ethnicityConceptId;
+        return this;
+    }
+
+    @Transient
+    public String getEthnicity() {
+        return ethnicity;
+    }
+
+    public void setEthnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
+    }
+
+    public ParticipantCohortStatus ethnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
         return this;
     }
 
