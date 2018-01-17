@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import com.google.apphosting.api.ApiProxy;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
@@ -223,7 +225,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
-  private final Provider<User> userProvider;
+  private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
@@ -250,6 +252,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.apiHostName = apiHostName;
     this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  @VisibleForTesting
+  void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -557,7 +564,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     checkWorkspaceReadAccess(workspaceNamespace, workspaceId);
-    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequired(
+    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(
@@ -600,7 +607,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setDescription(toWorkspace.getDescription());
     }
 
-    // TODO(calbach): Copy cohorts.
     dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
 
@@ -611,7 +617,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.addWorkspaceUserRole(permissions);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    dbWorkspace = workspaceService.saveAndCloneCohorts(fromWorkspace, dbWorkspace);
     CloneWorkspaceResponse resp = new CloneWorkspaceResponse();
     resp.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
     return ResponseEntity.ok(resp);

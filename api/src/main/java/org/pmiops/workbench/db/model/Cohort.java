@@ -1,12 +1,15 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -19,13 +22,12 @@ public class Cohort {
   private String name;
   private String type;
   private String description;
-  private String externalId;
-  private Workspace workspace;
   private long workspaceId;
   private String criteria;
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
+  private Set<CohortReview> cohortReviews;
 
   @Id
   @GeneratedValue
@@ -117,5 +119,23 @@ public class Cohort {
 
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @OneToMany(mappedBy = "cohortId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<CohortReview> getCohortReviews() {
+    return cohortReviews;
+  }
+  
+  public void setCohortReviews(Set<CohortReview> cohortReviews) {
+    if (this.cohortReviews == null) {
+      this.cohortReviews = cohortReviews;
+      return;
+    }
+    this.cohortReviews.clear();
+    this.cohortReviews.addAll(cohortReviews);
+  }
+
+  public void addCohortReview(CohortReview cohortReview) {
+    this.cohortReviews.add(cohortReview);
   }
 }
