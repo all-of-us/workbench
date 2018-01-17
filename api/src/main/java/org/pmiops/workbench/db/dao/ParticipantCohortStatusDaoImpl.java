@@ -63,15 +63,26 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             }
 
             connection.commit();
-            connection.setAutoCommit(true);
 
         } catch (SQLException ex) {
             log.log(Level.INFO, "SQLException: " + ex.getMessage());
             rollback(connection);
             throw new RuntimeException("SQLException: " + ex.getMessage(), ex);
         } finally {
+            turnOnAutoCommit(connection);
             close(statement);
             close(connection);
+        }
+    }
+
+    private void turnOnAutoCommit(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                log.log(Level.INFO, "Problem setting auto commit to true: " + e.getMessage());
+                throw new RuntimeException("SQLException: " + e.getMessage(), e);
+            }
         }
     }
 
