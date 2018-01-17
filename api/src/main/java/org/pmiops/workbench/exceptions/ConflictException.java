@@ -18,6 +18,10 @@ public class ConflictException extends RuntimeException {
     this.errorResponse = errorResponse;
   }
 
+  public ConflictException(Throwable t) {
+    super(t);
+  }
+
   public ErrorResponse getErrorResponse() {
     return errorResponse;
   }

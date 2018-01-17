@@ -5,6 +5,8 @@ import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.firecloud.ApiException;
 
 /**
  * Utility methods related to exceptions.
@@ -24,11 +26,44 @@ public class ExceptionUtils {
     return false;
   }
 
+  public static boolean isGoogleConflictException(IOException e) {
+    if (e instanceof GoogleJsonResponseException) {
+      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
+      return code == 409;
+    }
+    return false;
+  }
+
+  public static boolean isGoogleBadRequestException(IOException e) {
+    if (e instanceof GoogleJsonResponseException) {
+      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
+      return code == 400;
+    }
+    return false;
+  }
+
   public static RuntimeException convertGoogleIOException(IOException e) {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
+    } else if (isGoogleConflictException(e)) {
+      throw new ConflictException(e);
+    } else if (isGoogleBadRequestException(e)) {
+      throw new BadRequestException(e);
     }
     throw new ServerErrorException(e);
+  }
+
+  public static RuntimeException convertFirecloudException(ApiException e) {
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
+    if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
+      throw new NotFoundException();
+    } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
+      throw new ForbiddenException();
+    } else if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+      throw new ServerUnavailableException();
+    } else {
+      throw new ServerErrorException();
+    }
   }
 
   public static <T> T executeWithRetries(AbstractGoogleClientRequest<T> request)
