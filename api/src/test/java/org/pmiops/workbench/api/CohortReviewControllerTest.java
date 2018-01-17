@@ -150,6 +150,17 @@ public class CohortReviewControllerTest {
         Cohort cohort = new Cohort();
         cohort.setWorkspaceId(workspaceId);
 
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
+        final Date dob = new Date(System.currentTimeMillis());
+
+        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
+                .participantKey(key)
+                .status(CohortStatus.INCLUDED)
+                .birthDate(dob)
+                .ethnicityConceptId(1L)
+                .genderConceptId(1L)
+                .raceConceptId(1L);
+
         Workspace workspace = new Workspace();
         workspace.setWorkspaceId(workspaceId);
         workspace.setWorkspaceNamespace(namespace);
@@ -180,8 +191,8 @@ public class CohortReviewControllerTest {
         pcs.setRaceConceptId(0L);
 
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
-                            "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
-                            "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
+                "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
+                "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
         cohort.setCriteria(definition);
 
@@ -204,6 +215,10 @@ public class CohortReviewControllerTest {
         rm.put("race_concept_id", 3);
         rm.put("ethnicity_concept_id", 4);
 
+        List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
+        participants.add(dbParticipant);
+        Page expectedPage = new PageImpl(participants);
+
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
@@ -220,6 +235,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
+        when(cohortReviewService.findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class))).thenReturn(expectedPage);
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
@@ -239,6 +255,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
+        verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
         verifyNoMoreMockInteractions();
     }
 
