@@ -10,7 +10,7 @@ import {
 
 
 /**
- * Review Workspace research purposes. Users with the REVIEW_RESEARCH_PURPOSE permission use this
+ * Review ID Verifications. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
 // TODO(RW-85) Design this UI. Current implementation is a rough sketch.
@@ -18,7 +18,7 @@ import {
   templateUrl: './component.html',
   styleUrls: ['./component.css']
 })
-export class AdminReviewIdVerificartionComponent implements OnInit {
+export class AdminReviewIdVerificationComponent implements OnInit {
   workspaces: Workspace[] = [];
   contentLoaded = false;
 
