@@ -148,7 +148,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   /**
-   * Create a map with key as ~/workspaceName/workspaceID/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
+   * Create a map with key as ~/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
    * @param workspaceNamespace
    * @param workspaceId
    * @param fileList
