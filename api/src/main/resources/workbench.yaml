@@ -459,8 +459,8 @@ paths:
 
   /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list/:
     get:
-      summary: Get details of Python files from google Bucket
-      description: Returns list of name and url of python files from google bucket.
+      summary: Get details of Python files from google Bucket directory notebook
+      description: Returns list of name and path of python files from google bucket, directory notebook.
       operationId: getNoteBookList
       tags:
         - workspaces
