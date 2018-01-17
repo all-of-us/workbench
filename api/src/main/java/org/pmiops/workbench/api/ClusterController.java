@@ -140,7 +140,7 @@ public class ClusterController implements ClusterApiDelegate {
   public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId, List<FileDetail> fileList) {
     try {
       String clusterName = convertClusterName(workspaceId);
-      this.notebooksService.localize(workspaceNamespace, clusterName, convertfileDetailsToMap(workspaceNamespace, workspaceId, fileList));
+      this.notebooksService.localize(workspaceNamespace, clusterName, convertfileDetailsToMap(fileList));
     } catch (ApiException e) {
         throw new RuntimeException(e);
     }
@@ -149,13 +149,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   /**
    * Create a map with key as ~/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
-   * @param workspaceNamespace
-   * @param workspaceId
    * @param fileList
    * @return
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
-  private HashMap convertfileDetailsToMap(String workspaceNamespace, String workspaceId, List<FileDetail> fileList) {
+  private HashMap convertfileDetailsToMap(List<FileDetail> fileList) {
     HashMap fileDetailsMap = new HashMap();
     for (FileDetail fileDetails : fileList) {
       StringBuffer key = new StringBuffer("~/");
