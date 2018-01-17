@@ -12,17 +12,10 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -199,64 +192,6 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void saveParticipantCohortStatuses() throws Exception {
-//        Whitebox.setInternalState(cohortReviewService, "entityManager", entityManager);
-//        Whitebox.setInternalState(cohortReviewService, "batchSize", 50);
-//        DataSource mockDatasource = mock(DataSource.class);
-//        Connection mockConnection = mock(Connection.class);
-//        PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
-//
-//        String compiledQuery = "insert into participant_cohort_status(" +
-//                "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
-//                "status, cohort_review_id, participant_id)" +
-//                " values (?, ?, ?, ?, ?, ?, ?)";
-//
-//        List<ParticipantCohortStatus> pcsList = new ArrayList<>();
-//        final ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus();
-//        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey(1, 1);
-//        participantCohortStatus.setParticipantKey(key);
-//        participantCohortStatus.setEthnicityConceptId(1L);
-//        participantCohortStatus.setGenderConceptId(1L);
-//        participantCohortStatus.setRaceConceptId(1L);
-//        pcsList.add(participantCohortStatus);
-//
-//        when(jdbcTemplate.getDataSource()).thenReturn(mockDatasource);
-//        when(mockDatasource.getConnection()).thenReturn(mockConnection);
-//        doNothing().when(mockConnection).setAutoCommit(false);
-//        when(mockConnection.prepareStatement(compiledQuery)).thenReturn(mockPreparedStatement);
-//        doNothing().when(mockPreparedStatement).setDate(1, participantCohortStatus.getBirthDate());
-//        doNothing().when(mockPreparedStatement).setLong(2, participantCohortStatus.getEthnicityConceptId());
-//        doNothing().when(mockPreparedStatement).setLong(3, participantCohortStatus.getGenderConceptId());
-//        doNothing().when(mockPreparedStatement).setLong(4, participantCohortStatus.getRaceConceptId());
-//        doNothing().when(mockPreparedStatement).setInt(5, 0);
-//        doNothing().when(mockPreparedStatement).setLong(6, participantCohortStatus.getParticipantKey().getCohortReviewId());
-//        doNothing().when(mockPreparedStatement).setLong(7, participantCohortStatus.getParticipantKey().getParticipantId());
-//        doNothing().when(mockPreparedStatement).addBatch();
-//        when(mockPreparedStatement.executeBatch()).thenReturn(new int[]{1});
-//        doNothing().when(mockPreparedStatement).close();
-//        doNothing().when(mockConnection).close();
-//
-//        cohortReviewService.saveParticipantCohortStatuses(pcsList);
-//
-//        verify(jdbcTemplate).getDataSource();
-//        verify(mockDatasource).getConnection();
-//        verify(mockConnection).setAutoCommit(false);
-//        verify(mockConnection).prepareStatement(compiledQuery);
-//        verify(mockPreparedStatement).setDate(1, participantCohortStatus.getBirthDate());
-//        verify(mockPreparedStatement).setLong(2, participantCohortStatus.getEthnicityConceptId());
-//        verify(mockPreparedStatement).setLong(3, participantCohortStatus.getGenderConceptId());
-//        verify(mockPreparedStatement).setLong(4, participantCohortStatus.getRaceConceptId());
-//        verify(mockPreparedStatement).setInt(5, 0);
-//        verify(mockPreparedStatement).setLong(6, participantCohortStatus.getParticipantKey().getCohortReviewId());
-//        verify(mockPreparedStatement).setLong(7, participantCohortStatus.getParticipantKey().getParticipantId());
-//        verify(mockPreparedStatement).addBatch();
-//        verify(mockPreparedStatement).executeBatch();
-//        verify(mockPreparedStatement).close();
-//        verify(mockConnection).close();
-//        verifyNoMoreMockInteractions();
-    }
-
-    @Test
     public void saveParticipantCohortStatus() throws Exception {
         ParticipantCohortStatus pcs = new ParticipantCohortStatus();
 
@@ -332,7 +267,11 @@ public class CohortReviewServiceImplTest {
     }
 
     private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortDao, cohortReviewDao, participantCohortStatusDao, workspaceService);
+        verifyNoMoreInteractions(
+                cohortDao,
+                cohortReviewDao,
+                participantCohortStatusDao,
+                workspaceService);
     }
 
 }

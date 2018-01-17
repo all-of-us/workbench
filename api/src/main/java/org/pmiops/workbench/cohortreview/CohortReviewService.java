@@ -63,14 +63,6 @@ public interface CohortReviewService {
     /**
      * Save the specified {@link ParticipantCohortStatus}.
      *
-     * @param participantCohortStatuses
-     * @return
-     */
-    Iterable<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses);
-
-    /**
-     * Save the specified {@link ParticipantCohortStatus}.
-     *
      * @param participantCohortStatus
      * @return
      */
