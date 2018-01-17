@@ -297,21 +297,23 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     for (const file of this.notebookList){
       if (file.push === false) {
         this.columnHeaderNotebook = false;
-        if(pushNotebookEnable)
+        if(pushNotebookEnable){
           break;
+        }
         notebookUnselect = true;
       }
-      if(file.push === true){
+      if(file.push === true) {
         this.pushNotebookEnable = true;
-        if(notebookUnselect)
+        if(notebookUnselect) {
           break;
+        }
         pushNotebookEnable = true;
       }
     }
   }
 
   columnHeaderNotebookHandler() : void {
-    for (const file of this.notebookList){
+    for (const file of this.notebookList) {
       file.push = this.columnHeaderNotebook;
     }
     this.pushNotebookEnable = this.columnHeaderNotebook;
@@ -337,7 +339,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   pushToNotebookServer(notebook): void {
     const list = [];
-    list.push(notebook.filter(function(item){
+    list.push(notebook.filter(function(item) {
       return item.push;
     }));
 
