@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
@@ -239,5 +240,44 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
     }
     return WorkspaceAccessLevel.fromValue(userAccess);
+  }
+
+  @Override
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
+      String workspaceId, WorkspaceAccessLevel requiredAccess) {
+    WorkspaceAccessLevel access;
+    try {
+      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (Exception e) {
+      throw e;
+    }
+
+    if (workspaceAccessLevelCompare(requiredAccess, access) == -1) {
+      throw new ForbiddenException(String.format("You do not have sufficient permissions to access workspace %s/%s",
+          workspaceNamespace, workspaceId));
+    } else {
+      return access;
+    }
+  }
+
+
+  private int workspaceAccessLevelCompare(WorkspaceAccessLevel accessLevelOne,
+      WorkspaceAccessLevel accessLevelTwo) {
+    if (accessLevelOne.equals(accessLevelTwo)) {
+      return 0;
+    } else if (accessLevelOne.equals(WorkspaceAccessLevel.OWNER)) {
+      return -1;
+    } else if (accessLevelTwo.equals(WorkspaceAccessLevel.OWNER)) {
+      return 1;
+    } else if (accessLevelOne.equals(WorkspaceAccessLevel.NO_ACCESS)) {
+      return 1;
+    } else if (accessLevelTwo.equals(WorkspaceAccessLevel.NO_ACCESS)){
+      return -1;
+    } else if (accessLevelOne.equals(WorkspaceAccessLevel.WRITER) && accessLevelTwo.equals(WorkspaceAccessLevel.READER)) {
+      return -1;
+    } else if (accessLevelTwo.equals(WorkspaceAccessLevel.WRITER) && accessLevelOne.equals(WorkspaceAccessLevel.READER)) {
+      return 1;
+    }
+    throw new ServerErrorException("Access level not handled by compare.");
   }
 }

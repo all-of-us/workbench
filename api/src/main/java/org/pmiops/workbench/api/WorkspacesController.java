@@ -311,25 +311,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private void checkWorkspaceWriteAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
-          WorkspaceAccessLevel.WRITER.equals(userAccess))) {
-      throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
-          workspaceNamespace, workspaceId));
-    }
-  }
-
-  private void checkWorkspaceReadAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
-          WorkspaceAccessLevel.WRITER.equals(userAccess) ||
-          WorkspaceAccessLevel.READER.equals(userAccess))) {
-      throw new ForbiddenException(String.format("Insufficient permissions to read workspace %s/%s",
-          workspaceNamespace, workspaceId));
-    }
-  }
-
   private org.pmiops.workbench.firecloud.model.Workspace
       attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     try {
@@ -507,7 +488,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    checkWorkspaceWriteAccess(workspaceNamespace, workspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
 
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
@@ -552,7 +534,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspace.getNamespace(), workspace.getName()));
     }
 
-    checkWorkspaceReadAccess(workspaceNamespace, workspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {

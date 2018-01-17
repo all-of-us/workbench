@@ -83,11 +83,11 @@ public class ClusterController implements ClusterApiDelegate {
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
       String workspaceId) {
 
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+          workspaceId, WorkspaceAccessLevel.WRITER);
     } catch (Exception e) {
       throw e;
     }
@@ -109,11 +109,11 @@ public class ClusterController implements ClusterApiDelegate {
   public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace,
       String workspaceId) {
 
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+          workspaceId, WorkspaceAccessLevel.WRITER);
     } catch (Exception e) {
       throw e;
     }
@@ -134,11 +134,11 @@ public class ClusterController implements ClusterApiDelegate {
   public ResponseEntity<Cluster> getCluster(String workspaceNamespace,
       String workspaceId) {
 
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
     WorkspaceAccessLevel accessLevel;
     try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+          workspaceId, WorkspaceAccessLevel.WRITER);
     } catch (Exception e) {
       throw e;
     }
