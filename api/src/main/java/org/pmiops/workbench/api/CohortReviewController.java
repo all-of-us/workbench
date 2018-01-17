@@ -166,6 +166,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .reviewedCount(0L)
                 .reviewStatus(ReviewStatus.CREATED);
 
+        //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
         List<ParticipantCohortStatus> paginatedPCS =
