@@ -297,14 +297,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     for (const file of this.notebookList){
       if (file.push === false) {
         this.columnHeaderNotebook = false;
-        if(pushNotebookEnable){
+        if (pushNotebookEnable) {
           break;
         }
         notebookUnselect = true;
       }
-      if(file.push === true) {
+      if (file.push === true) {
         this.pushNotebookEnable = true;
-        if(notebookUnselect) {
+        if (notebookUnselect) {
           break;
         }
         pushNotebookEnable = true;
@@ -312,7 +312,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  columnHeaderNotebookHandler() : void {
+  columnHeaderNotebookHandler(): void {
     for (const file of this.notebookList) {
       file.push = this.columnHeaderNotebook;
     }
