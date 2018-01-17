@@ -3,10 +3,7 @@ package org.pmiops.workbench.db.model;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.CohortStatus;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.Date;
 import java.util.Objects;
 
@@ -22,6 +19,12 @@ public class ParticipantCohortStatus {
     private Long ethnicityConceptId;
 
     @EmbeddedId
+    @AttributeOverrides({
+            @AttributeOverride(name="cohortReviewId",
+                    column=@Column(name="cohort_review_id")),
+            @AttributeOverride(name="participantId",
+                    column=@Column(name="participant_id"))
+    })
     public ParticipantCohortStatusKey getParticipantKey() {
         return participantKey;
     }

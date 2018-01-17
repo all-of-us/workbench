@@ -6,7 +6,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCohortStatus, Long> {
+public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCohortStatus, Long>, ParticipantCohortStatusDaoCustom {
 
     Slice<ParticipantCohortStatus> findByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId,
                                                                                Pageable pageRequest);
