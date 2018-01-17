@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -53,13 +54,22 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId) {
-        Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
-        if (workspace.getWorkspaceId() != workspaceId) {
-            throw new NotFoundException(
-                    String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
-                            workspaceNamespace, workspaceName));
-        }
+    public void validateMatchingWorkspace(
+        String workspaceNamespace, String workspaceName,
+        long workspaceId, WorkspaceAccessLevel accessRequired) {
+      // This also enforces registered auth domain.
+      try {
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, accessRequired);
+      } catch (Exception e) {
+        throw e;
+      }
+
+      Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
+      if (workspace.getWorkspaceId() != workspaceId) {
+          throw new NotFoundException(
+                  String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
+                          workspaceNamespace, workspaceName));
+      }
     }
 
     @Override

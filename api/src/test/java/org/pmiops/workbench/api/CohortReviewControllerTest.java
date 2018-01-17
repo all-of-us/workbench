@@ -73,9 +73,7 @@ public class CohortReviewControllerTest {
         CohortReview cohortReview = new CohortReview();
         cohortReview.setReviewSize(1);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
 
         try {
@@ -87,7 +85,6 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
@@ -98,9 +95,7 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
             fail("Should have thrown a BadRequestException!");
@@ -108,7 +103,6 @@ public class CohortReviewControllerTest {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
 
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
 
         verifyNoMoreMockInteractions();
     }
@@ -132,12 +126,10 @@ public class CohortReviewControllerTest {
         workspace.setWorkspaceNamespace(namespace);
         workspace.setFirecloudName(name);
 
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -150,8 +142,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         verifyNoMoreMockInteractions();
     }
 
@@ -238,10 +229,9 @@ public class CohortReviewControllerTest {
         Page expectedPage = new PageImpl(participants);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
@@ -261,7 +251,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
+        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
         verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200, 0L);
@@ -314,9 +304,7 @@ public class CohortReviewControllerTest {
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
         List<String> filterColumns = new ArrayList<String>();
         List<String> filterValues = new ArrayList<String>();
-        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
-
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        long workspaceId = 1;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         final Date dob = new Date(System.currentTimeMillis());
@@ -378,11 +366,10 @@ public class CohortReviewControllerTest {
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
         assertEquals(respCohortReview, response.getBody());
-
+        verify(cohortReviewService, atLeast(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
-        verify(workspaceService, atLeast(1)).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 
