@@ -611,16 +611,15 @@ public class WorkspacesControllerTest {
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
         cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
-    // TODO(calbach): Compare actual statuses, once fully supported.
-    assertThat(gotCr1.getParticipantCohortStatuses().size())
-        .isEqualTo(cr1.getParticipantCohortStatuses().size());
+    assertThat(gotCr1.getParticipantCohortStatuses())
+        .isEqualTo(cr1.getParticipantCohortStatuses());
 
     CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
         cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
-    assertThat(gotCr2.getParticipantCohortStatuses().size())
-        .isEqualTo(cr2.getParticipantCohortStatuses().size());
+    assertThat(gotCr2.getParticipantCohortStatuses())
+        .isEqualTo(cr2.getParticipantCohortStatuses());
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
