@@ -48,6 +48,7 @@
     "@angular/cli": "^1.4.7",
     "@angular/compiler-cli": "^4.4.5",
     "@angular/language-service": "^4.4.5",
+    "@types/google.analytics": "0.0.36",
     "@types/jasmine": "^2.5.54",
     "@types/jasminewd2": "^2.0.3",
     "@types/node": "^6.0.89",

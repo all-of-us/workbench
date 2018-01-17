@@ -22,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -106,12 +109,15 @@ public class WorkspacesControllerTest {
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.bigquery = new BigQueryConfig();
+    workbenchConfig.bigquery.projectId = "project";
+    workbenchConfig.bigquery.dataSetId = "dataset";
 
     CLOCK.setInstant(NOW);
     this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
         userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com");
-
+        "https://api.blah.com", Providers.of(workbenchConfig));
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -162,6 +168,8 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
+    verify(fireCloudService).grantGoogleRoleToUser(workspace.getNamespace(),
+        FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, this.loggedInUserEmail);
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),

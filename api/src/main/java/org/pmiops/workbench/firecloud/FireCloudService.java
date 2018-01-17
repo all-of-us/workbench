@@ -2,11 +2,10 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
-
-import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
 /**
@@ -14,6 +13,8 @@ import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
  * for internal use.
  */
 public interface FireCloudService {
+
+  public static final String BIGQUERY_JOB_USER_GOOGLE_ROLE = "bigquery.jobUser";
 
   /**
    * @return true if the user making the current request is enabled in FireCloud, false otherwise.
@@ -47,6 +48,8 @@ public interface FireCloudService {
    * Creates a new FC workspace.
    */
   void createWorkspace(String projectName, String workspaceName) throws ApiException;
+
+  void grantGoogleRoleToUser(String projectName, String role, String email) throws ApiException;
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 
