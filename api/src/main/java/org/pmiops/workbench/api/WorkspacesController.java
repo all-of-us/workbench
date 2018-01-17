@@ -482,12 +482,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
     catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
           workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
     }
     catch(NullPointerException ex){
       throw new NotFoundException(String.format("Workspace %s/%s not found",
