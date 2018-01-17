@@ -73,7 +73,6 @@ public class CohortReviewControllerTest {
         CohortReview cohortReview = new CohortReview();
         cohortReview.setReviewSize(1);
 
-
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
 
         try {
@@ -95,14 +94,12 @@ public class CohortReviewControllerTest {
         long cohortId = 1;
         long cdrVersionId = 1;
 
-
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
             fail("Should have thrown a BadRequestException!");
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Cohort Review size must be between 0 and 10000", e.getMessage());
         }
-
 
         verifyNoMoreMockInteractions();
     }
@@ -125,7 +122,6 @@ public class CohortReviewControllerTest {
         workspace.setWorkspaceId(workspaceId);
         workspace.setWorkspaceNamespace(namespace);
         workspace.setFirecloudName(name);
-
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
@@ -229,6 +225,9 @@ public class CohortReviewControllerTest {
         Page expectedPage = new PageImpl(participants);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
+        HashMap<Long, String> concepts = new HashMap<>();
+        concepts.put(1L, "race");
+
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
@@ -245,6 +244,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(concepts);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
         when(cohortReviewService.findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class))).thenReturn(expectedPage);
 
@@ -266,7 +266,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
-        verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
+        verify(cohortReviewService, times(1)).findGenderRaceEthnicityFromConcept();
         verifyNoMoreMockInteractions();
     }
 
@@ -361,6 +361,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
+        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(new HashMap<Long, String>());
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
 
@@ -376,6 +377,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
+        verify(cohortReviewService, times(1)).findGenderRaceEthnicityFromConcept();
         verifyNoMoreMockInteractions();
     }
 

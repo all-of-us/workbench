@@ -1,8 +1,15 @@
 package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.db.dao.*;
-import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +25,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
@@ -131,5 +140,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
+    }
+
+    @Override
+    public Map<Long, String> findGenderRaceEthnicityFromConcept() {
+        List<Concept> conceptList = conceptDao.findGenderRaceEthnicityFromConcept();
+        return conceptList.stream().collect(Collectors.toMap(Concept::getConceptId, Concept::getConceptName));
     }
 }
