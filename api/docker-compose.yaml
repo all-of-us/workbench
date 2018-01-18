@@ -99,6 +99,19 @@ services:
       command: wait-for db:3306 -- ./run-bigdata-migrations.sh bigdata local
       env_file:
         - db-cdr/vars.env
+  db-generate-cloudsql-cdr:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+      command: wait-for db:3306 -- ./generate-cloudsql-cdr.sh
+      env_file:
+        - db-cdr/vars.env
   drop-cdr-db:
     depends_on:
       - db
