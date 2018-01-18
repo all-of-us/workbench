@@ -5,6 +5,7 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
@@ -20,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -36,8 +38,6 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -74,7 +74,7 @@ public class CohortsControllerTest {
 
 
   @TestConfiguration
-  @Import(WorkspaceServiceImpl.class)
+  @Import({WorkspaceServiceImpl.class, CohortService.class})
   @MockBean(FireCloudService.class)
   static class Configuration {
     @Bean
@@ -166,6 +166,22 @@ public class CohortsControllerTest {
     cohort.setName(COHORT_NAME);
     cohort.setCriteria(cohortCriteria);
     return cohort;
+  }
+
+  @Test
+  public void testGetCohortsInWorkspace() throws Exception {
+    Cohort c1 = createDefaultCohort();
+    c1.setName("c1");
+    c1 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c1).getBody();
+    Cohort c2 = createDefaultCohort();
+    c2.setName("c2");
+    c2 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c2).getBody();
+
+    List<Cohort> cohorts = cohortsController
+        .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems();
+    assertThat(cohorts).containsExactlyElementsIn(ImmutableSet.of(c1, c2));
   }
 
   @Test

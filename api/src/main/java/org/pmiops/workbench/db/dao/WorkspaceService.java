@@ -12,8 +12,10 @@ public interface WorkspaceService {
   public Workspace get(String ns, String firecloudName);
   public Workspace getByName(String ns, String name);
   public Workspace getRequired(String ns, String firecloudName);
+  public Workspace getRequiredWithCohorts(String ns, String firecloudName);
   public Workspace saveWithLastModified(Workspace workspace);
   public List<Workspace> findForReview();
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
   public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
+  public Workspace saveAndCloneCohorts(Workspace from, Workspace to);
 }

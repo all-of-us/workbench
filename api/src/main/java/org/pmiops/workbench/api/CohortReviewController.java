@@ -137,7 +137,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
         }
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = null;
+        try {
+            cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        } catch (NotFoundException nfe) {
+            cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
+        }
         if(cohortReview.getReviewSize() > 0) {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
@@ -165,12 +170,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .reviewSize(participantCohortStatuses.size())
                 .reviewedCount(0L)
                 .reviewStatus(ReviewStatus.CREATED);
-        List<ParticipantCohortStatus> paginatedPCS = participantCohortStatuses
-                .stream()
-                .limit(PAGE_SIZE)
-                .collect(Collectors.toList());
 
+        //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
+
+        List<ParticipantCohortStatus> paginatedPCS =
+                cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID)).getContent();
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
