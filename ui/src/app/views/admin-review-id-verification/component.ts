@@ -3,9 +3,9 @@ import {Component, OnInit} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
-  ResearchPurposeReviewRequest,
-  Workspace,
-  WorkspacesService,
+  // IdVerificationRequest,
+  Profile,
+  ProfileService,
 } from 'generated';
 
 
@@ -19,37 +19,37 @@ import {
   styleUrls: ['./component.css']
 })
 export class AdminReviewIdVerificationComponent implements OnInit {
-  workspaces: Workspace[] = [];
+  profiles: Profile[] = [];
   contentLoaded = false;
 
   constructor(
       private errorHandlingService: ErrorHandlingService,
-      private workspacesService: WorkspacesService
+      private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.workspacesService.getWorkspacesForReview())
+    this.errorHandlingService.retryApi(this.profileService.getIdVerificationsForReview())
         .subscribe(
-            workspacesResp => {
-              for (const ws of workspacesResp.items) {
-                this.workspaces.push(ws);
+            profilesResp => {
+              for (const ws of profilesResp.profiles) {
+                this.profiles.push(ws);
               }
               this.contentLoaded = true;
             });
   }
 
-  approve(workspace: Workspace, approved: boolean): void {
-    const request = <ResearchPurposeReviewRequest>{
-      approved: approved,
-    };
-    this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
-        workspace.namespace, workspace.id, request))
-        .subscribe(
-            resp => {
-              const i = this.workspaces.indexOf(workspace, 0);
-              if (i >= 0) {
-                this.workspaces.splice(i, 1);
-              }
-            });
-  }
+  // approve(workspace: Workspace, approved: boolean): void {
+  //   const request = <ResearchPurposeReviewRequest>{
+  //     approved: approved,
+  //   };
+  //   this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
+  //       workspace.namespace, workspace.id, request))
+  //       .subscribe(
+  //           resp => {
+  //             const i = this.workspaces.indexOf(workspace, 0);
+  //             if (i >= 0) {
+  //               this.workspaces.splice(i, 1);
+  //             }
+  //           });
+  // }
 }

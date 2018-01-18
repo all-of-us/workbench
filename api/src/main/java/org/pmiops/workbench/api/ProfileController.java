@@ -6,12 +6,14 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.blockscore.BlockscoreService;
@@ -28,11 +30,13 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
+import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -352,5 +356,22 @@ public class ProfileController implements ProfileApiDelegate {
     // This does not update the name in Google.
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
+    IdVerificationListResponse response = new IdVerificationListResponse();
+    List<Profile> responseList = new ArrayList<Profile>();
+    try {
+      for (User user : userService.getNonVerified()) {
+        responseList.add(profileService.getProfile(user));
+      }
+    } catch (ApiException e) {
+      log.log(Level.INFO, "Error calling FireCloud", e);
+      return ResponseEntity.status(e.getCode()).build();
+    }
+
+    response.setProfileList(responseList);
+    return ResponseEntity.ok(response);
   }
 }

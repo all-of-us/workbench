@@ -159,7 +159,7 @@ paths:
   /v1/invitation-key-verification:
     post:
       tags:
-        - profile
+        - Profile
       description: Verifies invitation key.
       operationId: invitationKeyVerification
       security: []
@@ -565,6 +565,24 @@ paths:
           description: A list of workspaces
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
+
+  /v1/id-verification/list:
+    get:
+      tags:
+        - profile
+      description: >
+          Returns ID verifications that need review. Requires
+          REVIEW_ID_VERIFICATION authority.
+      operationId: getIdVerificationsForReview
+      responses:
+        200:
+          description: A list of users to be id verified
+          schema:
+            $ref: "#/definitions/IdVerificationListResponse"
+        403:
+          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
@@ -1394,7 +1412,8 @@ definitions:
         # https://github.com/swagger-api/swagger-codegen/issues/4261
         # TODO: Remove this sentinel when adding a new enum value with a
         # unique prefix (but leave the above cautionary comment).
-        _PREVENT_COMMON_PREFIX_TRIMMING
+        _PREVENT_COMMON_PREFIX_TRIMMING,
+        REVIEW_ID_VERIFICATION
     ]
 
   WorkspaceListResponse:
@@ -2444,6 +2463,16 @@ definitions:
         $ref: '#/definitions/Workspace'
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
+
+  IdVerificationListResponse:
+    type: object
+    required:
+      - profileList
+    properties:
+      profileList:
+        type: "array"
+        items:
+          $ref: "#/definitions/Profile"
 
   Concept:
     type: object

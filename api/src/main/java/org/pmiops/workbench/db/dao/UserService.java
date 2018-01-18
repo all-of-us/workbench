@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.function.Function;
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
@@ -159,5 +160,9 @@ public class UserService {
         return user;
       }
     });
+  }
+
+  public List<User> getNonVerified() {
+    return userDao.findByBlockscoreVerificationIsValidIsNotNull();
   }
 }
