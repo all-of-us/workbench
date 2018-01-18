@@ -1,5 +1,3 @@
-/* tslint:disable:no-unused-variable */
-// TODO (jms) - this is a stub, when written, make sure it fully passes linting
 import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
@@ -7,7 +5,6 @@ import {ReviewStateService} from '../review-state.service';
 
 import {
   CohortAnnotationDefinition,
-  CohortAnnotationDefinitionService,
   ParticipantCohortAnnotation,
 } from 'generated';
 
@@ -18,12 +15,12 @@ interface Annotation {
 
 /*
  * Curried predicate function that matches CohortAnnotationDefinitions to
- * ParticipantCohortAnnotations - byDefnId(definition)(value) => true/false.
+ * ParticipantCohortAnnotations - byDefinitionId(definition)(value) => true/false.
  */
-const byDefnId =
-  ({cohortAnnotationDefinitionId: defnId}: Annotation['definition']) =>
-  ({annotationDefinitionId: valId}: Annotation['value']): boolean =>
-  (defnId === valId);
+const byDefinitionId =
+  ({cohortAnnotationDefinitionId}: CohortAnnotationDefinition) =>
+  ({annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
+  (cohortAnnotationDefinitionId === annotationDefinitionId);
 
 /*
  * Curried ParticipantCohortAnnotation factory - generates a blank value, given
@@ -34,34 +31,43 @@ const valueFactory =
   (): ParticipantCohortAnnotation =>
   (<ParticipantCohortAnnotation>{participantId, cohortReviewId});
 
+/*
+ * The identity function (useful for filtering objects by truthiness)
+ */
+const identity = obj => obj;
+
 @Component({
   selector: 'app-annotations',
   templateUrl: './annotations.component.html',
   styleUrls: ['./annotations.component.css'],
 })
 export class AnnotationsComponent implements OnInit {
-  private annotations$: Observable<Annotation[]>;
-  private verbosity = false;
+  annotations$: Observable<Annotation[]>;
 
-  constructor(
-    private state: ReviewStateService,
-    private annotationAPI: CohortAnnotationDefinitionService,
-  ) {}
+  /* Determines if the children should show the datatype of the annotation */
+  /* tslint:disable-next-line:no-unused-variable */
+  verbosity = false;
+
+  constructor(private state: ReviewStateService) {}
 
   ngOnInit() {
-    const defs$ = this.state.annotationDefinitions$;
-    const vals$ = this.state.annotationValues$;
+    /* All four of these get filtered for existence; they must all exist for
+     * this component to make any sense
+     */
+    const defs$ = this.state.annotationDefinitions$.filter(identity);
+    const vals$ = this.state.annotationValues$.filter(identity);
+    const pid$ = this.state.participant$.filter(identity).pluck('participantId');
+    const rid$ = this.state.review$.filter(identity).pluck('cohortReviewId');
 
-    const factory$ = Observable.combineLatest(
-        this.state.participant$.pluck('participantId'),
-        this.state.review.pluck('cohortReviewId'))
+    const factory$ = Observable
+      .combineLatest(pid$, rid$)
       .map(vals => valueFactory(vals));
 
     this.annotations$ = Observable
       .combineLatest(defs$, vals$, factory$)
       .map(([defs, vals, factoryFunc]) =>
         defs.map(definition => {
-          const value = vals.find(byDefnId(definition)) || factoryFunc();
+          const value = vals.find(byDefinitionId(definition)) || factoryFunc();
           return <Annotation>{definition, value};
         }));
   }

@@ -1,8 +1,7 @@
-/* tslint:disable:no-unused-variable */
-// TODO (jms) - this is a stub, when written, make sure it fully passes linting
 import {Component, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
@@ -20,7 +19,7 @@ import {
   templateUrl: './participant-annotation.component.html',
   styleUrls: ['./participant-annotation.component.css']
 })
-export class ParticipantAnnotationComponent implements OnInit {
+export class ParticipantAnnotationComponent implements OnInit  {
   @Input() definition: Definition;
   @Input() value: Annotation;
   @Input() verbose: boolean;
@@ -30,48 +29,67 @@ export class ParticipantAnnotationComponent implements OnInit {
   private expandText = false;
   readonly kinds = AnnotationType;
 
-  private _create;
-  private _update;
-  private _delete;
-
   constructor(
     private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
-  ) {
-    this._create = reviewAPI.createParticipantCohortAnnotation;
-    this._update = reviewAPI.updateParticipantCohortAnnotation;
-    this._delete = reviewAPI.deleteParticipantCohortAnnotation;
-  }
+  ) {}
 
   ngOnInit() {
+    // TODO (jms) - once the backend is in place, here we'll establish
+    // delegating to create / update / destroy as is appropriate for changes to
+    // this.control
+    this.subscription = Observable.combineLatest(
+        this.control.valueChanges,
+        this.control.statusChanges)
+      .subscribe(console.log);
   }
 
-  create(kind, value) {
+  create(value): Observable<Annotation> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const pid = this.value.participantId;
     const request = <Annotation>{
       ...this.value,
       [this.valuePropertyName]: value
     };
-    return this._create(ns, wsid, cid, pid, request);
+    return this.reviewAPI.createParticipantCohortAnnotation(ns, wsid, cid, pid, request);
   }
 
-  update(value) {
+  update(value): Observable<Annotation> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const aid = this.definition.cohortAnnotationDefinitionId;
     const pid = this.value.participantId;
     const request = <Request>{
       [this.valuePropertyName]: value
     };
-    return this._update(ns, wsid, cid, pid, aid, request);
+    return this.reviewAPI.updateParticipantCohortAnnotation(ns, wsid, cid, pid, aid, request);
   }
 
-  delete() {
+  delete(): Observable<{}> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const aid = this.definition.cohortAnnotationDefinitionId;
     const pid = this.value.participantId;
-    return this._delete(ns, wsid, cid, pid, aid);
+    return this.reviewAPI.deleteParticipantCohortAnnotation(ns, wsid, cid, pid, aid);
+  }
+
+  refresh(): Observable<Annotation[]> {
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const pid = this.value.participantId;
+    return (this.reviewAPI
+      .getParticipantCohortAnnotations(ns, wsid, cid, pid)
+      .pluck('items') as Observable<Annotation[]>);
+  }
+
+  toggleExpandText() {
+    this.expandText = !this.expandText;
+  }
+
+  setEditMode() {
+    this.state.annotationMgrState.next({
+      open: true,
+      mode: 'edit',
+      defn: this.definition
+    });
   }
 
   get valuePropertyName() {
@@ -88,21 +106,9 @@ export class ParticipantAnnotationComponent implements OnInit {
     return this.definition.columnName.split(' ').join('-');
   }
 
-  get datatype() {
+  get datatypeDisplay() {
     return this.verbose
       ? ` (${this.definition.annotationType})`
       : '';
-  }
-
-  toggleExpandText() {
-    this.expandText = !this.expandText;
-  }
-
-  edit() {
-    this.state.annotationMgrState.next({
-      open: true,
-      mode: 'edit',
-      defn: this.definition
-    });
   }
 }

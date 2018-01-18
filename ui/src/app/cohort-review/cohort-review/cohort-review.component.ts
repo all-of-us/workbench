@@ -2,6 +2,8 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
+import {CreateReviewComponent} from '../create-review/create-review.component';
+import {SidebarDirective} from '../directives/sidebar.directive';
 import {ReviewStateService} from '../review-state.service';
 
 import {ReviewStatus} from 'generated';
@@ -12,8 +14,8 @@ import {ReviewStatus} from 'generated';
   styleUrls: ['./cohort-review.component.css']
 })
 export class CohortReviewComponent implements OnInit, OnDestroy {
-  @ViewChild('createReviewModal') createReviewModal;
-  @ViewChild('sidebar') sidebar;
+  @ViewChild('createReviewModal') createReviewModal: CreateReviewComponent;
+  @ViewChild('sidebar') sidebar: SidebarDirective;
   private subscription: Subscription;
 
   constructor(

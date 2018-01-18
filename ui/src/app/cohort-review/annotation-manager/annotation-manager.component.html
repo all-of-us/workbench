@@ -2,9 +2,9 @@
   <h3 class="modal-title">Cohort Annotations</h3>
 
   <div class="modal-body modal-body-custom" [style.min-height]="twoThirds">
-    <app-set-annotations-master
+    <app-set-annotation-master
       *ngIf="mode === 'overview'">
-    </app-set-annotations-master>
+    </app-set-annotation-master>
 
     <app-set-annotation-detail
       *ngIf="mode === 'edit' || mode === 'create'">

@@ -11,11 +11,11 @@ import {
 } from 'generated';
 
 @Component({
-  selector: 'app-set-annotations-master',
-  templateUrl: './set-annotations-master.component.html',
-  styleUrls: ['./set-annotations-master.component.css']
+  selector: 'app-set-annotation-master',
+  templateUrl: './set-annotation-master.component.html',
+  styleUrls: ['./set-annotation-master.component.css']
 })
-export class SetAnnotationsMasterComponent {
+export class SetAnnotationMasterComponent {
   readonly kinds = AnnotationType;
   private selected: CohortAnnotationDefinition[] = [];
   private posting = false;

@@ -16,7 +16,7 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 import {SetAnnotationDetailComponent} from './set-annotation-detail/set-annotation-detail.component';
-import {SetAnnotationsMasterComponent} from './set-annotations-master/set-annotations-master.component';
+import {SetAnnotationMasterComponent} from './set-annotation-master/set-annotation-master.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
@@ -33,7 +33,6 @@ import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
 } from 'generated';
-
 
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
@@ -66,6 +65,40 @@ const routes = [{
   }
 }];
 
+const components = [
+  AnnotationManagerComponent,
+  AnnotationsComponent,
+  CohortReviewComponent,
+  CreateReviewComponent,
+  OverviewComponent,
+  ParticipantAnnotationComponent,
+  ParticipantDetailComponent,
+  ParticipantStatusComponent,
+  ParticipantTableComponent,
+  ReviewNavComponent,
+  SetAnnotationDetailComponent,
+  SetAnnotationMasterComponent,
+];
+
+const directives = [
+  FullPageDirective,
+  SidebarDirective,
+];
+
+const services = [
+  CohortAnnotationDefinitionService,
+  CohortReviewService,
+  ReviewStateService,
+];
+
+const guards = [
+  AnnotationDefnResolver,
+  AnnotationValuesResolver,
+  CohortResolver,
+  ParticipantResolver,
+  ReviewResolver,
+];
+
 @NgModule({
   imports: [
     ClarityModule,
@@ -74,31 +107,12 @@ const routes = [{
     RouterModule.forChild(routes),
   ],
   declarations: [
-    AnnotationManagerComponent,
-    AnnotationsComponent,
-    CohortReviewComponent,
-    CreateReviewComponent,
-    FullPageDirective,
-    OverviewComponent,
-    ParticipantAnnotationComponent,
-    ParticipantDetailComponent,
-    ParticipantStatusComponent,
-    ParticipantTableComponent,
-    ReviewNavComponent,
-    SetAnnotationDetailComponent,
-    SetAnnotationsMasterComponent,
-    SidebarDirective,
+    ...components,
+    ...directives,
   ],
   providers: [
-    CohortAnnotationDefinitionService,
-    CohortReviewService,
-    ReviewStateService,
-
-    AnnotationDefnResolver,
-    AnnotationValuesResolver,
-    CohortResolver,
-    ReviewResolver,
-    ParticipantResolver,
+    ...services,
+    ...guards,
   ]
 })
 export class CohortReviewModule {}
