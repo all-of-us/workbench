@@ -9,11 +9,12 @@ import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
