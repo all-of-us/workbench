@@ -21,11 +21,12 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';

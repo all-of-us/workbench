@@ -24,6 +24,14 @@ const routes: Routes = [
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
   }, {
+    path: 'admin-review-workspace',
+    component: AdminReviewWorkspaceComponent,
+    data: {title: 'Review Workspaces'}
+  }, {
+    path: 'admin-review-id-verification',
+    component: AdminReviewIdVerificationComponent,
+    data: {title: 'Review ID Verifications'}
+  }, {
     path: 'data-browser/home',
     component: HomeComponent,
     data: {title: 'Data Browser'}
@@ -59,14 +67,6 @@ const routes: Routes = [
     path: 'workspace/:ns/:wsid/edit',
     component: WorkspaceEditComponent,
     data: {title: 'Edit Workspace', adding: false}
-  }, {
-    path: 'admin-review-workspace',
-    component: AdminReviewWorkspaceComponent,
-    data: {title: 'Review Workspaces'}
-  }, {
-    path: 'admin-review-id-verification',
-    component: AdminReviewIdVerificationComponent,
-    data: {title: 'Review ID Verifications'}
   }, {
     path: 'workspace/:ns/:wsid/share',
     component: WorkspaceShareComponent,
