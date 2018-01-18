@@ -355,9 +355,14 @@ public class CohortReviewControllerTest {
                 ? new Sort(orderParam, columnParam)
                 : new Sort(orderParam, columnParam, CohortReviewController.PARTICIPANT_ID);
 
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(1);
+
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
+        when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -370,6 +375,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
+        verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
         verifyNoMoreMockInteractions();
     }
 
