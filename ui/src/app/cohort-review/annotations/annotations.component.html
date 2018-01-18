@@ -15,7 +15,8 @@
 </div>
 
 <app-participant-annotation
-  *ngFor="let defn of (annotations$ | async)"
-  [definition]="defn"
+  *ngFor="let anno of (annotations$ | async)"
+  [definition]="anno.definition"
+  [value]="anno.value"
   [verbose]="verbosity">
 </app-participant-annotation>

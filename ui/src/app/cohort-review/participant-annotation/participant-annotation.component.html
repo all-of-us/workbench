@@ -1,7 +1,7 @@
 <div class="wrapper">
   <ng-container [ngSwitch]="definition.annotationType">
 
-    <div *ngSwitchCase="AnnotationType.STRING">
+    <div *ngSwitchCase="kinds.STRING">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
           {{ definition.columnName }}
@@ -14,7 +14,7 @@
       <textarea *ngIf="expandText" [name]="machineName" [id]="machineName" [formControl]="control"></textarea>
     </div>
 
-    <div *ngSwitchCase="AnnotationType.ENUM">
+    <div *ngSwitchCase="kinds.ENUM">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
           {{ definition.columnName }}
@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div *ngSwitchCase="AnnotationType.DATE">
+    <div *ngSwitchCase="kinds.DATE">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
           {{ definition.columnName }}
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Provisional data types -->
-    <div *ngSwitchCase="AnnotationType.BOOLEAN">
+    <div *ngSwitchCase="kinds.BOOLEAN">
       <div class="checkbox-inline flex-container">
         <input type="checkbox" [name]="machineName" [id]="machineName" [formControl]="control">
         <label [for]="machineName" class="flex-content-main">
@@ -53,7 +53,7 @@
       </div>
     </div>
 
-    <div *ngSwitchCase="AnnotationType.INTEGER">
+    <div *ngSwitchCase="kinds.INTEGER">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
           {{ definition.columnName }}

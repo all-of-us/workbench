@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-  AnnotationManagerMode,
+  AnnotationManagerState,
   ReviewStateService
 } from '../review-state.service';
 
@@ -13,7 +13,7 @@ import {
 })
 export class AnnotationManagerComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
-  private mgrState: AnnotationManagerMode;
+  private mgrState: AnnotationManagerState;
 
   constructor(
     private state: ReviewStateService,
