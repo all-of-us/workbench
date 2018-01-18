@@ -1,10 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ReviewStateService} from '../review-state.service';
+import {
+  AnnotationManagerState,
+  ReviewStateService,
+} from '../review-state.service';
 
 import {
   AnnotationType,
@@ -21,37 +24,37 @@ import {
 export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
   readonly kinds = AnnotationType;
   private posting = false;
-  private editing = false;
   private defn: CohortAnnotationDefinition | null;
+  private mode: AnnotationManagerState['mode'];
   private form: FormGroup;
   private subscription: Subscription;
 
   get name() { return this.form.get('name'); }
   get kind() { return this.form.get('kind'); }
+  get editing() { return this.mode === 'edit'; }
 
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private fb: FormBuilder,
-  ) { }
+  ) {
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      kind: ['', Validators.required],
+      enumValues: this.fb.array([]),
+    });
+  }
 
   ngOnInit() {
     this.subscription = this.state.annotationMgrState
       .subscribe(({open, mode, defn}) => {
-        this.editing = mode === 'edit';
+        this.mode = mode;
         this.defn = defn;
 
         if (this.editing) {
-          this.form = this.fb.group({
-            name: [defn.columnName, Validators.required],
-            kind: [{value: defn.annotationType, disabled: true}, Validators.required]
-          });
-        } else {
-          this.form = this.fb.group({
-            name: ['', Validators.required],
-            kind: ['', Validators.required],
-          });
+          this._setFromDefn();
+          this.kind.disable();
         }
       });
   }
@@ -60,14 +63,31 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private _setForm(): void {
+  private _setFromDefn(): void {
     this.name.setValue(this.defn.columnName);
     this.kind.setValue(this.defn.annotationType);
+    const vals = this.defn.enumValues || [];
+    const controls = vals.map(value => this.fb.group({value}));
+    this.form.setControl('enumValues', this.fb.array(controls));
+  }
+
+  get enumValues(): FormArray {
+    return this.form.get('enumValues') as FormArray;
+  }
+
+  addEnumValue(): void {
+    this.enumValues.push(this.fb.group({
+      value: ['', Validators.required]
+    }));
+  }
+
+  removeEnumValue(index: number): void {
+    this.enumValues.removeAt(index);
   }
 
   clear(): void {
     this.editing
-      ? this._setForm()
+      ? this._setFromDefn()
       : this.form.reset();
   }
 
@@ -92,12 +112,33 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
     return this.editing ? 'Save' : 'Create';
   }
 
-  get savingIsDisabled(): boolean {
-    const disabled = !this.form.valid;
-    const noChange = (this.editing && this.defn)
-      ? this.name.value === this.defn.columnName
-      : false;
-    return disabled || noChange;
+  get canSave(): boolean {
+    return this.editing ? this._editsAreValid : this.form.valid;
+  }
+
+  get _editsAreValid(): boolean {
+    if (!this.form.valid) { return false; }
+    let somethingChanged = false;
+
+    const name = this.defn && this.defn.columnName;
+    if (name !== this.name.value) {
+      somethingChanged = true;
+    }
+
+    if (this.kind.value === this.kinds.ENUM) {
+      const dvals = (this.defn && this.defn.enumValues) || [];
+      const fvals = this.enumValues.controls.map(c => c.value.value);
+      if (dvals.length !== fvals.length) {
+        somethingChanged = true;
+      }
+      for (let i = 0; i < dvals.length; i++) {
+        if (dvals[i] !== fvals[i]) {
+          somethingChanged = true;
+        }
+      }
+    }
+
+    return somethingChanged;
   }
 
   toOverview(): void {

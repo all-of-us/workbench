@@ -10,7 +10,7 @@ import {
   CohortReview,
 } from 'generated';
 
-export interface AnnotationManagerMode {
+export interface AnnotationManagerState {
   open: boolean;
   mode: 'overview' | 'edit' | 'create';
   defn?: CohortAnnotationDefinition;
@@ -23,7 +23,7 @@ export class ReviewStateService {
   cohort = new ReplaySubject<Cohort>(1);
   annotationDefinitions = new ReplaySubject<CohortAnnotationDefinition[]>(1);
   participant = new BehaviorSubject<Participant | null>(null);
-  annotationMgrState = new BehaviorSubject<AnnotationManagerMode>({
+  annotationMgrState = new BehaviorSubject<AnnotationManagerState>({
     open: false,
     mode: 'overview',
   });

@@ -73,10 +73,41 @@
           [value]="kinds.INTEGER">
         <label for="kind-integer">Integer</label>
       </div>
-
     </div>
-
   </section>
+
+  <!-- Specify the enumeration -->
+  <section *ngIf="kind.value === kinds.ENUM" class="form-block">
+    <label for="enum-values">
+      Enumerated Values
+      <button 
+        type="button" 
+        class="btn btn-sm btn-icon btn-primary"
+        (click)="addEnumValue()"
+        title="Add a value to the enumeration">
+        <clr-icon shape="plus"></clr-icon>
+      </button>
+    </label>
+    <div formArrayName="enumValues">
+      <div 
+        *ngFor="let valControl of enumValues.controls; let i=index" 
+        [formGroupName]="i"
+        class="form-group">
+        <label>
+          {{ i }}
+          <button 
+            type="button"
+            class="btn btn-sm btn-icon btn-danger"
+            (click)="removeEnumValue(i)"
+            title="Remove this value from the enumeration">
+            <clr-icon shape="trash"></clr-icon>
+          </button>
+        </label>
+        <input type="text" formControlName="value">
+      </div>
+    </div>
+  </section>
+
   <button
     type="button"
     class="btn btn-outline"
@@ -91,10 +122,10 @@
   </button>
   <button
     type="button"
-    class="btn btn-primary"
+    class="btn btn-success-outline"
     (click)="save()"
     [clrLoading]="posting"
-    [disabled]="savingIsDisabled">
+    [disabled]="!canSave">
     {{ saveButtonText }}
   </button>
 </form>
