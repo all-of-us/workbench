@@ -382,6 +382,26 @@ def create_db_creds(*args)
   end
 end
 
+def update_registered_user(add, account, email)
+  common = Common.new
+  common.run_inline %W{gcloud auth login}
+  token = common.capture_stdout %W{gcloud auth print-access-token}
+  common.run_inline %W{gcloud config set account #{account}}
+  if add == "add"
+    common.run_inline %W{curl -X POST -H "Authorization: Bearer #{token} "
+    -H "Content-type: application/json"
+    -d '{"email": "#{email}"}'
+    https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
+  end
+
+  if add == "remove"
+    common.run_inline %W{curl -X DELETE -H "Authorization: Bearer #{token}" \
+    -H "Content-type: application/json" \
+    -d '{"email": "#{email}"}' \
+    https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
+  end
+end
+
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
 class GcloudContext
@@ -596,6 +616,13 @@ Common.register_command({
   :invocation => "create-db-creds",
   :description => "Creates database credentials in a file in GCS; accepts project and account args",
   :fn => lambda { |*args| create_db_creds(*args) }
+})
+
+Common.register_command({
+  :invocation => "update-registered-user",
+  :description => "Adds or removes a specified user from the registered access domain." \
+                  " accepts `add` or `remove` as the first arg, and specified email as the second",
+  :fn => lambda { |*args| update_registered_user(*args) }
 })
 
 Common.register_command({
