@@ -229,6 +229,7 @@ public class CohortReviewControllerTest {
         Page expectedPage = new PageImpl(participants);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
@@ -266,7 +267,6 @@ public class CohortReviewControllerTest {
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
         verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
         verifyNoMoreMockInteractions();
     }
 

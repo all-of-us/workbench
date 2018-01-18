@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static junit.framework.TestCase.fail;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -46,6 +47,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -151,6 +153,8 @@ public class WorkspacesControllerTest {
   BigQueryService bigQueryService;
   @Autowired
   WorkspaceDao workspaceDao;
+  @Mock
+  WorkspaceService workspaceService;
   @Autowired
   UserDao userDao;
   @Autowired
@@ -571,6 +575,9 @@ public class WorkspacesControllerTest {
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
+    when(workspaceService.enforceWorkspaceAccessLevel(workspace.getNamespace(), workspace.getId(), WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
+    when(workspaceService.enforceWorkspaceAccessLevel(workspace.getNamespace(), workspace.getId(), WorkspaceAccessLevel.WRITER)).thenReturn(WorkspaceAccessLevel.OWNER);
+
     Cohort c1 = createDefaultCohort("c1");
     c1 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c1).getBody();
     Cohort c2 = createDefaultCohort("c2");
@@ -586,19 +593,22 @@ public class WorkspacesControllerTest {
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    
+
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
     Workspace cloned = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
+    when(workspaceService.enforceWorkspaceAccessLevel(cloned.getNamespace(), cloned.getId(), WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
+    when(workspaceService.enforceWorkspaceAccessLevel(cloned.getNamespace(), cloned.getId(), WorkspaceAccessLevel.WRITER)).thenReturn(WorkspaceAccessLevel.OWNER);
 
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
