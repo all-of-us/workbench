@@ -433,6 +433,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     try {
+      // This automatically handles access control to the workspace.
       fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       throw ExceptionUtils.convertFirecloudException(e);
@@ -451,6 +452,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponse response = new WorkspaceResponse();
 
     try {
+      // This enforces access controls.
       fcResponse = fireCloudService.getWorkspace(
           workspaceNamespace, workspaceId);
       fcWorkspace = fcResponse.getWorkspace();
@@ -620,6 +622,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       newUserRole.setRole(user.getRole());
       dbUserRoles.add(newUserRole);
     }
+    // This automatically enforces owner role.
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));

@@ -116,14 +116,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
@@ -148,14 +143,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(String workspaceNamespace, String workspaceId,
       Long cohortId) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     cohortDao.delete(dbCohort);
@@ -165,14 +155,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> getCohort(String workspaceNamespace, String workspaceId,
       Long cohortId) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
@@ -181,14 +166,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
     Workspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
@@ -204,14 +184,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> updateCohort(String workspaceNamespace, String workspaceId,
       Long cohortId, Cohort cohort) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     if(Strings.isNullOrEmpty(cohort.getEtag())) {

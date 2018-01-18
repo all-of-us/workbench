@@ -47,7 +47,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(null);
 
         try {
@@ -61,7 +61,7 @@ public class CohortAnnotationDefinitionControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
         verifyNoMoreMockInteractions();
     }
 
@@ -78,7 +78,7 @@ public class CohortAnnotationDefinitionControllerTest {
         Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
@@ -95,7 +95,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -128,7 +128,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(existingDefinition);
@@ -153,7 +153,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -186,7 +186,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition)).thenReturn(dbCohortAnnotationDefinition);
@@ -211,7 +211,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).save(dbCohortAnnotationDefinition);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -226,7 +226,7 @@ public class CohortAnnotationDefinitionControllerTest {
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(null);
 
         try {
@@ -242,7 +242,7 @@ public class CohortAnnotationDefinitionControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -264,7 +264,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
@@ -283,7 +283,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -303,7 +303,7 @@ public class CohortAnnotationDefinitionControllerTest {
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(null);
@@ -324,7 +324,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -353,7 +353,7 @@ public class CohortAnnotationDefinitionControllerTest {
                         "name1");
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(definition);
@@ -376,7 +376,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -412,7 +412,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(definition);
@@ -434,7 +434,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdAndColumnName(cohortId, columnName);
         verify(cohortAnnotationDefinitionDao, times(1)).save(definition);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -447,7 +447,7 @@ public class CohortAnnotationDefinitionControllerTest {
         long annotationDefinitionId = 1;
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(null);
 
         try {
@@ -462,7 +462,7 @@ public class CohortAnnotationDefinitionControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -482,7 +482,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
@@ -500,7 +500,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -519,7 +519,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(null);
@@ -539,7 +539,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -566,7 +566,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
@@ -584,7 +584,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
         verify(cohortAnnotationDefinitionDao, times(1)).delete(annotationDefinitionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER);
 
         verifyNoMoreMockInteractions();
     }
@@ -598,7 +598,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(null);
 
         try {
@@ -613,7 +613,7 @@ public class CohortAnnotationDefinitionControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -633,7 +633,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
 
@@ -651,7 +651,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -670,7 +670,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(null);
@@ -690,7 +690,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -717,7 +717,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findOne(annotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
@@ -739,7 +739,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findOne(annotationDefinitionId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -752,7 +752,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortDao.findOne(cohortId)).thenReturn(null);
 
         try {
@@ -766,7 +766,7 @@ public class CohortAnnotationDefinitionControllerTest {
         }
 
         verify(cohortDao, times(1)).findOne(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -787,7 +787,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
 
         try {
             cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
@@ -802,7 +802,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }
@@ -823,7 +823,7 @@ public class CohortAnnotationDefinitionControllerTest {
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findByCohortId(cohortId)).thenReturn(new ArrayList<>());
-        when(workspaceService.getWorkspaceAccessLevel(namespace, name)).thenReturn(owner);
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
 
         cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
                 namespace,
@@ -833,7 +833,7 @@ public class CohortAnnotationDefinitionControllerTest {
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
         verify(cohortAnnotationDefinitionDao, times(1)).findByCohortId(cohortId);
-        verify(workspaceService).getWorkspaceAccessLevel(namespace, name);
+        verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();
     }

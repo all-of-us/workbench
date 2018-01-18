@@ -84,13 +84,9 @@ public class ClusterController implements ClusterApiDelegate {
       String workspaceId) {
 
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
-          workspaceId, WorkspaceAccessLevel.WRITER);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
+
 
     Cluster createdCluster;
 
@@ -110,13 +106,8 @@ public class ClusterController implements ClusterApiDelegate {
       String workspaceId) {
 
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
-          workspaceId, WorkspaceAccessLevel.WRITER);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
 
     String clusterName = this.convertClusterName(workspaceId);
     try {
@@ -135,13 +126,8 @@ public class ClusterController implements ClusterApiDelegate {
       String workspaceId) {
 
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
-          workspaceId, WorkspaceAccessLevel.WRITER);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
 
     String clusterName = this.convertClusterName(workspaceId);
     Cluster cluster;
