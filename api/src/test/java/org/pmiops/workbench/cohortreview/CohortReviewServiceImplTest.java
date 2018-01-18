@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
+@ContextConfiguration
 public class CohortReviewServiceImplTest {
 
     @Mock
@@ -299,6 +301,21 @@ public class CohortReviewServiceImplTest {
         assertEquals("ethnicity", concepts.get(ethnicityConcept.getConceptId()));
         assertEquals("gender", concepts.get(genderConcept.getConceptId()));
         assertEquals("race", concepts.get(raceConcept.getConceptId()));
+    }
+
+    @Test
+    public void testCacheable() throws Exception {
+        List<Concept> conceptList = new ArrayList<>();
+        Concept concept = new Concept().conceptId(1L).conceptName("name");
+        conceptList.add(concept);
+
+        when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(conceptList);
+
+        cohortReviewService.findGenderRaceEthnicityFromConcept();
+        cohortReviewService.findGenderRaceEthnicityFromConcept();
+
+        verify(conceptDao, times(1)).findGenderRaceEthnicityFromConcept();
+        verifyNoMoreInteractions(conceptDao);
     }
 
     private void verifyNoMoreMockInteractions() {
