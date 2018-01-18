@@ -287,13 +287,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 List<String> filterColumns,
                                                                                                 List<String> filterValues) {
         CohortReview cohortReview = null;
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
             cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
         }
-
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohortId, WorkspaceAccessLevel.READER);
 
         PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
 

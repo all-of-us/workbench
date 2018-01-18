@@ -575,9 +575,6 @@ public class WorkspacesControllerTest {
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    when(workspaceService.enforceWorkspaceAccessLevel(workspace.getNamespace(), workspace.getId(), WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
-    when(workspaceService.enforceWorkspaceAccessLevel(workspace.getNamespace(), workspace.getId(), WorkspaceAccessLevel.WRITER)).thenReturn(WorkspaceAccessLevel.OWNER);
-
     Cohort c1 = createDefaultCohort("c1");
     c1 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c1).getBody();
     Cohort c2 = createDefaultCohort("c2");
@@ -607,9 +604,9 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     Workspace cloned = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
-    when(workspaceService.enforceWorkspaceAccessLevel(cloned.getNamespace(), cloned.getId(), WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
-    when(workspaceService.enforceWorkspaceAccessLevel(cloned.getNamespace(), cloned.getId(), WorkspaceAccessLevel.WRITER)).thenReturn(WorkspaceAccessLevel.OWNER);
 
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
