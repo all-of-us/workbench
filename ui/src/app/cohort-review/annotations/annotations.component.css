@@ -1,0 +1,13 @@
+div {
+  padding: 0.25rem 0.125rem 0 0.125rem;
+  margin: 0.25rem 0.125rem 0.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+div > h4 {
+  margin: 0;
+  display: inline;
+  flex: 1;
+}

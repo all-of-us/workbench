@@ -1,0 +1,68 @@
+<div class="wrapper">
+  <ng-container [ngSwitch]="definition.annotationType">
+
+    <div *ngSwitchCase="kinds.STRING">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+        <clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>
+        <clr-icon shape="pencil" (click)="setEditMode()"></clr-icon>
+      </label>
+      <input type="text" *ngIf="!expandText" [name]="machineName" [id]="machineName" [formControl]="control">
+      <textarea *ngIf="expandText" [name]="machineName" [id]="machineName" [formControl]="control"></textarea>
+    </div>
+
+    <div *ngSwitchCase="kinds.ENUM">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="setEditMode()"></clr-icon>
+      </label>
+      <div class="select">
+        <select [name]="machineName" [id]="machineName" [formControl]="control">
+          <option *ngFor="let value of definition.enumValues">
+            {{ value | titlecase }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="kinds.DATE">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="setEditMode()"></clr-icon>
+      </label>
+      <input type="date" [name]="machineName" [id]="machineName" [formControl]="control">
+    </div>
+
+    <!-- Provisional data types -->
+    <div *ngSwitchCase="kinds.BOOLEAN">
+      <div class="checkbox-inline flex-container">
+        <input type="checkbox" [name]="machineName" [id]="machineName" [formControl]="control">
+        <label [for]="machineName" class="flex-content-main">
+          {{ definition.columnName }}<em>{{ datatypeDisplay | titlecase }}</em>
+        </label>
+        <clr-icon shape="pencil" (click)="setEditMode()"></clr-icon>
+      </div>
+    </div>
+
+    <div *ngSwitchCase="kinds.INTEGER">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+        <clr-icon shape="pencil" (click)="setEditMode()"></clr-icon>
+      </label>
+      <input type="number" [name]="machineName" [id]="machineName" [formControl]="control">
+    </div>
+
+  </ng-container>
+</div>
