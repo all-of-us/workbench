@@ -539,7 +539,7 @@ paths:
         200:
           description: The updated workspace definition
           schema:
-            $ref: "#/definitions/UpdateWorkspaceResponse"
+            $ref: "#/definitions/Workspace"
     delete:
       tags:
         - workspaces
@@ -1521,12 +1521,6 @@ definitions:
     type: object
     required:
      - workspace
-    properties:
-      workspace:
-        $ref: "#/definitions/Workspace"
-
-  UpdateWorkspaceResponse:
-    type: object
     properties:
       workspace:
         $ref: "#/definitions/Workspace"
