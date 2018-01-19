@@ -11,11 +11,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
+  private final WorkspaceService workspaceService;
 
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
     new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
@@ -68,13 +73,21 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
-      Provider<User> userProvider) {
+      Provider<User> userProvider,
+      WorkspaceService workspaceService) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
+    this.workspaceService = workspaceService;
   }
 
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
+
+
     Cluster createdCluster;
 
     String clusterName = this.convertClusterName(workspaceId);
@@ -91,6 +104,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
+
     String clusterName = this.convertClusterName(workspaceId);
     try {
       // TODO: Replace with real workspaceNamespace/billing-project
@@ -106,6 +124,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   public ResponseEntity<Cluster> getCluster(String workspaceNamespace,
       String workspaceId) {
+
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
+
     String clusterName = this.convertClusterName(workspaceId);
     Cluster cluster;
     try {

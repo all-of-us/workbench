@@ -2,8 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -12,11 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -70,7 +66,7 @@ public class Workspace {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private List<Cohort> cohorts;
+  private Set<Cohort> cohorts = new HashSet<Cohort>();
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -322,14 +318,17 @@ public class Workspace {
     this.timeReviewed = timeReviewed;
   }
 
-  @OneToMany(mappedBy = "workspaceId")
-  @OrderBy("name ASC")
-  public List<Cohort> getCohorts() {
+  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<Cohort> getCohorts() {
     return cohorts;
   }
 
-  public void setCohorts(List<Cohort> cohorts) {
+  public void setCohorts(Set<Cohort> cohorts) {
     this.cohorts = cohorts;
+  }
+
+  public void addCohort(Cohort cohort) {
+    this.cohorts.add(cohort);
   }
 
   @Transient

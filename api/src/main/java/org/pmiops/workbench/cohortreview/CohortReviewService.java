@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortreview;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -25,7 +26,7 @@ public interface CohortReviewService {
      * @param workspaceName
      * @param workspaceId
      */
-    void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId);
+    void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId, WorkspaceAccessLevel requiredAccess);
 
     /**
      * Find the {@link CohortReview} for the specified cohortId and cdrVersionId.
@@ -59,14 +60,6 @@ public interface CohortReviewService {
      * @param participantCohortStatuses
      */
     void saveFullCohortReview(CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses);
-
-    /**
-     * Save the specified {@link ParticipantCohortStatus}.
-     *
-     * @param participantCohortStatuses
-     * @return
-     */
-    Iterable<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses);
 
     /**
      * Save the specified {@link ParticipantCohortStatus}.
