@@ -21,6 +21,10 @@ mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
     --no-data --add-drop-table --ignore-table=$cdr_db_name.DATABASECHANGELOG \
     --ignore-table=$cdr_db_name.DATABASECHANGELOGLOCK $cdr_db_name > $cdr_schema_file
 
+
+
+ls -la /
+
 # Grant access to buckets for service account
 SQL_SERVICE_ACCOUNT=`gcloud sql instances describe --project $project \
     --account peter.speltz@pmi-ops.org $cloudsql_instance | grep serviceAccountEmailAddress \
@@ -34,8 +38,3 @@ gsutil cp $cdr_schema_file $gcs_bucket/$cdr_schema_file
 
 # Import the schema into the cloud sql instance
 gcloud beta sql import sql $cloudsql_instance $gcs_bucket/$cdr_schema_file
-
-
-# Download data and import
-REMOTE_DATA_LOC=https://storage.googleapis.com/all-of-us-workbench-cdr-init
-
