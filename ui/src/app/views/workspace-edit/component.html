@@ -111,16 +111,16 @@
       <div class="button">
         <ng-container [ngSwitch]="mode">
           <button *ngSwitchCase="Mode.Create" class="btn add-button btn-primary"
-                  [clrLoading]="savingWorkspace" (click)="addWorkspace()">
+              [clrLoading]="savingWorkspace" (click)="addWorkspace()">
             Create Workspace
           </button>
           <button *ngSwitchCase="Mode.Edit" class="btn add-button btn-primary"
-                  [clrLoading]="savingWorkspace" (click)="updateWorkspace()"
-                  [disabled]="!hasPermission">
+              [clrLoading]="savingWorkspace" (click)="updateWorkspace()"
+              [disabled]="!hasPermission">
             Update Workspace
           </button>
           <button *ngSwitchCase="Mode.Clone" class="btn add-button btn-primary"
-                  [clrLoading]="savingWorkspace" (click)="cloneWorkspace()">
+              [clrLoading]="savingWorkspace" (click)="cloneWorkspace()">
             Clone Workspace
           </button>
         </ng-container>

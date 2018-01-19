@@ -185,8 +185,8 @@ export class WorkspaceEditComponent implements OnInit {
         workspace: this.workspace,
       }))
       .subscribe(
-        (resp: CloneWorkspaceResponse) => {
-          this.router.navigate(['/workspace', resp.workspace.namespace, resp.workspace.id]);
+        (r: CloneWorkspaceResponse) => {
+          this.router.navigate(['/workspace', r.workspace.namespace, r.workspace.id]);
         });
   }
 
