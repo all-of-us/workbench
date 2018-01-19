@@ -2238,7 +2238,7 @@ definitions:
   AnnotationType:
     type: string
     description: possible values representing the type of annotation.
-    enum: [STRING, BOOLEAN, INTEGER, DATE, TIMESTAMP]
+    enum: [STRING, ENUM, DATE, BOOLEAN, INTEGER]
 
   CohortAnnotationDefinition:
     type: object
@@ -2260,6 +2260,11 @@ definitions:
         description: the name of this annotation.
       annotationType:
         $ref: "#/definitions/AnnotationType"
+      enumValues:
+        type: array
+        items:
+          type: string
+
 
   ParticipantCohortAnnotation:
     type: object
@@ -2279,15 +2284,21 @@ definitions:
         type: integer
         format: int64
         description: the participant id.
-      annotationValueString:
+      valueString:
         type: string
-        description: the value of this annotation if the type is string
-      annotationValueInteger:
+        description: The Value of the annotation if the AnnotationType is STRING
+      valueEnum:
+        type: string
+        description: The option chosen for the annotation if the AnnotationType is ENUM
+      valueDate:
+        type: string
+        description: The Value of the annotation if the AnnotationType is DATE
+      valueBoolean:
+        type: boolean
+        description: The Value of the annotation if the AnnotationType is BOOLEAN
+      valueInteger:
         type: integer
-        description: the value of this annotation if the type in integer
-      annotationValueTimestamp:
-        type: string
-        description: the value of this annotation if the type is date/timestamp.
+        description: The Value of the annotation if the AnnotationType is INTEGER
 
   CohortAnnotationDefinitionListResponse:
     type: object
@@ -2321,15 +2332,21 @@ definitions:
   ModifyParticipantCohortAnnotationRequest:
     type: object
     properties:
-      annotationValueString:
+      valueString:
         type: string
-        description: the value of this annotation if the type is string
-      annotationValueInteger:
+        description: The Value of the annotation if the AnnotationType is STRING
+      valueEnum:
+        type: string
+        description: The option chosen for the annotation if the AnnotationType is ENUM
+      valueDate:
+        type: string
+        description: The Value of the annotation if the AnnotationType is DATE
+      valueBoolean:
+        type: boolean
+        description: The Value of the annotation if the AnnotationType is BOOLEAN
+      valueInteger:
         type: integer
-        description: the value of this annotation if the type in integer
-      annotationValueTimestamp:
-        type: string
-        description: the value of this annotation if the type is date/timestamp.
+        description: The Value of the annotation if the AnnotationType is INTEGER
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

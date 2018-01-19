@@ -1,0 +1,19 @@
+<clr-modal [(clrModalOpen)]="open" [clrModalSize]="'lg'">
+  <h3 class="modal-title">Cohort Annotations</h3>
+
+  <div class="modal-body modal-body-custom" [style.min-height]="twoThirds">
+    <app-set-annotation-master
+      *ngIf="mode === 'overview'">
+    </app-set-annotation-master>
+
+    <app-set-annotation-detail
+      *ngIf="mode === 'edit' || mode === 'create'">
+    </app-set-annotation-detail>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="open = false">
+      Close
+    </button>
+  </div>
+</clr-modal>
