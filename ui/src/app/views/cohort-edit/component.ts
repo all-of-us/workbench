@@ -11,7 +11,12 @@ import {Cohort, CohortsService} from 'generated';
   templateUrl: './component.html',
 })
 export class CohortEditComponent implements OnInit, OnDestroy {
-  cohort: Cohort;
+  cohort: Cohort = {
+    name: '',
+    description: '',
+    criteria: '',
+    type: '',
+  };
   workspaceNamespace: string;
   workspaceId: string;
   private sub: Subscription;
