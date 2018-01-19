@@ -382,23 +382,44 @@ def create_db_creds(*args)
   end
 end
 
-def update_registered_user(add, account, email)
+def update_user_registered_status(cmd_name, args)
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--action [action]",
+    lambda {|opts, v| opts.action = v},
+    "Action to perform: add/remove."
+  )
+  op.add_option(
+    "--account [account]",
+    lambda {|opts, v| opts.account = v},
+    "Account to perform update registered status as."
+  )
+  op.add_option(
+    "--user [user]",
+    lambda {|opts, v| opts.user = v},
+    "User to grant or revoke registered access from."
+  )
+  action = op.opts.action
+  account = op.opts.account
+  user = op.opts.user
+  op.parse.validate
+
   common.run_inline %W{gcloud auth login}
   token = common.capture_stdout %W{gcloud auth print-access-token}
   token = token.chomp
-  common.run_inline %W{gcloud config set account #{account}}
+  common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{email}\"}"
-  if add == "add"
+  payload = "{\"email\": \"#{op.opts.user}\"}"
+  if op.opts.action == "add"
     common.run_inline %W{curl -H #{header}
     -H #{content_type}
     -d #{payload}
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 
-  if add == "remove"
+  if op.opts.action == "remove"
     common.run_inline %W{curl -X DELETE -H #{header}
     -H #{content_type}
     -d #{payload}
@@ -623,10 +644,10 @@ Common.register_command({
 })
 
 Common.register_command({
-  :invocation => "update-registered-user",
-  :description => "Adds or removes a specified user from the registered access domain." \
-                  " accepts `add` or `remove` as the first arg, and specified email as the second",
-  :fn => lambda { |*args| update_registered_user(*args) }
+  :invocation => "update-user-registered-status",
+  :description => "Adds or removes a specified user from the registered access domain.\n" \
+                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+  :fn => lambda { |*args| update_user_registered_status("update_user_registered_status", args) }
 })
 
 Common.register_command({
