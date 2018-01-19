@@ -43,6 +43,8 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
+import org.pmiops.workbench.model.UpdateWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -486,13 +488,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> updateWorkspace(String workspaceNamespace, String workspaceId,
-      Workspace workspace) {
+  public ResponseEntity<UpdateWorkspaceResponse> updateWorkspace(String workspaceNamespace, String workspaceId,
+      UpdateWorkspaceRequest request) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
         workspaceId, WorkspaceAccessLevel.WRITER);
-
+    Workspace workspace = request.getWorkspace();
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }
@@ -515,7 +517,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+    UpdateWorkspaceResponse response = new UpdateWorkspaceResponse();
+    response.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+    return ResponseEntity.ok(response);
   }
 
   @Override
