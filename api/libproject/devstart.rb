@@ -386,6 +386,7 @@ def update_registered_user(add, account, email)
   common = Common.new
   common.run_inline %W{gcloud auth login}
   token = common.capture_stdout %W{gcloud auth print-access-token}
+  token = token.chomp
   common.run_inline %W{gcloud config set account #{account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
@@ -393,14 +394,14 @@ def update_registered_user(add, account, email)
   if add == "add"
     common.run_inline %W{curl -H #{header}
     -H #{content_type}
-    --data-binary #{payload} -v
+    -d #{payload}
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 
   if add == "remove"
-    common.run_inline %W{curl -X DELETE -H "Authorization: Bearer #{token}" \
-    -H "Content-type: application/json" \
-    -d '{"email": "#{email}"}' \
+    common.run_inline %W{curl -X DELETE -H #{header}
+    -H #{content_type}
+    -d #{payload}
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 end
