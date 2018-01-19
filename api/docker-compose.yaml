@@ -113,6 +113,8 @@ services:
         - ~/.config:/.config:cached
         - ~/.gsutil:/.gsutil:cached
       command: wait-for db:3306 -- ./generate-cloudsql-cdr.sh
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
       env_file:
         - db-cdr/vars.env
   drop-cdr-db:
