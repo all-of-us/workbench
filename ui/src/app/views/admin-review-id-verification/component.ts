@@ -31,8 +31,8 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     this.errorHandlingService.retryApi(this.profileService.getIdVerificationsForReview())
         .subscribe(
             profilesResp => {
-              for (const ws of profilesResp.profiles) {
-                this.profiles.push(ws);
+              for (const profile of profilesResp.profileList) {
+                this.profiles.push(profile);
               }
               this.contentLoaded = true;
             });

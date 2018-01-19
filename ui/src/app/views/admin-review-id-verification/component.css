@@ -6,9 +6,9 @@ li {
   align-items: flex-end;
   margin: 0.5rem;
 }
-h3 {
-  margin-top: 0;
+.user {
+  margin: 0.25rem;
 }
-.purpose, .review-buttons {
+.user, .review-buttons {
   flex: 1;
 }

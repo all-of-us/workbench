@@ -363,7 +363,7 @@ public class ProfileController implements ProfileApiDelegate {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
     try {
-      for (User user : userService.getNonVerified()) {
+      for (User user : userService.getNonVerifiedUsers()) {
         responseList.add(profileService.getProfile(user));
       }
     } catch (ApiException e) {

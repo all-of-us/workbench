@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
   private baseTitle: string;
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
+  hasReviewIdVerification = false;
   private _showCreateAccount = false;
   private overriddenUrl: string = null;
   currentUrl: string;
@@ -89,7 +90,9 @@ export class AppComponent implements OnInit {
         this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
           this.hasReviewResearchPurpose =
             profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-          // this.email = profile.username;
+          this.hasReviewIdVerification =
+            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+            // this.email = profile.username;
         });
       }
     });

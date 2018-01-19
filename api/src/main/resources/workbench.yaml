@@ -571,7 +571,7 @@ paths:
       tags:
         - profile
       description: >
-          Returns ID verifications that need review. Requires
+          Returns a list of profiles for users that need review. Requires
           REVIEW_ID_VERIFICATION authority.
       operationId: getIdVerificationsForReview
       responses:
@@ -583,7 +583,7 @@ paths:
           description: User doesn't have the REVIEW_ID_VERIFICATION authority
           schema:
             $ref: "#/definitions/ErrorResponse"
-
+ 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
