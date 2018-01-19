@@ -311,36 +311,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private void checkWorkspaceWriteAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
-          WorkspaceAccessLevel.WRITER.equals(userAccess))) {
-      throw new ForbiddenException(String.format("Insufficient permissions to edit workspace %s/%s",
-          workspaceNamespace, workspaceId));
-    }
-  }
-
-  private void checkWorkspaceReadAccess(String workspaceNamespace, String workspaceId) {
-    WorkspaceAccessLevel userAccess = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    if (!(WorkspaceAccessLevel.OWNER.equals(userAccess) ||
-          WorkspaceAccessLevel.WRITER.equals(userAccess) ||
-          WorkspaceAccessLevel.READER.equals(userAccess))) {
-      throw new ForbiddenException(String.format("Insufficient permissions to read workspace %s/%s",
-          workspaceNamespace, workspaceId));
-    }
-  }
-
-  private WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
-    String userAccess;
-    try {
-      userAccess = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId).getAccessLevel();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
-    return WorkspaceAccessLevel.fromValue(userAccess);
-  }
-
   private org.pmiops.workbench.firecloud.model.Workspace
       attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     try {
@@ -463,6 +433,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     try {
+      // This automatically handles access control to the workspace.
       fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       throw ExceptionUtils.convertFirecloudException(e);
@@ -481,6 +452,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceResponse response = new WorkspaceResponse();
 
     try {
+      // This enforces access controls.
       fcResponse = fireCloudService.getWorkspace(
           workspaceNamespace, workspaceId);
       fcWorkspace = fcResponse.getWorkspace();
@@ -518,7 +490,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    checkWorkspaceWriteAccess(workspaceNamespace, workspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
+        workspaceId, WorkspaceAccessLevel.WRITER);
 
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
@@ -563,7 +536,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspace.getNamespace(), workspace.getName()));
     }
 
-    checkWorkspaceReadAccess(workspaceNamespace, workspaceId);
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
@@ -649,6 +622,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       newUserRole.setRole(user.getRole());
       dbUserRoles.add(newUserRole);
     }
+    // This automatically enforces owner role.
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));

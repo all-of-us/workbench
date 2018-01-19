@@ -5,6 +5,7 @@ import java.util.Set;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public interface WorkspaceService {
   public WorkspaceDao getDao();
@@ -18,4 +19,7 @@ public interface WorkspaceService {
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
   public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
   public Workspace saveAndCloneCohorts(Workspace from, Workspace to);
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
+      String workspaceId, WorkspaceAccessLevel requiredAccess);
 }
