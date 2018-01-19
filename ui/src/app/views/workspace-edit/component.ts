@@ -113,7 +113,9 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   reloadConflictingWorkspace(): void {
-    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+    this.loadWorkspace().subscribe(() => {
+      this.resetWorkspaceEditor();
+    });
   }
 
   resetWorkspaceEditor(): void {
@@ -142,8 +144,12 @@ export class WorkspaceEditComponent implements OnInit {
     this.errorHandlingService.retryApi(
       this.workspacesService.createWorkspace(this.workspace))
       .subscribe(
-        () => this.navigateBack(),
-        (error) => this.workspaceCreationError = true);
+        () => {
+          this.navigateBack();
+        },
+        (error) => {
+          this.workspaceCreationError = true;
+        });
   }
 
   updateWorkspace(): void {
@@ -156,7 +162,9 @@ export class WorkspaceEditComponent implements OnInit {
       this.oldWorkspaceName,
       this.workspace))
       .subscribe(
-        () => this.navigateBack(),
+        () => {
+          this.navigateBack();
+        },
         (error) => {
           if (error.status === 409) {
             this.workspaceUpdateConflictError = true;
