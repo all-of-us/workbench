@@ -37,10 +37,9 @@ mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
 gsutil cp $tmp_dir/$hard_data_file $gcs_bucket/$hard_data_file
 rm $tmp_dir/$hard_data_file
 
-# Todo  need these for a service account
+# Todo  maybe not hardcode service account name ?
 SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
-CREDS_FILE=all-of-us-workbench-test-f8d191035ffe.json
-gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$CREDS_FILE
+gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
 # Grant access to buckets for service account for cloudsql
 SQL_SERVICE_ACCOUNT=`gcloud sql instances describe --project $project \

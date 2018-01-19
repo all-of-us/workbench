@@ -113,7 +113,6 @@ services:
         - ~/.config:/.config:cached
         - ~/.gsutil:/.gsutil:cached
       entrypoint: ["./generate-cdr/generate-cloudsql-cdr.sh"]
-
       environment:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
       env_file:
