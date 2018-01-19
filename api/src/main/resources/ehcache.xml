@@ -1,0 +1,6 @@
+<ehcache>
+    <!--<cache name="org.pmiops.workbench.cdr.model.Concept" maxElementsInMemory="1000" timeToLiveSeconds="86400" />-->
+    <defaultCache eternal="false"
+                  timeToLiveSeconds="60000" overflowToDisk="false" statistics="true"/>
+    <cache name="concept" eternal="false" maxElementsInMemory="1000" timeToLiveSeconds="60000" statistics="true"/>
+</ehcache>

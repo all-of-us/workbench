@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +47,7 @@ public class ConceptDaoTest {
 
     @Test
     public void findGenderRaceEthnicityFromConcept() throws Exception {
-        List<Concept> concepts = conceptDao.findGenderRaceEthnicityFromConcept();
+        List<Concept> concepts = conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"));
         assertEquals(3, concepts.size());
         assertEquals("ethnicity", concepts.get(0).getConceptName());
         assertEquals("gender", concepts.get(1).getConceptName());

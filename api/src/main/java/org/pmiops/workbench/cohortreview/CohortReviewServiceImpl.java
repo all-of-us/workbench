@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -144,7 +145,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Override
     public Map<Long, String> findGenderRaceEthnicityFromConcept() {
-        List<Concept> conceptList = conceptDao.findGenderRaceEthnicityFromConcept();
+        List<Concept> conceptList = conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"));
         return conceptList.stream().collect(Collectors.toMap(Concept::getConceptId, Concept::getConceptName));
     }
 }
