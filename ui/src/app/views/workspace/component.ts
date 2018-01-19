@@ -275,6 +275,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['edit'], {relativeTo : this.route});
   }
 
+  clone(): void {
+    this.router.navigate(['clone'], {relativeTo : this.route});
+  }
+
   share(): void {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
