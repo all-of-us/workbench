@@ -9,7 +9,7 @@ import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {WorkspaceEditComponent} from './views/workspace-edit/component';
+import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -63,11 +63,15 @@ const routes: Routes = [
   }, {
     path: 'workspace/build',
     component: WorkspaceEditComponent,
-    data: {title: 'Create Workspace', adding: true}
+    data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
   }, {
     path: 'workspace/:ns/:wsid/edit',
     component: WorkspaceEditComponent,
-    data: {title: 'Edit Workspace', adding: false}
+    data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
+  }, {
+    path: 'workspace/:ns/:wsid/clone',
+    component: WorkspaceEditComponent,
+    data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
   }, {
     path: 'workspace/:ns/:wsid/share',
     component: WorkspaceShareComponent,
