@@ -935,10 +935,10 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
         fcResponse
     );
-    List<String> blobDetailList = new ArrayList<BlobDetail>();
+    List<String> blobDetailList = new ArrayList<String>();
     String mockBlobDetail1 = new String("notebook/File.ipynb");
-    String mockBlobDetail2 = new String("notebook/File1.txt","//URL");
-    String mockBlobDetail3 = new String("config/File1.txt","//URL");
+    String mockBlobDetail2 = new String("notebook/File1.txt");
+    String mockBlobDetail3 = new String("config/File1.txt");
     blobDetailList.add(mockBlobDetail1);
     blobDetailList.add(mockBlobDetail2);
     blobDetailList.add(mockBlobDetail3);
