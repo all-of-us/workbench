@@ -343,7 +343,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
         .subscribe(() => {
           this.alertCategory = 'alert-success';
-          this.alertMsg = 'File(s) have been saved'
+          this.alertMsg = 'File(s) have been saved';
           this.showAlerts = true;
         }, () => {
           this.alertCategory = 'alert-danger';
