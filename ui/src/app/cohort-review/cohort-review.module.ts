@@ -11,7 +11,6 @@ import {AnnotationManagerComponent} from './annotation-manager/annotation-manage
 import {AnnotationsComponent} from './annotations/annotations.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
-import {D3ChartComponent} from './d3-chart/d3-chart.component';
 import {OverviewComponent} from './overview/overview.component';
 import {ParticipantAnnotationComponent} from './participant-annotation/participant-annotation.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
@@ -74,7 +73,6 @@ const components = [
   AnnotationsComponent,
   CohortReviewComponent,
   CreateReviewComponent,
-  D3ChartComponent,
   OverviewComponent,
   ParticipantAnnotationComponent,
   ParticipantDetailComponent,
