@@ -2,9 +2,6 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.CodeDomainLookup;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ public class CodeDomainLookupService {
      * for ICD9, ICD10 and CPT codes.
      **/
     public void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
-        AbstractQueryBuilder builder = QueryBuilderFactory.getQueryBuilder(FactoryKey.GROUP_CODES);
         searchGroups.stream()
                 .flatMap(searchGroup -> searchGroup.getItems().stream())
                 .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
