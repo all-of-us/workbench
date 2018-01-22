@@ -5,6 +5,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {ClarityModule} from 'clarity-angular';
 
+import {ChartsModule} from '../charts/charts.module';
+
 import {AnnotationManagerComponent} from './annotation-manager/annotation-manager.component';
 import {AnnotationsComponent} from './annotations/annotations.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
@@ -108,6 +110,7 @@ const guards = [
     CommonModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
+    ChartsModule,
   ],
   declarations: [
     ...components,
