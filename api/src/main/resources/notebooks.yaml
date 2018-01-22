@@ -211,13 +211,13 @@ paths:
             additionalProperties:
               type: string
       responses:
-        '200':
+         200:
           description: Files saved
-        '404':
+         404:
           description: Cluster not found
           schema:
             $ref: '#/definitions/ErrorReport'
-        '500':
+         500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'

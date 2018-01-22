@@ -137,12 +137,14 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId, List<FileDetail> fileList) {
+  public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId,
+      List<FileDetail> fileList) {
     try {
       String clusterName = convertClusterName(workspaceId);
-      this.notebooksService.localize(workspaceNamespace, clusterName, convertfileDetailsToMap(fileList));
+      this.notebooksService.localize(workspaceNamespace, clusterName,
+          convertfileDetailsToMap(fileList));
     } catch (ApiException e) {
-        throw new RuntimeException(e);
+      throw new RuntimeException(e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -153,14 +155,10 @@ public class ClusterController implements ClusterApiDelegate {
    * @return
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
-  private HashMap convertfileDetailsToMap(List<FileDetail> fileList) {
-    HashMap fileDetailsMap = new HashMap();
-    for (FileDetail fileDetails : fileList) {
-      StringBuffer key = new StringBuffer("~/");
-      key.append(fileDetails.getName());
-      fileDetailsMap.put(key, fileDetails.getPath());
-    }
-
+  private Map convertfileDetailsToMap(List<FileDetail> fileList) {
+    Map<String, String> fileDetailsMap = new HashMap<String, String>();
+    fileDetailsMap = fileList.stream().collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
+        fileDetail -> fileDetail.getPath()));
     return fileDetailsMap;
   }
 }

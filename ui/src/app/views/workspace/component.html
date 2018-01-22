@@ -114,29 +114,20 @@
       <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
     </div>
     <div class="indented">
-      <button class="btn" (click)="pushToNotebookServer(notebookList)" [ngClass]="{disabled: !pushNotebookEnable}">PUSH TO NOTEBOOK SERVER</button>
-      <div class="alert alert-success" *ngIf="saveSuccess">
+      <button class="btn" (click)="sendFilesToNotebookServer(notebookList)"
+              [ngClass]="{disabled: !enablePushNotebookBtn}">Push To Notebook Server</button>
+      <div class="alert {{alertCategory}}" *ngIf="showAlerts">
         <div class="alert-items">
           <div class="alert-item static">
             <div class="alert-icon-wrapper">
               <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
             </div>
-            <span class="alert-text">Files have been saved.</span>
-          </div>
-        </div>
-      </div>
-      <div class="alert alert-danger" *ngIf="saveError">
-        <div class="alert-items">
-          <div class="alert-item static">
-            <div class="alert-icon-wrapper">
-              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
-            </div>
-            <span class="alert-text">There was an error while saving the file. Please try again later.</span>
+            <span class="alert-text">{{alertMsg}}</span>
           </div>
         </div>
       </div>
       <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column><input type="checkbox" (change)="columnHeaderNotebookHandler()" [(ngModel)]="columnHeaderNotebook"/></clr-dg-column>
+        <clr-dg-column><input type="checkbox" (change)="sendAllNoteBooks()" [(ngModel)]="checkColumnNotebook"/></clr-dg-column>
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
@@ -144,7 +135,7 @@
         <clr-dg-column>Path</clr-dg-column>
         <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
         <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
-          <clr-dg-cell><input type="checkbox" (change)="checkNotebookHandlerEvent(notebook)" [(ngModel)]="notebook.push"/></clr-dg-cell>
+          <clr-dg-cell><input type="checkbox" (change)="sendANotebook(notebook)" [(ngModel)]="notebook.push"/></clr-dg-cell>
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
         </clr-dg-row>

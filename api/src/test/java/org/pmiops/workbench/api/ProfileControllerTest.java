@@ -289,7 +289,7 @@ public class ProfileControllerTest {
     // When a conflict occurs in dev, log the exception but continue.
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, projectName + "-2",
-      true);
+        true);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).createAllOfUsBillingProject(projectName + "-1");

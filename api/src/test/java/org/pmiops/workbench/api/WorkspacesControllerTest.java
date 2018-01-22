@@ -59,6 +59,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.BlobDetail;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortReview;
@@ -159,7 +160,7 @@ public class WorkspacesControllerTest {
   UserDao userDao;
   @Autowired
   CloudStorageService cloudStorageService;
-
+  @Autowired
   CdrVersionDao cdrVersionDao;
   @Mock
   Provider<User> userProvider;
@@ -911,35 +912,30 @@ public class WorkspacesControllerTest {
   @Test
   public void testNoteBookList() throws Exception {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-      new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     org.pmiops.workbench.firecloud.model.Workspace mockWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
     mockWorkspace.setBucketName("MockBucketName");
     fcResponse.setWorkspace(mockWorkspace);
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
-      fcResponse
+        fcResponse
     );
-    List<FileDetail> fileDetailsList = new ArrayList<FileDetail>();
-    FileDetail mockFileDetail1 = new FileDetail();
-    mockFileDetail1.setName("notebook/File.ipynb");
-    mockFileDetail1.setPath("//URL");
+    List<BlobDetail> blobDetailList = new ArrayList<BlobDetail>();
+    BlobDetail mockBlobDetail1 = new BlobDetail("notebook/File.ipynb","//URL");
+    BlobDetail mockBlobDetail2 = new BlobDetail("notebook/File1.txt","//URL");
+    BlobDetail mockBlobDetail3 = new BlobDetail("config/File1.txt","//URL");
+    blobDetailList.add(mockBlobDetail1);
+    blobDetailList.add(mockBlobDetail2);
+    blobDetailList.add(mockBlobDetail3);
+    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook")).thenReturn(blobDetailList);
 
-    FileDetail mockFileDetail2 = new FileDetail();
-    mockFileDetail2.setName("File1.txt");
-    mockFileDetail2.setPath("//URL");
-
-    fileDetailsList.add(mockFileDetail1);
-    fileDetailsList.add(mockFileDetail2);
-    when(cloudStorageService.getBucketFileList("MockBucketName","notebook")).thenReturn(fileDetailsList);
-
-    //Will return 1 entry as only python files are filtered out
-    List<FileDetail> result =workspacesController.getNoteBookList("mockProjectName","mockWorkspaceName").getBody();
-    assertEquals(result.size(),1);
+    // Will return 1 entry as only python files are filtered out
+    List<FileDetail> result = workspacesController.getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
+    assertEquals(result.size(), 1);
 
     try {
-      result =workspacesController.getNoteBookList("mockProject","mockWorkspace").getBody();
+      result = workspacesController.getNoteBookList("mockProject", "mockWorkspace").getBody();
       assertTrue(false);
-    }
-    catch(NullPointerException|NotFoundException ex) {
+    } catch (NullPointerException | NotFoundException ex) {
       assertTrue(true);
     }
   }

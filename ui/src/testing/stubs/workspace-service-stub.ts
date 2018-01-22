@@ -179,19 +179,18 @@ export class WorkspacesServiceStub {
   }
 
   getNoteBookList(workspaceNamespace: string,
-                  workspaceId: string, extraHttpRequestParams?: any)
-                  : Observable<Array<FileDetail>> {
+      workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
         if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
             && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
           const fileDetailsList = [{'name': 'FileDetails', 'path': 'dummyPath'}];
           observer.next(fileDetailsList);
-        }else {
+        } else {
           observer.next([]);
         }
         observer.complete();
-      });
+      }, 0);
     });
   }
 }

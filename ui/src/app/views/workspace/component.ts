@@ -90,7 +90,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cohortsError = false;
   notebookError = false;
   notebooksLoading = false;
-  columnHeaderNotebook = false;
+  checkColumnNotebook = false;
   cohortList: Cohort[] = [];
   cluster: Cluster;
   clusterPulled = false;
@@ -98,9 +98,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notFound = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
-  saveSuccess = false;
-  saveError = false;
-  pushNotebookEnable = false;
+  showAlerts = false;
+  enablePushNotebookBtn = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   editHover = false;
@@ -108,6 +107,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   trashHover = false;
   listenerAdded = false;
   notebookAuthListener: EventListenerOrEventListenerObject;
+  alertCategory: string;
+  alertMsg: string;
 
   constructor(
       private route: ActivatedRoute,
@@ -154,7 +155,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                     for (const fileDetail of FileList){
                       fileDetail.push = false;
                       this.notebookList.push(fileDetail);
-
                     }
                   },
                   error => {
@@ -288,35 +288,35 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
-  checkNotebookHandlerEvent(notebook): void {
-    let pushNotebookEnable = false;
-    let notebookUnselect = false;
-    this.columnHeaderNotebook = true;
-    this.pushNotebookEnable = false;
+  sendANotebook(notebook): void {
+    let enableBtn = false;
+    let unSelectCheckBox = false;
+    this.checkColumnNotebook = true;
+    this.enablePushNotebookBtn = false;
 
-    for (const file of this.notebookList){
+    for (const file of this.notebookList) {
       if (file.push === false) {
-        this.columnHeaderNotebook = false;
-        if (pushNotebookEnable) {
+        this.checkColumnNotebook = false;
+        if (enableBtn) {
           break;
         }
-        notebookUnselect = true;
+        unSelectCheckBox = true;
       }
       if (file.push === true) {
-        this.pushNotebookEnable = true;
-        if (notebookUnselect) {
+        this.enablePushNotebookBtn = true;
+        if (unSelectCheckBox) {
           break;
         }
-        pushNotebookEnable = true;
+        enableBtn = true;
       }
     }
   }
 
-  columnHeaderNotebookHandler(): void {
+  sendAllNoteBooks(): void {
     for (const file of this.notebookList) {
-      file.push = this.columnHeaderNotebook;
+      file.push = this.checkColumnNotebook;
     }
-    this.pushNotebookEnable = this.columnHeaderNotebook;
+    this.enablePushNotebookBtn = this.checkColumnNotebook;
   }
 
 
@@ -337,21 +337,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  pushToNotebookServer(notebook): void {
-    const list = [];
-    list.push(notebook.filter(function(item) {
-      return item.push;
-    }));
-
-    const fileList: Array<FileDetail> = list[0];
-
+  sendFilesToNotebookServer(notebooks): void {
+    const fileList: Array<FileDetail> = notebooks.filter((item) => item.push);
     this.clusterService
-    .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList).subscribe( () => {
-      this.saveSuccess = true;
-      this.saveError = false;
-    }, () => {
-      this.saveError = true;
-      this.saveSuccess = false;
-    });
+        .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
+        .subscribe(() => {
+          this.alertCategory = 'alert-success';
+          this.alertMsg = 'File(s) have been saved'
+          this.showAlerts = true;
+        }, () => {
+          this.alertCategory = 'alert-danger';
+          this.alertMsg = 'There was an issue while saving file(s) please try again later';
+          this.showAlerts = true;
+        });
   }
 }

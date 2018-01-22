@@ -518,16 +518,16 @@ paths:
           items:
             $ref: '#/definitions/FileDetail'
       responses:
-        "200":
-          description: List of files
-        "404":
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorReport'
-        "500":
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorReport'
+        200:
+         description: List of files
+        404:
+         description: Cluster not found
+         schema:
+           $ref: '#/definitions/ErrorReport'
+        500:
+         description: Internal Error
+         schema:
+          $ref: '#/definitions/ErrorReport'
 
 
   # Billing projects #####################################################################
@@ -2484,8 +2484,6 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
-
-
 
   FileDetail:
     type: object

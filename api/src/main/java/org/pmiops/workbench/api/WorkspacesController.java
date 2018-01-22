@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.pmiops.workbench.model.BlobDetail;
 
 
 @RestController
@@ -474,25 +475,32 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace, String workspaceId) {
-    List<FileDetail> bucketFileList = new ArrayList<FileDetail>();
+  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
+      String workspaceId) {
+    List<BlobDetail> bucketFileList = new ArrayList<BlobDetail>();
+    List<FileDetail> fileList = new ArrayList<FileDetail>();
     try {
-      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-                                                                          .getWorkspace();
+      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
+          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+              .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
-      bucketFileList = cloudStorageService.getBucketFileList(bucketName,"notebook");
+      bucketFileList = cloudStorageService.getBucketFileList(bucketName, "notebook");
 
       if (bucketFileList != null && bucketFileList.size() > 0) {
-        bucketFileList = bucketFileList.stream()
-          .filter(bucketFile -> bucketFile.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-          .collect(Collectors.toList());
+        bucketFileList.stream()
+            .filter(bucketFile -> bucketFile.getBlobName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .forEach(blobItem -> {
+              FileDetail fileDetail = new FileDetail();
+              fileDetail.setName(blobItem.getBlobName());
+              fileDetail.setPath("gs://" + bucketName + "/" + blobItem.getBlobName());
+              fileList.add(fileDetail);
+            });
       }
-    }
-    catch (org.pmiops.workbench.firecloud.ApiException e) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      throw new NotFoundException(String.format("Workspace %s/%s not found",
           workspaceNamespace, workspaceId));
     }
-    return ResponseEntity.ok(bucketFileList);
+    return ResponseEntity.ok(fileList);
   }
 
   @Override

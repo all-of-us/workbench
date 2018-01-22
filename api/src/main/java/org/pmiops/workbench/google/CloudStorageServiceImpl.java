@@ -9,6 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.pmiops.workbench.model.BlobDetail;
 
 @Service
 public class CloudStorageServiceImpl implements CloudStorageService {
@@ -29,15 +30,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public List<FileDetail> getBucketFileList(String bucketName,String directory) {
-    List<FileDetail> fileList = new ArrayList<FileDetail>();
+  public List<BlobDetail> getBucketFileList(String bucketName, String directory) {
+    List<BlobDetail> fileList = new ArrayList<BlobDetail>();
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    Iterable<Blob> blobList = storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
+    Iterable<Blob> blobList = storage.get(bucketName)
+        .list(Storage.BlobListOption.prefix(directory)).getValues();
     blobList.forEach(blobItem -> {
-        FileDetail fileDetail = new FileDetail();
-        fileDetail.setName(blobItem.getName());
-        fileDetail.setPath("gs://" + bucketName +"/"+ blobItem.getName());
-        fileList.add(fileDetail);
+      BlobDetail detail = new BlobDetail(blobItem.getName(), blobItem.getName());
+      fileList.add(detail);
     });
     return fileList;
   }
@@ -45,8 +45,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
   }
-
-
 
   String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
