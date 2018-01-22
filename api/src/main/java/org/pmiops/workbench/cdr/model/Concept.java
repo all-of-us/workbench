@@ -18,7 +18,7 @@ import java.util.Objects;
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "concept")
 @NamedNativeQuery(name = "Concept.findGenderRaceEthnicityFromConcept",
         query = "select c.* from cdr.concept c " +
-                "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity') order by c.concept_id",
+                "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
         resultClass = Concept.class)
 
 //TODO need to add a way to dynamically switch between database versions
