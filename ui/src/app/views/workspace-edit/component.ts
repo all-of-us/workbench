@@ -160,7 +160,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.errorHandlingService.retryApi(this.workspacesService.updateWorkspace(
       this.oldWorkspaceNamespace,
       this.oldWorkspaceName,
-      this.workspace))
+      {workspace: this.workspace}))
       .subscribe(
         () => {
           this.navigateBack();
