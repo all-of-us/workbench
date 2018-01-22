@@ -6,6 +6,7 @@ import {
   EmptyResponse,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
+  UpdateWorkspaceRequest,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResponse,
@@ -139,7 +140,7 @@ export class WorkspacesServiceStub {
 
   updateWorkspace(workspaceNamespace: string,
                   workspaceId: string,
-                  newWorkspace: Workspace): Observable<Workspace> {
+                  newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
@@ -152,7 +153,7 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces.splice(updateIndex, 1, this.clone(newWorkspace));
+        this.workspaces.splice(updateIndex, 1, this.clone(newWorkspace.workspace));
         observer.complete();
       }, 0);
     });
