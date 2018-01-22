@@ -534,7 +534,7 @@ paths:
           name: workspace
           description: workspace definition
           schema:
-            $ref: "#/definitions/Workspace"
+            $ref: "#/definitions/UpdateWorkspaceRequest"
       responses:
         200:
           description: The updated workspace definition
@@ -1516,6 +1516,14 @@ definitions:
       workspace:
         $ref: "#/definitions/Workspace"
         description: The newly created workspace clone.
+
+  UpdateWorkspaceRequest:
+    type: object
+    required:
+     - workspace
+    properties:
+      workspace:
+        $ref: "#/definitions/Workspace"
 
   WorkspaceAccessLevel:
     type: string
