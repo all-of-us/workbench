@@ -190,10 +190,6 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-cache:+') {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
   compile 'org.springframework.security:spring-security-web:+'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
@@ -215,9 +211,7 @@ dependencies {
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.blockscore:blockscore-java:4.0.2'
   compile 'com.google.guava:guava:22.0'
-  compile ('org.hibernate:hibernate-ehcache:5.0.12.Final') {
-    exclude group: 'net.sf.ehcache', module:'ehcache'
-  }
+  compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'

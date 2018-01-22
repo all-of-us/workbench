@@ -145,7 +145,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Override
     public Map<Long, String> findGenderRaceEthnicityFromConcept() {
-        List<Concept> conceptList = conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"));
+        List<Concept> conceptList = conceptDao.findGenderRaceEthnicityFromConcept();
         return conceptList.stream().collect(Collectors.toMap(Concept::getConceptId, Concept::getConceptName));
     }
 }
