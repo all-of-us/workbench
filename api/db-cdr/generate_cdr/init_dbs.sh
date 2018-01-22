@@ -7,40 +7,6 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-
-# get options
-# --project=all-of-us-workbench-test *required
-
-# --cdr=cdr_version ... *optional
-
-USAGE="./generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> [--cdr=<VERSION>]"
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
-    --project) PROJECT=$2; shift 2;;
-    --cdr) CDR=$2; shift 2;;
-    -- ) shift; break ;;
-    * ) break ;;
-  esac
-done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${PROJECT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-CREDS_ACCOUNT=${ACCOUNT}
-
-
-echo "Project $PROJECT Account $ACCOUNT CDR $CDR"
-
-# Init the local cdr database
 # Make the vocabulary table from cdr with no changes
 #bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
 project="all-of-us-workbench-test"
