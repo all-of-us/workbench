@@ -6,6 +6,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -47,6 +48,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -70,6 +72,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -156,6 +159,8 @@ public class WorkspacesControllerTest {
   BigQueryService bigQueryService;
   @Autowired
   WorkspaceDao workspaceDao;
+  @Mock
+  WorkspaceService workspaceService;
   @Autowired
   UserDao userDao;
   @Autowired
@@ -388,15 +393,17 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
@@ -410,25 +417,30 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(new Workspace().name("updated-name").etag(ws.getEtag()));
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
+        request).getBody();
 
     // Still using the initial now-stale etag; this should throw.
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    request.setWorkspace(new Workspace().name("updated-name2").etag(ws.getEtag()));
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
+        request).getBody();
   }
 
   @Test
@@ -442,8 +454,10 @@ public class WorkspacesControllerTest {
       try {
         stubGetWorkspace(ws.getNamespace(), ws.getId(),
             ws.getCreator(), WorkspaceAccessLevel.OWNER);
+        UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+        request.setWorkspace(new Workspace().name("updated-name").etag(etag));
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-            new Workspace().name("updated-name").etag(etag));
+            request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch(BadRequestException e) {
         // expected
@@ -594,13 +608,14 @@ public class WorkspacesControllerTest {
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    
+
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
@@ -608,6 +623,8 @@ public class WorkspacesControllerTest {
     Workspace cloned = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
 
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());

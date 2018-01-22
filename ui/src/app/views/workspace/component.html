@@ -13,6 +13,12 @@
         <app-share-icon [shareHover]="shareHover"></app-share-icon>
         <span class="tooltip-content">Share Workspace</span>
       </button>
+      <button (mouseover)="cloneHover=true" (mouseleave)="cloneHover=false"
+              (click)="clone()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+        <!-- TODO(calbach): Check whether we have the real asset available. -->
+        <clr-icon shape="copy"></clr-icon>
+        <span class="tooltip-content">Clone Workspace</span>
+      </button>
       <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
           [disabled]="!ownerPermission"
           class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"

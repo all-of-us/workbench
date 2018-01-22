@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +70,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                                                                        String workspaceId,
                                                                                        Long cohortId,
                                                                                        CohortAnnotationDefinition request) {
+        // This also enforces registered auth domain.
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -97,6 +101,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                                                           String workspaceId,
                                                                           Long cohortId,
                                                                           Long annotationDefinitionId) {
+        // This also enforces registered auth domain.
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -114,6 +121,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                                                                     String workspaceId,
                                                                                     Long cohortId,
                                                                                     Long annotationDefinitionId) {
+        // This also enforces registered auth domain.
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -128,6 +138,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId) {
+        // This also enforces registered auth domain.
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
@@ -148,6 +161,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                                      Long cohortId,
                                      Long annotationDefinitionId,
                                      ModifyCohortAnnotationDefinitionRequest modifyCohortAnnotationDefinitionRequest) {
+        // This also enforces registered auth domain.
+        workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
         String columnName = modifyCohortAnnotationDefinitionRequest.getColumnName();
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace

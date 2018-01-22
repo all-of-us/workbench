@@ -2,18 +2,6 @@
   <label>Participant {{ participant?.participantId }} Review Status</label>
   <span [style.margin-left]="'0.25rem'">
     <div *ngIf="changingStatus" class="spinner spinner-inline">Loading...</div>
-    <ng-container *ngIf="!changingStatus">
-      <clr-icon
-        *ngIf="statusControl.enabled"
-        shape="success-standard"
-        class="is-success">
-      </clr-icon>
-      <clr-icon
-        *ngIf="statusControl.disabled"
-        shape="warning-standard"
-        class="is-warning">
-      </clr-icon>
-    </ng-container>
   </span>
   <div class="radio" [class.disable]="statusControl.disabled">
     <input type="radio"

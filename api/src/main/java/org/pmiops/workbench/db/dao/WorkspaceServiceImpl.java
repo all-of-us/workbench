@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
@@ -204,7 +205,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return this.saveWithLastModified(workspace);
   }
-
   @Override
   @Transactional
   public Workspace saveAndCloneCohorts(Workspace from, Workspace to) {
@@ -224,5 +224,35 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       cohortService.saveAndCloneReviews(fromCohort, c);
     }
     return saved;
+  }
+  @Override
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
+    String userAccess;
+    try {
+      userAccess = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId).getAccessLevel();
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e.getResponseBody());
+      }
+    }
+    return WorkspaceAccessLevel.fromValue(userAccess);
+  }
+
+  @Override
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
+      String workspaceId, WorkspaceAccessLevel requiredAccess) {
+    WorkspaceAccessLevel access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+
+
+    if (requiredAccess.compareTo(access) > 0) {
+      throw new ForbiddenException(String.format("You do not have sufficient permissions to access workspace %s/%s",
+          workspaceNamespace, workspaceId));
+    } else {
+      return access;
+    }
   }
 }
