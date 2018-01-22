@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cdr.dao;
 
+import org.hibernate.Session;
+import org.hibernate.stat.SecondLevelCacheStatistics;
+import org.hibernate.stat.Statistics;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,8 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
-import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,6 +26,10 @@ public class ConceptDaoTest {
 
     @Autowired
     ConceptDao conceptDao;
+
+    @PersistenceContext
+    private EntityManager em;
+
     private Concept ethnicityConcept;
     private Concept genderConcept;
     private Concept raceConcept;
@@ -47,11 +54,28 @@ public class ConceptDaoTest {
 
     @Test
     public void findGenderRaceEthnicityFromConcept() throws Exception {
-        List<Concept> concepts = conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"));
-        assertEquals(3, concepts.size());
-        assertEquals("ethnicity", concepts.get(0).getConceptName());
-        assertEquals("gender", concepts.get(1).getConceptName());
-        assertEquals("race", concepts.get(2).getConceptName());
+        Session session = (Session)em.getDelegate();
+
+        conceptDao.findGenderRaceEthnicityFromConcept();
+
+        Statistics stats = session.getSessionFactory().getStatistics();
+        SecondLevelCacheStatistics slc = session
+                .getSessionFactory()
+                .getStatistics()
+                .getSecondLevelCacheStatistics("concept");
+
+        conceptDao.findGenderRaceEthnicityFromConcept();
+        assertEquals(3L, slc.getPutCount());
+        assertEquals(0L, slc.getHitCount());
+
+        tearDown();
+
+        conceptDao.findGenderRaceEthnicityFromConcept();
+
+        conceptDao.findGenderRaceEthnicityFromConcept();
+        assertEquals(3L, slc.getPutCount());
+        assertEquals(3L, slc.getHitCount());
+
     }
 
     private Concept createConcept(Long conceptId, String name, String vocabularyId) {

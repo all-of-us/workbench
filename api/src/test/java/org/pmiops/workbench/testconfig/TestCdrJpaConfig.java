@@ -1,7 +1,5 @@
 package org.pmiops.workbench.testconfig;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -20,9 +18,6 @@ import java.util.Properties;
 @EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr" })
 @EnableTransactionManagement
 public class TestCdrJpaConfig {
-
-    private static StandardServiceRegistry registry;
-    private static SessionFactory sessionFactory;
 
     @Bean
     @Profile("test-cdr")
@@ -62,6 +57,8 @@ public class TestCdrJpaConfig {
         hibernateProperties.setProperty("hibernate.cache.use_second_level_cache", "true");
         hibernateProperties.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
         hibernateProperties.setProperty("hibernate.javax.cache.provider", "org.ehcache.jsr107.EhcacheCachingProvider");
+        hibernateProperties.setProperty("hibernate.generate_statistics", "true");
+        hibernateProperties.setProperty("hibernate.cache.provider_configuration_file_resource_path", "classpath:ehcache.xml");
 
         return hibernateProperties;
     }

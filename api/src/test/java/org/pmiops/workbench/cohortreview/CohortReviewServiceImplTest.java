@@ -21,7 +21,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -295,7 +294,7 @@ public class CohortReviewServiceImplTest {
         conceptsList.add(genderConcept);
         conceptsList.add(raceConcept);
 
-        when(conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"))).thenReturn(conceptsList);
+        when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(conceptsList);
 
         Map<Long, String> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
 
@@ -310,12 +309,11 @@ public class CohortReviewServiceImplTest {
         Concept concept = new Concept().conceptId(1L).conceptName("name");
         conceptList.add(concept);
 
-        when(conceptDao.findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"))).thenReturn(conceptList);
+        when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(conceptList);
 
         cohortReviewService.findGenderRaceEthnicityFromConcept();
-        cohortReviewService.findGenderRaceEthnicityFromConcept();
 
-        verify(conceptDao, times(1)).findByVocabularyIdIn(Arrays.asList("Gender", "Race", "Ethnicity"));
+        verify(conceptDao, times(1)).findGenderRaceEthnicityFromConcept();
         verifyNoMoreInteractions(conceptDao);
     }
 
