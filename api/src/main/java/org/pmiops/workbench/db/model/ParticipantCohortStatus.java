@@ -11,6 +11,7 @@ import java.util.Objects;
 @Table(name = "participant_cohort_status")
 public class ParticipantCohortStatus {
 
+    // Important: Keep fields in sync with ParticipantCohortStatusDao.ALL_COLUMNS_EXCEPT_REVIEW_ID.
     private ParticipantCohortStatusKey participantKey;
     private CohortStatus status;
     private Long genderConceptId;

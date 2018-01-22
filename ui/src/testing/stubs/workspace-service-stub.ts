@@ -1,6 +1,8 @@
 import {Observable} from 'rxjs/Observable';
 
 import {
+  CloneWorkspaceRequest,
+  CloneWorkspaceResponse,
   EmptyResponse,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
@@ -57,27 +59,26 @@ export class WorkspacesServiceStub {
       ]
     };
 
-
     this.workspaces = [stubWorkspace];
-    this.workspaceResponses = [
-      {
-        workspace: stubWorkspace,
-        accessLevel: WorkspaceAccessLevel.OWNER
-      }
-    ];
+  }
+
+  private clone(w: Workspace): Workspace {
+    if (w == null) {
+      return w;
+    }
+    return JSON.parse(JSON.stringify(w));
   }
 
   createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        observer.next(this.workspaces.find(function(workspace: Workspace) {
-          if (workspace.id === newWorkspace.id) {
-            observer.error(new Error(`Error creating. Workspace with `
-                                    + `id: ${workspace.id} already exists.`));
-            return true;
-          }
-        }));
-        this.workspaces.push(newWorkspace);
+        if (this.workspaces.find(w => w.id === newWorkspace.id)) {
+          observer.error(new Error(`Error creating. Workspace with `
+                                   + `id: ${newWorkspace.id} already exists.`));
+          return;
+        }
+        this.workspaces.push(this.clone(newWorkspace));
+        observer.next(this.clone(newWorkspace));
         observer.complete();
       }, 0);
     });
@@ -94,6 +95,7 @@ export class WorkspacesServiceStub {
         if (deletionIndex === -1) {
           observer.error(new Error(`Error deleting. Workspace with `
             + `id: ${workspaceId} does not exist.`));
+          return;
         }
         this.workspaces.splice(deletionIndex, 1);
         observer.complete();
@@ -110,7 +112,7 @@ export class WorkspacesServiceStub {
           }
         });
         const response: WorkspaceResponse = {
-          workspace: workspaceReceived,
+          workspace: this.clone(workspaceReceived),
           accessLevel: WorkspaceAccessLevel.OWNER
         };
         observer.next(response);
@@ -122,15 +124,14 @@ export class WorkspacesServiceStub {
   getWorkspaces(): Observable<WorkspaceResponseListResponse> {
     return new Observable<WorkspaceResponseListResponse>(observer => {
       setTimeout(() => {
-        this.workspaceResponses = [];
-        this.workspaces.forEach((workspace) => {
-          this.workspaceResponses.push(
-            {
-              workspace: workspace,
+        observer.next({
+          items: this.workspaces.map(workspace => {
+            return {
+              workspace: this.clone(workspace),
               accessLevel: WorkspaceAccessLevel.OWNER
-            });
+            };
+          })
         });
-        observer.next({items: this.workspaceResponses});
         observer.complete();
       }, 0);
     });
@@ -147,10 +148,31 @@ export class WorkspacesServiceStub {
           }
         });
         if (updateIndex === -1) {
-          const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
+          const msg = `Error updating. Workspace with id: ${workspaceId} does not exist.`;
           observer.error(new Error(msg));
+          return;
         }
-        this.workspaces.splice(updateIndex, 1, newWorkspace);
+        this.workspaces.splice(updateIndex, 1, this.clone(newWorkspace));
+        observer.complete();
+      }, 0);
+    });
+  }
+
+  cloneWorkspace(workspaceNamespace: string,
+                 workspaceId: string,
+                 cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
+    return new Observable<CloneWorkspaceResponse>(observer => {
+      setTimeout(() => {
+        const source = this.workspaces.find(w => w.id === workspaceId);
+        if (!source) {
+          const msg = `Error Cloning. Workspace with id: ${workspaceId} does not exist.`;
+          observer.error(new Error(msg));
+          return;
+        }
+        const cloned = this.clone(cloneReq.workspace);
+        cloned.id = 'id-' + cloned.name;
+        this.workspaces.push(cloned);
+        observer.next({workspace: cloned});
         observer.complete();
       }, 0);
     });
@@ -169,6 +191,7 @@ export class WorkspacesServiceStub {
         if (updateIndex === -1) {
           const msg = `Error sharing. Workspace with id: ${workspaceId} does not exist.`;
           observer.error(new Error(msg));
+          return;
         }
         this.workspaces[updateIndex].userRoles = request.items;
         observer.next({});

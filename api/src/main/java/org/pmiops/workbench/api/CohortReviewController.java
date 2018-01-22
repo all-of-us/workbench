@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -22,6 +23,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -57,7 +59,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private BigQueryService bigQueryService;
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
-
+    private WorkspaceService workspaceService;
     private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
     /**
@@ -112,11 +114,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            CodeDomainLookupService codeDomainLookupService,
-                           ParticipantCounter participantCounter) {
+                           ParticipantCounter participantCounter,
+                           WorkspaceService workspaceService) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
+        this.workspaceService = workspaceService;
     }
 
     /**
@@ -141,7 +145,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
         }
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = null;
+        try {
+            cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        } catch (NotFoundException nfe) {
+            cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
+        }
         if(cohortReview.getReviewSize() > 0) {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
@@ -150,7 +159,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
@@ -226,7 +235,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                          Long participantId) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         ParticipantCohortStatus status =
                 cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
@@ -241,10 +250,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                             Long cdrVersionId,
                                                                                                             Long participantId,
                                                                                                             ModifyCohortStatusRequest cohortStatusRequest) {
-
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
@@ -285,6 +293,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 List<String> filterColumns,
                                                                                                 List<String> filterValues) {
         CohortReview cohortReview = null;
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
@@ -330,7 +341,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                        Long cdrVersionId) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 

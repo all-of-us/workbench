@@ -1,20 +1,22 @@
-<div class="form-group">
-  <label>Has Neck Pain?</label>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-yes" value="yes">
-    <label for="radio-yes">Yes</label>
-  </div>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-no" value="no">
-    <label for="radio-no">No</label>
-  </div>
-  <div class="radio">
-    <input type="radio" name="hasNeckPain" id="radio-na" value="na">
-    <label for="radio-na">N/A</label>
-  </div>
+<div>
+  <h4>Annotations</h4>
+  <clr-checkbox [clrInline]="true" [(clrChecked)]="verbosity" [name]="'verbosity'">
+    Verbose
+  </clr-checkbox>
+  <button
+    type="button"
+    class="btn btn-icon btn-link"
+    (click)="state.annotationMgrState.next({
+      open: true,
+      mode: 'overview'
+    })">
+    <clr-icon shape="cog" size="24" title="Manage Annotations"></clr-icon>
+  </button>
 </div>
 
-<div class="form-group">
-  <label>Date</label>
-  <input type="date">
-</div>
+<app-participant-annotation
+  *ngFor="let anno of (annotations$ | async)"
+  [definition]="anno.definition"
+  [value]="anno.value"
+  [verbose]="verbosity">
+</app-participant-annotation>

@@ -1,9 +1,16 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -15,9 +22,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
-
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -27,14 +31,25 @@ import static org.junit.Assert.assertEquals;
 @Transactional
 public class CohortReviewDaoTest {
 
-    private static long COHORT_ID = 1;
     private static long CDR_VERSION_ID = 1;
 
     @Autowired
+    WorkspaceDao workspaceDao;
+    @Autowired
+    CohortDao cohortDao;
+    @Autowired
     CohortReviewDao cohortReviewDao;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    private long cohortId;
+
+    @Before
+    public void setup() throws Exception {
+      Cohort cohort = new Cohort();
+      cohort.setWorkspaceId(workspaceDao.save(new Workspace()).getWorkspaceId());
+      cohortId = cohortDao.save(cohort).getCohortId();
+    }
 
     @Test
     public void save() throws Exception {
@@ -88,7 +103,7 @@ public class CohortReviewDaoTest {
         Gson gson = new Gson();
 
         return new CohortReview()
-                .cohortId(COHORT_ID)
+                .cohortId(cohortId)
                 .cdrVersionId(CDR_VERSION_ID)
                 .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
                 .lastModifiedTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
