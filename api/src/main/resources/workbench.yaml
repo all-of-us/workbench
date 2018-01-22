@@ -476,17 +476,17 @@ paths:
           required: true
           type: string
       responses:
-        "200":
+        200:
           description: List of files
           schema:
             type: array
             items:
               $ref: '#/definitions/FileDetail'
-        "404":
+        404:
           description: Workspace not found
           schema:
             $ref: '#/definitions/ErrorReport'
-        "500":
+        500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'

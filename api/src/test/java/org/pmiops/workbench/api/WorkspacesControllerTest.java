@@ -61,7 +61,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.BlobDetail;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortReview;
@@ -936,10 +935,10 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
         fcResponse
     );
-    List<BlobDetail> blobDetailList = new ArrayList<BlobDetail>();
-    BlobDetail mockBlobDetail1 = new BlobDetail("notebook/File.ipynb","//URL");
-    BlobDetail mockBlobDetail2 = new BlobDetail("notebook/File1.txt","//URL");
-    BlobDetail mockBlobDetail3 = new BlobDetail("config/File1.txt","//URL");
+    List<String> blobDetailList = new ArrayList<BlobDetail>();
+    String mockBlobDetail1 = new String("notebook/File.ipynb");
+    String mockBlobDetail2 = new String("notebook/File1.txt","//URL");
+    String mockBlobDetail3 = new String("config/File1.txt","//URL");
     blobDetailList.add(mockBlobDetail1);
     blobDetailList.add(mockBlobDetail2);
     blobDetailList.add(mockBlobDetail3);

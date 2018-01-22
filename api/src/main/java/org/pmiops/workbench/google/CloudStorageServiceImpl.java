@@ -9,7 +9,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.pmiops.workbench.model.BlobDetail;
 
 @Service
 public class CloudStorageServiceImpl implements CloudStorageService {
@@ -30,16 +29,15 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public List<BlobDetail> getBucketFileList(String bucketName, String directory) {
-    List<BlobDetail> fileList = new ArrayList<BlobDetail>();
+  public List<String> getBucketFileList(String bucketName, String directory) {
+    List<String> fileNameList = new ArrayList<String>();
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList = storage.get(bucketName)
         .list(Storage.BlobListOption.prefix(directory)).getValues();
     blobList.forEach(blobItem -> {
-      BlobDetail detail = new BlobDetail(blobItem.getName(), blobItem.getName());
-      fileList.add(detail);
+      fileNameList.add(blobItem.getName());
     });
-    return fileList;
+    return fileNameList;
   }
 
   String getCredentialsBucketName() {

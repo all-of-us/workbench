@@ -56,7 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.pmiops.workbench.model.BlobDetail;
 
 
 @RestController
@@ -449,7 +448,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
       String workspaceId) {
-    List<BlobDetail> bucketFileList = new ArrayList<BlobDetail>();
+    List<String> bucketFileList = new ArrayList<String>();
     List<FileDetail> fileList = new ArrayList<FileDetail>();
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
@@ -460,11 +459,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       if (bucketFileList != null && bucketFileList.size() > 0) {
         bucketFileList.stream()
-            .filter(bucketFile -> bucketFile.getBlobName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-            .forEach(blobItem -> {
+            .filter(bucketFileName -> bucketFileName.matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .forEach(bucketFileName -> {
               FileDetail fileDetail = new FileDetail();
-              fileDetail.setName(blobItem.getBlobName());
-              fileDetail.setPath("gs://" + bucketName + "/" + blobItem.getBlobName());
+              fileDetail.setName(bucketFileName);
+              fileDetail.setPath("gs://" + bucketName + "/" + bucketFileName);
               fileList.add(fileDetail);
             });
       }
