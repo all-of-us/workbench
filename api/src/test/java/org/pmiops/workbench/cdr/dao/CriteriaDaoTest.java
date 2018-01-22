@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.testconfig.TestCdrJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestCdrJpaConfig.class})
@@ -81,6 +83,19 @@ public class CriteriaDaoTest {
         final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L);
         assertEquals(cptCriteria2, cptList.get(0));
         assertEquals(cptCriteria1, cptList.get(1));
+    }
+
+    @Test
+    public void findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc() throws Exception {
+        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc(Arrays.asList("0039T", "0001T"));
+
+        final CodeDomainLookup icd9Domain1 = icd9DomainList.get(0);
+        assertEquals("0001T", icd9Domain1.getCode());
+        assertEquals("Condition", icd9Domain1.getDomainId());
+
+        final CodeDomainLookup icd9Domain2 = icd9DomainList.get(1);
+        assertEquals("0039T", icd9Domain2.getCode());
+        assertEquals("Condition", icd9Domain2.getDomainId());
     }
 
     private Criteria createCriteria(String type, String subtype, String code, String name) {

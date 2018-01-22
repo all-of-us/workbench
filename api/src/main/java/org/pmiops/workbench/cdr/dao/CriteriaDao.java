@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
+import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,6 +11,8 @@ import java.util.List;
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
     List<Criteria> findCriteriaByTypeAndParentIdOrderByCodeAsc(@Param("type") String type, @Param("parentId") Long parentId);
+
+    List<CodeDomainLookup> findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc(@Param("codes") List<String> codes);
 
     /** TODO: implement dynamic switching of schemas **/
     @Query(value = "select * from cdr.criteria c " +
