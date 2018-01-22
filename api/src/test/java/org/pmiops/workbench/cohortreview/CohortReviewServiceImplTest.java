@@ -309,20 +309,6 @@ public class CohortReviewServiceImplTest {
         assertEquals("race", concepts.get(raceConcept.getConceptId()));
     }
 
-    @Test
-    public void testCacheable() throws Exception {
-        List<Concept> conceptList = new ArrayList<>();
-        Concept concept = new Concept().conceptId(1L).conceptName("name");
-        conceptList.add(concept);
-
-        when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(conceptList);
-
-        cohortReviewService.findGenderRaceEthnicityFromConcept();
-
-        verify(conceptDao, times(1)).findGenderRaceEthnicityFromConcept();
-        verifyNoMoreInteractions(conceptDao);
-    }
-
     private void verifyNoMoreMockInteractions() {
         verifyNoMoreInteractions(
                 cohortDao,
