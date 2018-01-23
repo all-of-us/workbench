@@ -69,6 +69,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -384,15 +385,17 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
@@ -406,25 +409,30 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(new Workspace().name("updated-name").etag(ws.getEtag()));
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
+        request).getBody();
 
     // Still using the initial now-stale etag; this should throw.
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    request.setWorkspace(new Workspace().name("updated-name2").etag(ws.getEtag()));
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
+        request).getBody();
   }
 
   @Test
@@ -438,8 +446,10 @@ public class WorkspacesControllerTest {
       try {
         stubGetWorkspace(ws.getNamespace(), ws.getId(),
             ws.getCreator(), WorkspaceAccessLevel.OWNER);
+        UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+        request.setWorkspace(new Workspace().name("updated-name").etag(etag));
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-            new Workspace().name("updated-name").etag(etag));
+            request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch(BadRequestException e) {
         // expected
