@@ -20,7 +20,16 @@ interface Position {
 export class SidebarDirective implements OnInit {
 
   @Input() position: Position = {top: 0, left: 0};
+
   private _open = false;
+
+  @Input() set isOpen(val: boolean) {
+    val ? this.open() : this.close();
+  }
+
+  get isOpen() {
+    return this._open;
+  }
 
   readonly styles: Object = {
     'height': '100%',
@@ -78,9 +87,5 @@ export class SidebarDirective implements OnInit {
 
   toggle() {
     this.isOpen ? this.close() : this.open();
-  }
-
-  get isOpen() {
-    return this._open;
   }
 }
