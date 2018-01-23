@@ -22,9 +22,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
-
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)

@@ -6,8 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -19,13 +17,8 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -281,43 +274,6 @@ public class CohortReviewServiceImplTest {
                 cohortReviewId,
                 pageRequest);
         verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void findGenderRaceEthnicityFromConcept() throws Exception {
-        Concept ethnicityConcept = new Concept()
-                .conceptId(1L)
-                .conceptName("ethnicity");
-        Concept genderConcept = new Concept()
-                .conceptId(2L)
-                .conceptName("gender");
-        Concept raceConcept = new Concept()
-                .conceptId(3L)
-                .conceptName("race");
-
-        List<Concept> conceptsList = new ArrayList<>();
-        conceptsList.add(ethnicityConcept);
-        conceptsList.add(genderConcept);
-        conceptsList.add(raceConcept);
-
-        Map<String, Map<Long, String>> concepts = new HashMap<>();
-        final HashMap<Long, String> race = new HashMap<>();
-        race.put(3L, "race");
-        final HashMap<Long, String> gender = new HashMap<>();
-        gender.put(2L, "gender");
-        final HashMap<Long, String> ethnicity = new HashMap<>();
-        ethnicity.put(1L, "ethnicity");
-        concepts.put(GenderRaceEthnicityType.RACE.name(), race);
-        concepts.put(GenderRaceEthnicityType.GENDER.name(), gender);
-        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), ethnicity);
-
-        when(genderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(concepts));
-
-        Map<String, Map<Long, String>> conceptList = cohortReviewService.findGenderRaceEthnicityFromConcept();
-
-        assertEquals("ethnicity", conceptList.get(GenderRaceEthnicityType.ETHNICITY.name()).get(ethnicityConcept.getConceptId()));
-        assertEquals("gender", conceptList.get(GenderRaceEthnicityType.GENDER.name()).get(genderConcept.getConceptId()));
-        assertEquals("race", conceptList.get(GenderRaceEthnicityType.RACE.name()).get(raceConcept.getConceptId()));
     }
 
     private void verifyNoMoreMockInteractions() {

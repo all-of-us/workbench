@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -32,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
     private WorkspaceService workspaceService;
+    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
     private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
     /**
@@ -116,12 +119,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                            BigQueryService bigQueryService,
                            CodeDomainLookupService codeDomainLookupService,
                            ParticipantCounter participantCounter,
-                           WorkspaceService workspaceService) {
+                           WorkspaceService workspaceService,
+                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
         this.workspaceService = workspaceService;
+        this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
     /**
@@ -180,13 +185,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .reviewedCount(0L)
                 .reviewStatus(ReviewStatus.CREATED);
 
-        lookupGenderRaceEthnicityValues(paginatedPCS);
-
         //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
         List<ParticipantCohortStatus> paginatedPCS =
                 cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID)).getContent();
+        lookupGenderRaceEthnicityValues(paginatedPCS);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
@@ -308,7 +312,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         List<ParticipantCohortStatus> participantCohortStatuses =
                 cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), pageRequest).getContent();
-
         lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
@@ -431,7 +434,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     private void lookupGenderRaceEthnicityValues(List<ParticipantCohortStatus> participantCohortStatuses) {
-        Map<String, Map<Long, String>> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
+        Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
         participantCohortStatuses.forEach(pcs -> {
             pcs.setRace(concepts.get(GenderRaceEthnicityType.RACE.name()).get(pcs.getRaceConceptId()));
             pcs.setGender(concepts.get(GenderRaceEthnicityType.GENDER.name()).get(pcs.getGenderConceptId()));
