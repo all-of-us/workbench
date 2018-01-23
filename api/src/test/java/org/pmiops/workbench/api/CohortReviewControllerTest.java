@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -61,9 +60,6 @@ public class CohortReviewControllerTest {
 
     @Mock
     WorkspaceService workspaceService;
-
-    @Mock
-    private GenderRaceEthnicityConcept genderRaceEthnicityConcept;
 
     @InjectMocks
     CohortReviewController reviewController;

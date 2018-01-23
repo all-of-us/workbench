@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -46,12 +45,6 @@ public class CohortReviewServiceImplTest {
 
     @Mock
     private WorkspaceService workspaceService;
-
-    @Mock
-    private JdbcTemplate jdbcTemplate;
-
-    @Mock
-    private ConceptDao conceptDao;
 
     @Mock
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
