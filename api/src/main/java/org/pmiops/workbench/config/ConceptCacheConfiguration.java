@@ -21,26 +21,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Configuration
-public class GenderRaceEthnicityConceptCache {
+public class ConceptCacheConfiguration {
 
-    public static final String MAIN_CONFIG_ID = "main";
+    public static final String GENDER_RACE_ETHNICITY_ID = "gender_race_ethnicity";
 
-    private static final Map<String, Class<?>> GENDER_RACE_ETHNICITY_MAP = new HashMap<>();
+    private static final Map<String, Class<?>> CONCEPT_MAP = new HashMap<>();
 
     static {
-        GENDER_RACE_ETHNICITY_MAP.put(MAIN_CONFIG_ID, GenderRaceEthnicityConcept.class);
+        CONCEPT_MAP.put(GENDER_RACE_ETHNICITY_ID, GenderRaceEthnicityConcept.class);
     }
 
     @Bean
-    @Qualifier("genderRaceEthnicityCache")
-    LoadingCache<String, Object> getGenderRaceEthnicityCache(ConceptDao conceptDao) {
+    @Qualifier("conceptCacheConfiguration")
+    LoadingCache<String, Object> getConceptCacheConfiguration(ConceptDao conceptDao) {
         // Cache configuration in memory for 24 hours.
         return CacheBuilder.<String, GenderRaceEthnicityConcept>newBuilder()
-                .expireAfterWrite(10, TimeUnit.SECONDS)
+                .expireAfterWrite(24, TimeUnit.HOURS)
                 .build(new CacheLoader<String, Object>() {
                     @Override
                     public Object load(String key) {
-                        Class<?> genderRaceEthnicityConcept = GENDER_RACE_ETHNICITY_MAP.get(key);
+                        Class<?> genderRaceEthnicityConcept = CONCEPT_MAP.get(key);
                         if (genderRaceEthnicityConcept == null) {
                             throw new IllegalArgumentException("Invalid config key: " + key);
                         }
@@ -59,7 +59,7 @@ public class GenderRaceEthnicityConceptCache {
 
     @Bean
     @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept(@Qualifier("genderRaceEthnicityCache") LoadingCache<String, Object> genderRaceEthnicityCache) throws ExecutionException {
-        return (GenderRaceEthnicityConcept) genderRaceEthnicityCache.get(MAIN_CONFIG_ID);
+    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept(@Qualifier("conceptCacheConfiguration") LoadingCache<String, Object> conceptCacheConfiguration) throws ExecutionException {
+        return (GenderRaceEthnicityConcept) conceptCacheConfiguration.get(GENDER_RACE_ETHNICITY_ID);
     }
 }
