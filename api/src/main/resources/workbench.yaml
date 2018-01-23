@@ -2174,15 +2174,21 @@ definitions:
       genderConceptId:
         type: integer
         format: int64
+      gender:
+        type: string
       birthDatetime:
         type: integer
         format: int64
       raceConceptId:
         type: integer
         format: int64
+      race:
+        type: string
       ethnicityConceptId:
         type: integer
         format: int64
+      ethnicity:
+        type: string
 
   CohortStatus:
     type: string
