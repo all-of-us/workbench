@@ -322,7 +322,7 @@ end
 
 def generate_cloudsql_cdr(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-cdr}
+  common.run_inline %W{docker-compose run db-generate-cloudsql-cdr} + args
 end
 
 def run_drop_cdr_db(*args)

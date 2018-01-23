@@ -112,7 +112,8 @@ services:
         - .:/w:cached
         - ~/.config:/.config:cached
         - ~/.gsutil:/.gsutil:cached
-      command: wait-for db:3306 -- ./generate-cloudsql-cdr.sh --project all-of-us-workbench-test --account peter.speltz@pmi-ops.org --cdr 1.0
+      entrypoint: ["./generate-cdr/generate-cloudsql-cdr.sh"]
+
       environment:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
       env_file:

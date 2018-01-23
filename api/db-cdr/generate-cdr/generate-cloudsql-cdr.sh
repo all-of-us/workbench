@@ -13,12 +13,13 @@ IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
 
-USAGE="./generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> [--cdr=<VERSION>]"
+USAGE="./generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
+  echo "1 is $1"
   case "$1" in
     --account) ACCOUNT=$2; shift 2;;
     --project) PROJECT=$2; shift 2;;
-    --cdr) CDR=$2; shift 2;;
+    --cdr-version) CDR_VERSION=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -35,12 +36,39 @@ then
   echo "Usage: $USAGE"
   exit 1
 fi
+
+if [ -z "${CDR_VERSION}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
+#Check cdr_version is of form YYYYMMDD
+if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+    echo "New CDR VERSION will be $CDR_VERSION"
+  else
+    echo "CDR Version doesn't match required format YYYYMMDD"
+    echo "Usage: $USAGE"
+    exit 1
+fi
+
 CREDS_ACCOUNT=${ACCOUNT}
 
 
-echo "Project $PROJECT Account $ACCOUNT CDR $CDR"
-
 # Init the local cdr database
+# Init the db to fresh state ready for new cdr data keeping schema and certain tables
+echo "Initializing new cdr db"
+if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
+then
+    echo "CDR INITIALIZED"
+else
+    echo "CDR failed to initialize"
+    exit 1
+fi
+
+
+
+
 # Make the vocabulary table from cdr with no changes
 #bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
 project="all-of-us-workbench-test"
@@ -49,27 +77,8 @@ cloudsql_instance=workbenchtest
 cdr_db_name=cdr
 gcs_bucket=gs://all-of-us-workbench-cloudsql-create
 
-# output files
-tmp_dir="/tmp"
-cdr_schema_file="cdr_schema.sql"
-public_schema_file="public_schema.sql"
-hard_data_file="hard_data.sql"
 
-# Dump cdr schema and copy to gcs
-echo "Dumping cdr schema "
-mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
-    --no-data --add-drop-table --ignore-table=$cdr_db_name.DATABASECHANGELOG \
-    --ignore-table=$cdr_db_name.DATABASECHANGELOGLOCK $cdr_db_name --database cdr \
-    --add-drop-database > $tmp_dir/$cdr_schema_file
-gsutil cp $tmp_dir/$cdr_schema_file $gcs_bucket/$cdr_schema_file
-rm $tmp_dir/$cdr_schema_file
 
-# Dump the data from the hardcoded data tables -- criteria, db_domain... and copy to gcs
-echo "Dumping Hard coded data "
-mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
-     --add-drop-table --disable-keys cdr db_domain criteria > $tmp_dir/$hard_data_file
-gsutil cp $tmp_dir/$hard_data_file $gcs_bucket/$hard_data_file
-rm $tmp_dir/$hard_data_file
 
 # Todo  maybe not hardcode service account name ?
 SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
@@ -91,8 +100,8 @@ gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $gcs_bucket/*.sql
 # Todo install gcloud beta for importing csv and sql . It is intended to replace sql instances import
 # gcloud beta sql import sql $cloudsql_instance $gcs_bucket/$cdr_schema_file
 
-gcloud sql instances import --quiet --project $project  $cloudsql_instance $gcs_bucket/$cdr_schema_file
+#gcloud sql instances import --quiet --project $project  $cloudsql_instance $gcs_bucket/$cdr_schema_file
 
 # Import hard data
-gcloud sql instances import --quiet --project $project  --database cdr $cloudsql_instance $gcs_bucket/$hard_data_file
+#gcloud sql instances import --quiet --project $project  --database cdr $cloudsql_instance $gcs_bucket/$hard_data_file
 
