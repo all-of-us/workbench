@@ -6,12 +6,6 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-
-# get options
-# --project=all-of-us-workbench-test *required
-
-# --cdr=cdr_version ... *optional
-
 USAGE="./generate-clousql-cdr/run-achilles-queries.sh --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -44,7 +38,7 @@ fi
 
 #Check cdr_version is of form YYYYMMDD
 if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
-    echo "New CDR VERSION will be $CDR_VERSION"
+    echo "Working on CDR VERSION $CDR_VERSION"
   else
     echo "CDR Version doesn't match required format YYYYMMDD"
     echo "Usage: $USAGE"
