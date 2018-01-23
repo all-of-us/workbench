@@ -31,6 +31,8 @@ public class CriteriaDaoTest {
     private Criteria icd10Criteria2;
     private Criteria cptCriteria1;
     private Criteria cptCriteria2;
+    private Criteria parentIcd9;
+    private Criteria childIcd9;
 
     @Before
     public void setUp() {
@@ -42,6 +44,30 @@ public class CriteriaDaoTest {
         icd10Criteria2 = createCriteria("ICD10", null, "001", "icd10 test 2");
         cptCriteria1 = createCriteria("CPT", null, "0039T", "zzzcptzzz");
         cptCriteria2 = createCriteria("CPT", null, "0001T", "zzzCPTxxx");
+        parentIcd9 = new Criteria()
+                .id(1L)
+                .code("003")
+                .count("10")
+                .conceptId("1000")
+                .domainId(null)
+                .group(true)
+                .selectable(true)
+                .name("name")
+                .parentId(0)
+                .type("ICD9")
+                .subtype(null);
+
+        childIcd9 = new Criteria()
+                .code("003.1")
+                .count("10")
+                .conceptId("1000")
+                .domainId("Condition")
+                .group(false)
+                .selectable(true)
+                .name("name")
+                .parentId(1L)
+                .type("ICD9")
+                .subtype(null);
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -51,6 +77,8 @@ public class CriteriaDaoTest {
         criteriaDao.save(icd10Criteria2);
         criteriaDao.save(cptCriteria1);
         criteriaDao.save(cptCriteria2);
+        criteriaDao.save(parentIcd9);
+        criteriaDao.save(childIcd9);
     }
 
     @After
@@ -63,6 +91,8 @@ public class CriteriaDaoTest {
         criteriaDao.delete(icd10Criteria2);
         criteriaDao.delete(cptCriteria1);
         criteriaDao.delete(cptCriteria2);
+        criteriaDao.delete(parentIcd9);
+        criteriaDao.delete(childIcd9);
     }
 
     @Test
@@ -85,16 +115,13 @@ public class CriteriaDaoTest {
     }
 
     @Test
-    public void findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc() throws Exception {
-        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findCriteriaByTypeAndCode("CPT", "0039T");
+    public void findCriteriaByTypeAndCode() throws Exception {
+        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findCriteriaByTypeAndCode("ICD9", "003");
 
         final CodeDomainLookup icd9Domain1 = icd9DomainList.get(0);
-        assertEquals("0001T", icd9Domain1.getCode());
+        assertEquals(1, icd9DomainList.size());
+        assertEquals("003.1", icd9Domain1.getCode());
         assertEquals("Condition", icd9Domain1.getDomainId());
-
-        final CodeDomainLookup icd9Domain2 = icd9DomainList.get(1);
-        assertEquals("0039T", icd9Domain2.getCode());
-        assertEquals("Condition", icd9Domain2.getDomainId());
     }
 
     private Criteria createCriteria(String type, String subtype, String code, String name) {
