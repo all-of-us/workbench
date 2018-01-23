@@ -67,7 +67,7 @@ else
 fi
 
 # Make big query dbs and Run big queries
-echo "Doing big query stuff and generating counts from cdr version"
+echo "Making big query dataset for cloudsql cdr"
 if ./generate-cdr/make-bq-data.sh --project $PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
 then
     echo "BIG QUERY CDR Data Generated"

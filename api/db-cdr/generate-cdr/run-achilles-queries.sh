@@ -15,6 +15,7 @@ WORKBENCH_DATASET=""
 
 USAGE="./generate-clousql-cdr/run-achilles-queries.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
 USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
@@ -27,8 +28,10 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
+
 #TODO THESE FAIL WITHOUT PRINTING USAGE IF ARG ISN'T PASSED IN
 # I TRY TO PREVENT IT UP TOP BY INITING VARS BUT NO WORK
+
 if [ -z "${ACCOUNT}" ]
 then
   echo "Usage: $USAGE"
@@ -58,7 +61,6 @@ then
   echo "Usage: $USAGE"
   exit 1
 fi
-
 
 # TODO Next Populate achilles_results
 echo "Running achilles queries..."
