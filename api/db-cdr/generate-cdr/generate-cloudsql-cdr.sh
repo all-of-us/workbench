@@ -13,7 +13,7 @@ IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
 
-USAGE="./generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="./generate-cdr/generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
@@ -60,48 +60,19 @@ CREDS_ACCOUNT=${ACCOUNT}
 echo "Initializing new cdr db"
 if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
 then
-    echo "CDR INITIALIZED"
+    echo "Local MYSQL CDR Initialized"
 else
-    echo "CDR failed to initialize"
+    echo "Local MYSQL CDR failed to initialize"
     exit 1
 fi
 
-
-
-
-# Make the vocabulary table from cdr with no changes
-#bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
-project="all-of-us-workbench-test"
-bqcdr="test_merge_dec26"
-cloudsql_instance=workbenchtest
-cdr_db_name=cdr
-gcs_bucket=gs://all-of-us-workbench-cloudsql-create
-
-
-
-
-# Todo  maybe not hardcode service account name ?
-SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
-gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-
-# Grant access to buckets for service account for cloudsql
-SQL_SERVICE_ACCOUNT=`gcloud sql instances describe --project $project \
-    --account $SERVICE_ACCOUNT $cloudsql_instance | grep serviceAccountEmailAddress \
-    | cut -d: -f2`
-# Trim leading whitespace from sql service account
-SQL_SERVICE_ACCOUNT=${SQL_SERVICE_ACCOUNT//[[:blank:]]/}
-
-echo "Granting GCS access to ${SQL_SERVICE_ACCOUNT} to bucket $gcs_bucket..."
-# Note, this only applies to files already existing in the bucket . So must rerun after adding files
-gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:W $gcs_bucket
-gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $gcs_bucket/*.sql
-
-# Import the schema into the cloud sql instance
-# Todo install gcloud beta for importing csv and sql . It is intended to replace sql instances import
-# gcloud beta sql import sql $cloudsql_instance $gcs_bucket/$cdr_schema_file
-
-#gcloud sql instances import --quiet --project $project  $cloudsql_instance $gcs_bucket/$cdr_schema_file
-
-# Import hard data
-#gcloud sql instances import --quiet --project $project  --database cdr $cloudsql_instance $gcs_bucket/$hard_data_file
+# Make big query dbs and Run big queries
+echo "Doing big query stuff and generating counts from cdr version"
+if ./generate-cdr/make-bq-data.sh --project $PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
+then
+    echo "BIG QUERY CDR Data Generated"
+else
+    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
+    exit 1
+fi
 

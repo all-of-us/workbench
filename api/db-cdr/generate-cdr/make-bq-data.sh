@@ -14,9 +14,9 @@ IFS=$'\n\t'
 # --project=all-of-us-workbench-test *required
 
 # --cdr=cdr_version ... *optional
-
 USAGE="./generate-clousql-cdr/make-bq-data.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
 USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
@@ -59,7 +59,6 @@ then
   echo "Usage: $USAGE"
   exit 1
 fi
-
 
 #Check cdr_version is of form YYYYMMDD
 if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
