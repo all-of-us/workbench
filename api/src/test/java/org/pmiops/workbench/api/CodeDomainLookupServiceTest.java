@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CodeDomainLookupServiceTest {
@@ -22,47 +24,51 @@ public class CodeDomainLookupServiceTest {
     @Mock
     private CriteriaDao criteriaDao;
 
+    @Mock
+    private CodeDomainLookup codeDomainLookup;
+
     @InjectMocks
     CodeDomainLookupService codeDomainLookupService;
 
     @Test
-    public void findCodesForEmptyDomains_HasDomains() throws Exception {
-        SearchRequest request = createSearchRequest();
-
-        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-
-        List<SearchParameter> searchParameters = request.getIncludes().get(0).getItems().get(0).getSearchParameters();
-
-        assertEquals(1, searchParameters.size());
-        assertEquals("001", searchParameters.get(0).getValue());
-        assertEquals("Condition", searchParameters.get(0).getDomain());
-    }
-
-    private SearchRequest createSearchRequest() {
+    public void findCodesForEmptyDomains() throws Exception {
         SearchParameter searchParameter1 = new SearchParameter()
+                .type("ICD9")
                 .value("001")
                 .domain("Condition");
-
-        List<SearchParameter> searchParameters = new ArrayList<>();
-        searchParameters.add(searchParameter1);
+        SearchParameter searchParameter2 = new SearchParameter()
+                .type("ICD9")
+                .value("002")
+                .domain(null);
 
         SearchGroupItem searchGroupItem1 = new SearchGroupItem()
                 .type("ICD9")
-                .searchParameters(searchParameters);
+                .addSearchParametersItem(searchParameter1)
+                .addSearchParametersItem(searchParameter2);
 
-        List<SearchGroupItem> searchGroupItems = new ArrayList<>();
-        searchGroupItems.add(searchGroupItem1);
+        SearchRequest request = new SearchRequest()
+                .addIncludesItem(new SearchGroup()
+                        .addItemsItem(searchGroupItem1));
 
-        SearchGroup searchGroup1 = new SearchGroup();
-        searchGroup1.items(searchGroupItems);
+        List<CodeDomainLookup> lookups = new ArrayList<>();
+        lookups.add(codeDomainLookup);
 
-        List<SearchGroup> searchGroups = new ArrayList<>();
-        searchGroups.add(searchGroup1);
+        when(criteriaDao.findCriteriaByTypeAndCode(searchParameter2.getType(), searchParameter2.getValue()))
+                .thenReturn(lookups);
+        when(codeDomainLookup.getDomainId()).thenReturn("Procedure");
+        when(codeDomainLookup.getCode()).thenReturn("002");
 
-        SearchRequest request = new SearchRequest();
-        request.setIncludes(searchGroups);
+        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
 
-        return request;
+        assertEquals(2, searchGroupItem1.getSearchParameters().size());
+        assertEquals("001", searchGroupItem1.getSearchParameters().get(0).getValue());
+        assertEquals("Condition", searchGroupItem1.getSearchParameters().get(0).getDomain());
+        assertEquals("002", searchGroupItem1.getSearchParameters().get(1).getValue());
+        assertEquals("Procedure", searchGroupItem1.getSearchParameters().get(1).getDomain());
+
+        verify(criteriaDao, times(1))
+                .findCriteriaByTypeAndCode(searchParameter2.getType(), searchParameter2.getValue());
+        verifyNoMoreInteractions(criteriaDao);
     }
 
 }
