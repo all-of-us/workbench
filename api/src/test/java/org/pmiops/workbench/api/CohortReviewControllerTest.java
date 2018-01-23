@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -60,6 +62,9 @@ public class CohortReviewControllerTest {
 
     @Mock
     WorkspaceService workspaceService;
+
+    @Mock
+    Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     @InjectMocks
     CohortReviewController reviewController;
@@ -232,6 +237,7 @@ public class CohortReviewControllerTest {
         concepts.put(GenderRaceEthnicityType.RACE.name(), race);
         concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
         concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
 
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
@@ -249,7 +255,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
-        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(concepts);
+        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
         when(cohortReviewService.findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class))).thenReturn(expectedPage);
 
@@ -271,7 +277,7 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
-        verify(cohortReviewService, times(1)).findGenderRaceEthnicityFromConcept();
+        verify(genderRaceEthnicityConceptProvider, times(1)).get();
         verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
         verifyNoMoreMockInteractions();
     }
@@ -368,13 +374,14 @@ public class CohortReviewControllerTest {
         concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
         concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
         concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(concepts);
+        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -388,7 +395,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
-        verify(cohortReviewService, atLeast(1)).findGenderRaceEthnicityFromConcept();
+        verify(genderRaceEthnicityConceptProvider, atLeast(1)).get();
         verifyNoMoreMockInteractions();
     }
 
