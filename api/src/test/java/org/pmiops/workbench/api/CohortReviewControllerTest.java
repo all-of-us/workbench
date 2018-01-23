@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -29,10 +31,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +61,9 @@ public class CohortReviewControllerTest {
 
     @Mock
     WorkspaceService workspaceService;
+
+    @Mock
+    private GenderRaceEthnicityConcept genderRaceEthnicityConcept;
 
     @InjectMocks
     CohortReviewController reviewController;
@@ -225,8 +230,12 @@ public class CohortReviewControllerTest {
         Page expectedPage = new PageImpl(participants);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        HashMap<Long, String> concepts = new HashMap<>();
-        concepts.put(1L, "race");
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        Map<Long, String> race = new HashMap<>();
+        race.put(1L, "race");
+        concepts.put(GenderRaceEthnicityType.RACE.name(), race);
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
 
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
@@ -359,12 +368,17 @@ public class CohortReviewControllerTest {
         Cohort cohort = new Cohort();
         cohort.setWorkspaceId(1);
 
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
         doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(new HashMap<Long, String>());
+        when(cohortReviewService.findGenderRaceEthnicityFromConcept()).thenReturn(concepts);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(

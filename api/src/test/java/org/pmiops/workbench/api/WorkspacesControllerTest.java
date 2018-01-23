@@ -11,8 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -70,7 +71,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,15 @@ public class WorkspacesControllerTest {
       config.bigquery.projectId = "project";
       config.bigquery.dataSetId = "dataset";
       return config;
+    }
+
+    @Bean
+    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+      Map<String, Map<Long, String>> concepts = new HashMap<>();
+      concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+      return new GenderRaceEthnicityConcept(concepts);
     }
 
     @Bean
@@ -578,8 +588,6 @@ public class WorkspacesControllerTest {
     c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
 
     stubBigQueryCohortCalls();
-    Concept concept = new Concept().conceptId(1).conceptName("name");
-    when(conceptDao.findGenderRaceEthnicityFromConcept()).thenReturn(Arrays.asList(concept));
     CreateReviewRequest reviewReq = new CreateReviewRequest();
     reviewReq.setSize(1);
     CohortReview cr1 = cohortReviewController.createCohortReview(
@@ -629,7 +637,6 @@ public class WorkspacesControllerTest {
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
-    verify(conceptDao, times(4)).findGenderRaceEthnicityFromConcept();
   }
 
   @Test

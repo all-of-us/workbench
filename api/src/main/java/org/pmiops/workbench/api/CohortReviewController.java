@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -428,11 +429,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     private void lookupGenderRaceEthnicityValues(List<ParticipantCohortStatus> participantCohortStatuses) {
-        Map<Long, String> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
+        Map<String, Map<Long, String>> concepts = cohortReviewService.findGenderRaceEthnicityFromConcept();
         participantCohortStatuses.forEach(pcs -> {
-            pcs.setRace(concepts.get(pcs.getRaceConceptId()));
-            pcs.setGender(concepts.get(pcs.getGenderConceptId()));
-            pcs.setEthnicity(concepts.get(pcs.getEthnicityConceptId()));
+            pcs.setRace(concepts.get(GenderRaceEthnicityType.RACE.name()).get(pcs.getRaceConceptId()));
+            pcs.setGender(concepts.get(GenderRaceEthnicityType.GENDER.name()).get(pcs.getGenderConceptId()));
+            pcs.setEthnicity(concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).get(pcs.getEthnicityConceptId()));
         });
     }
 

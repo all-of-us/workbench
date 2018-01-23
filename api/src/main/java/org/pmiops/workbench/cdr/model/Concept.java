@@ -1,26 +1,15 @@
 package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 import java.util.Objects;
 
 
 @Entity
-@Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "concept")
-@NamedNativeQuery(name = "Concept.findGenderRaceEthnicityFromConcept",
-        query = "select c.* from cdr.concept c " +
-                "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
-        resultClass = Concept.class)
-
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "concept", catalog="cdr")

@@ -54,11 +54,6 @@ public class TestCdrJpaConfig {
         hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         hibernateProperties.setProperty("hibernate.show_sql", "true");
-        hibernateProperties.setProperty("hibernate.cache.use_second_level_cache", "true");
-        hibernateProperties.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
-        hibernateProperties.setProperty("hibernate.javax.cache.provider", "org.ehcache.jsr107.EhcacheCachingProvider");
-        hibernateProperties.setProperty("hibernate.generate_statistics", "true");
-        hibernateProperties.setProperty("hibernate.cache.provider_configuration_file_resource_path", "classpath:ehcache.xml");
 
         return hibernateProperties;
     }

@@ -1,8 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import org.hibernate.Session;
-import org.hibernate.stat.SecondLevelCacheStatistics;
-import org.hibernate.stat.Statistics;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,8 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,9 +22,6 @@ public class ConceptDaoTest {
 
     @Autowired
     ConceptDao conceptDao;
-
-    @PersistenceContext
-    private EntityManager em;
 
     private Concept ethnicityConcept;
     private Concept genderConcept;
@@ -54,28 +47,11 @@ public class ConceptDaoTest {
 
     @Test
     public void findGenderRaceEthnicityFromConcept() throws Exception {
-        Session session = (Session)em.getDelegate();
+        List<Concept> concepts = conceptDao.findGenderRaceEthnicityFromConcept();
 
-        conceptDao.findGenderRaceEthnicityFromConcept();
-
-        Statistics stats = session.getSessionFactory().getStatistics();
-        SecondLevelCacheStatistics slc = session
-                .getSessionFactory()
-                .getStatistics()
-                .getSecondLevelCacheStatistics("concept");
-
-        conceptDao.findGenderRaceEthnicityFromConcept();
-        assertEquals(3L, slc.getPutCount());
-        assertEquals(0L, slc.getHitCount());
-
-        tearDown();
-
-        conceptDao.findGenderRaceEthnicityFromConcept();
-
-        conceptDao.findGenderRaceEthnicityFromConcept();
-        assertEquals(3L, slc.getPutCount());
-        assertEquals(3L, slc.getHitCount());
-
+        assertEquals("ethnicity", concepts.get(0).getConceptName());
+        assertEquals("gender", concepts.get(1).getConceptName());
+        assertEquals("race", concepts.get(2).getConceptName());
     }
 
     private Concept createConcept(Long conceptId, String name, String vocabularyId) {
