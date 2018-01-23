@@ -38,6 +38,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -69,7 +72,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -89,6 +91,25 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -138,6 +159,15 @@ public class WorkspacesControllerTest {
       config.bigquery.projectId = "project";
       config.bigquery.dataSetId = "dataset";
       return config;
+    }
+
+    @Bean
+    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+      Map<String, Map<Long, String>> concepts = new HashMap<>();
+      concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+      return new GenderRaceEthnicityConcept(concepts);
     }
 
     @Bean

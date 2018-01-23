@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortreview;
 
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.inject.Provider;
 import java.util.Arrays;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 public class CohortReviewServiceImpl implements CohortReviewService {
@@ -38,6 +38,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private ParticipantCohortStatusDao participantCohortStatusDao;
     private ConceptDao conceptDao;
     private WorkspaceService workspaceService;
+    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
@@ -46,12 +47,14 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                             CohortDao cohortDao,
                             ParticipantCohortStatusDao participantCohortStatusDao,
                             ConceptDao conceptDao,
-                            WorkspaceService workspaceService) {
+                            WorkspaceService workspaceService,
+                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.conceptDao = conceptDao;
         this.workspaceService = workspaceService;
+        this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
     public CohortReviewServiceImpl() {
@@ -144,8 +147,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public Map<Long, String> findGenderRaceEthnicityFromConcept() {
-        List<Concept> conceptList = conceptDao.findGenderRaceEthnicityFromConcept();
-        return conceptList.stream().collect(Collectors.toMap(Concept::getConceptId, Concept::getConceptName));
+    public Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept() {
+        return genderRaceEthnicityConceptProvider.get().getConcepts();
     }
 }

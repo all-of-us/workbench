@@ -1,4 +1,0 @@
-<ehcache>
-    <defaultCache eternal="false" timeToLiveSeconds="86400" maxElementsInMemory="1000" overflowToDisk="false" statistics="true"/>
-    <cache name="concept" eternal="false" maxElementsInMemory="1000" timeToLiveSeconds="86400" statistics="true"/>
-</ehcache>

@@ -1,17 +1,12 @@
 package org.pmiops.workbench.cdr.dao;
-
 import org.pmiops.workbench.cdr.model.Concept;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.persistence.QueryHint;
 import java.util.List;
 
-@CacheConfig(cacheNames = "concept")
-public interface ConceptDao extends JpaRepository<Concept, Long> {
+public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     @Query(value = "select c.* " +
             "from cdr.concept c " +
@@ -45,7 +40,8 @@ public interface ConceptDao extends JpaRepository<Concept, Long> {
 
     List<Concept> findByConceptName(String conceptName);
 
-    @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")})
-    @Query(nativeQuery=true)
+    @Query(value = "select c.* from cdr.concept c " +
+            "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
+            nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
 }

@@ -88,5 +88,5 @@ public interface CohortReviewService {
      */
     Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest);
 
-    Map<Long, String> findGenderRaceEthnicityFromConcept();
+    Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept();
 }
