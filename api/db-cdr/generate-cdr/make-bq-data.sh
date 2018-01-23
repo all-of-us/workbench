@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# This generates new cloudsql database for a cdr
+# This generates big query data that gets put in cloudsql
+# Counts and teh public and cdr data four cloudsql
 # note dev-up must be run to generate the schema
 # note run-local-data-migrations must be run to generate hard coded data from liquibase
+# note  the account must be authorized to perform gcloud and bq operations
 
 set -xeuo pipefail
 IFS=$'\n\t'
@@ -13,7 +15,7 @@ IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
 
-USAGE="./generate-cdr/generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="./generate-clousql-cdr/make-bq-data.sh --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
@@ -54,25 +56,20 @@ fi
 
 CREDS_ACCOUNT=${ACCOUNT}
 
+# Variables
 
-# Init the local cdr database
-# Init the db to fresh state ready for new cdr data keeping schema and certain tables
-echo "Initializing new cdr db"
-if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
-then
-    echo "Local MYSQL CDR Initialized"
-else
-    echo "Local MYSQL CDR failed to initialize"
-    exit 1
-fi
+# TODO make this agument for cdr_vession
+bqcdr="test_merge_dec26"
 
-# Make big query dbs and Run big queries
-echo "Doing big query stuff and generating counts from cdr version"
-if ./generate-cdr/make-bq-data.sh --project $PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
-then
-    echo "BIG QUERY CDR Data Generated"
-else
-    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
-    exit 1
-fi
+bq_new_cdr_dataset=cloudsql_cdr$CDR_VERSION
+bq_new_public_dataset=cloudsql_public$CDR_VERSION
 
+gcs_bucket=gs://all-of-us-workbench-cdr$CDR_VERSION
+
+# Make dataset for cloudsql tables
+bq --project=$PROJECT mk $bq_new_cdr_dataset
+bq --project=$PROJECT mk $bq_new_public_dataset
+
+# Make data
+# Make the vocabulary table from cdr with no changes
+#bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
