@@ -6,7 +6,6 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -58,7 +57,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private BigQueryService bigQueryService;
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
-    private WorkspaceService workspaceService;
     private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
     /**
@@ -110,13 +108,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            CodeDomainLookupService codeDomainLookupService,
-                           ParticipantCounter participantCounter,
-                           WorkspaceService workspaceService) {
+                           ParticipantCounter participantCounter) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
-        this.workspaceService = workspaceService;
     }
 
     /**
@@ -159,7 +155,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
@@ -338,7 +333,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 

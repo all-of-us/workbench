@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -87,7 +86,7 @@ public class CriteriaDaoTest {
 
     @Test
     public void findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc() throws Exception {
-        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findByCodeInAndSelectableIsTrueAndGroupIsFalseOrderByCodeAsc(Arrays.asList("0039T", "0001T"));
+        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findCriteriaByTypeAndCode("CPT", "0039T");
 
         final CodeDomainLookup icd9Domain1 = icd9DomainList.get(0);
         assertEquals("0001T", icd9Domain1.getCode());
