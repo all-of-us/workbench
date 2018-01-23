@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -26,6 +27,7 @@ public class CacheSpringConfiguration {
   }
 
   @Bean
+  @Qualifier("configCache")
   LoadingCache<String, Object> getConfigCache(ConfigDao configDao) {
     // Cache configuration in memory for ten minutes.
     return CacheBuilder.<String, Config>newBuilder()
@@ -49,7 +51,7 @@ public class CacheSpringConfiguration {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  WorkbenchConfig getWorkbenchConfig(LoadingCache<String, Object> configCache) throws ExecutionException {
+  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
     return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
   }
 }
