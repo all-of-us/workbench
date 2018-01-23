@@ -1,76 +1,43 @@
 #!/bin/bash
 
-# This generates new cloudsql database for a cdr with counts
-# note account must be preauthorized with gcloud auth login
-
-# End product is:
-# 0) csv dumps of tables for cdr in gcs bucket
-# 1) Local mysql database cdrYYYYMMDD
-# 3) sql dump of both mysql db in gcs bucket
-
-# Example usage, you need to provide a bunch of args
-# Provide:  your authorized gcloud account
-#  bq project and dataset where the cdr release is
-#  the workbench-project you want the data to be generated in and the dumps to be in
-#  the cdr release number -- YYYYMMDD format . This is used to name generated datasets
-#  the gcs bucket you want to put the generated data in
-#
-# ./project.rb generate-cloudsql-cdr --account peter.speltz@pmi-ops.org --bq-project all-of-us-ehr-dev \
-# --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
+# This generates new cloudsql database for a cdr
+# note dev-up must be run to generate the schema
+# note run-local-data-migrations must be run to generate hard coded data from liquibase
 
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-cdr/generate-clousql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
-USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
-USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
-USAGE="$USAGE \n Local mysql databases named cdr<cdr-version> and public<cdr-version> are created and populated."
 
+# get options
+# --project=all-of-us-workbench-test *required
+
+# --cdr=cdr_version ... *optional
+
+USAGE="./generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
     --account) ACCOUNT=$2; shift 2;;
-    --bq-project) BQ_PROJECT=$2; shift 2;;
-    --bq-dataset) BQ_DATASET=$2; shift 2;;
-    --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
+    --project) PROJECT=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
-    --bucket) BUCKET=$2; shift;;
     -- ) shift; break ;;
     * ) break ;;
   esac
 done
-# Todo this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
+
 if [ -z "${ACCOUNT}" ]
 then
   echo "Usage: $USAGE"
   exit 1
 fi
 
-if [ -z "${BQ_PROJECT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${BQ_DATASET}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${WORKBENCH_PROJECT}" ]
+if [ -z "${PROJECT}" ]
 then
   echo "Usage: $USAGE"
   exit 1
 fi
 
 if [ -z "${CDR_VERSION}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
-if [ -z "${BUCKET}" ]
 then
   echo "Usage: $USAGE"
   exit 1
@@ -85,23 +52,56 @@ if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; th
     exit 1
 fi
 
-# Make BigQuery dbs
-echo "Making big query dataset for cloudsql cdr"
-if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
+CREDS_ACCOUNT=${ACCOUNT}
+
+
+# Init the local cdr database
+# Init the db to fresh state ready for new cdr data keeping schema and certain tables
+echo "Initializing new cdr db"
+if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
 then
-    echo "BIG QUERY CDR Data Generated"
+    echo "CDR INITIALIZED"
 else
-    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
+    echo "CDR failed to initialize"
     exit 1
 fi
 
-# Make BigQuery data dump
-dataset=cdr$CDR_VERSION
-echo "Making big query dataset for cloudsql cdr"
-if ./generate-cdr/make-bq-data-dump.sh --dataset $dataset --project $WORKBENCH_PROJECT --account $ACCOUNT --bucket $BUCKET
-then
-    echo "BIG QUERY CDR Data Generated"
-else
-    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
-    exit 1
-fi
+
+
+
+# Make the vocabulary table from cdr with no changes
+#bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
+project="all-of-us-workbench-test"
+bqcdr="test_merge_dec26"
+cloudsql_instance=workbenchtest
+cdr_db_name=cdr
+gcs_bucket=gs://all-of-us-workbench-cloudsql-create
+
+
+
+
+# Todo  maybe not hardcode service account name ?
+SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
+gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
+# Grant access to buckets for service account for cloudsql
+SQL_SERVICE_ACCOUNT=`gcloud sql instances describe --project $project \
+    --account $SERVICE_ACCOUNT $cloudsql_instance | grep serviceAccountEmailAddress \
+    | cut -d: -f2`
+# Trim leading whitespace from sql service account
+SQL_SERVICE_ACCOUNT=${SQL_SERVICE_ACCOUNT//[[:blank:]]/}
+
+echo "Granting GCS access to ${SQL_SERVICE_ACCOUNT} to bucket $gcs_bucket..."
+# Note, this only applies to files already existing in the bucket . So must rerun after adding files
+gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:W $gcs_bucket
+gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $gcs_bucket/*.sql
+
+# Import the schema into the cloud sql instance
+# Todo install gcloud beta for importing csv and sql . It is intended to replace sql instances import
+# gcloud beta sql import sql $cloudsql_instance $gcs_bucket/$cdr_schema_file
+
+#gcloud sql instances import --quiet --project $project  $cloudsql_instance $gcs_bucket/$cdr_schema_file
+
+# Import hard data
+#gcloud sql instances import --quiet --project $project  --database cdr $cloudsql_instance $gcs_bucket/$hard_data_file
+
