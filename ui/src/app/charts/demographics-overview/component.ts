@@ -1,19 +1,8 @@
 import {Component, Input, ViewChild} from '@angular/core';
 import * as d3 from 'd3';
 
-interface Datum {
-  race: string;
-  ageRange: string;
-  gender: string;
-  count: number;
-}
+import ChartInfoContainer from './model';
 
-function decode(value) {
-  return {
-    'M': 'Male',
-    'F': 'Female',
-  }[value];
-}
 
 @Component({
   selector: 'app-demographics-overview-chart',
@@ -25,6 +14,8 @@ function decode(value) {
   `
 })
 export default class DemographicsOverviewChartComponent {
+  readonly d3 = d3;  /* for console debugging */
+
   readonly options = {
     margin: {top: 20, right: 20, bottom: 30, left: 40},
     width: 600,
@@ -33,57 +24,20 @@ export default class DemographicsOverviewChartComponent {
   @ViewChild('container') container;
 
   /* Demographics Overview Data shape and functions */
-  @Input() set data(incoming: Datum[]) {
+  private _data: ChartInfoContainer;
+
+  get data() {
+    return this._data;
+  }
+
+  @Input() set data(incoming) {
     if (incoming) {
-      this._data = incoming;
+      this._data = new ChartInfoContainer(incoming);
       setTimeout(() => this.drawChart(), 0);
     }
   }
-  private _data: Datum[] = [];
-  get data()      { return this._data; }
-  get races()     { return this._dataProperty('race'); }
-  get genders()   { return this._dataProperty('gender'); }
-  get ageRanges() { return this._dataProperty('ageRange'); }
 
-  private _dataProperty(prop) {
-    return Array.from(new Set(this.data.map(d => d[prop])));
-  }
-
-  /**
-   * .stacked() - this function will take .data and roll it up into the stack
-   * format expected by D3's stack charting tools
-   */
-  stacked() {
-    /* Cross product genders x ageRanges */
-    const ageRangesByGender = [];
-    this.genders.forEach(gender => {
-      this.ageRanges.forEach(range => {
-        ageRangesByGender.push([gender, range]);
-      });
-    });
-
-    /* Generate an empty set of counts */
-    const initCounts = () =>
-      this.races.reduce((counter, race) => {
-        counter[race] = 0; return counter;
-      }, {});
-
-    /* Roll up the data by gender and ageRange */
-    return ageRangesByGender.map(([gender, ageRange]) => {
-      const counts = initCounts();
-      let total = 0;
-      this.data
-        .filter(datum => datum.ageRange === ageRange)
-        .filter(datum => datum.gender === gender)
-        .forEach(datum => {
-          total += datum.count;
-          counts[datum.race] += datum.count;
-        });
-      const key = `${decode(gender)} ${ageRange}`;
-      return {key, total, ...counts};
-    });
-  }
-
+  /* D3 specific scaling functions */
   get x() {
     return d3.scaleBand()
       .rangeRound([0, this.container.width])
@@ -104,24 +58,37 @@ export default class DemographicsOverviewChartComponent {
   drawChart() {
     const {x, y, z} = this;
     const {chart, width, height} = this.container;
-    const data = this.stacked();
-    const keys = this.races;
 
-    data.sort(function(a, b) { return b.total - a.total; });
-    x.domain(data.map(function(d) { return d.key; }));
+    const keys = this.data.races;
+    const data = this.data.asStack();
+
+    const stack = d3.stack()
+      .keys(keys)
+      .order(d3.stackOrderDescending);
+
+    const series = stack(data);
+
+    data.sort(function(a, b) { return b.genderAgeRange < a.genderAgeRange ? 1 : -1; });
+    x.domain(data.map(function(d) { return d.genderAgeRange; }));
     y.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
-    z.domain(keys);
+
+    const zkeys = d3
+      .entries(this.data.annotateWithTotals('race'))
+      .sort(entry => entry.value)
+      .map(entry => entry.key);
+
+    z.domain(zkeys);
 
     chart
       .append("g")
       .selectAll("g")
-      .data(d3.stack().keys(keys)(data))
+      .data(series)
       .enter().append("g")
         .attr("fill", function(d) { return z(d.key); })
       .selectAll("rect")
       .data(function(d) { return d; })
       .enter().append("rect")
-        .attr("x", function(d) { return x(d.data.key); })
+        .attr("x", function(d) { return x(d.data.genderAgeRange); })
         .attr("y", function(d) { return y(d[1]); })
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
         .attr("width", x.bandwidth());
