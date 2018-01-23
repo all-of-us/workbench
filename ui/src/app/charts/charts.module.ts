@@ -2,7 +2,7 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ClarityModule} from 'clarity-angular';
 
-import ChartContainer from './chart-container/component';
+import ChartContainerComponent from './chart-container/component';
 import DemographicsOverviewChartComponent from './demographics-overview/component';
 
 
@@ -12,7 +12,7 @@ import DemographicsOverviewChartComponent from './demographics-overview/componen
     ClarityModule,
   ],
   declarations: [
-    ChartContainer,
+    ChartContainerComponent,
     DemographicsOverviewChartComponent,
   ],
   exports: [

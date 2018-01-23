@@ -42,7 +42,7 @@ const DEFAULT_OPTIONS = <Options>{
     </svg>
   `,
 })
-export default class ChartContainer {
+export default class ChartContainerComponent {
 
   /*
    * .gElement and .chart

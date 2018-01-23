@@ -7,8 +7,8 @@ import ChartInfoContainer from './model';
 @Component({
   selector: 'app-demographics-overview-chart',
   template: `
-    <div *ngIf="data">
-      <app-chart-container #container [options]="options">
+    <div *ngIf='data'>
+      <app-chart-container #container [options]='options'>
       </app-chart-container>
     </div>
   `
@@ -52,7 +52,7 @@ export default class DemographicsOverviewChartComponent {
 
   get z() {
     return d3.scaleOrdinal()
-      .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+      .range(['#98abc5', '#8a89a6', '#7b6888', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']);
   }
 
   drawChart() {
@@ -73,66 +73,66 @@ export default class DemographicsOverviewChartComponent {
     y.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
 
     const zkeys = d3
-      .entries(this.data.annotateWithTotals('race'))
+      .entries(this.data.withTotals('race'))
       .sort(entry => entry.value)
       .map(entry => entry.key);
 
     z.domain(zkeys);
 
     chart
-      .append("g")
-      .selectAll("g")
+      .append('g')
+      .selectAll('g')
       .data(series)
-      .enter().append("g")
-        .attr("fill", function(d) { return z(d.key); })
-      .selectAll("rect")
+      .enter().append('g')
+        .attr('fill', function(d) { return z(d.key); })
+      .selectAll('rect')
       .data(function(d) { return d; })
-      .enter().append("rect")
-        .attr("x", function(d) { return x(d.data.genderAgeRange); })
-        .attr("y", function(d) { return y(d[1]); })
-        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-        .attr("width", x.bandwidth());
+      .enter().append('rect')
+        .attr('x', function(d) { return x(d.data.genderAgeRange); })
+        .attr('y', function(d) { return y(d[1]); })
+        .attr('height', function(d) { return y(d[0]) - y(d[1]); })
+        .attr('width', x.bandwidth());
 
     chart
-      .append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + height + ")")
+      .append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
         .call(d3.axisBottom(x));
 
     chart
-      .append("g")
-        .attr("class", "axis")
-        .call(d3.axisLeft(y).ticks(null, "s"))
-      .append("text")
-        .attr("x", 2)
-        .attr("y", y(y.ticks().pop()) + 0.5)
-        .attr("dy", "0.32em")
-        .attr("fill", "#000")
-        .attr("font-weight", "bold")
-        .attr("text-anchor", "start")
-        .text("Population");
+      .append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(y).ticks(null, 's'))
+      .append('text')
+        .attr('x', 2)
+        .attr('y', y(y.ticks().pop()) + 0.5)
+        .attr('dy', '0.32em')
+        .attr('fill', '#000')
+        .attr('font-weight', 'bold')
+        .attr('text-anchor', 'start')
+        .text('Population');
 
-    const legend = chart.append("g")
-        .attr("font-family", "sans-serif")
-        .attr("font-size", 10)
-        .attr("text-anchor", "end")
-      .selectAll("g")
+    const legend = chart.append('g')
+        .attr('font-family', 'sans-serif')
+        .attr('font-size', 10)
+        .attr('text-anchor', 'end')
+      .selectAll('g')
       .data(keys.slice().reverse())
-      .enter().append("g")
-        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+      .enter().append('g')
+        .attr('transform', function(d, i) { return 'translate(0,' + i * 20 + ')'; });
 
     legend
-      .append("rect")
-        .attr("x", width - 19)
-        .attr("width", 19)
-        .attr("height", 19)
-        .attr("fill", z);
+      .append('rect')
+        .attr('x', width - 19)
+        .attr('width', 19)
+        .attr('height', 19)
+        .attr('fill', z);
 
     legend
-      .append("text")
-        .attr("x", width - 24)
-        .attr("y", 9.5)
-        .attr("dy", "0.32em")
+      .append('text')
+        .attr('x', width - 24)
+        .attr('y', 9.5)
+        .attr('dy', '0.32em')
         .text(function(d) { return d; });
   }
 }

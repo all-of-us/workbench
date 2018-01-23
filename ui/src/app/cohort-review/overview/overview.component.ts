@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
@@ -10,7 +10,7 @@ import {CohortBuilderService, SearchRequest} from 'generated';
   selector: 'app-overview',
   templateUrl: './overview.component.html',
 })
-export class OverviewComponent implements OnInit {
+export class OverviewComponent implements OnInit, OnDestroy {
 
   data;
   private subscription: Subscription;

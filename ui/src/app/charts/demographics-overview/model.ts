@@ -74,8 +74,8 @@ export default class ChartInfoContainer {
    * Returns a mapping {prop value => count} for the given property,
    * distributed across all other properties in the chart info set
    */
-  annotateWithTotals(prop: keyof ChartInfo) {
-    const arr = this[prop+'s'];
+  withTotals(prop: keyof ChartInfo) {
+    const arr = this[prop + 's'];
     const counts = makeCounter(arr);
     arr.forEach(value => {
       this.raw.filter(d => d[prop] === value)
