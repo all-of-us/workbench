@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -111,8 +110,7 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CodeDomainLookupService.class,
-    ParticipantCounter.class,
-    ConceptDao.class
+    ParticipantCounter.class
   })
   static class Configuration {
     @Bean
@@ -172,8 +170,6 @@ public class WorkspacesControllerTest {
   CohortReviewController cohortReviewController;
   @Autowired
   WorkspacesController workspacesController;
-  @Autowired
-  ConceptDao conceptDao;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;

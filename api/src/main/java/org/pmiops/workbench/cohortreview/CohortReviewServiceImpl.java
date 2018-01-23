@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -29,7 +28,6 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
-    private ConceptDao conceptDao;
     private WorkspaceService workspaceService;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
@@ -39,13 +37,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
                             CohortDao cohortDao,
                             ParticipantCohortStatusDao participantCohortStatusDao,
-                            ConceptDao conceptDao,
                             WorkspaceService workspaceService,
                             Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
-        this.conceptDao = conceptDao;
         this.workspaceService = workspaceService;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
