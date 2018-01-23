@@ -3,15 +3,15 @@
 # This generates new cloudsql database for a cdr
 # note dev-up must be run to generate the schema
 # note run-local-data-migrations must be run to generate hard coded data from liquibase
+# note account must be preauthorized with gcloud auth login
+
+# End product is:
+# 1) Local mysql database cdrYYYYMMDD
+# 2) Local mysql database publicYYYYMMDD
+# 3) sql dump of both of these in google cloud storage
 
 set -xeuo pipefail
 IFS=$'\n\t'
-
-
-# get options
-# --project=all-of-us-workbench-test *required
-
-# --cdr=cdr_version ... *optional
 
 USAGE="./generate-cdr/generate-clousql-cdr --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do

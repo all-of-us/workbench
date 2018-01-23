@@ -1,16 +1,11 @@
 #!/bin/bash
 
-# This generates cloudsql  database from cdr dump
+# This generates cloudsql data from the big query cdr dataset created
+# by make-bq-data.sh
 # note  the account must be authorized to perform gcloud and bq operations
 
 set -xeuo pipefail
 IFS=$'\n\t'
-
-
-# get options
-# --project=all-of-us-workbench-test *required
-
-# --cdr=cdr_version ... *optional
 
 USAGE="./generate-clousql-cdr/make-bq-data.sh --project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD"
 while [ $# -gt 0 ]; do
@@ -54,14 +49,9 @@ fi
 CREDS_ACCOUNT=${ACCOUNT}
 
 # Variables
+# TODO .... all this is just old code for reference
+#
 
-
-# Make data
-# Make the vocabulary table from cdr with no changes
-#bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
-
-
-# Todo  maybe not hardcode service account name ?
 #SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
 #gcloud auth activate-service-account $CREDS_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
