@@ -150,6 +150,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
             userInfo.getEmail(), null);
+    } else {
+      if (user.getDisabled()) {
+        response.addHeader("disabled", "true");
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(403);
+        return false;
+      }
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
@@ -159,6 +166,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
     if (!hasRequiredAuthority(method.getMethod(), user)) {
+
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }

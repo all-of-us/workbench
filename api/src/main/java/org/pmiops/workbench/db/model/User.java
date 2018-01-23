@@ -42,6 +42,7 @@ public class User {
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
+  private Boolean disabled;
 
   @Id
   @GeneratedValue
@@ -199,5 +200,13 @@ public class User {
 
   public void setDemographicSurveyCompletionTime(Timestamp demographicSurveyCompletionTime) {
     this.demographicSurveyCompletionTime = demographicSurveyCompletionTime;
+  }
+
+  public boolean getDisabled() {
+    return disabled;
+  }
+
+  public void setDisabled(boolean disabled) {
+    this.disabled = disabled;
   }
 }
