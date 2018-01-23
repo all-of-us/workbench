@@ -1,7 +1,7 @@
 package org.pmiops.workbench.api;
 
-import com.google.apphosting.api.ApiProxy;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -31,9 +31,9 @@ import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -575,7 +575,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspace.getNamespace(), workspace.getName()));
     }
 
-    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    // Retrieving the workspace is done first, which acts as an access check.
+    String fromBucket = null;
+    try {
+      fromBucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+          .getWorkspace()
+          .getBucketName();
+    } catch (ApiException e) {
+      log.log(Level.SEVERE, "Firecloud server error", e);
+      throw new ServerErrorException();
+    }
     org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
@@ -588,7 +597,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.cloneWorkspace(workspaceNamespace, workspaceId,
         fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName());
 
-    // TODO(calbach): Determine whether we need to copy GCS notebooks here.
+    String toBucket = null;
+    try {
+      toBucket = fireCloudService.getWorkspace(
+          fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName())
+          .getWorkspace()
+          .getBucketName();
+    } catch (ApiException e) {
+      log.log(Level.SEVERE, "Firecloud error retrieving newly cloned workspace", e);
+      throw new ServerErrorException();
+    }
+
+    for (String name : cloudStorageService.getBucketFileList(fromBucket, "notebooks")) {
+      cloudStorageService.copyBlob(BlobId.of(fromBucket, name), BlobId.of(toBucket, name));
+    }
 
     org.pmiops.workbench.db.model.Workspace toWorkspace =
         FROM_CLIENT_WORKSPACE.apply(body.getWorkspace());

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -103,6 +104,7 @@ public class WorkspacesControllerTest {
   private static final long NOW_TIME = Timestamp.from(NOW).getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String BUCKET_NAME = "workspace-bucket";
 
   @TestConfiguration
   @Import({
@@ -162,6 +164,8 @@ public class WorkspacesControllerTest {
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
+  CloudStorageService cloudStorageService;
+  @Autowired
   BigQueryService bigQueryService;
   @Autowired
   WorkspaceDao workspaceDao;
@@ -203,20 +207,30 @@ public class WorkspacesControllerTest {
     CLOCK.setInstant(NOW);
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator,
-      WorkspaceAccessLevel access) throws Exception {
+  private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
+      String ns, String name, String creator) {
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
         new org.pmiops.workbench.firecloud.model.Workspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
+    fcWorkspace.setBucketName(BUCKET_NAME);
+    return fcWorkspace;
+  }
+
+  private void stubGetWorkspace(String ns, String name, String creator,
+      WorkspaceAccessLevel access) throws Exception {
+    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
+  }
+
+  private void stubGetWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      WorkspaceAccessLevel access) throws Exception {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
-    when(fireCloudService.getWorkspace(ns, name)).thenReturn(
-      fcResponse
-    );
+    when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
+        .thenReturn(fcResponse);
   }
 
   private void stubBigQueryCohortCalls() {
@@ -625,11 +639,11 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace cloned = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
 
-    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
@@ -653,6 +667,34 @@ public class WorkspacesControllerTest {
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
+  }
+
+  @Test
+  public void testCloneWorkspaceWithNotebooks() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = createFcWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    fcWorkspace.setBucketName("bucket2");
+    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
+    when(cloudStorageService.getBucketFileList(BUCKET_NAME, "notebooks"))
+        .thenReturn(ImmutableList.of("f1", "f2"));
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, "f1"), BlobId.of("bucket2", "f1"));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, "f2"), BlobId.of("bucket2", "f2"));
   }
 
   @Test
