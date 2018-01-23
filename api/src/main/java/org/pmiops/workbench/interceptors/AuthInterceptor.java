@@ -153,8 +153,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     } else {
       if (user.getDisabled()) {
         response.addHeader("disabled", "true");
-        response.sendError(HttpServletResponse.SC_FORBIDDEN);
         response.setStatus(403);
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "User Disabled");
         return false;
       }
     }
