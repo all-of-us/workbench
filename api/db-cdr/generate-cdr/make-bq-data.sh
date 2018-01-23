@@ -59,17 +59,79 @@ CREDS_ACCOUNT=${ACCOUNT}
 # Variables
 
 # TODO make this agument for cdr_vession
-bqcdr="test_merge_dec26"
-
-bq_new_cdr_dataset=cloudsql_cdr$CDR_VERSION
-bq_new_public_dataset=cloudsql_public$CDR_VERSION
-
+bq_cdr_dataset="test_merge_dec26"
+NEW_BQ_CDR_DATASET=cloudsql_cdr$CDR_VERSION
+schema_path=generate-cdr/bq-schemas
 gcs_bucket=gs://all-of-us-workbench-cdr$CDR_VERSION
 
-# Make dataset for cloudsql tables
-bq --project=$PROJECT mk $bq_new_cdr_dataset
-bq --project=$PROJECT mk $bq_new_public_dataset
+# Make dataset for cdr cloudsql tables
+datasets=`bq --project=$PROJECT ls | grep $NEW_BQ_CDR_DATASET`
+echo $datasets
+if [[ $datasets =~ .*$NEW_BQ_CDR_DATASET.* ]]; then
+  echo "$NEW_BQ_CDR_DATASET exists"
+else
+  echo "Creating $NEW_BQ_CDR_DATASET"
+  catch_create=`eval("bq --project=$PROJECT mk $NEW_BQ_CDR_DATASET")`
+fi
 
-# Make data
-# Make the vocabulary table from cdr with no changes
-#bq --project=all-of-us-ehr-dev cp test_merge_dec26.vocabulary test_vocabulary_ppi.vocabulary
+# Copy tables we can that we need from cdr to our cloudsql cdr dataset
+copy_tables=( concept_relationship domain vocabulary criteria )
+for t in "${copy_tables[@]}"
+do
+  bq --project=$PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
+  bq --quiet --project=$PROJECT cp $bq_cdr_dataset.$t $NEW_BQ_CDR_DATASET.$t
+done
+
+# Create bq tables we have json schema for
+create_tables=( concept achilles_analysis achilles_results achilles_results_concept )
+for t in "${create_tables[@]}"
+do
+  # Make the concept_counts table from cdr
+  bq --project=$PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
+  bq --quiet --project=$PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
+done
+
+
+###########################
+# concept with count cols #
+###########################
+# We can't just copy concept because the schema has a couple extra columns
+# Insert the data into it.
+bq --quiet --project=$PROJECT query --allow_large_results --destination_table=$NEW_BQ_CDR_DATASET.concept \
+ --use_legacy_sql "SELECT *, 0 as count_value, 0.00 as prevalence FROM [$PROJECT:$bq_cdr_dataset.concept]"
+
+# Convert the date columns into mysql dates where they are not null
+bq --quiet --project=$PROJECT query --nouse_legacy_sql \
+  "UPDATE \`$NEW_BQ_CDR_DATASET.concept\` \
+  SET valid_start_date = Concat(substr(valid_start_date, 1,4), '-',substr(valid_start_date,5,2),'-',substr(valid_start_date,7,2)) \
+  WHERE valid_start_date is not null"
+
+bq --quiet --project=$PROJECT query --nouse_legacy_sql \
+  "UPDATE \`$NEW_BQ_CDR_DATASET.concept\` \
+  SET valid_end_date = Concat(substr(valid_end_date, 1,4), '-',substr(valid_end_date,5,2),'-',substr(valid_end_date,7,2)) \
+  WHERE valid_end_date is not null"
+
+########################
+# concept_relationship #
+########################
+# Convert the date columns into mysql dates where they are not null
+bq --quiet --project=$PROJECT query --nouse_legacy_sql \
+"UPDATE \`$NEW_BQ_CDR_DATASET.concept_relationship\` \
+SET valid_start_date = Concat(substr(valid_start_date, 1,4), '-',substr(valid_start_date,5,2),'-',substr(valid_start_date,7,2)) \
+WHERE valid_start_date is not null"
+
+bq --quiet --project=$PROJECT query --nouse_legacy_sql \
+"UPDATE \`$NEW_BQ_CDR_DATASET.concept_relationship\` \
+SET valid_end_date = Concat(substr(valid_end_date, 1,4), '-',substr(valid_end_date,5,2),'-',substr(valid_end_date,7,2)) \
+WHERE valid_end_date is not null"
+
+# Run achilles count queries to fill achilles_results
+if ./generate-cdr/run-achilles-queries.sh --project $PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
+then
+    echo "Achilles queries ran"
+else
+    echo "FAILED To run achilles queries for CDR $CDR_VERSION"
+    exit 1
+fi
+
+
