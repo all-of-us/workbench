@@ -12,8 +12,6 @@ import java.util.Map;
  */
 public enum FactoryKey {
     CODES,
-    /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
-    GROUP_CODES,
     DEMO,
     PHECODE;
 
@@ -41,7 +39,6 @@ public enum FactoryKey {
         tMap.put("ICD9", FactoryKey.CODES);
         tMap.put("ICD10", FactoryKey.CODES);
         tMap.put("CPT", FactoryKey.CODES);
-        tMap.put("PHECODE", FactoryKey.PHECODE);
         tMap.put("DEMO", FactoryKey.DEMO);
         return tMap;
     }
