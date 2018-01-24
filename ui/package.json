@@ -24,6 +24,7 @@
     "@angular/platform-browser": "^4.4.6",
     "@angular/platform-browser-dynamic": "^4.4.6",
     "@angular/router": "^4.4.6",
+    "@types/geojson": "^1.0.6",
     "@webcomponents/custom-elements": "^1.0.4",
     "angular-2-local-storage": "^1.0.1",
     "angular2-highcharts": "^0.5.5",
