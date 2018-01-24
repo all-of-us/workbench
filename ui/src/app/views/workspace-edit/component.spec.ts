@@ -105,7 +105,8 @@ describe('WorkspaceEditComponent', () => {
       setupComponent(WorkspaceEditMode.Clone);
       expect(testComponent.workspace.name).toBe(
         `Clone of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
-      expect(testComponent.hasPermission).toBeTruthy('cloner should be able to edit cloned workspace');
+      expect(testComponent.hasPermission).toBeTruthy(
+        'cloner should be able to edit cloned workspace');
 
       const spy = spyOn(router, 'navigate');
       fixture.debugElement.query(By.css('.add-button'))
