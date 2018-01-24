@@ -60,6 +60,7 @@ then
   exit 1
 fi
 
+
 #Check cdr_version is of form YYYYMMDD
 if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
     echo "New CDR VERSION will be $CDR_VERSION"
@@ -79,6 +80,17 @@ then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
+if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
+  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
+else
+  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
+  exit 1
+fi
+
+
+# Check that bq_dataset exists and exit if not
+datasets=`bq --project=$BQ_PROJECT ls | grep $BQ_DATASET`
+echo $datasets
 if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
   echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
 else

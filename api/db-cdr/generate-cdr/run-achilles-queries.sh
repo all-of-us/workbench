@@ -29,9 +29,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-#TODO THESE FAIL WITHOUT PRINTING USAGE IF ARG ISN'T PASSED IN
-# I TRY TO PREVENT IT UP TOP BY INITING VARS BUT NO WORK
-
 if [ -z "${ACCOUNT}" ]
 then
   echo "Usage: $USAGE"
@@ -382,6 +379,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 where co1.observation_concept_id > 0
 group by co1.observation_CONCEPT_ID"
 
+
 # Observation 3101 concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -531,3 +529,4 @@ select  0 as id, 3115 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1
   FROM  priorstats p
 join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
  group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
+
