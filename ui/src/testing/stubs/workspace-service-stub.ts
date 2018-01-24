@@ -4,6 +4,7 @@ import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
   EmptyResponse,
+  FileDetail,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
@@ -12,7 +13,6 @@ import {
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
-import {FileDetail} from '../../generated/model/fileDetail';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
