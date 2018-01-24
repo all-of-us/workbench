@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
@@ -190,7 +189,6 @@ public class WorkspacesControllerTest {
   CohortReviewController cohortReviewController;
   @Autowired
   WorkspacesController workspacesController;
-
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
