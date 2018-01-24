@@ -311,8 +311,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           break;
         }
       }
-    }
-    else {
+    } else {
       this.enablePushNotebookBtn = true;
     }
   }
