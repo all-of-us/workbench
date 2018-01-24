@@ -7,6 +7,8 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
+# Todo change this script to use liquibase to make the db
+
 # INIT defaults FOR OPTIONAL PARAMS
 COPY_CDR_VERSION="";
 USAGE="./init-new-cdr-db.sh --cdr-version <VERSION> [--copy-cdr-version <VERSION>]"
