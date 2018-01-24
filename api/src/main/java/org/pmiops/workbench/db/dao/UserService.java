@@ -54,8 +54,12 @@ public class UserService {
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  private User updateWithRetries(Function<User, User> userModifier) {
+  private User updateWithRetries(Function<User, User> modifyUser) {
     User user = userProvider.get();
+    return updateWithRetries(modifyUser, user);
+  }
+
+  private User updateWithRetries(Function<User, User> userModifier, User user) {
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -73,6 +77,7 @@ public class UserService {
       }
     }
   }
+
 
   private void updateDataAccessLevel(User user) {
     if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
@@ -174,6 +179,6 @@ public class UserService {
         user.setBlockscoreVerificationIsValid(blockscoreVerificationIsValid);
         return user;
       }
-    });
+    }, user);
   }
 }
