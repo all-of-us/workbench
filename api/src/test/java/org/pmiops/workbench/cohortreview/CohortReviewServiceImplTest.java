@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -16,7 +17,8 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import javax.inject.Provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -38,7 +40,7 @@ public class CohortReviewServiceImplTest {
     private WorkspaceService workspaceService;
 
     @Mock
-    private JdbcTemplate jdbcTemplate;
+    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     @InjectMocks
     private CohortReviewServiceImpl cohortReviewService;
