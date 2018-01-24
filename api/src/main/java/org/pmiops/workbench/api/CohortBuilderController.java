@@ -3,26 +3,18 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
-import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
-import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -100,7 +92,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<Long> countParticipants(SearchRequest request) {
 
-        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
@@ -117,7 +108,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
         ChartInfoListResponse response = new ChartInfoListResponse();
 
-        /** TODO: this is temporary and will be removed when we figure out the conceptId mappings **/
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
