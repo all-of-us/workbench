@@ -3,7 +3,7 @@ import {Component, OnInit} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
-  // IdVerificationRequest,
+  IdVerificationReviewRequest,
   Profile,
   ProfileService,
 } from 'generated';
@@ -38,18 +38,11 @@ export class AdminReviewIdVerificationComponent implements OnInit {
             });
   }
 
-  // approve(workspace: Workspace, approved: boolean): void {
-  //   const request = <ResearchPurposeReviewRequest>{
-  //     approved: approved,
-  //   };
-  //   this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
-  //       workspace.namespace, workspace.id, request))
-  //       .subscribe(
-  //           resp => {
-  //             const i = this.workspaces.indexOf(workspace, 0);
-  //             if (i >= 0) {
-  //               this.workspaces.splice(i, 1);
-  //             }
-  //           });
-  // }
-}
+  approve(contactEmail: string, approved: boolean): void {
+    const request = <IdVerificationReviewRequest>{
+      approved: approved,
+    };
+    this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
+        contactEmail, request));
+  }
+ }

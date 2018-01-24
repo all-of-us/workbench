@@ -166,14 +166,9 @@ public class UserService {
     return userDao.findUserByBlockscoreVerificationIsValidIsNull();
   }
 
-  public User setBlockscoreIdVerificationIsValid(boolean blockscoreVerificationIsValid) {
-    return updateWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setBlockscoreVerificationIsValid(blockscoreVerificationIsValid);
-        return user;
-      }
-    });
-  }
-
+  // public User getUserByUsername(String username) {
+  //   User user = userProvider.get();
+  //   user = userDao.findUserByUsername(username);
+  //   return user;
+  // }
 }

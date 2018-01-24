@@ -35,8 +35,10 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationListResponse;
+import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -374,4 +376,13 @@ public class ProfileController implements ProfileApiDelegate {
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
   }
+
+  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  public ResponseEntity<EmptyResponse> reviewIdVerification(String contactEmail, IdVerificationReviewRequest review) {
+    User user = userDao.findUserByEmail(contactEmail);
+    user.setBlockscoreVerificationIsValid(review.getApproved());
+    userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
 }

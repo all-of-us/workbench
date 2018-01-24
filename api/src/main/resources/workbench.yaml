@@ -65,7 +65,7 @@ parameters:
     description: Cohort ID
   cohortReviewId:
     in: path
-    name: cohortId
+    name: cohortReviewId
     type: integer
     format: int64
     required: true
@@ -84,7 +84,12 @@ parameters:
     format: int64
     required: true
     description: specifies which participant
-
+  contactEmail:
+    in: path
+    name: contactEmail
+    type: string
+    required: true
+    description: specifies the contact email of the user
 
 paths:
 
@@ -326,8 +331,6 @@ paths:
           description: request carrying user email to add
           schema:
             $ref: "#/definitions/AuthDomainRequest"
-      tags:
-        - authDomain
       summary: add a user to an auth domain if you have manage groups permission
       operationId: addUserToAuthDomain
     delete:
@@ -583,6 +586,27 @@ paths:
           description: User doesn't have the REVIEW_ID_VERIFICATION authority
           schema:
             $ref: "#/definitions/ErrorResponse"
+
+  /v1/id-verification/{contactEmail}/review:
+    parameters:
+      - $ref: '#/parameters/contactEmail'
+    post:
+      tags:
+        - profile
+      description:
+          Manually verifies the ID of a user. Requires REVIEW_ID_VERIFICATION authority.
+      operationId: reviewIdVerification
+      parameters:
+        - in: body
+          name: review
+          description: result of the manual ID verification
+          schema:
+            $ref: "#/definitions/IdVerificationReviewRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
  
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
@@ -1604,6 +1628,15 @@ definitions:
 
   ResearchPurposeReviewRequest:
     description: Approve or reject a workspace's research purpose.
+    type: object
+    required:
+      - approved
+    properties:
+      approved:
+        type: boolean
+
+  IdVerificationReviewRequest:
+    description: Manually verify or reject a user's identity
     type: object
     required:
       - approved

@@ -6,7 +6,8 @@
         <p>{{profile.givenName}} ({{profile.username}})</p>
       </div>
       <div class="review-buttons">
-        <button (click)="verify(profile, true)">Verify</button>
+        <button (click)="approve(profile, true)">Approve</button>
+        <button (click)="approve(profile, false)">Reject</button>
       </div>
     </li>
   </ul>
