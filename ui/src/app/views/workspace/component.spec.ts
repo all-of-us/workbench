@@ -139,7 +139,7 @@ describe('WorkspaceComponent', () => {
   }));
 
   it('displays correct notebook information', fakeAsync(() => {
-    // It'll call mock notebook service in workspace stub as part of ngInit & return the notebooklist
+    // Mock notebook service in workspace stub will be called as part of ngInit
     const fixture = workspacePage.fixture;
     const app = fixture.debugElement.componentInstance;
     expect(app.notebookList.length).toEqual(1);
