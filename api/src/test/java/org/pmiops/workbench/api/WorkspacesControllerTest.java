@@ -960,11 +960,20 @@ public class WorkspacesControllerTest {
     when(mockBlob.getName()).thenReturn("notebook/mockFile.ipynb");
     when(mockBlob1.getName()).thenReturn("notebook/mockFile.text");
     List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new ApiException());
-    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook")).thenReturn(blobList);
+    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
+    when(cloudStorageService.getBlobList("MockBucketName", "notebook")).thenReturn(blobList);
     // Will return 1 entry as only python files in notebook folder are return
     List<FileDetail> result = workspacesController
         .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
     assertEquals(result.size(), 1);
+
+    try{
+      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
+      fail();
+    } catch (NotFoundException ex){
+
+    } catch (Exception e){
+      fail();
+    }
   }
 }

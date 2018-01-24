@@ -293,27 +293,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   selectANotebook(notebook): void {
-    let oneTrueExist = false;
-    let oneFalseExist = false;
+    let loopedNotebook = 0;
     this.checkColumnNotebook = true;
     this.enablePushNotebookBtn = false;
 
     for (const file of this.notebookList) {
-      if (!oneFalseExist && !file.selected) {
+      loopedNotebook++;
+      if (!file.selected) {
         this.checkColumnNotebook = false;
-        if (oneTrueExist) {
-          break;
-        }
-        oneFalseExist = true;
-      }
-      if (!oneTrueExist && file.selected) {
-        this.enablePushNotebookBtn = true;
-        if (oneFalseExist) {
-          break;
-        }
-        oneTrueExist = true;
+        break;
       }
     }
+    if (loopedNotebook == 1) {
+      for (const file of this.notebookList) {
+        if (file.selected) {
+          this.enablePushNotebookBtn = true;
+          break;
+        }
+      }
+    }
+    else
+      this.enablePushNotebookBtn = true;
   }
 
   selectAllNoteBooks(): void {

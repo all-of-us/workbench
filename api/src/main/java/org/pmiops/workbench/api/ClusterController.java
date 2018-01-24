@@ -183,7 +183,6 @@ public class ClusterController implements ClusterApiDelegate {
    * Create a map with key as ~/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
    * @param fileList
    * @return
-   * @throws org.pmiops.workbench.firecloud.ApiException
    */
   private Map convertfileDetailsToMap(List<FileDetail> fileList) {
     return fileList.stream()

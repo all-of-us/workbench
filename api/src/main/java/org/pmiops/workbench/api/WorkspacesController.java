@@ -450,23 +450,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
       String workspaceId) {
-    List<Blob> bucketFileList = new ArrayList<>();
+    List<Blob> blobList = new ArrayList<>();
     List<FileDetail> fileList = new ArrayList<>();
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
-      bucketFileList = cloudStorageService.getBucketFileList(bucketName, "notebook");
+      blobList = cloudStorageService.getBlobList(bucketName, "notebook");
 
-      if (bucketFileList != null && bucketFileList.size() > 0) {
-        bucketFileList.stream()
-            .filter(bucketFileName ->
-                bucketFileName.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-            .forEach(bucketFileName -> {
+      if (blobList != null && blobList.size() > 0) {
+        blobList.stream()
+            .filter(blob ->
+                blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .forEach(blob -> {
               FileDetail fileDetail = new FileDetail();
-              fileDetail.setName(bucketFileName.getName());
-              fileDetail.setPath("gs://" + bucketName + "/" + bucketFileName.getName());
+              fileDetail.setName(blob.getName());
+              fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
               fileList.add(fileDetail);
             });
       }
@@ -474,9 +474,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
             workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e);
       }
+      throw new ServerErrorException(e);
     }
     return ResponseEntity.ok(fileList);
   }
