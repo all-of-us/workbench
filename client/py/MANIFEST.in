@@ -1,0 +1,10 @@
+include Makefile
+include requirements.txt
+include README*
+include test*
+
+recursive-include swagger_docs *
+recursive-include test *
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[c|o]

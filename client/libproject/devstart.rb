@@ -28,9 +28,7 @@ def install_py_requirements()
   py_root = File.join(Workbench::WORKBENCH_ROOT, 'client', 'py')
 
   common = Common.new
-  common.run_inline %W{
-      pip install --requirement #{File.join(py_root, "requirements.txt")}
-      --requirement #{File.join(py_root, "swagger-requirements.txt")}}
+  common.run_inline %W{pip install --requirement #{File.join(py_root, "requirements.txt")}}
 end
 
 def pylint()
@@ -58,7 +56,9 @@ def test()
   install_py_requirements
 
   common = Common.new
-  common.run_inline [File.join(Workbench::WORKBENCH_ROOT, 'client', 'py', 'run_tests.py')]
+  setup_dot_py = File.join(Workbench::WORKBENCH_ROOT, 'client', 'py', 'setup.py')
+  common.run_inline %W{python #{setup_dot_py} test}
+  FileUtils.rm_rf('aou_workbench_client.egg-info', {:verbose => true})
 end
 
 Common.register_command({
