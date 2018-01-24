@@ -208,7 +208,8 @@ export class WorkspacesServiceStub {
       setTimeout(() => {
         if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
             && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
-          const fileDetailsList = [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
+          const fileDetailsList =
+              [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
           observer.next(fileDetailsList);
         } else {
           observer.next([]);
