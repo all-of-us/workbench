@@ -857,11 +857,13 @@ paths:
         - in: query
           name: page
           type: integer
+          default: '0'
           required: false
           description: specific page (default is 0)
         - in: query
           name: pageSize
           type: integer
+          default: '25'
           required: false
           description: page size of results (default is 25)
         - in: query
