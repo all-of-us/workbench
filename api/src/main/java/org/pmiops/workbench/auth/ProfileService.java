@@ -35,6 +35,7 @@ public class ProfileService {
 
     boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
+    profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
     profile.setFamilyName(user.getFamilyName());
     profile.setGivenName(user.getGivenName());

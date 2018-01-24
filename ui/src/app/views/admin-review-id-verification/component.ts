@@ -38,11 +38,18 @@ export class AdminReviewIdVerificationComponent implements OnInit {
             });
   }
 
-  approve(contactEmail: string, approved: boolean): void {
+  approve(profile: Profile, approved: boolean): void {
     const request = <IdVerificationReviewRequest>{
       approved: approved,
     };
     this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
-        contactEmail, request));
+        profile.userId, request))
+        .subscribe(
+            resp => {
+              const i = this.profiles.indexOf(profile, 0);
+              if (i >= 0) {
+                this.profiles.splice(i, 1);
+              }
+            });
   }
  }

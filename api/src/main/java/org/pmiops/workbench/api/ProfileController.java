@@ -378,11 +378,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<EmptyResponse> reviewIdVerification(String contactEmail, IdVerificationReviewRequest review) {
-    User user = userDao.findUserByEmail(contactEmail);
-    user.setBlockscoreVerificationIsValid(review.getApproved());
-    userDao.save(user);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  public ResponseEntity<EmptyResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
+    User user = userService.setIdVerificationApproved(userId, review.getApproved());
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
 }

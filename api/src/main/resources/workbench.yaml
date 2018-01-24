@@ -84,12 +84,14 @@ parameters:
     format: int64
     required: true
     description: specifies which participant
-  contactEmail:
+  userId:
     in: path
-    name: contactEmail
-    type: string
+    name: userId
+    type: integer
+    format: int64
     required: true
-    description: specifies the contact email of the user
+    description: researchallofus user ID
+
 
 paths:
 
@@ -587,9 +589,9 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/id-verification/{contactEmail}/review:
+  /v1/id-verification/{userId}/review:
     parameters:
-      - $ref: '#/parameters/contactEmail'
+      - $ref: '#/parameters/userId'
     post:
       tags:
         - profile
@@ -1794,6 +1796,10 @@ definitions:
       - enabledInFireCloud
       - dataAccessLevel
     properties:
+      userId:
+        description: researchallofus userId
+        type: integer
+        format: int64
       username:
         description: researchallofus username
         type: string

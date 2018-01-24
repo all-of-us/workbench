@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface UserDao extends CrudRepository<User, Long> {
 
   User findUserByEmail(String email);
+  User findUserByUserId(long userId);
   List<User> findUserByBlockscoreVerificationIsValidIsNull();
 
   /**
