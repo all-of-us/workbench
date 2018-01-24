@@ -929,7 +929,7 @@ public class WorkspacesControllerTest {
   public void testNoteBookList() throws Exception {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseEmptyNotebook =
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseWithException =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     org.pmiops.workbench.firecloud.model.Workspace mockWorkspace =
         new org.pmiops.workbench.firecloud.model.Workspace();
@@ -937,7 +937,7 @@ public class WorkspacesControllerTest {
         new org.pmiops.workbench.firecloud.model.Workspace();
     mockWorkspace.setBucketName("MockBucketName");
     fcResponse.setWorkspace(mockWorkspace);
-    fcResponseEmptyNotebook.setWorkspace(mockWorkspaceEmpty);
+    fcResponseWithException.setWorkspace(mockWorkspaceEmpty);
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
         fcResponse
     );
