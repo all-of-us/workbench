@@ -172,10 +172,8 @@ public class ClusterController implements ClusterApiDelegate {
         throw new BadRequestException(e.getResponseBody());
       } else if (e.getCode() == 404) {
         throw new NotFoundException("Cluster not found.");
-      } else if (e.getCode() == 500) {
-        throw new ServerErrorException(e);
       } else {
-        throw new ServerUnavailableException(e);
+        throw new ServerErrorException(e);
       }
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -188,9 +186,8 @@ public class ClusterController implements ClusterApiDelegate {
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
   private Map convertfileDetailsToMap(List<FileDetail> fileList) {
-    Map<String, String> fileDetailsMap = fileList.stream()
+    return fileList.stream()
         .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
         fileDetail -> fileDetail.getPath()));
-    return fileDetailsMap;
   }
 }

@@ -1,7 +1,11 @@
 package org.pmiops.workbench.google;
 
-import com.google.cloud.storage.*;
-
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.Storage;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
@@ -29,15 +33,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public List<String> getBucketFileList(String bucketName, String directory) {
-    List<String> fileNameList = new ArrayList<>();
+  public List<Blob> getBucketFileList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList = storage.get(bucketName)
         .list(Storage.BlobListOption.prefix(directory)).getValues();
-    blobList.forEach(blobItem -> {
-      fileNameList.add(blobItem.getName());
-    });
-    return fileNameList;
+    return ImmutableList.copyOf(blobList);
   }
 
   String getCredentialsBucketName() {

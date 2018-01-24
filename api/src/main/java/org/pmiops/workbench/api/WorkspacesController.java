@@ -32,8 +32,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import com.google.cloud.storage.Blob;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
@@ -448,8 +450,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
       String workspaceId) {
-    List<String> bucketFileList = new ArrayList<String>();
-    List<FileDetail> fileList = new ArrayList<FileDetail>();
+    List<Blob> bucketFileList = new ArrayList<>();
+    List<FileDetail> fileList = new ArrayList<>();
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
@@ -459,17 +461,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       if (bucketFileList != null && bucketFileList.size() > 0) {
         bucketFileList.stream()
-            .filter(bucketFileName -> bucketFileName.matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .filter(bucketFileName ->
+                bucketFileName.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
             .forEach(bucketFileName -> {
               FileDetail fileDetail = new FileDetail();
-              fileDetail.setName(bucketFileName);
-              fileDetail.setPath("gs://" + bucketName + "/" + bucketFileName);
+              fileDetail.setName(bucketFileName.getName());
+              fileDetail.setPath("gs://" + bucketName + "/" + bucketFileName.getName());
               fileList.add(fileDetail);
             });
       }
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found",
-          workspaceNamespace, workspaceId));
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      } else {
+        throw new ServerErrorException(e);
+      }
     }
     return ResponseEntity.ok(fileList);
   }

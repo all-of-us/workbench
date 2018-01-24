@@ -21,7 +21,7 @@ import {
 
 
 class Notebook {
-  constructor(public name: string, public path: string, public push: boolean) {}
+  constructor(public name: string, public path: string, public selected: boolean) {}
 }
 /*
 * Search filters used by the cohort and notebook data tables to
@@ -151,8 +151,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.errorHandlingService.retryApi(this.workspacesService
               .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
-                  FileList => {
-                    for (const fileDetail of FileList){
+                  fileList => {
+                    for (const fileDetail of fileList){
                       fileDetail.push = false;
                       this.notebookList.push(fileDetail);
                     }
@@ -292,33 +292,33 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
-  sendANotebook(notebook): void {
-    let enableBtn = false;
-    let unSelectCheckBox = false;
+  selectANotebook(notebook): void {
+    let oneTrueExist = false;
+    let oneFalseExist = false;
     this.checkColumnNotebook = true;
     this.enablePushNotebookBtn = false;
 
     for (const file of this.notebookList) {
-      if (file.push === false) {
+      if (file.selected === false) {
         this.checkColumnNotebook = false;
-        if (enableBtn) {
+        if (oneTrueExist) {
           break;
         }
-        unSelectCheckBox = true;
+        oneFalseExist = true;
       }
-      if (file.push === true) {
+      if (file.selected === true) {
         this.enablePushNotebookBtn = true;
-        if (unSelectCheckBox) {
+        if (oneFalseExist) {
           break;
         }
-        enableBtn = true;
+        oneTrueExist = true;
       }
     }
   }
 
-  sendAllNoteBooks(): void {
+  selectAllNoteBooks(): void {
     for (const file of this.notebookList) {
-      file.push = this.checkColumnNotebook;
+      file.selected = this.checkColumnNotebook;
     }
     this.enablePushNotebookBtn = this.checkColumnNotebook;
   }
@@ -341,8 +341,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  sendFilesToNotebookServer(notebooks): void {
-    const fileList: Array<FileDetail> = notebooks.filter((item) => item.push);
+  localizeNotebooks(notebooks): void {
+    const fileList: Array<FileDetail> = notebooks.filter((item) => item.selected);
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
         .subscribe(() => {

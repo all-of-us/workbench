@@ -13,8 +13,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static com.google.cloud.storage.Blob.Builder;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -112,7 +114,6 @@ public class WorkspacesControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
 
   @TestConfiguration
-
   @Import({
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
@@ -956,20 +957,16 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
         fcResponse
     );
+    Blob mockBlob = mock(Blob.class);
+    Blob mockBlob1 = mock(Blob.class);
+    when(mockBlob.getName()).thenReturn("notebook/mockFile.ipynb");
+    when(mockBlob1.getName()).thenReturn("notebook/mockFile.text");
+    List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new ApiException());
-    List<String> blobDetailList =
-        ImmutableList.of("notebook/File.ipynb", "notebook/File1.txt", "config/File1.txt");
-    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook"))
-        .thenReturn(blobDetailList);
+    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook")).thenReturn(blobList);
     // Will return 1 entry as only python files in notebook folder are return
     List<FileDetail> result = workspacesController
         .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
     assertEquals(result.size(), 1);
-    try {
-      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
-      fail();
-    } catch (NotFoundException ex) {
-      assertTrue(true);
-    }
   }
 }
