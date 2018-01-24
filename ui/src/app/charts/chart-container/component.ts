@@ -50,9 +50,9 @@ export default class ChartContainerComponent {
    * Provides a handle on the SVGGElement selection that renders the chart inside the margins
    */
   @ViewChild('chart') gElement: ElementRef;
-  private _selection: d3.Selection;
+  private _selection;
 
-  get chart(): d3.Selection<SVGGElement> {
+  get chart() {
     if (!this._selection) {
       this._selection = d3.select(this.gElement.nativeElement);
     }
