@@ -172,9 +172,8 @@ public class ClusterController implements ClusterApiDelegate {
         throw new BadRequestException(e.getResponseBody());
       } else if (e.getCode() == 404) {
         throw new NotFoundException("Cluster not found.");
-      } else {
-        throw new ServerErrorException(e);
       }
+      throw new ServerErrorException(e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -182,7 +181,7 @@ public class ClusterController implements ClusterApiDelegate {
   /**
    * Create a map with key as ~/fileName and value as file path which should be in format the gs://firecloudBucket name/filename
    * @param fileList
-   * @return
+   * @return FileDetail Map
    */
   private Map convertfileDetailsToMap(List<FileDetail> fileList) {
     return fileList.stream()

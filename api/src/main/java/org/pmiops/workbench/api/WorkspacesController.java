@@ -458,7 +458,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
       blobList = cloudStorageService.getBlobList(bucketName, "notebook");
-
       if (blobList != null && blobList.size() > 0) {
         blobList.stream()
             .filter(blob ->
