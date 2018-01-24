@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CohortReviewService {
 
@@ -89,6 +88,4 @@ public interface CohortReviewService {
      * @return
      */
     Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest);
-
-    Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept();
 }
