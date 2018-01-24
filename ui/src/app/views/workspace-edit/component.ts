@@ -91,9 +91,9 @@ export class WorkspaceEditComponent implements OnInit {
       this.oldWorkspaceNamespace, this.oldWorkspaceName);
     obs.subscribe(
       (resp) => {
-        this.accessLevel = resp.accessLevel;
         if (this.mode === WorkspaceEditMode.Edit) {
           this.workspace = resp.workspace;
+          this.accessLevel = resp.accessLevel;
         } else if (this.mode === WorkspaceEditMode.Clone) {
           this.workspace.name = 'Clone of ' + resp.workspace.name;
           this.workspace.description = resp.workspace.description;
