@@ -31,6 +31,7 @@
     "clarity-icons": "^0.10.21",
     "clarity-ui": "^0.10.21",
     "core-js": "^2.5.1",
+    "d3": "^4.12.2",
     "dom-to-image": "^2.6.0",
     "enhanced-resolve": "3.3.0",
     "highcharts": "^6.0.3",
