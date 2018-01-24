@@ -9,6 +9,8 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.SortColumn;
+import org.pmiops.workbench.cohortreview.SortOrder;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -53,13 +55,11 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
 
-    public static final String STATUS = "status";
-    public static final String PARTICIPANT_ID = "participantKey.participantId";
+    public static final String ASC = SortOrder.asc.name();
+    public static final String PARTICIPANT_ID = SortColumn.participantId.name();
     public static final Integer PAGE = 0;
     public static final Integer PAGE_SIZE = 25;
     public static final Integer MAX_REVIEW_SIZE = 10000;
-    public static final String ASC = "ASC";
-    public static final String DESC = "DESC";
 
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
@@ -299,8 +299,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 Long cdrVersionId,
                                                                                                 Integer page,
                                                                                                 Integer pageSize,
-                                                                                                String sortOrder,
                                                                                                 String sortColumn,
+                                                                                                String sortOrder,
                                                                                                 List<String> filterColumns,
                                                                                                 List<String> filterValues) {
         CohortReview cohortReview = null;
@@ -437,20 +437,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         Sort.Direction orderParam = getSortOrder(sortOrder);
         String columnParam = getSortColumn(sortColumn);
 
-        final Sort sort = (columnParam.equals(PARTICIPANT_ID))
-                ? new Sort(orderParam, columnParam)
-                : new Sort(orderParam, columnParam, PARTICIPANT_ID);
+        final Sort sort = (columnParam.equals(SortColumn.participantId.name()))
+                ? new Sort(orderParam, "participantKey." + columnParam)
+                : new Sort(orderParam, columnParam, "participantKey." + SortColumn.participantId.name());
         return new PageRequest(pageParam, pageSizeParam, sort);
     }
 
     private Sort.Direction getSortOrder(String sortOrder) {
         return Sort.Direction.fromString(Optional.ofNullable(sortOrder)
-                .filter(o -> o.equalsIgnoreCase(DESC)).orElse(ASC));
+                .filter(o -> o.equalsIgnoreCase(SortOrder.desc.name())).orElse(SortOrder.asc.name()));
     }
 
     private String getSortColumn(String sortColumn) {
         return Optional.ofNullable(sortColumn)
-                .filter(o -> o.equalsIgnoreCase(STATUS)).orElse(PARTICIPANT_ID);
+                .filter(o -> o.equalsIgnoreCase(SortColumn.status.name())).orElse("participantKey." + SortColumn.participantId.name());
     }
 
     private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {
