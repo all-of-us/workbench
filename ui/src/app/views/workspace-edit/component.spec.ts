@@ -12,8 +12,7 @@ import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stu
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {ProfileService} from 'generated';
-import {WorkspacesService} from 'generated';
+import {ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -101,9 +100,13 @@ describe('WorkspaceEditComponent', () => {
 
   it('should support cloning a workspace', inject(
     [Router], fakeAsync((router: Router) => {
+      workspacesService.workspaceAccess.set(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
       setupComponent(WorkspaceEditMode.Clone);
       expect(testComponent.workspace.name).toBe(
         `Clone of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
+      expect(testComponent.hasPermission).toBeTruthy(
+        'cloner should be able to edit cloned workspace');
 
       const spy = spyOn(router, 'navigate');
       fixture.debugElement.query(By.css('.add-button'))

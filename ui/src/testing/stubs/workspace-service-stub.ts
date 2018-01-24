@@ -24,7 +24,8 @@ export class WorkspaceStubVariables {
 
 export class WorkspacesServiceStub {
   workspaces: Workspace[];
-  workspaceResponses: WorkspaceResponse[];
+  // By default, access is OWNER.
+  workspaceAccess: Map<string, WorkspaceAccessLevel>;
 
   constructor() {
     const stubWorkspace: Workspace = {
@@ -62,6 +63,7 @@ export class WorkspacesServiceStub {
     };
 
     this.workspaces = [stubWorkspace];
+    this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
   }
 
   private clone(w: Workspace): Workspace {
@@ -113,9 +115,13 @@ export class WorkspacesServiceStub {
             return true;
           }
         });
+        let accessLevel = WorkspaceAccessLevel.OWNER;
+        if (this.workspaceAccess.has(workspaceId)) {
+          accessLevel = this.workspaceAccess.get(workspaceId);
+        }
         const response: WorkspaceResponse = {
           workspace: this.clone(workspaceReceived),
-          accessLevel: WorkspaceAccessLevel.OWNER
+          accessLevel: accessLevel
         };
         observer.next(response);
         observer.complete();
@@ -128,9 +134,13 @@ export class WorkspacesServiceStub {
       setTimeout(() => {
         observer.next({
           items: this.workspaces.map(workspace => {
+            let accessLevel = WorkspaceAccessLevel.OWNER;
+            if (this.workspaceAccess.has(workspace.id)) {
+              accessLevel = this.workspaceAccess.get(workspace.id);
+            }
             return {
               workspace: this.clone(workspace),
-              accessLevel: WorkspaceAccessLevel.OWNER
+              accessLevel: accessLevel
             };
           })
         });
