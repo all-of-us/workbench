@@ -76,7 +76,7 @@ export class ParticipantAnnotationComponent implements OnInit  {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const pid = this.value.participantId;
     return (this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, cid, pid)
+      .getParticipantCohortAnnotations(ns, wsid, +cid, pid)
       .pluck('items') as Observable<Annotation[]>);
   }
 

@@ -65,7 +65,7 @@ parameters:
     description: Cohort ID
   cohortReviewId:
     in: path
-    name: cohortId
+    name: cohortReviewId
     type: integer
     format: int64
     required: true
