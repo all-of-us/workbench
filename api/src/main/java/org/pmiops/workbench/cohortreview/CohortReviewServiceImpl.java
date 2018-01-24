@@ -14,19 +14,11 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.inject.Provider;
-import java.util.Arrays;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.Map;
 import java.util.logging.Logger;
 
 @Service
@@ -140,10 +132,5 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
         return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
-    }
-
-    @Override
-    public Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept() {
-        return genderRaceEthnicityConceptProvider.get().getConcepts();
     }
 }
