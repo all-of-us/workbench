@@ -304,7 +304,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         break;
       }
     }
-    if (loopedNotebook == 1) {
+    if (loopedNotebook === 1) {
       for (const file of this.notebookList) {
         if (file.selected) {
           this.enablePushNotebookBtn = true;
@@ -312,8 +312,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         }
       }
     }
-    else
+    else {
       this.enablePushNotebookBtn = true;
+    }
   }
 
   selectAllNoteBooks(): void {
