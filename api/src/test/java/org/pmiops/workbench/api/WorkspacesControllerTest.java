@@ -929,29 +929,31 @@ public class WorkspacesControllerTest {
   public void testNoteBookList() throws Exception {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    org.pmiops.workbench.firecloud.model.Workspace mockWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseEmptyNotebook =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    org.pmiops.workbench.firecloud.model.Workspace mockWorkspace =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    org.pmiops.workbench.firecloud.model.Workspace mockWorkspaceEmpty =
+        new org.pmiops.workbench.firecloud.model.Workspace();
     mockWorkspace.setBucketName("MockBucketName");
     fcResponse.setWorkspace(mockWorkspace);
+    fcResponseEmptyNotebook.setWorkspace(mockWorkspaceEmpty);
     when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
         fcResponse
     );
-    List<String> blobDetailList = new ArrayList<String>();
-    String mockBlobDetail1 = new String("notebook/File.ipynb");
-    String mockBlobDetail2 = new String("notebook/File1.txt");
-    String mockBlobDetail3 = new String("config/File1.txt");
-    blobDetailList.add(mockBlobDetail1);
-    blobDetailList.add(mockBlobDetail2);
-    blobDetailList.add(mockBlobDetail3);
-    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook")).thenReturn(blobDetailList);
-
-    // Will return 1 entry as only python files are filtered out
-    List<FileDetail> result = workspacesController.getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
+    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new ApiException());
+    List<String> blobDetailList =
+        ImmutableList.of("notebook/File.ipynb", "notebook/File1.txt", "config/File1.txt");
+    when(cloudStorageService.getBucketFileList("MockBucketName", "notebook"))
+        .thenReturn(blobDetailList);
+    // Will return 1 entry as only python files in notebook folder are return
+    List<FileDetail> result = workspacesController
+        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
     assertEquals(result.size(), 1);
-
     try {
-      result = workspacesController.getNoteBookList("mockProject", "mockWorkspace").getBody();
-      assertTrue(false);
-    } catch (NullPointerException | NotFoundException ex) {
+      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
+      fail();
+    } catch (NotFoundException ex) {
       assertTrue(true);
     }
   }

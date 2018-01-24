@@ -14,9 +14,11 @@ import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -166,7 +168,15 @@ public class ClusterController implements ClusterApiDelegate {
       this.notebooksService.localize(workspaceNamespace, clusterName,
           convertfileDetailsToMap(fileList));
     } catch (ApiException e) {
-      throw new RuntimeException(e);
+      if (e.getCode() == 400) {
+        throw new BadRequestException(e.getResponseBody());
+      } else if (e.getCode() == 404) {
+        throw new NotFoundException("Cluster not found.");
+      } else if (e.getCode() == 500) {
+        throw new ServerErrorException(e);
+      } else {
+        throw new ServerUnavailableException(e);
+      }
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -178,8 +188,8 @@ public class ClusterController implements ClusterApiDelegate {
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
   private Map convertfileDetailsToMap(List<FileDetail> fileList) {
-    Map<String, String> fileDetailsMap = new HashMap<String, String>();
-    fileDetailsMap = fileList.stream().collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
+    Map<String, String> fileDetailsMap = fileList.stream()
+        .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
         fileDetail -> fileDetail.getPath()));
     return fileDetailsMap;
   }

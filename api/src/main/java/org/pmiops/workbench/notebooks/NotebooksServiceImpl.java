@@ -73,10 +73,6 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public void localize(String googleProject, String clusterName, Map fileList) throws ApiException {
     ClusterApi clusterApi = clusterApiProvider.get();
-    try {
-      clusterApi.localizeFiles(googleProject, clusterName, fileList);
-    } catch (ApiException e) {
-      throw new RuntimeException(e);
-    }
+    clusterApi.localizeFiles(googleProject, clusterName, fileList);
   }
 }

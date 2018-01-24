@@ -30,7 +30,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public List<String> getBucketFileList(String bucketName, String directory) {
-    List<String> fileNameList = new ArrayList<String>();
+    List<String> fileNameList = new ArrayList<>();
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList = storage.get(bucketName)
         .list(Storage.BlobListOption.prefix(directory)).getValues();
