@@ -521,7 +521,7 @@ paths:
         200:
          description: List of files
         404:
-         description: Cluster not found
+         description: Cluster or Workspace not found
          schema:
            $ref: '#/definitions/ErrorReport'
         500:

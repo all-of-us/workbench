@@ -292,28 +292,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
 
-  selectANotebook(notebook): void {
-    let loopedNotebook = 0;
-    this.checkColumnNotebook = true;
-    this.enablePushNotebookBtn = false;
-
-    for (const file of this.notebookList) {
-      loopedNotebook++;
-      if (!file.selected) {
-        this.checkColumnNotebook = false;
-        break;
-      }
-    }
-    if (loopedNotebook === 1) {
-      for (const file of this.notebookList) {
-        if (file.selected) {
-          this.enablePushNotebookBtn = true;
-          break;
-        }
-      }
-    } else {
-      this.enablePushNotebookBtn = true;
-    }
+  selectANotebook(): void {
+    this.checkColumnNotebook = this.notebookList.every(notebook => notebook.selected);
+    this.enablePushNotebookBtn = this.notebookList.some(notebook => notebook.selected);
   }
 
   selectAllNoteBooks(): void {
@@ -342,6 +323,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   localizeNotebooks(notebooks): void {
+    var self = this;
     const fileList: Array<FileDetail> = notebooks.filter((item) => item.selected);
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
@@ -349,10 +331,22 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.alertCategory = 'alert-success';
           this.alertMsg = 'File(s) have been saved';
           this.showAlerts = true;
+          setTimeout(function () {
+            self.resetAlerts();
+          }, 5000);
         }, () => {
           this.alertCategory = 'alert-danger';
           this.alertMsg = 'There was an issue while saving file(s) please try again later';
           this.showAlerts = true;
+          setTimeout(function () {
+            self.resetAlerts();
+          }, 5000);
         });
+  }
+
+  resetAlerts(): void {
+    this.alertCategory = '';
+    this.alertMsg = '';
+    this.showAlerts = false;
   }
 }

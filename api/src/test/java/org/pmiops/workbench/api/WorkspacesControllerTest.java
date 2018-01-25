@@ -967,13 +967,11 @@ public class WorkspacesControllerTest {
         .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
     assertEquals(result.size(), 1);
 
-    try{
+    try {
       workspacesController.getNoteBookList("mockProject", "mockWorkspace");
       fail();
-    } catch (NotFoundException ex){
-
-    } catch (Exception e){
-      fail();
+    } catch (NotFoundException ex) {
+      // NotFoundException expected
     }
   }
 }
