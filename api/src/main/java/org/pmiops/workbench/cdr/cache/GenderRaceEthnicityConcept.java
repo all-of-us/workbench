@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cdr.cache;
 
-import org.pmiops.workbench.cohortreview.SortOrder;
+import org.pmiops.workbench.cohortreview.util.SortOrder;
 
 import java.util.Comparator;
 import java.util.List;

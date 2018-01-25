@@ -3,12 +3,13 @@ package org.pmiops.workbench.db.dao;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCohortStatus, Long>, ParticipantCohortStatusDaoCustom {
+public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCohortStatus, Long>, ParticipantCohortStatusDaoCustom, JpaSpecificationExecutor<ParticipantCohortStatus> {
 
   // Important: Keep in sync with all DB rows that should be copied.
   static final String ALL_COLUMNS_EXCEPT_REVIEW_ID =

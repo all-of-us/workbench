@@ -4,6 +4,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusSpecification;
+import org.pmiops.workbench.cohortreview.util.SearchCriteria;
+import org.pmiops.workbench.cohortreview.util.SearchOperation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.CohortStatus;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,6 +123,16 @@ public class ParticipantCohortStatusDaoTest {
         List<ParticipantCohortStatus> pcdList =
                 participantCohortStatusDao.findByParticipantKey_CohortReviewId(2, new PageRequest(0, 10)).getContent();
         assertEquals(2, pcdList.size());
+    }
+
+    @Test
+    public void findAll() throws Exception {
+        ParticipantCohortStatusSpecification spec1 =
+                new ParticipantCohortStatusSpecification(new SearchCriteria("status", SearchOperation.EQUALITY, CohortStatus.EXCLUDED));
+        ParticipantCohortStatusSpecification spec2 =
+                new ParticipantCohortStatusSpecification(new SearchCriteria("participantKey.cohortReviewId", SearchOperation.EQUALITY, COHORT_REVIEW_ID));
+        assertEquals(1, participantCohortStatusDao.findAll(Specifications.where(spec1).and(spec2)).size());
+
     }
 
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
