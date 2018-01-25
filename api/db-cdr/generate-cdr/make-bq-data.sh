@@ -110,7 +110,6 @@ else
 fi
 
 # Copy tables we can that we need from cdr to our cloudsql cdr dataset
-# todo uncomment temp commented out
 copy_tables=(domain vocabulary)
 for t in "${copy_tables[@]}"
 do
