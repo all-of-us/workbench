@@ -14,5 +14,11 @@
         <constraints nullable="true"/>
       </column>
     </addColumn>
+    <addForeignKeyConstraint baseColumnNames="disabling_admin_id"
+        baseTableName="user"
+        constraintName="disabling_admin"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
   </changeSet>
 </databaseChangeLog>
