@@ -111,13 +111,13 @@ fi
 #done
 #
 ## Create bq tables we have json schema for
-#create_tables=( concept achilles_analysis achilles_results achilles_results_concept )
-#for t in "${create_tables[@]}"
-#do
-#  # Make the concept_counts table from cdr
-#  bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
-#  bq --quiet --project=$WORKBENCH_PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
-#done
+create_tables=(achilles_results achilles_results_dist )
+for t in "${create_tables[@]}"
+do
+  # Make the concept_counts table from cdr
+  bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
+  bq --quiet --project=$WORKBENCH_PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
+done
 
 
 
