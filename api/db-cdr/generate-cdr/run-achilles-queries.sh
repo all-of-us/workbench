@@ -374,11 +374,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, count_value)
 select 0, 3000 as analysis_id,
-	CAST(o1.observation_CONCEPT_ID AS STRING) as stratum_1,
-	COUNT(distinct o1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o1
-where o1.observation_concept_id > 0
-group by o1.observation_CONCEPT_ID"
+	CAST(co1.observation_CONCEPT_ID AS STRING) as stratum_1,
+	COUNT(distinct co1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+where co1.observation_concept_id > 0
+group by co1.observation_CONCEPT_ID"
 
 # Observation 3101 concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -391,7 +391,7 @@ select 0, 3101 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 on p1.person_id = co1.person_id
-where o1.observation_concept_id > 0
+where co1.observation_concept_id > 0
 group by co1.observation_concept_id, p1.gender_concept_id"
 
 # Observation (3102)	Number of persons with   concept id by  age decile  30+ yr old deciles
@@ -423,14 +423,109 @@ where co1.observation_concept_id > 0 and (extract(year from co1.observation_date
 group by co1.observation_concept_id, stratum_2"
 
 # PPI Observation (3000)
+# Todo , we co count > 0 to eliminate all the junk data now
+# Note, we only want counts related to 3 survery modules which have concept id
+# (1586134, 1585855,1855710)
 echo "Querying PPI observation"
+# Get ones with value as string
+
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0, 3000 as analysis_id, c.concept_id as stratum_1, value_as_string as stratum_2, count(*) as count_value
+SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
+value_as_string as stratum_2, count(*) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 on co1.observation_source_concept_id = c.concept_id
-where vocabulary_id = 'PPI' and (value_as_string is not null ) and c.concept_class_id = 'Question'
-group by c.concept_name, c.concept_id, value_as_string, value_as_concept_id
-limit 1000"
+inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
+on r.concept_id_2 = c.concept_id
+where r.concept_id_1 in (1586134, 1585855,1855710) and value_as_string is not null
+group by c.concept_id, value_as_string"
+
+# Get ones with value as number.
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, count_value)
+SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
+CAST(value_as_number as STRING) as stratum_2, count(*) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+on co1.observation_source_concept_id = c.concept_id
+inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
+on r.concept_id_2 = c.concept_id
+where r.concept_id_1 in(1586134, 1585855,1855710) and value_as_number is not null
+group by c.concept_id, value_as_number"
+
+# Todo maybe for real data None were in test data
+# Get ones with value as concept_id .
+
+# 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, count_value)
+select  3000 as analysis_id, CAST(m.measurement_concept_id  AS STRING) as stratum_1, COUNT(distinct m.person_id) as count_value
+  from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+ where co1.measurement_concept_id > 0
+ group by  co1.measurement_concept_id"
+
+# Measurement concept by gender
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
+	CAST(p1.gender_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_concept_id > 0
+group by co1.measurement_concept_id, p1.gender_concept_id"
+
+# Measurement by age deciles
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_concept_id > 0 and floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) >=3
+group by co1.measurement_concept_id, stratum_2"
+
+# Measurement  18-29 yr old decile 2
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
+group by co1.measurement_concept_id, stratum_2"
+
+# Measurement Distributions
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+(analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
+WITH rawdata_1815 AS
+(SELECT measurement_concept_id as subject_id, unit_concept_id, cast(value_as_number  as float64) as count_value
+  FROM  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m
+where m.unit_concept_id is not null
+	and m.value_as_number is not null),
+overallstats  as ( select  subject_id  as stratum1_id, unit_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value, cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value, COUNT(*)  as total   from  rawdata_1815
+	 group by  1, 2 ), statsview  as ( select  subject_id  as stratum1_id, unit_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, unit_concept_id order by count_value)  as rn   from  rawdata_1815
+   group by  1, 2, 3 ), priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
+  join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
+   group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
+ )
+select  0 as id, 3115 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id, o.total as count_value, o.min_value, o.max_value, o.avg_value, o.stdev_value, min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value, min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value, min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value, min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value, min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+  FROM  priorstats p
+join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
+ group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
