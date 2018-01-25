@@ -2,21 +2,21 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
@@ -70,6 +70,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
+  private static final Pattern NOTEBOOK_PATTERN = Pattern.compile("([^\\s]+(\\.(?i)(ipynb))$)");
+  // "directory" for notebooks, within the workspace cloud storage bucket.
+  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
@@ -459,11 +462,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
-      blobList = cloudStorageService.getBlobList(bucketName, "notebook");
+      blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
       if (blobList != null && blobList.size() > 0) {
         blobList.stream()
-            .filter(blob ->
-                blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .filter(blob -> NOTEBOOK_PATTERN.matcher(blob.getName()).matches())
             .forEach(blob -> {
               FileDetail fileDetail = new FileDetail();
               fileDetail.setName(blob.getName());
@@ -585,6 +587,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .getWorkspace()
           .getBucketName();
     } catch (ApiException e) {
+      if (e.getCode() == 404) {
+        log.log(Level.INFO, "Firecloud workspace not found", e);
+        throw new NotFoundException(String.format(
+            "workspace %s/%s not found or not accessible", workspaceNamespace, workspaceId));
+      }
       log.log(Level.SEVERE, "Firecloud server error", e);
       throw new ServerErrorException();
     }
@@ -611,9 +618,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ServerErrorException();
     }
 
-    // TODO(calbach): Share regex / constants with notebook listing code.
-    for (BlobInfo b : cloudStorageService.getBucketFileList(fromBucket, "notebooks")) {
-      if (!b.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)")) {
+    // In the future, we may want to allow callers to specify whether notebooks
+    // should be cloned at all (by default, yes), else they are currently stuck
+    // if someone accidentally adds a large notebook or if there are too many to
+    // feasibly copy within a single API request.
+    for (Blob b : cloudStorageService.getBlobList(fromBucket, NOTEBOOKS_WORKSPACE_DIRECTORY)) {
+      if (!NOTEBOOK_PATTERN.matcher(b.getName()).matches()) {
         continue;
       }
       if (b.getSize() != null && b.getSize()/1e6 > MAX_NOTEBOOK_SIZE_MB) {
@@ -709,6 +719,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /** Record approval or rejection of research purpose. */
+  @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
@@ -723,6 +734,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // We can add pagination in the DAO by returning Slice<Workspace> if we want the method to return
   // pagination information (e.g. are there more workspaces to get), and Page<Workspace> if we
   // want the method to return both pagination information and a total count.
+  @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();

@@ -1,14 +1,8 @@
 package org.pmiops.workbench.api;
 
-import static com.google.cloud.storage.Blob.Builder;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.any;
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
@@ -22,7 +16,6 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -40,8 +33,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -180,8 +173,6 @@ public class WorkspacesControllerTest {
   @Autowired
   UserDao userDao;
   @Autowired
-  CloudStorageService cloudStorageService;
-  @Autowired
   CdrVersionDao cdrVersionDao;
   @Mock
   Provider<User> userProvider;
@@ -212,9 +203,14 @@ public class WorkspacesControllerTest {
 
     CLOCK.setInstant(NOW);
   }
-  
-  private BlobInfo fakeBlobInfo(String bucket, String path) {
-    return BlobInfo.newBuilder(BlobId.of(bucket, path)).build();
+
+  private Blob mockBlob(String bucket, String path) {
+    Blob blob = mock(Blob.class);
+    when(blob.getBlobId()).thenReturn(BlobId.of(bucket, path));
+    when(blob.getBucket()).thenReturn(bucket);
+    when(blob.getName()).thenReturn(path);
+    when(blob.getSize()).thenReturn(5_000L);
+    return blob;
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
@@ -593,12 +589,12 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody().getWorkspace();
 
-    stubGetWorkspace(workspace2.getNamespace(), workspace2.getId(),
-        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     assertWithMessage("get and clone responses are inconsistent")
         .that(workspace2)
         .isEqualTo(
@@ -702,11 +698,10 @@ public class WorkspacesControllerTest {
     String f1 = "notebooks/f1.ipynb";
     String f2 = "notebooks/f2.ipynb";
     String f3 = "notebooks/f3.vcf";
-    when(cloudStorageService.getBucketFileList(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(
-            fakeBlobInfo(BUCKET_NAME, f1),
-            fakeBlobInfo(BUCKET_NAME, f2),
-            fakeBlobInfo(BUCKET_NAME, f3)));
+    // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
+    List<Blob> blobs = ImmutableList.of(
+        mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
+    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks")).thenReturn(blobs);
     workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
@@ -727,7 +722,7 @@ public class WorkspacesControllerTest {
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
-    stubGetWorkspace(workspace.getNamespace(), workspace.getId(),
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
@@ -737,6 +732,8 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody().getWorkspace();
@@ -778,7 +775,7 @@ public class WorkspacesControllerTest {
     workspacesController.cloneWorkspace("doesnot", "exist", req);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test(expected = NotFoundException.class)
   public void testClonePermissionDenied() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -791,8 +788,9 @@ public class WorkspacesControllerTest {
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
+    // Permission denied manifests as a 404 in Firecloud.
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenThrow(new ApiException(404, ""));
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -824,10 +822,9 @@ public class WorkspacesControllerTest {
         modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
-    BlobInfo bigNotebook = mock(BlobInfo.class);
-    when(bigNotebook.getName()).thenReturn("notebooks/nb.ipynb");
+    Blob bigNotebook = mockBlob(BUCKET_NAME, "notebooks/nb.ipynb");
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBucketFileList(BUCKET_NAME, "notebooks"))
+    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks"))
         .thenReturn(ImmutableList.of(bigNotebook));
     workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
@@ -1038,11 +1035,11 @@ public class WorkspacesControllerTest {
     );
     Blob mockBlob = mock(Blob.class);
     Blob mockBlob1 = mock(Blob.class);
-    when(mockBlob.getName()).thenReturn("notebook/mockFile.ipynb");
-    when(mockBlob1.getName()).thenReturn("notebook/mockFile.text");
+    when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
+    when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
     List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
-    when(cloudStorageService.getBlobList("MockBucketName", "notebook")).thenReturn(blobList);
+    when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
     // Will return 1 entry as only python files in notebook folder are return
     List<FileDetail> result = workspacesController
         .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
