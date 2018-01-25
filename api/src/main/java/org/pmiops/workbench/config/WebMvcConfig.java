@@ -90,17 +90,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
   }
 
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
-        // TODO: change this to be just the domains appropriate for the environment.
-        .allowedOrigins("*")
-        .allowedMethods(HttpMethods.GET, HttpMethods.HEAD, HttpMethods.POST, HttpMethods.PUT,
-            HttpMethods.DELETE, HttpMethods.PATCH, HttpMethods.TRACE, HttpMethods.OPTIONS)
-        .allowedHeaders(HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.AUTHORIZATION,
-            "X-Requested-With", "requestId", "Correlation-Id");
-  }
+  
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
