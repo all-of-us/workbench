@@ -1,9 +1,7 @@
 import {
   Component,
-  EventEmitter,
-  Input,
   OnInit,
-  Output,
+  ViewChild,
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -28,8 +26,7 @@ export class CreateReviewComponent implements OnInit {
     numParticipants: new FormControl(),
   });
 
-  @Input() open = false;
-  @Output() openChange = new EventEmitter<boolean>();
+  @ViewChild('modal') modal;
 
   private creating = false;
   private maxParticipants: number;
@@ -80,8 +77,7 @@ export class CreateReviewComponent implements OnInit {
       .subscribe(review => {
         this.creating = false;
         this.state.review.next(review);
-        this.open = false;
-        this.openChange.emit(this.open);
+        this.modal.close();
       });
   }
 }
