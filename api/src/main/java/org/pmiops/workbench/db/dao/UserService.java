@@ -78,7 +78,6 @@ public class UserService {
     }
   }
 
-
   private void updateDataAccessLevel(User user) {
     if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
       if (user.getBlockscoreVerificationIsValid() != null

@@ -10,10 +10,9 @@ import {
 
 
 /**
- * Review ID Verifications. Users with the REVIEW_RESEARCH_PURPOSE permission use this
- * to view other users' workspaces for which a review has been requested, and approve/reject them.
+ * Review ID Verifications. Users with the REVIEW_ID_VERIFICATION permission use this
+ * to manually set (approve/reject) the ID verification state of a user.
  */
-// TODO(RW-85) Design this UI. Current implementation is a rough sketch.
 @Component({
   templateUrl: './component.html',
   styleUrls: ['./component.css']

@@ -90,7 +90,6 @@ parameters:
     type: integer
     format: int64
     required: true
-    description: researchallofus user ID
 
 
 paths:
@@ -166,7 +165,7 @@ paths:
   /v1/invitation-key-verification:
     post:
       tags:
-        - Profile
+        - profile
       description: Verifies invitation key.
       operationId: invitationKeyVerification
       security: []
@@ -571,12 +570,12 @@ paths:
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
 
-  /v1/id-verification/list:
+  /v1/users/id-verification/list:
     get:
       tags:
         - profile
       description: >
-          Returns a list of profiles for users that need review. Requires
+          Returns a list of profiles for users to be reviewed. Requires
           REVIEW_ID_VERIFICATION authority.
       operationId: getIdVerificationsForReview
       responses:
@@ -589,14 +588,15 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/id-verification/{userId}/review:
+  /v1/users/id-verification/{userId}/review:
     parameters:
       - $ref: '#/parameters/userId'
     post:
       tags:
         - profile
-      description:
-          Manually verifies the ID of a user. Requires REVIEW_ID_VERIFICATION authority.
+      description: >
+          Manually sets the ID verfication status for a user. Requires
+          REVIEW_ID_VERIFICATION authority.
       operationId: reviewIdVerification
       parameters:
         - in: body
@@ -1638,7 +1638,6 @@ definitions:
         type: boolean
 
   IdVerificationReviewRequest:
-    description: Manually verify or reject a user's identity
     type: object
     required:
       - approved
