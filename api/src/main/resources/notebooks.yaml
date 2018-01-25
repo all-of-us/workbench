@@ -182,6 +182,47 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
+  '/notebooks/{googleProject}/{clusterName}/api/localize':
+    post:
+      summary: Send files to store in notebook
+      description: Saves files to noteboook.
+      operationId: localizeFiles
+      tags:
+        - cluster
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+        - in: body
+          name: fileList
+          description: files to be transfered
+          required: true
+          schema :
+            type: object
+            additionalProperties:
+              type: string
+      responses:
+         200:
+          description: Files saved
+         404:
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+         500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
