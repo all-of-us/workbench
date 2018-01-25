@@ -5,3 +5,13 @@ h2 {
 .btn {
   margin: 0 0 0.75rem 0.5rem;
 }
+
+div.field {
+  display: inline-block;
+  margin-right: 2rem;
+  width: 10rem;
+}
+
+.field-label {
+  font-size: 0.55rem;
+}
