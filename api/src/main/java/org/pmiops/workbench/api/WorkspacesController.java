@@ -1,20 +1,21 @@
 package org.pmiops.workbench.api;
 
 import com.google.apphosting.api.ApiProxy;
+import com.google.cloud.storage.Blob;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
@@ -39,6 +41,7 @@ import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -441,6 +444,38 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
+      String workspaceId) {
+    List<Blob> blobList = new ArrayList<>();
+    List<FileDetail> fileList = new ArrayList<>();
+    try {
+      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
+          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+              .getWorkspace();
+      String bucketName = fireCloudWorkspace.getBucketName();
+      blobList = cloudStorageService.getBlobList(bucketName, "notebook");
+      if (blobList != null && blobList.size() > 0) {
+        blobList.stream()
+            .filter(blob ->
+                blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            .forEach(blob -> {
+              FileDetail fileDetail = new FileDetail();
+              fileDetail.setName(blob.getName());
+              fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+              fileList.add(fileDetail);
+            });
+      }
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      }
+      throw new ServerErrorException(e);
+    }
+    return ResponseEntity.ok(fileList);
   }
 
   @Override

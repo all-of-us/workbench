@@ -4,6 +4,7 @@ import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
   EmptyResponse,
+  FileDetail,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
@@ -206,6 +207,23 @@ export class WorkspacesServiceStub {
         }
         this.workspaces[updateIndex].userRoles = request.items;
         observer.next({});
+        observer.complete();
+      }, 0);
+    });
+  }
+
+  getNoteBookList(workspaceNamespace: string,
+      workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
+    return new Observable<Array<FileDetail>>(observer => {
+      setTimeout(() => {
+        if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
+            && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
+          const fileDetailsList =
+              [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
+          observer.next(fileDetailsList);
+        } else {
+          observer.next([]);
+        }
         observer.complete();
       }, 0);
     });
