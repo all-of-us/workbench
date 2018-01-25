@@ -395,7 +395,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -457,7 +457,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list/:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
     get:
       summary: Get details of Python files from google Bucket directory notebook
       description: Returns list of name and path of python files from google bucket, directory notebook.
@@ -491,7 +491,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /api/v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebook/:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebooks:
     post:
       summary: Localize files from workspace to notebook cluster
       description: localize files
@@ -2527,7 +2527,7 @@ definitions:
         description: File Name
       path:
         type: string
-        description: The path is in format of gs://bucketName//name
+        description: The path is in format of gs://bucket-name/name
 
   ClusterListResponse:
     type: object
