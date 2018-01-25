@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -31,6 +32,7 @@ import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -67,6 +69,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
+  private static final int MAX_NOTEBOOK_SIZE_MB = 100;
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
@@ -608,10 +611,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ServerErrorException();
     }
 
-    for (String name : cloudStorageService.getBucketFileList(fromBucket, "notebooks")) {
-      cloudStorageService.copyBlob(BlobId.of(fromBucket, name), BlobId.of(toBucket, name));
+    // TODO(calbach): Share regex / constants with notebook listing code.
+    for (BlobInfo b : cloudStorageService.getBucketFileList(fromBucket, "notebooks")) {
+      if (!b.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)")) {
+        continue;
+      }
+      if (b.getSize() != null && b.getSize()/1e6 > MAX_NOTEBOOK_SIZE_MB) {
+        throw new FailedPreconditionException(String.format(
+            "workspace %s/%s contains a notebook larger than %dMB: '%s'; cannot clone - please " +
+            "remove this notebook, reduce its size, or contact the workspace owner",
+            workspaceNamespace, workspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
+      }
+      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(toBucket, b.getName()));
     }
 
+    // The final step in the process is to clone the AoU representation of the
+    // workspace. The implication here is that we may generate orphaned
+    // Firecloud workspaces / buckets, but a user should not be able to see
+    // half-way cloned workspaces via AoU - so it will just appear as a
+    // transient failure.
     org.pmiops.workbench.db.model.Workspace toWorkspace =
         FROM_CLIENT_WORKSPACE.apply(body.getWorkspace());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =

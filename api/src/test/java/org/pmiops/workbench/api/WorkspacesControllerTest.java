@@ -7,10 +7,14 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +22,7 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,6 +60,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -205,6 +211,10 @@ public class WorkspacesControllerTest {
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     CLOCK.setInstant(NOW);
+  }
+  
+  private BlobInfo fakeBlobInfo(String bucket, String path) {
+    return BlobInfo.newBuilder(BlobId.of(bucket, path)).build();
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
@@ -689,12 +699,20 @@ public class WorkspacesControllerTest {
         modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
+    String f1 = "notebooks/f1.ipynb";
+    String f2 = "notebooks/f2.ipynb";
+    String f3 = "notebooks/f3.vcf";
     when(cloudStorageService.getBucketFileList(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of("f1", "f2"));
+        .thenReturn(ImmutableList.of(
+            fakeBlobInfo(BUCKET_NAME, f1),
+            fakeBlobInfo(BUCKET_NAME, f2),
+            fakeBlobInfo(BUCKET_NAME, f3)));
     workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, "f1"), BlobId.of("bucket2", "f1"));
-    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, "f2"), BlobId.of("bucket2", "f2"));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
+    verify(cloudStorageService, never()).copyBlob(
+        BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
   }
 
   @Test
@@ -784,6 +802,35 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req);
+  }
+
+  @Test(expected = FailedPreconditionException.class)
+  public void testCloneWithMassiveNotebook() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = createFcWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    fcWorkspace.setBucketName("bucket2");
+    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
+    BlobInfo bigNotebook = mock(BlobInfo.class);
+    when(bigNotebook.getName()).thenReturn("notebooks/nb.ipynb");
+    when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
+    when(cloudStorageService.getBucketFileList(BUCKET_NAME, "notebooks"))
+        .thenReturn(ImmutableList.of(bigNotebook));
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
   }
 
   @Test

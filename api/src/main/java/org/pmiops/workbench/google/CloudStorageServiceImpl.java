@@ -10,7 +10,6 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
