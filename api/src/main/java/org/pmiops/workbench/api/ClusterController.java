@@ -183,9 +183,9 @@ public class ClusterController implements ClusterApiDelegate {
    * @param fileList
    * @return FileDetail Map
    */
-  private Map convertfileDetailsToMap(List<FileDetail> fileList) {
+  private Map<String, String> convertfileDetailsToMap(List<FileDetail> fileList) {
     return fileList.stream()
         .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
-        fileDetail -> fileDetail.getPath()));
+            fileDetail -> fileDetail.getPath()));
   }
 }

@@ -323,7 +323,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   localizeNotebooks(notebooks): void {
-    const self = this;
     const fileList: Array<FileDetail> = notebooks.filter((item) => item.selected);
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
@@ -331,15 +330,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.alertCategory = 'alert-success';
           this.alertMsg = 'File(s) have been saved';
           this.showAlerts = true;
-          setTimeout(function () {
-            self.resetAlerts();
+          setTimeout(() => {
+            this.resetAlerts();
           }, 5000);
         }, () => {
           this.alertCategory = 'alert-danger';
           this.alertMsg = 'There was an issue while saving file(s) please try again later';
           this.showAlerts = true;
-          setTimeout(function () {
-            self.resetAlerts();
+          setTimeout(() => {
+            this.resetAlerts();
           }, 5000);
         });
   }
