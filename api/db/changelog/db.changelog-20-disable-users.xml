@@ -9,6 +9,8 @@
       <column name="disabled" type="boolean" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
+      <column name="disabled_time" type="datetime"/>
+      <column name="disabling_admin_id" type="bigint"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

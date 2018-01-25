@@ -43,6 +43,9 @@ public class User {
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private Boolean disabled;
+  private Timestamp disabledTime;
+  private long disablingAdminId;
+
 
   @Id
   @GeneratedValue
@@ -202,6 +205,7 @@ public class User {
     this.demographicSurveyCompletionTime = demographicSurveyCompletionTime;
   }
 
+  @Column(name = "disabled")
   public boolean getDisabled() {
     return disabled;
   }
@@ -209,4 +213,24 @@ public class User {
   public void setDisabled(boolean disabled) {
     this.disabled = disabled;
   }
+
+  @Column(name = "disabled_time")
+  public Timestamp getDisabledTime() {
+    return disabledTime;
+  }
+
+  public void setDisabledTime(Timestamp disabledTime) {
+    this.disabledTime = disabledTime;
+  }
+
+  @Column(name = "disabling_admin_id")
+  public long getdisablingAdminId() {
+    return disablingAdminId;
+  }
+
+  public void setDisablingAdminId(long disablingAdminId) {
+    this.disablingAdminId = disablingAdminId;
+  }
+
+
 }

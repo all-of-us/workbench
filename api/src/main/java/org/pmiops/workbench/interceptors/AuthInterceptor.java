@@ -152,10 +152,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             userInfo.getEmail(), null);
     } else {
       if (user.getDisabled()) {
-        response.addHeader("disabled", "true");
-        response.setStatus(403);
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "User Disabled");
-        return false;
+        throw new ForbiddenException("This user account has been disabled.");
       }
     }
 

@@ -283,7 +283,10 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> disableAccount() {
     User user = userProvider.get();
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     user.setDisabled(true);
+    user.setDisabledTime(timestamp);
+    user.setDisablingAdminId(user.getUserId());
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

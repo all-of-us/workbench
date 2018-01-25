@@ -12,6 +12,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
+import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,9 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private AuthInterceptor authInterceptor;
+
+  @Autowired
+  private CorsInterceptor corsInterceptor;
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -100,6 +104,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
   }
 
