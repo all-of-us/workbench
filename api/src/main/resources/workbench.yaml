@@ -395,7 +395,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster/:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -456,6 +456,78 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorReport'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
+    get:
+      summary: Get details of Python files from google Bucket directory notebook
+      description: Returns list of name and path of python files from google bucket, directory notebook.
+      operationId: getNoteBookList
+      tags:
+        - workspaces
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+      responses:
+        200:
+          description: List of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileDetail'
+        404:
+          description: Workspace not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebooks:
+    post:
+      summary: Localize files from workspace to notebook cluster
+      description: localize files
+      operationId: localizeNotebook
+      tags:
+        - cluster
+      parameters:
+      - in: path
+        name: workspaceNamespace
+        description: workspaceNamespace
+        required: true
+        type: string
+      - in: path
+        name: workspaceId
+        description: workspaceId
+        required: true
+        type: string
+      - in: body
+        name: fileList
+        description: List of file to be transfered
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/FileDetail'
+      responses:
+        200:
+         description: List of files
+        404:
+         description: Cluster or Workspace not found
+         schema:
+           $ref: '#/definitions/ErrorReport'
+        500:
+         description: Internal Error
+         schema:
+          $ref: '#/definitions/ErrorReport'
 
 
   # Billing projects #####################################################################
@@ -2443,6 +2515,19 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+
+  FileDetail:
+    type: object
+    required:
+      - name
+      - path
+    properties:
+      name:
+        type: string
+        description: File Name
+      path:
+        type: string
+        description: The path is in format of gs://bucket-name/name
 
   ClusterListResponse:
     type: object

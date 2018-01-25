@@ -1,15 +1,41 @@
 package org.pmiops.workbench.api;
 
+import static com.google.cloud.storage.Blob.Builder;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -40,6 +66,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -64,25 +91,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -161,6 +169,8 @@ public class WorkspacesControllerTest {
   WorkspaceService workspaceService;
   @Autowired
   UserDao userDao;
+  @Autowired
+  CloudStorageService cloudStorageService;
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Mock
@@ -919,5 +929,41 @@ public class WorkspacesControllerTest {
     writer.setRole(WorkspaceAccessLevel.WRITER);
     shareWorkspaceRequest.addItemsItem(writer);
     workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+  }
+
+  @Test
+  public void testNoteBookList() throws Exception {
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseWithException =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    org.pmiops.workbench.firecloud.model.Workspace mockWorkspace =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    org.pmiops.workbench.firecloud.model.Workspace mockWorkspaceEmpty =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    mockWorkspace.setBucketName("MockBucketName");
+    fcResponse.setWorkspace(mockWorkspace);
+    fcResponseWithException.setWorkspace(mockWorkspaceEmpty);
+    when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
+        fcResponse
+    );
+    Blob mockBlob = mock(Blob.class);
+    Blob mockBlob1 = mock(Blob.class);
+    when(mockBlob.getName()).thenReturn("notebook/mockFile.ipynb");
+    when(mockBlob1.getName()).thenReturn("notebook/mockFile.text");
+    List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
+    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
+    when(cloudStorageService.getBlobList("MockBucketName", "notebook")).thenReturn(blobList);
+    // Will return 1 entry as only python files in notebook folder are return
+    List<FileDetail> result = workspacesController
+        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
+    assertEquals(result.size(), 1);
+
+    try {
+      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
+      fail();
+    } catch (NotFoundException ex) {
+      // NotFoundException expected
+    }
   }
 }
