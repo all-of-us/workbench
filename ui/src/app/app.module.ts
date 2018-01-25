@@ -71,8 +71,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ClarityModule.forRoot(),
     CohortSearchModule,
     CohortReviewModule,
-    DataBrowserModule
-
+    DataBrowserModule,
   ],
   declarations: [
     AppComponent,

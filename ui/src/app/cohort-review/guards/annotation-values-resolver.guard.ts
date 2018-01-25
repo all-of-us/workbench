@@ -21,7 +21,6 @@ export class AnnotationValuesResolver implements Resolve<ParticipantCohortAnnota
   resolve(route: ActivatedRouteSnapshot): Observable<ParticipantCohortAnnotation[]> {
     const ns = route.parent.paramMap.get('ns');
     const wsid = route.parent.paramMap.get('wsid');
-    const cid = +route.parent.paramMap.get('cid');
     const pid = +route.paramMap.get('pid');
 
     // TODO (jms) This is a temporary fix while backend is being implemented
@@ -29,9 +28,14 @@ export class AnnotationValuesResolver implements Resolve<ParticipantCohortAnnota
       items: <ParticipantCohortAnnotation[]>[],
     };
 
+    const rid = route.parent.data.review.cohortReviewId;
+
     console.log(`Loading annotations from resolver for ${pid}`);
+    console.log(`ns: ${ns}, wsid: ${wsid}, rid: ${rid}`);
+    console.dir(route);
+
     return this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, cid, pid)
+      .getParticipantCohortAnnotations(ns, wsid, rid, pid)
       .catch(err => Observable.of(empty))
       .pluck('items')
       .do(vals => this.state.annotationValues.next(<ParticipantCohortAnnotation[]>vals));
