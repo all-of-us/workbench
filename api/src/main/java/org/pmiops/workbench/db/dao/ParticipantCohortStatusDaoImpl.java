@@ -4,6 +4,8 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,6 +24,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @PersistenceContext
+    private EntityManager em;
 
     private static final Logger log = Logger.getLogger(ParticipantCohortStatusDaoImpl.class.getName());
 
