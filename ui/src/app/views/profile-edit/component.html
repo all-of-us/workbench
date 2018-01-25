@@ -1,14 +1,29 @@
 <h2>Profile</h2>
-<span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
-<h5>Given Name:</h5>
-<input *ngIf="profileLoaded else loading" type="text" autofocus
-    [(ngModel)]="profile.givenName">
-<h5>Family Name:</h5>
-<input *ngIf="profileLoaded else loading" type="text"
-    [(ngModel)]="profile.familyName">
-<h5>Contact Email:</h5>
-<input *ngIf="profileLoaded else loading" type="text"
-    [(ngModel)]="profile.contactEmail">
+<span *ngIf="!profileLoaded;else publicInfo" class="spinner spinner-sm"></span>
+<ng-template #publicInfo>
+  <div class="static info">
+    <clr-icon shape="user" size="18" class="is-solid"></clr-icon> Shows on your public profile.
+  </div>
+</ng-template>
+<div class="field-wrapper">
+  <div class="field">
+    <label for="givenName" class="long-text-field">Given Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
+    <input *ngIf="profileLoaded else loading" type="text" autofocus
+      [(ngModel)]="profile.givenName" id="givenName">
+  </div>
+  <div class="field">
+    <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
+    <input *ngIf="profileLoaded else loading" type="text"
+      [(ngModel)]="profile.familyName" id="givenName">
+  </div>
+</div>
+<div class="field-wrapper">
+  <div class="field">
+    <label for="contactEmail" class="long-text-field">Contact Email:</label>
+    <input *ngIf="profileLoaded else loading" type="text"
+      [(ngModel)]="profile.contactEmail" id="contactEmail">
+  </div>
+</div>
 <h5>Username:</h5>
 <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
 <ng-template #loading>
