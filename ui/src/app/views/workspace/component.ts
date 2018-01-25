@@ -323,7 +323,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   localizeNotebooks(notebooks): void {
-    var self = this;
+    const self = this;
     const fileList: Array<FileDetail> = notebooks.filter((item) => item.selected);
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
