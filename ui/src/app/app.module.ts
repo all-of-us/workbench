@@ -76,21 +76,21 @@ export function getConfiguration(signInService: SignInService): Configuration {
     DataBrowserModule,
   ],
   declarations: [
-    AppComponent,
     AccountCreationComponent,
+    AdminReviewWorkspaceComponent,
+    AdminReviewIdVerificationComponent,
+    AppComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
     HomePageComponent,
     IdVerificationPageComponent,
+    InvitationKeyComponent
     ProfileEditComponent,
     ProfilePageComponent,
-    AdminReviewWorkspaceComponent,
-    AdminReviewIdVerificationComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,
-    InvitationKeyComponent
   ],
   providers: [
     AuthDomainService,
