@@ -18,10 +18,6 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 
-
-
-
-
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
   route: UrlSegment[];

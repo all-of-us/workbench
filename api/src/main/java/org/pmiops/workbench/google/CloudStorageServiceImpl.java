@@ -1,14 +1,16 @@
 package org.pmiops.workbench.google;
 
 import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageOptions;
-import java.util.Map;
-import java.util.Properties;
+import com.google.cloud.storage.Storage;
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   public String readBlockscoreApiKey() {
     return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
+  }
+
+  @Override
+  public List<Blob> getBlobList(String bucketName, String directory) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Iterable<Blob> blobList = storage.get(bucketName)
+        .list(Storage.BlobListOption.prefix(directory)).getValues();
+    return ImmutableList.copyOf(blobList);
   }
 
   String getCredentialsBucketName() {
