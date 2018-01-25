@@ -4,6 +4,20 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -12,6 +26,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
@@ -31,20 +46,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -114,10 +115,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     @Autowired
     CohortReviewController(CohortReviewService cohortReviewService,
-                           BigQueryService bigQueryService,
-                           CodeDomainLookupService codeDomainLookupService,
-                           ParticipantCounter participantCounter,
-                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
+        BigQueryService bigQueryService,
+        CodeDomainLookupService codeDomainLookupService,
+        ParticipantCounter participantCounter,
+        Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
@@ -161,9 +162,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
+            workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
+
 
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
@@ -236,7 +240,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                          Long participantId) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        Workspace workspace =
+            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         ParticipantCohortStatus status =
                 cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
@@ -296,7 +303,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+            cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
@@ -342,7 +351,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                        Long cdrVersionId) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+            cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
 
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 

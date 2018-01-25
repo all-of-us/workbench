@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.AnnotationType;
 
@@ -20,7 +21,7 @@ public class CohortAnnotationDefinition {
     private AnnotationType annotationType;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cohort_annotation_definition_id")
     public long getCohortAnnotationDefinitionId() {
         return cohortAnnotationDefinitionId;

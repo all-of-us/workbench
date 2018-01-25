@@ -28,4 +28,5 @@
   <include file="changelog/db.changelog-18.xml"/>
   <include file="changelog/db.changelog-19.xml"/>
   <include file="changelog/db.changelog-20-disable-users.xml"/>
+  <include file="changelog/db.changelog-21.xml"/>
 </databaseChangeLog>

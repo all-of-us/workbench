@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
+import org.pmiops.workbench.annotations.UsesDefaultCdr;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -22,6 +23,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
+@UsesDefaultCdr
+// TODO: don't use the default CDR version, let the client specify what version to use
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;

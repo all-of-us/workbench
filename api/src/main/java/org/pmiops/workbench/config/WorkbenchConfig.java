@@ -16,12 +16,11 @@ public class WorkbenchConfig {
 
   public FireCloudConfig firecloud;
 
-  public static class BigQueryConfig {
-    public String dataSetId;
-    public String projectId;
+  public static class CdrConfig {
+    public String defaultCdrVersion;
   }
 
-  public BigQueryConfig bigquery;
+  public CdrConfig cdr;
 
   public static class GoogleCloudStorageServiceConfig {
     public String credentialsBucketName;

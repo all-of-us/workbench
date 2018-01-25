@@ -162,8 +162,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
-    if (!hasRequiredAuthority(method.getMethod(), user)) {
-
+    if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
@@ -183,34 +182,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    * We can only annotate FooController methods, but are given a FooApiController, so we use
    * reflection to hack our way to FooController's method.
    *
-   * @param method The ApiController (Swagger-generated) method which calls our annotated delegate.
+   * @param handlerMethod The HandlerMethod for this request.
    * @param user Database details of the authenticated user.
    */
-  boolean hasRequiredAuthority(Method apiControllerMethod, User user) {
-    // There's no concise way to find out what class implements the delegate interface, so instead
-    // depend on naming conventions. Essentially, this removes "Api" from the class name.
-    // If this becomes a bottleneck, consider caching the class mapping, or copying annotations
-    // from our implementation to the Swagger wrapper at startup (locally it takes <1ms).
-    Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
-    String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
-    String controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
-    Class controllerClass;
-    try {
-      controllerClass = Class.forName(controllerName);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(
-          "Missing " + controllerName + " by name derived from " + apiControllerName + ". "
-          + " Cannot check @AuthorityRequired.",
-          e);
-    }
-
-    Method controllerMethod;
-    try {
-      controllerMethod = controllerClass.getMethod(
-          apiControllerMethod.getName(), apiControllerMethod.getParameterTypes());
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    }
+  boolean hasRequiredAuthority(HandlerMethod handlerMethod, User user) {
+    Method controllerMethod = InterceptorUtils.getControllerMethod(handlerMethod);
     String controllerMethodName =
         controllerMethod.getDeclaringClass().getName() + "." + controllerMethod.getName();
 

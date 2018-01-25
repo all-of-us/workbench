@@ -12,7 +12,7 @@ import java.util.Objects;
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
-@Table(name = "achilles_analysis", catalog="cdr")
+@Table(name = "achilles_analysis")
 public class AchillesAnalysis {
 
 
