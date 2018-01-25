@@ -8,8 +8,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -21,16 +24,18 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +59,12 @@ public class CohortReviewControllerTest {
 
     @Mock
     CodeDomainLookupService codeDomainLookupService;
+
+    @Mock
+    WorkspaceService workspaceService;
+
+    @Mock
+    Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     @InjectMocks
     CohortReviewController reviewController;
@@ -120,7 +131,7 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -133,7 +144,7 @@ public class CohortReviewControllerTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
+        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verifyNoMoreMockInteractions();
     }
 
@@ -149,6 +160,17 @@ public class CohortReviewControllerTest {
         CohortReview cohortReview = new CohortReview();
         Cohort cohort = new Cohort();
         cohort.setWorkspaceId(workspaceId);
+
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
+        final Date dob = new Date(System.currentTimeMillis());
+
+        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
+                .participantKey(key)
+                .status(CohortStatus.INCLUDED)
+                .birthDate(dob)
+                .ethnicityConceptId(1L)
+                .genderConceptId(1L)
+                .raceConceptId(1L);
 
         Workspace workspace = new Workspace();
         workspace.setWorkspaceId(workspaceId);
@@ -180,8 +202,8 @@ public class CohortReviewControllerTest {
         pcs.setRaceConceptId(0L);
 
         String definition = "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":" +
-                            "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
-                            "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
+                "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":" +
+                "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
         cohort.setCriteria(definition);
 
@@ -204,9 +226,23 @@ public class CohortReviewControllerTest {
         rm.put("race_concept_id", 3);
         rm.put("ethnicity_concept_id", 4);
 
+        List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
+        participants.add(dbParticipant);
+        Page expectedPage = new PageImpl(participants);
+        WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        Map<Long, String> race = new HashMap<>();
+        race.put(1L, "race");
+        concepts.put(GenderRaceEthnicityType.RACE.name(), race);
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
+
+        when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
@@ -219,13 +255,15 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 2)).thenReturn(0L);
         when(bigQueryService.getLong(null, 3)).thenReturn(0L);
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
+        when(cohortReviewService.findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class))).thenReturn(expectedPage);
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId);
+        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
         verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
         verify(participantCounter, times(1)).buildParticipantIdQuery(request, 200, 0L);
@@ -239,6 +277,8 @@ public class CohortReviewControllerTest {
         verify(bigQueryService, times(1)).getLong(null, 4);
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
+        verify(genderRaceEthnicityConceptProvider, times(1)).get();
+        verify(cohortReviewService).findParticipantCohortStatuses(isA(Long.class), isA(PageRequest.class));
         verifyNoMoreMockInteractions();
     }
 
@@ -276,6 +316,7 @@ public class CohortReviewControllerTest {
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
         List<String> filterColumns = new ArrayList<String>();
         List<String> filterValues = new ArrayList<String>();
+        long workspaceId = 1;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         final Date dob = new Date(System.currentTimeMillis());
@@ -326,9 +367,21 @@ public class CohortReviewControllerTest {
                 ? new Sort(orderParam, columnParam)
                 : new Sort(orderParam, columnParam, CohortReviewController.PARTICIPANT_ID);
 
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(1);
+
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
+
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
+        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
+        when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
+        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -337,15 +390,17 @@ public class CohortReviewControllerTest {
         org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
         respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
         assertEquals(respCohortReview, response.getBody());
-
+        verify(cohortReviewService, atLeast(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1))
                 .findParticipantCohortStatuses(cohortId, new PageRequest(pageParam, pageSizeParam, sort));
+        verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
+        verify(genderRaceEthnicityConceptProvider, atLeast(1)).get();
         verifyNoMoreMockInteractions();
     }
 
     private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, codeDomainLookupService);
+        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, codeDomainLookupService, workspaceService);
     }
 
 }

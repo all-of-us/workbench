@@ -18,9 +18,20 @@
     -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        google.charts.load('current', {'packages': ['corechart']});
+      google.charts.load('current', {'packages': ['corechart']});
     </script>
 
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112406425-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+       
+      // TODO: make this configurable per environment
+      ga_tracking_id = 'UA-112406425-1';
+      gtag('config', ga_tracking_id);
+    </script>
   </head>
 
   <!-- Push state routing -->

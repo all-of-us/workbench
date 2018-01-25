@@ -3,12 +3,10 @@
   <div appSidebar
     #sidebar="appSidebar"
     [position]="{top: 0, right: 0}">
-    <a class="closebtn" (click)="sidebar.close()">&times;</a>
+    <a class="closebtn" (click)="closeSidebar()">&times;</a>
     <div class="status-wrapper">
-      <h4>Status</h4>
       <app-participant-status></app-participant-status>
       <hr />
-      <h4>Annotations</h4>
       <app-annotations></app-annotations>
     </div>
   </div>
@@ -20,6 +18,9 @@
   </div>
 
   <!-- CohortReview first time creation modal -->
-  <app-create-review [(open)]="createReviewModalOpen">
+  <app-create-review #createReviewModal>
   </app-create-review>
+
+  <app-annotation-manager>
+  </app-annotation-manager>
 </div>

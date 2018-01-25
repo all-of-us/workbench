@@ -1,6 +1,6 @@
 import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {async as _async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from 'clarity-angular';
 import {fromJS, Map} from 'immutable';
 
@@ -20,7 +20,7 @@ describe('TreeComponent', () => {
   let dispatchSpy;
   let mockReduxInst;
 
-  beforeEach(_async(() => {
+  beforeEach(async(() => {
     mockReduxInst = MockNgRedux.getInstance();
     const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());

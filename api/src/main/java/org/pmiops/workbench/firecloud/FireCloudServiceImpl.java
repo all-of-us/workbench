@@ -39,6 +39,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
+  private static final String USER_FC_ROLE = "user";
+
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
@@ -107,7 +109,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void addUserToBillingProject(String email, String projectName) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
-    billingApi.addUserToBillingProject(projectName, "user", email);
+    billingApi.addUserToBillingProject(projectName, USER_FC_ROLE, email);
   }
 
   @Override
@@ -125,6 +127,12 @@ public class FireCloudServiceImpl implements FireCloudService {
       workspaceIngest.setAuthorizationDomain(authDomain);
     }
     workspacesApi.createWorkspace(workspaceIngest);
+  }
+
+  @Override
+  public void grantGoogleRoleToUser(String projectName, String role, String email) throws ApiException {
+    BillingApi billingApi = billingApiProvider.get();
+    billingApi.grantGoogleRoleToUser(projectName, role, email);
   }
 
   @Override

@@ -4,6 +4,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -20,6 +28,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -107,6 +116,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
@@ -131,6 +143,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(String workspaceNamespace, String workspaceId,
       Long cohortId) {
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     cohortDao.delete(dbCohort);
@@ -140,6 +155,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> getCohort(String workspaceNamespace, String workspaceId,
       Long cohortId) {
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
@@ -148,11 +166,17 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    Workspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
-    List<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
+    Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
-      response.setItems(cohorts.stream().map(TO_CLIENT_COHORT).collect(Collectors.toList()));
+      response.setItems(cohorts.stream()
+          .map(TO_CLIENT_COHORT)
+          .sorted(Comparator.comparing(c -> c.getName()))
+          .collect(Collectors.toList()));
     }
     return ResponseEntity.ok(response);
   }
@@ -160,6 +184,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> updateCohort(String workspaceNamespace, String workspaceId,
       Long cohortId, Cohort cohort) {
+    // This also enforces registered auth domain.
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     if(Strings.isNullOrEmpty(cohort.getEtag())) {
@@ -197,6 +224,14 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
+    // TODO: enforce access level.
+    // This also enforces registered auth domain.
+    WorkspaceAccessLevel accessLevel;
+    try {
+      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (Exception e) {
+      throw e;
+    }
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
     if (request.getCdrVersionName() != null) {

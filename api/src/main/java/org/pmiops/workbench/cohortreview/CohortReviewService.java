@@ -3,10 +3,12 @@ package org.pmiops.workbench.cohortreview;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CohortReviewService {
 
@@ -25,7 +27,7 @@ public interface CohortReviewService {
      * @param workspaceName
      * @param workspaceId
      */
-    void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId);
+    void validateMatchingWorkspace(String workspaceNamespace, String workspaceName, long workspaceId, WorkspaceAccessLevel requiredAccess);
 
     /**
      * Find the {@link CohortReview} for the specified cohortId and cdrVersionId.
@@ -63,14 +65,6 @@ public interface CohortReviewService {
     /**
      * Save the specified {@link ParticipantCohortStatus}.
      *
-     * @param participantCohortStatuses
-     * @return
-     */
-    Iterable<ParticipantCohortStatus> saveParticipantCohortStatuses(List<ParticipantCohortStatus> participantCohortStatuses);
-
-    /**
-     * Save the specified {@link ParticipantCohortStatus}.
-     *
      * @param participantCohortStatus
      * @return
      */
@@ -93,4 +87,6 @@ public interface CohortReviewService {
      * @return
      */
     Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest);
+
+    Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept();
 }

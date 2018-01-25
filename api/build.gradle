@@ -203,14 +203,15 @@ dependencies {
   }
   compile 'com.google.code.gson:gson:+'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:2.4.0'
-  compile 'com.squareup.okhttp:logging-interceptor:+'
+  compile 'com.squareup.okhttp:okhttp:2.7.5'
+  compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.blockscore:blockscore-java:4.0.2'
   compile 'com.google.guava:guava:22.0'
+  compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
@@ -229,8 +230,8 @@ dependencies {
   generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
-  generatedCompile 'com.squareup.okhttp:okhttp:+'
-  generatedCompile 'com.squareup.okhttp:logging-interceptor:+'
+  generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
+  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   generatedCompile 'com.google.code.gson:gson:+'
   generatedCompile 'joda-time:joda-time:+'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'

@@ -2,7 +2,10 @@ package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Objects;
 
 
@@ -21,7 +24,6 @@ public class Concept {
     private String domainId;
     private long countValue;
     private float prevalence;
-
 
     @Id
     @Column(name = "concept_id")

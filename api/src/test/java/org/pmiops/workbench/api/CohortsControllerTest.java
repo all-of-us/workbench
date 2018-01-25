@@ -1,23 +1,18 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static junit.framework.TestCase.fail;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.List;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -34,12 +29,11 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.Providers;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -54,6 +48,16 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
+import static junit.framework.TestCase.fail;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -71,7 +75,7 @@ public class CohortsControllerTest {
 
 
   @TestConfiguration
-  @Import(WorkspaceServiceImpl.class)
+  @Import({WorkspaceServiceImpl.class, CohortService.class})
   @MockBean(FireCloudService.class)
   static class Configuration {
     @Bean
@@ -125,10 +129,15 @@ public class CohortsControllerTest {
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.bigquery = new BigQueryConfig();
+    workbenchConfig.bigquery.projectId = "project";
+    workbenchConfig.bigquery.dataSetId = "dataset";
+
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com");
+        "https://api.blah.com", Providers.of(workbenchConfig));
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -158,6 +167,22 @@ public class CohortsControllerTest {
     cohort.setName(COHORT_NAME);
     cohort.setCriteria(cohortCriteria);
     return cohort;
+  }
+
+  @Test
+  public void testGetCohortsInWorkspace() throws Exception {
+    Cohort c1 = createDefaultCohort();
+    c1.setName("c1");
+    c1 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c1).getBody();
+    Cohort c2 = createDefaultCohort();
+    c2.setName("c2");
+    c2 = cohortsController.createCohort(
+        workspace.getNamespace(), workspace.getId(), c2).getBody();
+
+    List<Cohort> cohorts = cohortsController
+        .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems();
+    assertThat(cohorts).containsExactlyElementsIn(ImmutableSet.of(c1, c2));
   }
 
   @Test
@@ -214,10 +239,18 @@ public class CohortsControllerTest {
   public void testMaterializeCohortWorkspaceNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
-
+    WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
+    String workspaceName = "badWorkspace";
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setAccessLevel(owner.toString());
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(
+        fcResponse
+    );
+    when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName)).thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
-    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, "badWorkspace", request);
+    cohortsController.materializeCohort(WORKSPACE_NAMESPACE, workspaceName, request);
   }
 
   @Test(expected = NotFoundException.class)

@@ -1,31 +1,30 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.google.api.gax.rpc.PermissionDeniedException;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryResult;
 import com.google.common.collect.ImmutableList;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import javax.inject.Provider;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -37,16 +36,22 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -60,6 +65,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -70,48 +94,103 @@ public class WorkspacesControllerTest {
   private static final Instant NOW = Instant.now();
   private static final long NOW_TIME = Timestamp.from(NOW).getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
 
   @TestConfiguration
-  @Import(WorkspaceServiceImpl.class)
-  @MockBean(FireCloudService.class)
+  @Import({
+    WorkspacesController.class,
+    WorkspaceServiceImpl.class,
+    CohortsController.class,
+    CohortService.class,
+    CohortReviewController.class,
+    CohortReviewServiceImpl.class
+  })
+  @MockBean({
+    FireCloudService.class,
+    CohortMaterializationService.class,
+    CloudStorageService.class,
+    BigQueryService.class,
+    CodeDomainLookupService.class,
+    ParticipantCounter.class
+  })
   static class Configuration {
     @Bean
     Clock clock() {
       return CLOCK;
+    }
+
+    @Bean
+    @Qualifier("apiHostName")
+    String apiHostName() {
+      return "https://api.blah.com";
+    }
+
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig config = new WorkbenchConfig();
+      config.bigquery = new BigQueryConfig();
+      config.bigquery.projectId = "project";
+      config.bigquery.dataSetId = "dataset";
+      return config;
+    }
+
+    @Bean
+    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+      Map<String, Map<Long, String>> concepts = new HashMap<>();
+      concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+      concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+      return new GenderRaceEthnicityConcept(concepts);
+    }
+
+    @Bean
+    User user() {
+      // Allows for wiring of the initial Provider<User>; actual mocking of the
+      // user is achieved via setUserProvider().
+      return null;
     }
   }
 
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
+  BigQueryService bigQueryService;
+  @Autowired
+  WorkspaceDao workspaceDao;
+  @Mock
   WorkspaceService workspaceService;
   @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
   UserDao userDao;
+  @Autowired
+  CdrVersionDao cdrVersionDao;
   @Mock
   Provider<User> userProvider;
-  @Mock
-  CloudStorageService cloudStorageService;
+  @Autowired
+  CohortsController cohortsController;
+  @Autowired
+  CohortReviewController cohortReviewController;
+  @Autowired
+  WorkspacesController workspacesController;
 
-  private WorkspacesController workspacesController;
-
-  private final String loggedInUserEmail = "bob@gmail.com";
+  private CdrVersion cdrVersion;
+  private String cdrVersionId;
 
   @Before
   public void setUp() {
     User user = new User();
-    user.setEmail(this.loggedInUserEmail);
+    user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+    workspacesController.setUserProvider(userProvider);
+
+    cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
+    cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     CLOCK.setInstant(NOW);
-    this.workspacesController = new WorkspacesController(workspaceService, cdrVersionDao,
-        userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com");
-
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -128,6 +207,37 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
       fcResponse
     );
+  }
+
+  private void stubBigQueryCohortCalls() {
+    QueryResult queryResult = mock(QueryResult.class);
+    Iterable testIterable = new Iterable() {
+        @Override
+        public Iterator iterator() {
+          List<FieldValue> list = new ArrayList<>();
+          list.add(null);
+          return list.iterator();
+        }
+      };
+    Map<String, Integer> rm = ImmutableMap.<String, Integer>builder()
+        .put("person_id", 0)
+        .put("birth_datetime", 1)
+        .put("gender_concept_id", 2)
+        .put("race_concept_id", 3)
+        .put("ethnicity_concept_id", 4)
+        .put("count", 5)
+        .build();
+
+    when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
+    when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
+    when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
+    when(queryResult.iterateAll()).thenReturn(testIterable);
+    when(bigQueryService.getLong(null, 0)).thenReturn(0L);
+    when(bigQueryService.getString(null, 1)).thenReturn("1");
+    when(bigQueryService.getLong(null, 2)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 3)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 4)).thenReturn(0L);
+    when(bigQueryService.getLong(null, 5)).thenReturn(0L);
   }
 
   public Workspace createDefaultWorkspace() throws Exception {
@@ -154,8 +264,16 @@ public class WorkspacesControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
-    stubGetWorkspace("namespace", "name", this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    workspace.setCdrVersionId(cdrVersionId);
+    stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     return workspace;
+  }
+
+  public Cohort createDefaultCohort(String name) {
+    Cohort cohort = new Cohort();
+    cohort.setName(name);
+    cohort.setCriteria(new Gson().toJson(SearchRequests.males()));
+    return cohort;
   }
 
   @Test
@@ -165,14 +283,14 @@ public class WorkspacesControllerTest {
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
-    assertThat(workspace2.getCdrVersionId()).isNull();
-    assertThat(workspace2.getCreator()).isEqualTo(this.loggedInUserEmail);
+    assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
+    assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
     assertThat(workspace2.getDescription()).isEqualTo("description");
     assertThat(workspace2.getId()).isEqualTo("name");
@@ -203,7 +321,7 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getId())
             .getBody().getWorkspace();
@@ -220,7 +338,7 @@ public class WorkspacesControllerTest {
     doThrow(new ConflictException("Conflict")).when(fireCloudService)
         .createWorkspace(workspace2.getNamespace(), workspace2.getId());
     stubGetWorkspace(workspace2.getNamespace(), workspace2.getId() + '0',
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspaceCreated =
         workspacesController.createWorkspace(workspace2).getBody();
 
@@ -237,7 +355,7 @@ public class WorkspacesControllerTest {
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -270,15 +388,17 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
 
     ws.setName("updated-name2");
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
-    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+    updated = workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
@@ -292,25 +412,30 @@ public class WorkspacesControllerTest {
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ws.setName("updated-name");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), ws).getBody();
+        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(new Workspace().name("updated-name").etag(ws.getEtag()));
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name").etag(ws.getEtag())).getBody();
+        request).getBody();
 
     // Still using the initial now-stale etag; this should throw.
     stubGetWorkspace(ws.getNamespace(), ws.getId(),
         ws.getCreator(), WorkspaceAccessLevel.OWNER);
+    request.setWorkspace(new Workspace().name("updated-name2").etag(ws.getEtag()));
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-        new Workspace().name("updated-name2").etag(ws.getEtag())).getBody();
+        request).getBody();
   }
 
   @Test
@@ -324,8 +449,10 @@ public class WorkspacesControllerTest {
       try {
         stubGetWorkspace(ws.getNamespace(), ws.getId(),
             ws.getCreator(), WorkspaceAccessLevel.OWNER);
+        UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+        request.setWorkspace(new Workspace().name("updated-name").etag(etag));
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(),
-            new Workspace().name("updated-name").etag(etag));
+            request);
         fail(String.format("expected BadRequestException for etag: %s", etag));
       } catch(BadRequestException e) {
         // expected
@@ -362,13 +489,13 @@ public class WorkspacesControllerTest {
     researchPurpose = ws.getResearchPurpose();
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
-    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(ws);
     // already approved
     ws = createDefaultWorkspace();
     ws.setName("alreadyApproved");
-    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     researchPurpose = ws.getResearchPurpose();
     ws = workspacesController.createWorkspace(ws).getBody();
@@ -384,7 +511,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setTimeRequested(null);
     researchPurpose.setApproved(null);
     researchPurpose.setTimeReviewed(null);
-    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), this.loggedInUserEmail,
+    stubGetWorkspace(ws.getNamespace(), ws.getName().toLowerCase(), LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -409,7 +536,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.loggedInUserEmail);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
@@ -423,7 +550,7 @@ public class WorkspacesControllerTest {
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -436,8 +563,8 @@ public class WorkspacesControllerTest {
         workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody().getWorkspace();
 
-    stubGetWorkspace(workspace2.getNamespace(), workspace2.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(workspace2.getNamespace(), workspace2.getId(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     assertWithMessage("get and clone responses are inconsistent")
         .that(workspace2)
         .isEqualTo(
@@ -457,6 +584,68 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testCloneWorkspaceWithCohorts() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    Cohort c1 = createDefaultCohort("c1");
+    c1 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c1).getBody();
+    Cohort c2 = createDefaultCohort("c2");
+    c2 = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), c2).getBody();
+
+    stubBigQueryCohortCalls();
+    CreateReviewRequest reviewReq = new CreateReviewRequest();
+    reviewReq.setSize(1);
+    CohortReview cr1 = cohortReviewController.createCohortReview(
+        workspace.getNamespace(), workspace.getId(), c1.getId(),
+        cdrVersion.getCdrVersionId(), reviewReq).getBody();
+    reviewReq.setSize(2);
+    CohortReview cr2 = cohortReviewController.createCohortReview(
+        workspace.getNamespace(), workspace.getId(), c2.getId(),
+        cdrVersion.getCdrVersionId(), reviewReq).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+    Workspace cloned = workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
+
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    List<Cohort> cohorts = cohortsController
+        .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
+    Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
+    assertThat(cohortsByName.keySet()).containsExactlyElementsIn(ImmutableSet.of("c1", "c2"));
+    assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
+        .containsNoneOf(c1.getId(), c2.getId());
+
+    CohortReview gotCr1 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
+    assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
+    assertThat(gotCr1.getParticipantCohortStatuses())
+        .isEqualTo(cr1.getParticipantCohortStatuses());
+
+    CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
+        cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
+        cdrVersion.getCdrVersionId(), null, null, null, null, null, null).getBody();
+    assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
+    assertThat(gotCr2.getParticipantCohortStatuses())
+        .isEqualTo(cr2.getParticipantCohortStatuses());
+
+    assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
+        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
+  }
+
+  @Test
   public void testCloneWorkspaceDifferentOwner() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -468,8 +657,8 @@ public class WorkspacesControllerTest {
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.READER);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getId(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.READER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -495,7 +684,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -533,7 +722,7 @@ public class WorkspacesControllerTest {
     when(userProvider.get()).thenReturn(cloner);
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        this.loggedInUserEmail, WorkspaceAccessLevel.NO_ACCESS);
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.NO_ACCESS);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -564,7 +753,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.loggedInUserEmail);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
@@ -581,7 +770,7 @@ public class WorkspacesControllerTest {
     WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
-    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), this.loggedInUserEmail, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
         workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
             .getBody().getWorkspace();
@@ -593,7 +782,7 @@ public class WorkspacesControllerTest {
     int numReaders = 0;
     for (UserRole userRole : workspace2.getUserRoles()) {
       if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-        assertThat(userRole.getEmail()).isEqualTo(this.loggedInUserEmail);
+        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
         numOwners++;
       } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
         assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
@@ -626,7 +815,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.loggedInUserEmail);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();
@@ -668,7 +857,7 @@ public class WorkspacesControllerTest {
     int numReaders = 0;
     for (UserRole userRole : workspace3.getUserRoles()) {
       if (userRole.getRole().equals(WorkspaceAccessLevel.OWNER)) {
-        assertThat(userRole.getEmail()).isEqualTo(this.loggedInUserEmail);
+        assertThat(userRole.getEmail()).isEqualTo(LOGGED_IN_USER_EMAIL);
         numOwners++;
       } else if (userRole.getRole().equals(WorkspaceAccessLevel.WRITER)) {
         assertThat(userRole.getEmail()).isEqualTo("writerfriend@gmail.com");
@@ -692,7 +881,7 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     UserRole creator = new UserRole();
-    creator.setEmail(this.loggedInUserEmail);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
 
@@ -722,7 +911,7 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     UserRole creator = new UserRole();
-    creator.setEmail(this.loggedInUserEmail);
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
     creator.setRole(WorkspaceAccessLevel.OWNER);
     shareWorkspaceRequest.addItemsItem(creator);
     UserRole writer = new UserRole();

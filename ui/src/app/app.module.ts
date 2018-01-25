@@ -7,6 +7,7 @@ import {ClarityModule} from 'clarity-angular';
 import {environment} from 'environments/environment';
 
 import {ErrorHandlingService} from './services/error-handling.service';
+import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {SignInService} from './services/sign-in.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
@@ -70,8 +71,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ClarityModule.forRoot(),
     CohortSearchModule,
     CohortReviewModule,
-    DataBrowserModule
-
+    DataBrowserModule,
   ],
   declarations: [
     AppComponent,
@@ -108,6 +108,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ProfileService,
     SignInService,
     WorkspacesService,
+    GoogleAnalyticsEventsService,
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]

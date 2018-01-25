@@ -130,6 +130,49 @@ paths:
               - email
               - profile
 
+  /api/billing/{projectId}/googleRole/{role}/{email}:
+    put:
+      responses:
+        200:
+          description: Successfully Granted Google Role to User
+        403:
+          description: You must be a project owner granting a role on the whitelist
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: User not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Project ID
+          name: projectId
+          required: true
+          type: string
+        - in: path
+          description: google role of user for project
+          name: role
+          required: true
+          type: string
+        - in: path
+          description: email of user
+          name: email
+          required: true
+          type: string
+      tags:
+        - Billing
+      summary: grant a google role to a user and their pet in the billing project the caller owns
+      operationId: grantGoogleRoleToUser
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
+
   /api/profile/billing:
     get:
       tags:

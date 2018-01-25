@@ -1,7 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.springframework.test.util.AssertionErrors.fail;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,8 +16,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.springframework.test.util.AssertionErrors.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -28,7 +29,7 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testWorkspaceVersionLocking() {
-    org.pmiops.workbench.db.model.Workspace ws = new org.pmiops.workbench.db.model.Workspace();
+    Workspace ws = new Workspace();
     ws.setVersion(1);
     ws = workspaceDao.save(ws);
 
