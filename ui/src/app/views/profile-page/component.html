@@ -4,14 +4,26 @@
   <app-edit-icon [editHover]="editHover"></app-edit-icon>
 </button>
 <span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
-<h5>Given Name:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.givenName}}</div>
-<h5>Family Name:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.familyName}}</div>
-<h5>Contact Email:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.contactEmail}}</div>
-<h5>Username:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.username}}</div>
+<div class="field-wrapper">
+  <div class="field">
+    <h5 class="field-label">Given Name:</h5>
+    <div *ngIf="profileLoaded else loading" class="data">{{profile.givenName}}</div>
+  </div>
+  <div class="field">
+    <h5 class="field-label">Family Name:</h5>
+    <div *ngIf="profileLoaded else loading" class="data">{{profile.familyName}}</div>
+  </div>
+</div>
+<div class="field-wrapper">
+  <div class="field">
+    <h5 class="field-label">Contact Email:</h5>
+    <div *ngIf="profileLoaded else loading" class="data">{{profile.contactEmail}}</div>
+  </div>
+</div>
+<div class="field">
+  <h5>Username:</h5>
+  <div *ngIf="profileLoaded else loading" class="data">{{profile.username}}</div>
+</div>
 <ng-template #loading>
   <div class="loading-area">
     <span class="loading-text">Loading...</span>
