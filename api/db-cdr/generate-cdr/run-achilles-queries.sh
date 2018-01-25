@@ -379,7 +379,6 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 where co1.observation_concept_id > 0
 group by co1.observation_CONCEPT_ID"
 
-
 # Observation 3101 concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -443,6 +442,7 @@ where r.concept_id_1 in (1586134, 1585855,1855710) and value_as_string is not nu
 group by c.concept_id, value_as_string"
 
 # Get ones with value as number.
+
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
