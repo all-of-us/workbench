@@ -72,7 +72,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
+    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(Long cdrVersionId, String type, Long parentId) {
 
         final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(type, parentId);
 
@@ -90,7 +90,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<Long> countParticipants(SearchRequest request) {
+    public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
 
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
@@ -104,7 +104,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ChartInfoListResponse> getChartInfo(SearchRequest request) {
+    public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
 
         ChartInfoListResponse response = new ChartInfoListResponse();
 
@@ -126,7 +126,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(String type, String value) {
+    public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(Long cdrVersionId, String type, String value) {
         String nameOrCode = value + "*";
         final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(type, nameOrCode);
 
