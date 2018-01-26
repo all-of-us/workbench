@@ -85,7 +85,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ErrorHandlerComponent,
     HomePageComponent,
     IdVerificationPageComponent,
-    InvitationKeyComponent
+    InvitationKeyComponent,
     ProfileEditComponent,
     ProfilePageComponent,
     WorkspaceComponent,
