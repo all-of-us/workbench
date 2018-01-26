@@ -65,16 +65,20 @@ jobs:
           - ui-cache-
       - run:
           working_directory: ~/workbench/ui
-          command: |
-            npm install
+          command: npm install
       - save_cache:
           paths:
             - ~/workbench/ui/node_modules
           key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
       - run:
+          name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
-            npm run codegen && npm run build && npm test -- --no-watch
+            npm run codegen && npm test -- --no-watch
+      - run:
+          name: Test compilation of the Angular app
+          working_directory: ~/workbench/ui
+          command: npm run build
       - deploy:
           name: Deploy to gcloud test project
           command: |
