@@ -281,19 +281,13 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> deleteAccount() {
-    UserAuthentication userAuth =
-        (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
-    String email = userAuth.getPrincipal().getEmail();
-    String[] parts = email.split("@");
-    try {
-      directoryService.deleteUser(parts[0]);
-    } catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
-
-    userDao.delete(userDao.findUserByEmail(email));
-
+  public ResponseEntity<Void> disableAccount() {
+    User user = userProvider.get();
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    user.setDisabled(true);
+    user.setDisabledTime(timestamp);
+    user.setDisablingAdminId(user.getUserId());
+    userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
