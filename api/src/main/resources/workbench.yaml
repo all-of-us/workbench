@@ -201,8 +201,8 @@ paths:
     delete:
       tags:
         - profile
-      description: Deletes your account in the researchallofus.org domain.
-      operationId: deleteAccount
+      description: Disables your account in the allOfUs DB.
+      operationId: disableAccount
       responses:
         204:
           description: Account deleted successfully.
@@ -1858,6 +1858,8 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
+      disabled:
+        type: boolean
 
   ErrorResponse:
     type: object

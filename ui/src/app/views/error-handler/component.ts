@@ -27,4 +27,8 @@ export class ErrorHandlerComponent implements OnInit {
   closeServerBusy(): void {
     this.errorHandlingService.clearServerBusy();
   }
+
+  acceptedUserDisabled(): void {
+    this.errorHandlingService.clearUserDisabledError();
+  }
 }
