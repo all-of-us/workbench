@@ -7,15 +7,18 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.testconfig.TestCdrJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest(classes = {TestCdrJpaConfig.class})
+@ActiveProfiles("test-cdr")
 @DataJpaTest
 @Import({LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
@@ -119,6 +124,14 @@ public class ParticipantCohortStatusDaoTest {
         List<ParticipantCohortStatus> pcdList =
                 participantCohortStatusDao.findByParticipantKey_CohortReviewId(2, new PageRequest(0, 10)).getContent();
         assertEquals(2, pcdList.size());
+    }
+
+    @Test
+    public void findAll() throws Exception {
+        int page = 0;
+        int pageSize = 25;
+        PageRequest pageRequest = new PageRequest(page, pageSize, new Sort(Sort.Direction.ASC, "participant_id"));
+        participantCohortStatusDao.findAll(null, pageRequest);
     }
 
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
