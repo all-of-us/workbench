@@ -32,6 +32,7 @@ export class AccountCreationComponent {
   contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
+  showPasswordLengthError: boolean;
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
@@ -46,16 +47,21 @@ export class AccountCreationComponent {
   createAccount(): void {
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;
+    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
           this.profile.username, this.password, this.passwordAgain];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
-    }
-    if (!(this.password === this.passwordAgain)) {
+      return;
+    } else if (!(this.password === this.passwordAgain)) {
       this.showPasswordsDoNotMatchError = true;
-    }
-    if (this.showAllFieldsRequiredError || this.showPasswordsDoNotMatchError) {
+      return;
+    } else if (this.password.length < 8 || this.password.length > 100) {
+      this.showPasswordLengthError = true;
+      return;
+    } else if (this.passwordAgain.length < 8 || this.passwordAgain.length > 100) {
+      this.showPasswordLengthError = true;
       return;
     }
 
