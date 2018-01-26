@@ -628,7 +628,7 @@ paths:
 
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/workspaces/review:
+  /v1/admin/workspaces/review:
     get:
       tags:
         - workspaces
@@ -642,7 +642,7 @@ paths:
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
 
-  /v1/users/id-verification/list:
+  /v1/admin/users/id-verification/list:
     get:
       tags:
         - profile
@@ -660,7 +660,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/users/id-verification/{userId}/review:
+  /v1/admin/users/id-verification/{userId}/review:
     parameters:
       - $ref: '#/parameters/userId'
     post:
@@ -682,7 +682,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
  
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
+  /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'

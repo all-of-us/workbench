@@ -168,7 +168,7 @@ public class UserService {
   }
 
   public List<User> getNonVerifiedUsers() {
-    return userDao.findUserByBlockscoreVerificationIsValidIsNull();
+    return userDao.findUserNotValidated();
   }
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {

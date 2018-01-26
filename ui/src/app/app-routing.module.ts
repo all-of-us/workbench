@@ -25,11 +25,11 @@ const routes: Routes = [
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
   }, {
-    path: 'admin-review-workspace',
+    path: 'admin/review-workspace',
     component: AdminReviewWorkspaceComponent,
     data: {title: 'Review Workspaces'}
   }, {
-    path: 'admin-review-id-verification',
+    path: 'admin/review-id-verification',
     component: AdminReviewIdVerificationComponent,
     data: {title: 'Review ID Verifications'}
   }, {

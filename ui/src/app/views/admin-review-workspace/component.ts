@@ -31,17 +31,13 @@ export class AdminReviewWorkspaceComponent implements OnInit {
     this.errorHandlingService.retryApi(this.workspacesService.getWorkspacesForReview())
         .subscribe(
             workspacesResp => {
-              for (const ws of workspacesResp.items) {
-                this.workspaces.push(ws);
-              }
+              this.workspaces = workspacesResp.items;
               this.contentLoaded = true;
             });
   }
 
   approve(workspace: Workspace, approved: boolean): void {
-    const request = <ResearchPurposeReviewRequest>{
-      approved: approved,
-    };
+    const request = <ResearchPurposeReviewRequest> {approved};
     this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
         workspace.namespace, workspace.id, request))
         .subscribe(

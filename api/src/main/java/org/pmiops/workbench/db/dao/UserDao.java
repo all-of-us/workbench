@@ -10,7 +10,12 @@ public interface UserDao extends CrudRepository<User, Long> {
 
   User findUserByEmail(String email);
   User findUserByUserId(long userId);
-  List<User> findUserByBlockscoreVerificationIsValidIsNull();
+
+  /**
+   * Returns the users who's identities have not been validated by BlockScore
+   */
+  @Query("SELECT user FROM User user WHERE user.blockscoreVerificationIsValid IS NULL OR user.blockscoreVerificationIsValid = false")
+  List<User> findUserNotValidated();
 
   /**
    * Returns the user with their authorities loaded.

@@ -8,7 +8,6 @@ import {
   ProfileService,
 } from 'generated';
 
-
 /**
  * Review ID Verifications. Users with the REVIEW_ID_VERIFICATION permission use this
  * to manually set (approve/reject) the ID verification state of a user.
@@ -30,17 +29,13 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     this.errorHandlingService.retryApi(this.profileService.getIdVerificationsForReview())
         .subscribe(
             profilesResp => {
-              for (const profile of profilesResp.profileList) {
-                this.profiles.push(profile);
-              }
+              this.profiles = profilesResp.profileList;
               this.contentLoaded = true;
             });
   }
 
   approve(profile: Profile, approved: boolean): void {
-    const request = <IdVerificationReviewRequest>{
-      approved: approved,
-    };
+    const request = <IdVerificationReviewRequest> {approved};
     this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
         profile.userId, request))
         .subscribe(
