@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build_and_test_and_deploy_api:
+  api-build-test-deploy:
     docker:
       - image: allofustest/workbench:buildimage-0.0.9
     working_directory: ~/workbench
@@ -44,7 +44,7 @@ jobs:
           command: |
             ./project.rb circle-deploy \
               --project all-of-us-workbench-test --creds-file circle-sa-key.json
-  build_and_test_and_deploy_ui:
+  ui-build-test-deploy:
     docker:
       - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
@@ -81,7 +81,7 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy_ui.sh
             fi
-  test_client:
+  py-client-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.8
     working_directory: ~/workbench
@@ -103,11 +103,11 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test_and_deploy:
+  build-test-deploy:
     jobs:
-      - build_and_test_and_deploy_api
-      - build_and_test_and_deploy_ui
-      - test_client
+      - api-build-test-deploy
+      - ui-build-test-deploy
+      - py-client-test
 
 experimental:
   notify:
