@@ -152,7 +152,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
                   fileList => {
-                    for (const fileDetail of fileList){
+                    for (const fileDetail of fileList) {
                       fileDetail.push = false;
                       this.notebookList.push(fileDetail);
                     }

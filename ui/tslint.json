@@ -10,7 +10,7 @@
       true,
       "check-space"
     ],
-    "curly": [true, "as-needed"],
+    "curly": [true],
     "eofline": true,
     "forin": true,
     "import-blacklist": [
@@ -105,7 +105,6 @@
         "variable-declaration": "nospace"
       }
     ],
-    "typeof-compare": true,
     "unified-signatures": true,
     "variable-name": false,
     "whitespace": [
