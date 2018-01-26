@@ -69,6 +69,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
+  // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
   private static final Pattern NOTEBOOK_PATTERN = Pattern.compile("([^\\s]+(\\.(?i)(ipynb))$)");
   // "directory" for notebooks, within the workspace cloud storage bucket.
