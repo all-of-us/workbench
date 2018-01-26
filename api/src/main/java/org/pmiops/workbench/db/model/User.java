@@ -42,9 +42,9 @@ public class User {
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
-  private Boolean disabled;
+  private boolean disabled;
   private Timestamp disabledTime;
-  private long disablingAdminId;
+  private Long disablingAdminId;
 
 
   @Id
@@ -224,11 +224,11 @@ public class User {
   }
 
   @Column(name = "disabling_admin_id")
-  public long getdisablingAdminId() {
+  public Long getDisablingAdminId() {
     return disablingAdminId;
   }
 
-  public void setDisablingAdminId(long disablingAdminId) {
+  public void setDisablingAdminId(Long disablingAdminId) {
     this.disablingAdminId = disablingAdminId;
   }
 

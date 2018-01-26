@@ -10,7 +10,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="disabled_time" type="datetime"/>
-      <column name="disabling_admin_id" type="bigint">
+      <column name="disabling_admin_id" type="bigint" defaultValue="null">
         <constraints nullable="true"/>
       </column>
     </addColumn>

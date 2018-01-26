@@ -177,6 +177,7 @@ public class WorkspacesControllerTest {
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName("TestBillingProject1");
+    user.setDisabled(false);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
@@ -518,6 +519,7 @@ public class WorkspacesControllerTest {
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -641,6 +643,7 @@ public class WorkspacesControllerTest {
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
+    cloner.setDisabled(false);
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
@@ -705,6 +708,7 @@ public class WorkspacesControllerTest {
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setFreeTierBillingProjectName("TestBillingProject1");
+    cloner.setDisabled(false);
     cloner = userDao.save(cloner);
     when(userProvider.get()).thenReturn(cloner);
 
@@ -727,13 +731,14 @@ public class WorkspacesControllerTest {
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setFreeTierBillingProjectName("TestBillingProject3");
-
+    readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -791,11 +796,13 @@ public class WorkspacesControllerTest {
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setFreeTierBillingProjectName("TestBillingProject3");
+    readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
