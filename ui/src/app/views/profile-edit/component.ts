@@ -36,8 +36,8 @@ export class ProfileEditComponent implements OnInit {
     });
   }
 
-  deleteAccount(): void {
-    this.profileService.deleteAccount().subscribe(() => {
+  disableAccount(): void {
+    this.profileService.disableAccount().subscribe(() => {
       this.signInService.signOut();
     });
   }

@@ -87,6 +87,7 @@ public class AuthInterceptorTest {
         Providers.of(workbenchConfig), userDao, userService);
     this.user = new User();
     user.setUserId(USER_ID);
+    user.setDisabled(false);
   }
 
   @Test

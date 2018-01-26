@@ -112,6 +112,7 @@ public class CohortsControllerTest {
     User user = new User();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
+    user.setDisabled(false);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
