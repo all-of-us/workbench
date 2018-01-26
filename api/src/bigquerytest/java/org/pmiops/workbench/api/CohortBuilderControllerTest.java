@@ -67,7 +67,6 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Override
     public List<String> getTableNames() {
         return Arrays.asList(
-                "criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
