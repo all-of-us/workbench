@@ -6,7 +6,12 @@ jobs:
       - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment:
-      JVM_OPTS: -Xmx3200m
+      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+      # https://circleci.com/blog/how-to-handle-java-oom-errors/
+      # Gradle itself doesn't usually reach 1G, so as long as we can keep tasks under 3G, we should
+      # have room in Circle's 4G to get our work done.
+      JAVA_TOOL_OPTIONS: -Xmx3g
       TERM: dumb
     steps:
       - checkout
@@ -48,7 +53,10 @@ jobs:
           command: |
             ./project.rb circle-deploy \
               --project all-of-us-workbench-test --creds-file circle-sa-key.json
-
+      - run:
+          name: Scan dependencies for vulnerabilities
+          working_directory: ~/workbench/api
+          command: ./project.rb gradle dependencyCheckAnalyze --info
   ui-build-test-deploy:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
