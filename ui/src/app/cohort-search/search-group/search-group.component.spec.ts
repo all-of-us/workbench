@@ -8,7 +8,6 @@ import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   OPEN_WIZARD,
   openWizard,
@@ -20,7 +19,6 @@ import {SearchGroupComponent} from './search-group.component';
 
 import {CohortBuilderService} from 'generated';
 
-/* tslint:disable-next-line:no-unused-variable */
 const itemA = fromJS({
   id: 'itemA',
   count: null,
@@ -30,7 +28,6 @@ const itemA = fromJS({
   modifiers: [],
 });
 
-/* tslint:disable-next-line:no-unused-variable */
 const itemB = fromJS({
   id: 'itemB',
   count: null,

@@ -9,7 +9,6 @@ import {
   activeCriteriaType,
   activeParameterList,
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   REMOVE_PARAMETER,
   removeParameter,

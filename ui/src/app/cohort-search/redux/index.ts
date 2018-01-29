@@ -7,7 +7,6 @@ import {environment} from 'environments/environment';
 import {CohortSearchEpics} from './epics';
 import {rootReducer} from './reducer';
 import {
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   initialState,
 } from './store';
@@ -16,11 +15,9 @@ import {
 export class ConfigureStore {
 
   constructor(
-    /* tslint:disable:no-unused-variable */
     private ngRedux: NgRedux<CohortSearchState>,
     private epics: CohortSearchEpics,
     private devTools: DevToolsExtension,
-    /* tslint:enable:no-unused-variable */
   ) {
 
     let storeEnhancers = [];

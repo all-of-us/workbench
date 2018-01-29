@@ -41,11 +41,9 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
 })
 export class HomePageComponent implements OnInit {
 
-  /* tslint:disable:no-unused-variable */
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
-  /* tslint:enable:no-unused-variable */
 
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;

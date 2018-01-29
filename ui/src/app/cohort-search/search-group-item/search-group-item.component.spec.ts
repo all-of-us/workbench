@@ -8,7 +8,6 @@ import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   getItem,
   parameterList,
