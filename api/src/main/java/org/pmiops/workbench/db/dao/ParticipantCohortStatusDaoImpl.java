@@ -25,20 +25,20 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "status,\n" +
             "gender_concept_id as genderConceptId,\n" +
             "(select concept_name\n" +
-            "        from cdr.concept c\n" +
+            "        from concept c\n" +
             "        where c.concept_id = pcs.gender_concept_id\n" +
             "        and c.vocabulary_id = 'Gender'\n" +
             "       ) as gender,\n" +
             "birth_date as birthDate,\n" +
             "race_concept_id as raceConceptId,\n" +
             "(select concept_name\n" +
-            "        from cdr.concept c\n" +
+            "        from concept c\n" +
             "        where c.concept_id = pcs.race_concept_id\n" +
             "        and c.vocabulary_id = 'Race'\n" +
             "       ) as race,\n" +
             "ethnicity_concept_id as ethnicityConceptId,\n" +
             "(select concept_name\n" +
-            "        from cdr.concept c\n" +
+            "        from concept c\n" +
             "        where c.concept_id = pcs.ethnicity_concept_id\n" +
             "        and c.vocabulary_id = 'Ethnicity'\n" +
             "       ) as ethnicity\n" +
