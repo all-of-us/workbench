@@ -5,12 +5,12 @@ import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClusterServiceStub, HttpStub} from '../../../testing/stubs';
-import {ClarityModule} from 'clarity-angular';
-import {CohortsService,WorkspacesService} from 'generated';
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {ClarityModule} from 'clarity-angular';
+import {CohortsService,WorkspacesService} from 'generated';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -160,12 +160,11 @@ describe('WorkspaceComponent', () => {
     const app = fixture.debugElement.componentInstance;
     fixture.componentRef.instance.createAndLaunchNotebook();
     tick(5000);
-    //discardPeriodicTasks();
-     expect(app.fileList.length).toEqual(2);
-     expect(app.fileList[0].name).toEqual('FileDetails');
-     expect(app.fileList[0].path).toEqual('gs://bucket/notebook/mockFile');
-     expect(app.fileList[1].name).toEqual('ConfigFileDetails');
-     expect(app.fileList[1].path).toEqual('gs://bucket/config/mockFile123');
+    expect(app.fileList.length).toEqual(2);
+    expect(app.fileList[0].name).toEqual('FileDetails');
+    expect(app.fileList[0].path).toEqual('gs://bucket/notebook/mockFile');
+    expect(app.fileList[1].name).toEqual('ConfigFileDetails');
+    expect(app.fileList[1].path).toEqual('gs://bucket/config/mockFile123');
   }));
 
 
