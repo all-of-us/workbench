@@ -11,19 +11,16 @@ import org.pmiops.workbench.cohortreview.util.SortOrder;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.testconfig.TestCdrJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +31,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestCdrJpaConfig.class})
-@ActiveProfiles("test-cdr")
 @DataJpaTest
 @Import({LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
@@ -58,13 +53,13 @@ public class ParticipantCohortStatusDaoTest {
         jdbcTemplate.execute("insert into participant_cohort_status" +
                 "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id)" +
                 "values (1, 2, 0, 1, sysdate(), 2, 3)");
-        jdbcTemplate.execute("insert into cdr.concept" +
+        jdbcTemplate.execute("insert into concept" +
                 "(concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence)" +
                 "values (1, 'MALE', 3, 'Gender', 1, 'c', 'c', 1, 1)");
-        jdbcTemplate.execute("insert into cdr.concept" +
+        jdbcTemplate.execute("insert into concept" +
                 "(concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence)" +
                 "values (2, 'Asian', 3, 'Race', 1, 'c', 'c', 1, 1)");
-        jdbcTemplate.execute("insert into cdr.concept" +
+        jdbcTemplate.execute("insert into concept" +
                 "(concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence)" +
                 "values (3, 'Not Hispanic', 3, 'Ethnicity', 1, 'c', 'c', 1, 1)");
     }
@@ -72,7 +67,7 @@ public class ParticipantCohortStatusDaoTest {
     @After
     public void onTearDown() {
         jdbcTemplate.execute("delete from participant_cohort_status");
-        jdbcTemplate.execute("delete from cdr.concept");
+        jdbcTemplate.execute("delete from concept");
     }
 
     @Test
