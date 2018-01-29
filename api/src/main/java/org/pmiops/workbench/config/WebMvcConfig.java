@@ -7,12 +7,14 @@ import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
+import org.hibernate.annotations.NaturalId;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
+import org.pmiops.workbench.interceptors.DefaultCdrVersionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,10 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private CorsInterceptor corsInterceptor;
+
+  @Autowired
+  private DefaultCdrVersionInterceptor defaultCdrVersionInterceptor;
+
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -90,12 +96,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     }
   }
 
-  
-
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(defaultCdrVersionInterceptor);
   }
 
   @Override

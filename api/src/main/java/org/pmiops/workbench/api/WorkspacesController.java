@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -204,8 +203,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           if (workspace.getResearchPurpose() != null) {
             setResearchPurposeDetails(result, workspace.getResearchPurpose());
             if (workspace.getResearchPurpose().getTimeReviewed() != null) {
-              result
-                  .setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+              result.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
             }
             result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
             if (workspace.getResearchPurpose().getTimeRequested() != null) {
@@ -241,7 +239,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final String apiHostName;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   WorkspacesController(
@@ -252,8 +249,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      @Qualifier("apiHostName") String apiHostName,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      @Qualifier("apiHostName") String apiHostName) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -262,7 +258,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.apiHostName = apiHostName;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @VisibleForTesting
@@ -338,18 +333,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
    * Creates a JSON configuration file in GCS with properties that can be used in notebooks.
    * This file will be localized when launching a notebook.
    */
-  private void createConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+  private void createConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      CdrVersion cdrVersion) {
     JSONObject config = new JSONObject();
 
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
     config.put(API_HOST_KEY, this.apiHostName);
     // TODO: make these based on the CDR version for the workspace; update this file if the
     // CDR version changes.
-    config.put(CDR_VERSION_CLOUD_PROJECT, workbenchConfig.bigquery.projectId);
-    config.put(CDR_VERSION_BIGQUERY_DATASET, workbenchConfig.bigquery.dataSetId);
+    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
+    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
     cloudStorageService.writeFile(fcWorkspace.getBucketName(), CONFIG_FILENAME,
         config.toString().getBytes(Charsets.UTF_8));
   }
@@ -401,7 +396,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       }
     }
-    createConfigFile(fcWorkspace);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
@@ -413,6 +407,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+
+    createConfigFile(fcWorkspace, dbWorkspace.getCdrVersion());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
     // TODO: enforce data access level authorization
