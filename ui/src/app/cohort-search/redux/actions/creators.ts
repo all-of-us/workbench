@@ -40,9 +40,9 @@ import {ChartInfo, Criteria, SearchRequest} from 'generated';
  * Criteria loading mgmt
  */
 export const requestCriteria =
-  (kind: string, parentId: number
+  (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
-  ({type: BEGIN_CRITERIA_REQUEST, kind, parentId});
+  ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
@@ -63,9 +63,9 @@ export const criteriaRequestError =
  * Count loading mgmt
  */
 export const requestCounts =
-  (entityType: string, entityId: string, request: SearchRequest
+  (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
   ): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
-  ({type: BEGIN_COUNT_REQUEST, entityType, entityId, request});
+  ({type: BEGIN_COUNT_REQUEST, cdrVersionId, entityType, entityId, request});
 
 export const loadCountRequestResults =
   (entityType: string, entityId: string, count: number
@@ -86,9 +86,9 @@ export const countRequestError =
  * Count loading mgmt
  */
 export const requestCharts =
-  (entityType: string, entityId: string, request: SearchRequest
+  (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
   ): ActionTypes[typeof BEGIN_CHARTS_REQUEST] =>
-  ({type: BEGIN_CHARTS_REQUEST, entityType, entityId, request});
+  ({type: BEGIN_CHARTS_REQUEST, cdrVersionId, entityType, entityId, request});
 
 export const loadChartsRequestResults =
   (entityType: string, entityId: string, chartData: ChartInfo[]
