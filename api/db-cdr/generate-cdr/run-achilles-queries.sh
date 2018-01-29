@@ -463,7 +463,7 @@ group by c.concept_id, value_as_number"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, count_value)
-select  3000 as analysis_id, CAST(m.measurement_concept_id  AS STRING) as stratum_1, COUNT(distinct m.person_id) as count_value
+select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1, COUNT(distinct co1.person_id) as count_value
   from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
  where co1.measurement_concept_id > 0
  group by  co1.measurement_concept_id"
@@ -473,7 +473,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
 select 0, 3101 as analysis_id,
-	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
+	CAST(co1.measurement_concept_id AS STRING) as stratum_1,G
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,
 	COUNT(distinct p1.PERSON_ID) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
@@ -513,7 +513,7 @@ group by co1.measurement_concept_id, stratum_2"
 # Measurement Distributions
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
-(analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
+(id, analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
 WITH rawdata_1815 AS
 (SELECT measurement_concept_id as subject_id, unit_concept_id, cast(value_as_number  as float64) as count_value
   FROM  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m

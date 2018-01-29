@@ -24,11 +24,12 @@ while [ $# -gt 0 ]; do
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
+    --bucket) BUCKET=$2; shift;;
     -- ) shift; break ;;
     * ) break ;;
   esac
 done
-
+# Todo this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
 if [ -z "${ACCOUNT}" ]
 then
   echo "Usage: $USAGE"
@@ -59,6 +60,12 @@ then
   exit 1
 fi
 
+if [ -z "${BUCKET}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
 #Check cdr_version is of form YYYYMMDD
 if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
     echo "New CDR VERSION will be $CDR_VERSION"
@@ -67,7 +74,6 @@ if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; th
     echo "Usage: $USAGE"
     exit 1
 fi
-
 
 # Make BigQuery dbs
 echo "Making big query dataset for cloudsql cdr"
@@ -79,6 +85,16 @@ else
     exit 1
 fi
 
+# Make BigQuery data dump
+dataset=cdr$CDR_VERSION
+echo "Making big query dataset for cloudsql cdr"
+if ./generate-cdr/make-bq-data-dump.sh --dataset $dataset --project $WORKBENCH_PROJECT --account $ACCOUNT --bucket $BUCKET
+then
+    echo "BIG QUERY CDR Data Generated"
+else
+    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
+    exit 1
+fi
 
 # Init the local cdr database
 # Init the db to fresh state ready for new cdr data keeping schema and certain tables
