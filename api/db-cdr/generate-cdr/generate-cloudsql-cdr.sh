@@ -4,9 +4,19 @@
 # note account must be preauthorized with gcloud auth login
 
 # End product is:
+# 0) csv dumps of tables for cdr in gcs bucket
 # 1) Local mysql database cdrYYYYMMDD
-# 2) Local mysql database publicYYYYMMDD
-# 3) sql dump of both of these in google cloud storage
+# 3) sql dump of both mysql db in gcs bucket
+
+# Example usage, you need to provide a bunch of args
+# Provide:  your authorized gcloud account
+#  bq project and dataset where the cdr release is
+#  the workbench-project you want the data to be generated in and the dumps to be in
+#  the cdr release number -- YYYYMMDD format . This is used to name generated datasets
+#  the gcs bucket you want to put the generated data in
+#
+# ./project.rb generate-cloudsql-cdr --account peter.speltz@pmi-ops.org --bq-project all-of-us-ehr-dev \
+# --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
 
 set -xeuo pipefail
 IFS=$'\n\t'
