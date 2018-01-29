@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -29,17 +31,23 @@ import org.springframework.http.HttpStatus;
 public class AuthDomainController implements AuthDomainApiDelegate {
 
   private static final Logger log = Logger.getLogger(BugReportController.class.getName());
+  private final Clock clock;
   private final FireCloudService fireCloudService;
   private final UserDao userDao;
+  private final Provider<User> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
+      Clock clock,
       UserDao userDao,
+      Provider<User> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.fireCloudService = fireCloudService;
+    this.clock = clock;
     this.userDao = userDao;
+    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -60,6 +68,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     User user = userDao.findUserByEmail(request.getEmail());
     try {
       fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
@@ -73,6 +82,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
       }
     }
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
+    user.setDisabled(true);
+    user.setDisabledTime(timestamp);
+    user.setDisablingAdminId(userProvider.get().getUserId());
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -93,6 +105,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     }
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
+    user.setDisabled(false);
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

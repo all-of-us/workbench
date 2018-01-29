@@ -25,7 +25,6 @@ export class ProfilePageComponent implements OnInit {
   getVerifiedStatus(): void {
     this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
         (profile: Profile) => {
-      console.log(profile);
       this.verifiedStatusIsValid = profile.blockscoreVerificationIsValid;
       this.verifiedStatusIsLoaded = true;
       this.profile = profile;
