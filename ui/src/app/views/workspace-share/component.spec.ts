@@ -3,7 +3,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ClarityModule} from 'clarity-angular';
+import {ClarityModule} from '@clr/angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';

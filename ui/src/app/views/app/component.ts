@@ -13,7 +13,6 @@ import {environment} from 'environments/environment';
 
 import {Authority, ProfileService} from 'generated';
 
-/* tslint:disable-next-line:no-unused-variable */
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 

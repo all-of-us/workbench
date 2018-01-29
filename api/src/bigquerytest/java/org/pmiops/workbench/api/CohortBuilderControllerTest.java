@@ -7,10 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.ChartInfo;
@@ -21,6 +24,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -36,9 +40,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class,
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.when;
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     private CohortBuilderController controller;
+    private CdrVersion cdrVersion;
 
     @Autowired
     private BigQuery bigquery;
@@ -54,7 +57,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Autowired
     private ParticipantCounter participantCounter;
 
-    @Autowired
+    @Mock
     private CodeDomainLookupService codeDomainLookupService;
 
     @Autowired
@@ -66,10 +69,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Mock
     private CriteriaDao mockCriteriaDao;
 
+    @Mock
+    private CdrVersionDao mockCdrVersionDao;
+
+    @Autowired
+    TestWorkbenchConfig testWorkbenchConfig;
+
     @Override
     public List<String> getTableNames() {
         return Arrays.asList(
-                "criteria",
                 "person",
                 "concept",
                 "condition_occurrence",
@@ -83,8 +91,12 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
+        cdrVersion = new CdrVersion();
+        cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+        cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+        CdrVersionContext.setCdrVersion(cdrVersion);
         this.controller = new CohortBuilderController(bigQueryService, codeDomainLookupService,
-            participantCounter, mockCriteriaDao);
+            participantCounter, mockCriteriaDao, mockCdrVersionDao);
     }
 
     @Test
@@ -105,7 +117,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("ICD9", 0L),
+                controller.getCriteriaByTypeAndParentId(1L,"ICD9", 0L),
                 new Criteria()
                         .id(1L)
                         .type("ICD9")
@@ -138,7 +150,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("DEMO", 0L),
+                controller.getCriteriaByTypeAndParentId(1L,"DEMO", 0L),
                 new Criteria()
                         .id(1L)
                         .type("DEMO")
@@ -170,7 +182,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("ICD10", 0L),
+                controller.getCriteriaByTypeAndParentId(1L,"ICD10", 0L),
                 new Criteria()
                         .id(1L)
                         .type("ICD10")
@@ -201,7 +213,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("CPT", 0L),
+                controller.getCriteriaByTypeAndParentId(1L,"CPT", 0L),
                 new Criteria()
                         .id(1L)
                         .type("CPT")
@@ -232,7 +244,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaByTypeAndParentId("PHECODE", 0L),
+                controller.getCriteriaByTypeAndParentId(1l,"PHECODE", 0L),
                 new Criteria()
                         .id(1L)
                         .type("PHECODE")
@@ -263,7 +275,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
-                controller.getCriteriaTreeQuickSearch("PHECODE", "infect"),
+                controller.getCriteriaTreeQuickSearch(1L,"PHECODE", "infect"),
                 new Criteria()
                         .id(1L)
                         .type("PHECODE")
@@ -279,56 +291,62 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     @Test
     public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001")))),
+                controller.countParticipants(1L,
+                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("001.1").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
-        assertParticipants(
-                controller.countParticipants(
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002")))),
-                        1);
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
+        assertParticipants(controller.countParticipants(1L,
+                createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("002.1").domain("Procedure")))),
+                1);
     }
 
     @Test
     public void countSubjects_ICD9MeasurementLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
                         1);
     }
 
     @Test
     public void countSubjects_ICD9MeasurementParent() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003")))),
+                controller.countParticipants(1L,
+                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().value("003.1").domain("Measurement")))),
                         1);
     }
 
     @Test
     public void countSubjects_DemoGender() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")))),
                         1);
     }
@@ -338,8 +356,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
+
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
                                 .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
                         1);
@@ -353,8 +373,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
                 .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
         SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
+
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
                         1);
     }
@@ -375,7 +397,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
         testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-        assertParticipants( controller.countParticipants(testSearchRequest), 1);
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
+
+        assertParticipants( controller.countParticipants(1L, testSearchRequest), 1);
     }
 
     @Test
@@ -389,7 +413,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
         testSearchRequest.getIncludes().add(anotherSearchGroup);
 
-        assertParticipants( controller.countParticipants(testSearchRequest), 1);
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
+
+        assertParticipants( controller.countParticipants(1L, testSearchRequest), 1);
     }
 
     @Test
@@ -403,69 +429,79 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
         testSearchRequest.getExcludes().add(anotherSearchGroup);
 
-        assertParticipants( controller.countParticipants(testSearchRequest), 0);
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
+
+        assertParticipants( controller.countParticipants(1L, testSearchRequest), 0);
     }
 
     @Test
     public void countSubjects_ICD10ConditionOccurrenceLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("A09").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10ConditionOccurrenceParent() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
-                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("C00")))),
+                controller.countParticipants(1L,
+                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("C00.5").domain("Condition")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10ProcedureOccurrenceLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("16070").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_ICD10MeasurementLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("ICD10", Arrays.asList(new SearchParameter().value("R92.2").domain("Measurement")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTProcedureOccurrenceLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001T").domain("Procedure")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTObservationLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Z").domain("Observation")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTMeasurementLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("0001Q").domain("Measurement")))),
                 1);
     }
 
     @Test
     public void countSubjects_CPTDrugExposureLeaf() throws Exception {
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
         assertParticipants(
-                controller.countParticipants(
+                controller.countParticipants(1L,
                         createSearchRequests("CPT", Arrays.asList(new SearchParameter().value("90703").domain("Drug")))),
                 1);
     }
@@ -473,26 +509,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void countSubjects_EmptyIcludesAndExcludes() throws Exception {
         try {
-            controller.countParticipants(new SearchRequest());
+            controller.countParticipants(1L, new SearchRequest());
         } catch (BadRequestException e) {
             assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
         }
-    }
-
-    @Test
-    public void countSubjects_PheCodes() throws Exception {
-        assertParticipants(
-                controller.countParticipants(
-                        createSearchRequests("PHECODE", Arrays.asList(new SearchParameter().value("008")))),
-                1);
-    }
-
-    @Test
-    public void getChartInfo_PheCodes() throws Exception {
-        assertChartInfoCounts(
-                controller.getChartInfo(
-                        createSearchRequests("PHECODE", Arrays.asList(new SearchParameter().value("008")))),
-                "F", "Unknown", "> 65", 1);
     }
 
     @Test
@@ -504,7 +524,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     }
 
     protected String getTablePrefix() {
-        return workbenchConfig.get().bigquery.projectId + "." + workbenchConfig.get().bigquery.dataSetId;
+        CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+        return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
     }
 
     private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {

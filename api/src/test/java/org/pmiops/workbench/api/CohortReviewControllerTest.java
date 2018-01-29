@@ -131,7 +131,8 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -242,7 +243,8 @@ public class CohortReviewControllerTest {
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReview);
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(request, 200, 0L)).thenReturn(null);
@@ -379,7 +381,8 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findParticipantCohortStatuses(cohortId,
                 new PageRequest(pageParam, pageSizeParam, sort))).thenReturn(expectedPage);
-        doNothing().when(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+            WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 

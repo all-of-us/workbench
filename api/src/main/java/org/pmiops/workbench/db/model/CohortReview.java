@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.ReviewStatus;
 
@@ -26,7 +27,7 @@ public class CohortReview {
     private ReviewStatus reviewStatus;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cohort_review_id")
     public long getCohortReviewId() {
         return cohortReviewId;

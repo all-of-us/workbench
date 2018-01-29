@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { FormBuilder, FormGroup} from '@angular/forms';
-import { State } from 'clarity-angular';
+import { State } from '@clr/angular';
 import { AchillesService } from '../services/achilles.service';
 
 @Component({
