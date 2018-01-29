@@ -18,7 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import org.bitbucket.radistao.test.annotation.AfterAllMethods;
 import org.bitbucket.radistao.test.annotation.BeforeAllMethods;
 import org.pmiops.workbench.testconfig.TestBigQueryConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -40,7 +40,7 @@ public abstract class BigQueryBaseTest {
     BigQuery bigquery;
 
     @Autowired
-    WorkbenchConfig workbenchConfig;
+    TestWorkbenchConfig workbenchConfig;
 
     public static final String BASE_PATH = "src/bigquerytest/resources/bigquery/";
 
