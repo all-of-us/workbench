@@ -54,6 +54,7 @@ describe('TreeComponent', () => {
   it('Should dispatch BEGIN_CRITERIA_REQUEST on init', () => {
     expect(comp).toBeTruthy();
     expect(dispatchSpy).toHaveBeenCalledWith({
+      cdrVersionId: undefined,
       type: BEGIN_CRITERIA_REQUEST,
       kind: 'icd9',
       parentId: 0

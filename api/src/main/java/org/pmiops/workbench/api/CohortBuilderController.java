@@ -3,10 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
-import org.pmiops.workbench.annotations.UsesDefaultCdr;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
@@ -23,14 +24,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
-@UsesDefaultCdr
-// TODO: don't use the default CDR version, let the client specify what version to use
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
     private CodeDomainLookupService codeDomainLookupService;
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
+    private CdrVersionDao cdrVersionDao;
     private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     /**
@@ -60,11 +60,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CohortBuilderController(BigQueryService bigQueryService,
                             CodeDomainLookupService codeDomainLookupService,
                             ParticipantCounter participantCounter,
-                            CriteriaDao criteriaDao) {
+                            CriteriaDao criteriaDao,
+                            CdrVersionDao cdrVersionDao) {
         this.bigQueryService = bigQueryService;
         this.codeDomainLookupService = codeDomainLookupService;
         this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
+        this.cdrVersionDao = cdrVersionDao;
     }
 
     /**
@@ -75,8 +77,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(String type, Long parentId) {
-
+    public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(Long cdrVersionId, String type, Long parentId) {
+        CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(type, parentId);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
@@ -93,8 +95,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<Long> countParticipants(SearchRequest request) {
-
+    public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
+        CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
@@ -107,8 +109,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ChartInfoListResponse> getChartInfo(SearchRequest request) {
-
+    public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
+        CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         ChartInfoListResponse response = new ChartInfoListResponse();
 
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
@@ -129,7 +131,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
 
     @Override
-    public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(String type, String value) {
+    public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(Long cdrVersionId, String type, String value) {
+        CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         String nameOrCode = value + "*";
         final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(type, nameOrCode);
 

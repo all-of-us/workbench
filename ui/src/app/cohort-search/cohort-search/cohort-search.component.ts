@@ -49,9 +49,11 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription = this.route.queryParams.subscribe(params => {
+    const {queryParams: query$, data: data$} = this.route;
+    this.subscription = Observable.combineLatest(query$, data$).subscribe(([params, data]) => {
       /* EVERY time the route changes, reset the store first */
       this.actions.resetStore();
+      this.actions.cdrVersionId = data.workspace.cdrVersionId;
 
       /* If a criteria string is given in the route, we initialize state with
        * it */

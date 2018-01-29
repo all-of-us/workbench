@@ -72,7 +72,7 @@ export class ExplorerComponent implements OnInit {
     this.searchValue = value;
     if (value.length >= 3) {
       this.loading$ = this.loading$.merge(Observable.of(true));
-      this.api.getCriteriaTreeQuickSearch(this.criteriaType, value)
+      this.api.getCriteriaTreeQuickSearch(this.actions.cdrVersionId, this.criteriaType, value)
         .first()
         .subscribe(results => {
           this.searchResults = fromJS(results.items);
