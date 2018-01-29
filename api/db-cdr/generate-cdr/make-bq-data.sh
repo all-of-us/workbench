@@ -100,7 +100,7 @@ fi
 
 # Copy tables we can that we need from cdr to our cloudsql cdr dataset
 # todo uncomment temp commented out
-copy_tables=(domain vocabulary criteria )
+copy_tables=(domain vocabulary)
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
@@ -108,7 +108,7 @@ do
 done
 
 # Create bq tables we have json schema for
-create_tables=(achilles_analysis achilles_results achilles_results_dist achilles_results_concept concept concept_relationship )
+create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship )
 for t in "${create_tables[@]}"
 do
   # Make the concept_counts table from cdr
