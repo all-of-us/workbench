@@ -41,11 +41,10 @@ public class DefaultCdrVersionInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
     Method method = InterceptorUtils.getControllerMethod((HandlerMethod) handler);
+    CdrVersionContext.clearCdrVersion();
     if (method.getAnnotation(UsesDefaultCdr.class) != null ||
         method.getDeclaringClass().getAnnotation(UsesDefaultCdr.class) != null) {
       CdrVersionContext.setCdrVersion(defaultCdrVersionProvider.get());
-    } else {
-      CdrVersionContext.clearCdrVersion();
     }
     return true;
   }
