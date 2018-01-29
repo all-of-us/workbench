@@ -53,6 +53,7 @@ echo "Dumping tables to csv from $BUCKET\n"
 # Get tables in project, stripping out tableId.
 # Note tables larger than 1 G need to be dumped into more than one file.
 # concept_relationship and concept are only big ones now.
+
 tables=`bq ls $PROJECT:$DATASET | tr -d "-" |  tr -s " " |  cut -f 2 -d' ' | sed "s/tableId//"`
 
 for table in $tables; do

@@ -72,6 +72,7 @@ fi
 
 NEW_BQ_CDR_DATASET=cdr$CDR_VERSION
 schema_path=generate-cdr/bq-schemas
+<<<<<<< HEAD
 
 # Check that bq_dataset exists and exit if not
 datasets=`bq --project=$BQ_PROJECT ls`
@@ -87,10 +88,16 @@ else
   exit 1
 fi
 
+=======
+>>>>>>> db dumps working
 
 # Check that bq_dataset exists and exit if not
-datasets=`bq --project=$BQ_PROJECT ls | grep $BQ_DATASET`
-echo $datasets
+datasets=`bq --project=$BQ_PROJECT ls`
+if [ -z "$datasets" ]
+then
+  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
+  exit 1
+fi
 if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
   echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
 else
