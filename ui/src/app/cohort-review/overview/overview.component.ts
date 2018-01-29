@@ -23,7 +23,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const {cdrVersionId} = this.route.snapshot.data.workspace;
+    const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
       .switchMap(request => this.chartAPI.getChartInfo(cdrVersionId, request))
