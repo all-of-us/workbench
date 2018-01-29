@@ -2,7 +2,7 @@ import {async, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
 
-import {ClarityModule} from 'clarity-angular';
+import {ClarityModule} from '@clr/angular';
 
 import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';

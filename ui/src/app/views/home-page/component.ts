@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from 'clarity-angular';
+import {Comparator, StringFilter} from '@clr/angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 

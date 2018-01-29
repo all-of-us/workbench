@@ -2,7 +2,7 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from 'clarity-angular';
+import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
