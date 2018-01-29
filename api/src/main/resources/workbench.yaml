@@ -198,14 +198,6 @@ paths:
           description: Error occurred while creating account.
           schema:
             $ref: "#/definitions/ErrorResponse"
-    delete:
-      tags:
-        - profile
-      description: Disables your account in the allOfUs DB.
-      operationId: disableAccount
-      responses:
-        204:
-          description: Account deleted successfully.
 
   /v1/id-verification:
     post:
