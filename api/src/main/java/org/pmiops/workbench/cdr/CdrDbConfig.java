@@ -4,6 +4,8 @@ import com.mysql.fabric.Server;
 import java.rmi.ServerError;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.inject.Provider;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -43,8 +45,14 @@ public class CdrDbConfig {
 
   public static class CdrDataSource extends AbstractRoutingDataSource {
 
+    private boolean finishedInitialization = false;
+
+    private final Provider<CdrVersion> defaultCdrVersionProvider;
+
     @Autowired
-    public void CdrDataSource(CdrVersionDao cdrVersionDao) {
+    public CdrDataSource(CdrVersionDao cdrVersionDao,
+                         @Qualifier("defaultCdr")Provider<CdrVersion> defaultCdrVersionProvider) {
+      this.defaultCdrVersionProvider = defaultCdrVersionProvider;
       Map<String, String> envVariables = System.getenv();
       String dbDriverClassName = envVariables.get(DB_DRIVER_CLASS_NAME_KEY);
       String dbUser = envVariables.get(DB_USER_KEY);
@@ -77,11 +85,22 @@ public class CdrDbConfig {
       afterPropertiesSet();
     }
 
+    @PostConstruct
+    public void init() {
+      finishedInitialization = true;
+    }
+
     @Override
     protected Object determineCurrentLookupKey() {
       CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
       if (cdrVersion == null) {
-        throw new ServerErrorException("No CDR version specified!");
+        if (finishedInitialization) {
+          throw new ServerErrorException("No CDR version specified!");
+        } else {
+          // If Spring is still initializing, return the the default CDR version
+          // for configuring metadata.
+          return defaultCdrVersionProvider.get().getCdrVersionId();
+        }
       }
       return cdrVersion.getCdrVersionId();
     }
@@ -100,8 +119,9 @@ public class CdrDbConfig {
   }
 
   @Bean("cdrDataSource")
-  public DataSource getCdrDataSource() {
-    return new CdrDataSource();
+  public DataSource getCdrDataSource(CdrVersionDao cdrVersionDao,
+                                     @Qualifier("defaultCdr")Provider<CdrVersion> defaultCdrVersionProvider) {
+    return new CdrDataSource(cdrVersionDao, defaultCdrVersionProvider);
   }
 
   @Bean(name = "cdrEntityManagerFactory")
