@@ -372,9 +372,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<EmptyResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
+  public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     User user = userService.setIdVerificationApproved(userId, review.getApproved());
-    return ResponseEntity.ok(new EmptyResponse());
+    return getIdVerificationsForReview();
   }
 
 }

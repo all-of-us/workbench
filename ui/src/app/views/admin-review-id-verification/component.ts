@@ -21,29 +21,30 @@ export class AdminReviewIdVerificationComponent implements OnInit {
   contentLoaded = false;
 
   constructor(
-      private errorHandlingService: ErrorHandlingService,
-      private profileService: ProfileService
+    private errorHandlingService: ErrorHandlingService,
+    private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
     this.errorHandlingService.retryApi(this.profileService.getIdVerificationsForReview())
-        .subscribe(
+      .subscribe(
+          profilesResp => {
+            this.profiles = profilesResp.profileList;
+            this.contentLoaded = true;
+          });
+  }
+
+  approve(profile: Profile, approved: boolean): void {
+    if (profile.blockscoreVerificationIsValid !== approved) {
+      this.contentLoaded = false;
+      const request = <IdVerificationReviewRequest> {approved};
+      this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
+        profile.userId, request))
+          .subscribe(
             profilesResp => {
               this.profiles = profilesResp.profileList;
               this.contentLoaded = true;
             });
-  }
-
-  approve(profile: Profile, approved: boolean): void {
-    const request = <IdVerificationReviewRequest> {approved};
-    this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
-        profile.userId, request))
-        .subscribe(
-            resp => {
-              const i = this.profiles.indexOf(profile, 0);
-              if (i >= 0) {
-                this.profiles.splice(i, 1);
-              }
-            });
+    }
   }
  }

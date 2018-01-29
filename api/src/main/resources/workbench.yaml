@@ -678,9 +678,9 @@ paths:
             $ref: "#/definitions/IdVerificationReviewRequest"
       responses:
         200:
-          description: success
+          description: return updated list of profiles
           schema:
-            $ref: "#/definitions/EmptyResponse"
+            $ref: "#/definitions/IdVerificationListResponse"
  
   /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
