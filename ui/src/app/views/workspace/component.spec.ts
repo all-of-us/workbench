@@ -1,5 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -73,10 +74,10 @@ const activatedRouteStub  = {
 
 describe('WorkspaceComponent', () => {
   let workspacePage: WorkspacePage;
-
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        FormsModule,
         RouterTestingModule,
         IconsModule,
         ClarityModule.forRoot()
@@ -109,7 +110,7 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
-    expect(workspacePage.notebookTableRows.length).toEqual(0);
+    expect(workspacePage.notebookTableRows.length).toEqual(1);
   }));
 
   it('fetches the correct workspace', fakeAsync(() => {
@@ -135,6 +136,15 @@ describe('WorkspaceComponent', () => {
     tick();
     expect(workspaceLength).toBe(originalWorkspaceLength - 1);
 
+  }));
+
+  it('displays correct notebook information', fakeAsync(() => {
+    // Mock notebook service in workspace stub will be called as part of ngInit
+    const fixture = workspacePage.fixture;
+    const app = fixture.debugElement.componentInstance;
+    expect(app.notebookList.length).toEqual(1);
+    expect(app.notebookList[0].name).toEqual('FileDetails');
+    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
   }));
 
 

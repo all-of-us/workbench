@@ -282,11 +282,13 @@ tasks.withType(Test) {
 }
 
 test {
-  // Starting with a smaller minimum seems to help this task use memory more slowly. When Gradle
-  // runs out of memory, it fails with this message:
+  // Starting with a smaller minimum seems to help this task use memory more slowly.
+  // Increase max heap size from default of 1024M in order to avoid OOM errors.
+  // When Gradle runs out of memory, it fails with this message:
   //   Process 'Gradle Test Executor 1' finished with non-zero exit value 137
   // and literally nothing else in terms of helpful debugging information.
   minHeapSize = '128m'
+  maxHeapSize = '2048m'
 }
 
 integration {

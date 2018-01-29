@@ -1,46 +1,37 @@
 package org.pmiops.workbench.interceptors;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import javax.inject.Provider;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.inject.Provider;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Authority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
-import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.auth.ProfileService;
-import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.auth.UserInfoService;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.Authority;
 
 
 /**
@@ -150,6 +141,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
             userInfo.getEmail(), null);
+    } else {
+      if (user.getDisabled()) {
+        throw new ForbiddenException("This user account has been disabled.");
+      }
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
@@ -158,7 +153,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
 
-    if (!hasRequiredAuthority(method.getMethod(), user)) {
+    if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
@@ -178,39 +173,17 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    * We can only annotate FooController methods, but are given a FooApiController, so we use
    * reflection to hack our way to FooController's method.
    *
-   * @param method The ApiController (Swagger-generated) method which calls our annotated delegate.
+   * @param handlerMethod The HandlerMethod for this request.
    * @param user Database details of the authenticated user.
    */
-  boolean hasRequiredAuthority(Method apiControllerMethod, User user) {
-    // There's no concise way to find out what class implements the delegate interface, so instead
-    // depend on naming conventions. Essentially, this removes "Api" from the class name.
-    // If this becomes a bottleneck, consider caching the class mapping, or copying annotations
-    // from our implementation to the Swagger wrapper at startup (locally it takes <1ms).
-    Pattern apiControllerPattern = Pattern.compile("(.*\\.[^.]+)Api(Controller)");
-    String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
-    String controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
-    Class controllerClass;
-    try {
-      controllerClass = Class.forName(controllerName);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(
-          "Missing " + controllerName + " by name derived from " + apiControllerName + ". "
-          + " Cannot check @AuthorityRequired.",
-          e);
-    }
+  boolean hasRequiredAuthority(HandlerMethod handlerMethod, User user) {
+    return hasRequiredAuthority(InterceptorUtils.getControllerMethod(handlerMethod), user);
+  }
 
-    Method controllerMethod;
-    try {
-      controllerMethod = controllerClass.getMethod(
-          apiControllerMethod.getName(), apiControllerMethod.getParameterTypes());
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    }
+  boolean hasRequiredAuthority(Method controllerMethod, User user) {
     String controllerMethodName =
         controllerMethod.getDeclaringClass().getName() + "." + controllerMethod.getName();
-
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
-
     if (req != null) {
       if (user == null) {
         throw new BadRequestException("User is not initialized; please register");
