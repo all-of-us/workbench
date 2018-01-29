@@ -1,6 +1,5 @@
-import {Cluster, FileDetail} from '../../generated/model';
 import {Observable} from 'rxjs/Observable';
-
+import {Cluster, FileDetail} from "generated";
 
 export class ClusterServiceStub {
 
@@ -47,4 +46,3 @@ export class ClusterServiceStub {
     });
   }
 }
-

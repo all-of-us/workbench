@@ -4,16 +4,17 @@ import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ClusterServiceStub, HttpStub} from '../../../testing/stubs';
+import {HttpStub} from "../../../testing/stubs/Http-stub";
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {ClarityModule} from 'clarity-angular';
-import {CohortsService,WorkspacesService} from 'generated';
+import {ClusterService, CohortsService, WorkspacesService} from 'generated';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {
   queryAllByCss,
   queryByCss,
