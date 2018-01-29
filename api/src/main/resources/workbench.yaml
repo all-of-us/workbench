@@ -797,7 +797,9 @@ paths:
             $ref: "#/definitions/MaterializeCohortResponse"
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/criteria/{type}/{parentId}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{parentId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
@@ -821,7 +823,9 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/search:
+  /v1/cohortbuilder/{cdrVersionId}/search:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
         - cohortBuilder
@@ -841,7 +845,9 @@ paths:
             type: integer
             format: int64
 
-  /v1/cohortbuilder/chartinfo:
+  /v1/cohortbuilder/{cdrVersionId}/chartinfo:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
         - cohortBuilder
@@ -860,8 +866,9 @@ paths:
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
-
-  /v1/cohortbuilder/quicksearch/{type}/{value}:
+  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder

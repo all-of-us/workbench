@@ -21,7 +21,7 @@ export class TreeService {
   getVocabTree(vocabulary_id: string, parent_id: number) {
     vocabulary_id = vocabulary_id.toLowerCase();
 
-    return this.api.getCriteriaByTypeAndParentId(vocabulary_id, parent_id)
+    return this.api.getCriteriaByTypeAndParentId(1, vocabulary_id, parent_id)
       .map(
       (response) => {
         console.log('Vocab Resuponse ', response);

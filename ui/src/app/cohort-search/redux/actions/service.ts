@@ -35,6 +35,11 @@ export class CohortSearchActions {
     private ngRedux: NgRedux<CohortSearchState>,
   ) {}
 
+  /* We instrument the API calls with the CDR version (which is set in the root
+    * component of the Search app and does not change)
+    */
+  cdrVersionId: number;
+
   /*
    * Auto-dispatched action creators:
    * We wrap the bare action creators in dispatch here so that we
@@ -100,6 +105,7 @@ export class CohortSearchActions {
 
   debugDir(obj) {if (environment.debug) { console.dir(obj); }}
   debugLog(msg) {if (environment.debug) { console.log(msg); }}
+
 
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
@@ -186,7 +192,7 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
-    this.requestCriteria(kind, parentId);
+    this.requestCriteria(this.cdrVersionId, kind, parentId);
   }
 
   requestItemCount(role: keyof SearchRequest, itemId: string): void {
@@ -201,7 +207,7 @@ export class CohortSearchActions {
         items: [this.mapGroupItem(itemId)],
       }]
     };
-    this.requestCounts('items', itemId, request);
+    this.requestCounts(this.cdrVersionId, 'items', itemId, request);
   }
 
   requestGroupCount(role: keyof SearchRequest, groupId: string): void {
@@ -214,7 +220,7 @@ export class CohortSearchActions {
       excludes: [],
       [role]: [this.mapGroup(groupId)]
     };
-    this.requestCounts('groups', groupId, request);
+    this.requestCounts(this.cdrVersionId, 'groups', groupId, request);
   }
 
   /**
@@ -256,7 +262,7 @@ export class CohortSearchActions {
     }
 
     const request = this.mapAll();
-    this.requestCharts('searchRequests', SR_ID, request);
+    this.requestCharts(this.cdrVersionId, 'searchRequests', SR_ID, request);
   }
 
   /*
@@ -280,7 +286,7 @@ export class CohortSearchActions {
      * `this.requestTotalCount` are sure to be off.  Basically ALL the groups
      * are outdated at the time this runs */
     const request = this.mapAll();
-    this.requestCharts('searchRequests', SR_ID, request);
+    this.requestCharts(this.cdrVersionId, 'searchRequests', SR_ID, request);
   }
 
   mapAll = (): SearchRequest => {

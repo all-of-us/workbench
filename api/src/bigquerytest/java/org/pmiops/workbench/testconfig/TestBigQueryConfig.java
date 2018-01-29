@@ -7,7 +7,6 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.gson.Gson;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +33,7 @@ public class TestBigQueryConfig {
     }
 
     @Bean
-    public WorkbenchConfig workbenchConfig() throws Exception {
+    public TestWorkbenchConfig bqConfig() throws Exception {
         ObjectMapper jackson = new ObjectMapper();
         String dataSetId = "test_" + UUID
                 .randomUUID()
@@ -43,7 +42,7 @@ public class TestBigQueryConfig {
         JsonNode newJson = jackson
                 .readTree("{\"bigquery\": {\"dataSetId\": \"" + dataSetId + "\",\"projectId\": \"all-of-us-workbench-test\"}}");
         Gson gson = new Gson();
-        WorkbenchConfig workbenchConfig = gson.fromJson(newJson.toString(), WorkbenchConfig.class);
-        return workbenchConfig;
+        TestWorkbenchConfig testWorkbenchConfig = gson.fromJson(newJson.toString(), TestWorkbenchConfig.class);
+        return testWorkbenchConfig;
     }
 }
