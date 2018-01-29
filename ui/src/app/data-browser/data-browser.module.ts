@@ -3,14 +3,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ClarityModule } from 'clarity-angular';
+import { ClarityModule } from '@clr/angular';
 
 /* Components */
 import { ChartModule } from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import * as highcharts from 'highcharts';
+import 'highcharts/highcharts-more';
 import { ChartComponent } from './chart/chart.component';
-// import * as highmaps from 'highcharts/js/modules/map';
 
 import { AchillesService } from './services/achilles.service';
 
@@ -35,21 +35,12 @@ import { TreeContainerComponent } from './tree-container/tree-container.componen
 import {DataBrowserService} from 'generated';
 import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
 
-/*Add highmaps to highchart in factory for workaround
-to build problems with angular2-highcharts */
-export function highchartsFactory() {
-   // highmaps(highcharts);
-    return highcharts;
-}
-
-
 @NgModule({
   imports: [
       BrowserModule,
       FormsModule,
       ReactiveFormsModule,
-      ChartModule,
-      // HttpClientModule,
+      ChartModule.forRoot(highcharts),
       HttpModule,
       BrowserAnimationsModule,
       ClarityModule,
@@ -79,7 +70,8 @@ export function highchartsFactory() {
       DataBrowserService,
       TreeService,
       {
-        provide: HighchartsStatic, useFactory: highchartsFactory
+        provide: HighchartsStatic,
+        useValue: highcharts,
       }
   ]
 })

@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {State} from 'clarity-angular';
+import {State} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
