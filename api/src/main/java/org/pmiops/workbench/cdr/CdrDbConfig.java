@@ -51,7 +51,7 @@ public class CdrDbConfig {
 
     @Autowired
     public CdrDataSource(CdrVersionDao cdrVersionDao,
-                         @Qualifier("defaultCdr")Provider<CdrVersion> defaultCdrVersionProvider) {
+                         @Qualifier("defaultCdr") Provider<CdrVersion> defaultCdrVersionProvider) {
       this.defaultCdrVersionProvider = defaultCdrVersionProvider;
       Map<String, String> envVariables = System.getenv();
       String dbDriverClassName = envVariables.get(DB_DRIVER_CLASS_NAME_KEY);
@@ -96,11 +96,13 @@ public class CdrDbConfig {
       if (cdrVersion == null) {
         if (finishedInitialization) {
           throw new ServerErrorException("No CDR version specified!");
-        } else {
-          // If Spring is still initializing, return the the default CDR version
-          // for configuring metadata.
-          return defaultCdrVersionProvider.get().getCdrVersionId();
         }
+        // While Spring beans are being initialized, this method can be called
+        // in the course of attempting to determine metadata about the data source.
+        // Return the the default CDR version for configuring metadata.
+        // After Spring beans are finished being initialized, init() will
+        // be called and we will start requiring clients to specify a CDR version.
+        cdrVersion = defaultCdrVersionProvider.get();
       }
       return cdrVersion.getCdrVersionId();
     }
@@ -120,7 +122,7 @@ public class CdrDbConfig {
 
   @Bean("cdrDataSource")
   public DataSource getCdrDataSource(CdrVersionDao cdrVersionDao,
-                                     @Qualifier("defaultCdr")Provider<CdrVersion> defaultCdrVersionProvider) {
+                                     @Qualifier("defaultCdr") Provider<CdrVersion> defaultCdrVersionProvider) {
     return new CdrDataSource(cdrVersionDao, defaultCdrVersionProvider);
   }
 
