@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ClarityModule} from 'clarity-angular';
+import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -16,9 +17,9 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.data.domain.PageRequest;
 
 import javax.inject.Provider;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -261,18 +262,10 @@ public class CohortReviewServiceImplTest {
     @Test
     public void findParticipantCohortStatuses() throws Exception {
         long cohortReviewId = 1;
-        PageRequest pageRequest = new PageRequest(0, 1);
+        org.pmiops.workbench.cohortreview.util.PageRequest pageRequest = new org.pmiops.workbench.cohortreview.util.PageRequest(0, 1);
 
-        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
-        when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
-                cohortReviewId,
-                pageRequest)).thenReturn(null);
+        cohortReviewService.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest);
 
-        cohortReviewService.findParticipantCohortStatuses(cohortReviewId, pageRequest);
-
-        verify(participantCohortStatusDao).findByParticipantKey_CohortReviewId(
-                cohortReviewId,
-                pageRequest);
         verifyNoMoreMockInteractions();
     }
 

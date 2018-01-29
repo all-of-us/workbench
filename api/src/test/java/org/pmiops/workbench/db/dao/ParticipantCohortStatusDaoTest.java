@@ -6,6 +6,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.pmiops.workbench.cohortreview.util.Filter;
+import org.pmiops.workbench.cohortreview.util.FilterOperation;
 import org.pmiops.workbench.cohortreview.util.SortColumn;
 import org.pmiops.workbench.cohortreview.util.SortOrder;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -25,7 +27,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -150,7 +154,7 @@ public class ParticipantCohortStatusDaoTest {
         int pageSize = 25;
         org.pmiops.workbench.cohortreview.util.PageRequest pageRequest =
                 new org.pmiops.workbench.cohortreview.util.PageRequest(0, 25, SortOrder.asc, SortColumn.PARTICIPANT_ID);
-        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(null, pageRequest);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
 
@@ -169,17 +173,16 @@ public class ParticipantCohortStatusDaoTest {
         int pageSize = 25;
         org.pmiops.workbench.cohortreview.util.PageRequest pageRequest =
                 new org.pmiops.workbench.cohortreview.util.PageRequest(0, 25, SortOrder.asc, SortColumn.PARTICIPANT_ID);
-        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(null, pageRequest);
+        List<Filter> filters = new ArrayList<>();
+        filters.add(new Filter("participantId", FilterOperation.EQUALS, "1"));
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, filters, pageRequest);
 
-        assertEquals(2, results.size());
+        assertEquals(1, results.size());
 
         ParticipantCohortStatus participant1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
         participant1.setBirthDate(results.get(0).getBirthDate());
-        ParticipantCohortStatus participant2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.EXCLUDED);
-        participant2.setBirthDate(results.get(1).getBirthDate());
 
         assertEquals(participant1, results.get(0));
-        assertEquals(participant2, results.get(1));
     }
 
     private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {

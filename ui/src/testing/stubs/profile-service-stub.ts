@@ -34,17 +34,12 @@ export class ProfileServiceStub {
     });
   }
 
-  public invitationKeyVerification(invitationVerificationRequest?: InvitationVerificationRequest)
-      : Observable<{}> {
-    if (invitationVerificationRequest.invitationKey === 'dummy') {
-      const observable = new Observable(observer => {
-          observer.next(this.profile);
-      });
-      return observable;
-      }
-    const observable = new Observable(observer => {
-          observer.error(new Error(`Invalid invitation code`));
-    });
-    return observable;
-   }
+  invitationKeyVerification(request?: InvitationVerificationRequest): Observable<{}> {
+    if (request.invitationKey === 'dummy') {
+      return new Observable(observer => { observer.next(this.profile); });
+    } else {
+      const err = new Error('Invalid invitation code');
+      return new Observable(observer => { observer.error(err); });
+    }
+  }
 }

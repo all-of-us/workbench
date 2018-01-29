@@ -1,7 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
+import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.SearchCriteria;
 import org.pmiops.workbench.cohortreview.util.SortColumn;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,14 +114,24 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     }
 
     @Override
-    public List<ParticipantCohortStatus> findAll(List<SearchCriteria> searchCriteriaList, PageRequest pageRequest) {
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
         String sortColumn = pageRequest.getSortColumn().getDbName();
         sortColumn = (sortColumn.equals(SortColumn.PARTICIPANT_ID.getDbName()))
                 ? SortColumn.PARTICIPANT_ID.getDbName() : sortColumn + ", " + SortColumn.PARTICIPANT_ID.getDbName();
         String sqlStatement = SELECT_SQL_TEMPLATE
+                + buildFilters(filtersList)
                 + String.format(ORDERBY_SQL_TEMPLATE, sortColumn, pageRequest.getSortOrder().name())
                 + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber(), pageRequest.getPageSize());
         return jdbcTemplate.query(sqlStatement, new ParticipantCohortStatusRowMapper());
+    }
+
+    private String buildFilters(List<Filter> filtersList) {
+        List<String> filtersSql = new ArrayList<>();
+        for (Filter filter : filtersList) {
+            filtersSql.add(SortColumn.fromName(filter.getProperty()).getDbName() + " " + filter.getOperation().getName() + " " + filter.getValue() + "\n");
+        }
+
+        return (!filtersSql.isEmpty()) ? WHERE_CLAUSE_TEMPLATE + String.join(" and ", filtersSql) : "";
     }
 
     private class ParticipantCohortStatusRowMapper implements RowMapper<ParticipantCohortStatus> {

@@ -167,7 +167,7 @@ export class SearchComponent {
     // clear out the concepts and the analysis results on route change
     this.itemFromHeader = event;
     this.conceptsArray = [];
-    for (const a of this.analyses){
+    for (const a of this.analyses) {
       a.results = [];
     }
 

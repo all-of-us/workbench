@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from 'clarity-angular';
+import {Comparator, StringFilter} from '@clr/angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
@@ -41,11 +41,9 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
 })
 export class HomePageComponent implements OnInit {
 
-  /* tslint:disable:no-unused-variable */
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
-  /* tslint:enable:no-unused-variable */
 
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
