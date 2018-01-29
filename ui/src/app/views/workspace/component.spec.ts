@@ -10,10 +10,10 @@ import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {ClarityModule} from 'clarity-angular';
 import {ClusterService, CohortsService, WorkspacesService} from 'generated';
-import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
+import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
-import {HttpStub} from 'testing/stubs/Http-stub';
+import {HttpStub} from 'testing/stubs/http-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
