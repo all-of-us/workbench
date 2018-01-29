@@ -29,6 +29,7 @@ def swagger_regen()
   Workbench::Swagger.download_swagger_codegen_cli
 
   common.run_inline %W{docker-compose run --rm ui npm run codegen}
+  common.run_inline %W{docker-compose run --rm ui npm run post-codegen}
 end
 
 class DevUpOptions
