@@ -1,44 +1,39 @@
 package org.pmiops.workbench.interceptors;
 
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
-import com.google.api.services.oauth2.Oauth2.Userinfo;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.inject.Provider;
 import org.apache.http.HttpHeaders;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.api.ProfileApi;
+import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.UserInfo;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.web.method.HandlerMethod;
-
-import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.api.ProfileApi;
-import org.pmiops.workbench.auth.UserInfoService;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.Authority;
 
 
 /** mimicing a Swagger-generated wrapper */
@@ -227,7 +222,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckDeniesWhenUserMissingAuthority() throws Exception {
-    Method apiControllerMethod = FakeApiController.class.getMethod("handle");
+    Method apiControllerMethod = FakeController.class.getMethod("handle");
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(user);
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isFalse();
   }

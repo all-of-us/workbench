@@ -4,6 +4,7 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -24,9 +25,11 @@ public class CdrVersion {
   private String bigqueryDataset;
   private Timestamp creationTime;
   private int numParticipants;
+  private String cdrDbName;
+  private String publicDbName;
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
     return cdrVersionId;
@@ -99,10 +102,20 @@ public class CdrVersion {
     this.numParticipants = numParticipants;
   }
 
+  @Column(name = "cdr_db_name")
+  public String getCdrDbName() { return cdrDbName; }
+
+  public void setCdrDbName(String cdrDbName) { this.cdrDbName = cdrDbName; }
+
+  @Column(name = "public_db_name")
+  public String getPublicDbName() { return publicDbName; }
+
+  public void setPublicDbName(String publicDbName) { this.publicDbName = publicDbName; }
+
   @Override
   public int hashCode() {
     return Objects.hash(cdrVersionId, name, dataAccessLevel, releaseNumber, bigqueryProject,
-        bigqueryDataset, creationTime, numParticipants);
+        bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName);
   }
 
   @Override
@@ -118,6 +131,8 @@ public class CdrVersion {
         .append(this.bigqueryProject, that.bigqueryProject)
         .append(this.creationTime, that.creationTime)
         .append(this.numParticipants, that.numParticipants)
+        .append(this.publicDbName, that.publicDbName)
+        .append(this.cdrDbName, that.cdrDbName)
         .build();
   }
 }

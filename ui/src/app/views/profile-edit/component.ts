@@ -2,7 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {SignInService} from 'app/services/sign-in.service';
 import {Profile, ProfileService} from 'generated';
 
 @Component({
@@ -19,7 +18,6 @@ export class ProfileEditComponent implements OnInit {
       private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,
-      private signInService: SignInService,
   ) {}
 
   ngOnInit(): void {
@@ -36,11 +34,6 @@ export class ProfileEditComponent implements OnInit {
     });
   }
 
-  disableAccount(): void {
-    this.profileService.disableAccount().subscribe(() => {
-      this.signInService.signOut();
-    });
-  }
 
   submitChanges(): void {
     this.errorHandlingService.retryApi(

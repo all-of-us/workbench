@@ -67,7 +67,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public void validateMatchingWorkspace(
+    public Workspace validateMatchingWorkspace(
         String workspaceNamespace, String workspaceName,
         long workspaceId, WorkspaceAccessLevel accessRequired) {
       // This also enforces registered auth domain.
@@ -80,6 +80,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                   String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                           workspaceNamespace, workspaceName));
       }
+      return workspace;
     }
 
     @Override
