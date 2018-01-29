@@ -41,8 +41,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BigQueryConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -132,15 +130,6 @@ public class WorkspacesControllerTest {
     @Qualifier("apiHostName")
     String apiHostName() {
       return "https://api.blah.com";
-    }
-
-    @Bean
-    WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = new WorkbenchConfig();
-      config.bigquery = new BigQueryConfig();
-      config.bigquery.projectId = "project";
-      config.bigquery.dataSetId = "dataset";
-      return config;
     }
 
     @Bean
