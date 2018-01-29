@@ -102,6 +102,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   enablePushNotebookBtn = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
+  fileList: Notebook[] = [];
   editHover = false;
   shareHover = false;
   trashHover = false;
@@ -148,8 +149,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                       this.cohortsLoading = false;
                       this.cohortsError = true;
                     });
+
             this.errorHandlingService.retryApi(this.workspacesService
-              .getNoteBookList(this.wsNamespace, this.wsId))
+              .getBucketFilesList(this.wsNamespace, this.wsId))
                 .subscribe(
                   fileList => {
                     for (const fileDetail of fileList){
@@ -269,7 +271,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.clusterLoading = false;
         this.cluster = polledCluster;
         this.initializeNotebookCookies().subscribe(() => {
-          this.clusterPulled = true;
+          this.localizeAllFiles();
         });
       });
     });
@@ -334,13 +336,38 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.resetAlerts();
           }, 5000);
         }, () => {
-          this.alertCategory = 'alert-danger';
-          this.alertMsg = 'There was an issue while saving file(s) please try again later';
-          this.showAlerts = true;
-          setTimeout(() => {
-            this.resetAlerts();
-          }, 5000);
+          this.handleLocalizeError();
         });
+  }
+
+  localizeAllFiles(): void {
+    this.errorHandlingService.retryApi(this.workspacesService
+        .getBucketFilesList(this.wsNamespace, this.wsId, 'createCluster'))
+        .subscribe(
+            fileList => {
+              this.fileList = this.notebookList;
+              fileList.every(fileInfo => this.fileList.push(fileInfo));
+              this.fileList.every(file => file.selected = true);
+              this.localizeNotebooks(this.fileList);
+              setTimeout(() => {
+                this.clusterPulled = true;
+              }, 2000);
+            },
+            error => {
+              this.handleLocalizeError();
+              setTimeout(() => {
+                this.clusterPulled = true;
+              }, 6000);
+            });
+  }
+
+  handleLocalizeError(): void {
+    this.alertCategory = 'alert-danger';
+    this.alertMsg = 'There was an issue while saving file(s) please try again later';
+    this.showAlerts = true;
+    setTimeout(() => {
+      this.resetAlerts();
+    }, 5000);
   }
 
   resetAlerts(): void {

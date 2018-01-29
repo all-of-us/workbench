@@ -4,8 +4,11 @@ import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ClarityModule} from 'clarity-angular';
+import {ClusterServiceStub} from "../../../testing/stubs/cluster-service-stub";
+import {HttpStub} from "../../../testing/stubs/Http-stub";
 
+import {ClarityModule} from 'clarity-angular';
+import {CohortsService,WorkspacesService} from 'generated';
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -20,10 +23,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ClusterService} from 'generated';
-import {CohortsService} from 'generated';
-import {WorkspacesService} from 'generated';
-
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
   cohortsService: CohortsService;
@@ -36,6 +35,7 @@ class WorkspacePage {
   cdrText: DebugElement;
   workspaceDescription: DebugElement;
   loggedOutMessage: DebugElement;
+  createAndLaunch: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceComponent);
@@ -55,6 +55,7 @@ class WorkspacePage {
     this.cdrText = queryByCss(this.fixture, '.cdr-text');
     this.workspaceDescription = queryByCss(this.fixture, '.description-text');
     this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
+    this.createAndLaunch = queryByCss(this.fixture, '#createAndLaunch');
   }
 }
 
@@ -86,10 +87,10 @@ describe('WorkspaceComponent', () => {
         WorkspaceComponent
       ],
       providers: [
-        { provide: ClusterService, useValue: ClusterService },
+        { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
-        { provide: Http, useValue: Http },
+        { provide: Http, useValue: new HttpStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
@@ -147,6 +148,27 @@ describe('WorkspaceComponent', () => {
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebook/mockFile');
   }));
 
+  it('displays correct config information after creation of notebook server', fakeAsync(() => {
+    // Mock notebook service in workspace stub will be called as part of ngInit
+    const fixture = workspacePage.fixture;
+    const app = fixture.debugElement.componentInstance;
+    expect(app.notebookList.length).toEqual(1);
+    expect(app.notebookList[0].name).toEqual('FileDetails');
+    expect(app.notebookList[0].path).toEqual('gs://bucket/notebook/mockFile');
+  }));
+
+  it('Creates correct file list to be localized after creating cluster', fakeAsync(() => {
+    const fixture = workspacePage.fixture;
+    const app = fixture.debugElement.componentInstance;
+    fixture.componentRef.instance.createAndLaunchNotebook();
+    tick(5000);
+    //discardPeriodicTasks();
+     expect(app.fileList.length).toEqual(2);
+     expect(app.fileList[0].name).toEqual('FileDetails');
+     expect(app.fileList[0].path).toEqual('gs://bucket/notebook/mockFile');
+     expect(app.fileList[1].name).toEqual('ConfigFileDetails');
+     expect(app.fileList[1].path).toEqual('gs://bucket/config/mockFile123');
+  }));
 
 
 });

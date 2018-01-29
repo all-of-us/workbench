@@ -457,11 +457,12 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/bucket-file-list:
     get:
-      summary: Get details of Python files from google Bucket directory notebook
-      description: Returns list of name and path of python files from google bucket, directory notebook.
-      operationId: getNoteBookList
+      summary: Get details of files from google Bucket directory
+      description: Returns python file from notebook director or all files from config based on
+        query parameter origin
+      operationId: getBucketFilesList
       tags:
         - workspaces
       parameters:
@@ -474,6 +475,12 @@ paths:
           name: workspaceId
           description: workspaceId
           required: true
+          type: string
+        - in: query
+          name: origin
+          description: If null, by default send all python files in notebook folder else
+            return all files from config folder
+          required: false
           type: string
       responses:
         200:

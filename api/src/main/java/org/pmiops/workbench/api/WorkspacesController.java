@@ -447,8 +447,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
-      String workspaceId) {
+  public ResponseEntity<List<FileDetail>> getBucketFilesList(String workspaceNamespace,
+      String workspaceId, String origin) {
     List<Blob> blobList = new ArrayList<>();
     List<FileDetail> fileList = new ArrayList<>();
     try {
@@ -456,18 +456,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
-      blobList = cloudStorageService.getBlobList(bucketName, "notebook");
-      if (blobList != null && blobList.size() > 0) {
-        blobList.stream()
+      if (null == origin || origin.isEmpty()) {
+        blobList = cloudStorageService.getBlobList(bucketName, "notebook");
+        blobList = blobList.stream()
             .filter(blob ->
                 blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-            .forEach(blob -> {
-              FileDetail fileDetail = new FileDetail();
-              fileDetail.setName(blob.getName());
-              fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-              fileList.add(fileDetail);
-            });
+            .collect(Collectors.toList());
+      } else if (origin.equals("createCluster")) {
+        blobList.addAll(cloudStorageService.getBlobList(bucketName, "config"));
       }
+      blobList.forEach(blob -> {
+        FileDetail fileDetail = new FileDetail();
+        fileDetail.setName(blob.getName());
+        fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+        fileList.add(fileDetail);
+      });
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
