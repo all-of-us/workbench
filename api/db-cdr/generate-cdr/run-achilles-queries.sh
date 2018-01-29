@@ -473,7 +473,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
 select 0, 3101 as analysis_id,
-	CAST(co1.measurement_concept_id AS STRING) as stratum_1,G
+	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,
 	COUNT(distinct p1.PERSON_ID) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
