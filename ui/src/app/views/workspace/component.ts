@@ -2,7 +2,7 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from 'clarity-angular';
+import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -72,15 +72,12 @@ class NotebookNameComparator implements Comparator<Notebook> {
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
 
-  /* tslint:disable:no-unused-variable */
-  /* All these are used in the template, not the class */
   private cohortNameFilter = new CohortNameFilter();
   private cohortDescriptionFilter = new CohortDescriptionFilter();
   private notebookNameFilter = new NotebookNameFilter();
   private cohortNameComparator = new CohortNameComparator();
   private cohortDescriptionComparator = new CohortDescriptionComparator();
   private notebookNameComparator = new NotebookNameComparator();
-  /* tslint:enable:no-unused-variable */
 
   workspace: Workspace;
   wsId: string;
@@ -119,7 +116,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       private router: Router,
       private signInService: SignInService,
       private workspacesService: WorkspacesService,
-      /* tslint:disable-next-line:no-unused-variable */
       @Inject(DOCUMENT) private document: any
   ) {}
 
@@ -152,7 +148,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
               .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
                   fileList => {
-                    for (const fileDetail of fileList){
+                    for (const fileDetail of fileList) {
                       fileDetail.push = false;
                       this.notebookList.push(fileDetail);
                     }

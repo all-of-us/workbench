@@ -5,7 +5,6 @@ import {Observable} from 'rxjs/Observable';
 
 import {
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   criteriaLoadErrors,
   focusedCriterion,
@@ -37,11 +36,9 @@ export class ExplorerComponent implements OnInit {
   private nodeInFocus$: Observable<Map<any, any>>;
 
   constructor(
-    /* tslint:disable:no-unused-variable */
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
-    /* tslint:enable:no-unused-variable */
   ) {}
 
   ngOnInit() {

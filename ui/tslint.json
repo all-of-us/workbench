@@ -10,7 +10,7 @@
       true,
       "check-space"
     ],
-    "curly": [true, "as-needed"],
+    "curly": [true],
     "eofline": true,
     "forin": true,
     "import-blacklist": [
@@ -69,7 +69,12 @@
     "no-trailing-whitespace": true,
     "no-unnecessary-initializer": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
+    /* This just won't play nice with Angular 2+, there are way too many false
+     * positives, we're cluttering the codebase with exceptions to the linting
+     * rule, it is defeating its own purpose.  Do not enable until it works
+     * properly.
+     */
+    // "no-unused-variable": true,
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "object-literal-sort-keys": false,
@@ -105,7 +110,6 @@
         "variable-declaration": "nospace"
       }
     ],
-    "typeof-compare": true,
     "unified-signatures": true,
     "variable-name": false,
     "whitespace": [

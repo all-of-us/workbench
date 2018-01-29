@@ -9,7 +9,6 @@ import {
   activeItem,
   activeParameterList,
   activeRole,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   getGroup,
   getItem,
@@ -33,7 +32,6 @@ import {
 @Injectable()
 export class CohortSearchActions {
   constructor(
-    /* tslint:disable-next-line:no-unused-variable */
     private ngRedux: NgRedux<CohortSearchState>,
   ) {}
 

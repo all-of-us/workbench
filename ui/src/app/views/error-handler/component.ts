@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import 'clarity-icons';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
