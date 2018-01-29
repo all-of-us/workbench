@@ -10,3 +10,10 @@
   Server is currently busy (503)
   <clr-icon shape="times" (click)="this.closeServerBusy()"></clr-icon>
 </div>
+
+<clr-modal [(clrModalOpen)]="this.errorHandlingService.userDisabledError">
+  <h3 class="modal-title">This account has been disabled</h3>
+  <div class="modal-body">
+    Please contact a system administrator to inquire about the status of your account.
+  </div>
+</clr-modal>

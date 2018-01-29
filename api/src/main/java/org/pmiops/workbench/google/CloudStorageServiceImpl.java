@@ -5,8 +5,11 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.CopyWriter;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.Storage.CopyRequest;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -47,6 +50,18 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     return new String(storage.get(bucketName, objectPath).getContent());
+  }
+
+  @Override
+  public void copyBlob(BlobId from, BlobId to) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    CopyWriter w = storage.copy(CopyRequest.newBuilder()
+        .setSource(from)
+        .setTarget(to)
+        .build());
+    while (!w.isDone()) {
+      w.copyChunk();
+    }
   }
 
   @Override

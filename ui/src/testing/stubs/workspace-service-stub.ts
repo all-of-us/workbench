@@ -219,7 +219,7 @@ export class WorkspacesServiceStub {
         if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
             && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
           const fileDetailsList =
-              [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
+              [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
           observer.next(fileDetailsList);
         } else {
           observer.next([]);

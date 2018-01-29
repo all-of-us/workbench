@@ -104,6 +104,7 @@ public class UserService {
     user.setContactEmail(contactEmail);
     user.setFamilyName(familyName);
     user.setGivenName(givenName);
+    user.setDisabled(false);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

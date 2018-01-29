@@ -144,7 +144,7 @@ describe('WorkspaceComponent', () => {
     const app = fixture.debugElement.componentInstance;
     expect(app.notebookList.length).toEqual(1);
     expect(app.notebookList[0].name).toEqual('FileDetails');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebook/mockFile');
+    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
   }));
 
 
