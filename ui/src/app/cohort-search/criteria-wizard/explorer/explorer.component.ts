@@ -1,5 +1,6 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 import {fromJS, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -42,6 +43,7 @@ export class ExplorerComponent implements OnInit {
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
     /* tslint:enable:no-unused-variable */
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -75,7 +77,7 @@ export class ExplorerComponent implements OnInit {
     this.searchValue = value;
     if (value.length >= 3) {
       this.loading$ = this.loading$.merge(Observable.of(true));
-      this.api.getCriteriaTreeQuickSearch(this.criteriaType, value)
+      this.api.getCriteriaTreeQuickSearch(this.actions.cdrVersionId, this.criteriaType, value)
         .first()
         .subscribe(results => {
           this.searchResults = fromJS(results.items);
