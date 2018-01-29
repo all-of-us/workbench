@@ -33,6 +33,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
+import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -373,8 +374,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
-    User user = userService.setIdVerificationApproved(userId, review.getApproved());
+    BlockscoreIdVerificationStatus status = review.getApproved();
+    if (status == BlockscoreIdVerificationStatus.VERIFIED) {
+      User user = userService.setIdVerificationApproved(userId, true);
+    } else {
+      User user = userService.setIdVerificationApproved(userId, false);
+    }
     return getIdVerificationsForReview();
   }
-
 }

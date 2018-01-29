@@ -673,7 +673,6 @@ paths:
       parameters:
         - in: body
           name: review
-          description: result of the manual ID verification
           schema:
             $ref: "#/definitions/IdVerificationReviewRequest"
       responses:
@@ -1715,7 +1714,7 @@ definitions:
       - approved
     properties:
       approved:
-        type: boolean
+        $ref: "#/definitions/BlockscoreIdVerificationStatus"
 
   CohortListResponse:
     type: object
@@ -1900,9 +1899,9 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Authority"
-      blockscoreVerificationIsValid:
-        type: boolean
-        description: Result of verification or null if not yet attempted.
+      blockscoreIdVerificationStatus:
+        $ref: "#/definitions/BlockscoreIdVerificationStatus"
+        description: Status of ID verification
       termsOfServiceCompletionTime:
         type: integer
         format: int64
@@ -2492,6 +2491,12 @@ definitions:
       valueInteger:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
+
+  BlockscoreIdVerificationStatus:
+    type: string
+    description: possible values indicating whether the user's ID has been verified
+    enum: [UNVERIFIED, VERIFIED, REJECTED]
+
 
   # Mirrors notebooks definitions ###############################################
   ErrorReport:

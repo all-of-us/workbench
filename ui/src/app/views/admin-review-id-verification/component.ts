@@ -3,6 +3,7 @@ import {Component, OnInit} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
+  BlockscoreIdVerificationStatus,
   IdVerificationReviewRequest,
   Profile,
   ProfileService,
@@ -34,8 +35,8 @@ export class AdminReviewIdVerificationComponent implements OnInit {
           });
   }
 
-  approve(profile: Profile, approved: boolean): void {
-    if (profile.blockscoreVerificationIsValid !== approved) {
+  approve(profile: Profile, approved: BlockscoreIdVerificationStatus): void {
+    if (profile.blockscoreIdVerificationStatus != approved) {
       this.contentLoaded = false;
       const request = <IdVerificationReviewRequest> {approved};
       this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(

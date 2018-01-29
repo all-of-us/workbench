@@ -7,16 +7,13 @@
     <clr-dg-column [style.width.%]="15">Action</clr-dg-column>
     <clr-dg-placeholder>No rejected or unverified profiles found.</clr-dg-placeholder>
     <clr-dg-row *clrDgItems="let profile of profiles" class="table-row workspace-table-row">
-      <clr-dg-cell>
-        <span *ngIf="profile.blockscoreVerificationIsValid === null">unverified</span>
-        <span *ngIf="profile.blockscoreVerificationIsValid === false">rejected</span>
-      </clr-dg-cell>
+      <clr-dg-cell>{{profile.blockscoreIdVerificationStatus | lowercase}}</clr-dg-cell>
       <clr-dg-cell>{{profile.givenName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.familyName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.username}}</clr-dg-cell>
       <clr-dg-cell>
-        <button (click)="approve(profile, true)">Approve</button>
-        <button (click)="approve(profile, false)">Reject</button>
+        <button (click)="approve(profile,'VERIFIED')">Approve</button>
+        <button (click)="approve(profile,'REJECTED')">Reject</button>
       </clr-dg-cell>
     </clr-dg-row>
   </clr-datagrid>
