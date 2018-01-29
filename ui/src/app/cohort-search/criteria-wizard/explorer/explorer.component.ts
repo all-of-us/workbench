@@ -1,6 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {fromJS, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -43,7 +42,6 @@ export class ExplorerComponent implements OnInit {
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
     /* tslint:enable:no-unused-variable */
-    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {

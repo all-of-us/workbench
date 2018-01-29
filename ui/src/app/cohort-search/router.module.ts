@@ -3,9 +3,9 @@ import {RouterModule} from '@angular/router';
 
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 
-import {Workspace, WorkspacesService} from 'generated';
+import {WorkspacesService} from 'generated';
 
-const workspaceProvider = (api) => (route) => api
+export const workspaceProvider = (api) => (route) => api
   .getWorkspace(route.params.ns, route.params.wsid)
   .map(({workspace, accessLevel}) => ({...workspace, accessLevel}));
 
