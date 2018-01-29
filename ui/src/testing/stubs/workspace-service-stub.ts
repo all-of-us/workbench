@@ -219,7 +219,7 @@ export class WorkspacesServiceStub {
       setTimeout(() => {
         if (!origin) {
           const fileDetailsList =
-              [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
+              [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
           observer.next(fileDetailsList);
         } else if ( origin === 'createCluster') {
           const fileDetailsList =

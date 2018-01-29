@@ -1,7 +1,8 @@
 package org.pmiops.workbench.google;
 
-import org.pmiops.workbench.model.FileDetail;
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import java.util.List;
 
 /**
@@ -13,4 +14,5 @@ public interface CloudStorageService {
   public String readBlockscoreApiKey();
   public List<Blob> getBlobList(String bucketName, String directory);
   public void writeFile(String bucketName, String fileName, byte[] bytes);
+  public void copyBlob(BlobId from, BlobId to);
 }

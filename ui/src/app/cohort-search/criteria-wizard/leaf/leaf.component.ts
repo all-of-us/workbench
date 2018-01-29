@@ -4,7 +4,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   isParameterActive,
 } from '../../redux';

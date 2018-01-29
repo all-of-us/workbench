@@ -13,20 +13,22 @@
     <validCheckSum>ANY</validCheckSum>
 
     <preConditions onFail="MARK_RAN">
-      <sqlCheck expectedResult="0">select count(*) from cdr_version</sqlCheck>
+      <sqlCheck expectedResult="0">select count(*) from cdr_version WHERE name = 'Test Registered CDR'</sqlCheck>
     </preConditions>
 
     <delete tableName="cdr_version"/>
 
     <insert tableName="cdr_version">
       <column name="cdr_version_id" type="bigint" value="1"/>
-      <column name="name" type="varchar(80)" value="version 1"/>
+      <column name="name" type="varchar(80)" value="Test Registered CDR"/>
       <column name="data_access_level" type="tinyint" value="1"/>
       <column name="release_number" type="smallint" value="1"/>
-      <column name="bigquery_project" type="varchar(80)" value="1"/>
-      <column name="bigquery_dataset" type="varchar(80)" value="1"/>
+      <column name="bigquery_project" type="varchar(80)" value="all-of-us-ehr-dev"/>
+      <column name="bigquery_dataset" type="varchar(80)" value="test_merge_dec26"/>
       <column name="creation_time" type="datetime" valueDate="${now}"/>
-      <column name="num_participants" type="bigint" value="1000"/>
+      <column name="num_participants" type="bigint" value="946237"/>
+      <column name="cdr_db_name" type="varchar(20)" value="cdr"/>
+      <column name="public_db_name" type="varchar(20)" value="public"/>
     </insert>
 
   </changeSet>

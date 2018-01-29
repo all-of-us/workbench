@@ -198,14 +198,6 @@ paths:
           description: Error occurred while creating account.
           schema:
             $ref: "#/definitions/ErrorResponse"
-    delete:
-      tags:
-        - profile
-      description: Deletes your account in the researchallofus.org domain.
-      operationId: deleteAccount
-      responses:
-        204:
-          description: Account deleted successfully.
 
   /v1/id-verification:
     post:
@@ -812,7 +804,9 @@ paths:
             $ref: "#/definitions/MaterializeCohortResponse"
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/criteria/{type}/{parentId}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{parentId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
@@ -836,7 +830,9 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/search:
+  /v1/cohortbuilder/{cdrVersionId}/search:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
         - cohortBuilder
@@ -856,7 +852,9 @@ paths:
             type: integer
             format: int64
 
-  /v1/cohortbuilder/chartinfo:
+  /v1/cohortbuilder/{cdrVersionId}/chartinfo:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     post:
       tags:
         - cohortBuilder
@@ -875,8 +873,9 @@ paths:
           schema:
             $ref: "#/definitions/ChartInfoListResponse"
 
-
-  /v1/cohortbuilder/quicksearch/{type}/{value}:
+  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
@@ -1865,6 +1864,8 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
+      disabled:
+        type: boolean
 
   ErrorResponse:
     type: object

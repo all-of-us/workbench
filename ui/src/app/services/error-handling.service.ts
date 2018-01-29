@@ -8,7 +8,8 @@ export class ErrorHandlingService {
   public noServerResponse: boolean;
   public serverBusy: boolean;
 
-  /* tslint:disable-next-line:no-unused-variable */
+  public userDisabledError: boolean;
+
   constructor(private zone: NgZone) {
     this.serverError = false;
     this.noServerResponse = false;
@@ -20,6 +21,14 @@ export class ErrorHandlingService {
 
   public clearServerError(): void {
     this.serverError = false;
+  }
+
+  public setUserDisabledError(): void {
+    this.userDisabledError = true;
+  }
+
+  public clearUserDisabledError(): void {
+    this.userDisabledError = false;
   }
 
   public setNoServerResponse(): void {
@@ -58,7 +67,11 @@ export class ErrorHandlingService {
           case 500:
             this.setServerError();
             throw e;
+          case 403:
+            this.setUserDisabledError();
+            throw e;
           case 0:
+            console.log(e);
             this.setNoServerResponse();
             throw e;
           default:

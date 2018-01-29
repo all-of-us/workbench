@@ -48,7 +48,7 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Cohorts</h3>
-      <a class="btn btn-link" routerLink="{{document.location.pathname}}/cohorts/build">Add a Cohort</a>
+      <a class="btn btn-link" [routerLink]="['cohorts', 'build']">Add a Cohort</a>
     </div>
     <div class="indented">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
@@ -65,7 +65,7 @@
         <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
           <clr-dg-action-overflow>
             <button class="action-item"
-              routerLink="{{document.location.pathname}}/cohorts/build"
+              [routerLink]="['cohorts', 'build']"
               [queryParams]="{criteria: cohort.criteria}">
               <clr-icon shape="copy"></clr-icon>
               Clone

@@ -54,9 +54,9 @@ export class CohortSearchEpics {
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
-      ({kind, parentId}: CritRequestAction) => {
+      ({cdrVersionId, kind, parentId}: CritRequestAction) => {
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByTypeAndParentId(_type, parentId)
+        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, _type, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -69,8 +69,8 @@ export class CohortSearchEpics {
 
   fetchCount: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
-      ({entityType, entityId, request}: CountRequestAction) =>
-      this.service.countParticipants(request)
+      ({cdrVersionId, entityType, entityId, request}: CountRequestAction) =>
+      this.service.countParticipants(cdrVersionId, request)
         .map(response => typeof response === 'number' ? response : 0)
         .map(count => loadCountRequestResults(entityType, entityId, count))
         .race(action$
@@ -83,8 +83,8 @@ export class CohortSearchEpics {
 
   fetchChartData: CSEpic = (action$) => (
     action$.ofType(BEGIN_CHARTS_REQUEST).mergeMap(
-      ({entityType, entityId, request}: ChartRequestAction) =>
-      this.service.getChartInfo(request)
+      ({cdrVersionId, entityType, entityId, request}: ChartRequestAction) =>
+      this.service.getChartInfo(cdrVersionId, request)
         .map(result => loadChartsRequestResults(entityType, entityId, result.items))
         .race(action$
           .ofType(CANCEL_CHARTS_REQUEST)

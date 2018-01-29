@@ -281,23 +281,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> deleteAccount() {
-    UserAuthentication userAuth =
-        (UserAuthentication)SecurityContextHolder.getContext().getAuthentication();
-    String email = userAuth.getPrincipal().getEmail();
-    String[] parts = email.split("@");
-    try {
-      directoryService.deleteUser(parts[0]);
-    } catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
-
-    userDao.delete(userDao.findUserByEmail(email));
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
   public ResponseEntity<Profile> submitIdVerification(IdVerificationRequest request) {
     // TODO(dmohs): Prevent this if the user has already attempted verification?
     Person person = blockscoreService.createPerson(

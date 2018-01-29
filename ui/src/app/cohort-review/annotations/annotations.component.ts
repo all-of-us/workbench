@@ -45,7 +45,6 @@ export class AnnotationsComponent implements OnInit {
   annotations$: Observable<Annotation[]>;
 
   /* Determines if the children should show the datatype of the annotation */
-  /* tslint:disable-next-line:no-unused-variable */
   verbosity = false;
 
   constructor(private state: ReviewStateService) {}

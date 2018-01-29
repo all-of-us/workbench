@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
+import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -13,7 +14,7 @@ import java.util.Objects;
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
-@Table(name = "criteria", catalog="cdr")
+@Table(name = "criteria")
 public class Criteria {
 
     private long id;
@@ -29,7 +30,7 @@ public class Criteria {
     private String domainId;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public long getId() {
         return id;

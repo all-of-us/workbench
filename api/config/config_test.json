@@ -7,9 +7,8 @@
     "registeredDomainName": "all-of-us-registered-test",
     "enforceRegistered": false
   },
-  "bigquery": {
-    "dataSetId": "test_merge_dec26",
-    "projectId": "all-of-us-ehr-dev"
+  "cdr": {
+    "defaultCdrVersion": "Test Registered CDR"
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-workbench-test-credentials"

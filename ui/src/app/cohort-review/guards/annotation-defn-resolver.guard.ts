@@ -23,9 +23,11 @@ export class AnnotationDefnResolver implements Resolve<CohortAnnotationDefinitio
     const cid = +route.paramMap.get('cid');
 
     console.log('Loading annotation definitions from resolver');
-    return this.annotationAPI
+    const call = this.annotationAPI
       .getCohortAnnotationDefinitions(ns, wsid, cid)
       .pluck('items')
       .do(defns => this.state.annotationDefinitions.next(<CohortAnnotationDefinition[]>defns));
+
+    return (call as Observable<CohortAnnotationDefinition[]>);
   }
 }

@@ -7,11 +7,14 @@ import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
+import org.hibernate.annotations.NaturalId;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
+import org.pmiops.workbench.interceptors.CorsInterceptor;
+import org.pmiops.workbench.interceptors.DefaultCdrVersionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +38,13 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private AuthInterceptor authInterceptor;
+
+  @Autowired
+  private CorsInterceptor corsInterceptor;
+
+  @Autowired
+  private DefaultCdrVersionInterceptor defaultCdrVersionInterceptor;
+
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -87,20 +97,10 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   }
 
   @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
-        // TODO: change this to be just the domains appropriate for the environment.
-        .allowedOrigins("*")
-        .allowedMethods(HttpMethods.GET, HttpMethods.HEAD, HttpMethods.POST, HttpMethods.PUT,
-            HttpMethods.DELETE, HttpMethods.PATCH, HttpMethods.TRACE, HttpMethods.OPTIONS)
-        .allowedHeaders(HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-            HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, HttpHeaders.AUTHORIZATION,
-            "X-Requested-With", "requestId", "Correlation-Id");
-  }
-
-  @Override
   public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(defaultCdrVersionInterceptor);
   }
 
   @Override

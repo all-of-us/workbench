@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import 'clarity-icons';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
@@ -26,5 +25,9 @@ export class ErrorHandlerComponent implements OnInit {
 
   closeServerBusy(): void {
     this.errorHandlingService.clearServerBusy();
+  }
+
+  acceptedUserDisabled(): void {
+    this.errorHandlingService.clearUserDisabledError();
   }
 }

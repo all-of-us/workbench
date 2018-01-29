@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
+import {ClarityModule} from '@clr/angular';
+
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {ClarityModule} from 'clarity-angular';
 import {ClusterService, CohortsService, WorkspacesService} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
@@ -145,16 +146,7 @@ describe('WorkspaceComponent', () => {
     const app = fixture.debugElement.componentInstance;
     expect(app.notebookList.length).toEqual(1);
     expect(app.notebookList[0].name).toEqual('FileDetails');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebook/mockFile');
-  }));
-
-  it('displays correct config information after creation of notebook server', fakeAsync(() => {
-    // Mock notebook service in workspace stub will be called as part of ngInit
-    const fixture = workspacePage.fixture;
-    const app = fixture.debugElement.componentInstance;
-    expect(app.notebookList.length).toEqual(1);
-    expect(app.notebookList[0].name).toEqual('FileDetails');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebook/mockFile');
+    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
   }));
 
   it('Creates correct file list to be localized after creating cluster', fakeAsync(() => {
@@ -164,7 +156,7 @@ describe('WorkspaceComponent', () => {
     tick(5000);
     expect(app.fileList.length).toEqual(2);
     expect(app.fileList[0].name).toEqual('FileDetails');
-    expect(app.fileList[0].path).toEqual('gs://bucket/notebook/mockFile');
+    expect(app.fileList[0].path).toEqual('gs://bucket/notebooks/mockFile');
     expect(app.fileList[1].name).toEqual('ConfigFileDetails');
     expect(app.fileList[1].path).toEqual('gs://bucket/config/mockFile123');
   }));
