@@ -43,7 +43,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   private subscription;
 
-  /* tslint:disable-next-line:no-unused-variable */
   constructor(
     private actions: CohortSearchActions,
     private route: ActivatedRoute,

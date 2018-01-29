@@ -3,7 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ClarityModule} from 'clarity-angular';
+import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
 
 import {ErrorHandlingService} from './services/error-handling.service';
@@ -68,7 +68,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     FormsModule,
     HttpModule,
     IconsModule,
-    ClarityModule.forRoot(),
+    ClarityModule,
     CohortSearchModule,
     CohortReviewModule,
     DataBrowserModule,

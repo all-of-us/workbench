@@ -74,13 +74,10 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   private selected: List<string>;
   private subscription: Subscription;
 
-  /* tslint:disable:no-unused-variable */
-  /* All are used in the template */
   private readonly operators = OPERATORS;
   private readonly opCodes = Object.keys(OPERATORS);
   private readonly maxAge = MAX_AGE;
   private readonly minAge = MIN_AGE;
-  /* tslint:enable:no-unused-variable */
 
   @Output() attribute = new EventEmitter<Attribute | null>();
 

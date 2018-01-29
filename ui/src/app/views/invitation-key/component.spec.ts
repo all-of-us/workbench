@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
-import {ClarityModule} from 'clarity-angular';
+import {ClarityModule} from '@clr/angular';
 import {ProfileService} from 'generated';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';

@@ -1,14 +1,14 @@
-import {Component, DebugElement} from '@angular/core';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
-export function updateAndTick(fixture: any) {
+export function updateAndTick<C>(fixture: ComponentFixture<C>) {
   fixture.detectChanges();
   tick();
 }
 
-export function simulateInput(
-    fixture: ComponentFixture<Component>,
+export function simulateInput<C>(
+    fixture: ComponentFixture<C>,
     element: DebugElement,
     text: string) {
   element.nativeNode.value = text;
@@ -16,28 +16,28 @@ export function simulateInput(
   updateAndTick(fixture);
 }
 
-export function queryByCss(
-    fixture: ComponentFixture<Component>,
+export function queryByCss<C>(
+    fixture: ComponentFixture<C>,
     css: string) {
   return fixture.debugElement.query(By.css(css));
 }
 
-export function queryAllByCss(
-    fixture: ComponentFixture<Component>,
+export function queryAllByCss<C>(
+    fixture: ComponentFixture<C>,
     css: string) {
   return fixture.debugElement.queryAll(By.css(css));
 }
 
-export function simulateEvent(
-  fixture: ComponentFixture<Component>,
-  element: DebugElement,
-  eventType: string) {
-    element.triggerEventHandler(eventType, null);
-    updateAndTick(fixture);
+export function simulateEvent<C>(
+    fixture: ComponentFixture<C>,
+    element: DebugElement,
+    eventType: string) {
+  element.triggerEventHandler(eventType, null);
+  updateAndTick(fixture);
 }
 
-export function simulateClick(
-  fixture: ComponentFixture<Component>,
-  element: DebugElement) {
-    simulateEvent(fixture, element, 'click');
-  }
+export function simulateClick<C>(
+    fixture: ComponentFixture<C>,
+    element: DebugElement) {
+  simulateEvent(fixture, element, 'click');
+}

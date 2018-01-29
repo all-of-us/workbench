@@ -20,7 +20,6 @@ export class SetAnnotationMasterComponent {
   private selected: CohortAnnotationDefinition[] = [];
   private posting = false;
 
-  /* tslint:disable-next-line:no-unused-variable */
   private annotations$: Observable<CohortAnnotationDefinition[]> =
     this.state.annotationDefinitions$;
 

@@ -5,7 +5,6 @@ import {Observable} from 'rxjs/Observable';
 
 import {
   CohortSearchActions,
-  /* tslint:disable-next-line:no-unused-variable */
   CohortSearchState,
   criteriaChildren,
   criteriaError,
