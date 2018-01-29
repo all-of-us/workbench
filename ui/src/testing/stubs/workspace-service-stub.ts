@@ -213,7 +213,7 @@ export class WorkspacesServiceStub {
   }
 
   getBucketFilesList(workspaceNamespace: string,
-      workspaceId: string,origin?: string, extraHttpRequestParams?: any)
+      workspaceId: string, origin?: string, extraHttpRequestParams?: any)
       : Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
@@ -221,7 +221,7 @@ export class WorkspacesServiceStub {
           const fileDetailsList =
               [{'name': 'FileDetails', 'path': 'gs://bucket/notebook/mockFile'}];
           observer.next(fileDetailsList);
-        } else if(origin === 'createCluster') {
+        } else if ( origin === 'createCluster') {
           const fileDetailsList =
               [{'name': 'ConfigFileDetails', 'path': 'gs://bucket/config/mockFile123'}];
           observer.next(fileDetailsList);

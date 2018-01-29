@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
-import {ClusterServiceStub} from "../../../testing/stubs/cluster-service-stub";
-import {HttpStub} from "../../../testing/stubs/Http-stub";
-
+import {ClusterServiceStub, HttpStub} from '../../../testing/stubs';
 import {ClarityModule} from 'clarity-angular';
 import {CohortsService,WorkspacesService} from 'generated';
 import {IconsModule} from 'app/icons/icons.module';

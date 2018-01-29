@@ -1,11 +1,10 @@
-import {Cluster} from "../../generated/model/cluster";
+import {Cluster, FileDetail} from '../../generated/model';
 import {Observable} from 'rxjs/Observable';
-import {FileDetail} from "../../generated/model/fileDetail";
 
 
 export class ClusterServiceStub {
 
-  cluster : Cluster;
+  cluster: Cluster;
 
   constructor() {
     const stubCluster: Cluster = <Cluster>{
@@ -47,5 +46,5 @@ export class ClusterServiceStub {
       }, 0);
     });
   }
-
 }
+
