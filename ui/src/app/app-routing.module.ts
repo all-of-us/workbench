@@ -14,14 +14,49 @@ import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
+import {CohortResolver} from './resolvers/cohort';
+import {WorkspaceResolver} from './resolvers/workspace';
+
 declare let gtag: Function;
 declare let ga_tracking_id: string;
+
+const cohortRoutes: Routes = [
+];
+
+const workspaceRoutes: Routes = [
+  {
+    path: '',
+    component: WorkspaceComponent,
+    data: {title: 'View Workspace Details'}
+  }, {
+    path: 'edit',
+    component: WorkspaceEditComponent,
+    data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
+  }, {
+    path: 'clone',
+    component: WorkspaceEditComponent,
+    data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
+  }, {
+    path: 'share',
+    component: WorkspaceShareComponent,
+    data: {title: 'Share Workspace'}
+  }, {
+    path: 'cohorts/:cid/edit',
+    component: CohortEditComponent,
+    data: {title: 'Edit Cohort'},
+    resolve: {cohort: CohortResolver},
+  }
+];
 
 const routes: Routes = [
   {
     path: '',
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
+  }, {
+    path: 'workspace/:ns/:wsid',
+    children: workspaceRoutes,
+    resolve: { workspace: WorkspaceResolver },
   }, {
     path: 'data-browser/home',
     component: HomeComponent,
@@ -43,39 +78,23 @@ const routes: Routes = [
     component: ProfileEditComponent,
     data: {title: 'Profile'}
   }, {
-    path: 'workspace/:ns/:wsid',
-    component: WorkspaceComponent,
-    data: {title: 'View Workspace Details'}
-  }, {
-    path: 'workspace/:ns/:wsid/cohorts/:cid/edit',
-    component: CohortEditComponent,
-    data: {title: 'Edit Cohort'},
-  }, {
     path: 'workspace/build',
     component: WorkspaceEditComponent,
     data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
   }, {
-    path: 'workspace/:ns/:wsid/edit',
-    component: WorkspaceEditComponent,
-    data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
-  }, {
-    path: 'workspace/:ns/:wsid/clone',
-    component: WorkspaceEditComponent,
-    data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
-  }, {
     path: 'review',
     component: ReviewComponent,
     data: {title: 'Review Research Purposes'}
-  }, {
-    path: 'workspace/:ns/:wsid/share',
-    component: WorkspaceShareComponent,
-    data: {title: 'Share Workspace'}
   }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
+  providers: [
+    CohortResolver,
+    WorkspaceResolver,
+  ]
 })
 export class AppRoutingModule {
 
