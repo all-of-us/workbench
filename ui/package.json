@@ -9,8 +9,9 @@
     "test": "ng test --sourcemaps=false",
     "lint": "ng lint --type-check",
     "e2e": "ng e2e",
+    "codegen": "npm run codegen-clean && npm run codegen-swagger && npm run post-codegen",
     "codegen-clean": "rm -rf src/generated",
-    "codegen": "npm run codegen-clean && java -jar ../libproject/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2",
+    "codegen-swagger": "java -jar ../libproject/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2",
     "post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/generated/variables.ts"
   },
   "private": true,
