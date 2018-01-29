@@ -34,8 +34,12 @@ import {ReviewResolver} from './guards/review-resolver.guard';
 import {
   CohortAnnotationDefinitionService,
   CohortReviewService,
+  WorkspacesService,
 } from 'generated';
 
+export const workspaceProvider = (api) => (route) => api
+  .getWorkspace(route.params.ns, route.params.wsid)
+  .map(({workspace, accessLevel}) => ({...workspace, accessLevel}));
 
 const routes = [{
   path: 'workspace/:ns/:wsid/cohorts/:cid/review',
@@ -62,6 +66,7 @@ const routes = [{
     }
   ],
   resolve: {
+    workspace: 'workspace',
     review: ReviewResolver,
     cohort: CohortResolver,
     annotationDefns: AnnotationDefnResolver,
@@ -117,6 +122,11 @@ const guards = [
   providers: [
     ...services,
     ...guards,
+    {
+      provide: 'workspace',
+      deps: [WorkspacesService],
+      useFactory: workspaceProvider,
+    },
   ]
 })
 export class CohortReviewModule {}

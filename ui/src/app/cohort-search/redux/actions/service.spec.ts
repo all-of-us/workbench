@@ -9,6 +9,8 @@ import {CohortSearchActions} from './service';
 /**
  * Dummy objects / mock state peices
  */
+const CDR_VERSION_ID = 1;
+
 const dummyItem = fromJS({
   id: 'item001',
   type: 'icd9',
@@ -101,6 +103,7 @@ describe('CohortSearchActions', () => {
     actions = new CohortSearchActions(
       mockReduxInst as NgRedux<CohortSearchState>,
     );
+    actions.cdrVersionId = CDR_VERSION_ID;
   });
 
   it('Should correctly be monkey-patched', () => {
@@ -122,7 +125,7 @@ describe('CohortSearchActions', () => {
     const requestSpy = spyOn(actions, 'requestCharts');
     const setDataSpy = spyOn(actions, 'setChartData');
     actions.requestTotalCount();
-    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
+    expect(requestSpy).toHaveBeenCalledWith(CDR_VERSION_ID, 'searchRequests', SR_ID, expectedSR);
     expect(setDataSpy).not.toHaveBeenCalled();
   });
 
@@ -134,7 +137,7 @@ describe('CohortSearchActions', () => {
     const setDataSpy = spyOn(actions, 'setChartData');
     mockReduxInst.getState = () => mockStore;
     actions.requestTotalCount('include0');
-    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, expectedSR);
+    expect(requestSpy).toHaveBeenCalledWith(CDR_VERSION_ID, 'searchRequests', SR_ID, expectedSR);
     expect(setDataSpy).not.toHaveBeenCalled();
   };
 
@@ -228,7 +231,7 @@ describe('CohortSearchActions', () => {
     // Othe group has null count
     mockReduxInst.getState = () => twoGroupState;
     actions.requestTotalCount('include0');
-    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
+    expect(requestSpy).toHaveBeenCalledWith(CDR_VERSION_ID, 'searchRequests', SR_ID, newExpectedSR);
     expect(setDataSpy).not.toHaveBeenCalled();
 
     requestSpy.calls.reset();
@@ -239,7 +242,7 @@ describe('CohortSearchActions', () => {
     // Other group has nonzero real count
     mockReduxInst.getState = () => twoGroupState.setIn(groupCountPath, 123);
     actions.requestTotalCount('include0');
-    expect(requestSpy).toHaveBeenCalledWith('searchRequests', SR_ID, newExpectedSR);
+    expect(requestSpy).toHaveBeenCalledWith(CDR_VERSION_ID, 'searchRequests', SR_ID, newExpectedSR);
     expect(setDataSpy).not.toHaveBeenCalled();
 
     requestSpy.calls.reset();

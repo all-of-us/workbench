@@ -42,6 +42,7 @@ export interface ActiveContext {
 export interface ActionTypes {
   BEGIN_CRITERIA_REQUEST: {
     type: typeof BEGIN_CRITERIA_REQUEST;
+    cdrVersionId: number;
     kind: string;
     parentId: number;
   };
@@ -65,6 +66,7 @@ export interface ActionTypes {
 
   BEGIN_COUNT_REQUEST: {
     type: typeof BEGIN_COUNT_REQUEST;
+    cdrVersionId: number;
     entityType: string;
     entityId: string;
     request: SearchRequest;
@@ -89,6 +91,7 @@ export interface ActionTypes {
 
   BEGIN_CHARTS_REQUEST: {
     type: typeof BEGIN_CHARTS_REQUEST;
+    cdrVersionId: number;
     entityType: string;
     entityId: string;
     request: SearchRequest;
