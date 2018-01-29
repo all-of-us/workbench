@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class CohortReviewController implements CohortReviewApiDelegate {
 
     public static final String ASC = SortOrder.asc.name();
-    public static final String PARTICIPANT_ID = SortColumn.participantId.name();
+    public static final String PARTICIPANT_ID = SortColumn.PARTICIPANT_ID.getName();
     public static final Integer PAGE = 0;
     public static final Integer PAGE_SIZE = 25;
     public static final Integer MAX_REVIEW_SIZE = 10000;
@@ -399,9 +399,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         Sort.Direction orderParam = getSortOrder(sortOrder);
         String columnParam = getSortColumn(sortColumn);
 
-        final Sort sort = (columnParam.equals(SortColumn.participantId.name()))
-                ? new Sort(orderParam, "participantKey." + columnParam)
-                : new Sort(orderParam, columnParam, "participantKey." + SortColumn.participantId.name());
+        final Sort sort = (columnParam.equals(SortColumn.PARTICIPANT_ID.getName()))
+                ? new Sort(orderParam, columnParam)
+                : new Sort(orderParam, columnParam, SortColumn.PARTICIPANT_ID.getName());
         return new PageRequest(pageParam, pageSizeParam, sort);
     }
 
@@ -412,7 +412,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private String getSortColumn(String sortColumn) {
         return Optional.ofNullable(sortColumn)
-                .filter(o -> o.equalsIgnoreCase(SortColumn.status.name())).orElse("participantKey." + SortColumn.participantId.name());
+                .filter(o -> o.equalsIgnoreCase(SortColumn.STATUS.name())).orElse(SortColumn.PARTICIPANT_ID.getName());
     }
 
     private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {

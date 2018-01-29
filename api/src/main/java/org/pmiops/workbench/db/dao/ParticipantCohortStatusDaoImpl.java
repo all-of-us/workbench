@@ -1,11 +1,11 @@
 package org.pmiops.workbench.db.dao;
 
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.SearchCriteria;
+import org.pmiops.workbench.cohortreview.util.SortColumn;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +43,8 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "        and c.vocabulary_id = 'Ethnicity'\n" +
             "       ) as ethnicity\n" +
             "from participant_cohort_status pcs\n";
+
+    private static final String WHERE_CLAUSE_TEMPLATE = "where\n";
 
     private static final String ORDERBY_SQL_TEMPLATE = "order by %s %s\n";
 
@@ -112,16 +113,13 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     }
 
     @Override
-    public List<ParticipantCohortStatus> findAll(List<SearchCriteria> searchCriteriaList, Pageable pageable) {
-        String sortColumns = "";
-        String sortDirection = "";
-        for (Iterator<Sort.Order> sortIter = pageable.getSort().iterator(); sortIter.hasNext();) {
-            sortColumns = pageable.getSort().iterator().next().getProperty();
-            sortDirection = pageable.getSort().iterator().next().getDirection().name();
-        }
+    public List<ParticipantCohortStatus> findAll(List<SearchCriteria> searchCriteriaList, PageRequest pageRequest) {
+        String sortColumn = pageRequest.getSortColumn().getDbName();
+        sortColumn = (sortColumn.equals(SortColumn.PARTICIPANT_ID.getDbName()))
+                ? SortColumn.PARTICIPANT_ID.getDbName() : sortColumn + ", " + SortColumn.PARTICIPANT_ID.getDbName();
         String sqlStatement = SELECT_SQL_TEMPLATE
-                + String.format(ORDERBY_SQL_TEMPLATE, sortColumns, sortDirection)
-                + String.format(LIMIT_SQL_TEMPLATE, pageable.getPageNumber(), pageable.getPageSize());
+                + String.format(ORDERBY_SQL_TEMPLATE, sortColumn, pageRequest.getSortOrder().name())
+                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber(), pageRequest.getPageSize());
         return jdbcTemplate.query(sqlStatement, new ParticipantCohortStatusRowMapper());
     }
 

@@ -314,7 +314,7 @@ public class CohortReviewControllerTest {
         Integer pageParam = page == null ? 0 : page;
         Integer pageSizeParam = pageSize == null ? 25 : pageSize;
         Sort.Direction orderParam = (sortOrder == null || sortOrder.equals("asc")) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantKey.participantId" : sortColumn;
+        String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantId" : sortColumn;
         List<String> filterColumns = new ArrayList<String>();
         List<String> filterValues = new ArrayList<String>();
         long workspaceId = 1;
@@ -364,9 +364,9 @@ public class CohortReviewControllerTest {
         cohortReviewAfter.setReviewSize(200);
         cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
 
-        final Sort sort = (columnParam.equals(SortColumn.participantId.name()))
+        final Sort sort = (columnParam.equals(SortColumn.PARTICIPANT_ID.getName()))
                 ? new Sort(orderParam, columnParam)
-                : new Sort(orderParam, columnParam, "participantKey." + SortColumn.participantId.name());
+                : new Sort(orderParam, columnParam, SortColumn.PARTICIPANT_ID.getName());
 
         Cohort cohort = new Cohort();
         cohort.setWorkspaceId(1);
