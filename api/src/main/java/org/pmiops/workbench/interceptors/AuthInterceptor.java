@@ -1,46 +1,36 @@
 package org.pmiops.workbench.interceptors;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import javax.inject.Provider;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.inject.Provider;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Authority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
-import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.auth.ProfileService;
-import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.auth.UserInfoService;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.Authority;
 
 
 /**
@@ -186,12 +176,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    * @param user Database details of the authenticated user.
    */
   boolean hasRequiredAuthority(HandlerMethod handlerMethod, User user) {
-    Method controllerMethod = InterceptorUtils.getControllerMethod(handlerMethod);
+    return hasRequiredAuthority(InterceptorUtils.getControllerMethod(handlerMethod), user);
+  }
+
+  boolean hasRequiredAuthority(Method controllerMethod, User user) {
     String controllerMethodName =
         controllerMethod.getDeclaringClass().getName() + "." + controllerMethod.getName();
-
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
-
     if (req != null) {
       if (user == null) {
         throw new BadRequestException("User is not initialized; please register");
