@@ -1,5 +1,4 @@
 // Configuration for the all-of-us-workbench-test.
-// TODO(calbach): Fill in StackDriver values before submit.
 {
   "firecloud": {
     "debugEndpoints": false,
