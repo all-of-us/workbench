@@ -2,6 +2,7 @@ import {NgReduxModule} from '@angular-redux/store';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
+import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxPopperModule} from 'ngx-popper';
 
@@ -16,21 +17,24 @@ import {SearchGroupComponent} from './search-group/search-group.component';
 import {ChartsModule} from './charts/charts.module';
 import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
-import {CohortSearchRouter} from './router.module';
 
-import {CohortBuilderService} from 'generated';
+const routes: Routes = [{
+  path: '',
+  component: CohortSearchComponent,
+  data: {title: 'Build Cohort Criteria'},
+}];
 
 @NgModule({
   imports: [
     // Angular
     CommonModule,
     ReactiveFormsModule,
+    RouterModule.forChild(routes),
     // 3rd Party
     ClarityModule,
     NgReduxModule,
     NgxPopperModule,
     // Ours
-    CohortSearchRouter,
     ChartsModule,
     CriteriaWizardModule,
   ],
@@ -42,7 +46,6 @@ import {CohortBuilderService} from 'generated';
     OverviewComponent,
   ],
   providers: [
-    CohortBuilderService,
     CohortSearchActions,
     CohortSearchEpics,
     ConfigureStore,

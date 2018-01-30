@@ -28,20 +28,13 @@ import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {CohortReviewModule} from './cohort-review/cohort-review.module';
-import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
 import {
-  AuthDomainService,
-  BugReportService,
-  ClusterService,
-  CohortsService,
+  ApiModule,
   ConfigService,
   Configuration,
-  ProfileService,
-  WorkspacesService
 } from 'generated';
 
 function getBasePath() {
@@ -62,6 +55,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
 
 @NgModule({
   imports: [
+    ApiModule,
     AppRoutingModule,
     BrowserModule,
     BrowserAnimationsModule,
@@ -69,8 +63,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     HttpModule,
     IconsModule,
     ClarityModule,
-    CohortSearchModule,
-    CohortReviewModule,
     DataBrowserModule,
   ],
   declarations: [
@@ -90,10 +82,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent
   ],
   providers: [
-    AuthDomainService,
-    BugReportService,
-    ClusterService,
-    CohortsService,
     {
       provide: ConfigService,
       deps: [Http],
@@ -105,9 +93,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useFactory: getConfiguration
     },
     ErrorHandlingService,
-    ProfileService,
     SignInService,
-    WorkspacesService,
     GoogleAnalyticsEventsService,
   ],
   // This specifies the top-level components, to load first.

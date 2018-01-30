@@ -49,6 +49,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    console.log(`Entering CohortSearchComponent.ngOnInit with route:`);
+    console.dir(this.route);
+
     const {queryParams: query$, data: data$} = this.route;
     this.subscription = Observable.combineLatest(query$, data$).subscribe(([params, data]) => {
       /* EVERY time the route changes, reset the store first */

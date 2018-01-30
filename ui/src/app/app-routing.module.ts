@@ -20,9 +20,6 @@ import {WorkspaceResolver} from './resolvers/workspace';
 declare let gtag: Function;
 declare let ga_tracking_id: string;
 
-const cohortRoutes: Routes = [
-];
-
 const workspaceRoutes: Routes = [
   {
     path: '',
@@ -40,6 +37,17 @@ const workspaceRoutes: Routes = [
     path: 'share',
     component: WorkspaceShareComponent,
     data: {title: 'Share Workspace'}
+  }, {
+    path: 'cohorts/build',
+    loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+  }, {
+    path: 'cohorts/:cid/review',
+    loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+    resolve: {
+      // review: ReviewResolver,
+      cohort: CohortResolver,
+      // annotationDefns: AnnotationDefnResolver,
+    },
   }, {
     path: 'cohorts/:cid/edit',
     component: CohortEditComponent,
