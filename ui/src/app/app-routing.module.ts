@@ -9,10 +9,12 @@ import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
@@ -22,6 +24,14 @@ const routes: Routes = [
     path: '',
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
+  }, {
+    path: 'admin/review-workspace',
+    component: AdminReviewWorkspaceComponent,
+    data: {title: 'Review Workspaces'}
+  }, {
+    path: 'admin/review-id-verification',
+    component: AdminReviewIdVerificationComponent,
+    data: {title: 'Review ID Verifications'}
   }, {
     path: 'data-browser/home',
     component: HomeComponent,
@@ -62,10 +72,6 @@ const routes: Routes = [
     path: 'workspace/:ns/:wsid/clone',
     component: WorkspaceEditComponent,
     data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
-  }, {
-    path: 'review',
-    component: ReviewComponent,
-    data: {title: 'Review Research Purposes'}
   }, {
     path: 'workspace/:ns/:wsid/share',
     component: WorkspaceShareComponent,
