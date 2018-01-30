@@ -71,7 +71,8 @@ if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; th
 fi
 
 NEW_BQ_CDR_DATASET=cdr$CDR_VERSION
-schema_path=generate-cdr/bq-schemas
+
+
 
 # Check that bq_dataset exists and exit if not
 datasets=`bq --project=$BQ_PROJECT ls`
@@ -121,6 +122,7 @@ do
 done
 
 # Create bq tables we have json schema for
+schema_path=generate-cdr/bq-schemas
 create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary )
 for t in "${create_tables[@]}"
 do
@@ -155,7 +157,7 @@ fi
 ###########################
 # We can't just copy concept because the schema has a couple extra columns
 # and dates need to be formatted for mysql
-# Insert the data into it.
+# Insert the base data into it formatting dates.
 echo "Inserting concept table data ... "
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.concept\`
@@ -164,13 +166,25 @@ concept_code, valid_start_date, valid_end_date, invalid_reason, count_value, pre
 SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
 Concat(substr(c.valid_start_date, 1,4), '-',substr(c.valid_start_date,5,2),'-',substr(c.valid_start_date,7,2)) as valid_start_date,
 Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',substr(c.valid_end_date,7,2)) as valid_end_date,
-invalid_reason,
-case when r.count_value is not null THEN r.count_value ELSE 0 end as count_value,
-case when r.count_value is not null THEN (select round(r.count_value / a.count_value, 2)
-  from \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.achilles_results\` a where a.analysis_id = 1)  ELSE 0.00 end as prevalence
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept\` c left outer join \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.achilles_results\` r
-on cast(c.concept_id as string) = r.stratum_1 and r.analysis_id = 3000"
+invalid_reason, 0 as count_value , 0.0 as prevalence
+from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 
+# Peter -- can't do these in one query because some concepts have more than one row and we need to sum them.
+# Couldn't get it in one query
+q="select count_value from \`${WORKBENCH_PROJECT}.${NEW_BQ_CDR_DATASET}.achilles_results\` a where a.analysis_id = 1"
+person_count=`bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"Update  \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.concept\`
+set count_value = (select sum(count_value) from \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.achilles_results\` r
+    where cast(concept_id as string) = r.stratum_1 and r.analysis_id = 3000),
+    prevalence = round(count_value/$person_count, 2)
+where concept_id > 0"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"Update  \`$WORKBENCH_PROJECT.$NEW_BQ_CDR_DATASET.concept\`
+set prevalence = round(count_value/$person_count, 2)
+where count_value > 0"
 
 ########################
 # concept_relationship #
