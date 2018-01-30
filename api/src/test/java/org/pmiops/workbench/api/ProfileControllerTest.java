@@ -39,7 +39,7 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingProjectMembership;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus
+import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.IdVerificationRequest;
