@@ -73,6 +73,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final Pattern NOTEBOOK_PATTERN = Pattern.compile("([^\\s]+(\\.(?i)(ipynb))$)");
   // "directory" for notebooks, within the workspace cloud storage bucket.
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  //Directory config within google bucket
+  private static final String CONFIG_WORKSPACE_DIRECTORY = "config";
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
@@ -81,6 +83,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
+  private static final String ORIGIN_CONFIG = "createCluster";
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -465,8 +468,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .filter(blob ->
                 blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
             .collect(Collectors.toList());
-      } else if (origin.equals("createCluster")) {
-        blobList.addAll(cloudStorageService.getBlobList(bucketName, "config"));
+      } else if (origin.equals(ORIGIN_CONFIG)) {
+        blobList.addAll(cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY));
       }
       blobList.forEach(blob -> {
         FileDetail fileDetail = new FileDetail();
