@@ -105,15 +105,3 @@ else
     echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
     exit 1
 fi
-
-# Init the local cdr database
-# Init the db to fresh state ready for new cdr data keeping schema and certain tables
-# Todo after bq data generation complete and csvs made
-# echo "Initializing new cdr db"
-#if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
-#then
-#    echo "Local MYSQL CDR Initialized"
-#else
-#    echo "Local MYSQL CDR failed to initialize"
-#    exit 1
-#fi

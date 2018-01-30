@@ -164,20 +164,3 @@ Concat(substr(c.valid_start_date, 1,4), '-',substr(c.valid_start_date,5,2),'-',s
 Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',substr(c.valid_end_date,7,2)) as valid_end_date,
 c.invalid_reason
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
-
-
-
-
-# Convert the date columns into mysql dates where they are not null
-#bq --quiet --project=$WORKBENCH_PROJECT query --nouse_legacy_sql \
-#"UPDATE \`$NEW_BQ_CDR_DATASET.concept_relationship\` \
-#SET valid_start_date = Concat(substr(valid_start_date, 1,4), '-',substr(valid_start_date,5,2),'-',substr(valid_start_date,7,2)) \
-#WHERE valid_start_date is not null"
-#
-#bq --quiet --project=$WORKBENCH_PROJECT query --nouse_legacy_sql \
-#"UPDATE \`$NEW_BQ_CDR_DATASET.concept_relationship\` \
-#SET valid_end_date = Concat(substr(valid_end_date, 1,4), '-',substr(valid_end_date,5,2),'-',substr(valid_end_date,7,2)) \
-#WHERE valid_end_date is not null"
-
-
-
