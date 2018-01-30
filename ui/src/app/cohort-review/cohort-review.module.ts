@@ -24,18 +24,11 @@ import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
-import {AnnotationDefnResolver} from './guards/annotation-defn-resolver.guard';
 import {AnnotationValuesResolver} from './guards/annotation-values-resolver.guard';
-import {CohortResolver} from './guards/cohort-resolver.guard';
 import {ParticipantResolver} from './guards/participant-resolver.guard';
-import {ReviewResolver} from './guards/review-resolver.guard';
 /* tslint:enable:max-line-length */
 
 import {WorkspacesService} from 'generated';
-
-export const workspaceProvider = (api) => (route) => api
-  .getWorkspace(route.params.ns, route.params.wsid)
-  .map(({workspace, accessLevel}) => ({...workspace, accessLevel}));
 
 const routes: Routes = [{
   path: '',
@@ -61,12 +54,6 @@ const routes: Routes = [{
       }
     }
   ],
-  resolve: {
-    workspace: 'workspace',
-    review: ReviewResolver,
-    cohort: CohortResolver,
-    annotationDefns: AnnotationDefnResolver,
-  }
 }];
 
 const components = [
@@ -94,11 +81,8 @@ const services = [
 ];
 
 const guards = [
-  AnnotationDefnResolver,
   AnnotationValuesResolver,
-  CohortResolver,
   ParticipantResolver,
-  ReviewResolver,
 ];
 
 @NgModule({
@@ -116,11 +100,6 @@ const guards = [
   providers: [
     ...services,
     ...guards,
-    {
-      provide: 'workspace',
-      deps: [WorkspacesService],
-      useFactory: workspaceProvider,
-    },
   ]
 })
 export class CohortReviewModule {}
