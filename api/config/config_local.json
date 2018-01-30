@@ -17,7 +17,7 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
-    "stackdriverApiKey": null,
-    "projectId": null
+    "stackdriverApiKey": "",
+    "projectId": ""
   }
 }

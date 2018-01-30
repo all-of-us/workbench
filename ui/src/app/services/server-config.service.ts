@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
@@ -13,8 +14,10 @@ export class ServerConfigService {
 
   public getConfig(): Observable<ConfigResponse> {
     if (!this.configObs) {
-      // share() avoids reexecution of this call on each subscribe().
-      this.configObs = this.errorHandlingService.retryApi(this.configService.getConfig()).share();
+      // Use of a replaySubject() caches the output of the API call across subscriptions.
+      const subject = new ReplaySubject<ConfigResponse>();
+      this.errorHandlingService.retryApi(this.configService.getConfig()).subscribe(subject);
+      this.configObs = subject;
     }
     return this.configObs;
   }
