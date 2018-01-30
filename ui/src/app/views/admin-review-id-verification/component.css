@@ -1,0 +1,14 @@
+ul {
+  list-style-item: none;
+}
+li {
+  display: flex;
+  align-items: flex-end;
+  margin: 0.5rem;
+}
+.user {
+  margin: 0.25rem;
+}
+.user, .review-buttons {
+  flex: 1;
+}

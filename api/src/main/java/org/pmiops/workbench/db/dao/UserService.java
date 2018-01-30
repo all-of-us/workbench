@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.function.Function;
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
@@ -53,8 +54,12 @@ public class UserService {
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  private User updateWithRetries(Function<User, User> userModifier) {
+  private User updateWithRetries(Function<User, User> modifyUser) {
     User user = userProvider.get();
+    return updateWithRetries(modifyUser, user);
+  }
+
+  private User updateWithRetries(Function<User, User> userModifier, User user) {
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -160,5 +165,20 @@ public class UserService {
         return user;
       }
     });
+  }
+
+  public List<User> getNonVerifiedUsers() {
+    return userDao.findUserNotValidated();
+  }
+
+  public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
+    User user = userDao.findUserByUserId(userId);
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setBlockscoreVerificationIsValid(blockscoreVerificationIsValid);
+        return user;
+      }
+    }, user);
   }
 }

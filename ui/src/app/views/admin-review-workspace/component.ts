@@ -10,7 +10,7 @@ import {
 
 
 /**
- * Review Workspace research purposes. Users with the REVIEW_RESEARCH_PURPOSE permission use this
+ * Review Workspaces. Users with the REVIEW_RESEARCH_PURPOSE permission use this
  * to view other users' workspaces for which a review has been requested, and approve/reject them.
  */
 // TODO(RW-85) Design this UI. Current implementation is a rough sketch.
@@ -18,7 +18,7 @@ import {
   templateUrl: './component.html',
   styleUrls: ['./component.css']
 })
-export class ReviewComponent implements OnInit {
+export class AdminReviewWorkspaceComponent implements OnInit {
   workspaces: Workspace[] = [];
   contentLoaded = false;
 
@@ -31,17 +31,13 @@ export class ReviewComponent implements OnInit {
     this.errorHandlingService.retryApi(this.workspacesService.getWorkspacesForReview())
         .subscribe(
             workspacesResp => {
-              for (const ws of workspacesResp.items) {
-                this.workspaces.push(ws);
-              }
+              this.workspaces = workspacesResp.items;
               this.contentLoaded = true;
             });
   }
 
   approve(workspace: Workspace, approved: boolean): void {
-    const request = <ResearchPurposeReviewRequest>{
-      approved: approved,
-    };
+    const request = <ResearchPurposeReviewRequest> {approved};
     this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
         workspace.namespace, workspace.id, request))
         .subscribe(

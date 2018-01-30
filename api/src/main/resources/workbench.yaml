@@ -84,6 +84,12 @@ parameters:
     format: int64
     required: true
     description: specifies which participant
+  userId:
+    in: path
+    name: userId
+    type: integer
+    format: int64
+    required: true
 
 
 paths:
@@ -318,8 +324,6 @@ paths:
           description: request carrying user email to add
           schema:
             $ref: "#/definitions/AuthDomainRequest"
-      tags:
-        - authDomain
       summary: add a user to an auth domain if you have manage groups permission
       operationId: addUserToAuthDomain
     delete:
@@ -616,7 +620,7 @@ paths:
 
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/workspaces/review:
+  /v1/admin/workspaces/review:
     get:
       tags:
         - workspaces
@@ -630,7 +634,46 @@ paths:
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review:
+  /v1/admin/users/id-verification/list:
+    get:
+      tags:
+        - profile
+      description: >
+          Returns a list of profiles for users to be reviewed. Requires
+          REVIEW_ID_VERIFICATION authority.
+      operationId: getIdVerificationsForReview
+      responses:
+        200:
+          description: A list of users to be id verified
+          schema:
+            $ref: "#/definitions/IdVerificationListResponse"
+        403:
+          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /v1/admin/users/id-verification/{userId}/review:
+    parameters:
+      - $ref: '#/parameters/userId'
+    post:
+      tags:
+        - profile
+      description: >
+          Manually sets the ID verfication status for a user. Requires
+          REVIEW_ID_VERIFICATION authority.
+      operationId: reviewIdVerification
+      parameters:
+        - in: body
+          name: review
+          schema:
+            $ref: "#/definitions/IdVerificationReviewRequest"
+      responses:
+        200:
+          description: return updated list of profiles
+          schema:
+            $ref: "#/definitions/IdVerificationListResponse"
+
+  /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1465,7 +1508,8 @@ definitions:
         # https://github.com/swagger-api/swagger-codegen/issues/4261
         # TODO: Remove this sentinel when adding a new enum value with a
         # unique prefix (but leave the above cautionary comment).
-        _PREVENT_COMMON_PREFIX_TRIMMING
+        _PREVENT_COMMON_PREFIX_TRIMMING,
+        REVIEW_ID_VERIFICATION
     ]
 
   WorkspaceListResponse:
@@ -1663,6 +1707,14 @@ definitions:
       approved:
         type: boolean
 
+  IdVerificationReviewRequest:
+    type: object
+    required:
+      - newStatus
+    properties:
+      newStatus:
+        $ref: "#/definitions/BlockscoreIdVerificationStatus"
+
   CohortListResponse:
     type: object
     required:
@@ -1813,6 +1865,10 @@ definitions:
       - enabledInFireCloud
       - dataAccessLevel
     properties:
+      userId:
+        description: researchallofus userId
+        type: integer
+        format: int64
       username:
         description: researchallofus username
         type: string
@@ -1842,9 +1898,9 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Authority"
-      blockscoreVerificationIsValid:
-        type: boolean
-        description: Result of verification or null if not yet attempted.
+      blockscoreIdVerificationStatus:
+        $ref: "#/definitions/BlockscoreIdVerificationStatus"
+        description: Status of ID verification
       termsOfServiceCompletionTime:
         type: integer
         format: int64
@@ -2435,6 +2491,12 @@ definitions:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
 
+  BlockscoreIdVerificationStatus:
+    type: string
+    description: possible values indicating whether the user's ID has been verified
+    enum: [UNVERIFIED, VERIFIED, REJECTED]
+
+
   # Mirrors notebooks definitions ###############################################
   ErrorReport:
     description: ''
@@ -2561,6 +2623,16 @@ definitions:
         $ref: '#/definitions/Workspace'
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
+
+  IdVerificationListResponse:
+    type: object
+    required:
+      - profileList
+    properties:
+      profileList:
+        type: "array"
+        items:
+          $ref: "#/definitions/Profile"
 
   Concept:
     type: object
