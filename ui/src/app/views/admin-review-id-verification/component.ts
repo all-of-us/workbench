@@ -35,10 +35,10 @@ export class AdminReviewIdVerificationComponent implements OnInit {
           });
   }
 
-  approve(profile: Profile, approved: BlockscoreIdVerificationStatus): void {
-    if (profile.blockscoreIdVerificationStatus !== approved) {
+  setIdVerificationStatus(profile: Profile, newStatus: BlockscoreIdVerificationStatus): void {
+    if (profile.blockscoreIdVerificationStatus !== newStatus) {
       this.contentLoaded = false;
-      const request = <IdVerificationReviewRequest> {approved};
+      const request = <IdVerificationReviewRequest> {newStatus};
       this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
         profile.userId, request))
           .subscribe(

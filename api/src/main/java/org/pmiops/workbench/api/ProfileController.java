@@ -363,7 +363,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
-    BlockscoreIdVerificationStatus status = review.getApproved();
+    BlockscoreIdVerificationStatus status = review.getNewStatus();
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       User user = userService.setIdVerificationApproved(userId, true);
     } else {

@@ -672,7 +672,7 @@ paths:
           description: return updated list of profiles
           schema:
             $ref: "#/definitions/IdVerificationListResponse"
- 
+
   /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1710,9 +1710,9 @@ definitions:
   IdVerificationReviewRequest:
     type: object
     required:
-      - approved
+      - newStatus
     properties:
-      approved:
+      newStatus:
         $ref: "#/definitions/BlockscoreIdVerificationStatus"
 
   CohortListResponse:

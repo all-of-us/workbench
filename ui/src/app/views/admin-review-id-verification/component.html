@@ -12,8 +12,8 @@
       <clr-dg-cell>{{profile.familyName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.username}}</clr-dg-cell>
       <clr-dg-cell>
-        <button (click)="approve(profile,'VERIFIED')">Approve</button>
-        <button (click)="approve(profile,'REJECTED')">Reject</button>
+        <button class="btn" (click)="setIdVerificationStatus(profile,'VERIFIED')">Approve</button>
+        <button class="btn" (click)="setIdVerificationStatus(profile,'REJECTED')">Reject</button>
       </clr-dg-cell>
     </clr-dg-row>
   </clr-datagrid>
