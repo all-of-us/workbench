@@ -16,7 +16,15 @@
 </div>
 <div class="field-wrapper">
   <div class="field">
-    <h5 class="field-label">Contact Email:</h5>
+    <h5 class="field-label">Contact Email:
+      <div *ngIf="profileLoaded" class="field-label-button-container">
+        <div *ngIf="profile.contactEmail!==null">
+          <button class="btn field-label-button" (click)="verifyEmail()">
+            Verify my Email
+          </button>
+        </div>
+      </div>
+    </h5>
     <div *ngIf="profileLoaded else loading" class="data">{{profile.contactEmail}}</div>
   </div>
 </div>

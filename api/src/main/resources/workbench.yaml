@@ -277,6 +277,25 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/verify-email:
+    post:
+      tags:
+        - profile
+      description: Submits demographic survey responses.
+      operationId: verifyEmail
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/VerifyEmailRequest"
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+
   /v1/auth-domain/{groupName}:
     post:
       tags:
@@ -1292,6 +1311,14 @@ definitions:
     type: object
     properties:
       additionalInfo:
+        type: string
+
+  VerifyEmailRequest:
+    type: object
+    properties:
+      emailToVerify:
+        type: string
+      username:
         type: string
 
   Authority:

@@ -45,4 +45,16 @@ export class ProfilePageComponent implements OnInit {
   submitDemographicSurvey(): void {
     this.profileService.submitDemographicsSurvey().subscribe();
   }
+
+  verifyEmail(): void {
+    const request = {
+      verifyEmail: this.profile.contactEmail,
+      username: this.profile.username
+    };
+    this.profileService.verifyEmail(request).subscribe(
+      (response) => {
+        console.log(response);
+      }
+    );
+  }
 }

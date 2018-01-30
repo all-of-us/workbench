@@ -64,6 +64,7 @@ public class ProfileService {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
           .getTime());
     }
+    // TODO: Add call to mailchimp using user email hash from DB to get email verified status.
     if (user.getDataAccessLevel() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }
