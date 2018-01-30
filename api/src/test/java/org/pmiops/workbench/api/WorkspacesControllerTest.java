@@ -1060,10 +1060,10 @@ public class WorkspacesControllerTest {
     Blob mockBlob = mock(Blob.class);
     Blob mockBlob1 = mock(Blob.class);
     if(origin == null || origin.isEmpty()) {
-      when(mockBlob.getName()).thenReturn("notebook/mockFile.ipynb");
-      when(mockBlob1.getName()).thenReturn("notebook/mockFile.text");
+      when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
+      when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
       List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-      when(cloudStorageService.getBlobList("MockBucketName", "notebook")).thenReturn(blobList);
+      when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
     }
     else if(origin.equals("createCluster")) {
       when(mockBlob.getName()).thenReturn("config/mockFile.ipynb");
