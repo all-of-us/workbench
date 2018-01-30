@@ -206,59 +206,59 @@ on p1.person_id = co1.person_id
 where (extract(year from condition_start_date) - p1.year_of_birth) > 18 and (extract(year from condition_start_date) - p1.year_of_birth) < 30
 group by co1.condition_concept_id, stratum_2"
 
-
+# No death data now per Kayla. Later when we have more data
 # 500	(3000) Number of persons with death, by cause_concept_id
-echo "Querying death ..."
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, count_value)
-select 0, 3000 as analysis_id,
-	CAST(d1.cause_concept_id AS STRING) as stratum_1,
-	COUNT(distinct d1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.death\` d1
-group by d1.cause_concept_id"
-
-# Death (3101)	Number of persons with a death by death cause concept id by  gender concept id
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-select 0, 3101 as analysis_id,
-	CAST(co1.cause_concept_id AS STRING) as stratum_1,
-	CAST(p1.gender_concept_id AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
-on p1.person_id = co1.person_id
-group by co1.cause_concept_id,
-	p1.gender_concept_id"
-
-# Death (3102)	Number of persons with a death by death cause concept id by  age decile  30+ yr old deciles */
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-select 0, 3102 as analysis_id,
-	CAST(co1.cause_concept_id AS STRING) as stratum_1,
-	CAST(floor((extract(year from co1.death_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
-on p1.person_id = co1.person_id
-where floor((extract(year from co1.death_date) - p1.year_of_birth)/10) >=3
-group by co1.cause_concept_id,
-	stratum_2"
-
-# Death (3102)	Number of persons with a death by death cause concept id by  age decile  18-29 yr old decile 2 */
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-select 0, 3102 as analysis_id, CAST(co1.cause_concept_id AS STRING) as stratum_1, '2' as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
-on p1.person_id = co1.person_id
-where (extract(year from co1.death_date) - p1.year_of_birth) >= 18 and (extract(year from co1.death_date) - p1.year_of_birth) < 30
-group by co1.cause_concept_id,
-	stratum_2"
+#echo "Querying death ..."
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+#(id, analysis_id, stratum_1, count_value)
+#select 0, 3000 as analysis_id,
+#	CAST(d1.cause_concept_id AS STRING) as stratum_1,
+#	COUNT(distinct d1.PERSON_ID) as count_value
+#from \`${BQ_PROJECT}.${BQ_DATASET}.death\` d1
+#group by d1.cause_concept_id"
+#
+## Death (3101)	Number of persons with a death by death cause concept id by  gender concept id
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+#(id, analysis_id, stratum_1, stratum_2, count_value)
+#select 0, 3101 as analysis_id,
+#	CAST(co1.cause_concept_id AS STRING) as stratum_1,
+#	CAST(p1.gender_concept_id AS STRING) as stratum_2,
+#	COUNT(distinct p1.PERSON_ID) as count_value
+#from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+#\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
+#on p1.person_id = co1.person_id
+#group by co1.cause_concept_id,
+#	p1.gender_concept_id"
+#
+## Death (3102)	Number of persons with a death by death cause concept id by  age decile  30+ yr old deciles */
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+#(id, analysis_id, stratum_1, stratum_2, count_value)
+#select 0, 3102 as analysis_id,
+#	CAST(co1.cause_concept_id AS STRING) as stratum_1,
+#	CAST(floor((extract(year from co1.death_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+#	COUNT(distinct p1.PERSON_ID) as count_value
+#from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+#\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
+#on p1.person_id = co1.person_id
+#where floor((extract(year from co1.death_date) - p1.year_of_birth)/10) >=3
+#group by co1.cause_concept_id,
+#	stratum_2"
+#
+## Death (3102)	Number of persons with a death by death cause concept id by  age decile  18-29 yr old decile 2 */
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+#(id, analysis_id, stratum_1, stratum_2, count_value)
+#select 0, 3102 as analysis_id, CAST(co1.cause_concept_id AS STRING) as stratum_1, '2' as stratum_2,
+#	COUNT(distinct p1.PERSON_ID) as count_value
+#from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+#\`${BQ_PROJECT}.${BQ_DATASET}.death\` co1
+#on p1.person_id = co1.person_id
+#where (extract(year from co1.death_date) - p1.year_of_birth) >= 18 and (extract(year from co1.death_date) - p1.year_of_birth) < 30
+#group by co1.cause_concept_id,
+#	stratum_2"
 
 # 600	Number of persons with at least one procedure occurrence, by procedure_concept_id
 echo "Querying procedure_occurrence"
@@ -525,7 +525,7 @@ overallstats  as ( select  subject_id  as stratum1_id, unit_concept_id  as strat
   join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
    group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
  )
-select  0 as id, 3115 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id, o.total as count_value, o.min_value, o.max_value, o.avg_value, o.stdev_value, min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value, min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value, min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value, min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value, min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+select  0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id, o.total as count_value, o.min_value, o.max_value, o.avg_value, o.stdev_value, min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value, min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value, min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value, min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value, min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
   FROM  priorstats p
 join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
  group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"

@@ -320,9 +320,9 @@ def run_local_bigdata_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
 end
 
-def generate_cloudsql_cdr(*args)
+def generate_bigquery_cloudsql_cdr(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-cdr} + args
+  common.run_inline %W{docker-compose run db-generate-bigquery-cloudsql-cdr} + args
 end
 
 def run_drop_cdr_db(*args)
@@ -684,9 +684,9 @@ Common.register_command({
   :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
 })
 Common.register_command({
-  :invocation => "generate-cloudsql-cdr",
+  :invocation => "generate-bigquery-cloudsql-cdr",
   :description => "Generates cloud sql databases for a cdr release.",
-  :fn => lambda { |*args| generate_cloudsql_cdr(*args) }
+  :fn => lambda { |*args| generate_bigquery_cloudsql_cdr(*args) }
 })
 Common.register_command({
   :invocation => "run-drop-cdr-db",

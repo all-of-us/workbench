@@ -121,15 +121,23 @@ do
 done
 
 # Create bq tables we have json schema for
-create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship )
+create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary )
 for t in "${create_tables[@]}"
 do
-  # Make the concept_counts table from cdr
-  bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
-  bq --quiet --project=$WORKBENCH_PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
+    # Make the concept_counts table from cdr
+    bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
+    bq --quiet --project=$WORKBENCH_PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
 done
 
+# Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
+load_tables=(achilles_analysis criteria )
+csv_path=generate-cdr/csv
+for t in "${load_tables[@]}"
+do
+    bq --project=$WORKBENCH_PROJECT load --source_format=CSV --skip_leading_rows=1 $NEW_BQ_CDR_DATASET.$t $csv_path/$t.csv
+done
 
+# Copy csv to gcs
 ####################
 # achilles queries #
 ####################

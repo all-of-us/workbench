@@ -100,7 +100,7 @@ services:
       command: wait-for db:3306 -- ./run-bigdata-migrations.sh bigdata local
       env_file:
         - db-cdr/vars.env
-  db-generate-cloudsql-cdr:
+  db-generate-bigquery-cloudsql-cdr:
       depends_on:
         - db
       build:
@@ -112,7 +112,8 @@ services:
         - .:/w:cached
         - ~/.config:/.config:cached
         - ~/.gsutil:/.gsutil:cached
-      entrypoint: ["./generate-cdr/generate-cloudsql-cdr.sh"]
+
+      entrypoint: ["./generate-cdr/generate-bigquery-cloudsql-cdr.sh"]
       environment:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
       env_file:

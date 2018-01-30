@@ -1,0 +1,18 @@
+[
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_id", 
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_name", 
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_concept_id", 
+        "type": "INTEGER"
+      }
+]
+
