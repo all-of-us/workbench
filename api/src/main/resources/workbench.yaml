@@ -452,8 +452,8 @@ paths:
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/bucket-file-list:
     get:
       summary: Get details of files from google Bucket directory
-      description: Returns python file from notebook director or all files from config based on
-        query parameter origin
+      description: Returns python files from notebook director or all files from config directory
+      based on query parameter origin
       operationId: getBucketFilesList
       tags:
         - workspaces
