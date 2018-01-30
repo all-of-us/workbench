@@ -24,6 +24,7 @@ public class ConfigController implements ConfigApiDelegate {
     return ResponseEntity.ok(
       new ConfigResponse()
         .gsuiteDomain(configProvider.get().googleDirectoryService.gSuiteDomain)
-    );
+        .projectId(configProvider.get().server.projectId)
+        .stackdriverApiKey(configProvider.get().server.stackdriverApiKey));
   }
 }
