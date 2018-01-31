@@ -30,6 +30,7 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
@@ -81,6 +82,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
   private final BlockscoreService blockscoreService;
+  private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
 
@@ -90,6 +92,7 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
+      MailChimpService mailChimpService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
@@ -101,6 +104,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
     this.blockscoreService = blockscoreService;
+    this.mailChimpService = mailChimpService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
   }
@@ -326,7 +330,11 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> verifyEmail(VerifyEmailRequest request) {
     User user = userDao.findUserByEmail(request.getUsername());
-
+    try {
+      mailChimpService.addUserContactEmail(cloudStorageService.readMailChimpListId(), user.getContactEmail());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
     // TODO: Call http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
     //  Store response id in database as mailchimp hash value
     return getProfileResponse(user);
