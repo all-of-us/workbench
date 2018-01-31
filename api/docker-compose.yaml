@@ -96,7 +96,26 @@ services:
       volumes:
         - gradle-cache:/.gradle
         - .:/w:cached
+        - ~/.config:/.config
       command: wait-for db:3306 -- ./run-bigdata-migrations.sh bigdata local
+      env_file:
+        - db-cdr/vars.env
+  db-generate-bigquery-cloudsql-cdr:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+        - ~/.config:/.config:cached
+        - ~/.gsutil:/.gsutil:cached
+
+      entrypoint: ["./generate-cdr/generate-bigquery-cloudsql-cdr.sh"]
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
       env_file:
         - db-cdr/vars.env
   drop-cdr-db:

@@ -21,10 +21,12 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -74,20 +76,21 @@ export function getConfiguration(signInService: SignInService): Configuration {
     DataBrowserModule,
   ],
   declarations: [
-    AppComponent,
     AccountCreationComponent,
+    AdminReviewWorkspaceComponent,
+    AdminReviewIdVerificationComponent,
+    AppComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
     HomePageComponent,
     IdVerificationPageComponent,
+    InvitationKeyComponent,
     ProfileEditComponent,
     ProfilePageComponent,
-    ReviewComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,
-    InvitationKeyComponent
   ],
   providers: [
     AuthDomainService,
