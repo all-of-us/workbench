@@ -2,19 +2,19 @@
 {
   "firecloud": {
     "debugEndpoints": false,
-    "billingAccountId": "001A68-D1B344-975E93",
-    "billingProjectPrefix": "aou-test-free1-",
-    "registeredDomainName": "all-of-us-registered-test",
+    "billingAccountId": "014D91-FCB792-33D2C0",
+    "billingProjectPrefix": "aou-rw-stable-",
+    "registeredDomainName": "all-of-us-registered-stable",
     "enforceRegistered": false
   },
   "cdr": {
-    "defaultCdrVersion": "Test Registered CDR"
+    "defaultCdrVersion": "Stable Registered CDR"
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-workbench-test-credentials"
+    "credentialsBucketName": "aou-res-workbench-stable-credentials"
   },
   "googleDirectoryService": {
-    "gSuiteDomain": "fake-research-aou.org"
+    "gSuiteDomain": "stable.fake-research-aou.org"
   },
   "server": {
     "stackdriverApiKey": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",

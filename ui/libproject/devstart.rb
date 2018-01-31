@@ -104,7 +104,8 @@ class DeployUI
     add_options
     @parser.parse @args
     validate_options
-    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=test}
+    # TODO(dmohs): Select environment from project.
+    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=stable}
     common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
                          --version #{@opts.version} --#{@opts.promote}}
   end
@@ -161,4 +162,14 @@ Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
   :fn => Proc.new { |*args| rebuild_image(*args) }
+})
+
+def docker_run(cmd_name, args)
+  Common.new.run_inline %W{docker-compose run --rm ui} + args
+end
+
+Common.register_command({
+  :invocation => "docker-run",
+  :description => "Runs the specified command in a docker container.",
+  :fn => lambda { |*args| docker_run("docker-run", args) }
 })
