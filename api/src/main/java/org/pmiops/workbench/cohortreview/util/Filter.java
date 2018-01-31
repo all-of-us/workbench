@@ -5,12 +5,9 @@ public class Filter {
     private SearchOperation operation;
     private String value;
 
-    public Filter() {
-
-    }
+    public Filter() {}
 
     public Filter(final String property, final SearchOperation operation, final String value) {
-        super();
         this.property = property;
         this.operation = operation;
         this.value = value;

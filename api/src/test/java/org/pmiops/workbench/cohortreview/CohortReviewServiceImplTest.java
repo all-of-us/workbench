@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -262,7 +263,7 @@ public class CohortReviewServiceImplTest {
     @Test
     public void findParticipantCohortStatuses() throws Exception {
         long cohortReviewId = 1;
-        org.pmiops.workbench.cohortreview.util.PageRequest pageRequest = new org.pmiops.workbench.cohortreview.util.PageRequest(0, 1);
+        PageRequest pageRequest = new PageRequest(0, 1);
 
         when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
 

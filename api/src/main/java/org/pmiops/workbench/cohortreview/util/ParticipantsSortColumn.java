@@ -40,15 +40,6 @@ public enum ParticipantsSortColumn {
         return null;
     }
 
-    public static ParticipantsSortColumn fromDbName(String dbName) {
-        for (ParticipantsSortColumn sortColumn : ParticipantsSortColumn.values()) {
-            if (String.valueOf(sortColumn.dbName).equals(dbName)) {
-                return sortColumn;
-            }
-        }
-        return null;
-    }
-
     public static boolean isDatabaseTypeLong(String property) {
         return fromName(property).getDatabaseType().equals(DatabaseType.LONG);
     }

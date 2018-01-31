@@ -436,8 +436,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private PageRequest createPageRequest(Integer page, Integer pageSize, String sortOrder, String sortColumn) {
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
-        String sortOrderParam = Optional.ofNullable(sortOrder).orElse(SortOrder.asc.name());
-        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(ParticipantsSortColumn.PARTICIPANT_ID.getName());
+        String sortOrderParam = Optional.ofNullable(sortOrder).orElse(ASC);
+        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(PARTICIPANT_ID);
         return new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrderParam), ParticipantsSortColumn.fromName(sortColumnParam));
     }
 
