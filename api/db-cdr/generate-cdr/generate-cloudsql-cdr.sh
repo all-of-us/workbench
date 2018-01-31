@@ -4,19 +4,20 @@
 # with data from specified bucket
 
 # Example usage, you need to provide a bunch of args
-# Provide:  your authorized gcloud account
-#  bq project and dataset where the omop CDR release is
-#  the workbench-project you want the new dataset  to be generated in
-#  the cdr release number -- YYYYMMDD format . This is used to name generated datasets
-#  the gcs bucket you want to put the generated data in
-#
-# ./project.rb generate-bigquery-cloudsql-cdr --account peter.speltz@pmi-ops.org --bq-project all-of-us-ehr-dev \
-# --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
+# Provide:
+# your authorized gcloud account
+# the cdr release number -- YYYYMMDD format
+# cdr-db-prefix -- cdr or public usually
+# bucket -- where the csvs are to import into the db
+# Example
+# ../project.rb generate-cloudsql-cdr --account peter.speltz@pmi-ops.org --cdr-version 20180130 --cdr-db-prefix cdr --bucket all-of-us-workbench-cloudsql-create
+
+# Todo public db in here?
 
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-cdr/generate-cloudsql-cdr --account <ACCOUNT> --cdr-version YYYYMMDD --bucket <BUCKET>"
+USAGE="./generate-cdr/generate-cloudsql-cdr --account <ACCOUNT> --cdr-version YYYYMMDD --cdr-db-prefix <cdr|public> --bucket <BUCKET>"
 USAGE="$USAGE \n Local mysql or remote cloudsql database named cdr<cdr-version> and public<cdr-version> are created and populated."
 
 while [ $# -gt 0 ]; do
@@ -24,13 +25,14 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --account) ACCOUNT=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
+    --cdr-db-prefix) CDR_DB_PREFIX=$2; shift 2;;
     --bucket) BUCKET=$2; shift;;
     -- ) shift; break ;;
     * ) break ;;
   esac
 done
 
-# Todo test if this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
+# Todo why does this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
 if [ -z "${ACCOUNT}" ]
 then
   echo "Usage: $USAGE"
@@ -38,6 +40,12 @@ then
 fi
 
 if [ -z "${CDR_VERSION}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
+if [ -z "${CDR_DB_PREFIX}" ]
 then
   echo "Usage: $USAGE"
   exit 1
@@ -58,10 +66,13 @@ if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; th
     exit 1
 fi
 
+# Export CDR_DB_NAME for all scripts
+export CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
+
 # Init the local cdr database
 # Init the db to fresh state ready for new cdr data keeping schema and certain tables
-echo "Initializing new cdr db"
-if ./generate-cdr/init-new-cdr-db.sh --cdr-version $CDR_VERSION
+echo "Initializing new cdr db $CDR_DB_NAME"
+if ./generate-cdr/init-new-cdr-db.sh --cdr-db-name $CDR_DB_NAME
 then
   echo "Local MYSQL CDR Initialized"
 else
@@ -71,10 +82,12 @@ fi
 
 # Import the gcs data
 echo "Initializing new cdr db"
-if ./generate-cdr/import-gcs-data.sh --account $ACCOUNT --bucket $BUCKET --cdr-version $CDR_VERSION
+if ./generate-cdr/import-gcs-data.sh --account $ACCOUNT --bucket $BUCKET --cdr-db-name $CDR_DB_NAME
 then
-  echo "Imported data to local database"
+  echo "Imported data to local database $CDR_DB_NAME"
 else
   echo "Local MYSQL CDR failed to initialize"
   exit 1
 fi
+
+exit 0

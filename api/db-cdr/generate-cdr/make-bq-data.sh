@@ -168,8 +168,7 @@ Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',subst
 invalid_reason, 0 as count_value , 0.0 as prevalence
 from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 
-# Peter -- can't do these in one query because some concepts have more than one row and we need to sum them.
-# Couldn't get it in one query
+# Update counts and prevalence in concept
 q="select count_value from \`${WORKBENCH_PROJECT}.${NEW_BQ_CDR_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=`bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
 
