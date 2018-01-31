@@ -99,7 +99,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   enablePushNotebookBtn = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
-  fileList: Notebook[] = [];
   editHover = false;
   shareHover = false;
   trashHover = false;
@@ -147,7 +146,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                     });
 
             this.errorHandlingService.retryApi(this.workspacesService
-              .getBucketFilesList(this.wsNamespace, this.wsId))
+              .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
                   fileList => {
                     for (const fileDetail of fileList) {
@@ -338,16 +337,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   localizeAllFiles(): void {
     this.errorHandlingService.retryApi(this.workspacesService
-        .getBucketFilesList(this.wsNamespace, this.wsId, 'createCluster'))
-        .subscribe(
-            fileList => {
-              this.fileList = this.notebookList;
-              fileList.every(fileInfo => this.fileList.push(fileInfo));
-              this.fileList.every(file => file.selected = true);
-              this.localizeNotebooks(this.fileList);
+        .retrieveAndLocalizeFiles(this.wsNamespace, this.wsId))
+        .subscribe(() => {
+              this.alertCategory = 'alert-success';
+              this.alertMsg = 'File(s) have been saved';
+              this.showAlerts = true;
               setTimeout(() => {
+                this.resetAlerts();
                 this.clusterPulled = true;
-              }, 2000);
+              }, 5000);
             },
             error => {
               this.handleLocalizeError();
@@ -355,6 +353,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                 this.clusterPulled = true;
               }, 6000);
             });
+
   }
 
   handleLocalizeError(): void {

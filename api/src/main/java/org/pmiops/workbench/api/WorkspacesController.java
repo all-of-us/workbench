@@ -10,6 +10,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -54,8 +55,10 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -242,6 +245,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final String apiHostName;
+  private final NotebooksService notebooksService;
 
   @Autowired
   WorkspacesController(
@@ -252,7 +256,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      @Qualifier("apiHostName") String apiHostName) {
+      @Qualifier("apiHostName") String apiHostName,
+      NotebooksService notebooksService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -261,6 +266,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.apiHostName = apiHostName;
+    this.notebooksService = notebooksService;
   }
 
   @VisibleForTesting
@@ -453,30 +459,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<FileDetail>> getBucketFilesList(String workspaceNamespace,
-      String workspaceId, String origin) {
-    List<Blob> blobList = new ArrayList<>();
+  public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
+      String workspaceId) {
     List<FileDetail> fileList = new ArrayList<>();
     try {
-      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
-          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-              .getWorkspace();
-      String bucketName = fireCloudWorkspace.getBucketName();
-      if (null == origin || origin.isEmpty()) {
-        blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
-        blobList = blobList.stream()
-            .filter(blob ->
-                blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
-            .collect(Collectors.toList());
-      } else if (origin.equals(ORIGIN_CONFIG)) {
-        blobList.addAll(cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY));
-      }
-      blobList.forEach(blob -> {
-        FileDetail fileDetail = new FileDetail();
-        fileDetail.setName(blob.getName());
-        fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
-        fileList.add(fileDetail);
-      });
+      fileList = getFilesFromBucket(workspaceNamespace, workspaceId, NOTEBOOKS_WORKSPACE_DIRECTORY);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
@@ -485,6 +472,34 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ServerErrorException(e);
     }
     return ResponseEntity.ok(fileList);
+  }
+
+  @Override
+  public ResponseEntity<Void> retrieveAndLocalizeFiles(String workspaceNamespace,
+      String workspaceId) {
+    List<FileDetail> fileList = new ArrayList<>();
+    try {
+      fileList = getFilesFromBucket(workspaceNamespace, workspaceId, CONFIG_WORKSPACE_DIRECTORY);
+      Map<String, String> fileMap = fileList.stream()
+          .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
+              fileDetail -> fileDetail.getPath()));
+      this.notebooksService.localize(workspaceNamespace, convertClusterName(workspaceId), fileMap);
+    } catch (org.pmiops.workbench.firecloud.ApiException ex) {
+      if (ex.getCode() == 404) {
+        throw new NotFoundException(String.format("Workspace %s/%s not found",
+            workspaceNamespace, workspaceId));
+      }
+      throw new ServerErrorException(ex);
+    } catch (org.pmiops.workbench.notebooks.ApiException ex) {
+      if (ex.getCode() == 400) {
+        throw new BadRequestException(ex.getResponseBody());
+      } else if (ex.getCode() == 404) {
+        throw new NotFoundException(String.format("Cluster %s/%s not found",
+            workspaceNamespace, workspaceId));
+      }
+      throw new ServerErrorException(ex);
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
@@ -745,5 +760,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  private String convertClusterName(String workspaceId) {
+    String clusterName = workspaceId + this.userProvider.get().getUserId();
+    clusterName = clusterName.toLowerCase();
+    return clusterName;
+  }
+
+  /**
+   * Gets the notebook files from google bucket.
+   * In case origin is createCluster, add config files to the file list and return
+   * @param workspaceNamespace
+   * @param workspaceId
+   * @param directory
+   * @return List of FileDetail
+   * @throws org.pmiops.workbench.firecloud.ApiException
+   */
+  private List<FileDetail> getFilesFromBucket(String workspaceNamespace,
+      String workspaceId, String directory) throws org.pmiops.workbench.firecloud.ApiException {
+    List<Blob> blobList = new ArrayList<>();
+    List<FileDetail> fileList = new ArrayList<>();
+    org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+            .getWorkspace();
+    String bucketName = fireCloudWorkspace.getBucketName();
+    blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
+    blobList = blobList.stream()
+        .filter(blob ->
+            blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+        .collect(Collectors.toList());
+    if (directory.equals(CONFIG_WORKSPACE_DIRECTORY)) {
+      blobList.addAll(cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY));
+    }
+    blobList.forEach(blob -> {
+      FileDetail fileDetail = new FileDetail();
+      fileDetail.setName(blob.getName());
+      fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+      fileList.add(fileDetail);
+    });
+    return fileList;
   }
 }

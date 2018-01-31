@@ -449,11 +449,11 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/bucket-file-list:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
     get:
-      summary: Get details of files from google Bucket directory
-      description: Returns python files from notebook directory or all files from config directory
-      operationId: getBucketFilesList
+      summary: Get details of Python files from google Bucket directory notebook
+      description: Returns list of name and path of python files from google bucket, directory notebook.
+      operationId: getNoteBookList
       tags:
         - workspaces
       parameters:
@@ -466,11 +466,6 @@ paths:
           name: workspaceId
           description: workspaceId
           required: true
-          type: string
-        - in: query
-          name: origin
-          description: If null send python files in notebook folder else return files from config
-          required: false
           type: string
       responses:
         200:
@@ -526,6 +521,35 @@ paths:
          schema:
           $ref: '#/definitions/ErrorReport'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/retrieve-localize-files:
+    get:
+      summary: Get details files from google bucket and then localize to notebook server
+      description: Get details files from google bucket and then localize to notebook server
+      operationId: retrieveAndLocalizeFiles
+      tags:
+        - workspaces
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Files have been localized
+        404:
+          description: Workspace not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
 
   # Billing projects #####################################################################
 

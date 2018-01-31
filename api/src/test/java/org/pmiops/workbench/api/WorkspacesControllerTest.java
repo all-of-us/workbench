@@ -73,6 +73,7 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +119,8 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CodeDomainLookupService.class,
-    ParticipantCounter.class
+    ParticipantCounter.class,
+    NotebooksService.class
   })
   static class Configuration {
     @Bean
@@ -1014,15 +1016,15 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testBucketFileList() throws Exception {
-    mockObjectsForBuckFileList(null);
+  public void testNotebookFileList() throws Exception {
+    mockObjectsForBuckFileList();
       // Will return 1 entry as only python files in notebook folder are return
     List<FileDetail> result = workspacesController
-        .getBucketFilesList("mockProjectName", "mockWorkspaceName",null).getBody();
+        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
     assertEquals(result.size(), 1);
 
     try {
-      workspacesController.getBucketFilesList("mockProject", "mockWorkspace",null);
+      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
       fail();
     } catch (NotFoundException ex) {
       // NotFoundException expected
@@ -1030,19 +1032,17 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testBucketFileListWithOrigin() throws Exception {
-    mockObjectsForBuckFileList("createCluster");
-     // Will return entries only from config folder
-    List<FileDetail> result = workspacesController
-        .getBucketFilesList("mockProjectName", "mockWorkspaceName",null).getBody();
-    assertEquals(result.size(), 0);
-
-    result = workspacesController
-        .getBucketFilesList("mockProjectName", "mockWorkspaceName","createCluster").getBody();
-    assertEquals(result.size(), 2);
+  public void testRetrieveandLocalize() throws Exception {
+    mockObjectsForBuckFileList();
+    try {
+      workspacesController.retrieveAndLocalizeFiles("mockProjectName", "mockWorkspaceName");
+    }
+    catch(Exception ex){
+      fail();
+    }
   }
 
-  private void mockObjectsForBuckFileList(String origin) throws ApiException {
+  private void mockObjectsForBuckFileList() throws ApiException {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseWithException =
@@ -1059,18 +1059,10 @@ public class WorkspacesControllerTest {
     );
     Blob mockBlob = mock(Blob.class);
     Blob mockBlob1 = mock(Blob.class);
-    if(origin == null || origin.isEmpty()) {
-      when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
-      when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
-      List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-      when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
-    }
-    else if(origin.equals("createCluster")) {
-      when(mockBlob.getName()).thenReturn("config/mockFile.ipynb");
-      when(mockBlob1.getName()).thenReturn("config/mockFile.text");
-      List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-      when(cloudStorageService.getBlobList("MockBucketName", "config")).thenReturn(blobList);
-    }
+    when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
+    when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
+    List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
+    when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
 
   }

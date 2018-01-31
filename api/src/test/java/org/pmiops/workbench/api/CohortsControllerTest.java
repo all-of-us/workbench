@@ -39,6 +39,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class})
-  @MockBean(FireCloudService.class)
+  @MockBean({FireCloudService.class, NotebooksService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -98,6 +99,8 @@ public class CohortsControllerTest {
   Provider<User> userProvider;
   @Autowired
   FireCloudService fireCloudService;
+  @Autowired
+  NotebooksService notebooksService;
   @Mock
   CloudStorageService cloudStorageService;
 
@@ -129,7 +132,7 @@ public class CohortsControllerTest {
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com");
+        "https://api.blah.com",notebooksService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();

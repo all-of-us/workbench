@@ -212,22 +212,26 @@ export class WorkspacesServiceStub {
     });
   }
 
-  getBucketFilesList(workspaceNamespace: string,
-      workspaceId: string, origin?: string, extraHttpRequestParams?: any)
-      : Observable<Array<FileDetail>> {
+  getNoteBookList(workspaceNamespace: string,
+      workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
-        if (!origin) {
-          const fileDetailsList =
-              [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
-          observer.next(fileDetailsList);
-        } else if ( origin === 'createCluster') {
-          const fileDetailsList =
-              [{'name': 'ConfigFileDetails', 'path': 'gs://bucket/config/mockFile123'}];
-          observer.next(fileDetailsList);
-        }
+        const fileDetailsList =
+            [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
+        observer.next(fileDetailsList);
         observer.complete();
       }, 0);
     });
+  }
+
+  retrieveAndLocalizeFiles(workspaceNamespace: string, workspaceId: string,
+      extraHttpRequestParams?: any): Observable<{}> {
+    return new Observable<{}>(observer => {
+      setTimeout(() => {
+        observer.next(null);
+        observer.complete();
+      }, 0);
+    })
+
   }
 }
