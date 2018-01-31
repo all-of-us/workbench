@@ -55,7 +55,7 @@ export class IdVerificationPageComponent implements OnInit {
     this.showError = false;
     let dobFormat = this.request.dob;
     const dobArr = dobFormat.split('/');
-    //Date format YYYY-MM-DD as req in backend
+    // Date format YYYY-MM-DD as req in backend
     dobFormat = dobArr[2] + '-' + dobArr[1] + '-' + dobArr[0];
     this.request.dob = dobFormat;
     this.profileService.submitIdVerification(this.request).subscribe(() => {
