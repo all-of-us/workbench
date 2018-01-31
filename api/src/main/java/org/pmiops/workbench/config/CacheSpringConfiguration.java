@@ -49,9 +49,14 @@ public class CacheSpringConfiguration {
         });
   }
 
+  public static WorkbenchConfig lookupWorkbenchConfig(
+          LoadingCache<String, Object> configCache) throws ExecutionException {
+    return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
-    return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
+    return lookupWorkbenchConfig(configCache);
   }
 }
