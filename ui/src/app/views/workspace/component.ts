@@ -176,7 +176,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
       this.cluster = cluster;
       this.initializeNotebookCookies().subscribe(() => {
-        this.clusterPulled = true;
+        this.localizeAllFiles();
       });
     });
   }
