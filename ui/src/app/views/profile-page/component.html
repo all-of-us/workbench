@@ -31,12 +31,12 @@
 </ng-template>
 <div>
   <h3>Identity Verification</h3>
-  <div *ngIf="!verifiedStatusIsLoaded; else verifiedStatus">
+  <div *ngIf="!verifiedStatusIsLoaded; else verifiedStatusMessage">
     <!-- TODO(dmohs): Spinner. -->
     Checking verification status...
   </div>
-  <ng-template #verifiedStatus>
-    <div *ngIf="verifiedStatusIsValid == null">
+  <ng-template #verifiedStatusMessage>
+    <div *ngIf="verifiedStatus === 'UNVERIFIED'">
       <div class="alert alert-warning">
         <div class="alert-items">
           <div class="alert-item static">
@@ -51,7 +51,7 @@
         <a routerLink="id-verification">Verify your identity</a>
       </div>
     </div>
-    <div class="alert alert-success" *ngIf="verifiedStatusIsValid">
+    <div class="alert alert-success" *ngIf="verifiedStatus === 'VERIFIED'">
       <div class="alert-items">
         <div class="alert-item static">
           <div class="alert-icon-wrapper">
@@ -61,7 +61,7 @@
         </div>
       </div>
     </div>
-    <div class="alert alert-danger" *ngIf="verifiedStatusIsValid == false">
+    <div class="alert alert-danger" *ngIf="verifiedStatus === 'REJECTED'">
       <div class="alert-items">
         <div class="alert-item static">
           <div class="alert-icon-wrapper">

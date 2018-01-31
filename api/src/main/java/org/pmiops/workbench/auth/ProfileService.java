@@ -6,6 +6,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class ProfileService {
 
     boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
+    profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
     profile.setFamilyName(user.getFamilyName());
     profile.setGivenName(user.getGivenName());
@@ -42,7 +44,16 @@ public class ProfileService {
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setEnabledInFireCloud(enabledInFireCloud);
-    profile.setBlockscoreVerificationIsValid(user.getBlockscoreVerificationIsValid());
+
+    if (user.getBlockscoreVerificationIsValid() == null) {
+      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
+    } else if (user.getBlockscoreVerificationIsValid() == false) {
+      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.REJECTED);
+    }
+    else {
+      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.VERIFIED);
+    }
+
     if (user.getTermsOfServiceCompletionTime() != null) {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
     }

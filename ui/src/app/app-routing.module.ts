@@ -4,12 +4,13 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
 
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {ReviewComponent} from './views/review/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
@@ -68,6 +69,14 @@ const routes: Routes = [
     children: workspaceRoutes,
     resolve: { workspace: WorkspaceResolver },
   }, {
+    path: 'admin/review-workspace',
+    component: AdminReviewWorkspaceComponent,
+    data: {title: 'Review Workspaces'}
+  }, {
+    path: 'admin/review-id-verification',
+    component: AdminReviewIdVerificationComponent,
+    data: {title: 'Review ID Verifications'}
+  }, {
     path: 'data-browser/home',
     component: HomeComponent,
     data: {title: 'Data Browser'}
@@ -91,10 +100,6 @@ const routes: Routes = [
     path: 'workspace/build',
     component: WorkspaceEditComponent,
     data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-  }, {
-    path: 'review',
-    component: ReviewComponent,
-    data: {title: 'Review Research Purposes'}
   }
 ];
 
