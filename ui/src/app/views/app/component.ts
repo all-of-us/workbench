@@ -1,9 +1,24 @@
-// UI Component framing the overall app (title and nav).
-// Content is in other Components.
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  NgZone,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
+
 import {Title} from '@angular/platform-browser';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+
+import {
+  ActivatedRoute,
+  Event as RouterEvent,
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+} from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
 
@@ -22,22 +37,30 @@ export const overriddenUrlKey = 'allOfUsApiUrlOverride';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
-  private baseTitle: string;
+  @ViewChild('pageSpinner') pageSpinner: ElementRef;
+
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
-  private _showCreateAccount = false;
-  private overriddenUrl: string = null;
   currentUrl: string;
   email: string;
+
+  private baseTitle: string;
+  private overriddenUrl: string = null;
+  private _showCreateAccount = false;
+
   constructor(
-      private activatedRoute: ActivatedRoute,
-      private errorHandlingService: ErrorHandlingService,
-      private locationService: Location,
-      private profileService: ProfileService,
-      private router: Router,
-      private signInService: SignInService,
-      private titleService: Title
+    /* Ours */
+    private signInService: SignInService,
+    private errorHandlingService: ErrorHandlingService,
+    private profileService: ProfileService,
+    /* Angular's */
+    private activatedRoute: ActivatedRoute,
+    private locationService: Location,
+    private router: Router,
+    private titleService: Title,
+    private zone: NgZone,
+    private renderer: Renderer2,
   ) {}
 
   ngOnInit(): void {
@@ -66,21 +89,9 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(this.baseTitle);
     }
 
-    // After navigation events, get the "title" value of the current Route and
-    // include it in the web page title.
-    this.router.events.subscribe((event) => {
-      this.currentUrl = this.router.url;
-      if (event instanceof NavigationEnd) {
-
-        let currentRoute = this.activatedRoute;
-        while (currentRoute.firstChild) {
-          currentRoute = currentRoute.firstChild;
-        }
-        if (currentRoute.outlet === 'primary') {
-          currentRoute.data.subscribe(value =>
-              this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
-        }
-      }
+    this.router.events.subscribe((event: RouterEvent) => {
+      this.spinOnNavigate(event);
+      this.setTitleFromRoute(event);
     });
 
     this.user = this.signInService.user;
@@ -95,6 +106,50 @@ export class AppComponent implements OnInit {
         });
       }
     });
+  }
+
+  /**
+   * On Navigation start, show a spinner.  On navigation end, stop the spinner.
+   */
+  private spinOnNavigate(event: RouterEvent): void {
+    const spinner = this.pageSpinner.nativeElement;
+    const spinParent = this.renderer.parentNode(spinner);
+
+    if (event instanceof NavigationStart) {
+      this.zone.runOutsideAngular(() => {
+        this.renderer.setStyle(spinParent, 'opacity', 0.8);
+        this.renderer.setStyle(spinParent, 'z-index', 1);
+        this.renderer.setStyle(spinner, 'opacity', 1);
+      });
+    } else if (event instanceof NavigationEnd
+            || event instanceof NavigationCancel
+            || event instanceof NavigationError) {
+      this.zone.runOutsideAngular(() => {
+        setTimeout(() => {
+        this.renderer.setStyle(spinParent, 'opacity', 0);
+        this.renderer.setStyle(spinParent, 'z-index', -1);
+        this.renderer.setStyle(spinner, 'opacity', 0);
+        }, 500);
+      });
+    }
+  }
+
+  /**
+   * Uses the title service to set the page title after nagivation events
+   */
+  private setTitleFromRoute(event: RouterEvent): void {
+    this.currentUrl = this.router.url;
+    if (event instanceof NavigationEnd) {
+
+      let currentRoute = this.activatedRoute;
+      while (currentRoute.firstChild) {
+        currentRoute = currentRoute.firstChild;
+      }
+      if (currentRoute.outlet === 'primary') {
+        currentRoute.data.subscribe(value =>
+            this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
+      }
+    }
   }
 
   signIn(e: Event): void {

@@ -87,3 +87,9 @@
 <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
   <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
 </div>
+
+<div class="page-spinner-container">
+  <div #pageSpinner class="spinner spinner-inverse" [style.opacity]="0">
+    Loading...
+  </div>
+</div>
