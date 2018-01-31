@@ -224,7 +224,7 @@ export class WorkspacesServiceStub {
     });
   }
 
-  retrieveAndLocalizeFiles(workspaceNamespace: string, workspaceId: string,
+  localizeAllFiles(workspaceNamespace: string, workspaceId: string,
       extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {

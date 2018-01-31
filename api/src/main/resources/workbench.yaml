@@ -525,11 +525,11 @@ paths:
          schema:
           $ref: '#/definitions/ErrorReport'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/retrieve-localize-files:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-all-files:
     get:
       summary: Get file details from google bucket and then localize to notebook server
-      description: Get files details from bucket folder,config and notebooks and then localize to notebook server
-      operationId: retrieveAndLocalizeFiles
+      description: Get files details from bucket folders config and notebooks and then localize to notebook server
+      operationId: localizeAllFiles
       tags:
         - workspaces
       parameters:

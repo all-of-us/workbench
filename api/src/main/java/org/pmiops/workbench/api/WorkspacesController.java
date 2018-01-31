@@ -462,7 +462,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId) {
     List<FileDetail> fileList = new ArrayList<>();
     try {
-      fileList = getFilesFromBucket(workspaceNamespace, workspaceId, NOTEBOOKS_WORKSPACE_DIRECTORY);
+      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
+          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+              .getWorkspace();
+      String bucketName = fireCloudWorkspace.getBucketName();
+      fileList = getFilesFromNotebooks(bucketName);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
@@ -474,11 +478,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> retrieveAndLocalizeFiles(String workspaceNamespace,
+  public ResponseEntity<Void> localizeAllFiles(String workspaceNamespace,
       String workspaceId) {
     List<FileDetail> fileList = new ArrayList<>();
     try {
-      fileList = getFilesFromBucket(workspaceNamespace, workspaceId, CONFIG_WORKSPACE_DIRECTORY);
+      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
+          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+              .getWorkspace();
+      String bucketName = fireCloudWorkspace.getBucketName();
+      fileList = getFilesFromNotebooks(bucketName);
+      fileList.addAll(getFilesFromConfig(bucketName));
       Map<String, String> fileMap = fileList.stream()
           .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
               fileDetail -> fileDetail.getPath()));
@@ -768,30 +777,42 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /**
-   * Gets the notebook files from google bucket.
-   * In case origin is createCluster, add config files to the file list and return
-   * @param workspaceNamespace
-   * @param workspaceId
-   * @param directory
-   * @return List of FileDetail
+   * Returns List of python fileDetails from notebooks folder
+   * @param bucketName
+   * @return list of FileDetail
    * @throws org.pmiops.workbench.firecloud.ApiException
    */
-  private List<FileDetail> getFilesFromBucket(String workspaceNamespace,
-      String workspaceId, String directory) throws org.pmiops.workbench.firecloud.ApiException {
+  private List<FileDetail> getFilesFromNotebooks(String bucketName) throws org.pmiops.workbench.firecloud.ApiException {
     List<Blob> blobList = new ArrayList<>();
-    List<FileDetail> fileList = new ArrayList<>();
-    org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-            .getWorkspace();
-    String bucketName = fireCloudWorkspace.getBucketName();
     blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
     blobList = blobList.stream()
         .filter(blob ->
             blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
         .collect(Collectors.toList());
-    if (directory.equals(CONFIG_WORKSPACE_DIRECTORY)) {
-      blobList.addAll(cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY));
-    }
+    return convertBlobToFileDetail(blobList, bucketName);
+
+  }
+
+  /**
+   * Returns List of FileDetail from config folder
+   * @param bucketName
+   * @return list of FileDetail
+   * @throws org.pmiops.workbench.firecloud.ApiException
+   */
+  private List<FileDetail> getFilesFromConfig(String bucketName) throws org.pmiops.workbench.firecloud.ApiException {
+    List<Blob> blobList = new ArrayList<>();
+    blobList = cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY);
+    return convertBlobToFileDetail(blobList, bucketName);
+  }
+
+  /**
+   * Convers Blob to FileDetail
+   * @param blobList
+   * @param bucketName
+   * @return List of FileDetail
+   */
+  private List<FileDetail> convertBlobToFileDetail(List<Blob> blobList, String bucketName) {
+    List<FileDetail> fileList = new ArrayList<>();
     blobList.forEach(blob -> {
       FileDetail fileDetail = new FileDetail();
       fileDetail.setName(blob.getName());

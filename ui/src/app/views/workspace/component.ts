@@ -338,19 +338,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   localizeAllFiles(): void {
     this.errorHandlingService.retryApi(this.workspacesService
-        .retrieveAndLocalizeFiles(this.wsNamespace, this.wsId))
+        .localizeAllFiles(this.wsNamespace, this.wsId))
         .subscribe(() => {
               this.handleLocalizeSuccess();
+              this.clusterPulled = true;
               setTimeout(() => {
                 this.resetAlerts();
-                this.clusterPulled = true;
               }, 3000);
             },
             error => {
               this.handleLocalizeError();
+              this.clusterPulled = true;
               setTimeout(() => {
                 this.resetAlerts();
-                this.clusterPulled = true;
               }, 3000);
             });
 

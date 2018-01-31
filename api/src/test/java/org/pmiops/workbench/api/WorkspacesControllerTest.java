@@ -1032,10 +1032,10 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRetrieveandLocalize() throws Exception {
+  public void testLocalizeAllFiles() throws Exception {
     mockObjectsForBuckFileList();
     try {
-      workspacesController.retrieveAndLocalizeFiles("mockProjectName", "mockWorkspaceName");
+      workspacesController.localizeAllFiles("mockProjectName", "mockWorkspaceName");
     }
     catch(Exception ex){
       fail();
