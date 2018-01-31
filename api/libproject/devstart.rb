@@ -1152,7 +1152,7 @@ def print_scoped_access_token(cmd_name, args)
   op.parse.validate
   gcc.validate
   gcc.ensure_service_account
-  scopes = %W{profile email}
+  scopes = %W{profile email https://www.googleapis.com/auth/cloud-billing}
 
   require "googleauth"
   creds = Google::Auth::ServiceAccountCredentials.make_creds(
