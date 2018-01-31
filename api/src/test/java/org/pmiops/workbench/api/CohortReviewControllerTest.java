@@ -314,6 +314,7 @@ public class CohortReviewControllerTest {
         Integer pageParam = page == null ? 0 : page;
         Integer pageSizeParam = pageSize == null ? 25 : pageSize;
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantId" : sortColumn;
+        sortOrder = sortOrder == null ? "asc" : sortOrder;
         long workspaceId = 1;
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(1L).participantId(1L);
@@ -371,12 +372,11 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findAll(key.getCohortReviewId(),
-                new ArrayList<>(),
-                new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(sortColumn)))).thenReturn(participants);
+                Collections.<String>emptyList(),
+                new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(columnParam)))).thenReturn(participants);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -390,9 +390,8 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findAll(key.getCohortReviewId(),
                         Collections.<String>emptyList(),
-                        new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(sortColumn)));
+                        new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(columnParam)));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
-        verify(genderRaceEthnicityConceptProvider, atLeast(1)).get();
         verifyNoMoreMockInteractions();
     }
 

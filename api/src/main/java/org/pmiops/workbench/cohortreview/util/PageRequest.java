@@ -1,5 +1,9 @@
 package org.pmiops.workbench.cohortreview.util;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.Objects;
+
 public class PageRequest {
     private int page;
     private int size;
@@ -52,4 +56,30 @@ public class PageRequest {
     public SortOrder getSortOrder() { return this.sortOrder; }
 
     public ParticipantsSortColumn getSortColumn() { return this.sortColumn; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PageRequest that = (PageRequest) o;
+        return page == that.page &&
+                size == that.size &&
+                sortOrder == that.sortOrder &&
+                sortColumn == that.sortColumn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(page, size, sortOrder, sortColumn);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("page", page)
+                .append("size", size)
+                .append("sortOrder", sortOrder)
+                .append("sortColumn", sortColumn)
+                .toString();
+    }
 }
