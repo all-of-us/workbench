@@ -1,7 +1,6 @@
-package org.pmiops.workbench.api;
+package org.pmiops.workbench.publicapi;
 
 
-import org.pmiops.workbench.annotations.UsesDefaultCdr;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
@@ -21,7 +20,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
-@UsesDefaultCdr
 public class DataBrowserController implements DataBrowserApiDelegate {
 
 

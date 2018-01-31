@@ -73,6 +73,14 @@ def run_api(account)
   end
 end
 
+def run_public_api_and_db()
+  common = Common.new
+  common.status "Starting database..."
+  common.run_inline %W{docker-compose up -d db}
+  common.status "Starting public API."
+  common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
+end
+
 def clean()
   common = Common.new
   common.run_inline %W{docker-compose run --rm api ./gradlew clean}
@@ -576,6 +584,12 @@ Common.register_command({
   :invocation => "run-api",
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
   :fn => lambda { |*args| run_api_and_db(*args) }
+})
+
+Common.register_command({
+  :invocation => "run-public-api",
+  :description => "Runs the public api server (assumes database is up-to-date.)",
+  :fn => lambda { |*args| run_public_api_and_db() }
 })
 
 Common.register_command({

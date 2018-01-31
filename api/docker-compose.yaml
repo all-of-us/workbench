@@ -20,9 +20,9 @@ services:
     build:
       context: ./src/dev/server
     user: ${UID}
-    working_dir: /w
+    working_dir: /w/api
     volumes:
-      - .:/w:cached
+      - ..:/w:cached
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
@@ -34,6 +34,24 @@ services:
     ports:
       - 8081:8081
       - 8001:8001
+  public-api:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: ./gradlew ../public-api:appengineRun
+    env_file:
+      - db/vars.env
+    ports:
+      - 8083:8083
+      - 8001:8084
   db-migration:
     depends_on:
       - db
@@ -159,11 +177,12 @@ services:
     build:
      context: ./src/dev/server
     user: ${UID}
-    working_dir: /w
+    working_dir: /w/api
     volumes:
+      - ..:/w:cached
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./gradlew tools:loadConfig -Pconfig_file=../config/config_local.json
+    command: wait-for db:3306 -- ./gradlew :tools:loadConfig -Pconfig_file=../config/config_local.json
     env_file:
       - db/vars.env
 volumes:
