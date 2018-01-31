@@ -547,7 +547,7 @@ paths:
         200:
           description: Files have been localized
         404:
-          description: Workspace not found
+          description: Workspace or Cluster not found
           schema:
             $ref: '#/definitions/ErrorReport'
         500:

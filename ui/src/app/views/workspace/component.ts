@@ -324,7 +324,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
         .subscribe(() => {
-
+          this.handleLocalizeSuccess();
           setTimeout(() => {
             this.resetAlerts();
           }, 5000);
