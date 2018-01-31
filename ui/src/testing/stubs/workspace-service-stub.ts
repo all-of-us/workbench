@@ -231,7 +231,7 @@ export class WorkspacesServiceStub {
         observer.next(null);
         observer.complete();
       }, 0);
-    })
+    });
 
   }
 }
