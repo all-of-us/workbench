@@ -4,7 +4,7 @@ public class PageRequest {
     private int page;
     private int size;
     private SortOrder sortOrder;
-    private SortColumn sortColumn;
+    private ParticipantsSortColumn sortColumn;
 
     /**
      * Creates a new {@link PageRequest}. Pages are zero indexed.
@@ -24,7 +24,7 @@ public class PageRequest {
         this.page = page;
         this.size = size;
         this.sortOrder = SortOrder.asc;
-        this.sortColumn = SortColumn.PARTICIPANT_ID;
+        this.sortColumn = ParticipantsSortColumn.PARTICIPANT_ID;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PageRequest {
      * @param sortOrder order of the sort.
      * @param sortColumn column to sort.
      */
-    public PageRequest(int page, int size, SortOrder sortOrder, SortColumn sortColumn) {
+    public PageRequest(int page, int size, SortOrder sortOrder, ParticipantsSortColumn sortColumn) {
         this(page, size);
         this.sortOrder = sortOrder;
         this.sortColumn = sortColumn;
@@ -51,5 +51,5 @@ public class PageRequest {
 
     public SortOrder getSortOrder() { return this.sortOrder; }
 
-    public SortColumn getSortColumn() { return this.sortColumn; }
+    public ParticipantsSortColumn getSortColumn() { return this.sortColumn; }
 }

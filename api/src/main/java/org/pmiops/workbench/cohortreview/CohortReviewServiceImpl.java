@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -12,8 +13,6 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,8 +129,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatus;
     }
 
-    @Override
-    public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
-        return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filterList, PageRequest pageRequest) {
+        return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
     }
 }

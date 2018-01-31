@@ -16,9 +16,10 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.data.domain.PageRequest;
 
 import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -261,18 +262,14 @@ public class CohortReviewServiceImplTest {
     @Test
     public void findParticipantCohortStatuses() throws Exception {
         long cohortReviewId = 1;
-        PageRequest pageRequest = new PageRequest(0, 1);
+        org.pmiops.workbench.cohortreview.util.PageRequest pageRequest = new org.pmiops.workbench.cohortreview.util.PageRequest(0, 1);
 
-        ParticipantCohortStatus pcs = new ParticipantCohortStatus();
-        when(participantCohortStatusDao.findByParticipantKey_CohortReviewId(
-                cohortReviewId,
-                pageRequest)).thenReturn(null);
+        when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
 
-        cohortReviewService.findParticipantCohortStatuses(cohortReviewId, pageRequest);
+        cohortReviewService.findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest);
 
-        verify(participantCohortStatusDao).findByParticipantKey_CohortReviewId(
-                cohortReviewId,
-                pageRequest);
+        verify(participantCohortStatusDao).findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest);
+
         verifyNoMoreMockInteractions();
     }
 

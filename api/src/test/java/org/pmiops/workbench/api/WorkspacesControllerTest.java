@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -188,6 +189,9 @@ public class WorkspacesControllerTest {
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
+    //set the db name to be empty since test cases currently
+    //run in the workbench schema only.
+    cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
@@ -606,6 +610,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithCohorts() throws Exception {
+    CdrVersionContext.setCdrVersion(cdrVersion);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
