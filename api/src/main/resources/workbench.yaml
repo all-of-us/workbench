@@ -1307,6 +1307,11 @@ definitions:
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
+  EmailVerificationStatus:
+    type: string
+    description: stage of email verification
+    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, verified]
+
   EmptyResponse:
     type: object
     properties:
@@ -1736,6 +1741,8 @@ definitions:
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
       disabled:
         type: boolean
+      emailVerificationStatus:
+        $ref: "#/definitions/EmailVerificationStatus"
 
   ErrorResponse:
     type: object
