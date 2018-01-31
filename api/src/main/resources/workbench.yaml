@@ -1463,6 +1463,14 @@ definitions:
       gsuiteDomain:
         type: string
         description: G-Suite domain containing user accounts.
+      projectId:
+        type: string
+        description: The cloud project in which this app is running.
+      stackdriverApiKey:
+        type: string
+        description: |
+          Stackdriver API key for error reporting, scoped to a particular
+          domain. If unset, Stackdriver error reporting should be disabled.
 
   # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:

@@ -47,6 +47,8 @@
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.6",
+    "stackdriver-errors-js": "^0.4.0",
+    "stacktrace-js": "^2.0.0",
     "zone.js": "0.8.12"
   },
   "devDependencies": {
