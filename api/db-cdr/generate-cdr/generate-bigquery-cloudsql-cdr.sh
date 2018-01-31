@@ -22,9 +22,8 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 USAGE="./generate-cdr/generate-bigquery-cloudsql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
-USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD --bucket <BUCKET>"
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
-USAGE="$USAGE \n Local mysql databases named cdr<cdr-version> and public<cdr-version> are created and populated."
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
