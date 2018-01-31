@@ -33,4 +33,11 @@ public class WorkbenchConfig {
   }
 
   public GoogleDirectoryServiceConfig googleDirectoryService;
+
+  public static class ServerConfig {
+    public String stackdriverApiKey;
+    public String projectId;
+  }
+
+  public ServerConfig server;
 }
