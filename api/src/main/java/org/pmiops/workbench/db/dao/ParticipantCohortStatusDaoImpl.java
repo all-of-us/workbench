@@ -59,7 +59,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
             "status, cohort_review_id, participant_id) " +
             "values";
-    private static final String INSERT_NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d)";
+    private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d)";
     private static final int BATCH_SIZE = 50;
 
     @Autowired
@@ -85,7 +85,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             for (ParticipantCohortStatus pcs : participantCohortStatuses) {
                 String birthDate = pcs.getBirthDate() == null
                         ? "NULL" : "'" + pcs.getBirthDate().toString() + "'";
-                String nextSql = String.format(INSERT_NEXT_INSERT,
+                String nextSql = String.format(NEXT_INSERT,
                         birthDate,
                         pcs.getEthnicityConceptId(),
                         pcs.getGenderConceptId(),

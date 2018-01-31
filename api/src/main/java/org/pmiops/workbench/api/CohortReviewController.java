@@ -190,7 +190,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         List<ParticipantCohortStatus> paginatedPCS =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(),
                         Collections.<String>emptyList(),
-                        createPageRequest(PAGE, PAGE_SIZE, SortOrder.asc.name(), PARTICIPANT_ID));
+                        createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         lookupGenderRaceEthnicityValues(paginatedPCS);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
@@ -408,8 +408,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private PageRequest createPageRequest(Integer page, Integer pageSize, String sortOrder, String sortColumn) {
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
-        String sortOrderParam = Optional.ofNullable(sortOrder).orElse(SortOrder.asc.name());
-        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(ParticipantsSortColumn.PARTICIPANT_ID.getName());
+        String sortOrderParam = Optional.ofNullable(sortOrder).orElse(ASC);
+        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(PARTICIPANT_ID);
         return new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrderParam), ParticipantsSortColumn.fromName(sortColumnParam));
     }
 
