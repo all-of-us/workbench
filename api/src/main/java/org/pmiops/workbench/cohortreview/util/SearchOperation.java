@@ -1,12 +1,12 @@
 package org.pmiops.workbench.cohortreview.util;
 
-public enum FilterOperation {
+public enum SearchOperation {
 
     EQUALS("=");
 
     private final String name;
 
-    private FilterOperation(String name) {
+    private SearchOperation(String name) {
         this.name = name;
     }
 

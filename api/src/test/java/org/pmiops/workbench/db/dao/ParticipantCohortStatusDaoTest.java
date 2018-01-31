@@ -6,22 +6,20 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.pmiops.workbench.cohortreview.util.Filter;
-import org.pmiops.workbench.cohortreview.util.FilterOperation;
-import org.pmiops.workbench.cohortreview.util.SortColumn;
+import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.cohortreview.util.ParticipantsSortColumn;
 import org.pmiops.workbench.cohortreview.util.SortOrder;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -49,8 +48,18 @@ public class ParticipantCohortStatusDaoTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    private int page;
+    private int pageSize;
+
     @Before
     public void onSetup() {
+        page = 0;
+        pageSize = 25;
+
+        CdrVersion cdrVersion = new CdrVersion();
+        cdrVersion.setCdrDbName("");
+        CdrVersionContext.setCdrVersion(cdrVersion);
+
         jdbcTemplate.execute("insert into participant_cohort_status" +
                 "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id)" +
                 "values (1, 1, 1, 1, sysdate(), 2, 3)");
@@ -75,34 +84,6 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Paging() throws Exception {
-
-        final Sort sort = new Sort(Sort.Direction.ASC, "participantKey.participantId");
-        assertParticipant(new PageRequest(0, 1, sort),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED));
-        assertParticipant(new PageRequest(1, 1, sort),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED));
-    }
-
-    @Test
-    public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId_Sorting() throws Exception {
-
-        final Sort sortParticipantAsc = new Sort(Sort.Direction.ASC, "participantKey.participantId");
-        final Sort sortParticipantDesc = new Sort(Sort.Direction.DESC, "participantKey.participantId");
-        final Sort sortStatusAsc = new Sort(Sort.Direction.ASC, "status");
-        final Sort sortStatusDesc = new Sort(Sort.Direction.DESC, "status");
-
-        assertParticipant(new PageRequest(0, 1, sortParticipantAsc),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED));
-        assertParticipant(new PageRequest(0, 1, sortParticipantDesc),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED));
-        assertParticipant(new PageRequest(0, 1, sortStatusAsc),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED));
-        assertParticipant(new PageRequest(0, 1, sortStatusDesc),
-                createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED));
-    }
-
-    @Test
     public void findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId() throws Exception {
         ParticipantCohortStatus participant1 = createExpectedPCS(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
         ParticipantCohortStatus actualParticipant = participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
@@ -121,7 +102,7 @@ public class ParticipantCohortStatusDaoTest {
      * @throws Exception
      */
     @Test
-    public void z_saveParticipantCohortStatuses() throws Exception {
+    public void zzz_saveParticipantCohortStatuses() throws Exception {
         ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortReviewId(2).participantId(3);
         ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortReviewId(2).participantId(4);
         ParticipantCohortStatus pcs1 = new ParticipantCohortStatus()
@@ -140,21 +121,22 @@ public class ParticipantCohortStatusDaoTest {
                 .raceConceptId(1L);
 
         participantCohortStatusDao.saveParticipantCohortStatusesCustom(Arrays.asList(pcs1, pcs2));
-        List<ParticipantCohortStatus> pcdList =
-                participantCohortStatusDao.findByParticipantKey_CohortReviewId(2, new PageRequest(0, 10)).getContent();
-        assertEquals(2, pcdList.size());
 
-        participantCohortStatusDao.delete(pcs1);
-        participantCohortStatusDao.delete(pcs2);
+        String sql = "select count(*) from participant_cohort_status where cohort_review_id = ?";
+        final Object[] sqlParams = { key1.getCohortReviewId() };
+        final Integer expectedCount = new Integer("2");
+
+        assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
     }
 
     @Test
     public void findAll_NoSearchCriteria() throws Exception {
-        int page = 0;
-        int pageSize = 25;
-        org.pmiops.workbench.cohortreview.util.PageRequest pageRequest =
-                new org.pmiops.workbench.cohortreview.util.PageRequest(0, 25, SortOrder.asc, SortColumn.PARTICIPANT_ID);
-        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+        CdrVersion cdrVersion = new CdrVersion();
+        cdrVersion.setCdrDbName("");
+        CdrVersionContext.setCdrVersion(cdrVersion);
+
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
 
@@ -169,29 +151,100 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAll_SearchCriteria() throws Exception {
-        int page = 0;
-        int pageSize = 25;
-        org.pmiops.workbench.cohortreview.util.PageRequest pageRequest =
-                new org.pmiops.workbench.cohortreview.util.PageRequest(0, 25, SortOrder.asc, SortColumn.PARTICIPANT_ID);
-        List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter("participantId", FilterOperation.EQUALS, "1"));
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        List<String> filters = new ArrayList<>();
+        filters.add("{property: participantId, value: 1}");
+        filters.add("{property: status, value: INCLUDED}");
+        filters.add("{property: birthDate, value: " + new Date(System.currentTimeMillis()).toString() + "}");
+        filters.add("{property: gender, value: MALE}");
+        filters.add("{property: race, value: Asian}");
+        filters.add("{property: 'ethnicity', value: 'Not Hispanic'}");
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, filters, pageRequest);
 
         assertEquals(1, results.size());
 
-        ParticipantCohortStatus participant1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
-        participant1.setBirthDate(results.get(0).getBirthDate());
+        ParticipantCohortStatus expectedPCS = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
-        assertEquals(participant1, results.get(0));
+        assertEquals(expectedPCS, results.get(0));
     }
 
-    private void assertParticipant(Pageable pageRequest, ParticipantCohortStatus expectedParticipant) {
-        Slice<ParticipantCohortStatus> participants = participantCohortStatusDao
-                .findByParticipantKey_CohortReviewId(
-                        expectedParticipant.getParticipantKey().getCohortReviewId(),
-                        pageRequest);
-        expectedParticipant.setBirthDate(participants.getContent().get(0).getBirthDate());
-        assertEquals(expectedParticipant, participants.getContent().get(0));
+    @Test
+    public void findAll_Paging() throws Exception {
+        PageRequest pageRequest = new PageRequest(page, 1, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(1, results.size());
+
+        ParticipantCohortStatus expectedPCS = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS.setBirthDate(results.get(0).getBirthDate());
+
+        assertEquals(expectedPCS, results.get(0));
+
+        pageRequest = new PageRequest(1, 1, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(1, results.size());
+
+        expectedPCS = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
+        expectedPCS.setBirthDate(results.get(0).getBirthDate());
+
+        assertEquals(expectedPCS, results.get(0));
+    }
+
+    @Test
+    public void findAll_Sorting() throws Exception {
+        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(2, results.size());
+
+        ParticipantCohortStatus expectedPCS1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS1.setBirthDate(results.get(0).getBirthDate());
+        ParticipantCohortStatus expectedPCS2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
+        expectedPCS2.setBirthDate(results.get(1).getBirthDate());
+
+        assertEquals(expectedPCS1, results.get(0));
+        assertEquals(expectedPCS2, results.get(1));
+
+        pageRequest = new PageRequest(page, 2, SortOrder.desc, ParticipantsSortColumn.PARTICIPANT_ID);
+        results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(2, results.size());
+
+        expectedPCS1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
+        expectedPCS1.setBirthDate(results.get(0).getBirthDate());
+        expectedPCS2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS2.setBirthDate(results.get(1).getBirthDate());
+
+        assertEquals(expectedPCS1, results.get(0));
+        assertEquals(expectedPCS2, results.get(1));
+    }
+
+    @Test
+    public void findAll_BadFilterValues() throws Exception {
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
+        List<String> filters = new ArrayList<>();
+
+        filters.add("{property: participantId, value: z}");
+        assertBadRequest(pageRequest, filters, "Problems parsing participantId: For input string: \"z\"");
+
+        filters.clear();
+        filters.add("{property: status, value: z}");
+        assertBadRequest(pageRequest, filters, "Problems parsing status: No enum constant org.pmiops.workbench.model.CohortStatus.z");
+
+        filters.clear();
+        filters.add("{property: birthDate, value: z}");
+        assertBadRequest(pageRequest, filters, "Problems parsing birthDate: Unparseable date: \"z\"");
+    }
+
+    private void assertBadRequest(PageRequest pageRequest, List<String> filters, String expectedException) {
+        try {
+            participantCohortStatusDao.findAll(1L, filters, pageRequest);
+            fail("Should have thrown BadRequestException!");
+        } catch (BadRequestException e) {
+            assertEquals(expectedException, e.getMessage());
+        }
     }
 
     private ParticipantCohortStatus createExpectedPCS(ParticipantCohortStatusKey key, CohortStatus status) {

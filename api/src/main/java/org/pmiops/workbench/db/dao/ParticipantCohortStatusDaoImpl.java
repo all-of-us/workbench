@@ -1,19 +1,30 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.SortColumn;
+import org.pmiops.workbench.cohortreview.util.ParticipantsSortColumn;
+import org.pmiops.workbench.cohortreview.util.SearchOperation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.CohortStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -21,31 +32,24 @@ import java.util.logging.Logger;
 
 public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDaoCustom {
 
+    public static final String cdrDbName = "${cdrDbName}";
+
     public static final String SELECT_SQL_TEMPLATE = "select cohort_review_id as cohortReviewId,\n" +
             "participant_id as participantId,\n" +
             "status,\n" +
             "gender_concept_id as genderConceptId,\n" +
-            "(select concept_name\n" +
-            "        from concept c\n" +
-            "        where c.concept_id = pcs.gender_concept_id\n" +
-            "        and c.vocabulary_id = 'Gender'\n" +
-            "       ) as gender,\n" +
+            "gender.concept_name as gender,\n" +
             "birth_date as birthDate,\n" +
             "race_concept_id as raceConceptId,\n" +
-            "(select concept_name\n" +
-            "        from concept c\n" +
-            "        where c.concept_id = pcs.race_concept_id\n" +
-            "        and c.vocabulary_id = 'Race'\n" +
-            "       ) as race,\n" +
+            "race.concept_name as race,\n" +
             "ethnicity_concept_id as ethnicityConceptId,\n" +
-            "(select concept_name\n" +
-            "        from concept c\n" +
-            "        where c.concept_id = pcs.ethnicity_concept_id\n" +
-            "        and c.vocabulary_id = 'Ethnicity'\n" +
-            "       ) as ethnicity\n" +
-            "from participant_cohort_status pcs\n";
+            "ethnicity.concept_name as ethnicity\n" +
+            "from participant_cohort_status pcs\n" +
+            "join " + cdrDbName + "concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
+            "join " + cdrDbName + "concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
+            "join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')";
 
-    private static final String WHERE_CLAUSE_TEMPLATE = "where\n";
+    private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 
     private static final String ORDERBY_SQL_TEMPLATE = "order by %s %s\n";
 
@@ -60,6 +64,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final Logger log = Logger.getLogger(ParticipantCohortStatusDaoImpl.class.getName());
 
@@ -114,24 +121,66 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     }
 
     @Override
-    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filtersList, PageRequest pageRequest) {
         String sortColumn = pageRequest.getSortColumn().getDbName();
-        sortColumn = (sortColumn.equals(SortColumn.PARTICIPANT_ID.getDbName()))
-                ? SortColumn.PARTICIPANT_ID.getDbName() : sortColumn + ", " + SortColumn.PARTICIPANT_ID.getDbName();
+        String schemaPrefix = CdrVersionContext.getCdrVersion().getCdrDbName();
+        schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
+
+        sortColumn = (sortColumn.equals(ParticipantsSortColumn.PARTICIPANT_ID.getDbName()))
+                ? ParticipantsSortColumn.PARTICIPANT_ID.getDbName() :
+                sortColumn + ", " + ParticipantsSortColumn.PARTICIPANT_ID.getDbName();
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("cohortReviewId", cohortReviewId);
+
         String sqlStatement = SELECT_SQL_TEMPLATE
-                + buildFilters(filtersList)
+                + buildFilteringSql(filtersList, parameters)
                 + String.format(ORDERBY_SQL_TEMPLATE, sortColumn, pageRequest.getSortOrder().name())
                 + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber(), pageRequest.getPageSize());
-        return jdbcTemplate.query(sqlStatement, new ParticipantCohortStatusRowMapper());
+
+        return namedParameterJdbcTemplate.query(sqlStatement.replace(cdrDbName, schemaPrefix),
+                parameters,
+                new ParticipantCohortStatusRowMapper());
     }
 
-    private String buildFilters(List<Filter> filtersList) {
-        List<String> filtersSql = new ArrayList<>();
-        for (Filter filter : filtersList) {
-            filtersSql.add(SortColumn.fromName(filter.getProperty()).getDbName() + " " + filter.getOperation().getName() + " " + filter.getValue() + "\n");
+    private String buildFilteringSql(List<String> filtersList, MapSqlParameterSource parameters) {
+        Filter fromJson;
+        List<String> sqlParts = new ArrayList<>();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+        sqlParts.add(WHERE_CLAUSE_TEMPLATE);
+        for (String filter : filtersList) {
+            try {
+                fromJson = new Gson().fromJson(filter, Filter.class);
+                fromJson.setOperation(SearchOperation.EQUALS);
+            } catch (JsonSyntaxException ex) {
+                throw new BadRequestException("Invalid Filter Definition: " + ex.getMessage());
+            }
+            if (ParticipantsSortColumn.fromName(fromJson.getProperty()) == null) {
+                throw new BadRequestException("Bad Filter in request: " + fromJson.getProperty());
+            }
+            sqlParts.add(ParticipantsSortColumn.fromName(fromJson.getProperty()).getDbName() +
+                    " " + fromJson.getOperation().getName() + " :" + fromJson.getProperty() + "\n");
+            try {
+                if (ParticipantsSortColumn.isDatabaseTypeLong(fromJson.getProperty())) {
+                    if (fromJson.getProperty().equals(ParticipantsSortColumn.STATUS.getName())) {
+                        parameters.addValue(fromJson.getProperty(), new Long(CohortStatus.valueOf(fromJson.getValue()).ordinal()));
+                    } else {
+                        parameters.addValue(fromJson.getProperty(), new Long(fromJson.getValue()));
+                    }
+                } else if (ParticipantsSortColumn.isDatabaseTypeDate(fromJson.getProperty())) {
+                    parameters.addValue(fromJson.getProperty(), new Date(df.parse(fromJson.getValue()).getTime()));
+                } else {
+                    parameters.addValue(fromJson.getProperty(), fromJson.getValue());
+                }
+
+            } catch (Exception ex) {
+                throw new BadRequestException("Problems parsing " + fromJson.getProperty() + ": " + ex.getMessage());
+            }
+
         }
 
-        return (!filtersSql.isEmpty()) ? WHERE_CLAUSE_TEMPLATE + String.join(" and ", filtersSql) : "";
+        return (!sqlParts.isEmpty()) ? String.join(" and ", sqlParts) : "";
     }
 
     private class ParticipantCohortStatusRowMapper implements RowMapper<ParticipantCohortStatus> {

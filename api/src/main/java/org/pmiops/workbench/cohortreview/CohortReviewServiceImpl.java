@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -130,7 +129,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatus;
     }
 
-    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> searchCriteriaList, PageRequest pageRequest) {
-        return participantCohortStatusDao.findAll(cohortReviewId, searchCriteriaList, pageRequest);
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filterList, PageRequest pageRequest) {
+        return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
     }
 }

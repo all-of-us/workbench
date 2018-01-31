@@ -4,16 +4,13 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.FilterOperation;
-import org.pmiops.workbench.cohortreview.util.SortColumn;
+import org.pmiops.workbench.cohortreview.util.ParticipantsSortColumn;
 import org.pmiops.workbench.cohortreview.util.SortOrder;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -57,7 +54,7 @@ import java.util.stream.Collectors;
 public class CohortReviewController implements CohortReviewApiDelegate {
 
     public static final String ASC = SortOrder.asc.name();
-    public static final String PARTICIPANT_ID = SortColumn.PARTICIPANT_ID.getName();
+    public static final String PARTICIPANT_ID = ParticipantsSortColumn.PARTICIPANT_ID.getName();
     public static final Integer PAGE = 0;
     public static final Integer PAGE_SIZE = 25;
     public static final Integer MAX_REVIEW_SIZE = 10000;
@@ -192,7 +189,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         List<ParticipantCohortStatus> paginatedPCS =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(),
-                        Collections.<Filter>emptyList(),
+                        Collections.<String>emptyList(),
                         createPageRequest(PAGE, PAGE_SIZE, SortOrder.asc.name(), PARTICIPANT_ID));
         lookupGenderRaceEthnicityValues(paginatedPCS);
 
@@ -318,8 +315,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
 
+        filters = filters == null ? Collections.<String>emptyList() : filters;
         List<ParticipantCohortStatus> participantCohortStatuses =
-                cohortReviewService.findAll(cohortReview.getCohortReviewId(), buildSearchCriteria(filters), pageRequest);
+                cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
         lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
@@ -408,29 +406,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return definition;
     }
 
-    private List<Filter> buildSearchCriteria(List<String> filters) {
-        List<Filter> searchFilters = new ArrayList<>();
-        if (filters == null) {
-            return searchFilters;
-        }
-        for (String filter : filters) {
-            try {
-                Filter fromJson = new Gson().fromJson(filter, Filter.class);
-                fromJson.setOperation(FilterOperation.EQUALS);
-                searchFilters.add(fromJson);
-            } catch (JsonSyntaxException ex) {
-                throw new BadRequestException("Invalid Filter: " + ex.getMessage());
-            }
-        }
-        return searchFilters;
-    }
-
     private PageRequest createPageRequest(Integer page, Integer pageSize, String sortOrder, String sortColumn) {
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
         String sortOrderParam = Optional.ofNullable(sortOrder).orElse(SortOrder.asc.name());
-        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(SortColumn.PARTICIPANT_ID.getName());
-        return new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrderParam), SortColumn.fromName(sortColumnParam));
+        String sortColumnParam = Optional.ofNullable(sortColumn).orElse(ParticipantsSortColumn.PARTICIPANT_ID.getName());
+        return new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrderParam), ParticipantsSortColumn.fromName(sortColumnParam));
     }
 
     private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {
