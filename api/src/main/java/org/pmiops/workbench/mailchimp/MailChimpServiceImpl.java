@@ -6,7 +6,9 @@ import com.ecwid.maleorang.MailchimpClient;
 import com.ecwid.maleorang.method.v3_0.lists.members.EditMemberMethod.Create;
 import com.ecwid.maleorang.method.v3_0.lists.members.GetMemberMethod;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -15,6 +17,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +27,7 @@ import org.springframework.stereotype.Service;
  * for internal use.
  */
 @Service
-public class MailChimpServiceImpl implements MailChimpService{
+public class MailChimpServiceImpl implements MailChimpService {
   private static final Logger log = Logger.getLogger(MailChimpServiceImpl.class.getName());
 
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
@@ -35,9 +38,11 @@ public class MailChimpServiceImpl implements MailChimpService{
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
   @Override
-  public String addUserContactEmail(String listId, String contactEmail) throws ApiException {
+  public String addUserContactEmail(String contactEmail) throws ApiException {
     String userId;
-    Create createRequest = new Create(listId, contactEmail);
+    Create createRequest = new Create(
+        cloudStorageServiceProvider.get().readMailChimpListId(),
+        contactEmail);
     createRequest.status = "pending";
     try {
       userId = getClient().execute(createRequest).mapping.get("id").toString();
@@ -48,14 +53,18 @@ public class MailChimpServiceImpl implements MailChimpService{
   }
 
   @Override
-  public String getUserVerificationStatus(String listId, String userEmailHash) throws ApiException {
-    String userStatus;
+  public GetMemberResponse getMember(String userEmailHash) throws ApiException {
+    Map<String, Object> mailchimpResponse;
     try {
-      userStatus = getClient().execute(new GetMemberMethod(listId, userEmailHash)).mapping.get("status").toString();
+      mailchimpResponse = getClient().execute(
+          new GetMemberMethod(cloudStorageServiceProvider.get().readMailChimpListId(),
+          userEmailHash)).mapping;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    return userStatus;
+    GetMemberResponse response = new GetMemberResponse(mailchimpResponse.get("email_address").toString(),
+        mailchimpResponse.get("status").toString());
+    return response;
   }
 
   MailchimpClient getClient() {

@@ -330,11 +330,13 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> verifyEmail(VerifyEmailRequest request) {
     User user = userDao.findUserByEmail(request.getUsername());
+    String mailchimpHash;
     try {
-      mailChimpService.addUserContactEmail(cloudStorageService.readMailChimpListId(), user.getContactEmail());
+      mailchimpHash = mailChimpService.addUserContactEmail(user.getContactEmail());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    user.setMailchimpHash(mailchimpHash);
     // TODO: Call http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
     //  Store response id in database as mailchimp hash value
     return getProfileResponse(user);

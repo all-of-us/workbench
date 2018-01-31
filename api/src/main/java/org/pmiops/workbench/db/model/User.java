@@ -46,7 +46,7 @@ public class User {
   private boolean disabled;
   private Timestamp disabledTime;
   private Long disablingAdminId;
-
+  private String mailchimpHash;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -233,5 +233,13 @@ public class User {
     this.disablingAdminId = disablingAdminId;
   }
 
+  @Column(name = "mailchimp_hash")
+  public String getMailchimpHash() {
+    return mailchimpHash;
+  }
+
+  public void setMailchimpHash(String mailchimpHash) {
+    this.mailchimpHash = mailchimpHash;
+  }
 
 }

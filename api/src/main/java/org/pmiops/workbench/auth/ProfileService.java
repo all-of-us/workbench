@@ -6,7 +6,10 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
+import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,13 +18,15 @@ import org.springframework.stereotype.Service;
 public class ProfileService {
 
   private final FireCloudService fireCloudService;
+  private final MailChimpService mailChimpService;
   private final Provider<User> userProvider;
   private final UserDao userDao;
 
   @Autowired
-  public ProfileService(FireCloudService fireCloudService, Provider<User> userProvider,
-      UserDao userDao) {
+  public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
+      Provider<User> userProvider, UserDao userDao) {
     this.fireCloudService = fireCloudService;
+    this.mailChimpService = mailChimpService;
     this.userProvider = userProvider;
     this.userDao = userDao;
   }
@@ -70,6 +75,24 @@ public class ProfileService {
     }
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));
+    }
+    if (user.getMailchimpHash() == null) {
+      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+    } else {
+      GetMemberResponse mailChimpResponse;
+      try {
+        mailChimpResponse = mailChimpService.getMember(user.getMailchimpHash());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      if (mailChimpResponse.getContactEmail() != user.getContactEmail()) {
+        user.setMailchimpHash(null);
+        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+      } else if (mailChimpResponse.getStatus() == "pending") {
+        profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+      } else {
+        profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+      }
     }
 
     return profile;
