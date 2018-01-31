@@ -527,8 +527,8 @@ paths:
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/retrieve-localize-files:
     get:
-      summary: Get details files from google bucket and then localize to notebook server
-      description: Get details files from google bucket and then localize to notebook server
+      summary: Get file details from google bucket and then localize to notebook server
+      description: Get files details from bucket folder,config and notebooks and then localize to notebook server
       operationId: retrieveAndLocalizeFiles
       tags:
         - workspaces

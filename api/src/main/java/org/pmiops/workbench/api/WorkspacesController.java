@@ -86,7 +86,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
-  private static final String ORIGIN_CONFIG = "createCluster";
 
   /**
    * Converter function from backend representation (used with Hibernate) to

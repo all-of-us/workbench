@@ -324,14 +324,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
         .subscribe(() => {
-          this.alertCategory = 'alert-success';
-          this.alertMsg = 'File(s) have been saved';
-          this.showAlerts = true;
+
           setTimeout(() => {
             this.resetAlerts();
           }, 5000);
         }, () => {
           this.handleLocalizeError();
+          setTimeout(() => {
+            this.resetAlerts();
+          }, 5000);
         });
   }
 
@@ -339,30 +340,32 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.errorHandlingService.retryApi(this.workspacesService
         .retrieveAndLocalizeFiles(this.wsNamespace, this.wsId))
         .subscribe(() => {
-              this.alertCategory = 'alert-success';
-              this.alertMsg = 'File(s) have been saved';
-              this.showAlerts = true;
+              this.handleLocalizeSuccess();
               setTimeout(() => {
                 this.resetAlerts();
                 this.clusterPulled = true;
-              }, 5000);
+              }, 3000);
             },
             error => {
               this.handleLocalizeError();
               setTimeout(() => {
+                this.resetAlerts();
                 this.clusterPulled = true;
-              }, 6000);
+              }, 3000);
             });
 
+  }
+
+  handleLocalizeSuccess(): void {
+    this.alertCategory = 'alert-success';
+    this.alertMsg = 'File(s) have been saved';
+    this.showAlerts = true;
   }
 
   handleLocalizeError(): void {
     this.alertCategory = 'alert-danger';
     this.alertMsg = 'There was an issue while saving file(s) please try again later';
     this.showAlerts = true;
-    setTimeout(() => {
-      this.resetAlerts();
-    }, 5000);
   }
 
   resetAlerts(): void {

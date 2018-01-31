@@ -1027,7 +1027,7 @@ public class WorkspacesControllerTest {
       workspacesController.getNoteBookList("mockProject", "mockWorkspace");
       fail();
     } catch (NotFoundException ex) {
-      // NotFoundException expected
+
     }
   }
 
