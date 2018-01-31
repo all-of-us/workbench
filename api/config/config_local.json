@@ -1,4 +1,4 @@
-// Configuration for the all-of-us-workbench-test.
+// Configuration for the local development environment.
 {
   "firecloud": {
     "debugEndpoints": false,
@@ -17,7 +17,7 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
-    "stackdriverApiKey": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
-    "projectId": "all-of-us-workbench-test"
+    "stackdriverApiKey": "",
+    "projectId": ""
   }
 }
