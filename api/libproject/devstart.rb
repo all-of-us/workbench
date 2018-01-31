@@ -347,6 +347,11 @@ def generate_bigquery_cloudsql_cdr(*args)
   common.run_inline %W{docker-compose run db-generate-bigquery-cloudsql-cdr} + args
 end
 
+def generate_cloudsql_cdr(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-cloudsql-cdr} + args
+end
+
 def run_drop_cdr_db(*args)
   common = Common.new
 
@@ -731,8 +736,13 @@ Common.register_command({
 })
 Common.register_command({
   :invocation => "generate-bigquery-cloudsql-cdr",
-  :description => "Generates cloud sql databases for a cdr release.",
+  :description => "Generates databases in bigquery and data from a cdr that will be in cloudsql.",
   :fn => lambda { |*args| generate_bigquery_cloudsql_cdr(*args) }
+})
+Common.register_command({
+  :invocation => "generate-cloudsql-cdr",
+  :description => "Creates and populates mysql or cloudsql database from data made by generate-bigquery-cloudsql-cdr.",
+  :fn => lambda { |*args| generate_cloudsql_cdr(*args) }
 })
 Common.register_command({
   :invocation => "run-drop-cdr-db",

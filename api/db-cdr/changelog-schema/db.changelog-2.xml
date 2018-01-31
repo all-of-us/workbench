@@ -7,7 +7,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="biopete" id="changelog-2">
     <validCheckSum>ANY</validCheckSum>
-    <createTable tableName="concept" schemaName="cdr">
+    <createTable tableName="concept">
       <column name="concept_id" type="INTEGER">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -47,21 +47,18 @@
     </createTable>
     <createIndex
             indexName="idx_concept_name"
-            schemaName="cdr"
             tableName="concept"
             unique="false">
       <column name="concept_name" type="varchar(255)"/>
     </createIndex>
     <createIndex
             indexName="idx_concept_code"
-            schemaName="cdr"
             tableName="concept"
             unique="false">
       <column name="concept_code" type="varchar(50)"/>
     </createIndex>
     <createIndex
             indexName="idx_domain_id"
-            schemaName="cdr"
             tableName="concept"
             unique="false">
       <column name="domain_id" type="varchar(20)"/>
@@ -69,20 +66,18 @@
 
     <createIndex
             indexName="idx_vocabulary_id"
-            schemaName="cdr"
             tableName="concept"
             unique="false">
       <column name="vocabulary_id" type="varchar(20)"/>
     </createIndex>
     <createIndex
             indexName="idx_standard_concept"
-            schemaName="cdr"
             tableName="concept"
             unique="false">
       <column name="standard_concept" type="varchar(1)"/>
     </createIndex>
 
-    <createTable tableName="concept_relationship" schemaName="cdr">
+    <createTable tableName="concept_relationship">
       <column name="concept_id_1" type="INTEGER">
         <constraints  nullable="false"/>
       </column>
@@ -107,21 +102,20 @@
       <column name="concept_id_1" type="bigint"></column>
     </createIndex>
 
-    <createIndex tableName="concept_relationship" indexName="idx_concept_2" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_concept_2">
       <column name="concept_id_2" type="bigint"></column>
     </createIndex>
 
-    <createIndex tableName="concept_relationship" indexName="idx_relationship_id" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_relationship_id">
       <column name="relationship_id" type="varchar(20)"></column>
     </createIndex>
 
     <addPrimaryKey
             columnNames="concept_id_1, concept_id_2, relationship_id"
             constraintName="pk_concept_rel"
-            schemaName="cdr"
             tableName="concept_relationship"/>
 
-    <createTable tableName="vocabulary" schemaName="cdr">
+    <createTable tableName="vocabulary">
       <column name="vocabulary_id"  type="VARCHAR(20)">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -210,7 +204,6 @@
 
     <createIndex
             indexName="idx_count_value"
-            schemaName="cdr"
             tableName="achilles_results"
             unique="false">
       <column name="count_value" type="bigint(20)"/>
@@ -275,14 +268,12 @@
 
     <createIndex
             indexName="idx_analysis_id"
-            schemaName="cdr"
             tableName="achilles_results_concept"
             unique="false">
       <column name="analysis_id" type="varchar(255)"/>
     </createIndex>
     <createIndex
             indexName="idx_analysis_id_stratum_1"
-            schemaName="cdr"
             tableName="achilles_results_concept"
             unique="false">
       <column name="analysis_id" type="bigint(20)"/>
@@ -291,7 +282,6 @@
 
     <createIndex
             indexName="idx_analysis_id_stratum_1_2"
-            schemaName="cdr"
             tableName="achilles_results_concept"
             unique="false">
       <column name="analysis_id" type="bigint(20)"/>
