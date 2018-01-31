@@ -429,8 +429,8 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findAll(key.getCohortReviewId(),
-                new ArrayList<>(),
-                new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(sortColumn)))).thenReturn(participants);
+                Collections.<String>emptyList(),
+                new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(columnParam)))).thenReturn(participants);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
@@ -448,7 +448,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findAll(key.getCohortReviewId(),
                         Collections.<String>emptyList(),
-                        new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(sortColumn)));
+                        new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(columnParam)));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
         verify(genderRaceEthnicityConceptProvider, atLeast(1)).get();
         verifyNoMoreMockInteractions();

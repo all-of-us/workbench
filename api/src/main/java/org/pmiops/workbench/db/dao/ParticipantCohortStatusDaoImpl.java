@@ -47,11 +47,11 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "from participant_cohort_status pcs\n" +
             "join " + cdrDbName + "concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
             "join " + cdrDbName + "concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
-            "join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')";
+            "join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
 
     private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 
-    private static final String ORDERBY_SQL_TEMPLATE = "order by %s %s\n";
+    private static final String ORDERBY_SQL_TEMPLATE = "order by %s\n";
 
     private static final String LIMIT_SQL_TEMPLATE = "limit %d, %d";
 
@@ -127,16 +127,16 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
         schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
 
         sortColumn = (sortColumn.equals(ParticipantsSortColumn.PARTICIPANT_ID.getDbName()))
-                ? ParticipantsSortColumn.PARTICIPANT_ID.getDbName() :
-                sortColumn + ", " + ParticipantsSortColumn.PARTICIPANT_ID.getDbName();
+                ? ParticipantsSortColumn.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
+                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantsSortColumn.PARTICIPANT_ID.getDbName();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("cohortReviewId", cohortReviewId);
 
         String sqlStatement = SELECT_SQL_TEMPLATE
                 + buildFilteringSql(filtersList, parameters)
-                + String.format(ORDERBY_SQL_TEMPLATE, sortColumn, pageRequest.getSortOrder().name())
-                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber(), pageRequest.getPageSize());
+                + String.format(ORDERBY_SQL_TEMPLATE, sortColumn)
+                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber() * pageRequest.getPageSize(), pageRequest.getPageSize());
 
         return namedParameterJdbcTemplate.query(sqlStatement.replace(cdrDbName, schemaPrefix),
                 parameters,

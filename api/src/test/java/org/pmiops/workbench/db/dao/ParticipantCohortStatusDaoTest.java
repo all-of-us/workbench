@@ -191,7 +191,7 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findAll_Sorting() throws Exception {
+    public void findAll_ParticipantIdSorting() throws Exception {
         PageRequest pageRequest = new PageRequest(page, 2, SortOrder.asc, ParticipantsSortColumn.PARTICIPANT_ID);
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
 
@@ -213,6 +213,35 @@ public class ParticipantCohortStatusDaoTest {
         expectedPCS1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
         expectedPCS1.setBirthDate(results.get(0).getBirthDate());
         expectedPCS2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS2.setBirthDate(results.get(1).getBirthDate());
+
+        assertEquals(expectedPCS1, results.get(0));
+        assertEquals(expectedPCS2, results.get(1));
+    }
+
+    @Test
+    public void findAll_StatusSorting() throws Exception {
+        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.asc, ParticipantsSortColumn.STATUS);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(2, results.size());
+
+        ParticipantCohortStatus expectedPCS1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
+        expectedPCS1.setBirthDate(results.get(0).getBirthDate());
+        ParticipantCohortStatus expectedPCS2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS2.setBirthDate(results.get(1).getBirthDate());
+
+        assertEquals(expectedPCS1, results.get(0));
+        assertEquals(expectedPCS2, results.get(1));
+
+        pageRequest = new PageRequest(page, 2, SortOrder.desc, ParticipantsSortColumn.STATUS);
+        results = participantCohortStatusDao.findAll(1L, Collections.<String>emptyList(), pageRequest);
+
+        assertEquals(2, results.size());
+
+        expectedPCS1 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),CohortStatus.INCLUDED);
+        expectedPCS1.setBirthDate(results.get(0).getBirthDate());
+        expectedPCS2 = createExpectedPCSWithConceptValues(new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),CohortStatus.EXCLUDED);
         expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
         assertEquals(expectedPCS1, results.get(0));

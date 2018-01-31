@@ -322,7 +322,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         filters = filters == null ? Collections.<String>emptyList() : filters;
         List<ParticipantCohortStatus> participantCohortStatuses =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
-        lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
         responseReview.setParticipantCohortStatuses(
