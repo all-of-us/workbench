@@ -61,16 +61,22 @@
         </div>
       </div>
     </div>
-    <div class="alert alert-danger" *ngIf="verifiedStatus === 'REJECTED'">
-      <div class="alert-items">
-        <div class="alert-item static">
-          <div class="alert-icon-wrapper">
-            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+    <div *ngIf="verifiedStatusIsValid == false">
+      <div class="alert alert-danger">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+            </div>
+            <span class="alert-text">Your identity cannot be validated.</span>
           </div>
-          <span class="alert-text">Your identity cannot be validated.</span>
         </div>
       </div>
+      <div style="margin-top: 1rem;">
+        <a routerLink="id-verification">Verify your identity</a>
+      </div>
     </div>
+
   </ng-template>
 </div>
 <div *ngIf="profileLoaded">
