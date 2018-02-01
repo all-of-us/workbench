@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AuditBigQueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -98,11 +97,7 @@ public class AuditController implements AuditApiDelegate {
   }
 
   @Override
-  public ResponseEntity<AuditBigQueryResponse> auditBigQuery(Boolean isAppengineCron) {
-    if (!isAppengineCron) {
-      throw new ForbiddenException("this endpoint is only callable via app engine cron");
-    }
-
+  public ResponseEntity<AuditBigQueryResponse> auditBigQuery() {
     // We expect to only see queries run within Firecloud AoU projects, or for administrative
     // purposes within the CDR project itself.
     String cdrProjectId = workbenchConfigProvider.get().server.projectId;

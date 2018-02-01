@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,9 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
+
+  @Autowired
+  private CronInterceptor cronInterceptor;
 
 
   @Bean
@@ -94,6 +98,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
+    registry.addInterceptor(cronInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
   }
 

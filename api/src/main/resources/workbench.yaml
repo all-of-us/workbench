@@ -694,20 +694,20 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+  # true, which app engine itself only sets when invoking as a cronjob.
+  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+
   /v1/cron/auditBigQuery:
     get:
       security: []
       tags:
         - audit
+        - cron
       description: >
         Endpoint meant to be called offline to trigger BigQuery auditing; may be
         slow to execute. Only executable via App Engine cronjob.
       operationId: auditBigQuery
-      parameters:
-        - in: header
-          name: X-Appengine-Cron
-          type: boolean
-          required: true
       responses:
         200:
           description: Audit was successful.

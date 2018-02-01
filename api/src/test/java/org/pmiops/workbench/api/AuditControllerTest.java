@@ -122,18 +122,18 @@ public class AuditControllerTest {
   @Test
   public void testAuditBigQueryCdrQueries() {
     stubBigQueryCalls(CDR_PROJECT_ID, USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery(true).getBody().getNumQueryIssues()).isEqualTo(0);
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test
   public void testAuditBigQueryFirecloudQueries() {
     stubBigQueryCalls(FC_PROJECT_ID, USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery(true).getBody().getNumQueryIssues()).isEqualTo(0);
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test
   public void testAuditBigQueryUnrecognizedProjectQueries() {
     stubBigQueryCalls("my-personal-gcp-project", USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery(true).getBody().getNumQueryIssues()).isEqualTo(5);
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(5);
   }
 }
