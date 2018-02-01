@@ -38,7 +38,7 @@ public class MailChimpServiceImpl implements MailChimpService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
   @Override
-  public String addUserContactEmail(String contactEmail) throws ApiException {
+  public String addUserContactEmail(String contactEmail) {
     String userId;
     Create createRequest = new Create(
         cloudStorageServiceProvider.get().readMailChimpListId(),
@@ -53,7 +53,7 @@ public class MailChimpServiceImpl implements MailChimpService {
   }
 
   @Override
-  public GetMemberResponse getMember(String userEmailHash) throws ApiException {
+  public GetMemberResponse getMember(String userEmailHash) {
     Map<String, Object> mailchimpResponse;
     try {
       mailchimpResponse = getClient().execute(

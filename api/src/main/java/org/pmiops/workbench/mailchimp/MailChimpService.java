@@ -9,7 +9,7 @@ import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
  * for internal use.
  */
 public interface MailChimpService {
-  String addUserContactEmail(String contactEmail) throws ApiException;
+  String addUserContactEmail(String contactEmail);
 
-  GetMemberResponse getMember(String userEmailHash) throws ApiException;
+  GetMemberResponse getMember(String userEmailHash);
 }
