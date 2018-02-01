@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cdr.model;
+package org.pmiops.workbench.cdr.model.common;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

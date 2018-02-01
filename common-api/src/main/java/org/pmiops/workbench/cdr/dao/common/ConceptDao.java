@@ -1,5 +1,5 @@
-package org.pmiops.workbench.cdr.dao;
-import org.pmiops.workbench.cdr.model.Concept;
+package org.pmiops.workbench.cdr.dao.common;
+import org.pmiops.workbench.cdr.model.common.Concept;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

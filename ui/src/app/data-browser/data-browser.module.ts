@@ -1,8 +1,19 @@
+<<<<<<< HEAD
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {ClarityModule} from '@clr/angular';
+=======
+import {environment} from 'environments/environment';
+
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Http, HttpModule } from '@angular/http';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ClarityModule } from '@clr/angular';
+>>>>>>> Moar changes
 
 /* Components */
 import {ChartModule} from 'angular2-highcharts';
@@ -18,21 +29,29 @@ import {TreeService} from './services/tree.service';
 
 import {LocalStorageModule} from 'angular-2-local-storage';
 
-
-import {HomeAsideComponent} from './home/home-aside/home-aside.component';
-import {HomeInfoComponent} from './home/home-info/home-info.component';
-import {HomeComponent} from './home/home.component';
-import {LazyTreeComponent} from './lazy-tree/lazy-tree.component';
-import {MobileChartsComponent} from './mobile-charts/mobile-charts.component';
-import {MyConceptsComponent} from './my-concepts/my-concepts.component';
-import {OneConceptComponent} from './one-concept/one-concept.component';
-import {PlaceholderComponent} from './placeholder/placeholder.component';
-import {SearchTableComponent} from './search-table/search-table.component';
-import {SearchComponent} from './search/search.component';
-import {TreeContainerComponent} from './tree-container/tree-container.component';
+import { HomeAsideComponent } from './home/home-aside/home-aside.component';
+import { HomeInfoComponent } from './home/home-info/home-info.component';
+import { HomeComponent } from './home/home.component';
+import { LazyTreeComponent } from './lazy-tree/lazy-tree.component';
+import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
+import { MyConceptsComponent } from './my-concepts/my-concepts.component';
+import { OneConceptComponent } from './one-concept/one-concept.component';
+import { PlaceholderComponent } from './placeholder/placeholder.component';
+import { SearchTableComponent } from './search-table/search-table.component';
+import { SearchComponent } from './search/search.component';
+import { TreeContainerComponent } from './tree-container/tree-container.component';
+import {overriddenPublicUrlKey} from '../views/app/component';
 
 import {DataBrowserService} from 'publicGenerated';
 import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
+
+function getPublicBasePath() {
+  return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
+}
+
+const DataBrowserServiceFactory = (http: Http) => {
+  return new DataBrowserService(http, getPublicBasePath(), null);
+};
 
 @NgModule({
   imports: [
@@ -64,13 +83,17 @@ import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component'
     PlaceholderComponent
   ],
   providers: [
-    AchillesService,
-    DataBrowserService,
-    TreeService,
-    {
-      provide: HighchartsStatic,
-      useValue: highcharts,
-    }
+      AchillesService,
+      {
+        provide:DataBrowserService,
+        useFactory: DataBrowserServiceFactory,
+        deps: [Http]
+      },
+      TreeService,
+      {
+        provide: HighchartsStatic,
+        useValue: highcharts,
+      }
   ]
 })
 export class DataBrowserModule {

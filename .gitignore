@@ -35,6 +35,7 @@
 /ui/dist/**
 /libproject/swagger-codegen-cli.jar
 /ui/src/generated/*
+/ui/src/publicGenerated/*
 cloud_sql_proxy
 node_modules
 npm-debug.log
@@ -46,6 +47,8 @@ common-api/.gradle/*
 common-api/.idea/*
 common-api/build/*
 common-api/common-api.iml
+public-api/.gradle
+public-api/wrapper
 public-api/.idea/*
 public-api/.swagger-codegen/*
 public-api/build/*

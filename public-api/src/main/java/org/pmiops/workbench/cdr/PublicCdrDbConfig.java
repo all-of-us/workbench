@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(
     entityManagerFactoryRef = "entityManagerFactory",
     transactionManagerRef = "transactionManager",
-    basePackages = { "org.pmiops.workbench.cdr" }
+    basePackages = { "org.pmiops.workbench.cdr", "org.pmiops.workbench.cdr.dao.common" }
 )
 /**
  * Spring configuration for our public CDR database; this is the only database used by public-api.
