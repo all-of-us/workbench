@@ -14,7 +14,7 @@ import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
-import {AppComponent, overriddenUrlKey, overriddenPublicUrlKey} from './views/app/component';
+import {AppComponent, overriddenPublicUrlKey, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
