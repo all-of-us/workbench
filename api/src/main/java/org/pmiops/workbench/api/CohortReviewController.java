@@ -25,7 +25,7 @@ import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantFilters;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -329,7 +329,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantFilters> getParticipantFilters(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
+    public ResponseEntity<ParticipantDemographics> getParticipantDemographics(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
         Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
@@ -347,9 +347,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
                 .collect(Collectors.toList());
 
-        ParticipantFilters participantFilters =
-                new ParticipantFilters().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
-        return ResponseEntity.ok(participantFilters);
+        ParticipantDemographics participantDemographics =
+                new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
+        return ResponseEntity.ok(participantDemographics);
     }
 
     @Override

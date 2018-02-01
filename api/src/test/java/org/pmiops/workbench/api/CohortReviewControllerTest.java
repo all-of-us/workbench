@@ -23,7 +23,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.ParticipantFilters;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -308,7 +308,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void getParticipantFilters() throws Exception {
+    public void getParticipantDemographics() throws Exception {
         String namespace = "aou-test";
         String name = "test";
         long cohortId = 1L;
@@ -345,14 +345,14 @@ public class CohortReviewControllerTest {
         List<ConceptIdName> ethnicityList = ethnicityMap.entrySet().stream()
                 .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
                 .collect(Collectors.toList());
-        ParticipantFilters expected = new ParticipantFilters().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
+        ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
 
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
                 WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 
-        ParticipantFilters response = reviewController.getParticipantFilters(namespace, name, cohortId, cdrVersionId).getBody();
+        ParticipantDemographics response = reviewController.getParticipantDemographics(namespace, name, cohortId, cdrVersionId).getBody();
         assertEquals(expected, response);
 
         verify(cohortReviewService).findCohort(cohortId);
