@@ -53,7 +53,7 @@ export class ProfilePageComponent implements OnInit {
     };
     this.profileService.verifyEmail(request).subscribe(
       (response) => {
-        console.log(response);
+        this.profile = response;
       }
     );
   }

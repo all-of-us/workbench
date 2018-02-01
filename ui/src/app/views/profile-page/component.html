@@ -17,15 +17,31 @@
 <div class="field-wrapper">
   <div class="field">
     <h5 class="field-label">Contact Email:
-      <div *ngIf="profileLoaded" class="field-label-button-container">
-        <div *ngIf="profile.contactEmail!==null">
-          <button class="btn field-label-button" (click)="verifyEmail()">
-            Verify my Email
-          </button>
-        </div>
+      <div *ngIf="profileLoaded && (profile.contactEmail!==null) && (profile.emailVerificationStatus=='unverified')" class="field-label-button-container">
+        <button class="btn field-label-button" (click)="verifyEmail()">
+          Verify my Email
+        </button>
       </div>
     </h5>
     <div *ngIf="profileLoaded else loading" class="data">{{profile.contactEmail}}</div>
+    <div *ngIf="profileLoaded && (profile.contactEmail !== null) && (profile.emailVerificationStatus !== 'unverified')">
+      <div class="alert alert-warning"*ngIf="profile.emailVerificationStatus === 'pending'">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper"><clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon></div>
+            <span class="alert-text">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-success" *ngIf="profileLoaded && (profile.emailVerificationStatus === 'verified')">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper"><clr-icon class="alert-icon" shape="check-circle"></clr-icon></div>
+            <span class="alert-text">Your email address has been verified.</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="field">
