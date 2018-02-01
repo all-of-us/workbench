@@ -25,24 +25,23 @@ then
   exit 1
 fi
 
-CREDS_ACCOUNT=${ACCOUNT}
+if [ -z "${BUCKET}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
 
-echo "Dumping tables to csv from $BUCKET\n"
+dump_path=./generate-cdr/$CDR_DB_NAME.sql
 
-# Get tables in project, stripping out tableId.
-# Note tables larger than 1 G need to be dumped into more than one file.
-# concept_relationship and concept are only big ones now.
+echo "Dumping $CDR_DB_NAME to $BUCKET\n"
 
-tables=`bq ls $PROJECT:$DATASET | tr -d "-" |  tr -s " " |  cut -f 2 -d' ' | sed "s/tableId//"`
+mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
+    --add-drop-table --disable-keys --ignore-table=$CDR_DB_NAME.DATABASECHANGELOG \
+    --ignore-table=$CDR_DB_NAME.DATABASECHANGELOGLOCK --databases \
+    $CDR_DB_NAME  > $dump_path
 
-for table in $tables; do
-  echo "Dumping table : $table"
-  if [[ $table =~ ^(concept|concept_relationship)$ ]]
-  then
-    bq extract $PROJECT:$DATASET.$table gs://$BUCKET/$DATASET/$table*.csv
-  else
-    bq extract $PROJECT:$DATASET.$table gs://$BUCKET/$DATASET/$table.csv
-  fi
-done
+
+gsutil cp $dump_path gs://$BUCKET/$CDR_DB_NAME.sql
+
 
 exit 0
