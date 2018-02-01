@@ -81,17 +81,13 @@ jobs:
           name: Test compilation of the Angular app
           working_directory: ~/workbench/ui
           command: yarn run build --no-watch --no-progress
-      - run:
-          name: Test compilation of the Angular app production bundle
-          working_directory: ~/workbench/ui
-          command: yarn run build --prod --no-watch --no-progress
       - deploy:
           name: Deploy to gcloud test project
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy_ui.sh
             else
-              echo "Not master branch, skipping"
+              echo "Not master branch, skipping deploy"
             fi
 
   py-client-test:
