@@ -53,10 +53,9 @@ echo "Dumping tables to csv from $BUCKET\n"
 # Get tables in project, stripping out tableId.
 # Note tables larger than 1 G need to be dumped into more than one file.
 # concept_relationship and concept are only big ones now.
+tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary)
 
-tables=`bq ls $PROJECT:$DATASET | tr -d "-" |  tr -s " " |  cut -f 2 -d' ' | sed "s/tableId//"`
-
-for table in $tables; do
+for table in ${tables[@]}; do
   echo "Dumping table : $table"
   if [[ $table =~ ^(concept|concept_relationship)$ ]]
   then
