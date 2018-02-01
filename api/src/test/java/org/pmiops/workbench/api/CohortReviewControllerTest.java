@@ -21,7 +21,9 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -40,6 +42,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -302,6 +305,60 @@ public class CohortReviewControllerTest {
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, pageSize,null,null);
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page,null,null,null);
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,null,null);
+    }
+
+    @Test
+    public void getParticipantDemographics() throws Exception {
+        String namespace = "aou-test";
+        String name = "test";
+        long cohortId = 1L;
+        long cdrVersionId = 1L;
+        long workspaceId = 1L;
+
+        Cohort cohort = new Cohort();
+        cohort.setWorkspaceId(workspaceId);
+
+        Map<Long, String> raceMap = new HashMap<>();
+        raceMap.put(1L, "White");
+        raceMap.put(2L, "African American");
+
+        Map<Long, String> genderMap = new HashMap<>();
+        genderMap.put(3L, "MALE");
+        genderMap.put(4L, "FEMALE");
+
+        Map<Long, String> ethnicityMap = new HashMap<>();
+        ethnicityMap.put(5L, "Hispanic or Latino");
+        ethnicityMap.put(6L, "Not Hispanic or Latino");
+
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        concepts.put(GenderRaceEthnicityType.RACE.name(), raceMap);
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), genderMap);
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), ethnicityMap);
+        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
+
+        List<ConceptIdName> raceList = raceMap.entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> genderList = genderMap.entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> ethnicityList = ethnicityMap.entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
+
+        when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+                WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
+        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
+
+        ParticipantDemographics response = reviewController.getParticipantDemographics(namespace, name, cohortId, cdrVersionId).getBody();
+        assertEquals(expected, response);
+
+        verify(cohortReviewService).findCohort(cohortId);
+        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId,
+                WorkspaceAccessLevel.READER);
+        verifyNoMoreMockInteractions();
     }
 
     private void assertFindByCohortIdAndCdrVersionId(String namespace,

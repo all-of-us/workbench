@@ -4,19 +4,6 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -31,12 +18,14 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -46,6 +35,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -323,6 +326,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<ParticipantDemographics> getParticipantDemographics(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
+
+        Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
+        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+
+        ParticipantDemographics participantDemographics =
+                new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
+        return ResponseEntity.ok(participantDemographics);
     }
 
     @Override
