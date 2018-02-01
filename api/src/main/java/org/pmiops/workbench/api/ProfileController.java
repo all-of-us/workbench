@@ -330,7 +330,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> verifyEmail(VerifyEmailRequest request) {
     User user = userDao.findUserByEmail(request.getUsername());
-    String mailchimpHash;
     try {
       mailChimpService.addUserContactEmail(user.getContactEmail());
     } catch (Exception e) {
