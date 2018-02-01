@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
@@ -76,23 +77,24 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));
     }
-    if (user.getMailchimpHash() == null) {
-      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    } else {
-      GetMemberResponse mailChimpResponse;
+    String userEmailVerificationStatus = null;
+    if(user.getContactEmail() != null) {
       try {
-        mailChimpResponse = mailChimpService.getMember(user.getMailchimpHash());
+        userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
+      } catch (NotFoundException e) {
+        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      if (mailChimpResponse.getContactEmail() != user.getContactEmail()) {
-        user.setMailchimpHash(null);
-        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-      } else if (mailChimpResponse.getStatus() == "pending") {
-        profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-      } else {
-        profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+      if (userEmailVerificationStatus != null) {
+        if (userEmailVerificationStatus.equals("pending")) {
+          profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+        } else {
+          profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+        }
       }
+    } else {
+      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
     }
 
     return profile;

@@ -232,14 +232,4 @@ public class User {
   public void setDisablingAdminId(Long disablingAdminId) {
     this.disablingAdminId = disablingAdminId;
   }
-
-  @Column(name = "mailchimp_hash")
-  public String getMailchimpHash() {
-    return mailchimpHash;
-  }
-
-  public void setMailchimpHash(String mailchimpHash) {
-    this.mailchimpHash = mailchimpHash;
-  }
-
 }

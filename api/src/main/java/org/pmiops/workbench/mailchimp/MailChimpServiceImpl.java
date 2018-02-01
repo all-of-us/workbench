@@ -3,8 +3,10 @@ package org.pmiops.workbench.mailchimp;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.ecwid.maleorang.MailchimpClient;
+import com.ecwid.maleorang.MailchimpException;
 import com.ecwid.maleorang.method.v3_0.lists.members.EditMemberMethod.Create;
 import com.ecwid.maleorang.method.v3_0.lists.members.GetMemberMethod;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,18 +52,22 @@ public class MailChimpServiceImpl implements MailChimpService {
   }
 
   @Override
-  public GetMemberResponse getMember(String userEmailHash) {
+  public String getMember(String contactEmail) throws NotFoundException {
     Map<String, Object> mailchimpResponse;
     try {
       mailchimpResponse = getClient().execute(
           new GetMemberMethod(cloudStorageServiceProvider.get().readMailChimpListId(),
-          userEmailHash)).mapping;
-    } catch (Exception e) {
+          contactEmail)).mapping;
+    } catch (MailchimpException e) {
+      if (e.code == 404) {
+        throw new NotFoundException();
+      } else {
+        throw new RuntimeException(e);
+      }
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    GetMemberResponse response = new GetMemberResponse(mailchimpResponse.get("email_address").toString(),
-        mailchimpResponse.get("status").toString());
-    return response;
+    return mailchimpResponse.get("status").toString();
   }
 
   MailchimpClient getClient() {

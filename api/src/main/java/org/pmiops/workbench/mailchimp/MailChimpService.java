@@ -1,8 +1,9 @@
 package org.pmiops.workbench.mailchimp;
 
+import com.ecwid.maleorang.MailchimpException;
+import java.io.IOException;
 import java.util.List;
 import java.util.HashMap;
-import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
 
 /**
  * Encapsulate mailchimp API interaction details and provide a simple/mockable interface
@@ -11,5 +12,5 @@ import org.pmiops.workbench.mailchimp.model.GetMemberResponse;
 public interface MailChimpService {
   String addUserContactEmail(String contactEmail);
 
-  GetMemberResponse getMember(String userEmailHash);
+  String getMember(String userEmailHash) throws MailchimpException, IOException;
 }
