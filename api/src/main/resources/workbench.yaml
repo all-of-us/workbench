@@ -620,21 +620,6 @@ paths:
 
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/admin/auditBigQuery:
-    get:
-      security: []
-      tags:
-        - audit
-      description: >
-        Endpoint meant to be called offline to trigger BigQuery auditing; may be
-        slow to execute.
-      operationId: auditBigQuery
-      responses:
-        200:
-          description: Audit was successful.
-          schema:
-            $ref: "#/definitions/AuditBigQueryResponse"
-
   /v1/admin/workspaces/review:
     get:
       tags:
@@ -708,6 +693,26 @@ paths:
           description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
+
+  /v1/cron/auditBigQuery:
+    get:
+      security: []
+      tags:
+        - audit
+      description: >
+        Endpoint meant to be called offline to trigger BigQuery auditing; may be
+        slow to execute. Only executable via App Engine cronjob.
+      operationId: auditBigQuery
+      parameters:
+        - in: header
+          name: X-Appengine-Cron
+          type: boolean
+          required: true
+      responses:
+        200:
+          description: Audit was successful.
+          schema:
+            $ref: "#/definitions/AuditBigQueryResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
@@ -1323,7 +1328,6 @@ definitions:
         # Note: Swagger trims any common prefix from enum values' corresponding
         # Java fields by default; this has no side-effect currently as there is
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
-        AUDIT,
         REVIEW_RESEARCH_PURPOSE,
         MANAGE_GROUP,
         REVIEW_ID_VERIFICATION
