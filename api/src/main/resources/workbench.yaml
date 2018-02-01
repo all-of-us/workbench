@@ -948,7 +948,7 @@ paths:
       operationId: "getParticipantFilters"
       responses:
         200:
-          description: A cohortReviewId and cohort count
+          description: An object which contains a list of all values for gender, race and ethnicity.
           schema:
             $ref: "#/definitions/ParticipantFilters"
 
