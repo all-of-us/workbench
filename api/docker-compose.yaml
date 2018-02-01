@@ -163,7 +163,7 @@ services:
     volumes:
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./gradlew tools:loadConfig
+    command: wait-for db:3306 -- ./gradlew tools:loadConfig -Pconfig_file=../config/config_local.json
     env_file:
       - db/vars.env
 volumes:
