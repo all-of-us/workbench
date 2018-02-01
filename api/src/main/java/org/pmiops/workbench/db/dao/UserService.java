@@ -15,6 +15,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,6 +34,7 @@ public class UserService {
   private final UserDao userDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
@@ -40,11 +42,13 @@ public class UserService {
       UserDao userDao,
       Clock clock,
       FireCloudService fireCloudService,
+      MailChimpService mailChimpService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
+    this.mailChimpService = mailChimpService;
     this.configProvider = configProvider;
   }
 
@@ -80,11 +84,23 @@ public class UserService {
 
   private void updateDataAccessLevel(User user) {
     if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
+      String userEmailVerificationStatus = null;
+      if(user.getContactEmail() != null) {
+        try {
+          userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
+        } catch (NotFoundException e) {
+          return;
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
       if (user.getBlockscoreVerificationIsValid() != null
           && user.getBlockscoreVerificationIsValid()
           && user.getDemographicSurveyCompletionTime() != null
           && user.getEthicsTrainingCompletionTime() != null
-          && user.getTermsOfServiceCompletionTime() != null) {
+          && user.getTermsOfServiceCompletionTime() != null
+          && userEmailVerificationStatus != null
+          && userEmailVerificationStatus.equals("subscribed")) {
         try {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
