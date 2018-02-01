@@ -935,7 +935,7 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/filters:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/demographics:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -945,12 +945,12 @@ paths:
       tags:
         - cohortReview
       description: Will return a list all values for gender, race and ethnicity.
-      operationId: "getParticipantFilters"
+      operationId: "getParticipantDemographics"
       responses:
         200:
           description: An object which contains a list of all values for gender, race and ethnicity.
           schema:
-            $ref: "#/definitions/ParticipantFilters"
+            $ref: "#/definitions/ParticipantDemographics"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
     parameters:
@@ -2314,7 +2314,7 @@ definitions:
       sortColumn:
         type: string
 
-  ParticipantFilters:
+  ParticipantDemographics:
     type: object
     required:
       - genderList
