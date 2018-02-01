@@ -2,14 +2,14 @@ package org.pmiops.workbench.cohortreview.util;
 
 public class Filter {
     private String property;
-    private SearchOperation operation;
+    private Operator operator;
     private String value;
 
     public Filter() {}
 
-    public Filter(final String property, final SearchOperation operation, final String value) {
+    public Filter(final String property, final Operator operator, final String value) {
         this.property = property;
-        this.operation = operation;
+        this.operator = operator;
         this.value = value;
     }
 
@@ -21,12 +21,12 @@ public class Filter {
         this.property = property;
     }
 
-    public SearchOperation getOperation() {
-        return operation;
+    public Operator getOperator() {
+        return operator;
     }
 
-    public void setOperation(final SearchOperation operation) {
-        this.operation = operation;
+    public void setOperator(final Operator operator) {
+        this.operator = operator;
     }
 
     public String getValue() {

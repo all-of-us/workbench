@@ -6,7 +6,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantsSortColumn;
-import org.pmiops.workbench.cohortreview.util.SearchOperation;
+import org.pmiops.workbench.cohortreview.util.Operator;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -18,6 +18,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -151,8 +154,10 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
         sqlParts.add(WHERE_CLAUSE_TEMPLATE);
         for (String filter : filtersList) {
             try {
-                fromJson = new Gson().fromJson(filter, Filter.class);
-                fromJson.setOperation(SearchOperation.EQUALS);
+                fromJson = new Gson().fromJson(URLDecoder.decode(filter, StandardCharsets.UTF_8.toString()), Filter.class);
+                fromJson.setOperator(Operator.EQUALS);
+            } catch (UnsupportedEncodingException ex) {
+                throw new BadRequestException("Invalid Filter Definition: " + ex.getMessage());
             } catch (JsonSyntaxException ex) {
                 throw new BadRequestException("Invalid Filter Definition: " + ex.getMessage());
             }
@@ -160,7 +165,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
                 throw new BadRequestException("Bad Filter in request: " + fromJson.getProperty());
             }
             sqlParts.add(ParticipantsSortColumn.fromName(fromJson.getProperty()).getDbName() +
-                    " " + fromJson.getOperation().getName() + " :" + fromJson.getProperty() + "\n");
+                    " " + fromJson.getOperator().getExpression() + " :" + fromJson.getProperty() + "\n");
             try {
                 if (ParticipantsSortColumn.isDatabaseTypeLong(fromJson.getProperty())) {
                     if (fromJson.getProperty().equals(ParticipantsSortColumn.STATUS.getName())) {
