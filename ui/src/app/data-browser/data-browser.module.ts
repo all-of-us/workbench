@@ -31,7 +31,7 @@ import {SearchTableComponent} from './search-table/search-table.component';
 import {SearchComponent} from './search/search.component';
 import {TreeContainerComponent} from './tree-container/tree-container.component';
 
-import {DataBrowserService} from 'generated';
+import {DataBrowserService} from 'publicGenerated';
 import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
 
 @NgModule({
