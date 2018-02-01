@@ -27,6 +27,7 @@
 /api/tools/build/*
 /api/tools/.gradle/*
 /build/*
+/ui/package-lock.json
 /ui/ui.iml
 /ui/.idea/*
 /ui/**/*.js

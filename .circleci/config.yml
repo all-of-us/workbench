@@ -1,8 +1,9 @@
 version: 2
 jobs:
+
   api-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.9
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -44,9 +45,10 @@ jobs:
           command: |
             ./project.rb circle-deploy \
               --project all-of-us-workbench-test --creds-file circle-sa-key.json
+
   ui-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.8
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment: []
     steps:
@@ -65,7 +67,7 @@ jobs:
           - ui-cache-
       - run:
           working_directory: ~/workbench/ui
-          command: npm install
+          command: yarn install
       - save_cache:
           paths:
             - ~/workbench/ui/node_modules
@@ -74,20 +76,23 @@ jobs:
           name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
-            npm run codegen && npm test -- --no-watch
+            yarn run codegen && yarn test --no-watch --no-progress
       - run:
           name: Test compilation of the Angular app
           working_directory: ~/workbench/ui
-          command: npm run build
+          command: yarn run build --no-watch --no-progress
       - deploy:
           name: Deploy to gcloud test project
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./ci/deploy_ui.sh
+            else
+              echo "Not master branch, skipping deploy"
             fi
+
   py-client-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.8
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment: []
     steps:

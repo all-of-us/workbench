@@ -20,7 +20,7 @@ end
 def install_dependencies()
   common = Common.new
 
-  common.run_inline %W{docker-compose run --rm ui npm install}
+  common.run_inline %W{docker-compose run --rm ui yarn install}
 end
 
 def swagger_regen()
@@ -28,7 +28,7 @@ def swagger_regen()
 
   Workbench::Swagger.download_swagger_codegen_cli
 
-  common.run_inline %W{docker-compose run --rm ui npm run codegen}
+  common.run_inline %W{docker-compose run --rm ui yarn run codegen}
 end
 
 class DevUpOptions
@@ -122,7 +122,7 @@ def dev_up(*args)
 end
 
 def run_linter()
-  Common.new.run_inline %W{docker-compose run --rm ui npm run lint}
+  Common.new.run_inline %W{docker-compose run --rm ui yarn run lint}
 end
 
 def rebuild_image()
@@ -139,7 +139,7 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "install-dependencies",
-  :description => "Installs dependencies via npm.",
+  :description => "Installs dependencies via yarn.",
   :fn => Proc.new { |*args| install_dependencies(*args) }
 })
 
