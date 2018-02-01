@@ -65,7 +65,7 @@ jobs:
           - ui-cache-
       - run:
           working_directory: ~/workbench/ui
-          command: npm install
+          command: yarn install
       - save_cache:
           paths:
             - ~/workbench/ui/node_modules
@@ -74,11 +74,11 @@ jobs:
           name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
-            npm run codegen && npm test -- --no-watch
+            yarn run codegen && yarn test --no-watch
       - run:
           name: Test compilation of the Angular app
           working_directory: ~/workbench/ui
-          command: npm run build
+          command: yarn run build
       - deploy:
           name: Deploy to gcloud test project
           command: |
