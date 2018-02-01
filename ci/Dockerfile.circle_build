@@ -27,7 +27,7 @@ RUN cd && \
   rm -rf node.tar.xz
 
 RUN sudo apt-get update
-RUN sudo apt-get install gettext ruby mysql-client python-pip
+RUN sudo apt-get install gettext ruby mysql-client python-pip yarn
 RUN sudo pip install --upgrade pip
 RUN sudo pip install --upgrade pylint
 

@@ -2,7 +2,7 @@ version: 2
 jobs:
   api-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.9
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -46,7 +46,7 @@ jobs:
               --project all-of-us-workbench-test --creds-file circle-sa-key.json
   ui-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.8
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment: []
     steps:
@@ -87,7 +87,7 @@ jobs:
             fi
   py-client-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.8
+      - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
     environment: []
     steps:
