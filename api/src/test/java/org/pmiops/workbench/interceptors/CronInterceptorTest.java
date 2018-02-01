@@ -60,5 +60,3 @@ public class CronInterceptorTest {
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 }
-
-
