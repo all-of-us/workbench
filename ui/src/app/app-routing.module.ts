@@ -23,51 +23,54 @@ import {WorkspaceResolver} from './resolvers/workspace';
 declare let gtag: Function;
 declare let ga_tracking_id: string;
 
-const workspaceRoutes: Routes = [
-  {
-    path: '',
-    component: WorkspaceComponent,
-    data: {title: 'View Workspace Details'}
-  }, {
-    path: 'edit',
-    component: WorkspaceEditComponent,
-    data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
-  }, {
-    path: 'clone',
-    component: WorkspaceEditComponent,
-    data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
-  }, {
-    path: 'share',
-    component: WorkspaceShareComponent,
-    data: {title: 'Share Workspace'}
-  }, {
-    path: 'cohorts/build',
-    loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-  }, {
-    path: 'cohorts/:cid/review',
-    loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-    resolve: {
-      annotationDefinitions: AnnotationDefinitionsResolver,
-      cohort: CohortResolver,
-      review: ReviewResolver,
-    },
-  }, {
-    path: 'cohorts/:cid/edit',
-    component: CohortEditComponent,
-    data: {title: 'Edit Cohort'},
-    resolve: {cohort: CohortResolver},
-  }
-];
-
 const routes: Routes = [
   {
     path: '',
     component: HomePageComponent,
     data: {title: 'View Workspaces'}
   }, {
+    /* TODO The children under ./views need refactoring to use the data
+     * provided by the route rather than double-requesting it.
+     */
     path: 'workspace/:ns/:wsid',
-    children: workspaceRoutes,
-    resolve: { workspace: WorkspaceResolver },
+    resolve: {
+      workspace: WorkspaceResolver,
+    },
+    children: [{
+        path: '',
+        component: WorkspaceComponent,
+        data: {title: 'View Workspace Details'}
+      }, {
+        path: 'edit',
+        component: WorkspaceEditComponent,
+        data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
+      }, {
+        path: 'clone',
+        component: WorkspaceEditComponent,
+        data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
+      }, {
+        path: 'share',
+        component: WorkspaceShareComponent,
+        data: {title: 'Share Workspace'}
+      }, {
+        path: 'cohorts/build',
+        loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+      }, {
+        path: 'cohorts/:cid/review',
+        loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+        resolve: {
+          annotationDefinitions: AnnotationDefinitionsResolver,
+          cohort: CohortResolver,
+          review: ReviewResolver,
+        },
+      }, {
+        path: 'cohorts/:cid/edit',
+        component: CohortEditComponent,
+        data: {title: 'Edit Cohort'},
+        resolve: {
+          cohort: CohortResolver,
+        },
+    }],
   }, {
     path: 'admin/review-workspace',
     component: AdminReviewWorkspaceComponent,

@@ -22,8 +22,8 @@ export class ParticipantResolver implements Resolve<Participant> {
     const {ns, wsid, cid} = route.parent.params;
     const {pid} = route.params;
 
-    console.log(`Resolving participant at ${ns}/${wsid}, cohort ${cid} and pid ${pid}`);
-    console.dir(route);
+    // console.log(`Resolving participant at ${ns}/${wsid}, cohort ${cid} and pid ${pid}`);
+    // console.dir(route);
 
     return <Observable<Participant>>this.reviewAPI
       .getParticipantCohortStatus(ns, wsid, +cid, CDR_VERSION, +pid)

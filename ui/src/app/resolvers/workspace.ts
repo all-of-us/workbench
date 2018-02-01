@@ -19,8 +19,8 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
     const ns: Workspace['namespace'] = route.params.ns;
     const wsid: Workspace['id'] = route.params.wsid;
 
-    console.log(`Resolving Workspace ${ns}/${wsid}:`);
-    console.dir(route);
+    // console.log(`Resolving Workspace ${ns}/${wsid}:`);
+    // console.dir(route);
 
     const call = this.api
       .getWorkspace(ns, wsid)

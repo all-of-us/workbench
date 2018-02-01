@@ -14,8 +14,8 @@ export class CohortResolver implements Resolve<Cohort> {
     const wsid: Workspace['id'] = route.params.wsid;
     const cid: Cohort['id'] = +(route.params.cid);
 
-    console.log(`Resolving cohort ${cid}:`);
-    console.dir(route);
+    // console.log(`Resolving cohort ${cid}:`);
+    // console.dir(route);
 
     return this.api.getCohort(ns, wsid, cid);
   }

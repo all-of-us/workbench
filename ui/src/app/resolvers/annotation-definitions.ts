@@ -19,7 +19,7 @@ export class AnnotationDefinitionsResolver implements Resolve<CohortAnnotationDe
     const wsid: Workspace['id'] = route.params.wsid;
     const cid: Cohort['id'] = +(route.params.cid);
 
-    console.log(`Resolving annotation definitions for ${ns}/${wsid}:${cid}`);
+    // console.log(`Resolving annotation definitions for ${ns}/${wsid}:${cid}`);
 
     const call = this.api.getCohortAnnotationDefinitions(ns, wsid, cid).pluck('items');
     return (call as Observable<CohortAnnotationDefinition[]>);
