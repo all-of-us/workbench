@@ -26,12 +26,15 @@ RUN cd && \
   mv node-v6.11.1-linux-x64 node && \
   rm -rf node.tar.xz
 
+
 RUN sudo apt-get update
 RUN sudo apt-get install gettext ruby mysql-client python-pip
 RUN sudo pip install --upgrade pip
 RUN sudo pip install --upgrade pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
+
+RUN npm install -g yarn
 
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
