@@ -26,7 +26,7 @@ services:
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
-    command: ./gradlew appengineRun
+    command: gradle appengineRun
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
     env_file:
@@ -35,23 +35,21 @@ services:
       - 8081:8081
       - 8001:8001
   public-api:
-    depends_on:
-      - db
     build:
       context: ./src/dev/server
     user: ${UID}
     working_dir: /w/api
     volumes:
       - ..:/w:cached
-      - gradle-cache:/.gradle
+      - gradle-public-api-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
-    command: ./gradlew ../public-api:appengineRun
+    command: gradle :public-api:appengineRun
     env_file:
       - db/vars.env
     ports:
       - 8083:8083
-      - 8001:8084
+      - 8084:8001
   db-migration:
     depends_on:
       - db
@@ -188,3 +186,4 @@ services:
 volumes:
   db:
   gradle-cache:
+  gradle-public-api-cache:
