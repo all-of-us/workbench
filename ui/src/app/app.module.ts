@@ -24,6 +24,7 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
+import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
@@ -91,6 +92,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent,
     ProfileEditComponent,
     ProfilePageComponent,
+    RoutingSpinnerComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,

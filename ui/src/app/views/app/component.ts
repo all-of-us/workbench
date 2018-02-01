@@ -1,22 +1,10 @@
 import {Location} from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  NgZone,
-  OnInit,
-  Renderer2,
-  ViewChild,
-} from '@angular/core';
-
+import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
-
 import {
   ActivatedRoute,
   Event as RouterEvent,
-  NavigationCancel,
   NavigationEnd,
-  NavigationError,
-  NavigationStart,
   Router,
 } from '@angular/router';
 
@@ -37,8 +25,6 @@ export const overriddenUrlKey = 'allOfUsApiUrlOverride';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
-  @ViewChild('pageSpinner') pageSpinner: ElementRef;
-
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
@@ -59,8 +45,6 @@ export class AppComponent implements OnInit {
     private locationService: Location,
     private router: Router,
     private titleService: Title,
-    private zone: NgZone,
-    private renderer: Renderer2,
   ) {}
 
   ngOnInit(): void {
@@ -90,7 +74,6 @@ export class AppComponent implements OnInit {
     }
 
     this.router.events.subscribe((event: RouterEvent) => {
-      this.spinOnNavigate(event);
       this.setTitleFromRoute(event);
     });
 
@@ -106,32 +89,6 @@ export class AppComponent implements OnInit {
         });
       }
     });
-  }
-
-  /**
-   * On Navigation start, show a spinner.  On navigation end, stop the spinner.
-   */
-  private spinOnNavigate(event: RouterEvent): void {
-    const spinner = this.pageSpinner.nativeElement;
-    const spinParent = this.renderer.parentNode(spinner);
-
-    if (event instanceof NavigationStart) {
-      this.zone.runOutsideAngular(() => {
-        this.renderer.setStyle(spinParent, 'opacity', 0.8);
-        this.renderer.setStyle(spinParent, 'z-index', 1);
-        this.renderer.setStyle(spinner, 'opacity', 1);
-      });
-    } else if (event instanceof NavigationEnd
-            || event instanceof NavigationCancel
-            || event instanceof NavigationError) {
-      this.zone.runOutsideAngular(() => {
-        setTimeout(() => {
-        this.renderer.setStyle(spinParent, 'opacity', 0);
-        this.renderer.setStyle(spinParent, 'z-index', -1);
-        this.renderer.setStyle(spinner, 'opacity', 0);
-        }, 500);
-      });
-    }
   }
 
   /**
