@@ -173,3 +173,15 @@ Common.register_command({
   :description => "Runs the specified command in a docker container.",
   :fn => lambda { |*args| docker_run("docker-run", args) }
 })
+
+def clean_environment(cmd_name, args)
+  common = Common.new
+  common.run_inline %W{rm -rf node_modules}
+  Common.new.run_inline %W{docker-compose down --volumes --rmi=local}
+end
+
+Common.register_command({
+  :invocation => "clean-environment",
+  :description => "Removes node modules, docker volumes and images.",
+  :fn => lambda { |*args| clean_environment("clean-environment", args) }
+})
