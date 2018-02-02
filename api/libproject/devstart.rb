@@ -807,7 +807,7 @@ def deploy(cmd_name, args)
   gcc.validate
   env = read_db_vars_v2(gcc)
   ENV.update(env)
-  common.run_inline %W{gradle :appengineStage --info}
+  common.run_inline %W{gradle :appengineStage}
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? "--quiet" : ""
