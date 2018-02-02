@@ -167,10 +167,6 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
-springBoot {
-  requiresUnpack = [ project(':common-api') ]
-}
-
 dependencies {
 
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
