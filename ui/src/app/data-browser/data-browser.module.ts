@@ -36,11 +36,11 @@ import { LazyTreeComponent } from './lazy-tree/lazy-tree.component';
 import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
 import { MyConceptsComponent } from './my-concepts/my-concepts.component';
 import { OneConceptComponent } from './one-concept/one-concept.component';
+import { overriddenPublicUrlKey } from '../views/app/component';
 import { PlaceholderComponent } from './placeholder/placeholder.component';
 import { SearchTableComponent } from './search-table/search-table.component';
 import { SearchComponent } from './search/search.component';
 import { TreeContainerComponent } from './tree-container/tree-container.component';
-import {overriddenPublicUrlKey} from '../views/app/component';
 
 import {DataBrowserService} from 'publicGenerated';
 import {ConceptDrawerComponent} from './concept-drawer/concept-drawer.component';
@@ -85,7 +85,7 @@ const DataBrowserServiceFactory = (http: Http) => {
   providers: [
       AchillesService,
       {
-        provide:DataBrowserService,
+        provide: DataBrowserService,
         useFactory: DataBrowserServiceFactory,
         deps: [Http]
       },
