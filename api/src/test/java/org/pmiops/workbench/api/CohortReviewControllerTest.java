@@ -261,7 +261,7 @@ public class CohortReviewControllerTest {
         when(bigQueryService.getLong(null, 4)).thenReturn(0L);
         when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
         doNothing().when(cohortReviewService).saveFullCohortReview(cohortReviewAfter, Arrays.asList(pcs));
-        when(cohortReviewService.findAll(isA(Long.class), isA(List.class), isA(org.pmiops.workbench.cohortreview.util.PageRequest.class))).thenReturn(participants);
+        when(cohortReviewService.findAll(isA(Long.class), isA(List.class), isA(PageRequest.class))).thenReturn(participants);
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
@@ -282,7 +282,7 @@ public class CohortReviewControllerTest {
         verify(queryResult, times(1)).iterateAll();
         verify(cohortReviewService, times(1)).saveFullCohortReview(isA(CohortReview.class), isA(List.class));
         verify(genderRaceEthnicityConceptProvider, times(1)).get();
-        verify(cohortReviewService).findAll(isA(Long.class), isA(List.class), isA(org.pmiops.workbench.cohortreview.util.PageRequest.class));
+        verify(cohortReviewService).findAll(isA(Long.class), isA(List.class), isA(PageRequest.class));
         verifyNoMoreMockInteractions();
     }
 
