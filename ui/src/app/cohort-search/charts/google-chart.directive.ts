@@ -12,21 +12,18 @@ declare var google: any;
   selector: '[appGoogleChart]'
 })
 export class GoogleChartDirective implements OnChanges {
-  public _element: any;
   @Input() public chartType: string;
   @Input() public options: object;
   @Input() public dataTable: object;
 
-  constructor(public element: ElementRef) {
-    this._element = this.element.nativeElement;
-  }
+  constructor(public element: ElementRef) {}
 
   ngOnChanges(changes: SimpleChanges) {
     const chart = {
       chartType: this.chartType,
       dataTable: this.dataTable,
       options: this.options,
-      containerId: this._element.id
+      containerId: this.element.nativeElement.id
     };
 
     for (const prop of Object.keys(changes)) {

@@ -39,7 +39,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(isRequstingTotal) isRequesting$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
 
-  @ViewChild('wrapper') _wrapper;
+  @ViewChild('wrapper') wrapper;
 
   private subscription;
 
@@ -66,7 +66,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         this.actions.runAllRequests();
       }
     });
-    this._updateWrapperDimensions();
+    this.updateWrapperDimensions();
   }
 
   ngOnDestroy() {
@@ -75,11 +75,11 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize() {
-    this._updateWrapperDimensions();
+    this.updateWrapperDimensions();
   }
 
-  _updateWrapperDimensions() {
-    const wrapper = this._wrapper.nativeElement;
+  updateWrapperDimensions() {
+    const wrapper = this.wrapper.nativeElement;
 
     const {top} = wrapper.getBoundingClientRect();
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);

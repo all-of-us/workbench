@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
 
   private baseTitle: string;
   private overriddenUrl: string = null;
-  private _showCreateAccount = false;
+  private showCreateAccount = false;
 
   constructor(
     /* Ours */
@@ -117,12 +117,8 @@ export class AppComponent implements OnInit {
     this.signInService.signOut();
   }
 
-  showCreateAccount(): void {
-    this._showCreateAccount = true;
-  }
-
   getTopMargin(): string {
-    return this._showCreateAccount ? '10vh' : '30vh';
+    return this.showCreateAccount ? '10vh' : '30vh';
   }
 
   get reviewActive(): boolean {

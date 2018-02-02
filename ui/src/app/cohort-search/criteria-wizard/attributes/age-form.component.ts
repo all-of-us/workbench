@@ -22,18 +22,18 @@ const OPERATORS = {
 
 const MAX_AGE = 120;
 const MIN_AGE = 0;
-const _operatorIsRange = (op: string): boolean => (op === 'between');
-const _operatorIsValid = (op: string): boolean => (Object.keys(OPERATORS).includes(op));
+const operatorIsRange = (op: string): boolean => (op === 'between');
+const operatorIsValid = (op: string): boolean => (Object.keys(OPERATORS).includes(op));
 
-const _asAttribute = (ageForm: FormGroup): Attribute => {
+const asAttribute = (ageForm: FormGroup): Attribute => {
   const operator = ageForm.get('operator').value;
-  const operands = _operatorIsRange(operator)
+  const operands = operatorIsRange(operator)
     ? [ageForm.get('rangeOpen').value, ageForm.get('rangeClose').value]
     : [ageForm.get('age').value];
   return <Attribute>{operator, operands};
 };
 
-const _validate = {
+const validate = {
   interval: (group: FormGroup): null|object => {
     const start = group.get('rangeOpen').value;
     const close = group.get('rangeClose').value;
@@ -43,7 +43,7 @@ const _validate = {
   },
   uniqueness: (existent: List<string>) =>
     (ageForm: FormGroup): null|object => {
-      const wrapped = fromJS(_asAttribute(ageForm));
+      const wrapped = fromJS(asAttribute(ageForm));
       const hash = wrapped.hashCode();
       const paramId = `param${hash}`;
       return existent.includes(paramId)
@@ -87,22 +87,22 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
       .subscribe(ids => this.selected = ids);
 
     const [isRange, isNotRange] = this.operator.valueChanges
-      .filter(_operatorIsValid)
-      .partition(_operatorIsRange);
+      .filter(operatorIsValid)
+      .partition(operatorIsRange);
 
     this.subscription.add(isRange.subscribe(op => {
       this.age.clearValidators();
       this.age.updateValueAndValidity();
 
-      this.rangeOpen.setValidators(_validate.age);
+      this.rangeOpen.setValidators(validate.age);
       this.rangeOpen.updateValueAndValidity();
 
-      this.rangeClose.setValidators(_validate.age);
+      this.rangeClose.setValidators(validate.age);
       this.rangeClose.updateValueAndValidity();
 
       this.ageForm.setValidators([
-        _validate.interval,
-        _validate.uniqueness(this.selected),
+        validate.interval,
+        validate.uniqueness(this.selected),
       ]);
       this.ageForm.updateValueAndValidity();
     }));
@@ -114,11 +114,11 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
       this.rangeClose.clearValidators();
       this.rangeClose.updateValueAndValidity();
 
-      this.age.setValidators(_validate.age);
+      this.age.setValidators(validate.age);
       this.age.updateValueAndValidity();
 
       this.ageForm.setValidators([
-        _validate.uniqueness(this.selected),
+        validate.uniqueness(this.selected),
       ]);
       this.ageForm.updateValueAndValidity();
     }));
@@ -133,18 +133,18 @@ export class AgeFormComponent implements AttributeFormComponent, OnInit, OnDestr
   get rangeOpen() { return this.ageForm.get('rangeOpen'); }
   get rangeClose() { return this.ageForm.get('rangeClose'); }
 
-  get operatorIsRange() { return _operatorIsRange(this.operator.value); }
-  get operatorIsValid() { return _operatorIsValid(this.operator.value); }
+  get operatorIsRange() { return operatorIsRange(this.operator.value); }
+  get operatorIsValid() { return operatorIsValid(this.operator.value); }
 
   get errorList() {
-    const _errors = this.ageForm.errors;
-    if (_errors) {
-      return Object.keys(_errors).map(key => _errors[key]);
+    const errors = this.ageForm.errors;
+    if (errors) {
+      return Object.keys(errors).map(key => errors[key]);
     }
   }
 
   submit(): void {
-    this.attribute.emit(_asAttribute(this.ageForm));
+    this.attribute.emit(asAttribute(this.ageForm));
   }
 
   cancel(): void {

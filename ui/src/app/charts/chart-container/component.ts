@@ -50,13 +50,13 @@ export default class ChartContainerComponent {
    * Provides a handle on the SVGGElement selection that renders the chart inside the margins
    */
   @ViewChild('chart') gElement: ElementRef;
-  private _selection;
+  private selection;
 
   get chart() {
-    if (!this._selection) {
-      this._selection = d3.select(this.gElement.nativeElement);
+    if (!this.selection) {
+      this.selection = d3.select(this.gElement.nativeElement);
     }
-    return this._selection;
+    return this.selection;
   }
 
   /*
@@ -68,16 +68,17 @@ export default class ChartContainerComponent {
   /*
    * Option processing
    */
+  private readonly defaultOptions: Options = DEFAULT_OPTIONS;
+
   private _options: Options;
-  private readonly _defaultOptions: Options = DEFAULT_OPTIONS;
 
   get options(): Options {
-    return this._options || this._defaultOptions;
+    return this._options || this.defaultOptions;
   }
 
   @Input() set options(opts) {
     this._options = {
-      ...this._defaultOptions,
+      ...this.defaultOptions,
       ...opts,
     };
   }

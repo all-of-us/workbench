@@ -131,7 +131,7 @@ describe('CohortSearchActions', () => {
   /* If the group being updated is the only group, then whether it has a
     * count or not, we should request totals from the API
     */
-  const _requestTotalCountWithOneGroup = (mockStore) => {
+  const requestTotalCountWithOneGroup = (mockStore) => {
     const requestSpy = spyOn(actions, 'requestCharts');
     const setDataSpy = spyOn(actions, 'setChartData');
     mockReduxInst.getState = () => mockStore;
@@ -143,17 +143,17 @@ describe('CohortSearchActions', () => {
   it('requestTotalCount(id): ignore group is only group, count is null', () => {
     // dummyState already has null for group count and just a single group
     const mockStore = dummyState;
-    _requestTotalCountWithOneGroup(mockStore);
+    requestTotalCountWithOneGroup(mockStore);
   });
 
   it('requestTotalCount(id): ignore group is only group, count is zero', () => {
     const mockStore = dummyState.setIn(['entities', 'groups', 'include0', 'count'], 0);
-    _requestTotalCountWithOneGroup(mockStore);
+    requestTotalCountWithOneGroup(mockStore);
   });
 
   it('requestTotalCount(id): ignore group is only group, count is real', () => {
     const mockStore = dummyState.setIn(['entities', 'groups', 'include0', 'count'], 123);
-    _requestTotalCountWithOneGroup(mockStore);
+    requestTotalCountWithOneGroup(mockStore);
   });
 
   it('requestTotalCount(id): group given is not only group', () => {
