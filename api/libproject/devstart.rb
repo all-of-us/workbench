@@ -807,12 +807,14 @@ def deploy(cmd_name, args)
   gcc.validate
   env = read_db_vars_v2(gcc)
   ENV.update(env)
-  common.run_inline %W{gradle :appengineStage}
+  common.run_inline %W{gradle :appengineStage --info}
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? "--quiet" : ""
   common.run_inline %W{
-    gcloud app deploy build/staged-app/app.yaml
+    gcloud app deploy
+      build/staged-app/app.yaml
+      build/staged-app/WEB-INF/appengine-generated/cron.yaml
       --project #{gcc.project} #{promote} #{quiet}
   } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
