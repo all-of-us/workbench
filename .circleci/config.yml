@@ -26,6 +26,9 @@ jobs:
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench
+          command: cp api/circle-sa-key.json public-api
+      - run:
+          working_directory: ~/workbench
           command: |
             gsutil cp \
               gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-9b5c623a838e.json \
