@@ -18,8 +18,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuditControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static final String CDR_PROJECT_ID = "cdr-project";
+  private static final String CDR_V1_PROJECT_ID = "cdr1-project";
+  private static final String CDR_V2_PROJECT_ID = "cdr2-project";
   private static final String FC_PROJECT_ID = "fc-project";
   private static final String USER_EMAIL = "falco@lombardi.com";
 
@@ -57,14 +59,6 @@ public class AuditControllerTest {
     Clock clock() {
       return CLOCK;
     }
-
-    @Bean
-    WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig config = new WorkbenchConfig();
-      config.server = new WorkbenchConfig.ServerConfig();
-      config.server.projectId = CDR_PROJECT_ID;
-      return config;
-    }
   }
 
   @Autowired
@@ -72,7 +66,11 @@ public class AuditControllerTest {
   @Autowired
   UserDao userDao;
   @Autowired
+  CdrVersionDao cdrVersionDao;
+  @Autowired
   AuditController auditController;
+
+  private CdrVersion cdrV1, cdrV2;
 
   @Before
   public void setUp() {
@@ -82,6 +80,13 @@ public class AuditControllerTest {
     user.setFreeTierBillingProjectName(FC_PROJECT_ID);
     user.setDisabled(false);
     user = userDao.save(user);
+
+    cdrV1 = new CdrVersion();
+    cdrV1.setBigqueryProject(CDR_V1_PROJECT_ID);
+    cdrV1 = cdrVersionDao.save(cdrV1);
+    cdrV2 = new CdrVersion();
+    cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
+    cdrV2 = cdrVersionDao.save(cdrV2);
 
     CLOCK.setInstant(NOW);
   }
@@ -120,8 +125,13 @@ public class AuditControllerTest {
   }
 
   @Test
-  public void testAuditBigQueryCdrQueries() {
-    stubBigQueryCalls(CDR_PROJECT_ID, USER_EMAIL, 5);
+  public void testAuditBigQueryCdrV1Queries() {
+    stubBigQueryCalls(CDR_V1_PROJECT_ID, USER_EMAIL, 5);
+  }
+
+  @Test
+  public void testAuditBigQueryCdrV2Queries() {
+    stubBigQueryCalls(CDR_V2_PROJECT_ID, USER_EMAIL, 5);
     assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
@@ -134,6 +144,7 @@ public class AuditControllerTest {
   @Test
   public void testAuditBigQueryUnrecognizedProjectQueries() {
     stubBigQueryCalls("my-personal-gcp-project", USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(5);
+    // These stubs are hit once per CDR project, so the total number of issues is doubled.
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
   }
 }

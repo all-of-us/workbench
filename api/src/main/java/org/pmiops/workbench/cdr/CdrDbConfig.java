@@ -1,6 +1,12 @@
 package org.pmiops.workbench.cdr;
 
 import com.google.common.cache.LoadingCache;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import org.apache.log4j.Logger;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -22,12 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
  * on the context of the current request. Applies to the model and DAO objects within this package.
  */
 public class CdrDbConfig {
+  private static Logger log = Logger.getLogger(CdrDbConfig.class);
 
   private static final String DB_DRIVER_CLASS_NAME_KEY = "spring.datasource.driver-class-name";
   private static final String DB_URL_KEY = "spring.datasource.url";
@@ -49,7 +50,6 @@ public class CdrDbConfig {
 
   @Service
   public static class CdrDataSource extends AbstractRoutingDataSource {
-
     private boolean finishedInitialization = false;
 
     private final Long defaultCdrVersionId;
@@ -81,6 +81,8 @@ public class CdrDbConfig {
         String dbName = isWorkbenchDbUser ? cdrVersion.getCdrDbName() : cdrVersion.getPublicDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName;
+
+        log.info("initializing db connection to " + dbUrl);
         DataSource dataSource = DataSourceBuilder
             .create()
             .driverClassName(dbDriverClassName)

@@ -3,6 +3,7 @@ package org.pmiops.workbench.interceptors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.http.HttpMethods;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -35,13 +36,21 @@ public class CronInterceptorTest {
   }
 
   @Test
+  public void preHandleOptions_OPTIONS() throws Exception {
+    when(request.getMethod()).thenReturn(HttpMethods.OPTIONS);
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue();
+  }
+
+  @Test
   public void prehandleForCronNoHeader() throws Exception {
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(handler.getMethod()).thenReturn(AuditApi.class.getMethod("auditBigQuery"));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
   @Test
   public void prehandleForCronWithBadHeader() throws Exception {
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(handler.getMethod()).thenReturn(AuditApi.class.getMethod("auditBigQuery"));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("asdf");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
@@ -49,6 +58,7 @@ public class CronInterceptorTest {
 
   @Test
   public void prehandleForCronWithHeader() throws Exception {
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(handler.getMethod()).thenReturn(AuditApi.class.getMethod("auditBigQuery"));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("true");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
@@ -56,6 +66,7 @@ public class CronInterceptorTest {
 
   @Test
   public void prehandleForNonCron() throws Exception {
+    when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(handler.getMethod()).thenReturn(WorkspacesApi.class.getMethod("getWorkspaces"));
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }

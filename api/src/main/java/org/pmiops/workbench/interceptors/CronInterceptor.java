@@ -1,5 +1,6 @@
 package org.pmiops.workbench.interceptors;
 
+import com.google.api.client.http.HttpMethods;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,10 @@ public class CronInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+    if (request.getMethod().equals(HttpMethods.OPTIONS)) {
+      return true;
+    }
+
     HandlerMethod method = (HandlerMethod) handler;
     ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
     if (apiOp == null) {
