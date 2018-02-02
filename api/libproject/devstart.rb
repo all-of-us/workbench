@@ -389,6 +389,10 @@ def do_create_db_creds(project, account, creds_file)
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      # TODO: replace with public DB, user, password
+      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/cdr?rewriteBatchedStatements=true"
+      db_creds_file.puts "PUBLIC_DB_USER=workbench"
+      db_creds_file.puts "PUBLIC_DB_PASSWORD=#{workbench_password}"
       db_creds_file.close
 
       activate_service_account(creds_file)
