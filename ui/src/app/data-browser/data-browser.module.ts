@@ -29,6 +29,7 @@ import {TreeService} from './services/tree.service';
 
 import {LocalStorageModule} from 'angular-2-local-storage';
 
+import { overriddenPublicUrlKey } from '../views/app/component';
 import { HomeAsideComponent } from './home/home-aside/home-aside.component';
 import { HomeInfoComponent } from './home/home-info/home-info.component';
 import { HomeComponent } from './home/home.component';
@@ -36,7 +37,6 @@ import { LazyTreeComponent } from './lazy-tree/lazy-tree.component';
 import { MobileChartsComponent } from './mobile-charts/mobile-charts.component';
 import { MyConceptsComponent } from './my-concepts/my-concepts.component';
 import { OneConceptComponent } from './one-concept/one-concept.component';
-import { overriddenPublicUrlKey } from '../views/app/component';
 import { PlaceholderComponent } from './placeholder/placeholder.component';
 import { SearchTableComponent } from './search-table/search-table.component';
 import { SearchComponent } from './search/search.component';
