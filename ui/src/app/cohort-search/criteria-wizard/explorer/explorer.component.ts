@@ -43,11 +43,11 @@ export class ExplorerComponent implements OnInit {
 
   ngOnInit() {
     const _type = <string>this.rootNode.get('type');
-    const _id = <number>this.rootNode.get('id');
+    const id = <number>this.rootNode.get('id');
 
     // TODO(jms) - loading now needs to listen for either the roots loading or
     // the quicksearch results loading as appropriate
-    this.loading$ = this.ngRedux.select(isCriteriaLoading(_type, _id));
+    this.loading$ = this.ngRedux.select(isCriteriaLoading(_type, id));
     this.errors$ = this.ngRedux.select(criteriaLoadErrors).map(errSet =>
       errSet
         .filter((_, key) => key.first() === this.criteriaType)

@@ -30,15 +30,15 @@ export class TreeComponent implements OnInit {
 
   ngOnInit() {
     const _type = this.node.get('type').toLowerCase();
-    const _parentId = this.node.get('id');
+    const parentId = this.node.get('id');
 
     this.hasError$ = this.ngRedux
-      .select(criteriaError(_type, _parentId))
+      .select(criteriaError(_type, parentId))
       .map(err => !(err === null || err === undefined));
 
-    this.loading$ = this.ngRedux.select(isCriteriaLoading(_type, _parentId));
-    this.children$ = this.ngRedux.select(criteriaChildren(_type, _parentId));
+    this.loading$ = this.ngRedux.select(isCriteriaLoading(_type, parentId));
+    this.children$ = this.ngRedux.select(criteriaChildren(_type, parentId));
 
-    this.actions.fetchCriteria(_type, _parentId);
+    this.actions.fetchCriteria(_type, parentId);
   }
 }

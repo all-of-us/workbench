@@ -53,7 +53,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
         this.defn = defn;
 
         if (this.editing) {
-          this._setFromDefn();
+          this.setFromDefn();
           this.kind.disable();
         }
       });
@@ -63,7 +63,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private _setFromDefn(): void {
+  private setFromDefn(): void {
     this.name.setValue(this.defn.columnName);
     this.kind.setValue(this.defn.annotationType);
     const vals = this.defn.enumValues || [];
@@ -87,7 +87,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
 
   clear(): void {
     this.editing
-      ? this._setFromDefn()
+      ? this.setFromDefn()
       : this.form.reset();
   }
 
@@ -97,13 +97,13 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
 
   save(): void {
     const call = this.editing
-      ? this._update()
-      : this._create();
+      ? this.update()
+      : this.create();
 
     this.posting = true;
 
-    call.switchMap(_ => this._fetchAll())
-      .do(defns => this._broadcast(defns))
+    call.switchMap(_ => this.fetchAll())
+      .do(defns => this.broadcast(defns))
       .do(_ => this.posting = false)
       .subscribe(_ => this.toOverview());
   }
@@ -113,10 +113,10 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
   }
 
   get canSave(): boolean {
-    return this.editing ? this._editsAreValid : this.form.valid;
+    return this.editing ? this.editsAreValid : this.form.valid;
   }
 
-  get _editsAreValid(): boolean {
+  get editsAreValid(): boolean {
     if (!this.form.valid) { return false; }
     let somethingChanged = false;
 
@@ -148,7 +148,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  private _create(): Observable<CohortAnnotationDefinition> {
+  private create(): Observable<CohortAnnotationDefinition> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const request = <CohortAnnotationDefinition>{
       cohortId: cid,
@@ -159,7 +159,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
       .createCohortAnnotationDefinition(ns, wsid, cid, request);
   }
 
-  private _update(): Observable<CohortAnnotationDefinition> {
+  private update(): Observable<CohortAnnotationDefinition> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const id = this.defn.cohortAnnotationDefinitionId;
     const request = <ModifyCohortAnnotationDefinitionRequest>{
@@ -169,7 +169,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
       .updateCohortAnnotationDefinition(ns, wsid, cid, id, request);
   }
 
-  private _fetchAll(): Observable<CohortAnnotationDefinition[]> {
+  private fetchAll(): Observable<CohortAnnotationDefinition[]> {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const call = this.annotationAPI
       .getCohortAnnotationDefinitions(ns, wsid, cid)
@@ -177,7 +177,7 @@ export class SetAnnotationDetailComponent implements OnInit, OnDestroy {
     return <Observable<CohortAnnotationDefinition[]>>call;
   }
 
-  private _broadcast(defns: CohortAnnotationDefinition[]): void {
+  private broadcast(defns: CohortAnnotationDefinition[]): void {
     this.state.annotationDefinitions.next(defns);
   }
 }
