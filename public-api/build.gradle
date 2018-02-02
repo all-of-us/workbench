@@ -91,8 +91,9 @@ repositories {   // repositories for Jar's you access in your code
 }
 
 dependencies {
-
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
+  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+
   compile project(':common-api')
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
