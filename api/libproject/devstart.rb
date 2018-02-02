@@ -102,9 +102,21 @@ def validate_swagger(cmd_name, args)
   Common.new.run_inline %W{gradle validateSwagger} + args
 end
 
-def run_tests(cmd_name, args)
+def run_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle test} + args
+end
+
+def run_public_api_tests(cmd_name, args)
+  ensure_docker cmd_name, args
+  Dir.chdir('../public-api') do
+    Common.new.run_inline %W{gradle test} + args
+  end
+end
+
+def run_all_tests(cmd_name, args)
+  run_api_tests(cmd_name, args)
+  run_public_api_tests(cmd_name, args)
 end
 
 def run_integration_tests(*args)
@@ -612,9 +624,23 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs tests. To run a single test, add (for example) " \
+  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => lambda { |*args| run_tests("test", args) }
+  :fn => lambda { |*args| run_all_tests("test", args) }
+})
+
+Common.register_command({
+  :invocation => "test-api",
+  :description => "Runs API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
+  :fn => lambda { |*args| run_api_tests("test-api", args) }
+})
+
+Common.register_command({
+  :invocation => "test-public-api",
+  :description => "Runs public API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
+  :fn => lambda { |*args| run_public_api_tests("test-public-api", args) }
 })
 
 Common.register_command({
@@ -750,7 +776,6 @@ Common.register_command({
 })
 
 def deploy(cmd_name, args)
-  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -782,11 +807,34 @@ def deploy(cmd_name, args)
   } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
 
+def deploy_api(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  common.status "Deploying api..."
+  deploy(cmd_name, args)
+end
+
+def deploy_public_api(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  common.status "Deploying public-api..."
+  Dir.chdir('../public-api') do
+    deploy(cmd_name, args)
+  end
+end
+
 Common.register_command({
-  :invocation => "deploy",
+  :invocation => "deploy-api",
   :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| deploy("deploy", args) }
+  :fn => lambda { |*args| deploy_api("deploy-api", args) }
 })
+
+Common.register_command({
+  :invocation => "deploy-public-api",
+  :description => "Deploys the public API server to the specified cloud project.",
+  :fn => lambda { |*args| deploy_public_api("deploy-public-api", args) }
+})
+
 
 def migrate_database()
   common = Common.new
@@ -910,7 +958,8 @@ def circle_deploy(cmd_name, args)
     version = ENV["CIRCLE_TAG"]
   end
 
-  deploy(cmd_name, args + %W{--version #{version} #{promote}})
+  deploy_api(cmd_name, args + %W{--version #{version} #{promote}})
+  deploy_public_api(cmd_name, args + %W{--version #{version} #{promote}})
 end
 
 def run_cloud_migrations(cmd_name, args)
