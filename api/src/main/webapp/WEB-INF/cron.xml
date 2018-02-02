@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/v1/cron/auditBigQuery</url>
+    <target>api</target>
+    <description>daily BigQuery audit job</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
+</cronentries>

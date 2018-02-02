@@ -694,6 +694,26 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+  # true, which app engine itself only sets when invoking as a cronjob.
+  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+
+  /v1/cron/auditBigQuery:
+    get:
+      security: []
+      tags:
+        - audit
+        - cron
+      description: >
+        Endpoint meant to be called offline to trigger BigQuery auditing; may be
+        slow to execute. Only executable via App Engine cronjob.
+      operationId: auditBigQuery
+      responses:
+        200:
+          description: Audit was successful.
+          schema:
+            $ref: "#/definitions/AuditBigQueryResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1305,14 +1325,11 @@ definitions:
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
+        # Note: Swagger trims any common prefix from enum values' corresponding
+        # Java fields by default; this has no side-effect currently as there is
+        # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         MANAGE_GROUP,
-        # Swagger trims any common prefix from enum values' corresponding Java
-        # fields by default; include a bogus sentinel value to prevent that.
-        # https://github.com/swagger-api/swagger-codegen/issues/4261
-        # TODO: Remove this sentinel when adding a new enum value with a
-        # unique prefix (but leave the above cautionary comment).
-        _PREVENT_COMMON_PREFIX_TRIMMING,
         REVIEW_ID_VERIFICATION
     ]
 
@@ -2477,3 +2494,13 @@ definitions:
     properties:
       email:
         type: string
+
+  AuditBigQueryResponse:
+    type: object
+    properties:
+      numQueryIssues:
+        type: integer
+        format: int32
+        description: >
+          Number of queries issues against the Curated data repository which are
+          flagged as possible audit issues. See logs/alerts for details.
