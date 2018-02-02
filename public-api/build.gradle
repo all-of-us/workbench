@@ -2,7 +2,7 @@ import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
 
 def swaggerTemplateDir = 'src/main/resources'
-def swaggerSourceFile = 'src/main/resources/workbench.yaml'
+def swaggerSourceFile = 'src/main/resources/public-api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateApi {
@@ -15,61 +15,13 @@ task generateApi {
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
     config.setAdditionalProperties([
-            'apiPackage'     : 'org.pmiops.workbench.api',
+            'apiPackage'     : 'org.pmiops.workbench.publicapi',
             'modelPackage'   : 'org.pmiops.workbench.model',
             'sourceFolder'   : swaggerTargetFolder,
             'useTags'        : 'true',
             // Generates delegate interfaces; used to make method annotations work without
             // having to copy them to our implementations.
             'delegatePattern': 'true'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def fireCloudApiFile = 'src/main/resources/fireCloud.yaml'
-
-task generateFireCloudClient {
-  inputs.file("$projectDir/$fireCloudApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$fireCloudApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.firecloud',
-            'modelPackage'     : 'org.pmiops.workbench.firecloud.model',
-            'apiPackage'       : 'org.pmiops.workbench.firecloud.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
-    ])
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
-  }
-}
-
-def notebooksApiFile = 'src/main/resources/notebooks.yaml'
-
-task generateNotebooksClient {
-  inputs.file("$projectDir/$notebooksApiFile")
-  outputs.dir("$projectDir/$swaggerTargetFolder")
-  doLast {
-    def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$notebooksApiFile")
-    config.setOutputDir("$projectDir")
-    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
-    config.setLang('java')
-    config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.notebooks',
-            'modelPackage'     : 'org.pmiops.workbench.notebooks.model',
-            'apiPackage'       : 'org.pmiops.workbench.notebooks.api',
-            'sourceFolder'     : swaggerTargetFolder,
-            'library'          : 'okhttp-gson',
-            'serializableModel': 'true',
-            'dateLibrary'      : 'java8'
     ])
     new DefaultGenerator().opts(config.toClientOptInput()).generate()
   }
@@ -107,13 +59,6 @@ apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 
-configurations {
-  integrationCompile.extendsFrom testCompile
-  integrationRuntime.extendsFrom testRuntime
-  bigquerytestCompile.extendsFrom testCompile
-  bigquerytestRuntime.extendsFrom testRuntime
-}
-
 sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
@@ -127,33 +72,11 @@ sourceSets {
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
-  integration {
-    java {
-      compileClasspath += main.output + test.output + generated.output
-      runtimeClasspath += main.output + test.output + generated.output
-      srcDir file('src/integration/java')
-    }
-  }
-  bigquerytest {
-    resources {
-      srcDir "bigquerytest/resources"
-      include "bigquery/**"
-    }
-    java {
-      compileClasspath += main.output + test.output + generated.output
-      runtimeClasspath += main.output + test.output + generated.output
-      srcDir file('src/bigquerytest/java')
-    }
-  }
 }
 
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
-ideaModule.dependsOn generateFireCloudClient
-compileGeneratedJava.dependsOn generateFireCloudClient
-ideaModule.dependsOn generateNotebooksClient
-compileGeneratedJava.dependsOn generateNotebooksClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
@@ -168,13 +91,10 @@ repositories {   // repositories for Jar's you access in your code
 }
 
 dependencies {
-
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
-
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
-  compile project(":common-api")
-  compile 'com.google.api-client:google-api-client-appengine:1.23.0'
+  compile project(':common-api')
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
@@ -196,23 +116,11 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:+'
   compile 'com.fasterxml.jackson.core:jackson-core:+'
   compile 'com.fasterxml.jackson.core:jackson-databind:+'
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
-  compile 'com.google.apis:google-api-services-oauth2:+'
-  compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
-  compile ('com.google.cloud:google-cloud-storage:1.8.0') {
-    exclude group: 'com.google.guava', module:'guava-jdk5'
-  }
-  compile 'com.google.code.gson:gson:+'
-  compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:2.7.5'
-  compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.blockscore:blockscore-java:4.0.2'
   compile 'com.google.guava:guava:22.0'
-  compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
@@ -243,26 +151,6 @@ swaggerSources {
   workbench {
     inputFile = file("$projectDir/$swaggerSourceFile")
   }
-  firecloud {
-    inputFile = file("$projectDir/$fireCloudApiFile")
-  }
-  notebooks {
-    inputFile = file("$projectDir/$notebooksApiFile")
-  }
-}
-
-task integration(type: Test) {
-  group = LifecycleBasePlugin.VERIFICATION_GROUP
-  testClassesDirs = sourceSets.integration.output.classesDirs
-  classpath = sourceSets.integration.runtimeClasspath
-  // Option to control size of stack trace:
-  // jvmArgs '-XX:MaxJavaStackTraceDepth=10'
-}
-
-task bigquerytest(type: Test) {
-  group = LifecycleBasePlugin.VERIFICATION_GROUP
-  testClassesDirs = sourceSets.bigquerytest.output.classesDirs
-  classpath = sourceSets.bigquerytest.runtimeClasspath
 }
 
 tasks.withType(Test) {
@@ -292,14 +180,9 @@ test {
   maxHeapSize = '2048m'
 }
 
-integration {
-  // These tests should always run when requested since they consume and produce side-effects.
-  outputs.upToDateWhen { false }
-}
-
 appengine {  // App Engine tasks configuration
   run {      // local (dev_appserver) configuration (standard environments only)
-    port = 8081                 // default
+    port = 8083                 // default
     host = "0.0.0.0"
     // Allows you to attach a debugger on port 8001 when running locally.
     jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']

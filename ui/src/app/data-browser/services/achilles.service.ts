@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {DataBrowserService} from 'generated';
+import {DataBrowserService} from 'publicGenerated';
 import 'rxjs/add/operator/toPromise';
 import 'rxjs/Rx'; // unlocks all rxjs operators, such as map()
 import { Analysis, AnalysisResult, IAnalysis} from '../AnalysisClasses';

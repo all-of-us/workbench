@@ -78,12 +78,28 @@ local API server under http://localhost:8081/api/.
 ./project.rb run-local-bigdata-migrations
 ```
 
+You can run the server (skipping config and db setup) by running:
+
+```Shell
+./project.rb run-api
+```
 
 
 Other available operations may be discovered by running:
 ```Shell
 ./project.rb
 ```
+
+### Public API: dev AppEngine appserver
+
+After running dev-up, run-local-data-migrations, and
+run-local-bigdata-migrations, run in the api dir:
+
+```Shell
+./project.rb run-public-api
+```
+
+This will start up the public API on http://localhost:8083/.
 
 ### UI
 
@@ -113,7 +129,7 @@ Other available operations may be discovered by running:
 
 ## Deploying
 
-To deploy your local API code to a given AppEngine project, in the api 
+To deploy your local workbench API code to a given AppEngine project, in the api 
 directory run:
 
 ```
@@ -128,6 +144,13 @@ Example:
 
 When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
 served out of https://api-dot-PROJECT.appspot.com.
+
+To deploy your local public API code, in the api directory run:
+
+```
+./project.rb deploy-public-api --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
+
+```
 
 To deploy your local UI code to a given AppEngine project, in the ui 
 directory run:
@@ -203,7 +226,8 @@ database with a 10 minute expiration.
 
 Loading of local tables/data for both schemas (workbench/cdr) happens in a manual goal(creates tables in both schemas and insert any app data needed for local development):
 
-```./project.rb run-local-all-migrations```
+```./project.rb run-local-all-migrations
+```
 
 Local tables loaded with data are:
   * **workbench** - cdr_version
@@ -271,7 +295,27 @@ CDR Schema - In the `api/libproject/devstart.rb` for **test deployment** we call
 ctx.common.run_inline("#{ctx.gradlew_path} --info update -PrunList=schema")
 ```
 
-## Running Big Query test cases
+## Running test cases
+
+To run both api and public api unit tests, in the api dir run:
+
+```
+./project.rb test
+```
+
+To run just api unit tests, run:
+
+```
+./project.rb test-api
+```
+
+To run just public api unit tests run:
+```
+./project.rb test-public-api
+```
+
+To run bigquery tests (which run slowly and actually
+create and delete BigQuery datasets), run:
 
 ```
 ./project.rb bigquerytest
