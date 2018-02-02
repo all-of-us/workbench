@@ -25,10 +25,9 @@ export class CohortEditComponent {
     private cohortService: CohortsService,
     private errorHandlingService: ErrorHandlingService,
   ) {
-    const {cohort} = route.snapshot.data;
     this.form = fb.group({
-      name: [cohort.name, Validators.required],
-      description: cohort.description || '',
+      name: [this.cohort.name, Validators.required],
+      description: this.cohort.description || '',
     });
   }
 
