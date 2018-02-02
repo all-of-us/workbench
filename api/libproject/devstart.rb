@@ -793,6 +793,11 @@ def deploy(cmd_name, args)
     lambda {|opts, v| opts.promote = false},
     "Do not promote this deploy to make it available at the root URL"
   )
+  op.add_option(
+    "--quiet",
+    lambda {|opts, v| opts.quiet = true},
+    "Don't display a confirmation prompt when deploying"
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -801,9 +806,10 @@ def deploy(cmd_name, args)
   common.run_inline %W{gradle :appengineStage}
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
+  quiet = op.opts.quiet ? "--quiet" : ""
   common.run_inline %W{
     gcloud app deploy build/staged-app/app.yaml
-      --project #{gcc.project} #{promote}
+      --project #{gcc.project} #{promote} #{quiet}
   } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
 
