@@ -86,10 +86,9 @@ public class AuditController implements AuditApiDelegate {
         "  SUM(1) total\n" +
         "FROM `%s`\n" +
         "WHERE protopayload_auditlog.methodName = 'jobservice.insert'\n" +
-        // Filter out queries where access was denied.
-        "  AND NOT EXISTS (\n" +
-        "    SELECT 1 FROM UNNEST(protopayload_auditlog.authorizationInfo)\n" +
-        "    WHERE granted IS NULL OR NOT granted)\n" +
+        // Filter out failed queries (0/unset means OK).
+        "  AND (protopayload_auditlog.status.code IS NULL\n" +
+        "       OR protopayload_auditlog.status.code = 0)\n" +
         "  AND _TABLE_SUFFIX IN (%s)\n" +
         "GROUP BY 1, 2",
         tableWildcard,
