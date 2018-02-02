@@ -191,8 +191,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         List<ParticipantCohortStatus> paginatedPCS =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(),
-                        Collections.<Filter>emptyList(),
-                        createPageRequest(PAGE, PAGE_SIZE, SortOrder.asc.name(), PARTICIPANT_ID));
+                        Collections.<String>emptyList(),
+                        createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
         lookupGenderRaceEthnicityValues(paginatedPCS);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));

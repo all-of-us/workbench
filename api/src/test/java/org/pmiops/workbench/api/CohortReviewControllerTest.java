@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
 import javax.inject.Provider;
@@ -38,6 +37,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -371,10 +371,10 @@ public class CohortReviewControllerTest {
         Integer pageParam = page == null ? 0 : page;
         Integer pageSizeParam = pageSize == null ? 25 : pageSize;
         String columnParam = (sortColumn == null || sortColumn.equals("participantId")) ? "participantId" : sortColumn;
-        List<String> filters = new ArrayList<String>();
+        sortOrder = sortOrder == null ? "asc" : sortOrder;
         long workspaceId = 1;
 
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(1L).participantId(1L);
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(1L);
         final Date dob = new Date(System.currentTimeMillis());
         ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
                 .participantKey(key)
@@ -434,7 +434,6 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-        when(genderRaceEthnicityConceptProvider.get()).thenReturn(greConcept);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
@@ -450,7 +449,6 @@ public class CohortReviewControllerTest {
                         Collections.<String>emptyList(),
                         new PageRequest(pageParam, pageSizeParam, SortOrder.valueOf(sortOrder), ParticipantsSortColumn.fromName(columnParam)));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
-        verify(genderRaceEthnicityConceptProvider, atLeast(1)).get();
         verifyNoMoreMockInteractions();
     }
 

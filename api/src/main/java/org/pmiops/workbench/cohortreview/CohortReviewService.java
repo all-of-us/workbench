@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortreview;
 
-import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -80,5 +79,5 @@ public interface CohortReviewService {
      */
     ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
-    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> searchCriteriaList, PageRequest pageRequest);
+    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filtersList, PageRequest pageRequest);
 }

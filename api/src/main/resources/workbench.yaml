@@ -1012,19 +1012,11 @@ paths:
           required: false
           description: Sort direction (default is ascending)
         - in: query
-          name: filterColumn
+          name: filters
           type: array
           collectionFormat: csv
           required: false
           uniqueItems: true
-          items:
-            type: string
-            enum: [participantId, status, gender, birthDate, race, ethnicity]
-        - in: query
-          name: filterValue
-          type: array
-          collectionFormat: csv
-          required: false
           items:
             type: string
       responses:
