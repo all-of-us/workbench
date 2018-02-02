@@ -32,7 +32,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
-  private _subscriptions: Subscription[];
+  private subscriptions: Subscription[];
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -41,14 +41,14 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const select = this.ngRedux.select;
-    this._subscriptions = [
+    this.subscriptions = [
       select(getItem(this.itemId)).subscribe(item => this.item = item),
       select(parameterList(this.itemId)).subscribe(rawCodes => this.rawCodes = rawCodes),
     ];
   }
 
   ngOnDestroy() {
-    this._subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   get codeType() {
@@ -69,14 +69,14 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   get codes() {
     const _type = this.codeType;
-    const _formatter = (param) => {
+    const formatter = (param) => {
       const funcs = _type === 'Demographics'
         ? [typeDisplay, nameDisplay, attributeDisplay]
         : [typeDisplay, attributeDisplay];
       return funcs.map(f => f(param)).join(' ').trim();
     };
     const sep = _type === 'Demographics' ? '; ' : ', ';
-    return this.rawCodes.map(_formatter).join(sep);
+    return this.rawCodes.map(formatter).join(sep);
   }
 
   remove() {

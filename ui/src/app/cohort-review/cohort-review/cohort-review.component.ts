@@ -24,16 +24,16 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this._broadcast();
-    this.subscription = this._newReviewSub();
-    this.subscription.add(this._sidebarSub());
+    this.broadcast();
+    this.subscription = this.newReviewSub();
+    this.subscription.add(this.sidebarSub());
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  private _broadcast() {
+  private broadcast() {
     const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
     const {workspace} = this.route.parent.snapshot.data;
 
@@ -42,14 +42,14 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
     this.state.review.next(review);
   }
 
-  private _newReviewSub = () => this.route.data
+  private newReviewSub = () => this.route.data
     .map(({review}) => review.reviewStatus)
     .map(status => status === ReviewStatus.NONE)
     .subscribe(val => val
       ? this.createReviewModal.modal.open()
       : this.createReviewModal.modal.close())
 
-  private _sidebarSub = () =>
+  private sidebarSub = () =>
     this.state.sidebarOpen$.subscribe(val => val
       ? this.sidebar.open()
       : this.sidebar.close())

@@ -58,8 +58,8 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
       this.createForm();
     });
 
-    this.subscription.add(submit$.subscribe(_attr => {
-      const attr = fromJS(_attr);
+    this.subscription.add(submit$.subscribe(arg => {
+      const attr = fromJS(arg);
       const parameterId = `param${attr.hashCode()}`;
       const param = this.node
         .set('attribute', attr)
