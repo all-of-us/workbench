@@ -958,8 +958,8 @@ def circle_deploy(cmd_name, args)
     version = ENV["CIRCLE_TAG"]
   end
 
-  deploy_api(cmd_name, args + %W{--version #{version} #{promote}})
-  deploy_public_api(cmd_name, args + %W{--version #{version} #{promote}})
+  deploy_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
+  deploy_public_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
 end
 
 def run_cloud_migrations(cmd_name, args)
