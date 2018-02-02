@@ -935,6 +935,23 @@ paths:
             $ref: "#/definitions/CriteriaListResponse"
 
   # Cohort Review  #######################################################################
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/demographics:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortReview
+      description: Will return a list all values for gender, race and ethnicity.
+      operationId: "getParticipantDemographics"
+      responses:
+        200:
+          description: An object which contains a list of all values for gender, race and ethnicity.
+          schema:
+            $ref: "#/definitions/ParticipantDemographics"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1014,7 +1031,7 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/status/{participantId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -2295,6 +2312,38 @@ definitions:
       sortOrder:
         type: string
       sortColumn:
+        type: string
+
+  ParticipantDemographics:
+    type: object
+    required:
+      - genderList
+      - raceList
+      - ethnicityList
+    properties:
+      genderList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+      raceList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+      ethnicityList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+
+  ConceptIdName:
+    type: object
+    required:
+      - conceptId
+      - conceptName
+    properties:
+      conceptId:
+        type: integer
+        format: int64
+      conceptName:
         type: string
 
   ParticipantCohortStatus:
