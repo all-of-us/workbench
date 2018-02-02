@@ -12,6 +12,7 @@ apply plugin: 'application'
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
+def db_name = System.getenv("CDR_DB_NAME") ?: "cdr"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 applicationDefaultJvmArgs = ["-Xmx2048m","-Xms2048m"]
 
@@ -19,7 +20,7 @@ liquibase {
     activities {
         schema {
             changeLogFile "changelog-schema/db.changelog-master.xml"
-            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
         }
@@ -28,7 +29,7 @@ liquibase {
                 contexts contexts
             }
             changeLogFile "changelog-data/db.changelog-master.xml"
-            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
         }
@@ -37,7 +38,7 @@ liquibase {
                 contexts contexts
             }
             changeLogFile "changelog-bigdata/db.changelog-add-indexes.xml"
-            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
         }
@@ -46,7 +47,7 @@ liquibase {
                 contexts contexts
             }
             changeLogFile "changelog-bigdata/db.changelog-drop-indexes.xml"
-            url "jdbc:mysql://${db_host}:${db_port}/cdr"
+            url "jdbc:mysql://${db_host}:${db_port}/${db_name}"
             username "liquibase"
             password "${liquibase_password}"
         }
