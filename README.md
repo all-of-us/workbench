@@ -89,7 +89,6 @@ Other available operations may be discovered by running:
 ```Shell
 ./project.rb
 ```
-i
 
 ### Public API: dev AppEngine appserver
 
