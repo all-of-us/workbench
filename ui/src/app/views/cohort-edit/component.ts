@@ -1,68 +1,69 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from '../../services/error-handling.service';
 
-import {Cohort, CohortsService} from 'generated';
+import {Cohort, CohortsService, Workspace} from 'generated';
 
-@Component({
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html',
-})
-export class CohortEditComponent implements OnInit, OnDestroy {
-  cohort: Cohort = {
-    name: '',
-    description: '',
-    criteria: '',
-    type: '',
-  };
-  workspaceNamespace: string;
-  workspaceId: string;
-  private sub: Subscription;
-  private loading = false;
+@Component({templateUrl: './component.html'})
+export class CohortEditComponent {
+  /* Properties */
+  loading = false;
+  form: FormGroup;
+
+  /* Convenience property aliases */
+  get name(): FormControl         { return this.form.get('name') as FormControl; }
+  get description(): FormControl  { return this.form.get('description') as FormControl; }
+  get cohort(): Cohort            { return this.route.snapshot.data.cohort; }
+  get workspace(): Workspace      { return this.route.snapshot.data.workspace; }
 
   constructor(
-      private router: Router,
-      private route: ActivatedRoute,
-      private cohortsService: CohortsService,
-      private errorHandlingService: ErrorHandlingService,
-  ) {}
-
-  ngOnInit(): void {
-    this.sub = this.route.params
-      .do(({ns, wsid}) => {
-        this.workspaceNamespace = ns;
-        this.workspaceId = wsid;
-      })
-      .switchMap(({ns, wsid, cid}) => this.cohortsService.getCohort(ns, wsid, +cid))
-      .subscribe(cohort => this.cohort = cohort);
-  }
-
-  ngOnDestroy() {
-    this.sub.unsubscribe();
+    private route: ActivatedRoute,
+    private router: Router,
+    private fb: FormBuilder,
+    private cohortService: CohortsService,
+    private errorHandlingService: ErrorHandlingService,
+  ) {
+    this.form = fb.group({
+      name: [this.cohort.name, Validators.required],
+      description: this.cohort.description || '',
+    });
   }
 
   save(): void {
     this.loading = true;
 
-    const call = this.cohortsService.updateCohort(
-      this.workspaceNamespace,
-      this.workspaceId,
-      this.cohort.id,
-      this.cohort
-    );
-
-    const success = ({cohort}) => {
-      this.cohort = cohort;
-      this.loading = false;
-      this.router.navigate(['../../..'], {relativeTo: this.route});
+    const newCohort = <Cohort>{
+      ...this.cohort,
+      name: this.name.value,
+      description: this.description.value,
     };
 
-    this.errorHandlingService.retryApi(call).subscribe(success);
+    const call = this.cohortService.updateCohort(
+      this.workspace.namespace,
+      this.workspace.id,
+      newCohort.id,
+      newCohort
+    );
+
+    this.errorHandlingService.retryApi(call)
+      .do(_ => this.loading = false)
+      .subscribe(_ => this.backToWorkspace());
   }
 
-  cancel(): void {
-    this.router.navigate(['../../..'], {relativeTo : this.route});
+  revert(): void {
+    this.name.setValue(this.cohort.name);
+    this.description.setValue(this.cohort.description);
+  }
+
+  backToWorkspace(): void {
+    this.router.navigate(['workspace', this.workspace.namespace, this.workspace.id]);
+  }
+
+  get canSave(): boolean {
+    const nameHasChanged = this.name.value !== this.cohort.name;
+    const descHasChanged = this.description.value !== this.cohort.description;
+    return this.form.valid && (nameHasChanged || descHasChanged);
   }
 }

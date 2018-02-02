@@ -9,6 +9,7 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
+import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
@@ -28,7 +29,8 @@ describe('AppComponent', () => {
       declarations: [
         AccountCreationComponent,
         AppComponent,
-        InvitationKeyComponent
+        InvitationKeyComponent,
+        RoutingSpinnerComponent,
       ],
       providers: [
         { provide: AuthDomainService, useValue: {} },
