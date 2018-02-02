@@ -24,12 +24,22 @@ export class CohortReviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this._broadcast();
     this.subscription = this._newReviewSub();
     this.subscription.add(this._sidebarSub());
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private _broadcast() {
+    const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
+    const {workspace} = this.route.parent.snapshot.data;
+
+    this.state.annotationDefinitions.next(annotationDefinitions);
+    this.state.cohort.next(cohort);
+    this.state.review.next(review);
   }
 
   private _newReviewSub = () => this.route.data

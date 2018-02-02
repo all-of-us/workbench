@@ -1,5 +1,5 @@
 import {ErrorHandler, NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -24,6 +24,7 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
+import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
@@ -33,20 +34,13 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {CohortReviewModule} from './cohort-review/cohort-review.module';
-import {CohortSearchModule} from './cohort-search/cohort-search.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
 import {
-  AuthDomainService,
-  BugReportService,
-  ClusterService,
-  CohortsService,
+  ApiModule,
   ConfigService,
   Configuration,
-  ProfileService,
-  WorkspacesService
 } from 'generated';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -72,15 +66,17 @@ export function getConfiguration(signInService: SignInService): Configuration {
 
 @NgModule({
   imports: [
+    ApiModule,
     AppRoutingModule,
+
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
     HttpModule,
+    ReactiveFormsModule,
+
     IconsModule,
     ClarityModule,
-    CohortSearchModule,
-    CohortReviewModule,
     DataBrowserModule,
   ],
   declarations: [
@@ -96,15 +92,12 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent,
     ProfileEditComponent,
     ProfilePageComponent,
+    RoutingSpinnerComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,
   ],
   providers: [
-    AuthDomainService,
-    BugReportService,
-    ClusterService,
-    CohortsService,
     {
       provide: ConfigService,
       deps: [Http],
@@ -122,9 +115,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       deps: [ServerConfigService],
       useClass: ErrorReporterService,
     },
-    ProfileService,
     SignInService,
-    WorkspacesService,
     GoogleAnalyticsEventsService,
   ],
   // This specifies the top-level components, to load first.
