@@ -20,7 +20,7 @@ def dbProperties = [
 
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
-task loadConfig(type: JavaExec) {
+task loadConfig(type: JavaExec, dependsOn: ':generateApi') {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ConfigLoader"
   systemProperties = dbProperties
@@ -30,7 +30,7 @@ task loadConfig(type: JavaExec) {
 // See api/project.rb set-authority.
 // This evals the value of the -PappArgs flag given to Gradle and passes the
 // result to the Java main method.
-task setAuthority(type: JavaExec) {
+task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.SetAuthority"
   systemProperties = dbProperties
@@ -60,6 +60,7 @@ sourceSets {
                    // In general, command-line tools won't need access to
                    // org.pmiops.workbench.model (Swagger-generated classes),
                    // so we selectively whitelist as needed.
+                   'org/pmiops/workbench/config/WorkbenchConfig.java',
                    'org/pmiops/workbench/model/Authority.java',
                    'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',
                    'org/pmiops/workbench/model/DataAccessLevel.java',
@@ -89,7 +90,9 @@ dependencies {
   compile 'com.github.fge:json-patch:+'
   compile 'io.swagger:swagger-annotations:1.5.9'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
-  compile rootProject
+  compile 'org.apache.commons:commons-lang3:3.0'
+  compile 'com.google.code.gson:gson:+'
+  compile 'org.hibernate:hibernate-validator:+'
 }
 
 

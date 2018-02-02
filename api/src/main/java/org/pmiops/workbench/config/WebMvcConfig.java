@@ -1,33 +1,27 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
-import org.hibernate.annotations.NaturalId;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
-import org.pmiops.workbench.interceptors.DefaultCdrVersionInterceptor;
+import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -43,7 +37,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   private CorsInterceptor corsInterceptor;
 
   @Autowired
-  private DefaultCdrVersionInterceptor defaultCdrVersionInterceptor;
+  private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
 
 
   @Bean
@@ -100,7 +94,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
     registry.addInterceptor(authInterceptor);
-    registry.addInterceptor(defaultCdrVersionInterceptor);
+    registry.addInterceptor(clearCdrVersionInterceptor);
   }
 
   @Override

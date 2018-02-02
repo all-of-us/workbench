@@ -1,0 +1,2 @@
+include ':common-api'
+project(':common-api').projectDir = new File(settingsDir, '../common-api')

@@ -18,6 +18,7 @@ import {Authority, ProfileService} from 'generated';
 
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
+export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -34,6 +35,7 @@ export class AppComponent implements OnInit {
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
+  private overriddenPublicUrl: string = null;
 
   constructor(
     /* Ours */
@@ -49,6 +51,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+    this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
     window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
         if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
@@ -62,8 +65,22 @@ export class AppComponent implements OnInit {
       }
       window.location.reload();
     };
-    console.log('To override the API URL, try:\n' +
-      'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+    window['setPublicApiUrl'] = (url: string) => {
+      if (url) {
+        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+        }
+        this.overriddenPublicUrl = url;
+        localStorage.setItem(overriddenPublicUrlKey, url);
+      } else {
+        this.overriddenPublicUrl = null;
+        localStorage.removeItem(overriddenPublicUrlKey);
+      }
+      window.location.reload();
+    };
+    console.log('To override the API URLs, try:\n' +
+      'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
+      'setPublicApiUrl(\'https://host.example.com:5678\')');
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.

@@ -1,0 +1,78 @@
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+repositories {   // repositories for Jar's you access in your code
+  jcenter()
+}
+
+dependencies {
+  // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
+  compile 'javax.servlet:javax.servlet-api:3.0.1'
+  compile 'joda-time:joda-time:+'
+  compile 'javax.inject:javax.inject:1'
+  compile 'com.google.guava:guava:22.0'
+  compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
+  compile 'org.apache.commons:commons-lang3:3.0'
+  compile('org.springframework.boot:spring-boot-starter-web:+') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.mockito:mockito-core:1.+'
+  testCompile 'com.google.truth:truth:+'
+  testCompile 'com.h2database:h2:+'
+  testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+}
+
+tasks.withType(Test) {
+  testLogging {
+    // Causes the correct line to be reported on an exception.
+    exceptionFormat "full"
+  }
+  def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
+  if (verboseTestLogging == 'yes') {
+    testLogging {
+      events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+  } else {
+    testLogging {
+      events "passed", "skipped", "failed"
+    }
+  }
+}
+
+test {
+  // Starting with a smaller minimum seems to help this task use memory more slowly.
+  // Increase max heap size from default of 1024M in order to avoid OOM errors.
+  // When Gradle runs out of memory, it fails with this message:
+  //   Process 'Gradle Test Executor 1' finished with non-zero exit value 137
+  // and literally nothing else in terms of helpful debugging information.
+  minHeapSize = '128m'
+  maxHeapSize = '2048m'
+}
+
+group = 'org.pmiops.allofus.workbench'
+version = '0.1.0'          // Version in generated output
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8

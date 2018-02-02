@@ -46,6 +46,7 @@
       "project": "src/tsconfig.app.json",
       "exclude": [
         "**/src/generated/**/*.ts",
+        "**/src/publicGenerated/**/*.ts",
         "**/node_modules/**/*"
       ]
     },
@@ -53,6 +54,7 @@
       "project": "src/tsconfig.spec.json",
       "exclude": [
         "**/src/generated/**/*.ts",
+        "**/src/publicGenerated/**/*.ts",
         "**/node_modules/**/*"
       ]
     },
