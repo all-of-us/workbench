@@ -812,7 +812,9 @@ def deploy(cmd_name, args)
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? "--quiet" : ""
   common.run_inline %W{
-    gcloud app deploy build/staged-app/app.yaml
+    gcloud app deploy
+      build/staged-app/app.yaml
+      build/staged-app/WEB-INF/appengine-generated/cron.yaml
       --project #{gcc.project} #{promote} #{quiet}
   } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
