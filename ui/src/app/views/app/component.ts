@@ -29,15 +29,13 @@ export class AppComponent implements OnInit {
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
-  private _showCreateAccount = false;
-  private overriddenUrl: string = null;
-  private overriddenPublicUrl: string = null;
   currentUrl: string;
   email: string;
 
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
+  private overriddenPublicUrl: string = null;
 
   constructor(
     /* Ours */

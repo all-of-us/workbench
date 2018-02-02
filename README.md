@@ -78,12 +78,29 @@ local API server under http://localhost:8081/api/.
 ./project.rb run-local-bigdata-migrations
 ```
 
+You can run the server (skipping config and db setup) by running:
+
+```Shell
+./project.rb run-api
+```
 
 
 Other available operations may be discovered by running:
 ```Shell
 ./project.rb
 ```
+i
+
+### Public API: dev AppEngine appserver
+
+After running dev-up, run-local-data-migrations, and
+run-local-bigdata-migrations, run in the api dir:
+
+```Shell
+./project.rb run-public-api
+```
+
+This will start up the public API on http://localhost:8083/.
 
 ### UI
 
