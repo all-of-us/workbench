@@ -9,7 +9,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.util.Filter;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantsSortColumn;
 import org.pmiops.workbench.cohortreview.util.SortOrder;
@@ -303,8 +302,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 Integer pageSize,
                                                                                                 String sortColumn,
                                                                                                 String sortOrder,
-                                                                                                List<String> filterColumns,
-                                                                                                List<String> filterValues) {
+                                                                                                List<String> filters) {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
