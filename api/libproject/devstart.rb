@@ -779,7 +779,7 @@ Common.register_command({
   :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })
 
-def deploy(cmd_name, args)
+def deploy(cmd_name, args, with_cron)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -814,16 +814,17 @@ def deploy(cmd_name, args)
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
-      build/staged-app/WEB-INF/appengine-generated/cron.yaml
-      --project #{gcc.project} #{promote}
-  } + (op.opts.quiet ? %W{--quiet} : []) + (op.opts.version ? %W{--version #{op.opts.version}} : [])
+  } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
+    %W{--project #{gcc.project} #{promote}} +
+    (op.opts.quiet ? %W{--quiet} : []) +
+    (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
 
 def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy(cmd_name, args)
+  deploy(cmd_name, args, with_cron=true)
 end
 
 def deploy_public_api(cmd_name, args)
@@ -831,7 +832,7 @@ def deploy_public_api(cmd_name, args)
   common = Common.new
   common.status "Deploying public-api..."
   Dir.chdir('../public-api') do
-    deploy(cmd_name, args)
+    deploy(cmd_name, args, with_cron=false)
   end
 end
 
