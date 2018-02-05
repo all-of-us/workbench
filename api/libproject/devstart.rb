@@ -815,8 +815,9 @@ def deploy(cmd_name, args)
     gcloud app deploy
       build/staged-app/app.yaml
       build/staged-app/WEB-INF/appengine-generated/cron.yaml
-      --project #{gcc.project} #{promote}#{quiet}
-  } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
+      --project #{gcc.project} #{promote}
+  } + (op.opts.quiet ? %W{--quiet} : [])
+    + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
 
 def deploy_api(cmd_name, args)
