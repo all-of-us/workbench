@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,7 +130,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatus;
     }
 
-    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filterList, PageRequest pageRequest) {
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
         return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
     }
 }

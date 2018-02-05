@@ -5,6 +5,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 import java.util.List;
@@ -79,5 +80,5 @@ public interface CohortReviewService {
      */
     ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
-    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<String> filtersList, PageRequest pageRequest);
+    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
 }

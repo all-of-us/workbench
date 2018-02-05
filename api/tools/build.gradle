@@ -69,7 +69,11 @@ sourceSets {
                    'org/pmiops/workbench/model/CohortReview.java',
                    'org/pmiops/workbench/model/ParticipantCohortStatus.java',
                    'org/pmiops/workbench/model/ReviewStatus.java',
-                   'org/pmiops/workbench/model/AnnotationType.java']
+                   'org/pmiops/workbench/model/AnnotationType.java',
+                   'org/pmiops/workbench/model/Filter.java',
+                   'org/pmiops/workbench/model/Operator.java',
+                   'org/pmiops/workbench/model/ParticipantCohortStatusColumns.java',
+                   'org/pmiops/workbench/model/SortOrder.java']
        excludes = ['org/pmiops/workbench/db/dao/UserService.java',
                    'org/pmiops/workbench/db/dao/WorkspaceService.java',
                    'org/pmiops/workbench/db/dao/WorkspaceServiceImpl.java']

@@ -1,6 +1,8 @@
 package org.pmiops.workbench.cohortreview.util;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.SortOrder;
 
 import java.util.Objects;
 
@@ -8,7 +10,7 @@ public class PageRequest {
     private int page;
     private int size;
     private SortOrder sortOrder;
-    private ParticipantsSortColumn sortColumn;
+    private ParticipantCohortStatusColumns sortColumn;
 
     /**
      * Creates a new {@link PageRequest}. Pages are zero indexed.
@@ -27,8 +29,8 @@ public class PageRequest {
 
         this.page = page;
         this.size = size;
-        this.sortOrder = SortOrder.asc;
-        this.sortColumn = ParticipantsSortColumn.PARTICIPANT_ID;
+        this.sortOrder = SortOrder.ASC;
+        this.sortColumn = ParticipantCohortStatusColumns.PARTICIPANTID;
     }
 
     /**
@@ -39,7 +41,7 @@ public class PageRequest {
      * @param sortOrder order of the sort.
      * @param sortColumn column to sort.
      */
-    public PageRequest(int page, int size, SortOrder sortOrder, ParticipantsSortColumn sortColumn) {
+    public PageRequest(int page, int size, SortOrder sortOrder, ParticipantCohortStatusColumns sortColumn) {
         this(page, size);
         this.sortOrder = sortOrder;
         this.sortColumn = sortColumn;
@@ -55,7 +57,7 @@ public class PageRequest {
 
     public SortOrder getSortOrder() { return this.sortOrder; }
 
-    public ParticipantsSortColumn getSortColumn() { return this.sortColumn; }
+    public ParticipantCohortStatusColumns getSortColumn() { return this.sortColumn; }
 
     @Override
     public boolean equals(Object o) {

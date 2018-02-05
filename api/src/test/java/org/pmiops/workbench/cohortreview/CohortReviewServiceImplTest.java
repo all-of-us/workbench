@@ -16,6 +16,7 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 import javax.inject.Provider;
@@ -265,11 +266,11 @@ public class CohortReviewServiceImplTest {
         long cohortReviewId = 1;
         PageRequest pageRequest = new PageRequest(0, 1);
 
-        when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
+        when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
 
-        cohortReviewService.findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest);
+        cohortReviewService.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest);
 
-        verify(participantCohortStatusDao).findAll(cohortReviewId, Collections.<String>emptyList(), pageRequest);
+        verify(participantCohortStatusDao).findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest);
 
         verifyNoMoreMockInteractions();
     }
