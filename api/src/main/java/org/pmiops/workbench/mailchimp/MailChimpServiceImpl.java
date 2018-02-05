@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MailChimpServiceImpl implements MailChimpService {
+
   private static final Logger log = Logger.getLogger(MailChimpServiceImpl.class.getName());
 
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
@@ -42,9 +43,10 @@ public class MailChimpServiceImpl implements MailChimpService {
     Create createRequest = new Create(
         cloudStorageServiceProvider.get().readMailChimpListId(),
         contactEmail);
-    createRequest.status = "pending";
+    createRequest.status = MailChimpService.MAILCHIMP_PENDING;
     try {
-      userId = getClient().execute(createRequest).mapping.get("id").toString();
+      userId = getClient().execute(createRequest)
+          .mapping.get(MailChimpService.MAILCHIMP_KEY_ID).toString();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -67,7 +69,7 @@ public class MailChimpServiceImpl implements MailChimpService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    return mailchimpResponse.get("status").toString();
+    return mailchimpResponse.get(MailChimpService.MAILCHIMP_KEY_STATUS).toString();
   }
 
   MailchimpClient getClient() {

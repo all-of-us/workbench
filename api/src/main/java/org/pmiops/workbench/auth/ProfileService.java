@@ -93,7 +93,7 @@ public class ProfileService {
         throw new RuntimeException(e);
       }
       if (userEmailVerificationStatus != null) {
-        if (userEmailVerificationStatus.equals("pending")) {
+        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_PENDING)) {
           profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         } else {
           profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);

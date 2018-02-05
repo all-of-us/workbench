@@ -10,6 +10,10 @@ import java.util.HashMap;
  * for internal use.
  */
 public interface MailChimpService {
+  static final String MAILCHIMP_PENDING = "pending";
+  static final String MAILCHIMP_KEY_ID = "id";
+  static final String MAILCHIMP_KEY_STATUS = "status";
+
   String addUserContactEmail(String contactEmail);
 
   String getMember(String userEmailHash) throws MailchimpException, IOException;
