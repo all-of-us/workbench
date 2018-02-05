@@ -13,7 +13,10 @@ const getValue = filt => (<{property: string, value: string}>filt).value;
 import {
   CohortReview,
   CohortReviewService,
-  ParticipantCohortStatus
+  ParticipantCohortStatus,
+  ParticipantCohortStatusColumns,
+  ParticipantCohortStatusesRequest,
+  SortOrder
 } from 'generated';
 
 @Component({
@@ -54,9 +57,21 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     const page = Math.floor(state.page.from / state.page.size);
     const pageSize = state.page.size;
 
-    const sortColumn = state.sort && <string>(state.sort.by);
-    const sortOrder = state.sort &&
-      (state.sort.reverse ? 'desc' : 'asc');
+    let sortColumn = state.sort && {
+      participantId: ParticipantCohortStatusColumns.ParticipantId,
+      gender: ParticipantCohortStatusColumns.Gender,
+      race: ParticipantCohortStatusColumns.Race,
+      ethnicity: ParticipantCohortStatusColumns.Ethnicity,
+      birthDate: ParticipantCohortStatusColumns.BirthDate,
+      status: ParticipantCohortStatusColumns.Status
+    }[<string>(state.sort.by)];
+
+    sortColumn = sortColumn || ParticipantCohortStatusColumns.ParticipantId;
+
+    let sortOrder = state.sort &&
+      (state.sort.reverse ? SortOrder.Desc : SortOrder.Asc);
+
+    sortOrder = sortOrder || SortOrder.Asc;
 
     const filterColumns = state.filters && state.filters.map(getProperty);
     const filterValues = state.filters && state.filters.map(getValue);
@@ -64,10 +79,16 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     console.dir(state);
 
     setTimeout(() => this.loading = true, 0);
+      const request = {
+          page: page,
+          pageSize: pageSize,
+          sortColumn: sortColumn,
+          sortOrder: sortOrder
+      };
+      // TODO: build filters list here
+      console.dir(request);
     this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION,
-                                                page, pageSize,
-                                                sortColumn, sortOrder,
-                                                filterColumns, filterValues)
+        request)
       .do(r => this.loading = false)
       .subscribe(review => this.state.review.next(review));
   }
