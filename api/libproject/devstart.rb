@@ -779,7 +779,7 @@ Common.register_command({
   :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
 })
 
-def deploy(cmd_name, args)
+def deploy(cmd_name, args, with_cron)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -802,16 +802,6 @@ def deploy(cmd_name, args)
     lambda {|opts, v| opts.quiet = true},
     "Don't display a confirmation prompt when deploying"
   )
-  op.add_option(
-    "--deploy-cron",
-    lambda {|opts, v| opts.deploy_cron = true},
-    "Also deploy cronjobs"
-  )
-  op.add_option(
-    "--no-deploy-cron",
-    lambda {|opts, v| opts.deploy_cron = false},
-    "Do not deploy cronjobs"
-  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -824,7 +814,7 @@ def deploy(cmd_name, args)
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
-  } + (op.opts.deploy_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
+  } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
     (op.opts.version ? %W{--version #{op.opts.version}} : [])
@@ -834,7 +824,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy(cmd_name, %W{--deploy-cron} + args)
+  deploy(cmd_name, args, with_cron=true)
 end
 
 def deploy_public_api(cmd_name, args)
@@ -842,7 +832,7 @@ def deploy_public_api(cmd_name, args)
   common = Common.new
   common.status "Deploying public-api..."
   Dir.chdir('../public-api') do
-    deploy(cmd_name, %W{--no-deploy-cron} + args)
+    deploy(cmd_name, args, with_cron=false)
   end
 end
 
