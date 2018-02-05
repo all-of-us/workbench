@@ -70,7 +70,6 @@ public class ProfileService {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
           .getTime());
     }
-    // TODO: Add call to mailchimp using user email hash from DB to get email verified status.
     if (user.getDataAccessLevel() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }
@@ -78,11 +77,18 @@ public class ProfileService {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));
     }
     String userEmailVerificationStatus = null;
-    if(user.getContactEmail() != null) {
+    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.UNVERIFIED)) {
+      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+    } else if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.VERIFIED)) {
+      profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+    } else {
+      // Verification is pending, need to query mailchimp.
       try {
         userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
       } catch (NotFoundException e) {
         profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+        user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+        userDao.save(user);
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -91,12 +97,11 @@ public class ProfileService {
           profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         } else {
           profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+          user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+          userDao.save(user);
         }
       }
-    } else {
-      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
     }
-
     return profile;
   }
 }

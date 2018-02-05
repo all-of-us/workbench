@@ -17,6 +17,7 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -99,8 +100,7 @@ public class UserService {
           && user.getDemographicSurveyCompletionTime() != null
           && user.getEthicsTrainingCompletionTime() != null
           && user.getTermsOfServiceCompletionTime() != null
-          && userEmailVerificationStatus != null
-          && userEmailVerificationStatus.equals("subscribed")) {
+          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.VERIFIED)) {
         try {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
@@ -126,6 +126,7 @@ public class UserService {
     user.setFamilyName(familyName);
     user.setGivenName(givenName);
     user.setDisabled(false);
+    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

@@ -37,6 +37,7 @@ import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationListResponse;
@@ -335,6 +336,8 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+    userDao.save(user);
     // TODO: Call http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
     //  Store response id in database as mailchimp hash value
     return getProfileResponse(user);
@@ -356,7 +359,12 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
-    user.setContactEmail(updatedProfile.getContactEmail());
+    if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+      mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+      user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+      user.setContactEmail(updatedProfile.getContactEmail());
+    }
+
     // This does not update the name in Google.
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
