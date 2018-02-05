@@ -119,9 +119,9 @@ fi
 echo "Making big query dataset for cloudsql cdr"
 if ./generate-cdr/make-bq-data-dump.sh --dataset $WORKBENCH_DATASET --project $WORKBENCH_PROJECT --account $ACCOUNT --bucket $BUCKET
 then
-    echo "Data dumped"
+    echo "Workbench cdr count data dumped"
 else
-    echo "FAILED to dump"
+    echo "FAILED to dump Workbench cdr count data"
     exit 1
 fi
 
@@ -130,8 +130,8 @@ dataset=cdr$CDR_VERSION
 echo "Making big query dataset for cloudsql cdr"
 if ./generate-cdr/make-bq-data-dump.sh --dataset $PUBLIC_DATASET --project $PUBLIC_PROJECT --account $ACCOUNT --bucket $BUCKET
 then
-    echo "Data dumped"
+    echo "Public cdr count data dumped"
 else
-    echo "FAILED to dump"
+    echo "FAILED to dump Public cdr count data"
     exit 1
 fi
