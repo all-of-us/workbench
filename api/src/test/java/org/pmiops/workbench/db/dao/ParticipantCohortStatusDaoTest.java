@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import com.google.gson.Gson;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -15,10 +14,8 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.FilterList;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
 import org.pmiops.workbench.model.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -270,15 +267,6 @@ public class ParticipantCohortStatusDaoTest {
         filters.clear();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).value("z"));
         assertBadRequest(pageRequest, filters, "Problems parsing birthDate: Unparseable date: \"z\"");
-
-        ParticipantCohortStatusesRequest request = new ParticipantCohortStatusesRequest();
-        request.setPage(1);
-        request.setPageSize(1);
-        request.setSortColumn(ParticipantCohortStatusColumns.PARTICIPANTID);
-        request.setSortOrder(SortOrder.ASC);
-        Filter fitler = new Filter().property(ParticipantCohortStatusColumns.RACE).operator(Operator.EQUAL).value("white");
-        request.setFilters(new FilterList().addItemsItem(fitler));
-        new Gson().toJson(request);
     }
 
     private void assertBadRequest(PageRequest pageRequest, List<Filter> filters, String expectedException) {
