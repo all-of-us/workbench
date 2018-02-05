@@ -29,11 +29,14 @@ public class ExceptionAdvice {
             return ResponseEntity.status(statusCode).body(
                 ((BadRequestException) e).getErrorResponse());
           }
-          return ResponseEntity.status(statusCode).body(e.getMessage());
+          return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(
+              e.getMessage()));
         }
       }
     }
     log.log(Level.SEVERE, "Server error", e);
-    return ResponseEntity.status(statusCode).body(e.getMessage());
+    String message = statusCode == 503 ? "The server is unavailable."
+        : "An unexpected error occurred.";
+    return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(message));
   }
 }
