@@ -31,7 +31,7 @@ then
   exit 1
 fi
 
-dump_path=./generate-cdr/$CDR_DB_NAME.sql
+dump_path=./generate-cdr/tmp/$CDR_DB_NAME.sql
 
 echo "Dumping $CDR_DB_NAME to $BUCKET\n"
 
@@ -43,5 +43,6 @@ mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
 
 gsutil cp $dump_path gs://$BUCKET/$CDR_DB_NAME.sql
 
+rm $dump_path
 
 exit 0

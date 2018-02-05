@@ -352,6 +352,11 @@ def generate_cloudsql_cdr(*args)
   common.run_inline %W{docker-compose run db-generate-cloudsql-cdr} + args
 end
 
+def generate_cloudsql_count_dbs(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-cloudsql-count-dbs} + args
+end
+
 def run_drop_cdr_db(*args)
   common = Common.new
 
@@ -744,6 +749,11 @@ Common.register_command({
   :description => "Creates and populates mysql or cloudsql database from data made by generate-bigquery-cloudsql-cdr.",
   :fn => lambda { |*args| generate_cloudsql_cdr(*args) }
 })
+Common.register_command({
+                            :invocation => "generate-cloudsql-count-dbs",
+                            :description => "Creates and populates mysql or cloudsql database from pubilc and cdr mysql data made by generate-bigquery-cloudsql-cdr.",
+                            :fn => lambda { |*args| generate_cloudsql_count_dbs(*args) }
+                        })
 Common.register_command({
   :invocation => "run-drop-cdr-db",
   :description => "Drops the cdr schema of SQL database for the specified project.",

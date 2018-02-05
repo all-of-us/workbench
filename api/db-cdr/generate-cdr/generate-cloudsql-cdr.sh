@@ -12,8 +12,6 @@
 # Example
 # ../project.rb generate-cloudsql-cdr --account peter.speltz@pmi-ops.org --cdr-version 20180130 --cdr-db-prefix cdr --bucket all-of-us-workbench-cloudsql-create
 
-# Todo public db in here?
-
 set -xeuo pipefail
 IFS=$'\n\t'
 
@@ -70,7 +68,6 @@ fi
 export CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
 
 # Init the local cdr database
-# Init the db to fresh state ready for new cdr data keeping schema and certain tables
 echo "Initializing new cdr db $CDR_DB_NAME"
 if ./generate-cdr/init-new-cdr-db.sh --cdr-db-name $CDR_DB_NAME
 then
@@ -87,6 +84,16 @@ then
   echo "Imported data to local database $CDR_DB_NAME"
 else
   echo "Local MYSQL CDR failed to initialize"
+  exit 1
+fi
+
+# Make mysqldump and upload to gcs
+echo "Making mysqldump of $CDR_DB_NAME"
+if ./generate-cdr/make-mysqldump.sh --cdr-db-name $CDR_DB_NAME --bucket $BUCKET
+then
+  echo "Success"
+else
+  echo "Fail"
   exit 1
 fi
 

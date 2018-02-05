@@ -96,7 +96,7 @@ do
   fi
 done
 
-#rm -r $local_fpath
+rm -r $local_fpath
 
 # Add the indexes back and any other queries with data
 echo "Adding indexes back to $CDR_DB_NAME ..."

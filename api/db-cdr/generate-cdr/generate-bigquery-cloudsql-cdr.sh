@@ -23,7 +23,7 @@ IFS=$'\n\t'
 
 
 USAGE="./generate-cdr/generate-bigquery-cloudsql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
-USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD --bucket all-of-us-workbench-cloudsql-create"
 
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
 
@@ -96,7 +96,7 @@ fi
 WORKBENCH_DATASET=cdr$CDR_VERSION
 PUBLIC_DATASET=public$CDR_VERSION
 
-## Make BigQuery dbs
+## Make BigQuery workbench
 echo "Making BigQuery dataset for CloudSql cdr"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
 then
@@ -106,7 +106,7 @@ else
     exit 1
 fi
 
-# Make public
+# Make BigQuery public
 echo "Making BigQuery public dataset for CloudSql cdr"
 if ./generate-cdr/make-bq-public-data.sh --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET
 then
