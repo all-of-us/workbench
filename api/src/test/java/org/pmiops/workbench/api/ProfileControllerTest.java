@@ -43,6 +43,7 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
@@ -392,6 +393,8 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+    userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     return result;
   }
