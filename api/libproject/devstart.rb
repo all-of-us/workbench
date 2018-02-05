@@ -810,12 +810,12 @@ def deploy(cmd_name, args)
   common.run_inline %W{gradle :appengineStage}
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
-  quiet = op.opts.quiet ? "--quiet" : ""
+  quiet = op.opts.quiet ? " --quiet" : ""
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
       build/staged-app/WEB-INF/appengine-generated/cron.yaml
-      --project #{gcc.project} #{promote} #{quiet}
+      --project #{gcc.project} #{promote}#{quiet}
   } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
 end
 

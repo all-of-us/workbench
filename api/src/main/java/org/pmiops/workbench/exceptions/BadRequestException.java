@@ -10,7 +10,7 @@ public class BadRequestException extends RuntimeException {
   private ErrorResponse errorResponse;
 
   public BadRequestException(String message) {
-    this(errorResponse(message));
+    this(ExceptionUtils.errorResponse(message));
   }
 
   public BadRequestException(ErrorResponse errorResponse) {
@@ -26,9 +26,5 @@ public class BadRequestException extends RuntimeException {
     return errorResponse;
   }
 
-  private static ErrorResponse errorResponse(String message) {
-    ErrorResponse response = new ErrorResponse();
-    response.setMessage(message);
-    return response;
-  }
+
 }
