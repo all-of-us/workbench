@@ -49,9 +49,9 @@ describe('SelectionComponent', () => {
 
   beforeEach(async(() => {
     mockReduxInst = MockNgRedux.getInstance();
-    const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
+    const old = mockReduxInst.getState;
+    const wrapped = () => fromJS(old());
+    mockReduxInst.getState = wrapped;
 
     TestBed
       .configureTestingModule({

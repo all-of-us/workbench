@@ -45,7 +45,7 @@ export class SetAnnotationMasterComponent {
   delete(): void {
     const {ns, wsid, cid} = this.route.snapshot.params;
 
-    const _deleteCalls = this.selected.map(({cohortAnnotationDefinitionId: id}) =>
+    const deleteCalls = this.selected.map(({cohortAnnotationDefinitionId: id}) =>
       this.annotationAPI.deleteCohortAnnotationDefinition(ns, wsid, cid, id)
     );
 
@@ -58,7 +58,7 @@ export class SetAnnotationMasterComponent {
 
     this.posting = true;
     Observable
-      .forkJoin(..._deleteCalls)
+      .forkJoin(...deleteCalls)
       .switchMap(_ => allDefns$)
       .do(broadcast)
       .subscribe(_ => this.posting = false);

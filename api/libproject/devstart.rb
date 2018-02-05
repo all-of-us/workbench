@@ -73,6 +73,14 @@ def run_api(account)
   end
 end
 
+def run_public_api_and_db()
+  common = Common.new
+  common.status "Starting database..."
+  common.run_inline %W{docker-compose up -d db}
+  common.status "Starting public API."
+  common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
+end
+
 def clean()
   common = Common.new
   common.run_inline %W{docker-compose run --rm api ./gradlew clean}
@@ -94,9 +102,21 @@ def validate_swagger(cmd_name, args)
   Common.new.run_inline %W{gradle validateSwagger} + args
 end
 
-def run_tests(cmd_name, args)
+def run_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle test} + args
+end
+
+def run_public_api_tests(cmd_name, args)
+  ensure_docker cmd_name, args
+  Dir.chdir('../public-api') do
+    Common.new.run_inline %W{gradle test} + args
+  end
+end
+
+def run_all_tests(cmd_name, args)
+  run_api_tests(cmd_name, args)
+  run_public_api_tests(cmd_name, args)
 end
 
 def run_integration_tests(*args)
@@ -369,6 +389,10 @@ def do_create_db_creds(project, account, creds_file)
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
+      # TODO: replace with public DB, user, password
+      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/cdr?rewriteBatchedStatements=true"
+      db_creds_file.puts "PUBLIC_DB_USER=workbench"
+      db_creds_file.puts "PUBLIC_DB_PASSWORD=#{workbench_password}"
       db_creds_file.close
 
       activate_service_account(creds_file)
@@ -579,6 +603,12 @@ Common.register_command({
 })
 
 Common.register_command({
+  :invocation => "run-public-api",
+  :description => "Runs the public api server (assumes database is up-to-date.)",
+  :fn => lambda { |*args| run_public_api_and_db() }
+})
+
+Common.register_command({
   :invocation => "clean",
   :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
   :fn => lambda { |*args| clean(*args) }
@@ -598,9 +628,23 @@ Common.register_command({
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs tests. To run a single test, add (for example) " \
+  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => lambda { |*args| run_tests("test", args) }
+  :fn => lambda { |*args| run_all_tests("test", args) }
+})
+
+Common.register_command({
+  :invocation => "test-api",
+  :description => "Runs API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
+  :fn => lambda { |*args| run_api_tests("test-api", args) }
+})
+
+Common.register_command({
+  :invocation => "test-public-api",
+  :description => "Runs public API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
+  :fn => lambda { |*args| run_public_api_tests("test-public-api", args) }
 })
 
 Common.register_command({
@@ -736,7 +780,6 @@ Common.register_command({
 })
 
 def deploy(cmd_name, args)
-  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -754,6 +797,11 @@ def deploy(cmd_name, args)
     lambda {|opts, v| opts.promote = false},
     "Do not promote this deploy to make it available at the root URL"
   )
+  op.add_option(
+    "--quiet",
+    lambda {|opts, v| opts.quiet = true},
+    "Don't display a confirmation prompt when deploying"
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -762,17 +810,43 @@ def deploy(cmd_name, args)
   common.run_inline %W{gradle :appengineStage}
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
+  quiet = op.opts.quiet ? " --quiet" : ""
   common.run_inline %W{
-    gcloud app deploy build/staged-app/app.yaml
+    gcloud app deploy
+      build/staged-app/app.yaml
+      build/staged-app/WEB-INF/appengine-generated/cron.yaml
       --project #{gcc.project} #{promote}
-  } + (op.opts.version ? %W{--version #{op.opts.version}} : [])
+  } + (op.opts.quiet ? %W{--quiet} : []) + (op.opts.version ? %W{--version #{op.opts.version}} : [])
+end
+
+def deploy_api(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  common.status "Deploying api..."
+  deploy(cmd_name, args)
+end
+
+def deploy_public_api(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  common.status "Deploying public-api..."
+  Dir.chdir('../public-api') do
+    deploy(cmd_name, args)
+  end
 end
 
 Common.register_command({
-  :invocation => "deploy",
+  :invocation => "deploy-api",
   :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| deploy("deploy", args) }
+  :fn => lambda { |*args| deploy_api("deploy-api", args) }
 })
+
+Common.register_command({
+  :invocation => "deploy-public-api",
+  :description => "Deploys the public API server to the specified cloud project.",
+  :fn => lambda { |*args| deploy_public_api("deploy-public-api", args) }
+})
+
 
 def migrate_database()
   common = Common.new
@@ -896,7 +970,8 @@ def circle_deploy(cmd_name, args)
     version = ENV["CIRCLE_TAG"]
   end
 
-  deploy(cmd_name, args + %W{--version #{version} #{promote}})
+  deploy_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
+  deploy_public_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
 end
 
 def run_cloud_migrations(cmd_name, args)

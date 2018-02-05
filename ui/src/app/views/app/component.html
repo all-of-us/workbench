@@ -32,15 +32,15 @@
       <div style="height: 2rem; margin: 0.5rem 2rem;">
         <ng-template *ngIf="true; then logoImages"></ng-template>
       </div>
-      <div *ngIf="!_showCreateAccount;" style="margin-top: 1.5rem;">
+      <div *ngIf="!showCreateAccount;" style="margin-top: 1.5rem;">
         <div style="display: flex; justify-content: space-around;">
-          <button (click)="showCreateAccount()" class="btn btn-primary">Create Account</button>
+          <button (click)="showCreateAccount = true" class="btn btn-primary">Create Account</button>
         </div>
         <div style="display: flex; justify-content: space-around;">
           <button (click)="signIn()" class="btn btn-primary">Sign In</button>
         </div>
       </div>
-      <div *ngIf="_showCreateAccount;">
+      <div *ngIf="showCreateAccount;">
         <app-invitation-key></app-invitation-key>
       </div>
     </div>

@@ -61,8 +61,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
     const statusChanger = this.statusControl.valueChanges
       .withLatestFrom(participantId)
-      .switchMap(this._callApi)
-      .subscribe(this._emit);
+      .switchMap(this.callApi)
+      .subscribe(this.emit);
 
     this.subscription.add(statusChanger);
   }
@@ -71,7 +71,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private _callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
+  private callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
@@ -81,7 +81,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     );
   }
 
-  private _emit = (newStatus: ParticipantCohortStatus) => {
+  private emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
     const participant = Participant.makeRandomFromExisting(newStatus);
     this.state.participant.next(participant);

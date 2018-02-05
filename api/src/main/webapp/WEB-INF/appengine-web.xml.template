@@ -19,6 +19,10 @@
     <include path="WEB-INF/sa-key.json"></include>
   </resource-files>
 
+  <static-error-handlers>
+    <handler file="server_unavailable.html" />
+  </static-error-handlers>
+
   <automatic-scaling>
     <min-idle-instances>1</min-idle-instances>
   </automatic-scaling>

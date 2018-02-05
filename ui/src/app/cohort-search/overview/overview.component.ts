@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions} from '../redux';
 
-import {Cohort, CohortsService} from 'generated';
+import {Cohort, CohortsService, Workspace} from 'generated';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -37,19 +37,14 @@ export class OverviewComponent {
   }
 
   submit() {
-    const workspaceId = this.route.snapshot.params['wsid'];
-    const workspaceNamespace = this.route.snapshot.params['ns'];
+    const ns: Workspace['namespace'] = this.route.snapshot.params.ns;
+    const wsid: Workspace['id'] = this.route.snapshot.params.wsid;
 
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const criteria = JSON.stringify(this.actions.mapAll());
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
-
-    const goBack = (_) =>
-      this.router.navigate(['../..'], {relativeTo: this.route});
-
-    this.cohortApi.createCohort(workspaceNamespace, workspaceId, cohort)
-      .first()
-      .subscribe(goBack);
+    const goBack = (_) => this.router.navigate(['workspace', ns, wsid]);
+    this.cohortApi.createCohort(ns, wsid, cohort).subscribe(goBack);
   }
 }
