@@ -13,7 +13,7 @@ const getValue = filt => (<{property: string, value: string}>filt).value;
 import {
   CohortReview,
   CohortReviewService,
-  ParticipantCohortStatus
+  ParticipantCohortStatus,
 } from 'generated';
 
 @Component({
@@ -21,7 +21,7 @@ import {
   templateUrl: './participant-table.component.html',
 })
 export class ParticipantTableComponent implements OnInit, OnDestroy {
-  DUMMY_DATA: Participant[];
+  participants: Participant[];
 
   review: CohortReview;
   loading: boolean;
@@ -38,10 +38,9 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
     this.subscription = this.state.review$
       .do(review => this.review = review)
-      .pluck('participantCohortStatuses')
-      .map(statusSet =>
-        (<ParticipantCohortStatus[]>statusSet).map(Participant.makeRandomFromExisting))
-      .subscribe(val => this.DUMMY_DATA = <Participant[]>val);
+      .pluck<CohortReview, ParticipantCohortStatus[]>('participantCohortStatuses')
+      .map(statusSet => statusSet.map(Participant.fromStatus))
+      .subscribe(val => this.participants = <Participant[]>val);
   }
 
   ngOnDestroy() {

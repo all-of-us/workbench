@@ -11,7 +11,7 @@
   <clr-dg-column [clrDgField]="'ethnicity'">Ethnicity</clr-dg-column>
   <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
 
-  <clr-dg-row *ngFor="let participant of DUMMY_DATA">
+  <clr-dg-row *ngFor="let participant of participants">
     <clr-dg-cell
       [style.cursor]="'pointer'"
       routerLink="{{ participant.id }}">
