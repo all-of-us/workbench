@@ -4,7 +4,6 @@ import com.blockscore.models.Address;
 import com.blockscore.models.PaginatedResult;
 import com.blockscore.models.Person;
 import com.blockscore.net.BlockscoreApiClient;
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import javax.inject.Provider;
@@ -23,10 +22,12 @@ public class BlockscoreServiceImpl implements BlockscoreService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
 
+  @Override
   public PaginatedResult<Person> listPeople() {
     return getClient().listPeople();
   }
 
+  @Override
   public Person createPerson(
       String firstName, String lastName, Address address, String dobString,
       String documentType, String documentNumber) {

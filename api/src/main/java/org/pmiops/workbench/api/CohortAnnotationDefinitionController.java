@@ -1,5 +1,8 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -15,10 +18,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
@@ -108,8 +107,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
+        findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
         cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
 

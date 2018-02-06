@@ -11,9 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -139,7 +137,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<WorkspaceACLUpdate>();
     Iterator<WorkspaceUserRole> dbUserRoles = workspace.getWorkspaceUserRoles().iterator();
     while (dbUserRoles.hasNext()) {
-      boolean resolved = false;
       WorkspaceUserRole currentUserRole = dbUserRoles.next();
 
       WorkspaceUserRole mapValue = userRoleMap.get(currentUserRole.getUser().getUserId());

@@ -1,10 +1,6 @@
 package org.pmiops.workbench.cdr;
 
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 

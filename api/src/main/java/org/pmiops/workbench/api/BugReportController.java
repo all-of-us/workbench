@@ -1,29 +1,21 @@
 package org.pmiops.workbench.api;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Properties;
 import javax.mail.Message;
-import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.AddressException;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Properties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
+import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.model.BugReport;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
 public class BugReportController implements BugReportApiDelegate {
-
-  private static final Logger log = Logger.getLogger(BugReportController.class.getName());
 
   @Override
   public ResponseEntity<BugReport> sendBugReport(BugReport bugReport) {

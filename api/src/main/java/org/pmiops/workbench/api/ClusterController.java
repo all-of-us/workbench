@@ -1,20 +1,16 @@
 package org.pmiops.workbench.api;
 
-import java.util.ArrayList;
-import java.util.function.Function;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -29,9 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
-  // This will currently only work inside the Broad's network.
-  private static final Logger log = Logger.getLogger(ClusterController.class.getName());
-
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
   private final WorkspaceService workspaceService;
@@ -46,7 +39,7 @@ public class ClusterController implements ClusterApiDelegate {
         allOfUsCluster.setStatus(firecloudCluster.getStatus());
         allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
         allOfUsCluster.setDestroyedDate(firecloudCluster.getDestroyedDate());
-        allOfUsCluster.setLabels(firecloudCluster.getLabels());;
+        allOfUsCluster.setLabels(firecloudCluster.getLabels());
         return allOfUsCluster;
       }
     };
@@ -81,6 +74,7 @@ public class ClusterController implements ClusterApiDelegate {
     this.workspaceService = workspaceService;
   }
 
+  @Override
   public ResponseEntity<Cluster> createCluster(String workspaceNamespace,
       String workspaceId) {
 
@@ -103,6 +97,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
+  @Override
   public ResponseEntity<EmptyResponse> deleteCluster(String workspaceNamespace,
       String workspaceId) {
 
@@ -123,6 +118,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
+  @Override
   public ResponseEntity<Cluster> getCluster(String workspaceNamespace,
       String workspaceId) {
 
@@ -143,8 +139,8 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
 
+  @Override
   public ResponseEntity<ClusterListResponse> listClusters(String labels) {
-    List<Cluster> newClusters = new ArrayList<Cluster>();
     List<org.pmiops.workbench.notebooks.model.Cluster> oldClusters;
     try {
       oldClusters = this.notebooksService.listClusters(labels);

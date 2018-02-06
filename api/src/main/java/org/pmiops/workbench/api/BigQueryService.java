@@ -25,9 +25,6 @@ public class BigQueryService {
 
     /**
      * Execute the provided query using bigquery.
-     *
-     * @param query
-     * @return
      */
     public QueryResult executeQuery(QueryJobConfiguration query) {
 

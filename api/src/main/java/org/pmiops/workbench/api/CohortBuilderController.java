@@ -3,6 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -17,12 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
@@ -31,7 +29,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private CdrVersionDao cdrVersionDao;
-    private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -71,10 +68,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     /**
      * This method list any of the criteria trees.
-     *
-     * @param type
-     * @param parentId
-     * @return
      */
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(Long cdrVersionId, String type, Long parentId) {
@@ -90,9 +83,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     /**
      * This method will return a count of unique subjects
      * defined by the provided {@link SearchRequest}.
-     *
-     * @param request
-     * @return
      */
     @Override
     public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {

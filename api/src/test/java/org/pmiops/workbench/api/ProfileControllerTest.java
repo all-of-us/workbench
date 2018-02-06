@@ -1,18 +1,16 @@
-
 package org.pmiops.workbench.api;
 
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.any;
 
 import com.blockscore.models.Address;
 import com.blockscore.models.Person;
-import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -128,8 +126,8 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, mailChimpService, configProvider);
-    ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userProvider, userDao);
+    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
+    ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment);
