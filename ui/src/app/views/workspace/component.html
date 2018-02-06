@@ -107,8 +107,18 @@
   <div class="area-block">
     <div class="table-header">
       <h3 class="table-header-descriptor">Notebooks</h3>
+      <div class="alert {{alertCategory}}" *ngIf="showAlerts">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+            </div>
+            <span class="alert-text">{{alertMsg}}</span>
+          </div>
+        </div>
+      </div>
       <button class="btn" (click)="launchNotebook()">Launch Notebook Server</button>
-      <button class="btn" (click)="createAndLaunchNotebook()">
+      <button class="btn" id="createAndLaunch" (click)="createAndLaunchNotebook()">
         <div *ngIf="!clusterLoading; else clusterCreateLoading">Create Notebook Server</div>
         <ng-template #clusterCreateLoading>
           <div>
@@ -122,16 +132,6 @@
     <div class="indented">
       <button class="btn" (click)="localizeNotebooks(notebookList)"
               [ngClass]="{disabled: !enablePushNotebookBtn}">Push To Notebook Server</button>
-      <div class="alert {{alertCategory}}" *ngIf="showAlerts">
-        <div class="alert-items">
-          <div class="alert-item static">
-            <div class="alert-icon-wrapper">
-              <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
-            </div>
-            <span class="alert-text">{{alertMsg}}</span>
-          </div>
-        </div>
-      </div>
       <clr-datagrid [clrDgLoading]="notebooksLoading">
         <clr-dg-column><input type="checkbox" (change)="selectAllNoteBooks()" [(ngModel)]="checkColumnNotebook"/></clr-dg-column>
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
