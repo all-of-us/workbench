@@ -4,7 +4,7 @@
 # with data from specified bucket.
 
 # Example usage, you need to provide a bunch of args
-# ./project.rb generate-cloudsql-cdr --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
+# ./project.rb generate-local-count-dbs --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
 
 set -xeuo pipefail
 IFS=$'\n\t'

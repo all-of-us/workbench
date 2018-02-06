@@ -259,22 +259,32 @@ CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities a
 
 This happens anytime a new cdr is released or if you want all the count data for databrowser and cohort builder generated locally. 
 
-### Generate count data in BigQuery from a cdr in biquery 
+Description of arguments for these scripts are as follows. See examples below.
+* bq-project : Project where BigQuery cdr lives. This must exist
+* bq-dataset : BigQuery Dataset for the cdr release. This must exist
+* workbench-project:  Project where generated private dataset. This must exist.
+* public-project: Project where generated  public dataset. This must exist.
+* cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets and csv folders
+* bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
+* db-name: Name of local mysql database
+
+###Examples:
+#### Generate count data in BigQuery from a cdr in biquery 
 `./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev \
   --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create`
 ##### Result is 
 1. BigQuery datasets:  all-of-us-workbench-test:cdr20180130 and all-of-us-workbench-test:public20180130
 2. CSV dumps of tables in bucket all-of-us-workbench-cloudsql-create: cdr20180130/*.csv and public20180130/*.csv  
 3. Note cdr-version can be ''  to make dbs named cdr public 
-### Generate local mysql databases -- cdr and public for data generated above
-`./project.rb generate-cloudsql-cdr --cdr-version 20180130 \
+#### Generate local mysql databases -- cdr and public for data generated above
+`./project.rb generate-local-count-dbs --cdr-version 20180130 \
 --bucket all-of-us-workbench-cloudsql-create`
 ##### Result is 
 1. Local mysql database cdr20180130 fully populated with count data from cdr version 20180130
 2. Local mysql database public20180130 fully populated with count data from cdr version 20180130
 3. Note cdr-version can be ''  to make dbs named cdr public
 
-### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
+#### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
 `./project.rb mysqldump-db --db-name cdr20180130 --bucket all-of-us-workbench-cloudsql-create`
 `./project.rb mysqldump-db --db-name public20180130 --bucket all-of-us-workbench-public-cloudsql`
 ##### Result is 
