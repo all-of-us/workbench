@@ -255,6 +255,33 @@ Workbench schema lives in `api/db` --> all workbench related activities access/p
 
 CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities access/persist data here
 
+## Generate cdr and public count databases for a CDR version
+
+This happens anytime a new cdr is released or if you want all the count data for databrowser and cohort builder generated locally. 
+
+### Generate count data in BigQuery from a cdr in biquery 
+`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev \
+  --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create`
+##### Result is 
+1. BigQuery datasets:  all-of-us-workbench-test:cdr20180130 and all-of-us-workbench-test:public20180130
+2. CSV dumps of tables in bucket all-of-us-workbench-cloudsql-create: cdr20180130/*.csv and public20180130/*.csv  
+
+### Generate local mysql databases -- cdr and public for data generated above
+`./project.rb generate-cloudsql-cdr --cdr-version 20180130 \
+--bucket all-of-us-workbench-cloudsql-create`
+##### Result is 
+1. Local mysql database cdr20180130 fully populated with count data from cdr version 20180130
+2. Local mysql database public20180130 fully populated with count data from cdr version 20180130
+
+### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
+`./project.rb mysqldump-db --db-name cdr20180130 --bucket all-of-us-workbench-cloudsql-create`
+`./project.rb mysqldump-db --db-name public20180130 --bucket all-of-us-workbench-public-cloudsql`
+##### Result is 
+1. cdr20180130.sql uploaded to all-of-us-workbench-cloudsql-create
+1. public20180130.sql uploaded to all-of-us-workbench-cloudsql-create
+
+### TODO import dump to cloudsql db 
+
 ## Cohort Builder
 
 During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema. 
