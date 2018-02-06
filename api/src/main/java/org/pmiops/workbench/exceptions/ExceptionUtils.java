@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.model.ErrorResponse;
 
 /**
  * Utility methods related to exceptions.
@@ -94,6 +95,11 @@ public class ExceptionUtils {
     }
   }
 
+  public static ErrorResponse errorResponse(String message) {
+    ErrorResponse response = new ErrorResponse();
+    response.setMessage(message);
+    return response;
+  }
 
   private ExceptionUtils() {}
 }

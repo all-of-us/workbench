@@ -21,7 +21,7 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-cdr/generate-bigquery-cloudsql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
+USAGE="./generate-cdr/generate-bigquery-cloudsql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
 USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
 USAGE="$USAGE \n Local mysql databases named cdr<cdr-version> and public<cdr-version> are created and populated."
@@ -33,6 +33,7 @@ while [ $# -gt 0 ]; do
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
+    --public-project) PUBLIC_PROJECT=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
     --bucket) BUCKET=$2; shift;;
     -- ) shift; break ;;
@@ -64,6 +65,12 @@ then
   exit 1
 fi
 
+if [ -z "${PUBLIC_PROJECT}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
 if [ -z "${CDR_VERSION}" ]
 then
   echo "Usage: $USAGE"
@@ -85,23 +92,46 @@ if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; th
     exit 1
 fi
 
-# Make BigQuery dbs
+WORKBENCH_DATASET=cdr$CDR_VERSION
+PUBLIC_DATASET=public$CDR_VERSION
+
+## Make BigQuery dbs
 echo "Making BigQuery dataset for CloudSql cdr"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
 then
-    echo "BIG QUERY CDR Data Generated"
+    echo "BigQuery cdr data generated"
 else
-    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
+    echo "FAILED To generate BigQuery data for cdr $CDR_VERSION"
     exit 1
 fi
 
-# Make BigQuery data dump
+# Make public
+echo "Making BigQuery public dataset for CloudSql cdr"
+if ./generate-cdr/make-bq-public-data.sh --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET
+then
+    echo "BigQuery public cdr data generated"
+else
+    echo "FAILED To generate public BigQuery data for $CDR_VERSION"
+    exit 1
+fi
+
+#dump workbench cdr counts
+echo "Making big query dataset for cloudsql cdr"
+if ./generate-cdr/make-bq-data-dump.sh --dataset $WORKBENCH_DATASET --project $WORKBENCH_PROJECT --account $ACCOUNT --bucket $BUCKET
+then
+    echo "Workbench cdr count data dumped"
+else
+    echo "FAILED to dump Workbench cdr count data"
+    exit 1
+fi
+
+# dump public counts
 dataset=cdr$CDR_VERSION
 echo "Making big query dataset for cloudsql cdr"
-if ./generate-cdr/make-bq-data-dump.sh --dataset $dataset --project $WORKBENCH_PROJECT --account $ACCOUNT --bucket $BUCKET
+if ./generate-cdr/make-bq-data-dump.sh --dataset $PUBLIC_DATASET --project $PUBLIC_PROJECT --account $ACCOUNT --bucket $BUCKET
 then
-    echo "BIG QUERY CDR Data Generated"
+    echo "Public cdr count data dumped"
 else
-    echo "FAILED To Generate BIG QUERY Data For CDR $CDR_VERSION"
+    echo "FAILED to dump Public cdr count data"
     exit 1
 fi

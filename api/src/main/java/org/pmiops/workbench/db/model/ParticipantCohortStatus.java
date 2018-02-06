@@ -3,7 +3,13 @@ package org.pmiops.workbench.db.model;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.CohortStatus;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.sql.Date;
 import java.util.Objects;
 
@@ -159,17 +165,19 @@ public class ParticipantCohortStatus {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantCohortStatus that = (ParticipantCohortStatus) o;
-        return Objects.equals(participantKey, that.participantKey) &&
-                status == that.status &&
+        return status == that.status &&
                 Objects.equals(genderConceptId, that.genderConceptId) &&
+                Objects.equals(gender, that.gender) &&
                 Objects.equals(birthDate, that.birthDate) &&
                 Objects.equals(raceConceptId, that.raceConceptId) &&
-                Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
+                Objects.equals(race, that.race) &&
+                Objects.equals(ethnicityConceptId, that.ethnicityConceptId) &&
+                Objects.equals(ethnicity, that.ethnicity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(participantKey, status, genderConceptId, birthDate, raceConceptId, ethnicityConceptId);
+        return Objects.hash(status, genderConceptId, gender, birthDate, raceConceptId, race, ethnicityConceptId, ethnicity);
     }
 
     @Override
@@ -178,9 +186,12 @@ public class ParticipantCohortStatus {
                 .append("participantKey", participantKey)
                 .append("status", status)
                 .append("genderConceptId", genderConceptId)
+                .append("gender", gender)
                 .append("birthDate", birthDate)
                 .append("raceConceptId", raceConceptId)
+                .append("race", race)
                 .append("ethnicityConceptId", ethnicityConceptId)
+                .append("ethnicity", ethnicity)
                 .toString();
     }
 }
