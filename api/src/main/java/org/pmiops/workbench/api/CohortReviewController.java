@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -16,22 +17,8 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CohortSummaryListResponse;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.ModifyCohortStatusRequest;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +28,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +41,9 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
 
-    public static final String STATUS = "status";
-    public static final String PARTICIPANT_ID = "participantKey.participantId";
     public static final Integer PAGE = 0;
     public static final Integer PAGE_SIZE = 25;
     public static final Integer MAX_REVIEW_SIZE = 10000;
-    public static final String ASC = "ASC";
-    public static final String DESC = "DESC";
 
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
@@ -99,7 +83,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             new BiFunction<CohortReview, PageRequest, org.pmiops.workbench.model.CohortReview>() {
                 @Override
                 public org.pmiops.workbench.model.CohortReview apply(CohortReview cohortReview, PageRequest pageRequest) {
-                    final Sort.Order order = pageRequest.getSort().iterator().next();
                     return new org.pmiops.workbench.model.CohortReview()
                             .cohortReviewId(cohortReview.getCohortReviewId())
                             .cohortId(cohortReview.getCohortId())
@@ -111,8 +94,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .reviewSize(cohortReview.getReviewSize())
                             .page(pageRequest.getPageNumber())
                             .pageSize(pageRequest.getPageSize())
-                            .sortOrder(order.getDirection().toString())
-                            .sortColumn(order.getProperty());
+                            .sortOrder(pageRequest.getSortOrder().toString())
+                            .sortColumn(pageRequest.getSortColumn().toString());
                 }
             };
 
@@ -191,10 +174,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
         List<ParticipantCohortStatus> paginatedPCS =
-                cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID)).getContent();
+                cohortReviewService.findAll(cohortReview.getCohortReviewId(),
+                        Collections.<Filter>emptyList(),
+                        createPageRequest(PAGE, PAGE_SIZE, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID));
         lookupGenderRaceEthnicityValues(paginatedPCS);
 
-        org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, ASC, PARTICIPANT_ID));
+        org.pmiops.workbench.model.CohortReview responseReview =
+                TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID));
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
@@ -286,10 +272,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      *
      * @param cohortId
      * @param cdrVersionId
-     * @param page
-     * @param pageSize
-     * @param sortOrder
-     * @param sortColumn
      * @return
      */
     @Override
@@ -297,12 +279,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 String workspaceId,
                                                                                                 Long cohortId,
                                                                                                 Long cdrVersionId,
-                                                                                                Integer page,
-                                                                                                Integer pageSize,
-                                                                                                String sortOrder,
-                                                                                                String sortColumn,
-                                                                                                List<String> filterColumns,
-                                                                                                List<String> filterValues) {
+                                                                                                ParticipantCohortStatusesRequest request) {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
@@ -315,11 +292,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             cohortReview = initializeAndSaveCohortReview(workspaceNamespace, workspaceId, cohortId, cdrVersionId);
         }
 
-        PageRequest pageRequest = createPageRequest(page, pageSize, sortOrder, sortColumn);
+        PageRequest pageRequest = createPageRequest(request.getPage(),
+                request.getPageSize(),
+                request.getSortOrder(),
+                request.getSortColumn());
 
+        List<Filter> filters = request.getFilters() == null ? Collections.<Filter>emptyList() : request.getFilters().getItems();
         List<ParticipantCohortStatus> participantCohortStatuses =
-                cohortReviewService.findParticipantCohortStatuses(cohortReview.getCohortReviewId(), pageRequest).getContent();
-        lookupGenderRaceEthnicityValues(participantCohortStatuses);
+                cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
 
         org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
         responseReview.setParticipantCohortStatuses(
@@ -431,26 +411,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return definition;
     }
 
-    private PageRequest createPageRequest(Integer page, Integer pageSize, String sortOrder, String sortColumn) {
+    private PageRequest createPageRequest(Integer page, Integer pageSize, SortOrder sortOrder, ParticipantCohortStatusColumns sortColumn) {
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
-        Sort.Direction orderParam = getSortOrder(sortOrder);
-        String columnParam = getSortColumn(sortColumn);
-
-        final Sort sort = (columnParam.equals(PARTICIPANT_ID))
-                ? new Sort(orderParam, columnParam)
-                : new Sort(orderParam, columnParam, PARTICIPANT_ID);
-        return new PageRequest(pageParam, pageSizeParam, sort);
-    }
-
-    private Sort.Direction getSortOrder(String sortOrder) {
-        return Sort.Direction.fromString(Optional.ofNullable(sortOrder)
-                .filter(o -> o.equalsIgnoreCase(DESC)).orElse(ASC));
-    }
-
-    private String getSortColumn(String sortColumn) {
-        return Optional.ofNullable(sortColumn)
-                .filter(o -> o.equalsIgnoreCase(STATUS)).orElse(PARTICIPANT_ID);
+        SortOrder sortOrderParam = Optional.ofNullable(sortOrder).orElse(SortOrder.ASC);
+        ParticipantCohortStatusColumns sortColumnParam = Optional.ofNullable(sortColumn).orElse(sortColumn.PARTICIPANTID);
+        return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumnParam);
     }
 
     private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {

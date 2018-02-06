@@ -1,15 +1,14 @@
 package org.pmiops.workbench.cohortreview;
 
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CohortReviewService {
 
@@ -81,14 +80,5 @@ public interface CohortReviewService {
      */
     ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
-    /**
-     * Find all {@link ParticipantCohortStatus} for the specified cohortReviewId and pageRequest.
-     *
-     * @param cohortReviewId
-     * @param pageRequest
-     * @return
-     */
-    Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest);
-
-    Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept();
+    List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
 }
