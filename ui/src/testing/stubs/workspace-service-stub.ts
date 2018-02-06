@@ -216,16 +216,22 @@ export class WorkspacesServiceStub {
       workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
-        if (workspaceNamespace === WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
-            && workspaceId === WorkspaceStubVariables.DEFAULT_WORKSPACE_ID) {
-          const fileDetailsList =
-              [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
-          observer.next(fileDetailsList);
-        } else {
-          observer.next([]);
-        }
+        const fileDetailsList =
+            [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
+        observer.next(fileDetailsList);
         observer.complete();
       }, 0);
     });
+  }
+
+  localizeAllFiles(workspaceNamespace: string, workspaceId: string,
+      extraHttpRequestParams?: any): Observable<{}> {
+    return new Observable<{}>(observer => {
+      setTimeout(() => {
+        observer.next(null);
+        observer.complete();
+      }, 0);
+    });
+
   }
 }

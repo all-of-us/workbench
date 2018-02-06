@@ -37,7 +37,23 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
+import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +119,8 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CodeDomainLookupService.class,
-    ParticipantCounter.class
+    ParticipantCounter.class,
+    NotebooksService.class
   })
   static class Configuration {
     @Bean
@@ -1004,7 +1021,33 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNoteBookList() throws Exception {
+  public void testNotebookFileList() throws Exception {
+    mockObjectsForBuckFileList();
+      // Will return 1 entry as only python files in notebook folder are return
+    List<FileDetail> result = workspacesController
+        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
+    assertEquals(result.size(), 1);
+
+    try {
+      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
+      fail();
+    } catch (NotFoundException ex) {
+      //Expected
+    }
+  }
+
+  @Test
+  public void testLocalizeAllFiles() throws Exception {
+    mockObjectsForBuckFileList();
+    try {
+      workspacesController.localizeAllFiles("mockProjectName", "mockWorkspaceName");
+    }
+    catch(Exception ex){
+      fail();
+    }
+  }
+
+  private void mockObjectsForBuckFileList() throws ApiException {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseWithException =
@@ -1024,18 +1067,8 @@ public class WorkspacesControllerTest {
     when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
     when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
     List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
     when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
-    // Will return 1 entry as only python files in notebook folder are return
-    List<FileDetail> result = workspacesController
-        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
-    assertEquals(result.size(), 1);
+    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
 
-    try {
-      workspacesController.getNoteBookList("mockProject", "mockWorkspace");
-      fail();
-    } catch (NotFoundException ex) {
-      // NotFoundException expected
-    }
   }
 }
