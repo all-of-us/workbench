@@ -13,6 +13,7 @@ public class BlockscoreServiceImplIntegrationTest {
     Providers.of(new CloudStorageServiceImpl(Providers.of(createConfig())))
   );
 
+  // TODO: Change names to be more distinct (there's a cloudStorageService test with the same name)
   @Test
   public void testCanReadFile() {
     assertThat(service.listPeople().getTotalCount()).isAtLeast(0);

@@ -1,7 +1,7 @@
 // Configuration for the local development environment.
 {
   "firecloud": {
-    "debugEndpoints": false,
+    "debugEndpoints": true,
     "billingAccountId": "001A68-D1B344-975E93",
     "billingProjectPrefix": "aou-test-free1-",
     "registeredDomainName": "all-of-us-registered-test",
