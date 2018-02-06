@@ -1,15 +1,18 @@
 package org.pmiops.workbench.db.model;
 
-import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.AnnotationType;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "cohort_annotation_definition")
@@ -19,6 +22,7 @@ public class CohortAnnotationDefinition {
     private long cohortId;
     private String columnName;
     private AnnotationType annotationType;
+    private Set<CohortAnnotationEnumValue> enumValues;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,6 +79,20 @@ public class CohortAnnotationDefinition {
 
     public CohortAnnotationDefinition annotationType(AnnotationType annotationType) {
         this.annotationType = annotationType;
+        return this;
+    }
+
+    @OneToMany(mappedBy = "cohortAnnotationDefinitionId", orphanRemoval = true, cascade = CascadeType.ALL)
+    public Set<CohortAnnotationEnumValue> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(Set<CohortAnnotationEnumValue> enumValues) {
+        this.enumValues = enumValues;
+    }
+
+    public CohortAnnotationDefinition enumValues(Set<CohortAnnotationEnumValue> enumValues) {
+        this.enumValues = enumValues;
         return this;
     }
 
