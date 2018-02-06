@@ -49,8 +49,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = false;
-    console.log('Route for participant table: ');
-    console.dir(this.route);
+    // console.log('Route for participant table: ');
+    // console.dir(this.route);
 
     this.subscription = this.route.data.subscribe(data => {
       this.participants = data.participants.map(Participant.fromStatus);
@@ -66,8 +66,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   }
 
   refresh(state: ClrDatagridStateInterface) {
-    console.log('Datagrid state: ');
-    console.dir(state);
+    // console.log('Datagrid state: ');
+    // console.dir(state);
 
     const query = <Request>{};
 

@@ -47,8 +47,8 @@ export class ParticipantPageResolver implements Resolve<ParticipantCohortStatus[
       items: query.filters || DEFAULT_FILTER_SET,
     };
 
-    console.log(`Resolving participant status set for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
-    console.dir(route);
+    // console.log(`Resolving statuses for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
+    // console.dir(route);
 
     const request = <Request>{page, pageSize, sortColumn, sortOrder, filters};
 
