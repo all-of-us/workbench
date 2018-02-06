@@ -25,8 +25,8 @@ export class ReviewResolver implements Resolve<CohortReview> {
     const wsid: Workspace['id'] = route.params.wsid;
     const cid: Cohort['id'] = +(route.params.cid);
 
-    console.log(`Resolving review for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
-    console.dir(route);
+    // console.log(`Resolving review for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
+    // console.dir(route);
 
     /* Default values */
     const request = <ParticipantCohortStatusesRequest>{
