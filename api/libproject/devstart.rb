@@ -2,8 +2,8 @@
 # to cause system() or spawn() to run the command in a shell. Calls with arrays
 # are not run in a shell, which can break usage of the CloudSQL proxy.
 
-require_relative "../../libproject/utils/common"
-require_relative "../../libproject/workbench"
+require_relative "../../apidef/libproject/utils/common"
+require_relative "../../apidef/libproject/workbench"
 require_relative "cloudsqlproxycontext"
 require_relative "gcloudcontext"
 require_relative "wboptionsparser"
@@ -476,7 +476,7 @@ end
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
 class GcloudContext
-  attr_reader :common, :gradlew_path, :opts
+  attr_reader :common, :opts
 
   def initialize(command_name, args, use_cloudsql_proxy = false)
     @common = Common.new
