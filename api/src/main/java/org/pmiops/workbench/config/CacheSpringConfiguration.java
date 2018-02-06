@@ -4,6 +4,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,11 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CacheSpringConfiguration {
@@ -30,7 +29,7 @@ public class CacheSpringConfiguration {
   @Qualifier("configCache")
   LoadingCache<String, Object> getConfigCache(ConfigDao configDao) {
     // Cache configuration in memory for ten minutes.
-    return CacheBuilder.<String, Config>newBuilder()
+    return CacheBuilder.newBuilder()
         .expireAfterWrite(10, TimeUnit.MINUTES)
         .build(new CacheLoader<String, Object>() {
           @Override

@@ -2,20 +2,17 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
-import java.util.function.Function;
 import java.util.List;
+import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +32,6 @@ public class UserService {
   private final UserDao userDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
-  private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
@@ -43,13 +39,11 @@ public class UserService {
       UserDao userDao,
       Clock clock,
       FireCloudService fireCloudService,
-      MailChimpService mailChimpService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
-    this.mailChimpService = mailChimpService;
     this.configProvider = configProvider;
   }
 
