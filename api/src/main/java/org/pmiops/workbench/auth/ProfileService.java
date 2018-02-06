@@ -1,7 +1,6 @@
 package org.pmiops.workbench.auth;
 
 import java.util.ArrayList;
-import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -19,15 +18,13 @@ public class ProfileService {
 
   private final FireCloudService fireCloudService;
   private final MailChimpService mailChimpService;
-  private final Provider<User> userProvider;
   private final UserDao userDao;
 
   @Autowired
   public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
-      Provider<User> userProvider, UserDao userDao) {
+      UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.mailChimpService = mailChimpService;
-    this.userProvider = userProvider;
     this.userDao = userDao;
   }
 
@@ -73,7 +70,7 @@ public class ProfileService {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }
     if (user.getAuthorities() != null) {
-      profile.setAuthorities(new ArrayList(user.getAuthorities()));
+      profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
     String userEmailVerificationStatus = null;
     if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.PENDING)) {

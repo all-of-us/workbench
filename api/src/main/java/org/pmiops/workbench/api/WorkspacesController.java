@@ -390,7 +390,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
-    for (int attemptValue = 0; attemptValue < this.MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
+    for (int attemptValue = 0; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
       try {
          fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
         break;
