@@ -27,7 +27,7 @@ export class ParticipantResolver implements Resolve<Participant> {
 
     return <Observable<Participant>>this.reviewAPI
       .getParticipantCohortStatus(ns, wsid, +cid, CDR_VERSION, +pid)
-      .map(Participant.makeRandomFromExisting)
+      .map(Participant.fromStatus)
       .do(participant => this.state.participant.next(participant));
   }
 }
