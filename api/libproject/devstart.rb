@@ -747,19 +747,19 @@ Common.register_command({
 Common.register_command({
   :invocation => "generate-cdr-counts",
   :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
---public-project <PROJECT> --account <ACCOUNT> --cdr-version=YYYYMMDD --bucket <BUCKET>
+--public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
   :fn => lambda { |*args| generate_cdr_counts(*args) }
 })
 Common.register_command({
   :invocation => "generate-local-cdr-db",
-  :description => "generate-cloudsql-cdr --account <ACCOUNT> --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
+  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
 Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
   :fn => lambda { |*args| generate_local_cdr_db(*args) }
 })
 Common.register_command({
                             :invocation => "generate-local-count-dbs",
-                            :description => "generate-local-count-dbs.sh --account <ACCOUNT> --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
+                            :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
 Creates and populates mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
                             :fn => lambda { |*args| generate_local_count_dbs(*args) }
                         })
