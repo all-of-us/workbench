@@ -342,19 +342,19 @@ def run_local_bigdata_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
 end
 
-def generate_bigquery_cloudsql_cdr(*args)
+def generate_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-bigquery-cloudsql-cdr} + args
+  common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
 end
 
-def generate_cloudsql_cdr(*args)
+def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-cdr} + args
+  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
 end
 
-def generate_cloudsql_count_dbs(*args)
+def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-count-dbs} + args
+  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
 end
 
 def run_drop_cdr_db(*args)
@@ -740,19 +740,19 @@ Common.register_command({
   :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
 })
 Common.register_command({
-  :invocation => "generate-bigquery-cloudsql-cdr",
+  :invocation => "generate-cdr-counts",
   :description => "Generates databases in bigquery and data from a cdr that will be in cloudsql.",
-  :fn => lambda { |*args| generate_bigquery_cloudsql_cdr(*args) }
+  :fn => lambda { |*args| generate_cdr_counts(*args) }
 })
 Common.register_command({
-  :invocation => "generate-cloudsql-cdr",
-  :description => "Creates and populates mysql or cloudsql database from data made by generate-bigquery-cloudsql-cdr.",
-  :fn => lambda { |*args| generate_cloudsql_cdr(*args) }
+  :invocation => "generate-local-cdr-db",
+  :description => "Creates and populates mysql or cloudsql database from data made by generate-cdr-counts.",
+  :fn => lambda { |*args| generate_local_cdr_db(*args) }
 })
 Common.register_command({
-                            :invocation => "generate-cloudsql-count-dbs",
-                            :description => "Creates and populates mysql or cloudsql database from pubilc and cdr mysql data made by generate-bigquery-cloudsql-cdr.",
-                            :fn => lambda { |*args| generate_cloudsql_count_dbs(*args) }
+                            :invocation => "generate-local-count-dbs",
+                            :description => "Creates and populates mysql database from pubilc and cdr mysql data made by generate-cdr-counts.",
+                            :fn => lambda { |*args| generate_local_count_dbs(*args) }
                         })
 Common.register_command({
   :invocation => "run-drop-cdr-db",

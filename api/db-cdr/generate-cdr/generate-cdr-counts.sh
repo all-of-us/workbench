@@ -15,14 +15,14 @@
 #  the cdr release number -- YYYYMMDD format . This is used to name generated datasets
 #  the gcs bucket you want to put the generated data in
 #
-# ./project.rb generate-bigquery-cloudsql-cdr --account peter.speltz@pmi-ops.org --bq-project all-of-us-ehr-dev \
-# --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
+# ./project.rb generate-cdr-counts --account peter.speltz@pmi-ops.org --bq-project all-of-us-ehr-dev \
+# --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create
 
 set -xeuo pipefail
 IFS=$'\n\t'
 
 
-USAGE="./generate-cdr/generate-bigquery-cloudsql-cdr --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
+USAGE="./generate-cdr/generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
 USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD --bucket all-of-us-workbench-cloudsql-create"
 
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
@@ -72,12 +72,6 @@ then
   exit 1
 fi
 
-if [ -z "${CDR_VERSION}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
 if [ -z "${BUCKET}" ]
 then
   echo "Usage: $USAGE"
@@ -85,7 +79,7 @@ then
 fi
 
 #Check cdr_version is of form YYYYMMDD
-if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
     echo "New CDR VERSION will be $CDR_VERSION"
   else
     echo "CDR Version doesn't match required format YYYYMMDD"
@@ -96,9 +90,11 @@ fi
 WORKBENCH_DATASET=cdr$CDR_VERSION
 PUBLIC_DATASET=public$CDR_VERSION
 
+echo `date` " Starting generate-cdr-counts "
+
 ## Make BigQuery workbench
 echo "Making BigQuery dataset for CloudSql cdr"
-if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --account $ACCOUNT --cdr-version $CDR_VERSION
+if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET --account $ACCOUNT --cdr-version "$CDR_VERSION"
 then
     echo "BigQuery cdr data generated"
 else
@@ -136,3 +132,5 @@ else
     echo "FAILED to dump Public cdr count data"
     exit 1
 fi
+
+echo `date` " Finished generate-cdr-counts "

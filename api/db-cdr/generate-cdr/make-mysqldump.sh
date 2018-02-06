@@ -33,7 +33,7 @@ fi
 
 dump_path=./generate-cdr/tmp/$CDR_DB_NAME.sql
 
-echo "Dumping $CDR_DB_NAME to $BUCKET\n"
+echo "Dumping $CDR_DB_NAME to $BUCKET " date "\n"
 
 mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
     --add-drop-table --disable-keys --ignore-table=$CDR_DB_NAME.DATABASECHANGELOG \
@@ -45,4 +45,4 @@ gsutil cp $dump_path gs://$BUCKET/$CDR_DB_NAME.sql
 
 rm $dump_path
 
-exit 0
+echo "Finished dumping $CDR_DB_NAME to $BUCKET " date "\n"

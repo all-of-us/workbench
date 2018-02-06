@@ -16,7 +16,7 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-cdr/generate-cloudsql-count-dbs.sh --account <ACCOUNT> --cdr-version YYYYMMDD --cdr-db-prefix <cdr|public> --bucket <BUCKET>"
+USAGE="./generate-cdr/generate-local-count-dbs.sh --account <ACCOUNT> --cdr-version YYYYMMDD --cdr-db-prefix <cdr|public> --bucket <BUCKET>"
 USAGE="$USAGE \n Local mysql or remote cloudsql database named cdr<cdr-version> and public<cdr-version> are created and populated."
 
 while [ $# -gt 0 ]; do
@@ -37,20 +37,16 @@ then
   exit 1
 fi
 
-if [ -z "${CDR_VERSION}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
 if [ -z "${BUCKET}" ]
 then
   echo "Usage: $USAGE"
   exit 1
 fi
 
+echo `date` " Starting generate-local-count-dbs "
+
 #Check cdr_version is of form YYYYMMDD
-if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
     echo "New CDR VERSION will be $CDR_VERSION"
   else
     echo "CDR Version doesn't match required format YYYYMMDD"
@@ -61,7 +57,7 @@ fi
 
 # Init the db to fresh state ready for new cdr data keeping schema and certain tables
 echo "Doing private count data"
-if ./generate-cdr/generate-cloudsql-cdr.sh --account $ACCOUNT --cdr-version $CDR_VERSION --cdr-db-prefix cdr --bucket $BUCKET
+if ./generate-cdr/generate-local-cdr-db.sh --account $ACCOUNT --cdr-version "$CDR_VERSION" --cdr-db-prefix cdr --bucket $BUCKET
 then
   echo "Success"
 else
@@ -71,7 +67,7 @@ fi
 
 # Init the db to fresh state ready for new cdr data keeping schema and certain tables
 echo "Doing public count data"
-if ./generate-cdr/generate-cloudsql-cdr.sh --account $ACCOUNT --cdr-version $CDR_VERSION --cdr-db-prefix public --bucket $BUCKET
+if ./generate-cdr/generate-local-cdr-db.sh --account $ACCOUNT --cdr-version "$CDR_VERSION" --cdr-db-prefix public --bucket $BUCKET
 then
   echo "Success"
 else
@@ -79,5 +75,4 @@ else
   exit 1
 fi
 
-
-exit 0
+echo `date` " Finished generate-local-count-dbs "

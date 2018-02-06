@@ -77,7 +77,7 @@ else
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
-create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary )
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
 for t in "${create_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t

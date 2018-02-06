@@ -37,12 +37,6 @@ then
   exit 1
 fi
 
-if [ -z "${CDR_VERSION}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
-
 if [ -z "${CDR_DB_PREFIX}" ]
 then
   echo "Usage: $USAGE"
@@ -56,7 +50,7 @@ then
 fi
 
 #Check cdr_version is of form YYYYMMDD
-if [[ $CDR_VERSION =~ ^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
     echo "New CDR VERSION will be $CDR_VERSION"
   else
     echo "CDR Version doesn't match required format YYYYMMDD"
@@ -66,6 +60,8 @@ fi
 
 # Export CDR_DB_NAME for all scripts
 export CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
+
+echo "Starting generate-local-cdr-db " date
 
 # Init the local cdr database
 echo "Initializing new cdr db $CDR_DB_NAME"
@@ -97,4 +93,4 @@ else
   exit 1
 fi
 
-exit 0
+echo "Finished generate-local-cdr-db " date

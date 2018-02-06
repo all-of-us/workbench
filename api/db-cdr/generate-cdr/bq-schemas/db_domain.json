@@ -1,0 +1,26 @@
+[
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_id", 
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_display",
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_desc",
+        "type": "STRING"
+      },
+      {
+        "name": "domain_parent",
+        "type": "STRING"
+      },
+      {
+      "name": "domain_route",
+      "type": "STRING"
+      }
+]
+
