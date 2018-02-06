@@ -85,16 +85,6 @@ public class UserService {
 
   private void updateDataAccessLevel(User user) {
     if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
-      String userEmailVerificationStatus = null;
-      if(user.getContactEmail() != null) {
-        try {
-          userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
-        } catch (NotFoundException e) {
-          return;
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
       if (user.getBlockscoreVerificationIsValid() != null
           && user.getBlockscoreVerificationIsValid()
           && user.getDemographicSurveyCompletionTime() != null
