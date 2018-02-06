@@ -56,8 +56,10 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run db-data-migration}
 
   common.status "Updating configuration..."
-  common.run_inline %W{docker-compose run update-config}
-
+  common.run_inline %W{
+    docker-compose run update-config
+    -Pconfig_file=../config/config_local.json
+  }
   run_api(account)
 end
 
@@ -901,11 +903,22 @@ def migrate_cdr_data()
   end
 end
 
-def load_config()
+def load_config(project)
+  configs = {
+    'all-of-us-workbench-test' => 'config_test.json'
+  }
+  config_json = configs[project]
+  unless config_json
+    raise("unknown project #{project}, expected one of #{configs.keys}")
+  end
+
   common = Common.new
-  common.status "Loading configuration into database..."
+  common.status "Loading #{config_json} into database..."
   Dir.chdir("tools") do
-    common.run_inline %W{gradle --info loadConfig}
+    common.run_inline %W{
+      gradle --info loadConfig
+      -Pconfig_file=../config/#{config_json}
+    }
   end
 end
 
@@ -917,7 +930,7 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
   ENV.update(read_db_vars_v2(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   CloudSqlProxyContext.new(gcc).run do
-    yield
+    yield(gcc)
   end
 end
 
@@ -949,10 +962,10 @@ def circle_deploy(cmd_name, args)
 
   if is_master
     common.status "Running database migrations..."
-    with_cloud_proxy_and_db_env(cmd_name, args) do
+    with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
       migrate_cdr_database
-      load_config
+      load_config(ctx.project)
     end
   end
 
@@ -987,7 +1000,9 @@ end
 
 def update_cloud_config(cmd_name, args)
   ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) { load_config }
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    load_config(ctx.project)
+  end
 end
 
 Common.register_command({
