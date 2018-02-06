@@ -357,6 +357,11 @@ def generate_local_count_dbs(*args)
   common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
 end
 
+def mysqldump_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-mysqldump-db} + args
+end
+
 def run_drop_cdr_db(*args)
   common = Common.new
 
@@ -754,6 +759,12 @@ Common.register_command({
                             :description => "Creates and populates mysql database from pubilc and cdr mysql data made by generate-cdr-counts.",
                             :fn => lambda { |*args| generate_local_count_dbs(*args) }
                         })
+Common.register_command({
+                            :invocation => "mysqldump-db",
+                            :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET> . Dumps and uploads to bucket",
+                            :fn => lambda { |*args| mysqldump_db(*args) }
+                        })
+
 Common.register_command({
   :invocation => "run-drop-cdr-db",
   :description => "Drops the cdr schema of SQL database for the specified project.",

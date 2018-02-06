@@ -61,7 +61,8 @@ fi
 # Export CDR_DB_NAME for all scripts
 export CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
 
-echo "Starting generate-local-cdr-db " date
+startDate=`date`
+echo "Starting generate-local-cdr-db $startDate\n"
 
 # Init the local cdr database
 echo "Initializing new cdr db $CDR_DB_NAME"
@@ -83,14 +84,7 @@ else
   exit 1
 fi
 
-# Make mysqldump and upload to gcs
-echo "Making mysqldump of $CDR_DB_NAME"
-if ./generate-cdr/make-mysqldump.sh --cdr-db-name $CDR_DB_NAME --bucket $BUCKET
-then
-  echo "Success"
-else
-  echo "Fail"
-  exit 1
-fi
+stopDate=`date`
+echo "Start $startDate Stop: $stopDate"
+echo "Finished generate-local-cdr-db \n"
 
-echo "Finished generate-local-cdr-db " date

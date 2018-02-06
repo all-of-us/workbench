@@ -43,7 +43,8 @@ then
   exit 1
 fi
 
-echo `date` " Starting generate-local-count-dbs "
+startDate=`date`
+echo " Starting generate-local-count-dbs $startDate"
 
 #Check cdr_version is of form YYYYMMDD
 if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
@@ -75,4 +76,6 @@ else
   exit 1
 fi
 
+stopDate=`date`
+echo "Start $startDate Stop: $stopDate"
 echo `date` " Finished generate-local-count-dbs "

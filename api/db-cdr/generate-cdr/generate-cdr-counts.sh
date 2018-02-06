@@ -90,7 +90,8 @@ fi
 WORKBENCH_DATASET=cdr$CDR_VERSION
 PUBLIC_DATASET=public$CDR_VERSION
 
-echo `date` " Starting generate-cdr-counts "
+startDate=`date`
+echo `date` " Starting generate-cdr-counts $startDate"
 
 ## Make BigQuery workbench
 echo "Making BigQuery dataset for CloudSql cdr"
@@ -133,4 +134,6 @@ else
     exit 1
 fi
 
+stopDate=`date`
+echo "Start $startDate Stop: $stopDate"
 echo `date` " Finished generate-cdr-counts "
