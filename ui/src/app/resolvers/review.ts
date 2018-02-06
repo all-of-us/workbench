@@ -6,6 +6,9 @@ import {
   Cohort,
   CohortReview,
   CohortReviewService,
+  ParticipantCohortStatusColumns,
+  ParticipantCohortStatusesRequest,
+  SortOrder,
   Workspace,
 } from 'generated';
 
@@ -24,7 +27,12 @@ export class ReviewResolver implements Resolve<CohortReview> {
 
     // console.log(`Resolving review for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
     // console.dir(route);
-
-    return this.api.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION);
+    const request = {
+        page: 0,
+        pageSize: 25,
+        sortColumn: ParticipantCohortStatusColumns.ParticipantId,
+        sortOrder: SortOrder.Asc
+    };
+    return this.api.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
   }
 }

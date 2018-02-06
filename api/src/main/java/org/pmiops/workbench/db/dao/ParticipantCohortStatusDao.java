@@ -1,8 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -27,9 +25,6 @@ public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCo
       nativeQuery=true)
   void bulkCopyByCohortReview(
       @Param("fromCrId") long fromCohortReviewId, @Param("toCrId") long toCohortReviewId);
-
-    Slice<ParticipantCohortStatus> findByParticipantKey_CohortReviewId(@Param("cohortReviewId") long cohortReviewId,
-                                                                               Pageable pageRequest);
 
     ParticipantCohortStatus findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
             @Param("cohortReviewId") long cohortReviewId,

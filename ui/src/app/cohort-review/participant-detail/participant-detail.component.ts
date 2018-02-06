@@ -11,7 +11,10 @@ import {dummyData} from './dummy-data';
 import {
   CohortReview,
   CohortReviewService,
-  ParticipantCohortStatus
+  ParticipantCohortStatus,
+  ParticipantCohortStatusColumns,
+    ParticipantCohortStatusesRequest,
+  SortOrder
 } from 'generated';
 
 const CDR_VERSION = 1;
@@ -126,7 +129,13 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, page, size);
+    const request = {
+        page: page,
+        pageSize: size,
+        sortColumn: ParticipantCohortStatusColumns.ParticipantId,
+        sortOrder: SortOrder.Asc
+    };
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
   }
 
   private navigateById = (id: number): void => {

@@ -997,7 +997,14 @@ paths:
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReview"
-    get:
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    post:
       tags:
          - cohortReview
       description:  >
@@ -1005,46 +1012,12 @@ paths:
         does pagination based on page, limit, order and column.
       operationId: "getParticipantCohortStatuses"
       parameters:
-        - in: query
-          name: page
-          type: integer
-          required: false
-          description: specific page (default is 0)
-        - in: query
-          name: pageSize
-          type: integer
-          required: false
-          description: page size of results (default is 25)
-        - in: query
-          name: sortColumn
-          type: string
-          enum: [participantId, status, gender, birthDate, race, ethnicity]
-          default: 'participantId'
-          required: false
-          description: Column upon which to sort (default is 'participantId')
-        - in: query
-          name: sortOrder
-          type: string
-          enum: ['asc', 'desc']
-          default: 'asc'
-          required: false
-          description: Sort direction (default is ascending)
-        - in: query
-          name: filterColumn
-          type: array
-          collectionFormat: csv
-          required: false
-          uniqueItems: true
-          items:
-            type: string
-            enum: [participantId, status, gender, birthDate, race, ethnicity]
-        - in: query
-          name: filterValue
-          type: array
-          collectionFormat: csv
-          required: false
-          items:
-            type: string
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatusesRequest"
       responses:
         200:
           description: A collection of participants
@@ -2109,6 +2082,61 @@ definitions:
         type: string
       sortColumn:
         type: string
+
+  ParticipantCohortStatusesRequest:
+    type: object
+    required:
+      - page
+      - pageSize
+      - sortColumn
+      - sortOrder
+    properties:
+      page:
+        type: integer
+        description: specific page (default is 0)
+      pageSize:
+        type: integer
+        description: page size of results (default is 25)
+      sortColumn:
+        $ref: "#/definitions/ParticipantCohortStatusColumns"
+        description: Column upon which to sort (default is 'participantId')
+      sortOrder:
+        $ref: "#/definitions/SortOrder"
+        description: Sort direction (default is ascending)
+      filters:
+        $ref: "#/definitions/FilterList"
+
+  ParticipantCohortStatusColumns:
+    type: string
+    enum: [participantId, status, gender, birthDate, race, ethnicity]
+
+  SortOrder:
+    type: string
+    enum: [asc, desc]
+
+  FilterList:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Filter"
+
+  Filter:
+    type: object
+    properties:
+      property:
+        $ref: "#/definitions/ParticipantCohortStatusColumns"
+      operator:
+        $ref: "#/definitions/Operator"
+      value:
+        type: string
+
+  Operator:
+    type: string
+    enum: ['=', '<', '>', '<=', '>=', 'like']
 
   ParticipantDemographics:
     type: object
