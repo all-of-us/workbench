@@ -262,8 +262,8 @@ This happens anytime a new cdr is released or if you want all the count data for
 Description of arguments for these scripts are as follows. See examples below.
 * bq-project : Project where BigQuery cdr lives. This must exist
 * bq-dataset : BigQuery Dataset for the cdr release. This must exist
-* workbench-project:  Project where generated private dataset. This must exist.
-* public-project: Project where generated  public dataset. This must exist.
+* workbench-project:  Project where private count dataset (cdr) is generated. This must exist.
+* public-project: Project where public count dataset (public) is generated. This must exist.
 * cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets, csv folders, and databases 
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
 * db-name: Name of local mysql database
