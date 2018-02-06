@@ -2,13 +2,17 @@ package org.pmiops.workbench.db;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolConfiguration;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -30,10 +34,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class WorkbenchDbConfig {
 
   @Primary
+  @Bean(name = "dataSourceProperties")
+  @ConfigurationProperties(prefix = "workbench.datasource")
+  public DataSourceProperties dataSourceProperties() {
+    return new DataSourceProperties();
+  }
+
+  @Primary
   @Bean(name = "dataSource")
-  @ConfigurationProperties(prefix = "spring.datasource")
+  @ConfigurationProperties(prefix = "workbench.datasource")
   public DataSource dataSource() {
-    return DataSourceBuilder.create().build();
+    return dataSourceProperties().initializeDataSourceBuilder().build();
   }
 
   @Primary
@@ -54,5 +65,16 @@ public class WorkbenchDbConfig {
   public PlatformTransactionManager transactionManager(
       @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
     return new JpaTransactionManager(entityManagerFactory);
+  }
+
+  /**
+   * The PoolConfiguration to use for all data sources (with modification). The primary connection
+   * info should be overwritten if used (callers may mutate, so use prototype scope).
+   */
+  @Bean("poolConfiguration")
+  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+  @ConfigurationProperties(prefix = "workbench.datasource")
+  public PoolConfiguration poolConfig() {
+    return new PoolProperties();
   }
 }
