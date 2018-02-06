@@ -19,6 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
@@ -46,7 +47,8 @@ public class User {
   private boolean disabled;
   private Timestamp disabledTime;
   private Long disablingAdminId;
-
+  private String mailchimpHash;
+  private EmailVerificationStatus emailVerificationStatus;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -233,5 +235,12 @@ public class User {
     this.disablingAdminId = disablingAdminId;
   }
 
+  @Column(name = "email_verification_status")
+  public EmailVerificationStatus getEmailVerificationStatus() {
+    return emailVerificationStatus;
+  }
 
+  public void setEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
+    this.emailVerificationStatus = emailVerificationStatus;
+  }
 }

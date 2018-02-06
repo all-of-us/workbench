@@ -15,7 +15,9 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -33,6 +35,7 @@ public class UserService {
   private final UserDao userDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
@@ -40,11 +43,13 @@ public class UserService {
       UserDao userDao,
       Clock clock,
       FireCloudService fireCloudService,
+      MailChimpService mailChimpService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
+    this.mailChimpService = mailChimpService;
     this.configProvider = configProvider;
   }
 
@@ -84,7 +89,8 @@ public class UserService {
           && user.getBlockscoreVerificationIsValid()
           && user.getDemographicSurveyCompletionTime() != null
           && user.getEthicsTrainingCompletionTime() != null
-          && user.getTermsOfServiceCompletionTime() != null) {
+          && user.getTermsOfServiceCompletionTime() != null
+          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.VERIFIED)) {
         try {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
@@ -110,6 +116,7 @@ public class UserService {
     user.setFamilyName(familyName);
     user.setGivenName(givenName);
     user.setDisabled(false);
+    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

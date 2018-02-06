@@ -2,7 +2,7 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
@@ -36,9 +36,9 @@ describe('WizardComponent', () => {
 
   beforeEach(async(() => {
     mockReduxInst = MockNgRedux.getInstance();
-    const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
+    const old = mockReduxInst.getState;
+    const wrapped = () => fromJS(old());
+    mockReduxInst.getState = wrapped;
 
     TestBed
       .configureTestingModule({
@@ -55,8 +55,8 @@ describe('WizardComponent', () => {
         ],
         imports: [
           AttributesModule,
-          BrowserAnimationsModule,
           ClarityModule,
+          NoopAnimationsModule,
           ReactiveFormsModule,
         ],
         providers: [

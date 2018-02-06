@@ -1,5 +1,5 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
@@ -19,11 +19,13 @@ class RouterStub {
 }
 
 class ActivatedRouteStub {
-  params = Observable.of({
-    ns: 'test-namespace',
-    wsid: 'test-workspace-id',
-    cid: 1
-  });
+  snapshot: any;
+
+  constructor(cohortStub: CohortsServiceStub) {
+    const cohort = cohortStub.cohorts[0];
+    const workspace = cohortStub.workspaces[0];
+    this.snapshot = {data: {cohort, workspace}};
+  }
 }
 
 describe('CohortEditComponent', () => {
@@ -34,14 +36,19 @@ describe('CohortEditComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ClarityModule.forRoot(),
-        FormsModule,
+        ReactiveFormsModule,
       ],
       declarations: [CohortEditComponent],
       providers: [
         { provide: Router, useClass: RouterStub },
-        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
         { provide: CohortsService, useClass: CohortsServiceStub },
         { provide: ErrorHandlingService, useClass: ErrorHandlingServiceStub },
+        {
+          provide: ActivatedRoute,
+          deps: [CohortsServiceStub],
+          useClass: ActivatedRouteStub
+        },
+        CohortsServiceStub,
       ]
     }).compileComponents()
   ));

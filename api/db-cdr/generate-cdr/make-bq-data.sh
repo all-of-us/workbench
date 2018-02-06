@@ -126,7 +126,6 @@ schema_path=generate-cdr/bq-schemas
 create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary )
 for t in "${create_tables[@]}"
 do
-    # Make the concept_counts table from cdr
     bq --project=$WORKBENCH_PROJECT rm -f $NEW_BQ_CDR_DATASET.$t
     bq --quiet --project=$WORKBENCH_PROJECT mk --schema=$schema_path/$t.json $NEW_BQ_CDR_DATASET.$t
 done
@@ -198,3 +197,4 @@ Concat(substr(c.valid_start_date, 1,4), '-',substr(c.valid_start_date,5,2),'-',s
 Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',substr(c.valid_end_date,7,2)) as valid_end_date,
 c.invalid_reason
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
+

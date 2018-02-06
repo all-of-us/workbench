@@ -1,9 +1,12 @@
-// UI Component framing the overall app (title and nav).
-// Content is in other Components.
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {
+  ActivatedRoute,
+  Event as RouterEvent,
+  NavigationEnd,
+  Router,
+} from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
 
@@ -15,6 +18,7 @@ import {Authority, ProfileService} from 'generated';
 
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
+export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -22,26 +26,32 @@ export const overriddenUrlKey = 'allOfUsApiUrlOverride';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
-  private baseTitle: string;
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
-  private _showCreateAccount = false;
-  private overriddenUrl: string = null;
   currentUrl: string;
   email: string;
+
+  private baseTitle: string;
+  private overriddenUrl: string = null;
+  private showCreateAccount = false;
+  private overriddenPublicUrl: string = null;
+
   constructor(
-      private activatedRoute: ActivatedRoute,
-      private errorHandlingService: ErrorHandlingService,
-      private locationService: Location,
-      private profileService: ProfileService,
-      private router: Router,
-      private signInService: SignInService,
-      private titleService: Title
+    /* Ours */
+    private signInService: SignInService,
+    private errorHandlingService: ErrorHandlingService,
+    private profileService: ProfileService,
+    /* Angular's */
+    private activatedRoute: ActivatedRoute,
+    private locationService: Location,
+    private router: Router,
+    private titleService: Title,
   ) {}
 
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+    this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
     window['setAllOfUsApiUrl'] = (url: string) => {
       if (url) {
         if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
@@ -55,8 +65,22 @@ export class AppComponent implements OnInit {
       }
       window.location.reload();
     };
-    console.log('To override the API URL, try:\n' +
-      'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+    window['setPublicApiUrl'] = (url: string) => {
+      if (url) {
+        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+        }
+        this.overriddenPublicUrl = url;
+        localStorage.setItem(overriddenPublicUrlKey, url);
+      } else {
+        this.overriddenPublicUrl = null;
+        localStorage.removeItem(overriddenPublicUrlKey);
+      }
+      window.location.reload();
+    };
+    console.log('To override the API URLs, try:\n' +
+      'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
+      'setPublicApiUrl(\'https://host.example.com:5678\')');
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
@@ -66,21 +90,8 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(this.baseTitle);
     }
 
-    // After navigation events, get the "title" value of the current Route and
-    // include it in the web page title.
-    this.router.events.subscribe((event) => {
-      this.currentUrl = this.router.url;
-      if (event instanceof NavigationEnd) {
-
-        let currentRoute = this.activatedRoute;
-        while (currentRoute.firstChild) {
-          currentRoute = currentRoute.firstChild;
-        }
-        if (currentRoute.outlet === 'primary') {
-          currentRoute.data.subscribe(value =>
-              this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
-        }
-      }
+    this.router.events.subscribe((event: RouterEvent) => {
+      this.setTitleFromRoute(event);
     });
 
     this.user = this.signInService.user;
@@ -97,6 +108,24 @@ export class AppComponent implements OnInit {
     });
   }
 
+  /**
+   * Uses the title service to set the page title after nagivation events
+   */
+  private setTitleFromRoute(event: RouterEvent): void {
+    this.currentUrl = this.router.url;
+    if (event instanceof NavigationEnd) {
+
+      let currentRoute = this.activatedRoute;
+      while (currentRoute.firstChild) {
+        currentRoute = currentRoute.firstChild;
+      }
+      if (currentRoute.outlet === 'primary') {
+        currentRoute.data.subscribe(value =>
+            this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
+      }
+    }
+  }
+
   signIn(e: Event): void {
     this.signInService.signIn();
   }
@@ -105,12 +134,8 @@ export class AppComponent implements OnInit {
     this.signInService.signOut();
   }
 
-  showCreateAccount(): void {
-    this._showCreateAccount = true;
-  }
-
   getTopMargin(): string {
-    return this._showCreateAccount ? '10vh' : '30vh';
+    return this.showCreateAccount ? '10vh' : '30vh';
   }
 
   get reviewActive(): boolean {

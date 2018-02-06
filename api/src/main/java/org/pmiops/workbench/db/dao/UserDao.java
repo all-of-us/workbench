@@ -1,6 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Set;
+
 import org.pmiops.workbench.db.model.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -22,4 +24,8 @@ public interface UserDao extends CrudRepository<User, Long> {
    */
   @Query("SELECT user FROM User user LEFT JOIN FETCH user.authorities WHERE user.userId = :id")
   User findUserWithAuthorities(@Param("id") long id);
+
+  @Query("SELECT DISTINCT user.freeTierBillingProjectName FROM User user\n" +
+      "WHERE user.freeTierBillingProjectName IS NOT NULL")
+  Set<String> getAllUserProjects();
 }

@@ -9,9 +9,18 @@ h2 {
 div.field {
   display: inline-block;
   margin-right: 2rem;
-  width: 10rem;
+  width: 15rem;
 }
 
 .field-label {
   font-size: 0.55rem;
+}
+
+.field-label-button-container {
+  display:inline-block;
+}
+
+.field-label-button {
+  height: 1rem;
+  line-height: 0rem;
 }
