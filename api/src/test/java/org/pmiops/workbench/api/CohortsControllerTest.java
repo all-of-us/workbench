@@ -33,6 +33,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -109,6 +110,7 @@ public class CohortsControllerTest {
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
+    user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 

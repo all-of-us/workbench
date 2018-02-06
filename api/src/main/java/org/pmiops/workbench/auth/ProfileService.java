@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,13 +18,15 @@ import org.springframework.stereotype.Service;
 public class ProfileService {
 
   private final FireCloudService fireCloudService;
+  private final MailChimpService mailChimpService;
   private final Provider<User> userProvider;
   private final UserDao userDao;
 
   @Autowired
-  public ProfileService(FireCloudService fireCloudService, Provider<User> userProvider,
-      UserDao userDao) {
+  public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
+      Provider<User> userProvider, UserDao userDao) {
     this.fireCloudService = fireCloudService;
+    this.mailChimpService = mailChimpService;
     this.userProvider = userProvider;
     this.userDao = userDao;
   }
@@ -70,7 +75,30 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));
     }
-
+    String userEmailVerificationStatus = null;
+    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.PENDING)) {
+      // Verification is pending, need to query mailchimp.
+      try {
+        userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
+      } catch (NotFoundException e) {
+        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+        user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+        userDao.save(user);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      if (userEmailVerificationStatus != null) {
+        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_SUBSCRIBED)) {
+          profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+        } else {
+          profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+          user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+          userDao.save(user);
+        }
+      }
+    } else {
+      profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
+    }
     return profile;
   }
 }

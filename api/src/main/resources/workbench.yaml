@@ -277,6 +277,25 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/verify-email:
+    post:
+      tags:
+        - profile
+      description: Submits demographic survey responses.
+      operationId: verifyEmail
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/VerifyEmailRequest"
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+
   /v1/auth-domain/{groupName}:
     post:
       tags:
@@ -1288,10 +1307,23 @@ definitions:
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
+  EmailVerificationStatus:
+    type: string
+    description: stage of email verification
+    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, verified]
+
   EmptyResponse:
     type: object
     properties:
       additionalInfo:
+        type: string
+
+  VerifyEmailRequest:
+    type: object
+    properties:
+      emailToVerify:
+        type: string
+      username:
         type: string
 
   Authority:
@@ -1709,6 +1741,8 @@ definitions:
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
       disabled:
         type: boolean
+      emailVerificationStatus:
+        $ref: "#/definitions/EmailVerificationStatus"
 
   ErrorResponse:
     type: object
