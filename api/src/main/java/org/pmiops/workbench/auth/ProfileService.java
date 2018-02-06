@@ -77,11 +77,7 @@ public class ProfileService {
       profile.setAuthorities(new ArrayList(user.getAuthorities()));
     }
     String userEmailVerificationStatus = null;
-    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.UNVERIFIED)) {
-      profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    } else if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.VERIFIED)) {
-      profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-    } else {
+    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.PENDING)) {
       // Verification is pending, need to query mailchimp.
       try {
         userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
@@ -93,7 +89,7 @@ public class ProfileService {
         throw new RuntimeException(e);
       }
       if (userEmailVerificationStatus != null) {
-        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_PENDING)) {
+        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_SUBSCRIBED)) {
           profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         } else {
           profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
@@ -101,6 +97,8 @@ public class ProfileService {
           userDao.save(user);
         }
       }
+    } else {
+      profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
     }
     return profile;
   }

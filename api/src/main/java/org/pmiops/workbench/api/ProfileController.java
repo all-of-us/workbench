@@ -359,10 +359,12 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
-    if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-      mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
-      user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-      user.setContactEmail(updatedProfile.getContactEmail());
+    if (updatedProfile.getContactEmail() != null) {
+      if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+        user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+        user.setContactEmail(updatedProfile.getContactEmail());
+      }
     }
 
     // This does not update the name in Google.
