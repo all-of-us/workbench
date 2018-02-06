@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -13,6 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -33,8 +36,23 @@ public class CohortAnnotationDefinitionDaoTest {
     JdbcTemplate jdbcTemplate;
 
     @Test
-    public void save() throws Exception {
+    public void save_NoEnumValues() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
+
+        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
+        String sql = "select count(*) from cohort_annotation_definition where cohort_annotation_definition_id = ?";
+        final Object[] sqlParams = { cohortAnnotationDefinition.getCohortAnnotationDefinitionId() };
+        final Integer expectedCount = new Integer("1");
+
+        assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+    }
+
+    @Test
+    public void save_WithEnumValues() throws Exception {
+        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
+        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue().name("name").order(0);
+        cohortAnnotationDefinition.enumValues(new HashSet<>(Arrays.asList(enumValue)));
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
