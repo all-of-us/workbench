@@ -8,11 +8,10 @@ IFS=$'\n\t'
 
 
 # get options
-USAGE="./generate-clousql-cdr/make-bq-data-dump.sh --account <ACCOUNT> --project <PROJECT> --dataset <DATASET>  --bucket=<BUCKET>"
+USAGE="./generate-clousql-cdr/make-bq-data-dump.sh --project <PROJECT> --dataset <DATASET>  --bucket=<BUCKET>"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --project) PROJECT=$2; shift 2;;
     --bucket) BUCKET=$2; shift 2;;
     --dataset) DATASET=$2; shift 2;;
@@ -20,12 +19,6 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${PROJECT}" ]
 then
@@ -44,9 +37,6 @@ then
   echo "Usage: $USAGE"
   exit 1
 fi
-
-
-CREDS_ACCOUNT=${ACCOUNT}
 
 echo "Dumping tables to csv from $BUCKET\n"
 

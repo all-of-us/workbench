@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# This generates big query data that gets put in cloudsql
-# Counts and teh public and cdr data four cloudsql
-# note dev-up must be run to generate the schema
-# note run-local-data-migrations must be run to generate hard coded data from liquibase
-# note  the account must be authorized to perform gcloud and bq operations
+# This generates big query count databases cdr and public that get put in cloudsql for workbench and data browser
 
 set -xeuo pipefail
 IFS=$'\n\t'
@@ -15,12 +11,11 @@ IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
 USAGE="./generate-clousql-cdr/make-bq-data.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
-USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="$USAGE --cdr-version=YYYYMMDD"
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
@@ -31,11 +26,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${BQ_PROJECT}" ]
 then
@@ -149,7 +139,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.vocabulary\`"
 # achilles queries #
 ####################
 # Run achilles count queries to fill achilles_results
-if ./generate-cdr/run-achilles-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --account $ACCOUNT --workbench-dataset $WORKBENCH_DATASET
+if ./generate-cdr/run-achilles-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET
 then
     echo "Achilles queries ran"
 else
