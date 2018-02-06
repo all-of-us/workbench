@@ -46,7 +46,7 @@ if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]];
 fi
 
 # Export CDR_DB_NAME for all scripts
-export CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
+CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
 
 startDate=`date`
 echo "Starting generate-local-cdr-db $startDate\n"

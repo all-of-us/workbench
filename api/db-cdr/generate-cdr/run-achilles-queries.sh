@@ -4,13 +4,6 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-# Init vars
-ACCOUNT=""
-BQ_PROJECT=""
-WORKBENCH_PROJECT=""
-BQ_DATASET=""
-WORKBENCH_DATASET=""
-
 USAGE="./generate-clousql-cdr/run-achilles-queries.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
 USAGE="$USAGE --cdr-version=YYYYMMDD"
 
