@@ -75,28 +75,28 @@ export class CohortSearchActions {
   @dispatch() _resetStore = ActionFuncs.resetStore;
 
   /** Internal tooling */
-  _idsInUse = Set<string>();
+  idsInUse = Set<string>();
 
   generateId(prefix?: string): string {
     prefix = prefix || 'id';
-    let newId = `${prefix}_${this._genSuffix()}`;
-    while (this._idsInUse.has(newId)) {
-      newId = `${prefix}_${this._genSuffix()}`;
+    let newId = `${prefix}_${this.genSuffix()}`;
+    while (this.idsInUse.has(newId)) {
+      newId = `${prefix}_${this.genSuffix()}`;
     }
     this.addId(newId);
     return newId;
   }
 
-  _genSuffix(): string {
+  genSuffix(): string {
     return Math.random().toString(36).substr(2, 9);
   }
 
   removeId(id: string): void {
-    this._idsInUse = this._idsInUse.delete(id);
+    this.idsInUse = this.idsInUse.delete(id);
   }
 
   addId(newId: string): void {
-    this._idsInUse = this._idsInUse.add(newId);
+    this.idsInUse = this.idsInUse.add(newId);
   }
 
   get state() {
@@ -270,7 +270,7 @@ export class CohortSearchActions {
    * requests
    */
   runAllRequests() {
-    const _doRequests = (kind) => {
+    const doRequests = (kind) => {
       const groups = groupList(kind)(this.state);
       groups.forEach(group => {
         group.get('items', List()).forEach(itemId => {
@@ -279,8 +279,8 @@ export class CohortSearchActions {
         this.requestGroupCount(kind, group.get('id'));
       });
     };
-    _doRequests('includes');
-    _doRequests('excludes');
+    doRequests('includes');
+    doRequests('excludes');
 
     /* Since everything is being run again, the optimizations in
      * `this.requestTotalCount` are sure to be off.  Basically ALL the groups
@@ -332,21 +332,21 @@ export class CohortSearchActions {
     };
   }
 
-  mapParameter = (_param): SearchParameter => {
+  mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
-      parameterId: _param.get('parameterId'),
-      name: _param.get('name', ''),
-      value: _param.get('code'),
-      type: _param.get('type', ''),
-      subtype: _param.get('subtype', ''),
-      group: _param.get('group'),
+      parameterId: immParam.get('parameterId'),
+      name: immParam.get('name', ''),
+      value: immParam.get('code'),
+      type: immParam.get('type', ''),
+      subtype: immParam.get('subtype', ''),
+      group: immParam.get('group'),
     };
 
     if (param.type.match(/^DEMO.*/i)) {
-      param.conceptId = _param.get('conceptId');
-      param.attribute = _param.get('attribute');
+      param.conceptId = immParam.get('conceptId');
+      param.attribute = immParam.get('attribute');
     } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
-      param.domain = _param.get('domainId');
+      param.domain = immParam.get('domainId');
     }
 
     return param;
@@ -400,7 +400,7 @@ export class CohortSearchActions {
    * Loads a JSONified SearchRequest into the store
    */
   loadFromJSON(json: string): void {
-    this._idsInUse = Set<string>();
+    this.idsInUse = Set<string>();
     const entities = this.deserializeEntities(json);
     this.loadEntities(entities);
   }
@@ -409,7 +409,7 @@ export class CohortSearchActions {
    * Reset Store: reset the store to the initial state and wipe all cached ID's
    */
   resetStore(): void {
-    this._idsInUse = Set<string>();
+    this.idsInUse = Set<string>();
     this._resetStore();
   }
 }

@@ -30,12 +30,14 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationListResponse;
@@ -43,6 +45,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.VerifyEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +83,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
   private final BlockscoreService blockscoreService;
+  private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
 
@@ -89,6 +93,7 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
+      MailChimpService mailChimpService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
@@ -100,6 +105,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
     this.blockscoreService = blockscoreService;
+    this.mailChimpService = mailChimpService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
   }
@@ -323,6 +329,21 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
+  public ResponseEntity<Profile> verifyEmail(VerifyEmailRequest request) {
+    User user = userDao.findUserByEmail(request.getUsername());
+    try {
+      mailChimpService.addUserContactEmail(user.getContactEmail());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+    userDao.save(user);
+    // TODO: Call http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
+    //  Store response id in database as mailchimp hash value
+    return getProfileResponse(user);
+  }
+
+  @Override
   public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest){
     verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -338,7 +359,14 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
-    user.setContactEmail(updatedProfile.getContactEmail());
+    if (updatedProfile.getContactEmail() != null) {
+      if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+        user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+        user.setContactEmail(updatedProfile.getContactEmail());
+      }
+    }
+
     // This does not update the name in Google.
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

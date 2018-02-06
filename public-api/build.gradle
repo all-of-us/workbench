@@ -1,0 +1,211 @@
+import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+
+def swaggerTemplateDir = 'src/main/resources'
+def swaggerSourceFile = 'src/main/resources/public-api.yaml'
+def swaggerTargetFolder = 'src/generated/java'
+
+task generateApi {
+  inputs.file("$projectDir/$swaggerSourceFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('spring')
+    config.setAdditionalProperties([
+            'apiPackage'     : 'org.pmiops.workbench.publicapi',
+            'modelPackage'   : 'org.pmiops.workbench.model',
+            'sourceFolder'   : swaggerTargetFolder,
+            'useTags'        : 'true',
+            // Generates delegate interfaces; used to make method annotations work without
+            // having to copy them to our implementations.
+            'delegatePattern': 'true'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
+task generate_local_appengine_web_xml(type: Exec) {
+  executable "bash"
+  args "libproject/generate_appengine_web_xml.sh"
+}
+
+configurations {
+  generatedCompile
+}
+
+buildscript {    // Configuration for building
+  repositories {
+    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.9.0'
+    classpath 'io.swagger:swagger-codegen:2.2.3'
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'war'
+apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
+apply plugin: 'org.springframework.boot'
+apply plugin: 'org.hidetake.swagger.generator'
+
+sourceSets {
+  generated {
+    compileClasspath = configurations.generatedCompile
+  }
+  main {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+  test {
+
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+}
+
+generateApi.dependsOn validateSwagger
+ideaModule.dependsOn generateApi
+compileGeneratedJava.dependsOn generateApi
+classes.dependsOn generatedClasses
+compileJava.dependsOn compileGeneratedJava
+
+war.dependsOn generate_local_appengine_web_xml
+
+clean.doFirst {
+  delete("${projectDir}/$swaggerTargetFolder")
+}
+
+repositories {   // repositories for Jar's you access in your code
+  jcenter()
+}
+
+dependencies {
+  // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
+  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+
+  compile project(':common-api')
+  compile 'mysql:mysql-connector-java:+'
+  compile 'com.google.cloud.sql:mysql-socket-factory:+'
+  compile 'com.google.appengine:appengine:+'
+  compile 'com.google.appengine:appengine-api-1.0-sdk:+'
+  compile('org.springframework.boot:spring-boot-starter-web:+') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+  compile 'org.springframework.security:spring-security-web:+'
+
+  compile 'com.fasterxml.jackson.core:jackson-annotations:+'
+  compile 'com.fasterxml.jackson.core:jackson-core:+'
+  compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'joda-time:joda-time:+'
+  compile 'javax.inject:javax.inject:1'
+  compile 'io.swagger:swagger-annotations:1.5.16'
+  compile 'org.apache.commons:commons-lang3:3.0'
+  compile 'com.google.guava:guava:22.0'
+
+  // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
+  compile 'org.json:json:20160810'
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.mockito:mockito-core:1.+'
+  testCompile 'com.google.truth:truth:+'
+  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
+  testCompile 'com.h2database:h2:+'
+  testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+
+  // For Swagger generation. These should include dependencies found in the Swagger codegen
+  // example here:
+  // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
+  generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
+  generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
+  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
+  generatedCompile 'com.google.code.gson:gson:+'
+  generatedCompile 'joda-time:joda-time:+'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
+
+}
+
+swaggerSources {
+  workbench {
+    inputFile = file("$projectDir/$swaggerSourceFile")
+  }
+}
+
+tasks.withType(Test) {
+  testLogging {
+    // Causes the correct line to be reported on an exception.
+    exceptionFormat "full"
+  }
+  def verboseTestLogging=project.properties['verboseTestLogging'] ?: 'no'
+  if (verboseTestLogging == 'yes') {
+    testLogging {
+      events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+  } else {
+    testLogging {
+      events "passed", "skipped", "failed"
+    }
+  }
+}
+
+test {
+  // Starting with a smaller minimum seems to help this task use memory more slowly.
+  // Increase max heap size from default of 1024M in order to avoid OOM errors.
+  // When Gradle runs out of memory, it fails with this message:
+  //   Process 'Gradle Test Executor 1' finished with non-zero exit value 137
+  // and literally nothing else in terms of helpful debugging information.
+  minHeapSize = '128m'
+  maxHeapSize = '2048m'
+}
+
+appengine {  // App Engine tasks configuration
+  run {      // local (dev_appserver) configuration (standard environments only)
+    port = 8083                 // default
+    host = "0.0.0.0"
+    // Allows you to attach a debugger on port 8001 when running locally.
+    jvmFlags = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8001']
+  }
+
+  // dmohs: You may see this message [1], but don't implement the suggested fix because it breaks
+  // Spring.
+  // [1] https://github.com/GoogleCloudPlatform/app-gradle-plugin/issues/100
+  // stage {
+  //    enableJarClasses = true
+  // }
+
+  deploy {   // deploy configuration
+    stopPreviousVersion = true  // default - stop the current version
+    promote = true              // default - & make this the current version
+    // TODO(danrodney)
+    //account = System.properties("account")
+    //project = System.properties("project")
+  }
+}
+
+group = 'org.pmiops.allofus.workbench'
+version = '0.1.0'          // Version in generated output
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8

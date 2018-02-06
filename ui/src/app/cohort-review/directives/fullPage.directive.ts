@@ -17,15 +17,15 @@ export class FullPageDirective implements OnInit {
     this.renderer.setStyle(el, 'padding', '1rem');
     this.renderer.setStyle(el, 'margin-bottom', '1rem');
     this.renderer.setStyle(el, 'position', 'relative');
-    this._updateWrapperDimensions();
+    this.updateWrapperDimensions();
   }
 
   @HostListener('window:resize')
   onResize() {
-    this._updateWrapperDimensions();
+    this.updateWrapperDimensions();
   }
 
-  _updateWrapperDimensions() {
+  updateWrapperDimensions() {
     const nativeEl = this.element.nativeElement;
     const {top} = nativeEl.getBoundingClientRect();
     const minHeight = pixel(window.innerHeight - top - ONE_REM);

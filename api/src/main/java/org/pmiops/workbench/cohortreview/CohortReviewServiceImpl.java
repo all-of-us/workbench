@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -10,23 +11,14 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.inject.Provider;
-import java.util.Arrays;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.Map;
 import java.util.logging.Logger;
 
 @Service
@@ -138,13 +130,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatus;
     }
 
-    @Override
-    public Slice<ParticipantCohortStatus> findParticipantCohortStatuses(Long cohortReviewId, PageRequest pageRequest) {
-        return participantCohortStatusDao.findByParticipantKey_CohortReviewId(cohortReviewId, pageRequest);
-    }
-
-    @Override
-    public Map<String, Map<Long, String>> findGenderRaceEthnicityFromConcept() {
-        return genderRaceEthnicityConceptProvider.get().getConcepts();
+    public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
+        return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
     }
 }

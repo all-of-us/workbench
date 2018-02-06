@@ -12,6 +12,7 @@ import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.inject.Provider;
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,16 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   public String readBlockscoreApiKey() {
     return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
+  }
+
+  public String readMailChimpApiKey() {
+    JSONObject mailChimpKeys = new JSONObject(readToString(getCredentialsBucketName(), "mailchimp-keys.json"));
+    return mailChimpKeys.getString("api-key");
+  }
+
+  public String readMailChimpListId() {
+    JSONObject mailChimpKeys = new JSONObject(readToString(getCredentialsBucketName(), "mailchimp-keys.json"));
+    return mailChimpKeys.getString("list-id");
   }
 
   @Override

@@ -1,0 +1,21 @@
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <service>public-api</service>
+  <runtime>java8</runtime>
+  <threadsafe>true</threadsafe>
+  <application>all-of-us-workbench-test</application>
+
+  <system-properties>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+  </system-properties>
+
+  <env-variables>
+    <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
+    <env-var name="spring.datasource.url" value="${PUBLIC_DB_CONNECTION_STRING}"/>
+    <env-var name="spring.datasource.username" value="${PUBLIC_DB_USER}"/>
+    <env-var name="spring.datasource.password" value="${PUBLIC_DB_PASSWORD}"/>
+  </env-variables>
+
+  <automatic-scaling>
+    <min-idle-instances>1</min-idle-instances>
+  </automatic-scaling>
+</appengine-web-app>

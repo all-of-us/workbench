@@ -11,7 +11,10 @@ import {dummyData} from './dummy-data';
 import {
   CohortReview,
   CohortReviewService,
-  ParticipantCohortStatus
+  ParticipantCohortStatus,
+  ParticipantCohortStatusColumns,
+    ParticipantCohortStatusesRequest,
+  SortOrder
 } from 'generated';
 
 const CDR_VERSION = 1;
@@ -90,19 +93,19 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   previous() {
-    this._navigate(true);
+    this.navigate(true);
   }
 
   next() {
-    this._navigate(false);
+    this.navigate(false);
   }
 
-  private _navigate(left: boolean) {
+  private navigate(left: boolean) {
     const id = left ? this.priorId : this.afterId;
     const hasNext = !(left ? this.isFirstParticipant : this.isLastParticipant);
 
     if (id !== undefined) {
-      this._navigateById(id);
+      this.navigateById(id);
     } else if (hasNext) {
       const statusGetter = (statuses: ParticipantCohortStatus[]) => left
         ? statuses[statuses.length - 1]
@@ -115,21 +118,27 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
       this.state.review$
         .take(1)
         .map(({page, pageSize}) => ({page: adjustPage(page), size: pageSize}))
-        .mergeMap(({page, size}) => this._callAPI(page, size))
+        .mergeMap(({page, size}) => this.callAPI(page, size))
         .subscribe(review => {
           this.state.review.next(review);
           const stat = statusGetter(review.participantCohortStatuses);
-          this._navigateById(stat.participantId);
+          this.navigateById(stat.participantId);
         });
     }
   }
 
-  private _callAPI = (page: number, size: number): Observable<CohortReview> => {
+  private callAPI = (page: number, size: number): Observable<CohortReview> => {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, page, size);
+    const request = {
+        page: page,
+        pageSize: size,
+        sortColumn: ParticipantCohortStatusColumns.ParticipantId,
+        sortOrder: SortOrder.Asc
+    };
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
   }
 
-  private _navigateById = (id: number): void => {
+  private navigateById = (id: number): void => {
     this.router.navigate(['..', id], {relativeTo: this.route});
   }
 }

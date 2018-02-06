@@ -7,18 +7,15 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
-import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BigQueryService {
@@ -70,6 +67,10 @@ public class BigQueryService {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
         return row.get(index).getLongValue();
+    }
+
+    public boolean isNull(List<FieldValue> row, int index) {
+      return row.get(index).isNull();
     }
 
     public String getString(List<FieldValue> row, int index) {

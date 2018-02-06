@@ -38,10 +38,12 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
@@ -78,6 +80,8 @@ public class ProfileControllerTest {
   private UserDao userDao;
   @Mock
   private FireCloudService fireCloudService;
+  @Mock
+  private MailChimpService mailChimpService;
   @Mock
   private DirectoryService directoryService;
   @Mock
@@ -124,14 +128,14 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
-    ProfileService profileService = new ProfileService(fireCloudService, userProvider, userDao);
+    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, mailChimpService, configProvider);
+    ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userProvider, userDao);
     this.profileController = new ProfileController(profileService, userProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), cloudEnvironment);
   }
 
   @Test(expected = BadRequestException.class)
@@ -206,6 +210,7 @@ public class ProfileControllerTest {
     createUser();
     when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
         eq(null), eq(null), eq(null))).thenReturn(person);
+    when(mailChimpService.getMember(CONTACT_EMAIL)).thenReturn("subscribed");
     when(person.getId()).thenReturn("id");
     when(person.isValid()).thenReturn(true);
     WorkbenchConfig testConfig = new WorkbenchConfig();
@@ -388,6 +393,8 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+    userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     return result;
   }

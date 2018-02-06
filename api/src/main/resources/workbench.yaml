@@ -277,6 +277,25 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/verify-email:
+    post:
+      tags:
+        - profile
+      description: Submits demographic survey responses.
+      operationId: verifyEmail
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/VerifyEmailRequest"
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+
   /v1/auth-domain/{groupName}:
     post:
       tags:
@@ -694,6 +713,26 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+  # true, which app engine itself only sets when invoking as a cronjob.
+  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+
+  /v1/cron/auditBigQuery:
+    get:
+      security: []
+      tags:
+        - audit
+        - cron
+      description: >
+        Endpoint meant to be called offline to trigger BigQuery auditing; may be
+        slow to execute. Only executable via App Engine cronjob.
+      operationId: auditBigQuery
+      responses:
+        200:
+          description: Audit was successful.
+          schema:
+            $ref: "#/definitions/AuditBigQueryResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -977,7 +1016,14 @@ paths:
           description: A cohortReviewId and cohort count
           schema:
             $ref: "#/definitions/CohortReview"
-    get:
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    post:
       tags:
          - cohortReview
       description:  >
@@ -985,46 +1031,12 @@ paths:
         does pagination based on page, limit, order and column.
       operationId: "getParticipantCohortStatuses"
       parameters:
-        - in: query
-          name: page
-          type: integer
-          required: false
-          description: specific page (default is 0)
-        - in: query
-          name: pageSize
-          type: integer
-          required: false
-          description: page size of results (default is 25)
-        - in: query
-          name: sortColumn
-          type: string
-          enum: [participantId, status, gender, birthDate, race, ethnicity]
-          default: 'participantId'
-          required: false
-          description: Column upon which to sort (default is 'participantId')
-        - in: query
-          name: sortOrder
-          type: string
-          enum: ['asc', 'desc']
-          default: 'asc'
-          required: false
-          description: Sort direction (default is ascending)
-        - in: query
-          name: filterColumn
-          type: array
-          collectionFormat: csv
-          required: false
-          uniqueItems: true
-          items:
-            type: string
-            enum: [participantId, status, gender, birthDate, race, ethnicity]
-        - in: query
-          name: filterValue
-          type: array
-          collectionFormat: csv
-          required: false
-          items:
-            type: string
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatusesRequest"
       responses:
         200:
           description: A collection of participants
@@ -1244,227 +1256,6 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  # Data Browser #######################################################################
-  /v1/databrowser/search-concepts:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Searches for concepts in concept table with search string and filters
-      operationId: "getConceptsSearch"
-      parameters:
-        - in: query
-          name: concept_name
-          type: string
-          required: false
-          description: concept name search string
-        - in: query
-          name: standard_concept
-          type: string
-          required: false
-          description: standard concept filter
-        - in: query
-          name: concept_code
-          type: string
-          required: false
-          description: concept code  filter
-        - in: query
-          name: vocabulary_id
-          type: string
-          required: false
-          description: vocabulary id filter
-        - in: query
-          name: domain_id
-          type: string
-          required: false
-          description: vocabulary id filter
-      responses:
-        200:
-          description: A collection of concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
-
-  /v1/databrowser/analysis-results:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets results for an analysis id and stratum
-      operationId: "getAnalysisResults"
-      parameters:
-        - in: query
-          name: analysis_id
-          type: integer
-          format: int64
-          required: true
-          description: analysis_id
-        - in: query
-          name: stratum_1
-          type: string
-          required: false
-          description: stratum 1
-        - in: query
-          name: stratum_2
-          type: string
-          required: false
-          description: stratum 2
-      responses:
-        200:
-          description: A collection of analysis results from achilles_results_view
-          schema:
-            $ref: "#/definitions/AnalysisResultListResponse"
-
-  /v1/databrowser/analyses:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets list of analysis definitions
-      operationId: "getAnalyses"
-      parameters: []
-      responses:
-        200:
-          description: A collection of analysis definitions
-          schema:
-            $ref: "#/definitions/AnalysisListResponse"
-
-  /v1/databrowser/participant-count:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets results for an analysis id and stratum
-      operationId: "getParticipantCount"
-      parameters: []
-      responses:
-        200:
-          description: A collection of analysis results from achilles_results_view
-          schema:
-            $ref: "#/definitions/AnalysisResult"
-
-  /v1/databrowser/concept-count:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets count for concept
-      operationId: "getConceptCount"
-      parameters:
-       - in: query
-         name: concept_id
-         type: string
-         required: true
-         description: concept id to get count for
-      responses:
-        200:
-          description: A collection with concept count for concept id
-          schema:
-            $ref: "#/definitions/AnalysisResultListResponse"
-
-  /v1/databrowser/concept-count-by-gender:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets counts for concept by gender
-      operationId: "getConceptCountByGender"
-      parameters:
-       - in: query
-         name: concept_id
-         type: string
-         required: true
-         description: concept id to get count for
-      responses:
-        200:
-          description: A collection with count for concept by gender
-          schema:
-            $ref: "#/definitions/AnalysisResultListResponse"
-
-  /v1/databrowser/concept-count-by-age:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets counts for concept by age
-      operationId: "getConceptCountByAge"
-      parameters:
-       - in: query
-         name: concept_id
-         type: string
-         required: true
-         description: concept id to get count for
-      responses:
-        200:
-          description: A collection with count for concept by age decile
-          schema:
-            $ref: "#/definitions/AnalysisResultListResponse"
-
-  /v1/databrowser/db-domains:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets list of analysis definitions
-      operationId: "getDbDomains"
-      parameters: []
-      responses:
-        200:
-          description: A collection of databrowser domains
-          schema:
-            $ref: "#/definitions/DbDomainListResponse"
-
-  /v1/databrowser/child-concepts:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Get children of the given concept
-      operationId: "getChildConcepts"
-      parameters:
-        - in: query
-          name: concept_id
-          type: integer
-          format: int64
-          required: true
-          description: concept id to get maps to concepts
-      responses:
-        200:
-          description: a collection of concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
-
-  /v1/databrowser/parent-concepts:
-      get:
-        security: []
-        tags:
-          - dataBrowser
-
-        description: Gets parent concepts for the given concept
-        operationId: "getParentConcepts"
-        parameters:
-          - in: query
-            name: concept_id
-            type: integer
-            format: int64
-            required: true
-            description: concept id to get maps to concepts
-        responses:
-          200:
-            description: A collection of databrowser domains
-            schema:
-              $ref: "#/definitions/ConceptListResponse"
-
-
-
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1516,24 +1307,34 @@ definitions:
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
+  EmailVerificationStatus:
+    type: string
+    description: stage of email verification
+    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, verified]
+
   EmptyResponse:
     type: object
     properties:
       additionalInfo:
         type: string
 
+  VerifyEmailRequest:
+    type: object
+    properties:
+      emailToVerify:
+        type: string
+      username:
+        type: string
+
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
+        # Note: Swagger trims any common prefix from enum values' corresponding
+        # Java fields by default; this has no side-effect currently as there is
+        # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         MANAGE_GROUP,
-        # Swagger trims any common prefix from enum values' corresponding Java
-        # fields by default; include a bogus sentinel value to prevent that.
-        # https://github.com/swagger-api/swagger-codegen/issues/4261
-        # TODO: Remove this sentinel when adding a new enum value with a
-        # unique prefix (but leave the above cautionary comment).
-        _PREVENT_COMMON_PREFIX_TRIMMING,
         REVIEW_ID_VERIFICATION
     ]
 
@@ -1940,6 +1741,8 @@ definitions:
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
       disabled:
         type: boolean
+      emailVerificationStatus:
+        $ref: "#/definitions/EmailVerificationStatus"
 
   ErrorResponse:
     type: object
@@ -2313,6 +2116,61 @@ definitions:
         type: string
       sortColumn:
         type: string
+
+  ParticipantCohortStatusesRequest:
+    type: object
+    required:
+      - page
+      - pageSize
+      - sortColumn
+      - sortOrder
+    properties:
+      page:
+        type: integer
+        description: specific page (default is 0)
+      pageSize:
+        type: integer
+        description: page size of results (default is 25)
+      sortColumn:
+        $ref: "#/definitions/ParticipantCohortStatusColumns"
+        description: Column upon which to sort (default is 'participantId')
+      sortOrder:
+        $ref: "#/definitions/SortOrder"
+        description: Sort direction (default is ascending)
+      filters:
+        $ref: "#/definitions/FilterList"
+
+  ParticipantCohortStatusColumns:
+    type: string
+    enum: [participantId, status, gender, birthDate, race, ethnicity]
+
+  SortOrder:
+    type: string
+    enum: [asc, desc]
+
+  FilterList:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Filter"
+
+  Filter:
+    type: object
+    properties:
+      property:
+        $ref: "#/definitions/ParticipantCohortStatusColumns"
+      operator:
+        $ref: "#/definitions/Operator"
+      value:
+        type: string
+
+  Operator:
+    type: string
+    enum: ['=', '<', '>', '<=', '>=', 'like']
 
   ParticipantDemographics:
     type: object
@@ -2691,196 +2549,6 @@ definitions:
         items:
           $ref: "#/definitions/Profile"
 
-  Concept:
-    type: object
-    required:
-      - conceptId
-      - conceptName
-      - domainId
-      - vocabularyId
-      - conceptCode
-      - conceptClassId
-      - standardConcept
-
-    properties:
-      conceptId:
-        description: id of the concept
-        type: integer
-        format: int64
-      conceptName:
-        description: name of concept
-        type: string
-      domainId:
-        description: domain of concept
-        type: string
-      vocabularyId:
-        description: vocabulary of concept
-        type: string
-      conceptCode:
-        description: original vocab code of concept
-        type: string
-      conceptClassId:
-        description: class of concept
-        type: string
-      standardConcept:
-        description: standard concept value 1 char
-        type: string
-      countValue:
-        description: est count in the cdr
-        type: integer
-        format: int64
-      prevalence:
-        description: prevalence among participants percent count divided num participants
-        type: number
-        format: float
-
-
-  ConceptListResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: "array"
-          items:
-            $ref: "#/definitions/Concept"
-
-  AnalysisResult:
-      type: object
-      required:
-        - analysisId
-
-      properties:
-        id:
-          description: pk id for jpa code to work
-          type: integer
-          format: int64
-        analysisId:
-          description: id analysis
-          type: integer
-          format: int64
-        countValue:
-          description: count
-          type: integer
-          format: int64
-        stratum1:
-          description: stratum 1
-          type: string
-        stratum1Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum2:
-          description: stratum 2
-          type: string
-        stratum2Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum3:
-          description: stratum 3
-          type: string
-        stratum3Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum4:
-          description: stratum 4
-          type: string
-        stratum4Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum5:
-          description: stratum 5
-          type: string
-        stratum5Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-
-
-  AnalysisResultListResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: "array"
-          items:
-            $ref: "#/definitions/AnalysisResult"
-
-  Analysis:
-      type: object
-      required:
-        - analysisId
-      properties:
-        analysisId:
-          description: id analysis
-          type: integer
-          format: int64
-        analysisName:
-          description:  analysis name
-          type: string
-        stratum1Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum2Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum3Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum4Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        stratum5Name:
-          description:  usually concept name corresponding to stratum
-          type: string
-        chartType:
-          description:  chart type to display for this analysis column pie box
-          type: string
-        dataType:
-          description:  data type of this analysis count or distribution
-          type: string
-
-  AnalysisListResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: "array"
-          items:
-            $ref: "#/definitions/Analysis"
-
-  DbDomain:
-      type: object
-      required:
-        - domainId
-      properties:
-        domainId:
-          description: domain id
-          type: string
-        domainDisplay:
-          description:  web display name
-          type: string
-        domainDesc:
-          description:  full desc text
-          type: string
-        domainParent:
-          description:  parent id
-          type: string
-        domainRoute:
-          description:  route
-          type: string
-
-
-  DbDomainListResponse:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: "array"
-          items:
-            $ref: "#/definitions/DbDomain"
-
   AuthDomainRequest:
     type: object
     required:
@@ -2888,3 +2556,13 @@ definitions:
     properties:
       email:
         type: string
+
+  AuditBigQueryResponse:
+    type: object
+    properties:
+      numQueryIssues:
+        type: integer
+        format: int32
+        description: >
+          Number of queries issues against the Curated data repository which are
+          flagged as possible audit issues. See logs/alerts for details.

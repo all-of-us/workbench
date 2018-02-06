@@ -1,18 +1,60 @@
-<h2>Set Cohort Info</h2>
-<div class="form-area">
-  <div>
-    <label>Cohort Name:</label>
-    <input type="text" class="input name" name="cohort-name" autofocus
-        [(ngModel)]="cohort.name">
-  </div>
-  <div>
-    <label>Description:</label>
-    <textarea class="input description" name="cohort-description"
-        [(ngModel)]="cohort.description">
-    </textarea>
-  </div>
-  <div class="button">
-    <button class="btn save-button" [clrLoading]="loading" (click)="save()">Save Cohort</button>
-    <button class="btn" (click)="cancel()">Cancel</button>
+<div class="row">
+  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+    <form [formGroup]="form">
+      <label><h2>Edit Cohort Info</h2></label>
+      <!-- Cohort Name -->
+      <div class="form-group">
+        <label for="name" class="required">Cohort Name:</label>
+        <label for="name"
+          aria-haspopup="true"
+          role="tooltip"
+          class="tooltip tooltip-validation tooltip-sm"
+          [class.invalid]="name.invalid && (name.dirty || name.touched)">
+          <input autofocus
+            type="text"
+            name="name"
+            formControlName="name">
+          <span class="tooltip-content">
+            A Cohort Name is Required.
+          </span>
+        </label>
+      </div>
+
+      <!-- Cohort Description -->
+      <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea
+          name="description"
+          formControlName="description">
+        </textarea>
+      </div>
+
+      <!-- Save / Revert / Cancel -->
+      <div class="button">
+        <button
+          type="submit"
+          class="btn btn-primary-outline"
+          title="{{ canSave ? 'Save Edits' : 'Edits are invalid or have not been made'}}"
+          [clrLoading]="loading"
+          [disabled]="!canSave"
+          (click)="save()">
+          {{ loading ? 'Saving...' : 'Save Edits' }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline"
+          title="Revert edits"
+          (click)="revert()">
+          Revert
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger-outline"
+          title="Go back to Workspace"
+          (click)="backToWorkspace()">
+          Cancel
+        </button>
+      </div>
+    </form>
   </div>
 </div>
