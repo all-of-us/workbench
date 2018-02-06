@@ -103,8 +103,11 @@ public class CdrDbConfig {
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
           // verification that the DB settings in application.properties are actually being loaded.
-          log.info("using tomcat pool for CDR data source, with minIdle: " +
+          log.info("using Tomcat pool for CDR data source, with minIdle: " +
               poolConfiguration.getMinIdle());
+        } else {
+          log.warn("not using Tomcat pool or initializing pool configuration; " +
+              "this should only happen within tests");
         }
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
       }
