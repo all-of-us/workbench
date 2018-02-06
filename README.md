@@ -271,25 +271,25 @@ Description of arguments for these scripts are as follows. See examples below.
 ###Examples:
 #### Generate count data in BigQuery from a cdr in biquery 
 `./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev \
-  --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180130 --bucket all-of-us-workbench-cloudsql-create`
+  --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is 
-1. BigQuery datasets:  all-of-us-workbench-test:cdr20180130 and all-of-us-workbench-test:public20180130
-2. CSV dumps of tables in bucket all-of-us-workbench-cloudsql-create: cdr20180130/*.csv and public20180130/*.csv  
+1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
+2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv and public20180206/*.csv  
 3. Note cdr-version can be ''  to make dbs named cdr public 
 #### Generate local mysql databases -- cdr and public for data generated above
-`./project.rb generate-local-count-dbs --cdr-version 20180130 \
---bucket all-of-us-workbench-cloudsql-create`
+`./project.rb generate-local-count-dbs --cdr-version 20180206 \
+--bucket all-of-us-workbench-private-cloudsql`
 ##### Result is 
-1. Local mysql database cdr20180130 fully populated with count data from cdr version 20180130
-2. Local mysql database public20180130 fully populated with count data from cdr version 20180130
+1. Local mysql database cdr20180206 fully populated with count data from cdr version 20180206
+2. Local mysql database public20180206 fully populated with count data from cdr version 20180206
 3. Note cdr-version can be ''  to make dbs named cdr public
 
 #### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
-`./project.rb mysqldump-db --db-name cdr20180130 --bucket all-of-us-workbench-cloudsql-create`
-`./project.rb mysqldump-db --db-name public20180130 --bucket all-of-us-workbench-public-cloudsql`
+`./project.rb mysqldump-db --db-name cdr20180206 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb mysqldump-db --db-name public20180206 --bucket all-of-us-workbench-public-cloudsql`
 ##### Result is 
-1. cdr20180130.sql uploaded to all-of-us-workbench-cloudsql-create
-1. public20180130.sql uploaded to all-of-us-workbench-cloudsql-create
+1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
+1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
 
 ### TODO import dump to cloudsql db 
 
