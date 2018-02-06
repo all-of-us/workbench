@@ -1,9 +1,9 @@
 # UI project management commands and command-line flag definitions.
 
 require "optparse"
-require_relative "../../libproject/utils/common"
-require_relative "../../libproject/workbench"
-require_relative "../../libproject/swagger"
+require_relative "../../apidef/libproject/utils/common"
+require_relative "../../apidef/libproject/workbench"
+require_relative "../../apidef/libproject/swagger"
 
 class Options < OpenStruct
 end

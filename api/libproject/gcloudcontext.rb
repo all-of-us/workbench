@@ -1,5 +1,5 @@
-require_relative "../../libproject/utils/common"
-require_relative "../../libproject/workbench"
+require_relative "../../apidef/libproject/utils/common"
+require_relative "../../apidef/libproject/workbench"
 require "json"
 
 class GcloudContextV2

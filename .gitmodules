@@ -4,3 +4,6 @@
 [submodule "firecloud-tools"]
 	path = firecloud-tools
 	url = https://github.com/broadinstitute/firecloud-tools
+[submodule "apidef"]
+	path = apidef
+	url = https://github.com/all-of-us/api
