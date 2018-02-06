@@ -167,6 +167,7 @@ public class WorkspacesControllerTest {
     user.setUserId(123L);
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user.setDisabled(false);
+    user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);

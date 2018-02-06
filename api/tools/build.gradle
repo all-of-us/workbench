@@ -64,6 +64,7 @@ sourceSets {
                    'org/pmiops/workbench/model/Authority.java',
                    'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',
                    'org/pmiops/workbench/model/DataAccessLevel.java',
+                   'org/pmiops/workbench/model/EmailVerificationStatus.java',
                    'org/pmiops/workbench/model/ErrorResponse.java',
                    'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
                    'org/pmiops/workbench/model/CohortStatus.java',

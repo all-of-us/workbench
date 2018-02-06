@@ -1,15 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {BlockscoreIdVerificationStatus, Profile, ProfileService} from 'generated';
+import {Profile, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
 export class ProfilePageComponent implements OnInit {
-  verifiedStatusIsLoaded: boolean;
-  verifiedStatus: BlockscoreIdVerificationStatus;
   profile: Profile;
   profileLoaded = false;
   editHover = false;
@@ -19,14 +17,8 @@ export class ProfilePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getVerifiedStatus();
-  }
-
-  getVerifiedStatus(): void {
     this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
         (profile: Profile) => {
-      this.verifiedStatus = profile.blockscoreIdVerificationStatus;
-      this.verifiedStatusIsLoaded = true;
       this.profile = profile;
       this.profileLoaded = true;
     });
@@ -44,5 +36,17 @@ export class ProfilePageComponent implements OnInit {
 
   submitDemographicSurvey(): void {
     this.profileService.submitDemographicsSurvey().subscribe();
+  }
+
+  verifyEmail(): void {
+    const request = {
+      verifyEmail: this.profile.contactEmail,
+      username: this.profile.username
+    };
+    this.profileService.verifyEmail(request).subscribe(
+      (response) => {
+        this.profile = response;
+      }
+    );
   }
 }
