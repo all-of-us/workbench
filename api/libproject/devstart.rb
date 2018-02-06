@@ -342,9 +342,24 @@ def run_local_bigdata_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
 end
 
-def generate_bigquery_cloudsql_cdr(*args)
+def generate_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-bigquery-cloudsql-cdr} + args
+  common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
+end
+
+def generate_local_cdr_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
+end
+
+def generate_local_count_dbs(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
+end
+
+def mysqldump_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-mysqldump-db} + args
 end
 
 def run_drop_cdr_db(*args)
@@ -730,10 +745,31 @@ Common.register_command({
   :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
 })
 Common.register_command({
-  :invocation => "generate-bigquery-cloudsql-cdr",
-  :description => "Generates cloud sql databases for a cdr release.",
-  :fn => lambda { |*args| generate_bigquery_cloudsql_cdr(*args) }
+  :invocation => "generate-cdr-counts",
+  :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
+--public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
+  :fn => lambda { |*args| generate_cdr_counts(*args) }
 })
+Common.register_command({
+  :invocation => "generate-local-cdr-db",
+  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
+Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
+  :fn => lambda { |*args| generate_local_cdr_db(*args) }
+})
+Common.register_command({
+                            :invocation => "generate-local-count-dbs",
+                            :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
+Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
+                            :fn => lambda { |*args| generate_local_count_dbs(*args) }
+                        })
+Common.register_command({
+                            :invocation => "mysqldump-db",
+                            :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
+Dumps the local mysql db and uploads the .sql file to bucket",
+                            :fn => lambda { |*args| mysqldump_db(*args) }
+                        })
+
 Common.register_command({
   :invocation => "run-drop-cdr-db",
   :description => "Drops the cdr schema of SQL database for the specified project.",

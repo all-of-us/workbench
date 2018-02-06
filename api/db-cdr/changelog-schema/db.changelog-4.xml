@@ -8,13 +8,13 @@
   <changeSet author="biopete" id="changelog-4">
 
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_name_index
       (concept_name);
     </sql>
 
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_code_index
       (concept_code);
     </sql>

@@ -1,25 +1,15 @@
 #!/bin/bash
 
-# This generates cloudsql  database from cdr dump
-# note  the account must be authorized to perform gcloud and bq operations
-
+# Runs achilles queries to populate count db for cloudsql in BigQuery
 set -xeuo pipefail
 IFS=$'\n\t'
 
-# Init vars
-ACCOUNT=""
-BQ_PROJECT=""
-WORKBENCH_PROJECT=""
-BQ_DATASET=""
-WORKBENCH_DATASET=""
-
 USAGE="./generate-clousql-cdr/run-achilles-queries.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
-USAGE="$USAGE --account <ACCOUNT> --cdr-version=YYYYMMDD"
+USAGE="$USAGE --cdr-version=YYYYMMDD"
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
@@ -28,12 +18,6 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${BQ_PROJECT}" ]
 then
