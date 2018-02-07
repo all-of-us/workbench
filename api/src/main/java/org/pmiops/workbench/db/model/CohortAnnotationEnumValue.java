@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
@@ -18,6 +20,7 @@ public class CohortAnnotationEnumValue {
     private long cohortAnnotationDefinitionId;
     private String name;
     private int order;
+    private CohortAnnotationDefinition cohortAnnotationDefinition;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,20 +38,6 @@ public class CohortAnnotationEnumValue {
         return this;
     }
 
-    @Column(name = "cohort_annotation_definition_id")
-    public long getCohortAnnotationDefinitionId() {
-        return cohortAnnotationDefinitionId;
-    }
-
-    public void setCohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
-        this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
-    }
-
-    public CohortAnnotationEnumValue cohortAnnotationDefinitionId(long cohortAnnotationDefinitionId) {
-        this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
-        return this;
-    }
-
     @Column(name = "name")
     public String getName() {
         return name;
@@ -63,7 +52,7 @@ public class CohortAnnotationEnumValue {
         return this;
     }
 
-    @Column(name = "order")
+    @Column(name = "enum_order")
     public int getOrder() {
         return order;
     }
@@ -75,6 +64,16 @@ public class CohortAnnotationEnumValue {
     public CohortAnnotationEnumValue order(int order) {
         this.order = order;
         return this;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "cohort_annotation_definition_id")
+    public CohortAnnotationDefinition getCohortAnnotationDefinition() {
+        return cohortAnnotationDefinition;
+    }
+
+    public void setCohortAnnotationDefinition(CohortAnnotationDefinition cohortAnnotationDefinition) {
+        this.cohortAnnotationDefinition = cohortAnnotationDefinition;
     }
 
     @Override
