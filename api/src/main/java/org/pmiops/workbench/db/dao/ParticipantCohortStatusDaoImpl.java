@@ -42,9 +42,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "ethnicity_concept_id as ethnicityConceptId,\n" +
             "ethnicity.concept_name as ethnicity\n" +
             "from participant_cohort_status pcs\n" +
-            "join " + cdrDbName + "concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
-            "join " + cdrDbName + "concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
-            "join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
+            "left join " + cdrDbName + "concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
+            "left join " + cdrDbName + "concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
+            "left join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
 
     private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 
