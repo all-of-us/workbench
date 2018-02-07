@@ -74,21 +74,8 @@ jobs:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
           - api-cache-
       - run:
-          name: Validate swagger definitions
-          working_directory: ~/workbench/api
-          command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
-      - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
-      - run:
-          working_directory: ~/workbench
-          command: cp api/circle-sa-key.json public-api
-      - run:
-          working_directory: ~/workbench
-          command: |
-            gsutil cp \
-              gs://all-of-us-workbench-test-credentials/all-of-us-workbench-test-9b5c623a838e.json \
-              api/src/main/webapp/WEB-INF/sa-key.json
       - run:
           working_directory: ~/workbench/api
           command: ./project.rb integration
@@ -96,7 +83,6 @@ jobs:
           paths:
             - ~/.gradle
             - ~/.m2
-            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
   ui-build-test-deploy:
     docker:
