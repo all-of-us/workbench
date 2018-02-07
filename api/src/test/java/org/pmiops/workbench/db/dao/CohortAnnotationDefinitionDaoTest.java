@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
+@Import({LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortAnnotationDefinitionDaoTest {
@@ -57,8 +57,14 @@ public class CohortAnnotationDefinitionDaoTest {
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         String sql = "select count(*) from cohort_annotation_definition where cohort_annotation_definition_id = ?";
-        final Object[] sqlParams = { cohortAnnotationDefinition.getCohortAnnotationDefinitionId() };
-        final Integer expectedCount = new Integer("1");
+        Object[] sqlParams = { cohortAnnotationDefinition.getCohortAnnotationDefinitionId() };
+        Integer expectedCount = new Integer("1");
+
+        assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+
+        sql = "select count(*) from cohort_annotation_enum_value where cohort_annotation_enum_value_id = ?";
+        sqlParams = new Object[]{ enumValue.getCohortAnnotationEnumValueId() };
+        expectedCount = new Integer("1");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
     }
