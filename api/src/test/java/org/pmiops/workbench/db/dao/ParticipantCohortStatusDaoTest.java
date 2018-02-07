@@ -132,11 +132,17 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
-    public void findAll_NoSearchCriteria() throws Exception {
-        CdrVersion cdrVersion = new CdrVersion();
-        cdrVersion.setCdrDbName("");
-        CdrVersionContext.setCdrVersion(cdrVersion);
+    public void findAll_NoMatchingConcept() throws Exception {
+        jdbcTemplate.execute("delete from concept");
 
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+
+        assertEquals(2, results.size());
+    }
+
+    @Test
+    public void findAll_NoSearchCriteria() throws Exception {
         PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
