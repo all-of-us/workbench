@@ -5,11 +5,12 @@ Common.unregister_upgrade_self_command
 ENV["UID"] = "#{Process.euid}"
 
 module Workbench
-  WORKBENCH_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+  LIBPROJECT_DIR = File.dirname(__FILE__)
+  WORKBENCH_ROOT = File.expand_path(File.join(LIBPROJECT_DIR, '..'))
 
   def check_submodules()
     # `git clone` includes submodule folders but nothing else.
-    unless File.exists? File.join(WORKBENCH_ROOT, "libproject", "utils", "README.md")
+    unless File.exists? File.join(LIBPROJECT_DIR, "utils", "README.md")
       unless system(*%W{git submodule update --init})
         common.error "`git submodule update` failed."
         exit 1

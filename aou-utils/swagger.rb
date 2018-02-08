@@ -5,7 +5,7 @@ require_relative "workbench"
 module Workbench
   module Swagger
     SWAGGER_CODEGEN_CLI_JAR = File.join(
-        Workbench::WORKBENCH_ROOT, "libproject", "swagger-codegen-cli.jar")
+        Workbench::LIBPROJECT_DIR, "swagger-codegen-cli.jar")
 
     def download(url, path)
       File.open(path, "wb") do |f|
