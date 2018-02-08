@@ -17,12 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
@@ -57,16 +54,14 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 @Override
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
                     List<String> enumValues = cohortAnnotationDefinition.getEnumValues();
-                    Set<CohortAnnotationEnumValue> enumValuesSet = (enumValues == null) ? null :
-                            new HashSet<CohortAnnotationEnumValue>(
-                                    IntStream.range(0, enumValues.size())
-                                            .mapToObj(i -> new CohortAnnotationEnumValue().name(enumValues.get(i)).order(i))
-                                            .collect(Collectors.toList()));
+                    List<CohortAnnotationEnumValue> enumValuesList = (enumValues == null) ? null :
+                            enumValues.stream().map(s -> new CohortAnnotationEnumValue().name(s))
+                                    .collect(Collectors.toList());
                     return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .columnName(cohortAnnotationDefinition.getColumnName())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
-                            .enumValues(enumValuesSet);
+                            .enumValues(enumValuesList);
                 }
             };
 
@@ -159,7 +154,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         List<org.pmiops.workbench.db.model.CohortAnnotationDefinition> dbList =
-                cohortAnnotationDefinitionDao.findByCohortId(cohortId);
+                cohortAnnotationDefinitionDao.findByCohortIdOrderByEnumValuesAsc(cohortId);
 
         CohortAnnotationDefinitionListResponse responseList = new CohortAnnotationDefinitionListResponse();
         responseList.setItems(dbList.stream().map(TO_CLIENT_COHORT_ANNOTATION_DEFINITION).collect(Collectors.toList()));

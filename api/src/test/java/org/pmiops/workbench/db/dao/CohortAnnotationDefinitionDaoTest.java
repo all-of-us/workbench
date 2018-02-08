@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -51,8 +50,8 @@ public class CohortAnnotationDefinitionDaoTest {
     @Test
     public void save_WithEnumValues() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue().name("name").order(0);
-        cohortAnnotationDefinition.setEnumValues(new HashSet<>(Arrays.asList(enumValue)));
+        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue().name("name");
+        cohortAnnotationDefinition.setEnumValues(Arrays.asList(enumValue));
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
@@ -84,13 +83,13 @@ public class CohortAnnotationDefinitionDaoTest {
     }
 
     @Test
-    public void findByCohortId() throws Exception {
+    public void findByCohortIdOrderByEnumValuesAsc() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         List<CohortAnnotationDefinition> expectedDBList =
-                cohortAnnotationDefinitionDao.findByCohortId(
+                cohortAnnotationDefinitionDao.findByCohortIdOrderByEnumValuesAsc(
                         cohortAnnotationDefinition.getCohortId());
 
         assertEquals(expectedDBList.get(0), cohortAnnotationDefinition);

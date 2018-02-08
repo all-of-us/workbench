@@ -18,7 +18,6 @@ public class CohortAnnotationEnumValue {
 
     private long cohortAnnotationEnumValueId;
     private String name;
-    private int order;
     private CohortAnnotationDefinition cohortAnnotationDefinition;
 
     @Id
@@ -51,20 +50,6 @@ public class CohortAnnotationEnumValue {
         return this;
     }
 
-    @Column(name = "enum_order")
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public CohortAnnotationEnumValue order(int order) {
-        this.order = order;
-        return this;
-    }
-
     @ManyToOne
     @JoinColumn(name = "cohort_annotation_definition_id")
     public CohortAnnotationDefinition getCohortAnnotationDefinition() {
@@ -85,13 +70,12 @@ public class CohortAnnotationEnumValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CohortAnnotationEnumValue enumValue = (CohortAnnotationEnumValue) o;
-        return order == enumValue.order &&
-                Objects.equals(name, enumValue.name);
+        return Objects.equals(name, enumValue.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, order);
+        return Objects.hash(name);
     }
 
     @Override
@@ -99,7 +83,6 @@ public class CohortAnnotationEnumValue {
         return new ToStringBuilder(this)
                 .append("cohortAnnotationEnumValueId", cohortAnnotationEnumValueId)
                 .append("name", name)
-                .append("order", order)
                 .toString();
     }
 }
