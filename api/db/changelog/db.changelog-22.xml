@@ -5,7 +5,7 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <changeSet author="brianfreeman" id="changelog-22">
+    <changeSet author="brianfreeman" id="changelog-23">
 
         <createTable tableName="cohort_annotation_enum_value">
             <column name="cohort_annotation_enum_value_id" type="bigint" autoIncrement="true">
@@ -33,11 +33,17 @@
             <column name="annotation_value_date" type="date"/>
         </addColumn>
         <addColumn tableName="participant_cohort_annotations">
-            <column name="annotation_value_enum" type="varchar(400)"/>
+            <column name="cohort_annotation_enum_value_id" type="bigint"/>
         </addColumn>
         <addColumn tableName="participant_cohort_annotations">
             <column name="annotation_value_boolean" type="tinyint"/>
         </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_annotation_enum_value_id"
+                                 baseTableName="participant_cohort_annotations"
+                                 constraintName="fk_enum_cohort_annotation_enum_value_id"
+                                 referencedColumnNames="cohort_annotation_enum_value_id"
+                                 referencedTableName="cohort_annotation_enum_value"/>
 
     </changeSet>
 </databaseChangeLog>
