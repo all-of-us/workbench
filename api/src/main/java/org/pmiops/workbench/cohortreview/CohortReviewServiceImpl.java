@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -132,5 +133,25 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
         return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
+    }
+
+    @Override
+    public ParticipantCohortAnnotation saveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation) {
+        return null;
+    }
+
+    @Override
+    public void deleteParticipantCohortAnnotation(Long annotationId) {
+
+    }
+
+    @Override
+    public ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId) {
+        return null;
+    }
+
+    @Override
+    public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId) {
+        return null;
     }
 }

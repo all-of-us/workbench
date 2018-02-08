@@ -1129,11 +1129,12 @@ paths:
           schema:
             $ref: "#/definitions/CohortSummaryListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
       - $ref: '#/parameters/participantId'
     post:
       tags:
@@ -1163,11 +1164,12 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
       - $ref: '#/parameters/participantId'
       - in: path
         name: annotationId
@@ -2369,7 +2371,11 @@ definitions:
       - cohortReviewId
       - participantId
     properties:
-      annotationDefinitionId:
+      annotationId:
+        type: integer
+        format: int64
+        description: participant annotation id.
+      cohortAnnotationDefinitionId:
         type: integer
         format: int64
         description: annotation definition id.
@@ -2381,19 +2387,19 @@ definitions:
         type: integer
         format: int64
         description: the participant id.
-      valueString:
+      annotationValueString:
         type: string
         description: The Value of the annotation if the AnnotationType is STRING
-      valueEnum:
+      annotationValueEnum:
         type: string
         description: The option chosen for the annotation if the AnnotationType is ENUM
-      valueDate:
+      annotationValueDate:
         type: string
         description: The Value of the annotation if the AnnotationType is DATE
-      valueBoolean:
+      annotationValueBoolean:
         type: boolean
         description: The Value of the annotation if the AnnotationType is BOOLEAN
-      valueInteger:
+      annotationValueInteger:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
 
