@@ -57,7 +57,7 @@ jobs:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
           command: ./project.rb gradle dependencyCheckAnalyze --info
-  api-build-integration-test:
+  api-integration-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
     working_directory: ~/workbench
@@ -71,10 +71,11 @@ jobs:
           command: git submodule update --init
       - restore_cache:
           keys:
-          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-          - api-cache-
+          - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-integration-cache-
       - run:
           working_directory: ~/workbench
+          #Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench
@@ -92,7 +93,7 @@ jobs:
           paths:
             - ~/.gradle
             - ~/.m2
-          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
   ui-build-test-deploy:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
@@ -167,6 +168,7 @@ workflows:
   integration-test:
     triggers:
       - schedule:
+          # Run this command once every day at 4:00AM UTC
           cron: "0 4 * * *"
           filters:
             branches:
