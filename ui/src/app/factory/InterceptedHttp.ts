@@ -1,4 +1,5 @@
 /*Intercepts all HTTP request */
+
 import {Injectable,NgZone} from '@angular/core';
 import {ConnectionBackend, Http, Response, Request, RequestOptions,
   RequestOptionsArgs} from '@angular/http';
@@ -8,7 +9,7 @@ import {overriddenUrlKey} from 'app/views/app/component';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {ConfigService} from 'generated';
-import {Observable} from "rxjs/Rx";
+import {Observable} from 'rxjs/Rx';
 
 @Injectable()
 export class InterceptedHttp extends Http {
