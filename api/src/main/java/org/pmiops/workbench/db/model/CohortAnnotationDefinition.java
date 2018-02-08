@@ -100,12 +100,7 @@ public class CohortAnnotationDefinition {
     }
 
     public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
-        this.enumValues = enumValues;
-        if (enumValues != null) {
-            for (CohortAnnotationEnumValue enumValue : this.enumValues) {
-                enumValue.setCohortAnnotationDefinition(this);
-            }
-        }
+        this.setEnumValues(enumValues);
         return this;
     }
 
