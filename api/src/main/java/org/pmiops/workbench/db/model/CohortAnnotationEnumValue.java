@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -88,7 +87,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     }
 
     @Override
-    public int compareTo(@NotNull Object o) {
+    public int compareTo(Object o) {
         Long thisLong = new Long(this.getCohortAnnotationEnumValueId());
         Long otherLong = new Long(((CohortAnnotationEnumValue) o).getCohortAnnotationEnumValueId());
         return thisLong.compareTo(otherLong);
