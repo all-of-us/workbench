@@ -547,6 +547,17 @@ Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => lambda { |*args| mysqldump_db(*args) }
 })
 
+def cloudsql_import(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-cloudsql-import} + args
+end
+Common.register_command({
+                            :invocation => "cloudsql-import",
+                            :description => "cloudsql-import --account <SERVICE_ACCOUNT> --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
+Imports .sql file to cloudsql instance",
+                            :fn => lambda { |*args| cloudsql_import(*args) }
+                        })
+
 def run_drop_cdr_db(*args)
   common = Common.new
   common.run_inline %W{docker-compose run drop-cdr-db}
@@ -831,70 +842,6 @@ Common.register_command({
   :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
   :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Common.register_command({
-                            :invocation => "cloudsql-import",
-                            :description => "cloudsql-import --account <SERVICE_ACCOUNT> --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
-Imports .sql file to cloudsql instance",
-                            :fn => lambda { |*args| cloudsql_import(*args) }
-                        })
-
-Common.register_command({
-  :invocation => "run-drop-cdr-db",
-  :description => "Drops the cdr schema of SQL database for the specified project.",
-  :fn => lambda { |*args| run_drop_cdr_db(*args) }
-})
->>>>>>> cloudsql-import goal made
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def connect_to_cloud_db(cmd_name, *args)
   ensure_docker cmd_name, args
