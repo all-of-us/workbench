@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortreview;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.Filter;
@@ -81,4 +82,12 @@ public interface CohortReviewService {
     ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
     List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
+
+    ParticipantCohortAnnotation saveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation);
+
+    void deleteParticipantCohortAnnotation(Long annotationId);
+
+    ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId);
+
+    List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId);
 }
