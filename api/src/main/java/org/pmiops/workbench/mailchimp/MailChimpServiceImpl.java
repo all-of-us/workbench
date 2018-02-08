@@ -40,6 +40,9 @@ public class MailChimpServiceImpl implements MailChimpService {
   @Override
   public String addUserContactEmail(String contactEmail) {
     String userId;
+    if (listId == null) {
+      listId = cloudStorageServiceProvider.get().readMailChimpListId();
+    }
     Create createRequest = new Create(
         listId,
         contactEmail);

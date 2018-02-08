@@ -96,6 +96,7 @@ buildscript {    // Configuration for building
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.9.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath 'org.owasp:dependency-check-gradle:3.1.0'
   }
 }
 
@@ -106,6 +107,7 @@ apply plugin: 'war'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
+apply plugin: 'org.owasp.dependencycheck'
 
 configurations {
   integrationCompile.extendsFrom testCompile
@@ -281,16 +283,6 @@ tasks.withType(Test) {
       events "passed", "skipped", "failed"
     }
   }
-}
-
-test {
-  // Starting with a smaller minimum seems to help this task use memory more slowly.
-  // Increase max heap size from default of 1024M in order to avoid OOM errors.
-  // When Gradle runs out of memory, it fails with this message:
-  //   Process 'Gradle Test Executor 1' finished with non-zero exit value 137
-  // and literally nothing else in terms of helpful debugging information.
-  minHeapSize = '128m'
-  maxHeapSize = '2048m'
 }
 
 integration {
