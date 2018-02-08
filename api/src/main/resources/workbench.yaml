@@ -1154,7 +1154,7 @@ paths:
       operationId: "getParticipantCohortAnnotations"
       responses:
         200:
-          description: A ParticipantCohortAnnotation.
+          description: A collection of ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
@@ -1170,6 +1170,16 @@ paths:
         format: int64
         required: true
         description: specifies which annotation
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a ParticipantCohortAnnotation.
+      operationId: "getParticipantCohortAnnotation"
+      responses:
+        200:
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
     put:
       tags:
         - cohortReview
