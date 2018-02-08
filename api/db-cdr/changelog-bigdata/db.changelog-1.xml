@@ -13,7 +13,6 @@
       </not>
     </preConditions>
     <addPrimaryKey
-      schemaName="cdr"
       tableName="concept"
       columnNames="concept_id"/>
   </changeSet>
@@ -27,7 +26,6 @@
 
     <createIndex
       indexName="idx_concept_name"
-      schemaName="cdr"
       tableName="concept"
       unique="false">
       <column name="concept_name" type="varchar(255)"/>
@@ -42,7 +40,6 @@
     </preConditions>
     <createIndex
       indexName="idx_concept_code"
-      schemaName="cdr"
       tableName="concept"
       unique="false">
       <column name="concept_code" type="varchar(50)"/>
@@ -58,7 +55,6 @@
     </preConditions>
     <createIndex
       indexName="idx_domain_id"
-      schemaName="cdr"
       tableName="concept"
       unique="false">
       <column name="domain_id" type="varchar(20)"/>
@@ -75,7 +71,6 @@
     </preConditions>
     <createIndex
       indexName="idx_vocabulary_id"
-      schemaName="cdr"
       tableName="concept"
       unique="false">
       <column name="vocabulary_id" type="varchar(20)"/>
@@ -91,7 +86,6 @@
     </preConditions>
     <createIndex
       indexName="idx_standard_concept"
-      schemaName="cdr"
       tableName="concept"
       unique="false">
       <column name="standard_concept" type="varchar(1)"/>
@@ -106,7 +100,7 @@
       </not>
     </preConditions>
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_name_index
       (concept_name);
     </sql>
@@ -120,7 +114,7 @@
       </not>
     </preConditions>
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_code_index
       (concept_code);
     </sql>
@@ -145,7 +139,7 @@
         <indexExists indexName="idx_concept_2"/>
       </not>
     </preConditions>
-    <createIndex tableName="concept_relationship" indexName="idx_concept_2" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_concept_2">
       <column name="concept_id_2" type="bigint"></column>
     </createIndex>
   </changeSet>
@@ -157,7 +151,7 @@
         <indexExists indexName="idx_relationship_id"/>
       </not>
     </preConditions>
-    <createIndex tableName="concept_relationship" indexName="idx_relationship_id" schemaName="cdr">
+    <createIndex tableName="concept_relationship" indexName="idx_relationship_id">
       <column name="relationship_id" type="varchar(20)"></column>
     </createIndex>
   </changeSet>
@@ -172,7 +166,6 @@
     <addPrimaryKey
       columnNames="concept_id_1, concept_id_2, relationship_id"
       constraintName="pk_concept_rel"
-      schemaName="cdr"
       tableName="concept_relationship"/>
   </changeSet>
 

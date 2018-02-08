@@ -56,8 +56,10 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run db-data-migration}
 
   common.status "Updating configuration..."
-  common.run_inline %W{docker-compose run update-config}
-
+  common.run_inline %W{
+    docker-compose run update-config
+    -Pconfig_file=../config/config_local.json
+  }
   run_api(account)
 end
 
@@ -137,9 +139,16 @@ def run_bigquery_tests(*args)
   end
 end
 
-def run_gradle(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew} + args
+def run_gradle(cmd_name, args)
+  ensure_docker cmd_name, args
+  begin
+    Common.new.run_inline %W{gradle} + args
+  ensure
+    if $! && $!.status != 0
+      Common.new.error "Command exited with non-zero status"
+      exit 1
+    end
+  end
 end
 
 def connect_to_db(*args)
@@ -340,9 +349,24 @@ def run_local_bigdata_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
 end
 
-def generate_bigquery_cloudsql_cdr(*args)
+def generate_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-bigquery-cloudsql-cdr} + args
+  common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
+end
+
+def generate_local_cdr_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
+end
+
+def generate_local_count_dbs(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
+end
+
+def mysqldump_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-mysqldump-db} + args
 end
 
 def run_drop_cdr_db(*args)
@@ -662,7 +686,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "gradle",
   :description => "Runs gradle inside the API docker container with the given arguments.",
-  :fn => lambda { |*args| run_gradle(*args) }
+  :fn => lambda { |*args| run_gradle("gradle", args) }
 })
 
 Common.register_command({
@@ -728,10 +752,31 @@ Common.register_command({
   :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
 })
 Common.register_command({
-  :invocation => "generate-bigquery-cloudsql-cdr",
-  :description => "Generates cloud sql databases for a cdr release.",
-  :fn => lambda { |*args| generate_bigquery_cloudsql_cdr(*args) }
+  :invocation => "generate-cdr-counts",
+  :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
+--public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
+  :fn => lambda { |*args| generate_cdr_counts(*args) }
 })
+Common.register_command({
+  :invocation => "generate-local-cdr-db",
+  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
+Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
+  :fn => lambda { |*args| generate_local_cdr_db(*args) }
+})
+Common.register_command({
+                            :invocation => "generate-local-count-dbs",
+                            :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
+Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
+                            :fn => lambda { |*args| generate_local_count_dbs(*args) }
+                        })
+Common.register_command({
+                            :invocation => "mysqldump-db",
+                            :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
+Dumps the local mysql db and uploads the .sql file to bucket",
+                            :fn => lambda { |*args| mysqldump_db(*args) }
+                        })
+
 Common.register_command({
   :invocation => "run-drop-cdr-db",
   :description => "Drops the cdr schema of SQL database for the specified project.",
@@ -901,11 +946,22 @@ def migrate_cdr_data()
   end
 end
 
-def load_config()
+def load_config(project)
+  configs = {
+    'all-of-us-workbench-test' => 'config_test.json'
+  }
+  config_json = configs[project]
+  unless config_json
+    raise("unknown project #{project}, expected one of #{configs.keys}")
+  end
+
   common = Common.new
-  common.status "Loading configuration into database..."
+  common.status "Loading #{config_json} into database..."
   Dir.chdir("tools") do
-    common.run_inline %W{gradle --info loadConfig}
+    common.run_inline %W{
+      gradle --info loadConfig
+      -Pconfig_file=../config/#{config_json}
+    }
   end
 end
 
@@ -917,7 +973,7 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
   ENV.update(read_db_vars_v2(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   CloudSqlProxyContext.new(gcc).run do
-    yield
+    yield(gcc)
   end
 end
 
@@ -949,10 +1005,10 @@ def circle_deploy(cmd_name, args)
 
   if is_master
     common.status "Running database migrations..."
-    with_cloud_proxy_and_db_env(cmd_name, args) do
+    with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
       migrate_cdr_database
-      load_config
+      load_config(ctx.project)
     end
   end
 
@@ -987,7 +1043,9 @@ end
 
 def update_cloud_config(cmd_name, args)
   ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) { load_config }
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    load_config(ctx.project)
+  end
 end
 
 Common.register_command({

@@ -144,6 +144,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                       this.cohortsLoading = false;
                       this.cohortsError = true;
                     });
+
             this.errorHandlingService.retryApi(this.workspacesService
               .getNoteBookList(this.wsNamespace, this.wsId))
                 .subscribe(
@@ -175,7 +176,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
       this.cluster = cluster;
       this.initializeNotebookCookies().subscribe(() => {
-        this.clusterPulled = true;
+        this.localizeAllFiles();
       });
     });
   }
@@ -265,7 +266,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.clusterLoading = false;
         this.cluster = polledCluster;
         this.initializeNotebookCookies().subscribe(() => {
-          this.clusterPulled = true;
+          this.localizeAllFiles();
         });
       });
     });
@@ -323,20 +324,48 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.clusterService
         .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
         .subscribe(() => {
-          this.alertCategory = 'alert-success';
-          this.alertMsg = 'File(s) have been saved';
-          this.showAlerts = true;
+          this.handleLocalizeSuccess();
           setTimeout(() => {
             this.resetAlerts();
           }, 5000);
         }, () => {
-          this.alertCategory = 'alert-danger';
-          this.alertMsg = 'There was an issue while saving file(s) please try again later';
-          this.showAlerts = true;
+          this.handleLocalizeError();
           setTimeout(() => {
             this.resetAlerts();
           }, 5000);
         });
+  }
+
+  localizeAllFiles(): void {
+    this.errorHandlingService.retryApi(this.workspacesService
+        .localizeAllFiles(this.wsNamespace, this.wsId))
+        .subscribe(() => {
+              this.handleLocalizeSuccess();
+              this.clusterPulled = true;
+              setTimeout(() => {
+                this.resetAlerts();
+              }, 3000);
+            },
+            error => {
+              this.handleLocalizeError();
+              this.clusterPulled = true;
+              setTimeout(() => {
+                this.resetAlerts();
+              }, 3000);
+            });
+
+  }
+
+  handleLocalizeSuccess(): void {
+    this.alertCategory = 'alert-success';
+    this.alertMsg = 'File(s) have been saved';
+    this.showAlerts = true;
+  }
+
+  handleLocalizeError(): void {
+    this.alertCategory = 'alert-danger';
+    this.alertMsg = 'There was an issue while saving file(s) please try again later';
+    this.showAlerts = true;
   }
 
   resetAlerts(): void {

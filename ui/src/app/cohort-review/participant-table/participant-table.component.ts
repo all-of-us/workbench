@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {State} from '@clr/angular';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
@@ -14,9 +14,9 @@ import {
   CohortReview,
   CohortReviewService,
   ParticipantCohortStatus,
-  ParticipantCohortStatusColumns,
-  ParticipantCohortStatusesRequest,
-  SortOrder
+  ParticipantCohortStatusColumns as Columns,
+  ParticipantCohortStatusesRequest as Request,
+  SortOrder,
 } from 'generated';
 
 @Component({
@@ -24,7 +24,17 @@ import {
   templateUrl: './participant-table.component.html',
 })
 export class ParticipantTableComponent implements OnInit, OnDestroy {
-  DUMMY_DATA: Participant[];
+
+  readonly columnsEnum = {
+    participantId: Columns.ParticipantId,
+    gender: Columns.Gender,
+    race: Columns.Race,
+    ethnicity: Columns.Ethnicity,
+    birthDate: Columns.BirthDate,
+    status: Columns.Status
+  };
+
+  participants: Participant[];
 
   review: CohortReview;
   loading: boolean;
@@ -34,62 +44,48 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit() {
     this.loading = false;
+    // console.log('Route for participant table: ');
+    // console.dir(this.route);
 
-    this.subscription = this.state.review$
-      .do(review => this.review = review)
-      .pluck('participantCohortStatuses')
-      .map(statusSet =>
-        (<ParticipantCohortStatus[]>statusSet).map(Participant.makeRandomFromExisting))
-      .subscribe(val => this.DUMMY_DATA = <Participant[]>val);
+    this.subscription = this.route.data.subscribe(data => {
+      this.participants = data.participants.map(Participant.fromStatus);
+    });
+
+    this.subscription.add(this.route.parent.data.subscribe(data => {
+      this.review = data.review;
+    }));
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  refresh(state: State) {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+  refresh(state: ClrDatagridStateInterface) {
+    // console.log('Datagrid state: ');
+    // console.dir(state);
 
-    const page = Math.floor(state.page.from / state.page.size);
-    const pageSize = state.page.size;
+    const query = <Request>{};
 
-    let sortColumn = state.sort && {
-      participantId: ParticipantCohortStatusColumns.ParticipantId,
-      gender: ParticipantCohortStatusColumns.Gender,
-      race: ParticipantCohortStatusColumns.Race,
-      ethnicity: ParticipantCohortStatusColumns.Ethnicity,
-      birthDate: ParticipantCohortStatusColumns.BirthDate,
-      status: ParticipantCohortStatusColumns.Status
-    }[<string>(state.sort.by)];
+    query.page = Math.floor(state.page.from / state.page.size) + 1;
+    query.pageSize = state.page.size;
 
-    sortColumn = sortColumn || ParticipantCohortStatusColumns.ParticipantId;
+    if (state.sort) {
+      const sortby = <string>(state.sort.by);
+      query.sortColumn = this.columnsEnum[sortby];
+      query.sortOrder = state.sort.reverse
+        ? SortOrder.Desc
+        : SortOrder.Asc;
+    }
 
-    let sortOrder = state.sort &&
-      (state.sort.reverse ? SortOrder.Desc : SortOrder.Asc);
+    if (state.filters) {
+      // TODO(jms) - do filter stuff here
+    }
 
-    sortOrder = sortOrder || SortOrder.Asc;
-
-    const filterColumns = state.filters && state.filters.map(getProperty);
-    const filterValues = state.filters && state.filters.map(getValue);
-
-    console.dir(state);
-
-    setTimeout(() => this.loading = true, 0);
-      const request = {
-          page: page,
-          pageSize: pageSize,
-          sortColumn: sortColumn,
-          sortOrder: sortOrder
-      };
-      // TODO: build filters list here
-      console.dir(request);
-    this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION,
-        request)
-      .do(r => this.loading = false)
-      .subscribe(review => this.state.review.next(review));
+    this.router.navigate(['.'], {relativeTo: this.route, queryParams: query});
   }
 }

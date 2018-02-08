@@ -83,7 +83,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   private emit = (newStatus: ParticipantCohortStatus) => {
     this.changingStatus = false;
-    const participant = Participant.makeRandomFromExisting(newStatus);
+    const participant = Participant.fromStatus(newStatus);
     this.state.participant.next(participant);
 
     /* TODO (jms) replace this with an action to refresh the table? */

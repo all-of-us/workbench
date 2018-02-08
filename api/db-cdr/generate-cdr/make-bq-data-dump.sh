@@ -8,11 +8,10 @@ IFS=$'\n\t'
 
 
 # get options
-USAGE="./generate-clousql-cdr/make-bq-data-dump.sh --account <ACCOUNT> --project <PROJECT> --dataset <DATASET>  --bucket=<BUCKET>"
+USAGE="./generate-clousql-cdr/make-bq-data-dump.sh --project <PROJECT> --dataset <DATASET>  --bucket=<BUCKET>"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --project) PROJECT=$2; shift 2;;
     --bucket) BUCKET=$2; shift 2;;
     --dataset) DATASET=$2; shift 2;;
@@ -20,12 +19,6 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${PROJECT}" ]
 then
@@ -45,15 +38,12 @@ then
   exit 1
 fi
 
-
-CREDS_ACCOUNT=${ACCOUNT}
-
 echo "Dumping tables to csv from $BUCKET\n"
 
 # Get tables in project, stripping out tableId.
 # Note tables larger than 1 G need to be dumped into more than one file.
 # concept_relationship and concept are only big ones now.
-tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary)
+tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary)
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"

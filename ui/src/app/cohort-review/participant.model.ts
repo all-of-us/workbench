@@ -1,3 +1,5 @@
+import * as moment from 'moment';
+
 import {CohortStatus, ParticipantCohortStatus} from 'generated';
 
 /* Pick a random element from an array */
@@ -22,8 +24,8 @@ export class Participant implements ParticipantCohortStatus {
   participantId: number;
   status: CohortStatus;
 
-  /* Moment.js? */
-  dob: Date;
+  birthDatetime: number;
+  dob: any; /* moment.js object */
 
   /* Potentially each of these should be an Enum */
   gender: string;
@@ -52,6 +54,23 @@ export class Participant implements ParticipantCohortStatus {
     } else {
       return {'label-info': true};
     }
+  }
+
+  constructor(obj?: ParticipantCohortStatus) {
+    if (obj) {
+      const {participantId, status, gender, race, ethnicity, birthDatetime} = obj;
+      this.id = participantId;
+      this.status = status;
+      this.gender = gender;
+      this.race = race;
+      this.ethnicity = ethnicity;
+      this.birthDatetime = birthDatetime;
+      this.dob = moment(birthDatetime);
+    }
+  }
+
+  static fromStatus(obj: ParticipantCohortStatus): Participant {
+    return new Participant(obj);
   }
 
   static makeRandom(id: number): Participant {

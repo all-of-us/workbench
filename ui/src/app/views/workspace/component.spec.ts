@@ -10,19 +10,19 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {ClusterService, CohortsService, WorkspacesService} from 'generated';
+import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {HttpStub} from 'testing/stubs/http-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+
 import {
   queryAllByCss,
   queryByCss,
   simulateClick,
   updateAndTick
 } from 'testing/test-helpers';
-
-import {ClusterService} from 'generated';
-import {CohortsService} from 'generated';
-import {WorkspacesService} from 'generated';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -36,6 +36,7 @@ class WorkspacePage {
   cdrText: DebugElement;
   workspaceDescription: DebugElement;
   loggedOutMessage: DebugElement;
+  createAndLaunch: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceComponent);
@@ -55,6 +56,7 @@ class WorkspacePage {
     this.cdrText = queryByCss(this.fixture, '.cdr-text');
     this.workspaceDescription = queryByCss(this.fixture, '.description-text');
     this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
+    this.createAndLaunch = queryByCss(this.fixture, '#createAndLaunch');
   }
 }
 
@@ -86,10 +88,10 @@ describe('WorkspaceComponent', () => {
         WorkspaceComponent
       ],
       providers: [
-        { provide: ClusterService, useValue: ClusterService },
+        { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
-        { provide: Http, useValue: Http },
+        { provide: Http, useValue: new HttpStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
@@ -147,6 +149,13 @@ describe('WorkspaceComponent', () => {
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
   }));
 
+  it('Calls localize All files after creating cluster', fakeAsync(() => {
+    const fixture = workspacePage.fixture;
+    const app = fixture.debugElement.componentInstance;
+    fixture.componentRef.instance.createAndLaunchNotebook();
+    tick(5000);
+    expect(app.clusterPulled).toEqual(true);
+  }));
 
 
 });

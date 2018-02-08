@@ -2,7 +2,6 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
 import {ChartsModule} from '../charts/charts.module';
@@ -24,37 +23,10 @@ import {FullPageDirective} from './directives/fullPage.directive';
 import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
-import {AnnotationValuesResolver} from './guards/annotation-values-resolver.guard';
-import {ParticipantResolver} from './guards/participant-resolver.guard';
+import {CohortReviewRoutingModule} from './routing/routing.module';
 /* tslint:enable:max-line-length */
 
 import {WorkspacesService} from 'generated';
-
-const routes: Routes = [{
-  path: '',
-  component: CohortReviewComponent,
-  data: {title: 'Review Cohort Participants'},
-  children: [
-    {
-      path: '',
-      redirectTo: 'overview',
-      pathMatch: 'full',
-    }, {
-      path: 'overview',
-      component: OverviewComponent,
-    }, {
-      path: 'participants',
-      component: ParticipantTableComponent,
-    }, {
-      path: 'participants/:pid',
-      component: ParticipantDetailComponent,
-      resolve: {
-        participant: ParticipantResolver,
-        annotations: AnnotationValuesResolver,
-      }
-    }
-  ],
-}];
 
 const components = [
   AnnotationManagerComponent,
@@ -76,30 +48,18 @@ const directives = [
   SidebarDirective,
 ];
 
-const services = [
-  ReviewStateService,
-];
-
-const guards = [
-  AnnotationValuesResolver,
-  ParticipantResolver,
-];
-
 @NgModule({
   imports: [
+    CohortReviewRoutingModule,
     ClarityModule,
     CommonModule,
     ReactiveFormsModule,
-    RouterModule.forChild(routes),
     ChartsModule,
   ],
   declarations: [
     ...components,
     ...directives,
   ],
-  providers: [
-    ...services,
-    ...guards,
-  ]
+  providers: [ReviewStateService]
 })
 export class CohortReviewModule {}

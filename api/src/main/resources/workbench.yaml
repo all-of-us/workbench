@@ -544,6 +544,35 @@ paths:
          schema:
           $ref: '#/definitions/ErrorReport'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-all-files:
+    get:
+      summary: Get file details from google bucket and then localize to notebook server
+      description: Get files details from bucket folders config and notebooks and then localize to notebook server
+      operationId: localizeAllFiles
+      tags:
+        - workspaces
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Files have been localized
+        404:
+          description: Workspace or Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
 
   # Billing projects #####################################################################
 

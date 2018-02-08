@@ -11,7 +11,7 @@ import {
 } from 'generated';
 
 @Injectable()
-export class AnnotationValuesResolver implements Resolve<ParticipantCohortAnnotation[]> {
+export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohortAnnotation[]> {
 
   constructor(
     private state: ReviewStateService,

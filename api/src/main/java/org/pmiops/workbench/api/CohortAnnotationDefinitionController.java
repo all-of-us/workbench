@@ -122,8 +122,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
+        findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
         cohortAnnotationDefinitionDao.delete(annotationDefinitionId);
 

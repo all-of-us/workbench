@@ -1,6 +1,13 @@
 package org.pmiops.workbench.cdr;
 
 import com.google.common.cache.LoadingCache;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import org.apache.log4j.Logger;
+import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -22,12 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -40,11 +41,9 @@ import java.util.concurrent.ExecutionException;
  * on the context of the current request. Applies to the model and DAO objects within this package.
  */
 public class CdrDbConfig {
+  private static final Logger log = Logger.getLogger(CdrDbConfig.class);
 
-  private static final String DB_DRIVER_CLASS_NAME_KEY = "spring.datasource.driver-class-name";
-  private static final String DB_URL_KEY = "spring.datasource.url";
-  private static final String DB_USER_KEY = "spring.datasource.username";
-  private static final String DB_PASSWORD_KEY = "spring.datasource.password";
+  private static final String DB_USER_KEY = "workbench.datasource.username";
   private static final String WORKBENCH_DB_USER = "workbench";
 
   @Service
@@ -56,13 +55,12 @@ public class CdrDbConfig {
 
     @Autowired
     public CdrDataSource(CdrVersionDao cdrVersionDao,
-                         @Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
+        @Qualifier("poolConfiguration") PoolConfiguration poolConfiguration,
+        @Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
       WorkbenchConfig workbenchConfig = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
-      Map<String, String> envVariables = System.getenv();
-      String dbDriverClassName = envVariables.get(DB_DRIVER_CLASS_NAME_KEY);
-      String dbUser = envVariables.get(DB_USER_KEY);
-      String dbPassword = envVariables.get(DB_PASSWORD_KEY);
-      String originalDbUrl = envVariables.get(DB_URL_KEY);
+      String dbUser = poolConfiguration.getUsername();
+      String dbPassword = poolConfiguration.getPassword();
+      String originalDbUrl = poolConfiguration.getUrl();
       boolean isWorkbenchDbUser = isWorkbenchDbUser(dbUser);
 
       // Build a map of CDR version ID -> DataSource for use later, based on all the entries in the
@@ -81,13 +79,36 @@ public class CdrDbConfig {
         String dbName = isWorkbenchDbUser ? cdrVersion.getCdrDbName() : cdrVersion.getPublicDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName;
-        DataSource dataSource = DataSourceBuilder
-            .create()
-            .driverClassName(dbDriverClassName)
+
+        DataSource dataSource =
+            DataSourceBuilder.create()
+            .driverClassName(poolConfiguration.getDriverClassName())
             .username(dbUser)
             .password(dbPassword)
             .url(dbUrl)
             .build();
+        if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+          org.apache.tomcat.jdbc.pool.DataSource tomcatSource =
+              (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
+          // A Tomcat DataSource implements PoolConfiguration, therefore these pool parameters can
+          // normally be populated via @ConfigurationProperties. Since we are directly initializing
+          // DataSources here without a hook to @ConfigurationProperties, we instead need to
+          // explicitly initialize the pool parameters here. We override the primary connection
+          // info, as the autowired PoolConfiguration is initialized from the same set of properties
+          // as the workbench DB.
+          poolConfiguration.setUsername(dbUser);
+          poolConfiguration.setPassword(dbPassword);
+          poolConfiguration.setUrl(dbUrl);
+          tomcatSource.setPoolProperties(poolConfiguration);
+
+          // The Spring autowiring is a bit of a maze here, log something concrete which will allow
+          // verification that the DB settings in application.properties are actually being loaded.
+          log.info("using Tomcat pool for CDR data source, with minIdle: " +
+              poolConfiguration.getMinIdle());
+        } else {
+          log.warn("not using Tomcat pool or initializing pool configuration; " +
+              "this should only happen within tests");
+        }
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
       }
       this.defaultCdrVersionId = cdrVersionId;
@@ -134,7 +155,7 @@ public class CdrDbConfig {
   }
 
   @Bean("cdrDataSource")
-  public DataSource getCdrDataSource(CdrDataSource cdrDataSource) {
+  public DataSource cdrDataSource(CdrDataSource cdrDataSource) {
     return cdrDataSource;
   }
 
@@ -151,7 +172,7 @@ public class CdrDbConfig {
   }
 
   @Bean(name = "cdrTransactionManager")
-  public PlatformTransactionManager barTransactionManager(
+  public PlatformTransactionManager cdrTransactionManager(
       @Qualifier("cdrEntityManagerFactory") EntityManagerFactory cdrEntityManagerFactory) {
     return new JpaTransactionManager(cdrEntityManagerFactory);
   }

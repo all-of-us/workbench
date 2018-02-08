@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,10 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.joda.time.DateTime;
 import org.pmiops.workbench.model.DataAccessLevel;
-
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "cdr_version")

@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -34,16 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.List;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortsController implements CohortsApiDelegate {
@@ -225,14 +217,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
-    // TODO: enforce access level.
     // This also enforces registered auth domain.
-    WorkspaceAccessLevel accessLevel;
-    try {
-      accessLevel = workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (Exception e) {
-      throw e;
-    }
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
     CdrVersionContext.setCdrVersion(cdrVersion);

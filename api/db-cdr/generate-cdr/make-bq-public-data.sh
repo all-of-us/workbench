@@ -52,7 +52,8 @@ then
   echo "$WORKBENCH_PROJECT.$WORKBENCH_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
-if [[ $datasets =~ .*$WORKBENCH_DATASET.* ]]; then
+re=\\b$WORKBENCH_DATASET\\b
+if [[ $datasets =~ $re ]]; then
   echo "$WORKBENCH_PROJECT.$WORKBENCH_DATASET exists. Good. Carrying on."
 else
   echo "$WORKBENCH_PROJECT.$WORKBENCH_DATASET does not exist. Please specify a valid project and dataset."
@@ -63,22 +64,22 @@ fi
 datasets=`bq --project=$PUBLIC_PROJECT ls`
 if [ -z "$datasets" ]
 then
-  echo "$WORKBENCH_PROJECT.$WORKBENCH_DATASET does not exist. Please specify a valid project and dataset."
+  echo "$PUBLIC_PROJECT does not exist. Please specify a valid PUBLIC project and dataset."
   exit 1
 fi
 
 # Make dataset for public cloudsql tables
 datasets=`bq --project=$PUBLIC_PROJECT ls`
-echo $datasets
-if [[ $datasets =~ .*$PUBLIC_DATASET.* ]]; then
+re=\\b$PUBLIC_DATASET\\b
+if [[ $datasets =~ $re ]]; then
   echo "$PUBLIC_DATASET exists"
 else
   echo "Creating $PUBLIC_DATASET"
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
-create_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain vocabulary )
-for t in "${create_tables[@]}"
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
+for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
   bq --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t

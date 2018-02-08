@@ -8,10 +8,9 @@
   <changeSet author="biopete" id="drop concept pk" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
-      <primaryKeyExists tableName="concept" schemaName="cdr"/>
+      <primaryKeyExists tableName="concept"/>
     </preConditions>
     <dropPrimaryKey
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
 
@@ -23,7 +22,6 @@
 
     <dropIndex
       indexName="idx_concept_name"
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
   <changeSet id="drop idx_concept_code" author="biopete" runAlways="true">
@@ -33,7 +31,6 @@
     </preConditions>
     <dropIndex
       indexName="idx_concept_code"
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
 
@@ -44,7 +41,6 @@
     </preConditions>
     <dropIndex
       indexName="idx_domain_id"
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
 
@@ -57,7 +53,6 @@
     </preConditions>
     <dropIndex
       indexName="idx_vocabulary_id"
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
 
@@ -68,7 +63,6 @@
     </preConditions>
     <dropIndex
       indexName="idx_standard_concept"
-      schemaName="cdr"
       tableName="concept"/>
   </changeSet>
 
@@ -93,7 +87,7 @@
     <preConditions onFail="MARK_RAN">
         <indexExists indexName="idx_concept_1"/>
     </preConditions>
-    <dropIndex tableName="concept_relationship" indexName="idx_concept_1" schemaName="cdr"/>
+    <dropIndex tableName="concept_relationship" indexName="idx_concept_1"/>
   </changeSet>
 
   <changeSet id="drop idx_concept_2" author="biopete" runAlways="true">
@@ -104,7 +98,7 @@
     <dropIndex
       tableName="concept_relationship"
       indexName="idx_concept_2"
-      schemaName="cdr"/>
+    />
   </changeSet>
 
   <changeSet id="drop idx_relationship_id" author="biopete" runAlways="true">
@@ -115,16 +109,15 @@
     <dropIndex
       tableName="concept_relationship"
       indexName="idx_relationship_id"
-      schemaName="cdr"/>
+    />
   </changeSet>
 
   <changeSet author="biopete" id="drop concept_relationship pk" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
-      <primaryKeyExists tableName="concept_relationship" schemaName="cdr"/>
+      <primaryKeyExists tableName="concept_relationship"/>
     </preConditions>
     <dropPrimaryKey
-      schemaName="cdr"
       tableName="concept_relationship"/>
   </changeSet>
 

@@ -6,15 +6,15 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="biopete" id="changelog-4">
-
+    <validCheckSum>ANY</validCheckSum>
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_name_index
       (concept_name);
     </sql>
 
     <sql dbms="mysql">
-      ALTER TABLE cdr.concept
+      ALTER TABLE concept
       ADD FULLTEXT INDEX concept_code_index
       (concept_code);
     </sql>
