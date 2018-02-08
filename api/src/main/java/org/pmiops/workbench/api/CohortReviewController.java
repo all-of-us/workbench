@@ -4,19 +4,6 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -30,27 +17,25 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CohortSummaryListResponse;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.ModifyCohortStatusRequest;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -223,6 +208,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                       Long cdrVersionId,
                                                                       String domain) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
+    }
+
+    @Override
+    public ResponseEntity<ParticipantCohortAnnotation> getParticipantCohortAnnotation(String workspaceNamespace,
+                                                                                      String workspaceId,
+                                                                                      Long cohortReviewId,
+                                                                                      Long participantId,
+                                                                                      Long annotationId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
 
     @Override
