@@ -63,6 +63,14 @@ def dev_up(*args)
   run_api(account)
 end
 
+Common.register_command({
+  :invocation => "dev-up",
+  :description => "Brings up the development environment, including db migrations and config " \
+     "update. (You can use run-api instead if database and config are up-to-date.)",
+  :fn => lambda { |*args| dev_up(*args) }
+})
+
+
 def run_api(account)
   common = Common.new
   # TODO(dmohs): This can be simplified now that we are using a shared service account.
@@ -83,10 +91,24 @@ def run_public_api_and_db()
   common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
 end
 
+Common.register_command({
+  :invocation => "run-public-api",
+  :description => "Runs the public api server (assumes database is up-to-date.)",
+  :fn => lambda { |*args| run_public_api_and_db() }
+})
+
+
 def clean()
   common = Common.new
   common.run_inline %W{docker-compose run --rm api ./gradlew clean}
 end
+
+Common.register_command({
+  :invocation => "clean",
+  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
+  :fn => lambda { |*args| clean(*args) }
+})
+
 
 def run_api_and_db(*args)
   common = Common.new
@@ -99,15 +121,37 @@ def run_api_and_db(*args)
   run_api(account)
 end
 
+Common.register_command({
+  :invocation => "run-api",
+  :description => "Runs the api server (assumes database and config are already up-to-date.)",
+  :fn => lambda { |*args| run_api_and_db(*args) }
+})
+
+
 def validate_swagger(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle validateSwagger} + args
 end
 
+Common.register_command({
+  :invocation => "validate-swagger",
+  :description => "Validate swagger definition files",
+  :fn => lambda { |*args| validate_swagger("validate-swagger", args) }
+})
+
+
 def run_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Common.new.run_inline %W{gradle test} + args
 end
+
+Common.register_command({
+  :invocation => "test-api",
+  :description => "Runs API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
+  :fn => lambda { |*args| run_api_tests("test-api", args) }
+})
+
 
 def run_public_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
@@ -116,10 +160,26 @@ def run_public_api_tests(cmd_name, args)
   end
 end
 
+Common.register_command({
+  :invocation => "test-public-api",
+  :description => "Runs public API tests. To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
+  :fn => lambda { |*args| run_public_api_tests("test-public-api", args) }
+})
+
+
 def run_all_tests(cmd_name, args)
   run_api_tests(cmd_name, args)
   run_public_api_tests(cmd_name, args)
 end
+
+Common.register_command({
+  :invocation => "test",
+  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
+      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
+  :fn => lambda { |*args| run_all_tests("test", args) }
+})
+
 
 def run_integration_tests(*args)
   common = Common.new
@@ -130,6 +190,13 @@ def run_integration_tests(*args)
   end
 end
 
+Common.register_command({
+  :invocation => "integration",
+  :description => "Runs integration tests.",
+  :fn => lambda { |*args| run_integration_tests(*args) }
+})
+
+
 def run_bigquery_tests(*args)
   common = Common.new
 
@@ -138,6 +205,13 @@ def run_bigquery_tests(*args)
     common.run_inline %W{docker-compose run --rm api ./gradlew bigquerytest} + args
   end
 end
+
+Common.register_command({
+  :invocation => "bigquerytest",
+  :description => "Runs bigquerytest tests.",
+  :fn => lambda { |*args| run_bigquery_tests(*args) }
+})
+
 
 def run_gradle(cmd_name, args)
   ensure_docker cmd_name, args
@@ -151,12 +225,26 @@ def run_gradle(cmd_name, args)
   end
 end
 
+Common.register_command({
+  :invocation => "gradle",
+  :description => "Runs gradle inside the API docker container with the given arguments.",
+  :fn => lambda { |*args| run_gradle("gradle", args) }
+})
+
+
 def connect_to_db(*args)
   common = Common.new
 
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
   common.run_inline %W{docker-compose exec db sh -c #{cmd}}
 end
+
+Common.register_command({
+  :invocation => "connect-to-db",
+  :description => "Connect to the running database via mysql.",
+  :fn => lambda { |*args| connect_to_db(*args) }
+})
+
 
 def docker_clean(*args)
   common = Common.new
@@ -168,11 +256,27 @@ def docker_clean(*args)
   common.run_inline %W{docker-compose down --volumes}
 end
 
+Common.register_command({
+  :invocation => "docker-clean",
+  :description => \
+    "Removes docker containers and volumes, allowing the next `dev-up` to" \
+    " start from scratch (e.g., the database will be re-created). Includes ALL" \
+    " docker images, not just for the API.",
+  :fn => lambda { |*args| docker_clean(*args) }
+})
+
 def rebuild_image(*args)
   common = Common.new
 
   common.run_inline %W{docker-compose build}
 end
+
+Common.register_command({
+  :invocation => "rebuild-image",
+  :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
+  :fn => lambda { |*args| rebuild_image(*args) }
+})
+
 
 def get_service_account_creds_file(project, account, creds_file)
   common = Common.new
@@ -306,6 +410,13 @@ def register_service_account(*args)
   end
 end
 
+Common.register_command({
+  :invocation => "register-service-account",
+  :description => "Registers a service account with Firecloud; do this once per account we use.",
+  :fn => lambda { |*args| register_service_account(*args) }
+})
+
+
 def drop_cloud_db(*args)
   GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
     puts "Dropping database..."
@@ -316,6 +427,12 @@ def drop_cloud_db(*args)
         to_redact=pw)
   end
 end
+
+Common.register_command({
+  :invocation => "drop-cloud-db",
+  :description => "Drops the Cloud SQL database for the specified project",
+  :fn => lambda { |*args| drop_cloud_db(*args) }
+})
 
 def drop_cloud_cdr(*args)
   GcloudContext.new("drop-cloud-cdr", args, true).run do |ctx|
@@ -328,6 +445,13 @@ def drop_cloud_cdr(*args)
   end
 end
 
+Common.register_command({
+  :invocation => "drop-cloud-cdr",
+  :description => "Drops the cdr schema of Cloud SQL database for the specified project",
+  :fn => lambda { |*args| drop_cloud_cdr(*args) }
+})
+
+
 def run_local_all_migrations(*args)
   common = Common.new
 
@@ -337,6 +461,13 @@ def run_local_all_migrations(*args)
   common.run_inline %W{docker-compose run db-data-migration}
 end
 
+Common.register_command({
+  :invocation => "run-local-all-migrations",
+  :description => "Runs local data/schema migrations for cdr/workbench schemas.",
+  :fn => lambda { |*args| run_local_all_migrations(*args) }
+})
+
+
 def run_local_data_migrations(*args)
   common = Common.new
 
@@ -344,36 +475,89 @@ def run_local_data_migrations(*args)
   common.run_inline %W{docker-compose run db-data-migration}
 end
 
+Common.register_command({
+  :invocation => "run-local-data-migrations",
+  :description => "Runs local data migrations for cdr/workbench schemas.",
+  :fn => lambda { |*args| run_local_data_migrations(*args) }
+})
+
+
 def run_local_bigdata_migrations(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
 end
+
+Common.register_command({
+  :invocation => "run-local-bigdata-migrations",
+  :description => "Runs big data migrations for cdr schemas.",
+  :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
+})
+
 
 def generate_cdr_counts(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
 end
 
+Common.register_command({
+  :invocation => "generate-cdr-counts",
+  :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
+--public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
+  :fn => lambda { |*args| generate_cdr_counts(*args) }
+})
+
+
 def generate_local_cdr_db(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
 end
+
+Common.register_command({
+  :invocation => "generate-local-cdr-db",
+  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
+Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
+  :fn => lambda { |*args| generate_local_cdr_db(*args) }
+})
+
 
 def generate_local_count_dbs(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
 end
 
+Common.register_command({
+  :invocation => "generate-local-count-dbs",
+  :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
+Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
+  :fn => lambda { |*args| generate_local_count_dbs(*args) }
+})
+
+
 def mysqldump_db(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-mysqldump-db} + args
 end
 
+Common.register_command({
+  :invocation => "mysqldump-db",
+  :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
+Dumps the local mysql db and uploads the .sql file to bucket",
+  :fn => lambda { |*args| mysqldump_db(*args) }
+})
+
+
 def run_drop_cdr_db(*args)
   common = Common.new
-
   common.run_inline %W{docker-compose run drop-cdr-db}
 end
+
+Common.register_command({
+  :invocation => "run-drop-cdr-db",
+  :description => "Drops the cdr schema of SQL database for the specified project.",
+  :fn => lambda { |*args| run_drop_cdr_db(*args) }
+})
+
 
 def run_cloud_data_migrations(cmd_name, args)
   ensure_docker cmd_name, args
@@ -382,6 +566,13 @@ def run_cloud_data_migrations(cmd_name, args)
     migrate_workbench_data
   end
 end
+
+Common.register_command({
+  :invocation => "run-cloud-data-migrations",
+  :description => "Runs data migrations in the cdr and workbench schemas on the Cloud SQL database for the specified project.",
+  :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
+})
+
 
 def do_create_db_creds(project, account, creds_file)
   puts "Enter the root DB user password:"
@@ -435,6 +626,13 @@ def create_db_creds(*args)
   end
 end
 
+Common.register_command({
+  :invocation => "create-db-creds",
+  :description => "Creates database credentials in a file in GCS; accepts project and account args",
+  :fn => lambda { |*args| create_db_creds(*args) }
+})
+
+
 def update_user_registered_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -479,6 +677,14 @@ def update_user_registered_status(cmd_name, args)
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 end
+
+Common.register_command({
+  :invocation => "update-user-registered-status",
+  :description => "Adds or removes a specified user from the registered access domain.\n" \
+                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+  :fn => lambda { |*args| update_user_registered_status("update_user_registered_status", args) }
+})
+
 
 # Run commands with various gcloud setup/teardown: authorization and,
 # optionally, a CloudSQL proxy.
@@ -595,6 +801,13 @@ class SetAuthority < GcloudContext
   end
 end
 
+Common.register_command({
+  :invocation => "set-authority",
+  :description => "Set user authorities (permissions). See set-authority --help.",
+  :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
+})
+
+
 # The test creds are always left in api/sa-key.json. This simply adds validation
 # that the command is only run for the test project, and logs the path of
 # the file written.
@@ -614,180 +827,61 @@ class GetTestServiceAccountCreds < GcloudContext
 end
 
 Common.register_command({
-  :invocation => "dev-up",
-  :description => "Brings up the development environment, including db migrations and config " \
-     "update. (You can use run-api instead if database and config are up-to-date.)",
-  :fn => lambda { |*args| dev_up(*args) }
-})
-
-Common.register_command({
-  :invocation => "run-api",
-  :description => "Runs the api server (assumes database and config are already up-to-date.)",
-  :fn => lambda { |*args| run_api_and_db(*args) }
-})
-
-Common.register_command({
-  :invocation => "run-public-api",
-  :description => "Runs the public api server (assumes database is up-to-date.)",
-  :fn => lambda { |*args| run_public_api_and_db() }
-})
-
-Common.register_command({
-  :invocation => "clean",
-  :description => "Runs gradle clean. Occasionally necessary before generating code from Swagger.",
-  :fn => lambda { |*args| clean(*args) }
-})
-
-Common.register_command({
   :invocation => "get-service-creds",
   :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
   :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
 })
 
-Common.register_command({
-  :invocation => "validate-swagger",
-  :description => "Validate swagger definition files",
-  :fn => lambda { |*args| validate_swagger("validate-swagger", args) }
-})
 
-Common.register_command({
-  :invocation => "test",
-  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => lambda { |*args| run_all_tests("test", args) }
-})
 
-Common.register_command({
-  :invocation => "test-api",
-  :description => "Runs API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
-  :fn => lambda { |*args| run_api_tests("test-api", args) }
-})
 
-Common.register_command({
-  :invocation => "test-public-api",
-  :description => "Runs public API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
-  :fn => lambda { |*args| run_public_api_tests("test-public-api", args) }
-})
 
-Common.register_command({
-  :invocation => "integration",
-  :description => "Runs integration tests.",
-  :fn => lambda { |*args| run_integration_tests(*args) }
-})
 
-Common.register_command({
-  :invocation => "bigquerytest",
-  :description => "Runs bigquerytest tests.",
-  :fn => lambda { |*args| run_bigquery_tests(*args) }
-})
 
-Common.register_command({
-  :invocation => "gradle",
-  :description => "Runs gradle inside the API docker container with the given arguments.",
-  :fn => lambda { |*args| run_gradle("gradle", args) }
-})
 
-Common.register_command({
-  :invocation => "connect-to-db",
-  :description => "Connect to the running database via mysql.",
-  :fn => lambda { |*args| connect_to_db(*args) }
-})
 
-Common.register_command({
-  :invocation => "docker-clean",
-  :description => \
-    "Removes docker containers and volumes, allowing the next `dev-up` to" \
-    " start from scratch (e.g., the database will be re-created). Includes ALL" \
-    " docker images, not just for the API.",
-  :fn => lambda { |*args| docker_clean(*args) }
-})
 
-Common.register_command({
-  :invocation => "rebuild-image",
-  :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => lambda { |*args| rebuild_image(*args) }
-})
 
-Common.register_command({
-  :invocation => "create-db-creds",
-  :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => lambda { |*args| create_db_creds(*args) }
-})
 
-Common.register_command({
-  :invocation => "update-user-registered-status",
-  :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
-  :fn => lambda { |*args| update_user_registered_status("update_user_registered_status", args) }
-})
 
-Common.register_command({
-  :invocation => "drop-cloud-db",
-  :description => "Drops the Cloud SQL database for the specified project",
-  :fn => lambda { |*args| drop_cloud_db(*args) }
-})
 
-Common.register_command({
-  :invocation => "drop-cloud-cdr",
-  :description => "Drops the cdr schema of Cloud SQL database for the specified project",
-  :fn => lambda { |*args| drop_cloud_cdr(*args) }
-})
 
-Common.register_command({
-  :invocation => "run-local-all-migrations",
-  :description => "Runs local data/schema migrations for cdr/workbench schemas.",
-  :fn => lambda { |*args| run_local_all_migrations(*args) }
-})
 
-Common.register_command({
-  :invocation => "run-local-data-migrations",
-  :description => "Runs local data migrations for cdr/workbench schemas.",
-  :fn => lambda { |*args| run_local_data_migrations(*args) }
-})
-Common.register_command({
-  :invocation => "run-local-bigdata-migrations",
-  :description => "Runs big data migrations for cdr schemas.",
-  :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
-})
-Common.register_command({
-  :invocation => "generate-cdr-counts",
-  :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
---public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
-  :fn => lambda { |*args| generate_cdr_counts(*args) }
-})
-Common.register_command({
-  :invocation => "generate-local-cdr-db",
-  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
-  :fn => lambda { |*args| generate_local_cdr_db(*args) }
-})
-Common.register_command({
-                            :invocation => "generate-local-count-dbs",
-                            :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
-                            :fn => lambda { |*args| generate_local_count_dbs(*args) }
-                        })
-Common.register_command({
-                            :invocation => "mysqldump-db",
-                            :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
-Dumps the local mysql db and uploads the .sql file to bucket",
-                            :fn => lambda { |*args| mysqldump_db(*args) }
-                        })
 
-Common.register_command({
-  :invocation => "run-drop-cdr-db",
-  :description => "Drops the cdr schema of SQL database for the specified project.",
-  :fn => lambda { |*args| run_drop_cdr_db(*args) }
-})
 
-Common.register_command({
-  :invocation => "run-cloud-data-migrations",
-  :description => "Runs data migrations in the cdr and workbench schemas on the Cloud SQL database for the specified project.",
-  :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
-})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def connect_to_cloud_db(cmd_name, *args)
   ensure_docker cmd_name, args
@@ -812,17 +906,6 @@ Common.register_command({
   :fn => lambda { |*args| connect_to_cloud_db("connect-to-cloud-db", *args) }
 })
 
-Common.register_command({
-  :invocation => "register-service-account",
-  :description => "Registers a service account with Firecloud; do this once per account we use.",
-  :fn => lambda { |*args| register_service_account(*args) }
-})
-
-Common.register_command({
-  :invocation => "set-authority",
-  :description => "Set user authorities (permissions). See set-authority --help.",
-  :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
-})
 
 def deploy(cmd_name, args, with_cron)
   common = Common.new
@@ -872,6 +955,13 @@ def deploy_api(cmd_name, args)
   deploy(cmd_name, args, with_cron=true)
 end
 
+Common.register_command({
+  :invocation => "deploy-api",
+  :description => "Deploys the API server to the specified cloud project.",
+  :fn => lambda { |*args| deploy_api("deploy-api", args) }
+})
+
+
 def deploy_public_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
@@ -880,12 +970,6 @@ def deploy_public_api(cmd_name, args)
     deploy(cmd_name, args, with_cron=false)
   end
 end
-
-Common.register_command({
-  :invocation => "deploy-api",
-  :description => "Deploys the API server to the specified cloud project.",
-  :fn => lambda { |*args| deploy_api("deploy-api", args) }
-})
 
 Common.register_command({
   :invocation => "deploy-public-api",
@@ -1031,28 +1115,17 @@ def circle_deploy(cmd_name, args)
   deploy_public_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
 end
 
-def run_cloud_migrations(cmd_name, args)
-  ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_database }
-end
-
-def run_cloud_cdr_migrations(cmd_name, args)
-  ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_cdr_database }
-end
-
-def update_cloud_config(cmd_name, args)
-  ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
-    load_config(ctx.project)
-  end
-end
-
 Common.register_command({
   :invocation => "circle-deploy",
   :description => "Deploys the API server from within the Circle CI envronment.",
   :fn => lambda { |*args| circle_deploy("circle-deploy", args) }
 })
+
+
+def run_cloud_migrations(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_database }
+end
 
 Common.register_command({
   :invocation => "run-cloud-migrations",
@@ -1060,11 +1133,25 @@ Common.register_command({
   :fn => lambda { |*args| run_cloud_migrations("run-cloud-migrations", args) }
 })
 
+
+def run_cloud_cdr_migrations(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_cdr_database }
+end
+
 Common.register_command({
   :invocation => "run-cloud-cdr-migrations",
   :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
   :fn => lambda { |*args| run_cloud_cdr_migrations("run-cloud-cdr-migrations", args) }
 })
+
+
+def update_cloud_config(cmd_name, args)
+  ensure_docker cmd_name, args
+  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
+    load_config(ctx.project)
+  end
+end
 
 Common.register_command({
   :invocation => "update-cloud-config",

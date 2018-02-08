@@ -19,17 +19,26 @@ end
 
 def install_dependencies()
   common = Common.new
-
   common.run_inline %W{docker-compose run --rm ui yarn install}
 end
 
+Common.register_command({
+  :invocation => "install-dependencies",
+  :description => "Installs dependencies via yarn.",
+  :fn => Proc.new { |*args| install_dependencies(*args) }
+})
+
 def swagger_regen()
   common = Common.new
-
   Workbench::Swagger.download_swagger_codegen_cli
-
   common.run_inline %W{docker-compose run --rm ui yarn run codegen}
 end
+
+Common.register_command({
+  :invocation => "swagger-regen",
+  :description => "Regenerates API client libraries from Swagger definitions.",
+  :fn => Proc.new { |*args| swagger_regen(*args) }
+})
 
 class DevUpOptions
   ENV_CHOICES = %W{local test prod}
@@ -101,6 +110,11 @@ class DeployUI
   end
 end
 
+Common.register_command({
+  :invocation => "deploy-ui",
+  :description => "Deploys the UI to the specified cloud project.",
+  :fn => lambda { |*args| DeployUI.new("deploy-ui", args).run }
+})
 
 def dev_up(*args)
   common = Common.new
@@ -121,9 +135,21 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run --rm --service-ports ui}
 end
 
+Common.register_command({
+  :invocation => "dev-up",
+  :description => "Brings up the development environment.",
+  :fn => Proc.new { |*args| dev_up(*args) }
+})
+
 def run_linter()
   Common.new.run_inline %W{docker-compose run --rm ui yarn run lint}
 end
+
+Common.register_command({
+  :invocation => "lint",
+  :description => "Runs linter.",
+  :fn => Proc.new { |*args| run_linter(*args) }
+})
 
 def rebuild_image()
   common = Common.new
@@ -132,43 +158,7 @@ def rebuild_image()
 end
 
 Common.register_command({
-  :invocation => "dev-up",
-  :description => "Brings up the development environment.",
-  :fn => Proc.new { |*args| dev_up(*args) }
-})
-
-Common.register_command({
-  :invocation => "install-dependencies",
-  :description => "Installs dependencies via yarn.",
-  :fn => Proc.new { |*args| install_dependencies(*args) }
-})
-
-Common.register_command({
-  :invocation => "swagger-regen",
-  :description => "Regenerates API client libraries from Swagger definitions.",
-  :fn => Proc.new { |*args| swagger_regen(*args) }
-})
-
-Common.register_command({
-  :invocation => "lint",
-  :description => "Runs linter.",
-  :fn => Proc.new { |*args| run_linter(*args) }
-})
-
-Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
   :fn => Proc.new { |*args| rebuild_image(*args) }
-})
-
-Common.register_command({
-  :invocation => "clean-git-hooks",
-  :description => "Removes symlinks created by shared-git-hooks. Necessary before re-installing.",
-  :fn => Proc.new { |*args| clean-git-hooks(*args) }
-})
-
-Common.register_command({
-  :invocation => "deploy-ui",
-  :description => "Deploys the UI to the specified cloud project.",
-  :fn => lambda { |*args| DeployUI.new("deploy-ui", args).run }
 })
