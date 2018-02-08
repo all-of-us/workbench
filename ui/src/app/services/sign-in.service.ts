@@ -39,6 +39,7 @@ export class SignInService {
   // Expose "current user details" as an Observable
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
+  private userLastActivityTime: Date = new Date();
   // TODO(calbach): Move into server config?
   public clientId = '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com';
   constructor(private zone: NgZone, serverConfigService: ServerConfigService) {
@@ -84,7 +85,16 @@ export class SignInService {
       gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
         const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
         const details = this.extractSignInDetails(currentUser);
-
+        if (gapi.auth2.getAuthInstance().isSignedIn.get() == true) {
+          const lastTokenRefreshTime = new Date();
+          lastTokenRefreshTime.setMinutes(lastTokenRefreshTime.getMinutes() - 53);
+          if (lastTokenRefreshTime > this.userLastActivityTime) {
+            console.log('No activity for the last 55 minutes logging out now!!');
+            this.signOut();
+            return;
+          }
+          this.currentAccessToken = details.authResponse['access_token'];
+        }
         // Without this, Angular views won't "notice" the externally-triggered
         // event, though the Angular models will update... so the change
         // won't propagate to UI automatically. Calling `zone.run`
@@ -93,6 +103,10 @@ export class SignInService {
         this.zone.run(() => user.next(details));
       });
     });
+  }
+
+  public setUserLastActivityTime(): void {
+    this.userLastActivityTime = new Date();
   }
 
   private subscribeToUser(): void {
