@@ -11,7 +11,7 @@ public interface CohortAnnotationDefinitionDao extends JpaRepository<CohortAnnot
 
     CohortAnnotationDefinition findByCohortIdAndColumnName(@Param("cohortId") long cohortId, @Param("ColumnName") String ColumnName);
 
-    List<CohortAnnotationDefinition> findByCohortId( @Param("cohortId") long cohortId);
+    List<CohortAnnotationDefinition> findByCohortIdOrderByEnumValuesAsc( @Param("cohortId") long cohortId);
 
     CohortAnnotationDefinition findByCohortIdAndCohortAnnotationDefinitionId( @Param("cohortId") long cohortId, @Param("cohortAnnotationDefinitionId") long cohortAnnotationDefinitionId);
 }
