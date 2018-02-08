@@ -139,9 +139,16 @@ def run_bigquery_tests(*args)
   end
 end
 
-def run_gradle(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew} + args
+def run_gradle(cmd_name, args)
+  ensure_docker cmd_name, args
+  begin
+    Common.new.run_inline %W{gradle} + args
+  ensure
+    if $! && $!.status != 0
+      Common.new.error "Command exited with non-zero status"
+      exit 1
+    end
+  end
 end
 
 def connect_to_db(*args)
@@ -679,7 +686,7 @@ Common.register_command({
 Common.register_command({
   :invocation => "gradle",
   :description => "Runs gradle inside the API docker container with the given arguments.",
-  :fn => lambda { |*args| run_gradle(*args) }
+  :fn => lambda { |*args| run_gradle("gradle", args) }
 })
 
 Common.register_command({
