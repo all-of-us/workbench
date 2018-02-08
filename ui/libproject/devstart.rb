@@ -104,8 +104,12 @@ class DeployUI
     add_options
     @parser.parse @args
     validate_options
-    # TODO(dmohs): Select environment from project.
-    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=stable}
+    environment_names = {
+      "all-of-us-workbench-test" => "test",
+      "aou-res-workbench-stable" => "stable",
+    }
+    environment_name = environment_names[@opts.project]
+    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=#{environment_name}}
     common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
                          --version #{@opts.version} --#{@opts.promote}}
   end
