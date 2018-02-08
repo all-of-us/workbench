@@ -24,6 +24,12 @@ def swagger_regen()
   common.status "Publish a version with `git tag pyclient-vN-N-rcN` and `git push --tags`."
 end
 
+Common.register_command({
+  :invocation => "swagger-regen",
+  :description => "rebuilds the Swagger-generated client libraries",
+  :fn => Proc.new { |*args| swagger_regen(*args) }
+})
+
 def install_py_requirements()
   py_root = File.join(Workbench::WORKBENCH_ROOT, 'client', 'py')
 
@@ -54,24 +60,18 @@ def pylint()
       #{py_module_root}} + support_py_files
 end
 
+Common.register_command({
+  :invocation => "pylint",
+  :description => "Lint Python",
+  :fn => Proc.new { |*args| pylint(*args) }
+})
+
 def test()
   install_py_requirements
 
   common = Common.new
   common.run_inline [File.join(Workbench::WORKBENCH_ROOT, 'client', 'py', 'run_tests.py')]
 end
-
-Common.register_command({
-  :invocation => "swagger-regen",
-  :description => "rebuilds the Swagger-generated client libraries",
-  :fn => Proc.new { |*args| swagger_regen(*args) }
-})
-
-Common.register_command({
-  :invocation => "pylint",
-  :description => "Lint Python",
-  :fn => Proc.new { |*args| pylint(*args) }
-})
 
 Common.register_command({
   :invocation => "test",
