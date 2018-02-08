@@ -1,6 +1,7 @@
+/*Intercepts all HTTP request */
 import {Injectable,NgZone} from '@angular/core';
 import {ConnectionBackend, Http, Response, Request, RequestOptions,
-  RequestOptionsArgs} from "@angular/http";
+  RequestOptionsArgs} from '@angular/http';
 import {environment} from '../../environments/environment';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {overriddenUrlKey} from 'app/views/app/component';
