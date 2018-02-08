@@ -40,11 +40,8 @@ public class MailChimpServiceImpl implements MailChimpService {
   @Override
   public String addUserContactEmail(String contactEmail) {
     String userId;
-    if (listId == null) {
-      listId = cloudStorageServiceProvider.get().readMailChimpListId();
-    }
     Create createRequest = new Create(
-        listId,
+        getListId(),
         contactEmail);
     createRequest.status = MailChimpService.MAILCHIMP_PENDING;
     try {
@@ -61,7 +58,7 @@ public class MailChimpServiceImpl implements MailChimpService {
     Map<String, Object> mailchimpResponse;
     try {
       mailchimpResponse = getClient().execute(
-          new GetMemberMethod(listId,
+          new GetMemberMethod(getListId(),
           contactEmail)).mapping;
     } catch (MailchimpException e) {
       if (e.code == 404) {
@@ -75,12 +72,16 @@ public class MailChimpServiceImpl implements MailChimpService {
     return mailchimpResponse.get(MailChimpService.MAILCHIMP_KEY_STATUS).toString();
   }
 
+  private String getListId() {
+    if (listId == null) {
+      listId = cloudStorageServiceProvider.get().readMailChimpListId();
+    }
+    return listId;
+  }
+
   MailchimpClient getClient() {
     if (apiKey == null) {
       apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
-    }
-    if (listId == null) {
-      listId = cloudStorageServiceProvider.get().readMailChimpListId();
     }
     return new MailchimpClient(apiKey);
   }
