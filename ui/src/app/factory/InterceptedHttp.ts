@@ -1,6 +1,6 @@
 /*Intercepts all HTTP request */
 
-import {Injectable,NgZone} from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import {ConnectionBackend, Http, Response, Request, RequestOptions,
   RequestOptionsArgs} from '@angular/http';
 import {environment} from '../../environments/environment';
