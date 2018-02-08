@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,9 +56,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 @Override
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
                     List<String> enumValues = cohortAnnotationDefinition.getEnumValues();
-                    List<CohortAnnotationEnumValue> enumValuesList = (enumValues == null) ? null :
-                            enumValues.stream().map(s -> new CohortAnnotationEnumValue().name(s))
-                                    .collect(Collectors.toList());
+                    SortedSet<CohortAnnotationEnumValue> enumValuesList = (enumValues == null) ? null :
+                            new TreeSet(enumValues.stream().map(s -> new CohortAnnotationEnumValue().name(s))
+                                    .collect(Collectors.toList()));
                     return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .columnName(cohortAnnotationDefinition.getColumnName())
@@ -154,7 +156,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
         List<org.pmiops.workbench.db.model.CohortAnnotationDefinition> dbList =
-                cohortAnnotationDefinitionDao.findByCohortIdOrderByEnumValuesAsc(cohortId);
+                cohortAnnotationDefinitionDao.findByCohortId(cohortId);
 
         CohortAnnotationDefinitionListResponse responseList = new CohortAnnotationDefinitionListResponse();
         responseList.setItems(dbList.stream().map(TO_CLIENT_COHORT_ANNOTATION_DEFINITION).collect(Collectors.toList()));

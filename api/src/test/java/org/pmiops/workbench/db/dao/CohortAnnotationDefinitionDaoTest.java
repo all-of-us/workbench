@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -50,8 +51,10 @@ public class CohortAnnotationDefinitionDaoTest {
     @Test
     public void save_WithEnumValues() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue().name("name");
-        cohortAnnotationDefinition.setEnumValues(Arrays.asList(enumValue));
+        CohortAnnotationEnumValue enumValue1 = new CohortAnnotationEnumValue().name("z");
+        CohortAnnotationEnumValue enumValue2 = new CohortAnnotationEnumValue().name("r");
+        CohortAnnotationEnumValue enumValue3 = new CohortAnnotationEnumValue().name("a");
+        cohortAnnotationDefinition.setEnumValues(new TreeSet<>(Arrays.asList(enumValue1, enumValue2, enumValue3)));
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
@@ -66,6 +69,10 @@ public class CohortAnnotationDefinitionDaoTest {
         expectedCount = new Integer("1");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+
+        List<CohortAnnotationDefinition> cad =
+                cohortAnnotationDefinitionDao.findByCohortId(cohortAnnotationDefinition.getCohortId());
+        assertEquals(cohortAnnotationDefinition, cad.get(0));
     }
 
     @Test
@@ -89,7 +96,7 @@ public class CohortAnnotationDefinitionDaoTest {
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         List<CohortAnnotationDefinition> expectedDBList =
-                cohortAnnotationDefinitionDao.findByCohortIdOrderByEnumValuesAsc(
+                cohortAnnotationDefinitionDao.findByCohortId(
                         cohortAnnotationDefinition.getCohortId());
 
         assertEquals(expectedDBList.get(0), cohortAnnotationDefinition);

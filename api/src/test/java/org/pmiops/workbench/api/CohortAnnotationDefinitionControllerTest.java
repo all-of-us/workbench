@@ -822,7 +822,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         when(cohortDao.findOne(cohortId)).thenReturn(cohort);
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
-        when(cohortAnnotationDefinitionDao.findByCohortIdOrderByEnumValuesAsc(cohortId)).thenReturn(new ArrayList<>());
+        when(cohortAnnotationDefinitionDao.findByCohortId(cohortId)).thenReturn(new ArrayList<>());
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(owner);
 
         cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
@@ -832,7 +832,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
         verify(cohortDao, times(1)).findOne(cohortId);
         verify(workspaceService, times(1)).getRequired(namespace, name);
-        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortIdOrderByEnumValuesAsc(cohortId);
+        verify(cohortAnnotationDefinitionDao, times(1)).findByCohortId(cohortId);
         verify(workspaceService).enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER);
 
         verifyNoMoreMockInteractions();

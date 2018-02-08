@@ -11,9 +11,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import java.util.List;
 import java.util.Objects;
+import java.util.SortedSet;
 
 @Entity
 @Table(name = "cohort_annotation_definition")
@@ -23,7 +24,7 @@ public class CohortAnnotationDefinition {
     private long cohortId;
     private String columnName;
     private AnnotationType annotationType;
-    private List<CohortAnnotationEnumValue> enumValues;
+    private SortedSet<CohortAnnotationEnumValue> enumValues;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,11 +85,12 @@ public class CohortAnnotationDefinition {
     }
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "cohortAnnotationDefinition", orphanRemoval = true, cascade = CascadeType.ALL)
-    public List<CohortAnnotationEnumValue> getEnumValues() {
+    @OrderBy("cohortAnnotationEnumValueId ASC")
+    public SortedSet<CohortAnnotationEnumValue> getEnumValues() {
         return enumValues;
     }
 
-    public void setEnumValues(List<CohortAnnotationEnumValue> enumValues) {
+    public void setEnumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
         this.enumValues = enumValues;
         if (enumValues != null) {
             for (CohortAnnotationEnumValue enumValue : enumValues) {
@@ -97,7 +99,7 @@ public class CohortAnnotationDefinition {
         }
     }
 
-    public CohortAnnotationDefinition enumValues(List<CohortAnnotationEnumValue> enumValues) {
+    public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
         this.enumValues = enumValues;
         if (enumValues != null) {
             for (CohortAnnotationEnumValue enumValue : this.enumValues) {
