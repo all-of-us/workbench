@@ -188,7 +188,7 @@ services:
             - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
           env_file:
             - db-cdr/vars.env
-  db-make-cloudsql:
+  db-cloudsql-import:
             build:
               context: ./src/dev/server
             user: ${UID}
@@ -199,7 +199,7 @@ services:
               - ~/.config:/.config:cached
               - ~/.gsutil:/.gsutil:cached
 
-            entrypoint: ["./generate-cdr/make-cloudsql.sh"]
+            entrypoint: ["./generate-cdr/cloudsql-import.sh"]
             environment:
               - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
             env_file:

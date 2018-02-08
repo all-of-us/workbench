@@ -277,8 +277,7 @@ Description of arguments for these scripts are as follows. See examples below.
 2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv and public20180206/*.csv  
 3. Note cdr-version can be ''  to make datasets named cdr public
 #### Generate local mysql databases -- cdr and public for data generated above
-`./project.rb generate-local-count-dbs --cdr-version 20180206 \
---bucket all-of-us-workbench-private-cloudsql`
+`./project.rb generate-local-count-dbs --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is 
 1. Local mysql database cdr20180206 fully populated with count data from cdr version 20180206
 2. Local mysql database public20180206 fully populated with count data from cdr version 20180206
@@ -291,7 +290,13 @@ Description of arguments for these scripts are as follows. See examples below.
 1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
 1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
 
-#### TODO import these dumps to cloudsql databases  
+#### Import a dump to cloudsql instance.
+`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchtest --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+##### Wait an hour or so for above to finish before running another import on same instance
+`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchtest --sql-dump-file public20180206.sql --bucket all-of-us-workbench-public-cloudsql`
+ 
+##### Result two hours later is
+1) cdr count databases are live in cloudsql instances 
 
 ###
 ## Cohort Builder

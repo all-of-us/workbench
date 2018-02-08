@@ -539,13 +539,13 @@ def mysqldump_db(*args)
   common.run_inline %W{docker-compose run db-mysqldump-db} + args
 end
 
+
 Common.register_command({
   :invocation => "mysqldump-db",
   :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
 Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => lambda { |*args| mysqldump_db(*args) }
 })
-
 
 def run_drop_cdr_db(*args)
   common = Common.new
@@ -852,6 +852,19 @@ Common.register_command({
 
 
 
+Common.register_command({
+                            :invocation => "cloudsql-import",
+                            :description => "cloudsql-import --account <SERVICE_ACCOUNT> --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
+Imports .sql file to cloudsql instance",
+                            :fn => lambda { |*args| cloudsql_import(*args) }
+                        })
+
+Common.register_command({
+  :invocation => "run-drop-cdr-db",
+  :description => "Drops the cdr schema of SQL database for the specified project.",
+  :fn => lambda { |*args| run_drop_cdr_db(*args) }
+})
+>>>>>>> cloudsql-import goal made
 
 
 
