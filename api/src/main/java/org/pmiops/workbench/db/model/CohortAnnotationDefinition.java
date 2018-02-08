@@ -90,10 +90,20 @@ public class CohortAnnotationDefinition {
 
     public void setEnumValues(Set<CohortAnnotationEnumValue> enumValues) {
         this.enumValues = enumValues;
+        if (enumValues != null) {
+            for (CohortAnnotationEnumValue enumValue : enumValues) {
+                enumValue.setCohortAnnotationDefinition(this);
+            }
+        }
     }
 
     public CohortAnnotationDefinition enumValues(Set<CohortAnnotationEnumValue> enumValues) {
         this.enumValues = enumValues;
+        if (enumValues != null) {
+            for (CohortAnnotationEnumValue enumValue : this.enumValues) {
+                enumValue.setCohortAnnotationDefinition(this);
+            }
+        }
         return this;
     }
 

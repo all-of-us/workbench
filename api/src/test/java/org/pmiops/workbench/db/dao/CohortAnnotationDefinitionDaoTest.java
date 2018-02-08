@@ -52,7 +52,7 @@ public class CohortAnnotationDefinitionDaoTest {
     public void save_WithEnumValues() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
         CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue().name("name").order(0);
-        cohortAnnotationDefinition.enumValues(new HashSet<>(Arrays.asList(enumValue)));
+        cohortAnnotationDefinition.setEnumValues(new HashSet<>(Arrays.asList(enumValue)));
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
@@ -62,8 +62,8 @@ public class CohortAnnotationDefinitionDaoTest {
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
 
-        sql = "select count(*) from cohort_annotation_enum_value where cohort_annotation_enum_value_id = ?";
-        sqlParams = new Object[]{ enumValue.getCohortAnnotationEnumValueId() };
+        sql = "select count(*) from cohort_annotation_enum_value where cohort_annotation_definition_id = ?";
+        sqlParams = new Object[]{ cohortAnnotationDefinition.getCohortAnnotationDefinitionId() };
         expectedCount = new Integer("1");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));

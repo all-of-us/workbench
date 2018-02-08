@@ -17,7 +17,6 @@ import java.util.Objects;
 public class CohortAnnotationEnumValue {
 
     private long cohortAnnotationEnumValueId;
-    private long cohortAnnotationDefinitionId;
     private String name;
     private int order;
     private CohortAnnotationDefinition cohortAnnotationDefinition;
@@ -76,26 +75,29 @@ public class CohortAnnotationEnumValue {
         this.cohortAnnotationDefinition = cohortAnnotationDefinition;
     }
 
+    public CohortAnnotationEnumValue cohortAnnotationDefinition(CohortAnnotationDefinition cohortAnnotationDefinition) {
+        this.cohortAnnotationDefinition = cohortAnnotationDefinition;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CohortAnnotationEnumValue enumValue = (CohortAnnotationEnumValue) o;
-        return cohortAnnotationDefinitionId == enumValue.cohortAnnotationDefinitionId &&
-                order == enumValue.order &&
+        return order == enumValue.order &&
                 Objects.equals(name, enumValue.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cohortAnnotationDefinitionId, name, order);
+        return Objects.hash(name, order);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("cohortAnnotationEnumValueId", cohortAnnotationEnumValueId)
-                .append("cohortAnnotationDefinitionId", cohortAnnotationDefinitionId)
                 .append("name", name)
                 .append("order", order)
                 .toString();

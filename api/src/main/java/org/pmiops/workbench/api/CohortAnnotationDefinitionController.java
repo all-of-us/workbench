@@ -40,11 +40,14 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             new Function<org.pmiops.workbench.db.model.CohortAnnotationDefinition, CohortAnnotationDefinition>() {
                 @Override
                 public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
+                    List<String> enumValues = cohortAnnotationDefinition.getEnumValues() == null ? null :
+                            cohortAnnotationDefinition.getEnumValues().stream().map(CohortAnnotationEnumValue::getName).collect(Collectors.toList());
                     return new org.pmiops.workbench.model.CohortAnnotationDefinition()
                             .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())
-                            .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+                            .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+                            .enumValues(enumValues);
                 }
             };
 
@@ -201,18 +204,12 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
     private org.pmiops.workbench.db.model.CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortId, Long annotationDefinitionId) {
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortAnnotationDefinitionDao.findOne(annotationDefinitionId);
+                cohortAnnotationDefinitionDao.findByCohortIdAndCohortAnnotationDefinitionId(cohortId, annotationDefinitionId);
 
         if (cohortAnnotationDefinition == null) {
             throw new NotFoundException(
                     String.format("Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: %s",
                             annotationDefinitionId));
-        }
-
-        if (cohortAnnotationDefinition.getCohortId() != cohortId) {
-            throw new NotFoundException(
-                    String.format("Not Found: Cohort Annotation Definition doesn't exist for cohortId: %s",
-                            cohortId));
         }
         return cohortAnnotationDefinition;
     }
