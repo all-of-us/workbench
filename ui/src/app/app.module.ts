@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
+import {AppRoutingModule} from './app-routing.module';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
@@ -32,7 +33,6 @@ import {WorkspaceComponent} from './views/workspace/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 /* Our Modules */
-import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
