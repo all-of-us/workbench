@@ -18,6 +18,7 @@ public class CohortAnnotationEnumValue implements Comparable {
 
     private long cohortAnnotationEnumValueId;
     private String name;
+    private int order;
     private CohortAnnotationDefinition cohortAnnotationDefinition;
 
     @Id
@@ -47,6 +48,20 @@ public class CohortAnnotationEnumValue implements Comparable {
 
     public CohortAnnotationEnumValue name(String name) {
         this.name = name;
+        return this;
+    }
+
+    @Column(name = "enum_order")
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public CohortAnnotationEnumValue order(int order) {
+        this.order = order;
         return this;
     }
 
@@ -88,8 +103,8 @@ public class CohortAnnotationEnumValue implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        Long thisLong = new Long(this.getCohortAnnotationEnumValueId());
-        Long otherLong = new Long(((CohortAnnotationEnumValue) o).getCohortAnnotationEnumValueId());
-        return thisLong.compareTo(otherLong);
+        Integer thisOrder = new Integer(this.getOrder());
+        Integer otherOrder = new Integer(((CohortAnnotationEnumValue) o).getOrder());
+        return thisOrder.compareTo(otherOrder);
     }
 }

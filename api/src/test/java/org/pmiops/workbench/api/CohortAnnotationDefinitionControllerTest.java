@@ -847,6 +847,7 @@ public class CohortAnnotationDefinitionControllerTest {
         request.setCohortId(cohortId);
         request.setColumnName(columnName);
         request.setAnnotationType(AnnotationType.STRING);
+        request.setEnumValues(new ArrayList<>());
         return request;
     }
 

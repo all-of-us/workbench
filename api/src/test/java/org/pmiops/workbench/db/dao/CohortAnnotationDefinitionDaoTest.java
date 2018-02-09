@@ -14,9 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -51,10 +49,12 @@ public class CohortAnnotationDefinitionDaoTest {
     @Test
     public void save_WithEnumValues() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-        CohortAnnotationEnumValue enumValue1 = new CohortAnnotationEnumValue().name("z");
-        CohortAnnotationEnumValue enumValue2 = new CohortAnnotationEnumValue().name("r");
-        CohortAnnotationEnumValue enumValue3 = new CohortAnnotationEnumValue().name("a");
-        cohortAnnotationDefinition.setEnumValues(new TreeSet<>(Arrays.asList(enumValue1, enumValue2, enumValue3)));
+        CohortAnnotationEnumValue enumValue1 = new CohortAnnotationEnumValue().name("z").order(0).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        CohortAnnotationEnumValue enumValue2 = new CohortAnnotationEnumValue().name("r").order(1).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        CohortAnnotationEnumValue enumValue3 = new CohortAnnotationEnumValue().name("a").order(2).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue1);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue2);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue3);
 
         cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
@@ -66,7 +66,7 @@ public class CohortAnnotationDefinitionDaoTest {
 
         sql = "select count(*) from cohort_annotation_enum_value where cohort_annotation_definition_id = ?";
         sqlParams = new Object[]{ cohortAnnotationDefinition.getCohortAnnotationDefinitionId() };
-        expectedCount = new Integer("1");
+        expectedCount = new Integer("3");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
 
