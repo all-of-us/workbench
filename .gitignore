@@ -48,6 +48,7 @@ common-api/.gradle/*
 common-api/.idea/*
 common-api/build/*
 common-api/common-api.iml
+Common-api/out/*
 public-api/?/
 public-api/.gradle
 public-api/wrapper

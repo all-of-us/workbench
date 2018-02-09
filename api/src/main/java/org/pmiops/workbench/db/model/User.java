@@ -1,25 +1,24 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import javax.persistence.Version;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
