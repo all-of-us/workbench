@@ -58,10 +58,10 @@ export function getConfigService(http: Http) {
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
-  return new Configuration({
-    basePath: getBasePath(),
-    accessToken: () => signInService.currentAccessToken
-  });
+    return new Configuration({
+      basePath: getBasePath(),
+      accessToken: () => signInService.currentAccessToken
+    });
 }
 
 @NgModule({
