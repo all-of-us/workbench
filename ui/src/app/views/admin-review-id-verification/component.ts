@@ -27,7 +27,7 @@ export class AdminReviewIdVerificationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.profileService.getIdVerificationsForReview())
+    this.profileService.getIdVerificationsForReview()
       .subscribe(
           profilesResp => {
             this.profiles = profilesResp.profileList;
@@ -39,13 +39,11 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     if (profile.blockscoreIdVerificationStatus !== newStatus) {
       this.contentLoaded = false;
       const request = <IdVerificationReviewRequest> {newStatus};
-      this.errorHandlingService.retryApi(this.profileService.reviewIdVerification(
-        profile.userId, request))
-          .subscribe(
-            profilesResp => {
-              this.profiles = profilesResp.profileList;
-              this.contentLoaded = true;
-            });
+      this.profileService.reviewIdVerification(profile.userId, request).subscribe(
+        profilesResp => {
+          this.profiles = profilesResp.profileList;
+          this.contentLoaded = true;
+        });
     }
   }
  }

@@ -97,7 +97,7 @@ export class AppComponent implements OnInit {
     this.user = this.signInService.user;
     this.user.subscribe(user => {
       if (user.isSignedIn) {
-        this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
+        this.profileService.getMe().subscribe(profile => {
           this.hasReviewResearchPurpose =
             profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
           this.hasReviewIdVerification =

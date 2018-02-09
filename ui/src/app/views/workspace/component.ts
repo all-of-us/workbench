@@ -124,15 +124,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
 
-    this.errorHandlingService.retryApi(this.workspacesService
-      .getWorkspace(this.wsNamespace, this.wsId))
+    this.workspacesService.getWorkspace(this.wsNamespace, this.wsId)
         .subscribe(
           workspaceResponse => {
             this.workspace = workspaceResponse.workspace;
             this.accessLevel = workspaceResponse.accessLevel;
             this.workspaceLoading = false;
-            this.errorHandlingService.retryApi(this.cohortsService
-                .getCohortsInWorkspace(this.wsNamespace, this.wsId))
+            this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
                 .subscribe(
                     cohortsReceived => {
                       for (const coho of cohortsReceived.items) {
@@ -145,14 +143,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                       this.cohortsError = true;
                     });
 
-            this.errorHandlingService.retryApi(this.workspacesService
-              .getNoteBookList(this.wsNamespace, this.wsId))
+            this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
                 .subscribe(
                   fileList => {
-                    for (const fileDetail of fileList) {
-                      fileDetail.push = false;
-                      this.notebookList.push(fileDetail);
-                    }
+                    for(var filedetail of fileList) {
+                      this.notebookList
+                          .push(new Notebook(filedetail.name, filedetail.path, false));
+                    };
                   },
                   error => {
                     this.notebooksLoading = false;
@@ -173,7 +170,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   launchNotebook(): void {
-    this.errorHandlingService.retryApi(this.pollCluster()).subscribe(cluster => {
+    this.pollCluster().subscribe(cluster => {
       this.cluster = cluster;
       this.initializeNotebookCookies().subscribe(() => {
         this.localizeAllFiles();
@@ -200,11 +197,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   pollCluster(): Observable<Cluster> {
     // Polls for cluster startup every minute.
     return new Observable<Cluster>(observer => {
-      this.errorHandlingService.retryApi(this.clusterService.getCluster(
-          this.workspace.namespace, this.workspace.id)).subscribe((cluster) => {
+      this.clusterService.getCluster(this.workspace.namespace, this.workspace.id)
+          .subscribe((cluster) => {
         if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
           setTimeout(() => {
-              this.errorHandlingService.retryApi(this.pollCluster()).subscribe(newCluster => {
+              this.pollCluster().subscribe(newCluster => {
                 this.cluster = newCluster;
                 observer.next(newCluster);
                 observer.complete();
@@ -260,9 +257,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   createAndLaunchNotebook(): void {
     this.clusterLoading = true;
-    this.errorHandlingService.retryApi(this.clusterService
-        .createCluster(this.workspace.namespace, this.workspace.id)).subscribe(() => {
-      this.errorHandlingService.retryApi(this.pollCluster()).subscribe(polledCluster => {
+    this.clusterService.createCluster(this.workspace.namespace, this.workspace.id)
+        .subscribe(() => {
+      this.pollCluster().subscribe(polledCluster => {
         this.clusterLoading = false;
         this.cluster = polledCluster;
         this.initializeNotebookCookies().subscribe(() => {
@@ -273,8 +270,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   killNotebook(): void {
-    this.errorHandlingService.retryApi(this.clusterService.deleteCluster(
-        this.workspace.namespace, this.workspace.id)).subscribe(() => {});
+    this.clusterService.deleteCluster(
+        this.workspace.namespace, this.workspace.id).subscribe(() => {});
   }
 
   edit(): void {
@@ -337,8 +334,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   localizeAllFiles(): void {
-    this.errorHandlingService.retryApi(this.workspacesService
-        .localizeAllFiles(this.wsNamespace, this.wsId))
+    this.workspacesService.localizeAllFiles(this.wsNamespace, this.wsId)
         .subscribe(() => {
               this.handleLocalizeSuccess();
               this.clusterPulled = true;

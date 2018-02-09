@@ -47,8 +47,7 @@ export class CohortEditComponent {
       newCohort
     );
 
-    this.errorHandlingService.retryApi(call)
-      .do(_ => this.loading = false)
+    call.do(_ => this.loading = false)
       .subscribe(_ => this.backToWorkspace());
   }
 

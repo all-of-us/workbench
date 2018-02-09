@@ -17,7 +17,7 @@ export class ProfilePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
+    this.profileService.getMe().subscribe(
         (profile: Profile) => {
       this.profile = profile;
       this.profileLoaded = true;

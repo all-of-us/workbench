@@ -56,8 +56,7 @@ export class HomePageComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.errorHandlingService.retryApi(this.workspacesService
-        .getWorkspaces())
+    this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;

@@ -28,7 +28,7 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.workspacesService.getWorkspacesForReview())
+    this.workspacesService.getWorkspacesForReview()
         .subscribe(
             workspacesResp => {
               this.workspaces = workspacesResp.items;
@@ -38,8 +38,8 @@ export class AdminReviewWorkspaceComponent implements OnInit {
 
   approve(workspace: Workspace, approved: boolean): void {
     const request = <ResearchPurposeReviewRequest> {approved};
-    this.errorHandlingService.retryApi(this.workspacesService.reviewWorkspace(
-        workspace.namespace, workspace.id, request))
+    this.workspacesService.reviewWorkspace(
+        workspace.namespace, workspace.id, request)
         .subscribe(
             resp => {
               const i = this.workspaces.indexOf(workspace, 0);
