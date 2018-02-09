@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import javax.inject.Provider;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.StatusResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
