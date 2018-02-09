@@ -408,10 +408,10 @@ group by co1.observation_concept_id, stratum_2"
 # PPI Observation (3000)
 # Todo , we co count > 0 to eliminate all the junk data now
 # Note, we only want counts related to 3 survery modules which have concept id
-# (1586134, 1585855,1855710)
+# (1586134, 1585855,1585710)
 echo "Querying PPI observation"
 # Get ones with value as string
-
+ppi_modules="(1586134, 1585855,1585710)"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
@@ -422,7 +422,10 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
 on co1.observation_source_concept_id = c.concept_id
 inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
 on r.concept_id_2 = c.concept_id
-where r.concept_id_1 in (1586134, 1585855,1855710) and value_as_string is not null
+where c.vocabulary_id = 'PPI' and
+c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\`
+and  r.concept_id_1 in $ppi_modules and r.relationship_id = 'Module of' and
+value_as_string is not null
 group by c.concept_id, value_as_string"
 
 # Get ones with value as number.
@@ -437,7 +440,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
 on co1.observation_source_concept_id = c.concept_id
 inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
 on r.concept_id_2 = c.concept_id
-where r.concept_id_1 in(1586134, 1585855,1855710) and value_as_number is not null
+where r.concept_id_1 in(1586134, 1585855,1585710) and value_as_number is not null
 group by c.concept_id, value_as_number"
 
 # Todo maybe for real data None were in test data
