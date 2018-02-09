@@ -11,7 +11,6 @@ import java.util.HashMap;
  */
 public interface MailChimpService {
   static final String MAILCHIMP_PENDING = "pending";
-  static final String MAILCHIMP_SUBSCRIBED = "subscribed";
   static final String MAILCHIMP_KEY_ID = "id";
   static final String MAILCHIMP_KEY_STATUS = "status";
 

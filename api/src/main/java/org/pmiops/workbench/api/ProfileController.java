@@ -41,7 +41,6 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
-import org.pmiops.workbench.model.VerifyEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -320,21 +319,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> submitTermsOfService() {
     User user = userService.submitTermsOfService();
-    return getProfileResponse(user);
-  }
-
-  @Override
-  public ResponseEntity<Profile> verifyEmail(VerifyEmailRequest request) {
-    User user = userDao.findUserByEmail(request.getUsername());
-    try {
-      mailChimpService.addUserContactEmail(user.getContactEmail());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-    userDao.save(user);
-    // TODO: Call http://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
-    //  Store response id in database as mailchimp hash value
     return getProfileResponse(user);
   }
 

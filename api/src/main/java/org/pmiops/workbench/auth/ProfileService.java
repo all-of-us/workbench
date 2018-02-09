@@ -72,30 +72,22 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    String userEmailVerificationStatus = null;
-    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.PENDING)) {
-      // Verification is pending, need to query mailchimp.
+    // Verification is pending or unverified, need to query mailchimp.
+    if (!user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
+      String userEmailVerificationStatus = null;
       try {
         userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
+      // user hasn't been sent to MailChimp before
       } catch (NotFoundException e) {
-        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-        user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-        userDao.save(user);
+        mailChimpService.addUserContactEmail(user.getContactEmail());
+        userEmailVerificationStatus = MailChimpService.MAILCHIMP_PENDING;
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      if (userEmailVerificationStatus != null) {
-        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_SUBSCRIBED)) {
-          profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-        } else {
-          profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-          user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-          userDao.save(user);
-        }
-      }
-    } else {
-      profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
+      user.setEmailVerificationStatus(EmailVerificationStatus.fromValue(userEmailVerificationStatus));
+      userDao.save(user);
     }
+    profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
     return profile;
   }
 }
