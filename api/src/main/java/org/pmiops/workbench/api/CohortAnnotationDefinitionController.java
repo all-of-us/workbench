@@ -17,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 public class CohortAnnotationDefinitionController implements CohortAnnotationDefinitionApiDelegate {
@@ -55,15 +55,21 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             new Function<CohortAnnotationDefinition, org.pmiops.workbench.db.model.CohortAnnotationDefinition>() {
                 @Override
                 public org.pmiops.workbench.db.model.CohortAnnotationDefinition apply(CohortAnnotationDefinition cohortAnnotationDefinition) {
-                    List<String> enumValues = cohortAnnotationDefinition.getEnumValues();
-                    SortedSet<CohortAnnotationEnumValue> enumValuesList = (enumValues == null) ? null :
-                            new TreeSet(enumValues.stream().map(s -> new CohortAnnotationEnumValue().name(s))
-                                    .collect(Collectors.toList()));
-                    return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
-                            .cohortId(cohortAnnotationDefinition.getCohortId())
-                            .columnName(cohortAnnotationDefinition.getColumnName())
-                            .annotationType(cohortAnnotationDefinition.getAnnotationType())
-                            .enumValues(enumValuesList);
+                    org.pmiops.workbench.db.model.CohortAnnotationDefinition dbCohortAnnotationDefinition =
+                            new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
+                                    .cohortId(cohortAnnotationDefinition.getCohortId())
+                                    .columnName(cohortAnnotationDefinition.getColumnName())
+                                    .annotationType(cohortAnnotationDefinition.getAnnotationType());
+                    List<CohortAnnotationEnumValue> enumValuesList = (cohortAnnotationDefinition.getEnumValues() == null) ? new ArrayList<>() :
+                            IntStream.range(0, cohortAnnotationDefinition.getEnumValues().size())
+                                    .mapToObj(i -> new CohortAnnotationEnumValue()
+                                            .name(cohortAnnotationDefinition.getEnumValues().get(i)).order(i)
+                                            .cohortAnnotationDefinition(dbCohortAnnotationDefinition))
+                                    .collect(Collectors.toList());
+                    for (CohortAnnotationEnumValue cohortAnnotationEnumValue : enumValuesList) {
+                        dbCohortAnnotationDefinition.getEnumValues().add(cohortAnnotationEnumValue);
+                    }
+                    return dbCohortAnnotationDefinition;
                 }
             };
 

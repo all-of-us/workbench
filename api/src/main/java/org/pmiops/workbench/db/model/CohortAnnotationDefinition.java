@@ -15,6 +15,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import java.util.Objects;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Entity
 @Table(name = "cohort_annotation_definition")
@@ -24,7 +25,7 @@ public class CohortAnnotationDefinition {
     private long cohortId;
     private String columnName;
     private AnnotationType annotationType;
-    private SortedSet<CohortAnnotationEnumValue> enumValues;
+    private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -92,11 +93,6 @@ public class CohortAnnotationDefinition {
 
     public void setEnumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
         this.enumValues = enumValues;
-        if (enumValues != null) {
-            for (CohortAnnotationEnumValue enumValue : enumValues) {
-                enumValue.setCohortAnnotationDefinition(this);
-            }
-        }
     }
 
     public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
