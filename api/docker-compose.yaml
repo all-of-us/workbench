@@ -188,6 +188,22 @@ services:
             - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
           env_file:
             - db-cdr/vars.env
+  db-cloudsql-import:
+            build:
+              context: ./src/dev/server
+            user: ${UID}
+            working_dir: /w/db-cdr
+            volumes:
+              - gradle-cache:/.gradle
+              - .:/w:cached
+              - ~/.config:/.config:cached
+              - ~/.gsutil:/.gsutil:cached
+
+            entrypoint: ["./generate-cdr/cloudsql-import.sh"]
+            environment:
+              - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+            env_file:
+              - db/vars.env
   drop-cdr-db:
     depends_on:
       - db

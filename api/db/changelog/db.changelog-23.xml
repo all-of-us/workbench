@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="brianfreeman" id="changelog-23">
+
+        <createTable tableName="cohort_annotation_enum_value">
+            <column name="cohort_annotation_enum_value_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cohort_annotation_definition_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enum_order" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_annotation_definition_id"
+                                 baseTableName="cohort_annotation_enum_value"
+                                 constraintName="fk_enum_cohort_annotation_definition_id"
+                                 referencedColumnNames="cohort_annotation_definition_id"
+                                 referencedTableName="cohort_annotation_definition"/>
+
+        <dropColumn columnName="annotation_value_timestamp" tableName="participant_cohort_annotations"/>
+        <addColumn tableName="participant_cohort_annotations">
+            <column name="annotation_value_date" type="date"/>
+        </addColumn>
+        <addColumn tableName="participant_cohort_annotations">
+            <column name="cohort_annotation_enum_value_id" type="bigint"/>
+        </addColumn>
+        <addColumn tableName="participant_cohort_annotations">
+            <column name="annotation_value_boolean" type="tinyint"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="cohort_annotation_enum_value_id"
+                                 baseTableName="participant_cohort_annotations"
+                                 constraintName="fk_enum_cohort_annotation_enum_value_id"
+                                 referencedColumnNames="cohort_annotation_enum_value_id"
+                                 referencedTableName="cohort_annotation_enum_value"/>
+
+    </changeSet>
+</databaseChangeLog>
