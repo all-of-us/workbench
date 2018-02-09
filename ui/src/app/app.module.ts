@@ -1,6 +1,6 @@
-import {ErrorHandler, NgModule, NgZone} from '@angular/core';
+import {ErrorHandler, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
+import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
@@ -35,7 +35,6 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
-import {InterceptedHttp} from './factory/InterceptedHttp';
 
 
 import {
@@ -118,11 +117,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     },
     SignInService,
     GoogleAnalyticsEventsService,
-    {
-      provide: Http,
-      useClass: InterceptedHttp,
-      deps: [XHRBackend, RequestOptions,ErrorHandlingService,NgZone]
-    },
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
