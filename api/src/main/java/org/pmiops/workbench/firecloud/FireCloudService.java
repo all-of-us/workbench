@@ -17,6 +17,11 @@ public interface FireCloudService {
   public static final String BIGQUERY_JOB_USER_GOOGLE_ROLE = "bigquery.jobUser";
 
   /**
+   * @return true if firecloud is okay, false if firecloud is down.
+   */
+  boolean getFirecloudStatus();
+
+  /**
    * @return true if the user making the current request is enabled in FireCloud, false otherwise.
    */
   boolean isRequesterEnabledInFirecloud() throws ApiException;
