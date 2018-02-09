@@ -1,8 +1,8 @@
 /*Intercepts all HTTP request */
 
 import {Injectable} from '@angular/core';
-import {ConnectionBackend, Http, Response, Request, RequestOptions,
-    RequestOptionsArgs} from '@angular/http';
+import {ConnectionBackend, Http, Request, RequestOptions, RequestOptionsArgs,
+  Response} from '@angular/http';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Observable} from 'rxjs/Rx';
 
