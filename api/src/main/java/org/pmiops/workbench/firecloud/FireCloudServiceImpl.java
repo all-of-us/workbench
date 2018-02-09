@@ -42,7 +42,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
+  private static final String STATUS_SUBSYSTEMS_KEY = "systems";
+
   private static final String USER_FC_ROLE = "user";
+  private static final String THURLOE_STATUS_NAME = "Thurloe";
+  private static final String SAM_STATUS_NAME = "Sam";
+  private static final String RAWLS_STATUS_NAME = "Rawls";
+  private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
 
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
@@ -67,12 +73,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     } catch (ApiException e) {
       String response = e.getResponseBody();
       JSONObject errorBody = new JSONObject(response);
-      JSONObject subSystemStatus = errorBody.getJSONObject("systems");
+      JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
       if (subSystemStatus != null) {
-        return systemOkay(subSystemStatus, "Thurloe") &&
-            systemOkay(subSystemStatus, "Sam") &&
-            systemOkay(subSystemStatus, "Rawls") &&
-            systemOkay(subSystemStatus, "GoogleBuckets");
+        return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
+            systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
+            systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
+            systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
       }
       return false;
     }
@@ -101,7 +107,6 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public Me getMe() throws ApiException {
-    getFirecloudStatus();
     return profileApiProvider.get().me();
   }
 
