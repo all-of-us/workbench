@@ -1,8 +1,8 @@
 require "optparse"
 require "fileutils"
-require_relative "../../libproject/utils/common"
-require_relative "../../libproject/workbench"
-require_relative "../../libproject/swagger"
+require_relative "../../aou-utils/utils/common"
+require_relative "../../aou-utils/workbench"
+require_relative "../../aou-utils/swagger"
 
 def swagger_regen()
   Workbench::Swagger.download_swagger_codegen_cli

@@ -38,6 +38,23 @@ securityDefinitions:
 ## PATHS
 ##########################################################################################
 paths:
+  /status:
+    get:
+      operationId: status
+      tags:
+        - status
+      summary: |
+        An orchestrated status check for underlying systems: Agora, Thurloe, Elasticsearch, Rawls
+      responses:
+        200:
+          description: All systems OK.
+          schema:
+            $ref: '#/definitions/SystemStatus'
+        500:
+          description: Problem with one or more systems. See response for details.
+          schema:
+            $ref: '#/definitions/SystemStatus'
+      security: []
   '/api/clusters':
     get:
       summary: List all clusters
@@ -346,3 +363,16 @@ definitions:
           The archive must be in tar.gz format, must not include a parent directory, and
           must have an entry point named 'main'. For more information on notebook extensions,
           see: http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
+  SystemStatus:
+    description: status of each subsystem Leonardo depends on
+    type: object
+    required:
+      - ok
+      - systems
+    properties:
+      ok:
+        type: boolean
+        description: true if everything is ok, false if anything is amiss
+      systems:
+        type: object
+        description: Map[String, SubsystemStatus]

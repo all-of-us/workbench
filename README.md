@@ -28,7 +28,7 @@ To initialize the project, run the following:
 git clone https://github.com/all-of-us/workbench
 cd workbench
 git submodule init
-git submodule update
+git submodule update --recursive
 ```
 
 Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -14,6 +15,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
@@ -37,21 +39,54 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
+  private final Provider<StatusApi> statusApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
+  private static final String STATUS_SUBSYSTEMS_KEY = "systems";
+
   private static final String USER_FC_ROLE = "user";
+  private static final String THURLOE_STATUS_NAME = "Thurloe";
+  private static final String SAM_STATUS_NAME = "Sam";
+  private static final String RAWLS_STATUS_NAME = "Rawls";
+  private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
 
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
+      Provider<StatusApi> statusApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
+    this.statusApiProvider = statusApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+  }
+
+  @Override
+  public boolean getFirecloudStatus() {
+    StatusApi statusApi = statusApiProvider.get();
+    try {
+      statusApi.status();
+    } catch (ApiException e) {
+      String response = e.getResponseBody();
+      JSONObject errorBody = new JSONObject(response);
+      JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
+      if (subSystemStatus != null) {
+        return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
+            systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
+            systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
+            systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
+      }
+      return false;
+    }
+    return true;
+  }
+
+  private boolean systemOkay(JSONObject systemList, String systemName) {
+    return systemList.getJSONObject(systemName).getBoolean("ok");
   }
 
   @Override

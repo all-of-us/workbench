@@ -94,6 +94,20 @@ parameters:
 
 paths:
 
+  /v1/status:
+    get:
+      tags:
+        - status
+      description: Returns the status of the various services and integrations
+      operationId: getStatus
+      security: []
+      responses:
+        200:
+          description: A map of system name to status.
+          schema:
+            $ref: "#/definitions/StatusResponse"
+
+
   /v1/config:
     get:
       tags:
@@ -1289,6 +1303,17 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+
+  StatusResponse:
+    type: object
+    required:
+      - firecloudStatus
+      - notebooksStatus
+    properties:
+      firecloudStatus:
+        type: boolean
+      notebooksStatus:
+        type: boolean
 
   ConfigResponse:
     type: object
