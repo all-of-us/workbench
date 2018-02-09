@@ -113,8 +113,9 @@ public class ExceptionUtils {
         throw new ServerUnavailableException();
       case 500:
         throw new ServerErrorException(e);
+      default:
+        throw new RuntimeException(e);
     }
-    throw new RuntimeException(e);
   }
 
   private ExceptionUtils() {}
