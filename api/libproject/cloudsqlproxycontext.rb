@@ -1,5 +1,5 @@
-require_relative "../../libproject/utils/common"
-require_relative "../../libproject/workbench"
+require_relative "../../aou-utils/utils/common"
+require_relative "../../aou-utils/workbench"
 
 class CloudSqlProxyContext
 
