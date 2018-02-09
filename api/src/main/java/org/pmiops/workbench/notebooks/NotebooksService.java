@@ -38,4 +38,9 @@ public interface NotebooksService {
    * Send files over to notebook Cluster
    */
   void localize(String googleProject, String clusterName, Map fileList) throws ApiException;
+
+  /**
+   * @return true if notebooks is okay, false if notebooks are down.
+   */
+  boolean getNotebooksStatus();
 }

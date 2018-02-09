@@ -48,7 +48,23 @@ securityDefinitions:
 ## PATHS
 ##########################################################################################
 paths:
-
+  /status:
+    get:
+      operationId: status
+      tags:
+        - status
+      summary: |
+        An orchestrated status check for underlying systems: Agora, Thurloe, Elasticsearch, Rawls
+      responses:
+        200:
+          description: All systems OK.
+          schema:
+            $ref: '#/definitions/SystemStatus'
+        500:
+          description: Problem with one or more systems. See response for details.
+          schema:
+            $ref: '#/definitions/SystemStatus'
+      security: []
   /api/billing:
     post:
       responses:
@@ -907,3 +923,37 @@ definitions:
       groupEmail:
         type: string
         description: 'the email associated with the group'
+
+  SystemStatus:
+    description: report status of systems Orchestration calls out to
+    type: object
+    required:
+      - ok
+      - systems
+    properties:
+      ok:
+        type: boolean
+        description: whether any system(s) need attention
+        example: false
+      systems:
+        type: object
+        description: Map[String, SubsystemStatus]
+        example:
+          Agora:
+            ok: true
+          Google:
+            ok: true
+          Consent:
+            ok: false
+            messages:
+              - "ClusterHealth is RED"
+          Rawls:
+            ok: true
+          Ontology:
+            ok: true
+          Search:
+            ok: true
+          Thurloe:
+            ok: false
+            messages:
+              - "Thurloe misbehavior message"

@@ -8,6 +8,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -38,6 +39,15 @@ public class NotebooksConfig {
     @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
     public ClusterApi clusterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
       ClusterApi api = new ClusterApi();
+      api.setApiClient(apiClient);
+      return api;
+    }
+
+    @Bean
+    @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+    public StatusApi statusApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+      // Group/Auth Domain creation and addition are made by the AllOfUs service account
+      StatusApi api = new StatusApi();
       api.setApiClient(apiClient);
       return api;
     }
