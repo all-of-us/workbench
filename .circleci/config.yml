@@ -175,7 +175,7 @@ workflows:
               only:
                 - master
     jobs:
-      - api-build-integration-test
+      - api-integration-test
 
 experimental:
   notify:
