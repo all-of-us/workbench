@@ -11,7 +11,7 @@ module Workbench
   def check_submodules()
     # `git clone` includes submodule folders but nothing else.
     unless File.exists? File.join(LIBPROJECT_DIR, "utils", "README.md")
-      unless system(*%W{git submodule update --init})
+      unless system(*%W{git submodule update --init --recursive})
         common.error "`git submodule update` failed."
         exit 1
       end
