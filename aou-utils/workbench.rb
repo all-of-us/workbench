@@ -48,7 +48,7 @@ module Workbench
     common = Common.new
     Dir.chdir(File.dirname(main_filename))
 
-    setup_workspace()
+    setup_workspace
     unless in_docker?
       common.docker.requires_docker
     end
