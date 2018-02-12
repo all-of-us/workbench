@@ -291,25 +291,6 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/account/verify-email:
-    post:
-      tags:
-        - profile
-      description: Submits demographic survey responses.
-      operationId: verifyEmail
-      parameters:
-        - in: body
-          name: request
-          required: true
-          schema:
-            $ref: "#/definitions/VerifyEmailRequest"
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            $ref: "#/definitions/Profile"
-
-
   /v1/auth-domain/{groupName}:
     post:
       tags:
@@ -1364,7 +1345,7 @@ definitions:
   EmailVerificationStatus:
     type: string
     description: stage of email verification
-    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, verified]
+    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, subscribed]
 
   EmptyResponse:
     type: object
