@@ -188,35 +188,44 @@ Common.register_command({
 })
 
 
-def run_integration_tests(*args)
+def run_integration_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
 
-  account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
-    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
-  end
+  op.add_option(
+    "--tests [tests]",
+    lambda {|opts, v| opts.tests = " --test " + v},
+    "Tests to run."
+  )
+
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gradle integration#{op.opts.tests}}
 end
 
 Common.register_command({
   :invocation => "integration",
   :description => "Runs integration tests.",
-  :fn => lambda { |*args| run_integration_tests(*args) }
+  :fn => lambda { |*args| run_integration_tests("integration", *args) }
 })
 
 
-def run_bigquery_tests(*args)
+def run_bigquery_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
   common = Common.new
 
   account = get_auth_login_account()
   do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
-    common.run_inline %W{docker-compose run --rm api ./gradlew bigquerytest} + args
+    common.run_inline %W{./gradlew bigquerytest} + args
   end
 end
 
 Common.register_command({
   :invocation => "bigquerytest",
   :description => "Runs bigquerytest tests.",
-  :fn => lambda { |*args| run_bigquery_tests(*args) }
+  :fn => lambda { |*args| run_bigquery_tests("bigquerytest", *args) }
 })
 
 
