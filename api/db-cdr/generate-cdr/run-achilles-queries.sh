@@ -118,18 +118,7 @@ select 0, 3000 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
 group by vo1.visit_concept_id"
 
-# Condition gender
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-select 0, 3101 as analysis_id,
-	CAST(co1.condition_concept_id AS STRING) as stratum_1,
-	CAST(p1.gender_concept_id AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
-on p1.person_id = co1.person_id
-group by co1.condition_concept_id, p1.gender_concept_id"
+
 
 # 400 (3000)	Number of persons with at least one condition occurrence, by condition_concept_id
 echo "Querying condition_occurrence ..."
@@ -160,7 +149,6 @@ group by co1.condition_concept_id, p1.gender_concept_id"
 #  children are 0-17 and we don't have children for now . Want all adults in a bucket thus 18 - 29 .
 #Ex yob = 2000  , start date : 2017 -- , sd - yob = 17  / 10 = 1.7 floor(1.7 ) = 1
 # 30 - 39 , 2017 - 1980 = 37 / 10 = 3
-
 
 # Get the 30-39, 40 - 49 , ... groups
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -423,13 +411,12 @@ on co1.observation_source_concept_id = c.concept_id
 inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
 on r.concept_id_2 = c.concept_id
 where c.vocabulary_id = 'PPI' and
-c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\`
+c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\` i)
 and  r.concept_id_1 in $ppi_modules and r.relationship_id = 'Module of' and
 value_as_string is not null
 group by c.concept_id, value_as_string"
 
-# Get ones with value as number.
-
+# Get PPI ones with value as number.
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
@@ -440,7 +427,9 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
 on co1.observation_source_concept_id = c.concept_id
 inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
 on r.concept_id_2 = c.concept_id
-where r.concept_id_1 in(1586134, 1585855,1585710) and value_as_number is not null
+where c.vocabulary_id = 'PPI' and
+c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\` i)
+and  r.concept_id_1 in $ppi_modules and r.relationship_id = 'Module of' and value_as_number is not null
 group by c.concept_id, value_as_number"
 
 # Todo maybe for real data None were in test data
@@ -496,6 +485,19 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
 group by co1.measurement_concept_id, stratum_2"
+
+
+# achilles_results_concept
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_concept\`
+(id, analysis_id, stratum_1, stratum_1_name, stratum_2, stratum_2_name, count_value)
+SELECT a.id AS id, a.analysis_id AS analysis_id, a.stratum_1 AS stratum_1,
+c1.concept_name AS stratum_1_name, a.stratum_2 AS stratum_2,c2.concept_name AS stratum_2_name,
+a.count_value AS count_value
+FROM \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a
+left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1 on a.stratum_1 = cast(c1.concept_id as STRING)
+left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c2  on a.stratum_2 = cast(c2.concept_id as STRING)"
+
 
 # Measurement Distributions
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \

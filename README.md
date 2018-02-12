@@ -270,8 +270,7 @@ Description of arguments for these scripts are as follows. See examples below.
 
 ###Examples:
 #### Generate count data in BigQuery from a cdr release 
-`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test 
-  --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is 
 1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
 2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv and public20180206/*.csv  
