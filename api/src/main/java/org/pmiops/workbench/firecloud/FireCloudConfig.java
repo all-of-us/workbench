@@ -10,6 +10,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -88,6 +89,15 @@ public class FireCloudConfig {
   public GroupsApi groupsApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
     // Group/Auth Domain creation and addition are made by the AllOfUs service account
     GroupsApi api = new GroupsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public StatusApi statusApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
+    // Group/Auth Domain creation and addition are made by the AllOfUs service account
+    StatusApi api = new StatusApi();
     api.setApiClient(apiClient);
     return api;
   }

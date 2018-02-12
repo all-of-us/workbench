@@ -1,6 +1,6 @@
-[submodule "libproject/utils"]
-	path = libproject/utils
-	url = https://github.com/dmohs/project-management.git
 [submodule "firecloud-tools"]
 	path = firecloud-tools
 	url = https://github.com/broadinstitute/firecloud-tools
+[submodule "aou-utils"]
+	path = aou-utils
+	url = https://github.com/all-of-us/utils

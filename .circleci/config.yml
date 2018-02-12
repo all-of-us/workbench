@@ -17,7 +17,7 @@ jobs:
       - checkout
       - run:
           name: Fetch Submodules
-          command: git submodule update --init
+          command: git submodule update --init --recursive
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -68,7 +68,7 @@ jobs:
       - checkout
       - run:
           name: Fetch Submodules
-          command: git submodule update --init
+          command: git submodule update --init --recursive
       - restore_cache:
           keys:
           - api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -103,12 +103,12 @@ jobs:
       - checkout
       - run:
           name: Fetch Submodules
-          command: git submodule update --init
+          command: git submodule update --init --recursive
       - run:
           working_directory: ~/workbench
           name: Download Swagger CLI
           command: |
-            ruby -r ./libproject/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+            ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
@@ -147,7 +147,7 @@ jobs:
       - checkout
       - run:
           name: Fetch Submodules
-          command: git submodule update --init
+          command: git submodule update --init --recursive
       - run:
           name: Generate Swagger Python Client
           command: client/project.rb swagger-regen
