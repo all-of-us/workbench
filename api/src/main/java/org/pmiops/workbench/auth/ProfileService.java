@@ -51,8 +51,7 @@ public class ProfileService {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
     } else if (user.getBlockscoreVerificationIsValid() == false) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.REJECTED);
-    }
-    else {
+    } else {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.VERIFIED);
     }
 
@@ -72,19 +71,16 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    // Verification is pending or unverified, need to query mailchimp.
-    if (!user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
-      String userEmailVerificationStatus = null;
-      try {
-        userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
-      // user hasn't been sent to MailChimp before
-      } catch (NotFoundException e) {
+    EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
+    // if verification is pending or unverified, need to query MailChimp and update DB accordingly
+    if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
+      if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED)) {
         mailChimpService.addUserContactEmail(user.getContactEmail());
-        userEmailVerificationStatus = MailChimpService.MAILCHIMP_PENDING;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+        userEmailVerificationStatus = EmailVerificationStatus.PENDING;
+      } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {
+        userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
       }
-      user.setEmailVerificationStatus(EmailVerificationStatus.fromValue(userEmailVerificationStatus));
+      user.setEmailVerificationStatus(userEmailVerificationStatus);
       userDao.save(user);
     }
     profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
