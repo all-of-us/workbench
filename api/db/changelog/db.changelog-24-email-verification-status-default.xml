@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="rsasch" id="changelog-23-email-verification-status-default">
-    <!-- set default value to PENDING -->
+    <!-- set default value to UNVERIFIED -->
     <addDefaultValue columnName="email_verification_status" defaultValue="0" tableName="user"/>
   </changeSet>
 </databaseChangeLog>
