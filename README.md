@@ -283,8 +283,8 @@ Description of arguments for these scripts are as follows. See examples below.
 3. Note cdr-version can be '' to make databases named cdr public
 
 #### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
-`./project.rb mysqldump-db --db-name cdr20180206 --bucket all-of-us-workbench-private-cloudsql`
-`./project.rb mysqldump-db --db-name public20180206 --bucket all-of-us-workbench-public-cloudsql`
+`./project.rb mysqldump-local-db --db-name cdr20180206 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb mysqldump-local-db --db-name public20180206 --bucket all-of-us-workbench-public-cloudsql`
 ##### Result is 
 1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
 1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
