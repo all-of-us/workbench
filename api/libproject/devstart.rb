@@ -196,13 +196,16 @@ def run_integration_tests(cmd_name, *args)
 
   op.add_option(
     "--tests [tests]",
-    lambda {|opts, v| opts.tests = " --test " + v},
+    lambda {|opts, v| opts.tests = "--tests " + v},
     "Tests to run."
   )
 
   op.parse.validate
   gcc.validate
-  common.run_inline %W{gradle integration#{op.opts.tests}}
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.creds_file
+  do_run_with_creds(op.opts.project, nil, op.opts.creds_file) do |creds_file|
+    common.run_inline "gradle integration #{op.opts.tests}"
+  end
 end
 
 Common.register_command({
@@ -215,10 +218,20 @@ Common.register_command({
 def run_bigquery_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
 
-  account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
-    common.run_inline %W{./gradlew bigquerytest} + args
+  op.add_option(
+    "--tests [tests]",
+    lambda {|opts, v| opts.tests = "--tests " + v},
+    "Tests to run."
+  )
+
+  op.parse.validate
+  gcc.validate
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.creds_file
+  do_run_with_creds(op.opts.project, nil, op.opts.creds_file) do |creds_file|
+    common.run_inline "gradle bigquerytest #{op.opts.tests}"
   end
 end
 
