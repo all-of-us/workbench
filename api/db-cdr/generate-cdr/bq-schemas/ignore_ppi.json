@@ -1,0 +1,7 @@
+[
+	{
+	"mode": "REQUIRED", 
+	"name": "concept_id", 
+	"type": "INTEGER"
+	}
+]
