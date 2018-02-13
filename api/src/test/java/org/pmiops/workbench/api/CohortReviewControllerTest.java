@@ -388,7 +388,7 @@ public class CohortReviewControllerTest {
                 new org.pmiops.workbench.model.ParticipantCohortStatus()
                         .participantId(1L)
                         .status(CohortStatus.INCLUDED)
-                        .birthDatetime(dob.getTime())
+                        .birthDate(dob.getTime())
                         .ethnicityConceptId(1L)
                         .genderConceptId(1L)
                         .raceConceptId(1L);
