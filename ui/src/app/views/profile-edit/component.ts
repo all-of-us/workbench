@@ -11,6 +11,7 @@ import {Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
+  errorText: string = null;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
@@ -29,8 +30,10 @@ export class ProfileEditComponent implements OnInit {
   submitChanges(): void {
     this.errorHandlingService.retryApi(
         this.profileService.updateProfile(this.profile)).subscribe(() => {
-        this.router.navigate(['../'], {relativeTo : this.route});
-      }
-    );
+          this.router.navigate(['../'], {relativeTo : this.route});
+      },
+        error => {
+          this.errorText = error.toString();
+      })
   }
 }

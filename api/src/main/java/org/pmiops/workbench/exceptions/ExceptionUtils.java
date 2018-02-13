@@ -103,9 +103,9 @@ public class ExceptionUtils {
 
   public static RuntimeException convertMailchimpError(MailchimpException e) {
     switch (e.code) {
-      case 400: case 414: case 422:
+      case 400:
         throw new BadRequestException(e);
-      case 401: case 403: case 405:
+      case 401: case 403: case 405: case 414: case 422:
         throw new ForbiddenException();
       case 404:
         throw new NotFoundException();

@@ -3,6 +3,7 @@ package org.pmiops.workbench.auth;
 import java.util.ArrayList;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -75,10 +76,19 @@ public class ProfileService {
     // if verification is pending or unverified, need to query MailChimp and update DB accordingly
     if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
       if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED)) {
-        mailChimpService.addUserContactEmail(user.getContactEmail());
+        try {
+          mailChimpService.addUserContactEmail(user.getContactEmail());
+        } catch (BadRequestException e) {
+          throw new ApiException(e);
+        }
         userEmailVerificationStatus = EmailVerificationStatus.PENDING;
       } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {
-        userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
+        try {
+          userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
+        }
+        catch (BadRequestException e) {
+          throw new ApiException(e);
+        }
       }
       user.setEmailVerificationStatus(userEmailVerificationStatus);
       userDao.save(user);
