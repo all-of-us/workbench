@@ -8,6 +8,7 @@ import {ChartsModule} from '../charts/charts.module';
 
 import {AnnotationManagerComponent} from './annotation-manager/annotation-manager.component';
 import {AnnotationsComponent} from './annotations/annotations.component';
+import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {OverviewComponent} from './overview/overview.component';
@@ -31,6 +32,7 @@ import {WorkspacesService} from 'generated';
 const components = [
   AnnotationManagerComponent,
   AnnotationsComponent,
+  ChoiceFilterComponent,
   CohortReviewComponent,
   CreateReviewComponent,
   OverviewComponent,

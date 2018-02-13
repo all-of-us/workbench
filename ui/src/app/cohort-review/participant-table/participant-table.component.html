@@ -15,12 +15,28 @@
     *ngFor="let participant of participants"
     [style.cursor]="'pointer'"
     routerLink="{{ participant.id }}">
-    <clr-dg-cell>{{ participant.id }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.dob       | date:'yyyy-MM-dd'}}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.gender    | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.race      | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.ethnicity | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.formattedStatusText }}</clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.id }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.dob | date:'yyyy-MM-dd' }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.gender | titlecase }}
+      <clr-dg-filter [clrDgFilter]="genderFilter">
+        <app-choice-fiter #genderFilter [options]="genders">
+        </app-choice-fiter>
+      </clr-dg-filter>
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.race | titlecase }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.ethnicity | titlecase }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.formattedStatusText }}
+    </clr-dg-cell>
   </clr-dg-row>
 
   <clr-dg-footer>

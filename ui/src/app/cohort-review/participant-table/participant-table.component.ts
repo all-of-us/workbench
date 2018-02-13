@@ -63,8 +63,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
   refresh(state: ClrDatagridStateInterface) {
     setTimeout(() => this.loading = true, 0);
-    // console.log('Datagrid state: ');
-    // console.dir(state);
+    console.log('Datagrid state: ');
+    console.dir(state);
 
     /* Populate the query with page / pagesize and then defaults */
     const query = <Request>{
@@ -91,8 +91,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
     const {ns, wsid, cid} = this.pathParams;
 
-    // console.log('Participant page request parameters:');
-    // console.dir(query);
+    console.log('Participant page request parameters:');
+    console.dir(query);
 
     return this.reviewAPI
       .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
@@ -108,5 +108,9 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
     return {ns, wsid, cid};
+  }
+
+  get genders() {
+    return ['Male', 'Female'];
   }
 }
