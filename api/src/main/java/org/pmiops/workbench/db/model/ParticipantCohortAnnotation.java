@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.sql.Date;
 import java.util.Objects;
 
@@ -19,8 +20,10 @@ public class ParticipantCohortAnnotation {
     private Long cohortReviewId;
     private Long participantId;
     private String annotationValueString;
+    private Long cohortAnnotationEnumValueId;
     private String annotationValueEnum;
     private Date annotationValueDate;
+    private String annotationValueDateString;
     private Boolean annotationValueBoolean;
     private Integer annotationValueInteger;
 
@@ -96,7 +99,21 @@ public class ParticipantCohortAnnotation {
         return this;
     }
 
-    @Column(name = "annotation_value_enum")
+    @Column(name = "cohort_annotation_enum_value_id")
+    public Long getCohortAnnotationEnumValueId() {
+        return cohortAnnotationEnumValueId;
+    }
+
+    public void setCohortAnnotationEnumValueId(Long cohortAnnotationEnumValueId) {
+        this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
+    }
+
+    public ParticipantCohortAnnotation cohortAnnotationEnumValueId(Long cohortAnnotationEnumValueId) {
+        this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
+        return this;
+    }
+
+    @Transient
     public String getAnnotationValueEnum() {
         return annotationValueEnum;
     }
@@ -121,6 +138,20 @@ public class ParticipantCohortAnnotation {
 
     public ParticipantCohortAnnotation annotationValueDate(Date annotationValueDate) {
         this.annotationValueDate = annotationValueDate;
+        return this;
+    }
+
+    @Transient
+    public String getAnnotationValueDateString() {
+        return annotationValueDateString;
+    }
+
+    public void setAnnotationValueDateString(String annotationValueDateString) {
+        this.annotationValueDateString = annotationValueDateString;
+    }
+
+    public ParticipantCohortAnnotation annotationValueDateString(String annotationValueDateString) {
+        this.annotationValueDateString = annotationValueDateString;
         return this;
     }
 
@@ -161,7 +192,7 @@ public class ParticipantCohortAnnotation {
                 Objects.equals(cohortReviewId, that.cohortReviewId) &&
                 Objects.equals(participantId, that.participantId) &&
                 Objects.equals(annotationValueString, that.annotationValueString) &&
-                Objects.equals(annotationValueEnum, that.annotationValueEnum) &&
+                Objects.equals(cohortAnnotationEnumValueId, that.cohortAnnotationEnumValueId) &&
                 Objects.equals(annotationValueDate, that.annotationValueDate) &&
                 Objects.equals(annotationValueBoolean, that.annotationValueBoolean) &&
                 Objects.equals(annotationValueInteger, that.annotationValueInteger);
@@ -173,7 +204,7 @@ public class ParticipantCohortAnnotation {
                 cohortReviewId,
                 participantId,
                 annotationValueString,
-                annotationValueEnum,
+                cohortAnnotationEnumValueId,
                 annotationValueDate,
                 annotationValueBoolean,
                 annotationValueInteger);
@@ -187,7 +218,7 @@ public class ParticipantCohortAnnotation {
                 .append("cohortReviewId", cohortReviewId)
                 .append("participantId", participantId)
                 .append("annotationValueString", annotationValueString)
-                .append("annotationValueEnum", annotationValueEnum)
+                .append("cohortAnnotationEnumValueId", cohortAnnotationEnumValueId)
                 .append("annotationValueDate", annotationValueDate)
                 .append("annotationValueBoolean", annotationValueBoolean)
                 .append("annotationValueInteger", annotationValueInteger)
