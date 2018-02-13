@@ -13,7 +13,6 @@ import {
 @Component({
   selector: 'app-set-annotation-master',
   templateUrl: './set-annotation-master.component.html',
-  styleUrls: ['./set-annotation-master.component.css']
 })
 export class SetAnnotationMasterComponent {
   readonly kinds = AnnotationType;

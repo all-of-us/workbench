@@ -15,7 +15,6 @@ import {
 @Component({
   selector: 'app-choice-filter',
   templateUrl: './choice-filter.component.html',
-  styleUrls: ['./choice-filter.component.css']
 })
 export class ChoiceFilterComponent
 implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {

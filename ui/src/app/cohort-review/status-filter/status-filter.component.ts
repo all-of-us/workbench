@@ -8,7 +8,6 @@ import {CohortStatus, ParticipantCohortStatusColumns} from 'generated';
 @Component({
   selector: 'app-status-filter',
   templateUrl: './status-filter.component.html',
-  styleUrls: ['./status-filter.component.css']
 })
 export class StatusFilterComponent extends ChoiceFilterComponent {
   @Input() property = ParticipantCohortStatusColumns.Status;
