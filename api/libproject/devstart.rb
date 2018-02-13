@@ -1023,6 +1023,74 @@ Common.register_command({
   :invocation => "print-scoped-sa-access-token",
   :description => "Prints access token for the service account that has been scoped for API access.",
   :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
+
+def create_project_resources(gcc)
+  common = Common.new
+  common.status "Enabling APIs..."
+  for service in SERVICES
+    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+  end
+  common.status "Creating GCS bucket to store credentials..."
+  common.run_inline("gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/")
+  common.status "Creating Cloud SQL instances..."
+  common.run_inline("gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2 " +
+                    "--activation-policy=ALWAYS --backup-start-time 00:00 " +
+                    "--failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log " +
+                    "--database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase")
+  common.status "Creating AppEngine app..."
+  common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
+end
+
+def setup_project_data(gcc, root_password, workbench_password, public_password, args)
+  common = Common.new
+  # This changes database connection information; don't call this while the server is running!
+  common.status "Writing DB credentials file..."
+  write_db_creds_file(gcc.project, root_password, workbench_password, public_password)
+  common.status "Setting root password..."
+  run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
+                     "--instance #{INSTANCE_NAME} --password #{root_password}",
+                     to_redact=root_password)
+  # Don't delete the credentials created here; they will be stored in GCS and reused during
+  # deployment, etc.
+  do_run_with_creds(gcc.project, gcc.account, nil, false) do |creds_file|
+    with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
+      common.status "Copying service account key to GCS..."
+      common.run_inline("gsutil cp #{creds_file} gs://#{gcc.project}-credentials/app-engine-default-sa.json")
+
+      common.status "Setting up databases and users..."
+      create_workbench_db
+      create_cdr_db
+
+      common.status "Running schema migrations..."
+      migrate_database
+      migrate_cdr_database
+      migrate_workbench_data
+      migrate_cdr_data
+
+      common.status "Loading configuration..."
+      load_config(gcc.project)
+    end
+  end
+end
+
+def random_password()
+  return rand(36**20).to_s(36)
+end
+
+def setup_cloud_project(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  create_project_resources(gcc)
+  setup_project_data(gcc, random_password(), random_password(), random_password(), args)
+end
+
+Common.register_command({
+  :invocation => "setup-cloud-project",
+  :description => "Initializes resources within a cloud project that has already been created",
+  :fn => lambda { |*args| setup_cloud_project("setup-cloud-project", *args) }
 })
 
 def create_project_resources(gcc)
