@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import com.ecwid.maleorang.MailchimpException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import java.io.IOException;
@@ -98,6 +99,21 @@ public class ExceptionUtils {
     ErrorResponse response = new ErrorResponse();
     response.setMessage(message);
     return response;
+  }
+
+  public static RuntimeException convertMailchimpError(MailchimpException e) {
+    switch (e.code) {
+      case 400: case 414: case 422:
+        throw new BadRequestException(e);
+      case 401: case 403: case 405:
+        throw new ForbiddenException();
+      case 404:
+        throw new NotFoundException();
+      case 429:
+        throw new ServerUnavailableException();
+      default:
+        throw new ServerErrorException(e);
+    }
   }
 
   private ExceptionUtils() {}
