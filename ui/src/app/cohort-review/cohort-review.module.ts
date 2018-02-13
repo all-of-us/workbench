@@ -29,27 +29,6 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
 
-const components = [
-  AnnotationManagerComponent,
-  AnnotationsComponent,
-  ChoiceFilterComponent,
-  CohortReviewComponent,
-  CreateReviewComponent,
-  OverviewComponent,
-  ParticipantAnnotationComponent,
-  ParticipantDetailComponent,
-  ParticipantStatusComponent,
-  ParticipantTableComponent,
-  ReviewNavComponent,
-  SetAnnotationDetailComponent,
-  SetAnnotationMasterComponent,
-];
-
-const directives = [
-  FullPageDirective,
-  SidebarDirective,
-];
-
 @NgModule({
   imports: [
     CohortReviewRoutingModule,
@@ -59,8 +38,24 @@ const directives = [
     ChartsModule,
   ],
   declarations: [
-    ...components,
-    ...directives,
+    /* Components */
+    AnnotationManagerComponent,
+    AnnotationsComponent,
+    ChoiceFilterComponent,
+    CohortReviewComponent,
+    CreateReviewComponent,
+    OverviewComponent,
+    ParticipantAnnotationComponent,
+    ParticipantDetailComponent,
+    ParticipantStatusComponent,
+    ParticipantTableComponent,
+    ReviewNavComponent,
+    SetAnnotationDetailComponent,
+    SetAnnotationMasterComponent,
+
+    /* Directives */
+    FullPageDirective,
+    SidebarDirective,
   ],
   providers: [ReviewStateService]
 })

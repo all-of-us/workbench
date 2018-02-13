@@ -3,10 +3,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
+import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
-
-const CDR_VERSION = 1;
 
 import {
   Cohort,
@@ -21,13 +20,21 @@ import {
   Workspace,
 } from 'generated';
 
+const CDR_VERSION = 1;
+
+function isChoiceFilter(filter): filter is ChoiceFilterComponent {
+  return (filter instanceof ChoiceFilterComponent);
+}
+
+
 @Component({
   selector: 'app-participant-table',
   templateUrl: './participant-table.component.html',
 })
 export class ParticipantTableComponent implements OnInit, OnDestroy {
 
-  readonly columnsEnum = {
+  readonly ColumnEnum = Columns;
+  readonly ReverseColumnEnum = {
     participantId: Columns.ParticipantId,
     gender: Columns.Gender,
     race: Columns.Race,
@@ -77,16 +84,22 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
-      query.sortColumn = this.columnsEnum[sortby];
+      query.sortColumn = this.ReverseColumnEnum[sortby];
       query.sortOrder = state.sort.reverse
         ? SortOrder.Desc
         : SortOrder.Asc;
     }
 
     if (state.filters) {
-      query.filters.items = <Filter[]>(state.filters.map(
-        ({property, value}: any) => (<Filter>{property, value, operator: Operator.Equal})
-      ));
+      for (const filter of state.filters) {
+        if (isChoiceFilter(filter)) {
+          query.filters.items.push(...filter.toFilters());
+        } else {
+          const {property, value} = <Partial<Filter>>filter;
+          const operator = Operator.Equal;
+          query.filters.items.push(<Filter>{property, value, operator});
+        }
+      }
     }
 
     const {ns, wsid, cid} = this.pathParams;

@@ -4,12 +4,31 @@
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
-  <clr-dg-column [clrDgField]="'participantId'">Participant ID</clr-dg-column>
-  <clr-dg-column [clrDgField]="'birthDate'">Date of Birth</clr-dg-column>
-  <clr-dg-column [clrDgField]="'gender'">Gender</clr-dg-column>
-  <clr-dg-column [clrDgField]="'race'">Race</clr-dg-column>
-  <clr-dg-column [clrDgField]="'ethnicity'">Ethnicity</clr-dg-column>
-  <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
+  <clr-dg-column [clrDgField]="'participantId'">
+    Participant ID
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'birthDate'">
+    Date of Birth
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'gender'">
+    Gender
+    <clr-dg-filter [clrDgFilter]="genderFilter">
+      <app-choice-filter
+        #genderFilter
+        [options]="genders"
+        [property]="ColumnEnum.Gender">
+      </app-choice-filter>
+    </clr-dg-filter>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'race'">
+    Race
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'ethnicity'">
+    Ethnicity
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'status'">
+    Review Status
+  </clr-dg-column>
 
   <clr-dg-row
     *ngFor="let participant of participants"
@@ -23,10 +42,6 @@
     </clr-dg-cell>
     <clr-dg-cell>
       {{ participant.gender | titlecase }}
-      <clr-dg-filter [clrDgFilter]="genderFilter">
-        <app-choice-fiter #genderFilter [options]="genders">
-        </app-choice-fiter>
-      </clr-dg-filter>
     </clr-dg-cell>
     <clr-dg-cell>
       {{ participant.race | titlecase }}
