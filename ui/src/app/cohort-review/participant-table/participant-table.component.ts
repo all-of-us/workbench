@@ -3,23 +3,31 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
+import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
-
-const CDR_VERSION = 1;
 
 import {
   Cohort,
   CohortReview,
   CohortReviewService,
+  ConceptIdName,
   Filter,
   Operator,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatusesRequest as Request,
+  ParticipantDemographics,
   SortOrder,
   Workspace,
 } from 'generated';
+
+const CDR_VERSION = 1;
+
+function isChoiceFilter(filter): filter is ChoiceFilterComponent {
+  return (filter instanceof ChoiceFilterComponent);
+}
+
 
 @Component({
   selector: 'app-participant-table',
@@ -27,7 +35,8 @@ import {
 })
 export class ParticipantTableComponent implements OnInit, OnDestroy {
 
-  readonly columnsEnum = {
+  readonly ColumnEnum = Columns;
+  readonly ReverseColumnEnum = {
     participantId: Columns.ParticipantId,
     gender: Columns.Gender,
     race: Columns.Race,
@@ -41,6 +50,10 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
+  concepts: ParticipantDemographics;
+  genders: string[] = [];
+  races: string[] = [];
+  ethnicities: string[] = [];
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -55,6 +68,12 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
     });
+
+    const {concepts} = this.route.snapshot.data;
+    this.concepts = concepts;
+    this.races = this.extractDemographics(concepts.raceList);
+    this.genders = this.extractDemographics(concepts.genderList);
+    this.ethnicities = this.extractDemographics(concepts.ethnicityList);
   }
 
   ngOnDestroy() {
@@ -63,8 +82,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
   refresh(state: ClrDatagridStateInterface) {
     setTimeout(() => this.loading = true, 0);
-    // console.log('Datagrid state: ');
-    // console.dir(state);
+    console.log('Datagrid state: ');
+    console.dir(state);
 
     /* Populate the query with page / pagesize and then defaults */
     const query = <Request>{
@@ -77,22 +96,28 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
-      query.sortColumn = this.columnsEnum[sortby];
+      query.sortColumn = this.ReverseColumnEnum[sortby];
       query.sortOrder = state.sort.reverse
         ? SortOrder.Desc
         : SortOrder.Asc;
     }
 
     if (state.filters) {
-      query.filters.items = <Filter[]>(state.filters.map(
-        ({property, value}: any) => (<Filter>{property, value, operator: Operator.Equal})
-      ));
+      for (const filter of state.filters) {
+        if (isChoiceFilter(filter)) {
+          query.filters.items.push(...filter.toFilters());
+        } else {
+          const {property, value} = <Partial<Filter>>filter;
+          const operator = Operator.Equal;
+          query.filters.items.push(<Filter>{property, value, operator});
+        }
+      }
     }
 
     const {ns, wsid, cid} = this.pathParams;
 
-    // console.log('Participant page request parameters:');
-    // console.dir(query);
+    console.log('Participant page request parameters:');
+    console.dir(query);
 
     return this.reviewAPI
       .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
@@ -108,5 +133,11 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
     return {ns, wsid, cid};
+  }
+
+  private extractDemographics(arr: ConceptIdName[]): string[] {
+    const names = arr.map(item => item.conceptName);
+    const vals = new Set<string>(names);
+    return Array.from(vals);
   }
 }
