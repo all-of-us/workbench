@@ -55,7 +55,8 @@ export class ParticipantAnnotationComponent implements OnInit  {
       ...this.value,
       [this.valuePropertyName]: value
     };
-    return this.reviewAPI.createParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, request);
+    return this.reviewAPI
+        .createParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, request);
   }
 
   update(value): Observable<Annotation> {
@@ -66,7 +67,8 @@ export class ParticipantAnnotationComponent implements OnInit  {
     const request = <Request>{
       [this.valuePropertyName]: value
     };
-    return this.reviewAPI.updateParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, aid, request);
+    return this.reviewAPI
+        .updateParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, aid, request);
   }
 
   delete(): Observable<{}> {
