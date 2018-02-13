@@ -43,14 +43,16 @@ public class MailChimpServiceImpl implements MailChimpService {
     try {
       userId = getClient().execute(createRequest)
           .mapping.get(MailChimpService.MAILCHIMP_KEY_ID).toString();
-    } catch (Exception e) {
+    } catch (MailchimpException e) {
+      throw ExceptionUtils.convertMailchimpError(e);
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
     return userId;
   }
 
   @Override
-  public String getMember(String contactEmail) throws NotFoundException {
+  public String getMember(String contactEmail) {
     Map<String, Object> mailchimpResponse = new HashMap<String, Object>();
     try {
       mailchimpResponse = getClient().execute(
