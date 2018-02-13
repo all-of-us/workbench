@@ -290,13 +290,13 @@ Description of arguments for these scripts are as follows. See examples below.
 1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
 
 #### Import a dump to cloudsql instance.
-`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchtest --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
 ##### Note a 3GB dump like cdr and public can take an hour or so to finish. You must wait before running another import on same instance (Cloudsql limitation) You can check status of import at the website: https://console.cloud.google.com/sql/instances/workbenchmaindb/operations?project=all-of-us-workbench-test 
 ##### Or with this command: 
 `gcloud sql operations list --instance [INSTANCE_NAME] --limit 10`
 
 ##### Run again for the public db
-`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchtest --sql-dump-file public20180206.sql --bucket all-of-us-workbench-public-cloudsql`
+`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file public20180206.sql --bucket all-of-us-workbench-public-cloudsql`
  
 ##### Result
 1) databases are live in cloudsql 
