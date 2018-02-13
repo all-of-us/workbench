@@ -12,6 +12,8 @@ import {
   Cohort,
   CohortReview,
   CohortReviewService,
+  Filter,
+  Operator,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatusesRequest as Request,
@@ -82,7 +84,9 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     }
 
     if (state.filters) {
-      // TODO(jms) - do filter stuff here
+      query.filters.items = <Filter[]>(state.filters.map(
+        ({property, value}: any) => (<Filter>{property, value, operator: Operator.Equal})
+      ));
     }
 
     const {ns, wsid, cid} = this.pathParams;
