@@ -2195,6 +2195,10 @@ definitions:
 
   Filter:
     type: object
+    required:
+      - property
+      - operator
+      - value
     properties:
       property:
         $ref: "#/definitions/ParticipantCohortStatusColumns"
@@ -2255,7 +2259,7 @@ definitions:
         format: int64
       gender:
         type: string
-      birthDatetime:
+      birthDate:
         type: integer
         format: int64
       raceConceptId:

@@ -7,16 +7,18 @@ import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
 const CDR_VERSION = 1;
-const getProperty = filt => (<{property: string, value: string}>filt).property;
-const getValue = filt => (<{property: string, value: string}>filt).value;
 
 import {
+  Cohort,
   CohortReview,
   CohortReviewService,
+  Filter,
+  Operator,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatusesRequest as Request,
   SortOrder,
+  Workspace,
 } from 'generated';
 
 @Component({
@@ -49,16 +51,10 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = false;
-    // console.log('Route for participant table: ');
-    // console.dir(this.route);
-
-    this.subscription = this.route.data.subscribe(data => {
-      this.participants = data.participants.map(Participant.fromStatus);
+    this.subscription = this.state.review$.subscribe(review => {
+      this.review = review;
+      this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
     });
-
-    this.subscription.add(this.route.parent.data.subscribe(data => {
-      this.review = data.review;
-    }));
   }
 
   ngOnDestroy() {
@@ -66,13 +62,18 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   }
 
   refresh(state: ClrDatagridStateInterface) {
+    setTimeout(() => this.loading = true, 0);
     // console.log('Datagrid state: ');
     // console.dir(state);
 
-    const query = <Request>{};
-
-    query.page = Math.floor(state.page.from / state.page.size) + 1;
-    query.pageSize = state.page.size;
+    /* Populate the query with page / pagesize and then defaults */
+    const query = <Request>{
+      page: Math.floor(state.page.from / state.page.size),
+      pageSize: state.page.size,
+      sortColumn: Columns.ParticipantId,
+      sortOrder: SortOrder.Asc,
+      filters: {items: []},
+    };
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
@@ -83,9 +84,29 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     }
 
     if (state.filters) {
-      // TODO(jms) - do filter stuff here
+      query.filters.items = <Filter[]>(state.filters.map(
+        ({property, value}: any) => (<Filter>{property, value, operator: Operator.Equal})
+      ));
     }
 
-    this.router.navigate(['.'], {relativeTo: this.route, queryParams: query});
+    const {ns, wsid, cid} = this.pathParams;
+
+    // console.log('Participant page request parameters:');
+    // console.dir(query);
+
+    return this.reviewAPI
+      .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
+      .do(_ => this.loading = false)
+      .subscribe(review => this.state.review.next(review));
+  }
+
+  private get pathParams() {
+    const paths = this.route.snapshot.pathFromRoot;
+    const params: any = paths.reduce((p, r) => ({...p, ...r.params}), {});
+
+    const ns: Workspace['namespace'] = params.ns;
+    const wsid: Workspace['id'] = params.wsid;
+    const cid: Cohort['id'] = +(params.cid);
+    return {ns, wsid, cid};
   }
 }
