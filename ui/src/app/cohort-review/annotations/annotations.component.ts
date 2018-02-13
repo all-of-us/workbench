@@ -19,8 +19,8 @@ interface Annotation {
  */
 const byDefinitionId =
   ({cohortAnnotationDefinitionId}: CohortAnnotationDefinition) =>
-  ({cohortAnnotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
-  (cohortAnnotationDefinitionId === cohortAnnotationDefinitionId);
+  ({cohortAnnotationDefinitionId: annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
+  (cohortAnnotationDefinitionId === annotationDefinitionId);
 
 /*
  * Curried ParticipantCohortAnnotation factory - generates a blank value, given
