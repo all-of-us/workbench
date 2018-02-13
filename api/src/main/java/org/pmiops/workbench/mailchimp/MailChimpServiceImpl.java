@@ -11,7 +11,7 @@ import java.util.Map;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class MailChimpServiceImpl implements MailChimpService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
   @Override
-  public String addUserContactEmail(String contactEmail) {
+  public String addUserContactEmail(String contactEmail) throws BadRequestException {
     String userId;
     Create createRequest = new Create(
         getListId(),

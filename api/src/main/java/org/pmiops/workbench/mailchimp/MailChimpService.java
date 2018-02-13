@@ -1,5 +1,6 @@
 package org.pmiops.workbench.mailchimp;
 
+import org.pmiops.workbench.exceptions.BadRequestException;
 
 /**
  * Encapsulate mailchimp API interaction details and provide a simple/mockable interface
@@ -10,7 +11,7 @@ public interface MailChimpService {
   static final String MAILCHIMP_KEY_ID = "id";
   static final String MAILCHIMP_KEY_STATUS = "status";
 
-  String addUserContactEmail(String contactEmail);
+  String addUserContactEmail(String contactEmail) throws BadRequestException;
 
   String getMember(String userEmailHash);
 }

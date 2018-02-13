@@ -251,6 +251,10 @@ paths:
       responses:
         204:
           description: Request received.
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   # TODO: add signature / other state?
   /v1/account/accept-terms-of-service:

@@ -35,6 +35,7 @@ import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
@@ -335,13 +336,18 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
   @Override
-  public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+  public ResponseEntity updateProfile(Profile updatedProfile) {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+        try {
+          mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+        }
+        catch (BadRequestException e) {
+          return ResponseEntity.ok(e.getErrorResponse());
+        }
         user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
