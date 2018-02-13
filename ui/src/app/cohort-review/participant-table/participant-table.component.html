@@ -11,22 +11,16 @@
   <clr-dg-column [clrDgField]="'ethnicity'">Ethnicity</clr-dg-column>
   <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
 
-  <clr-dg-row *ngFor="let participant of participants">
-    <clr-dg-cell
-      [style.cursor]="'pointer'"
-      routerLink="{{ participant.id }}">
-      {{ participant.id }}
-    </clr-dg-cell>
+  <clr-dg-row
+    *ngFor="let participant of participants"
+    [style.cursor]="'pointer'"
+    routerLink="{{ participant.id }}">
+    <clr-dg-cell>{{ participant.id }}</clr-dg-cell>
     <clr-dg-cell>{{ participant.dob       | date:'yyyy-MM-dd'}}</clr-dg-cell>
     <clr-dg-cell>{{ participant.gender    | titlecase }}</clr-dg-cell>
     <clr-dg-cell>{{ participant.race      | titlecase }}</clr-dg-cell>
     <clr-dg-cell>{{ participant.ethnicity | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>
-      <span class="label"
-        [ngClass]="participant.statusLabelClass">
-        {{ participant.formattedStatusText }}
-      </span>
-    </clr-dg-cell>
+    <clr-dg-cell>{{ participant.formattedStatusText }}</clr-dg-cell>
   </clr-dg-row>
 
   <clr-dg-footer>

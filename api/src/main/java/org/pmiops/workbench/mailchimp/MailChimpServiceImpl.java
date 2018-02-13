@@ -1,20 +1,16 @@
 package org.pmiops.workbench.mailchimp;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import com.ecwid.maleorang.MailchimpClient;
 import com.ecwid.maleorang.MailchimpException;
 import com.ecwid.maleorang.method.v3_0.lists.members.EditMemberMethod.Create;
 import com.ecwid.maleorang.method.v3_0.lists.members.GetMemberMethod;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +36,8 @@ public class MailChimpServiceImpl implements MailChimpService {
   @Override
   public String addUserContactEmail(String contactEmail) {
     String userId;
-    if (listId == null) {
-      listId = cloudStorageServiceProvider.get().readMailChimpListId();
-    }
     Create createRequest = new Create(
-        listId,
+        getListId(),
         contactEmail);
     createRequest.status = MailChimpService.MAILCHIMP_PENDING;
     try {
@@ -58,29 +51,29 @@ public class MailChimpServiceImpl implements MailChimpService {
 
   @Override
   public String getMember(String contactEmail) throws NotFoundException {
-    Map<String, Object> mailchimpResponse;
+    Map<String, Object> mailchimpResponse = new HashMap<String, Object>();
     try {
       mailchimpResponse = getClient().execute(
-          new GetMemberMethod(listId,
-          contactEmail)).mapping;
+          new GetMemberMethod(getListId(),
+              contactEmail)).mapping;
     } catch (MailchimpException e) {
-      if (e.code == 404) {
-        throw new NotFoundException();
-      } else {
-        throw new RuntimeException(e);
-      }
+      throw ExceptionUtils.convertMailchimpError(e);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     return mailchimpResponse.get(MailChimpService.MAILCHIMP_KEY_STATUS).toString();
   }
 
+  private String getListId() {
+    if (listId == null) {
+      listId = cloudStorageServiceProvider.get().readMailChimpListId();
+    }
+    return listId;
+  }
+
   MailchimpClient getClient() {
     if (apiKey == null) {
       apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
-    }
-    if (listId == null) {
-      listId = cloudStorageServiceProvider.get().readMailChimpListId();
     }
     return new MailchimpClient(apiKey);
   }

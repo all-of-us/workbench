@@ -6,13 +6,15 @@ class CloudSqlProxyContext
   def initialize(gcc)
     Workbench::assert_in_docker
     gcc.ensure_service_account
+    @project = gcc.project
   end
 
   def run()
+    # TODO(dmohs): An error here does not cause the main thread to die.
     @ps = fork do
       exec *%W{
         cloud_sql_proxy
-          -instances all-of-us-workbench-test:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
+          -instances #{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
           -credential_file=src/main/webapp/WEB-INF/sa-key.json
       }
     end

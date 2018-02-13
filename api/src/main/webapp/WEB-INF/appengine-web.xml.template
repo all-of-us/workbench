@@ -2,7 +2,6 @@
   <service>api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
-  <application>all-of-us-workbench-test</application>
 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>

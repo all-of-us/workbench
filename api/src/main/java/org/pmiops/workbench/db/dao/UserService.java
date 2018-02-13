@@ -84,7 +84,7 @@ public class UserService {
           && user.getDemographicSurveyCompletionTime() != null
           && user.getEthicsTrainingCompletionTime() != null
           && user.getTermsOfServiceCompletionTime() != null
-          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.VERIFIED)) {
+          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
         try {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
