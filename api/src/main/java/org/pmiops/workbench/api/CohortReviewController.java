@@ -77,7 +77,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     return new org.pmiops.workbench.model.ParticipantCohortStatus()
                             .participantId(participant.getParticipantKey().getParticipantId())
                             .status(participant.getStatus())
-                            .birthDatetime(participant.getBirthDate().getTime())
+                            .birthDate(participant.getBirthDate().getTime())
                             .ethnicityConceptId(participant.getEthnicityConceptId())
                             .ethnicity(participant.getEthnicity())
                             .genderConceptId(participant.getGenderConceptId())
