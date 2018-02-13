@@ -2,11 +2,14 @@ package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -28,6 +31,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private CohortReviewDao cohortReviewDao;
     private CohortDao cohortDao;
     private ParticipantCohortStatusDao participantCohortStatusDao;
+    private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
     private WorkspaceService workspaceService;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
@@ -37,11 +42,15 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
                             CohortDao cohortDao,
                             ParticipantCohortStatusDao participantCohortStatusDao,
+                            ParticipantCohortAnnotationDao participantCohortAnnotationDao,
+                            CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao,
                             WorkspaceService workspaceService,
                             Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
+        this.participantCohortAnnotationDao = participantCohortAnnotationDao;
+        this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
         this.workspaceService = workspaceService;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
@@ -131,13 +140,19 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         return participantCohortStatus;
     }
 
+    @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
         return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
     }
 
     @Override
     public ParticipantCohortAnnotation saveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation) {
-        return null;
+        return participantCohortAnnotationDao.save(participantCohortAnnotation);
+    }
+
+    @Override
+    public CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId) {
+        return cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
     }
 
     @Override
@@ -148,6 +163,16 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     public ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId) {
         return null;
+    }
+
+    @Override
+    public ParticipantCohortAnnotation findParticipantCohortAnnotation(Long cohortReviewId,
+                                                                       Long cohortAnnotationDefinitionId,
+                                                                       Long participantId) {
+        return participantCohortAnnotationDao.findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
+                cohortReviewId,
+                cohortAnnotationDefinitionId,
+                participantId);
     }
 
     @Override

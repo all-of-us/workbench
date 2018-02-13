@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -85,9 +86,13 @@ public interface CohortReviewService {
 
     ParticipantCohortAnnotation saveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation);
 
+    CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
+
     void deleteParticipantCohortAnnotation(Long annotationId);
 
     ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId);
+
+    ParticipantCohortAnnotation findParticipantCohortAnnotation(Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId);
 
     List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId);
 }
