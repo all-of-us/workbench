@@ -4,23 +4,72 @@
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
-  <clr-dg-column [clrDgField]="'participantId'">Participant ID</clr-dg-column>
-  <clr-dg-column [clrDgField]="'birthDate'">Date of Birth</clr-dg-column>
-  <clr-dg-column [clrDgField]="'gender'">Gender</clr-dg-column>
-  <clr-dg-column [clrDgField]="'race'">Race</clr-dg-column>
-  <clr-dg-column [clrDgField]="'ethnicity'">Ethnicity</clr-dg-column>
-  <clr-dg-column [clrDgField]="'status'">Review Status</clr-dg-column>
+  <clr-dg-column [clrDgField]="'participantId'">
+    Participant ID
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'birthDate'">
+    Date of Birth
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'gender'">
+    Gender
+    <clr-dg-filter [clrDgFilter]="genderFilter">
+      <app-choice-filter
+        #genderFilter
+        [options]="genders"
+        [property]="ColumnEnum.Gender">
+      </app-choice-filter>
+    </clr-dg-filter>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'race'">
+    Race
+    <clr-dg-filter [clrDgFilter]="raceFilter">
+      <app-choice-filter
+        #raceFilter
+        [options]="races"
+        [property]="ColumnEnum.Race">
+      </app-choice-filter>
+    </clr-dg-filter>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'ethnicity'">
+    Ethnicity
+    <clr-dg-filter [clrDgFilter]="ethnicityFilter">
+      <app-choice-filter
+        #ethnicityFilter
+        [options]="ethnicities"
+        [property]="ColumnEnum.Ethnicity">
+      </app-choice-filter>
+    </clr-dg-filter>
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'status'">
+    Review Status
+    <clr-dg-filter [clrDgFilter]="statusFilter">
+      <app-status-filter #statusFilter>
+      </app-status-filter>
+    </clr-dg-filter>
+  </clr-dg-column>
 
   <clr-dg-row
     *ngFor="let participant of participants"
     [style.cursor]="'pointer'"
     routerLink="{{ participant.id }}">
-    <clr-dg-cell>{{ participant.id }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.dob       | date:'yyyy-MM-dd'}}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.gender    | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.race      | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.ethnicity | titlecase }}</clr-dg-cell>
-    <clr-dg-cell>{{ participant.formattedStatusText }}</clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.id }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.dob | date:'yyyy-MM-dd' }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.gender | titlecase }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.race | titlecase }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.ethnicity | titlecase }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ participant.formattedStatusText }}
+    </clr-dg-cell>
   </clr-dg-row>
 
   <clr-dg-footer>
