@@ -10,7 +10,6 @@ export class Participant implements ParticipantCohortStatus {
 
   /* Status */
   status: CohortStatus;
-
   get formattedStatusText() {
     return {
       [CohortStatus.EXCLUDED]: 'Excluded',
@@ -30,10 +29,12 @@ export class Participant implements ParticipantCohortStatus {
     return this._dob;
   }
 
+  /* Demographic information */
   gender: ParticipantCohortStatus['gender'];
   race: ParticipantCohortStatus['race'];
   ethnicity: ParticipantCohortStatus['ethnicity'];
 
+  /* Constructor & static constructor (useful in .map, for example) */
   constructor(obj?: ParticipantCohortStatus) {
     if (obj) {
       const {participantId, status, gender, race, ethnicity, birthDate} = obj;
