@@ -10,18 +10,15 @@ export class Participant implements ParticipantCohortStatus {
 
   /* Status */
   status: CohortStatus;
+
   get formattedStatusText() {
-    return {
-      [CohortStatus.EXCLUDED]: 'Excluded',
-      [CohortStatus.INCLUDED]: 'Included',
-      [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
-      [CohortStatus.NOTREVIEWED]: '',
-    }[this.status];
+    return Participant.formatStatusForText(this.status);
   }
 
   /* Birthdate is a Unix timestamp; we also provide a moment.js object here */
   birthDate: ParticipantCohortStatus['birthDate'];
   private _dob: any; /* Moment.js object */
+
   get dob() {
     if (!this._dob) {
       this._dob = moment(this.birthDate);
@@ -34,7 +31,7 @@ export class Participant implements ParticipantCohortStatus {
   race: ParticipantCohortStatus['race'];
   ethnicity: ParticipantCohortStatus['ethnicity'];
 
-  /* Constructor & static constructor (useful in .map, for example) */
+  /* Constructor & static methods */
   constructor(obj?: ParticipantCohortStatus) {
     if (obj) {
       const {participantId, status, gender, race, ethnicity, birthDate} = obj;
@@ -49,5 +46,14 @@ export class Participant implements ParticipantCohortStatus {
 
   static fromStatus(obj: ParticipantCohortStatus): Participant {
     return new Participant(obj);
+  }
+
+  static formatStatusForText(status: CohortStatus): string {
+    return {
+      [CohortStatus.EXCLUDED]: 'Excluded',
+      [CohortStatus.INCLUDED]: 'Included',
+      [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
+      [CohortStatus.NOTREVIEWED]: '',
+    }[status];
   }
 }

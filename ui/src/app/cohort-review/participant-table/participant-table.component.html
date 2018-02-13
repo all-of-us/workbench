@@ -22,9 +22,23 @@
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'race'">
     Race
+    <clr-dg-filter [clrDgFilter]="raceFilter">
+      <app-choice-filter
+        #raceFilter
+        [options]="races"
+        [property]="ColumnEnum.Race">
+      </app-choice-filter>
+    </clr-dg-filter>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'ethnicity'">
     Ethnicity
+    <clr-dg-filter [clrDgFilter]="ethnicityFilter">
+      <app-choice-filter
+        #ethnicityFilter
+        [options]="ethnicities"
+        [property]="ColumnEnum.Ethnicity">
+      </app-choice-filter>
+    </clr-dg-filter>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'status'">
     Review Status
