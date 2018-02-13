@@ -970,8 +970,6 @@ end
 def migrate_database()
   common = Common.new
   common.status "Migrating main database..."
-  print "ENV[DB_NAME] = " + ENV["DB_NAME"]
-  print "LIQUIBASE PWD = " + ENV["LIQUIBASE_DB_PASSWORD"]
   Dir.chdir("db") do
     common.run_inline(%W{gradle --info update -PrunList=main})
   end
