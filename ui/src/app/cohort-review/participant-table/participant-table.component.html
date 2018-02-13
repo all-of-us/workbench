@@ -42,6 +42,10 @@
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'status'">
     Review Status
+    <clr-dg-filter [clrDgFilter]="statusFilter">
+      <app-status-filter #statusFilter>
+      </app-status-filter>
+    </clr-dg-filter>
   </clr-dg-column>
 
   <clr-dg-row

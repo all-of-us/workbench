@@ -20,7 +20,7 @@ import {
 export class ChoiceFilterComponent
 implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   @Input() property: ParticipantCohortStatusColumns;
-  @Input() options: any;
+  @Input() options: any[];
 
   selection = new FormControl();
   changes = new Subject<any>();

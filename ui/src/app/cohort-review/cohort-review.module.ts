@@ -28,6 +28,7 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 /* tslint:enable:max-line-length */
 
 import {WorkspacesService} from 'generated';
+import { StatusFilterComponent } from './status-filter/status-filter.component';
 
 @NgModule({
   imports: [
@@ -56,6 +57,7 @@ import {WorkspacesService} from 'generated';
     /* Directives */
     FullPageDirective,
     SidebarDirective,
+    StatusFilterComponent,
   ],
   providers: [ReviewStateService]
 })
