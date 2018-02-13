@@ -26,6 +26,15 @@ fi
 # export for liquibase to use this
 export CDR_DB_NAME
 
+# If CDR_DB_NAME matches ^public, we want to the public_db_user env var substituted in the create_db.sql
+if [[ CDR_DB_NAME =~ ^public ]]
+then
+    echo "Working the public db init cdr"
+    export WORKBENCH_DB_USER=$PUBLIC_DB_USER
+    export WORKBENCH_DB_PASSWORD=$PUBLIC_DB_PASSWORD
+fi
+
+
 CREATE_DB_FILE=/tmp/create_db.sql
 
 function finish {
