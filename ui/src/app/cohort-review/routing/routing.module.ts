@@ -6,6 +6,7 @@ import {OverviewComponent} from '../overview/overview.component';
 import {ParticipantDetailComponent} from '../participant-detail/participant-detail.component';
 import {ParticipantTableComponent} from '../participant-table/participant-table.component';
 
+import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
 import {ParticipantAnnotationsResolver} from './participant-annotations.resolver';
 import {ParticipantResolver} from './participant.resolver';
 
@@ -25,6 +26,9 @@ const routes: Routes = [{
     }, {
       path: 'participants',
       component: ParticipantTableComponent,
+      resolve: {
+        concepts: DemographicConceptMapsResolver,
+      }
     }, {
       path: 'participants/:pid',
       component: ParticipantDetailComponent,
@@ -40,6 +44,7 @@ const routes: Routes = [{
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
+    DemographicConceptMapsResolver,
     ParticipantResolver,
     ParticipantAnnotationsResolver,
   ],

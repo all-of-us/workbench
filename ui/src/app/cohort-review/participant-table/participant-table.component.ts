@@ -11,11 +11,13 @@ import {
   Cohort,
   CohortReview,
   CohortReviewService,
+  ConceptIdName,
   Filter,
   Operator,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatusesRequest as Request,
+  ParticipantDemographics,
   SortOrder,
   Workspace,
 } from 'generated';
@@ -48,6 +50,10 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
+  concepts: ParticipantDemographics;
+  genders: string[] = [];
+  races: string[] = [];
+  ethnicities: string[] = [];
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -62,6 +68,12 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
     });
+
+    const {concepts} = this.route.snapshot.data;
+    this.concepts = concepts;
+    this.races = this.extractDemographics(concepts.raceList);
+    this.genders = this.extractDemographics(concepts.genderList);
+    this.ethnicities = this.extractDemographics(concepts.ethnicityList);
   }
 
   ngOnDestroy() {
@@ -123,7 +135,9 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     return {ns, wsid, cid};
   }
 
-  get genders() {
-    return ['Male', 'Female'];
+  private extractDemographics(arr: ConceptIdName[]): string[] {
+    const names = arr.map(item => item.conceptName);
+    const vals = new Set<string>(names);
+    return Array.from(vals);
   }
 }
