@@ -14,6 +14,13 @@ require "optparse"
 require "ostruct"
 require "tempfile"
 
+INSTANCE_NAME = "workbenchmaindb"
+FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
+SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com
+              compute.googleapis.com admin.googleapis.com
+              cloudbilling.googleapis.com sqladmin.googleapis.com sql-component.googleapis.com
+              clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
+
 def ensure_docker(cmd_name, args)
   unless Workbench::in_docker?
     exec *(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args)
@@ -293,20 +300,20 @@ Common.register_command({
 })
 
 
-def get_service_account_creds_file(project, account, creds_file)
+def get_service_account_creds_file(project, account, creds_file_path)
   common = Common.new
   service_account = "#{project}@appspot.gserviceaccount.com"
-  common.run_inline %W{gcloud iam service-accounts keys create #{creds_file.path}
+  common.run_inline %W{gcloud iam service-accounts keys create #{creds_file_path}
     --iam-account=#{service_account} --project=#{project} --account=#{account}}
 end
 
-def delete_service_accounts_creds(project, account, creds_file)
-  tmp_private_key = `grep private_key_id #{creds_file.path} | cut -d\\\" -f4`.strip()
+def delete_service_accounts_creds(project, account, creds_file_path)
+  tmp_private_key = `grep private_key_id #{creds_file_path} | cut -d\\\" -f4`.strip()
   service_account ="#{project}@appspot.gserviceaccount.com"
   common = Common.new
   common.run_inline %W{gcloud iam service-accounts keys delete #{tmp_private_key} -q
      --iam-account=#{service_account} --project=#{project} --account=#{account}}
-  creds_file.unlink
+  common.run_inline %W{rm #{creds_file_path}}
 end
 
 def activate_service_account(creds_file)
@@ -378,36 +385,38 @@ end
 # Fetches a credentials file. Passes the path of the credentials to a block.
 # For all-of-us-workbench-test only, it leaves the (lazy-fetched) creds on disk;
 # for any other project, it cleans them up after the block is run.
-def do_run_with_creds(project, account, creds_file)
+def do_run_with_creds(project, account, creds_file, delete_after=True)
   if creds_file == nil
-    service_account_creds_file = Tempfile.new("#{project}-creds.json")
+    creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
     if project == "all-of-us-workbench-test"
-      creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
+      service_account_creds_file = Tempfile.new("#{project}-creds.json")
       # For test, use a locally stored key file copied from GCS (which we leave hanging
       # around.)
       if !File.file?(creds_filename)
         # Create a temporary creds file for accessing GCS.
-        get_service_account_creds_file(project, account, service_account_creds_file)
+        get_service_account_creds_file(project, account, service_account_creds_file.path)
         begin
           activate_service_account(service_account_creds_file.path)
           # Copy the stable creds file from its path in GCS to sa-key.json.
           # Important: we must leave this key file in GCS, and not delete it in Cloud Console,
           # or local development will stop working.
           get_file_from_gcs("all-of-us-workbench-test-credentials",
-              "all-of-us-workbench-test-9b5c623a838e.json", creds_filename)
+              "app-engine-default-sa.json", creds_filename)
         ensure
           # Delete the temporary creds we created.
-          delete_service_accounts_creds(project, account, service_account_creds_file)
+          delete_service_accounts_creds(project, account, service_account_creds_file.path)
         end
       end
       yield(creds_filename)
     else
       # Create a creds file and use it; clean up when done.
-      get_service_account_creds_file(project, account, service_account_creds_file)
+      get_service_account_creds_file(project, account, creds_filename)
       begin
-        yield(service_account_creds_file.path)
+        yield(creds_filename)
       ensure
-        delete_service_accounts_creds(project, account, service_account_creds_file)
+        if delete_after
+          delete_service_accounts_creds(project, account, creds_filename)
+        end
       end
     end
   else
@@ -599,23 +608,7 @@ Common.register_command({
   :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-
-def do_create_db_creds(project, account, creds_file)
-  puts "Enter the root DB user password:"
-  root_password = STDIN.noecho(&:gets)
-  puts "Enter the root DB user password again:"
-  root_password_2 = STDIN.noecho(&:gets)
-  if root_password != root_password_2
-    raise("Root password entries didn't match.")
-  end
-  puts "Enter the workbench DB user password:"
-  workbench_password = STDIN.noecho(&:gets)
-  puts "Enter the workbench DB user password again:"
-  workbench_password_2 = STDIN.noecho(&:gets)
-  if workbench_password != workbench_password_2
-    raise("Workbench password entries didn't match.")
-  end
-
+def write_db_creds_file(project, root_password, workbench_password, public_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -624,19 +617,18 @@ def do_create_db_creds(project, account, creds_file)
       db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
       db_creds_file.puts "DB_HOST=127.0.0.1"
       db_creds_file.puts "DB_NAME=workbench"
+      db_creds_file.puts "CDR_DB_NAME=cdr"
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      # TODO: replace with public DB, user, password
-      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/cdr?rewriteBatchedStatements=true"
-      db_creds_file.puts "PUBLIC_DB_USER=workbench"
-      db_creds_file.puts "PUBLIC_DB_PASSWORD=#{workbench_password}"
+      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/publicXXX?rewriteBatchedStatements=true"
+      db_creds_file.puts "PUBLIC_DB_USER=public"
+      db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
       db_creds_file.close
 
-      activate_service_account(creds_file)
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
     ensure
       db_creds_file.unlink
@@ -645,18 +637,6 @@ def do_create_db_creds(project, account, creds_file)
     raise("Error creating file.")
   end
 end
-
-def create_db_creds(*args)
-  GcloudContext.new("create-db-creds", args, true).run do |ctx|
-    do_create_db_creds(ctx.opts.project, ctx.opts.account, ctx.opts.creds_file)
-  end
-end
-
-Common.register_command({
-  :invocation => "create-db-creds",
-  :description => "Creates database credentials in a file in GCS; accepts project and account args",
-  :fn => lambda { |*args| create_db_creds(*args) }
-})
 
 def create_auth_domain()
   common = Common.new
@@ -971,14 +951,27 @@ Common.register_command({
 })
 
 
-def migrate_database()
-  common = Common.new
-  common.status "Migrating main database..."
+def create_workbench_db()
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
     "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
     to_redact=ENV["MYSQL_ROOT_PASSWORD"]
   )
+end
+
+def create_cdr_db()
+  run_with_redirects(
+    "cat db-cdr/create_db.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
+  )
+end
+
+def migrate_database()
+  common = Common.new
+  common.status "Migrating main database..."
+  print "ENV[DB_NAME] = " + ENV["DB_NAME"]
+  print "LIQUIBASE PWD = " + ENV["LIQUIBASE_DB_PASSWORD"]
   Dir.chdir("db") do
     common.run_inline(%W{gradle --info update -PrunList=main})
   end
@@ -987,11 +980,6 @@ end
 def migrate_workbench_data()
   common = Common.new
   common.status "Migrating workbench data..."
-  run_with_redirects(
-    "cat db/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-  )
   Dir.chdir("db") do
     common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
   end
@@ -1000,11 +988,6 @@ end
 def migrate_cdr_database()
   common = Common.new
   common.status "Migrating CDR database..."
-  run_with_redirects(
-    "cat db-cdr/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-  )
   Dir.chdir("db-cdr") do
     common.run_inline(%W{gradle --info update -PrunList=schema})
   end
@@ -1191,4 +1174,72 @@ Common.register_command({
   :invocation => "print-scoped-sa-access-token",
   :description => "Prints access token for the service account that has been scoped for API access.",
   :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
+
+def create_project_resources(gcc)
+  common = Common.new
+  common.status "Enabling APIs..."
+  for service in SERVICES
+    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+  end
+  common.status "Creating GCS bucket to store credentials..."
+  common.run_inline("gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/")
+  common.status "Creating Cloud SQL instances..."
+  common.run_inline("gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2 " +
+                    "--activation-policy=ALWAYS --backup-start-time 00:00 " +
+                    "--failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log " +
+                    "--database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase")
+  common.status "Creating AppEngine app..."
+  common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
+end
+
+def setup_project_data(gcc, root_password, workbench_password, public_password, args)
+  common = Common.new
+  # This changes database connection information; don't call this while the server is running!
+  common.status "Writing DB credentials file..."
+  write_db_creds_file(gcc.project, root_password, workbench_password, public_password)
+  common.status "Setting root password..."
+  run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
+                     "--instance #{INSTANCE_NAME} --password #{root_password}",
+                     to_redact=root_password)
+  # Don't delete the credentials created here; they will be stored in GCS and reused during
+  # deployment, etc.
+  do_run_with_creds(gcc.project, gcc.account, nil, false) do |creds_file|
+    with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
+      common.status "Copying service account key to GCS..."
+      common.run_inline("gsutil cp #{creds_file} gs://#{gcc.project}-credentials/app-engine-default-sa.json")
+
+      common.status "Setting up databases and users..."
+      create_workbench_db
+      create_cdr_db
+
+      common.status "Running schema migrations..."
+      migrate_database
+      migrate_cdr_database
+      migrate_workbench_data
+      migrate_cdr_data
+
+      common.status "Loading configuration..."
+      load_config(gcc.project)
+    end
+  end
+end
+
+def random_password()
+  return rand(36**20).to_s(36)
+end
+
+def setup_cloud_project(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  create_project_resources(gcc)
+  setup_project_data(gcc, random_password(), random_password(), random_password(), args)
+end
+
+Common.register_command({
+  :invocation => "setup-cloud-project",
+  :description => "Initializes resources within a cloud project that has already been created",
+  :fn => lambda { |*args| setup_cloud_project("setup-cloud-project", *args) }
 })
