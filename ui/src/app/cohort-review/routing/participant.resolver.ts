@@ -7,7 +7,7 @@ import {ReviewStateService} from '../review-state.service';
 
 import {CohortReviewService} from 'generated';
 
-/* TODO use a real CDR version */
+// TODO make this dynamic (jms)
 const CDR_VERSION = 1;
 
 @Injectable()
