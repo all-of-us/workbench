@@ -14,6 +14,9 @@ import {
   ParticipantCohortAnnotation as Annotation,
 } from 'generated';
 
+// TODO make this dynamic (jms)
+const CDR_VERSION = 1;
+
 @Component({
   selector: 'app-participant-annotation',
   templateUrl: './participant-annotation.component.html',
@@ -46,41 +49,43 @@ export class ParticipantAnnotationComponent implements OnInit  {
   }
 
   create(value): Observable<Annotation> {
-    const {ns, wsid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.params;
     const {cohortReviewId: rid} = this.route.snapshot.data.review;
     const pid = this.value.participantId;
     const request = <Annotation>{
       ...this.value,
       [this.valuePropertyName]: value
     };
-    return this.reviewAPI.createParticipantCohortAnnotation(ns, wsid, rid, pid, request);
+    return this.reviewAPI
+        .createParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, request);
   }
 
   update(value): Observable<Annotation> {
-    const {ns, wsid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.params;
     const {cohortReviewId: rid} = this.route.snapshot.data.review;
     const aid = this.definition.cohortAnnotationDefinitionId;
     const pid = this.value.participantId;
     const request = <Request>{
       [this.valuePropertyName]: value
     };
-    return this.reviewAPI.updateParticipantCohortAnnotation(ns, wsid, rid, pid, aid, request);
+    return this.reviewAPI
+        .updateParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, aid, request);
   }
 
   delete(): Observable<{}> {
-    const {ns, wsid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.params;
     const {cohortReviewId: rid} = this.route.snapshot.data.review;
     const aid = this.definition.cohortAnnotationDefinitionId;
     const pid = this.value.participantId;
-    return this.reviewAPI.deleteParticipantCohortAnnotation(ns, wsid, rid, pid, aid);
+    return this.reviewAPI.deleteParticipantCohortAnnotation(ns, wsid, cid, CDR_VERSION, pid, aid);
   }
 
   refresh(): Observable<Annotation[]> {
-    const {ns, wsid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.params;
     const {cohortReviewId: rid} = this.route.snapshot.data.review;
     const pid = this.value.participantId;
     return (this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, rid, pid)
+      .getParticipantCohortAnnotations(ns, wsid, cid, CDR_VERSION, pid)
       .pluck('items') as Observable<Annotation[]>);
   }
 

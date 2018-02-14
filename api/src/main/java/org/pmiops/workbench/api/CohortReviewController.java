@@ -4,19 +4,8 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -24,33 +13,34 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CohortSummaryListResponse;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.ModifyCohortStatusRequest;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
-import org.pmiops.workbench.model.ParticipantDemographics;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -109,6 +99,44 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .pageSize(pageRequest.getPageSize())
                             .sortOrder(pageRequest.getSortOrder().toString())
                             .sortColumn(pageRequest.getSortColumn().toString());
+                }
+            };
+
+    private static final Function<ParticipantCohortAnnotation, org.pmiops.workbench.db.model.ParticipantCohortAnnotation>
+            FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION =
+            new Function<ParticipantCohortAnnotation, org.pmiops.workbench.db.model.ParticipantCohortAnnotation>() {
+                @Override
+                public org.pmiops.workbench.db.model.ParticipantCohortAnnotation apply(ParticipantCohortAnnotation participantCohortAnnotation) {
+                    return new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+                            .annotationId(participantCohortAnnotation.getAnnotationId())
+                            .cohortAnnotationDefinitionId(participantCohortAnnotation.getCohortAnnotationDefinitionId())
+                            .cohortReviewId(participantCohortAnnotation.getCohortReviewId())
+                            .participantId(participantCohortAnnotation.getParticipantId())
+                            .annotationValueString(participantCohortAnnotation.getAnnotationValueString())
+                            .annotationValueEnum(participantCohortAnnotation.getAnnotationValueEnum())
+                            .annotationValueDateString(participantCohortAnnotation.getAnnotationValueDate())
+                            .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
+                            .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());
+                }
+            };
+
+    private static final Function<org.pmiops.workbench.db.model.ParticipantCohortAnnotation, ParticipantCohortAnnotation>
+            TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION =
+            new Function<org.pmiops.workbench.db.model.ParticipantCohortAnnotation, ParticipantCohortAnnotation>() {
+                @Override
+                public ParticipantCohortAnnotation apply(org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation) {
+                    String date = participantCohortAnnotation.getAnnotationValueDate() == null ? null :
+                            participantCohortAnnotation.getAnnotationValueDate().toString();
+                    return new ParticipantCohortAnnotation()
+                            .annotationId(participantCohortAnnotation.getAnnotationId())
+                            .cohortAnnotationDefinitionId(participantCohortAnnotation.getCohortAnnotationDefinitionId())
+                            .cohortReviewId(participantCohortAnnotation.getCohortReviewId())
+                            .participantId(participantCohortAnnotation.getParticipantId())
+                            .annotationValueString(participantCohortAnnotation.getAnnotationValueString())
+                            .annotationValueEnum(participantCohortAnnotation.getAnnotationValueEnum())
+                            .annotationValueDate(date)
+                            .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
+                            .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());
                 }
             };
 
@@ -201,16 +229,55 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Override
     public ResponseEntity<ParticipantCohortAnnotation> createParticipantCohortAnnotation(String workspaceNamespace,
                                                                                          String workspaceId,
-                                                                                         Long cohortReviewId,
+                                                                                         Long cohortId,
+                                                                                         Long cdrVersionId,
                                                                                          Long participantId,
                                                                                          ParticipantCohortAnnotation request) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+
+        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        if (cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId) == null) {
+            throw new BadRequestException(String.format("Invalid Request: No participant found for id: %s", participantId));
+        }
+
+        if (request.getCohortAnnotationDefinitionId() == null) {
+            throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+        }
+
+        org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
+                FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
+
+        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
+                cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId());
+
+        if (cohortAnnotationDefinition == null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: No cohort annotation definition found for id: %s",
+                            request.getCohortAnnotationDefinitionId()));
+        }
+
+        validateParticipantCohortAnnotation(participantCohortAnnotation, cohortAnnotationDefinition);
+
+        if(cohortReviewService.findParticipantCohortAnnotation(cohortReview.getCohortReviewId(),
+                request.getCohortAnnotationDefinitionId(), participantId) != null) {
+            throw new BadRequestException(
+                    String.format("Invalid Request: Cohort annotation definition exists for id: %s",
+                            request.getCohortAnnotationDefinitionId()));
+        }
+
+        cohortReviewService.saveParticipantCohortAnnotation(participantCohortAnnotation);
+
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
     }
 
     @Override
     public ResponseEntity<EmptyResponse> deleteParticipantCohortAnnotation(String workspaceNamespace,
                                                                            String workspaceId,
-                                                                           Long cohortReviewId,
+                                                                           Long cohortId,
+                                                                           Long cdrVersionId,
                                                                            Long participantId,
                                                                            Long annotationId) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
@@ -226,9 +293,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
+    public ResponseEntity<ParticipantCohortAnnotation> getParticipantCohortAnnotation(String workspaceNamespace,
+                                                                                      String workspaceId,
+                                                                                      Long cohortId,
+                                                                                      Long cdrVersionId,
+                                                                                      Long participantId,
+                                                                                      Long annotationId) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+    }
+
+    @Override
     public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                    String workspaceId,
-                                                                                                   Long cohortReviewId,
+                                                                                                   Long cohortId,
+                                                                                                   Long cdrVersionId,
                                                                                                    Long participantId) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
     }
@@ -341,14 +419,69 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantCohortAnnotation>
-    updateParticipantCohortAnnotation(String workspaceNamespace,
-                                      String workspaceId,
-                                      Long cohortReviewId,
-                                      Long participantId,
-                                      Long annotationId,
-                                      ModifyParticipantCohortAnnotationRequest request) {
+    public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
+                                                                                         String workspaceId,
+                                                                                         Long cohortId,
+                                                                                         Long cdrVersionId,
+                                                                                         Long participantId,
+                                                                                         Long annotationId,
+                                                                                         ModifyParticipantCohortAnnotationRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+    }
+
+    /**
+     * Helper method to validate that requested annotations are proper.
+     *
+     * @param participantCohortAnnotation
+     */
+    private void validateParticipantCohortAnnotation(org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation,
+                                                     org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
+
+        if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.BOOLEAN)) {
+            if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
+                throw createBadRequestException(AnnotationType.BOOLEAN.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.STRING)) {
+            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueString())) {
+                throw createBadRequestException(AnnotationType.STRING.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.DATE)) {
+            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueDateString())) {
+                throw createBadRequestException(AnnotationType.DATE.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date date = new Date(sdf.parse(participantCohortAnnotation.getAnnotationValueDateString()).getTime());
+                participantCohortAnnotation.setAnnotationValueDate(date);
+            } catch (ParseException e) {
+                throw new BadRequestException(String.format("Invalid Request: Please provide a valid %s value (%s) for annotation defintion id: %s",
+                        AnnotationType.DATE.name(),
+                        sdf.toPattern(),
+                        participantCohortAnnotation.getCohortAnnotationDefinitionId()));
+            }
+        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.INTEGER)) {
+            if (participantCohortAnnotation.getAnnotationValueInteger() == null) {
+                throw createBadRequestException(AnnotationType.INTEGER.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.ENUM)) {
+            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueEnum())) {
+                throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+            List<CohortAnnotationEnumValue> enumValues = cohortAnnotationDefinition.getEnumValues().stream()
+                    .filter(enumValue -> participantCohortAnnotation.getAnnotationValueEnum().equals(enumValue.getName()))
+                    .collect(Collectors.toList());
+            if (enumValues.isEmpty()) {
+                throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
+            }
+            participantCohortAnnotation.setCohortAnnotationEnumValueId(enumValues.get(0).getCohortAnnotationEnumValueId());
+        }
+    }
+
+    @NotNull
+    private BadRequestException createBadRequestException(String annotationType, Long cohortAnnotationDefinitionId) {
+        return new BadRequestException(
+                String.format("Invalid Request: Please provide a valid %s value for annotation defintion id: %s", annotationType, cohortAnnotationDefinitionId)
+        );
     }
 
     /**
@@ -393,7 +526,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             if (birthDateTimeString == null) {
                 throw new BigQueryException(500, "birth_datetime is null at position: " + rm.get("birth_datetime"));
             }
-            Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
+            java.util.Date birthDate = Date.from(Instant.ofEpochMilli(Double.valueOf(birthDateTimeString).longValue() * 1000));
             participantCohortStatuses.add(
                     new ParticipantCohortStatus()
                             .participantKey(
