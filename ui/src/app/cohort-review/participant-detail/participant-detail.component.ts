@@ -17,8 +17,6 @@ import {
   SortOrder
 } from 'generated';
 
-const CDR_VERSION = 1;
-
 @Component({
   selector: 'app-participant-detail',
   templateUrl: './participant-detail.component.html',
@@ -128,13 +126,14 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdr = this.route.parent.snapshot.data.workspace.cdrVersionId;
     const request = {
         page: page,
         pageSize: size,
         sortColumn: ParticipantCohortStatusColumns.ParticipantId,
         sortOrder: SortOrder.Asc
     };
-    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdr, request);
   }
 
   private navigateById = (id: number): void => {

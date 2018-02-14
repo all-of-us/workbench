@@ -22,8 +22,6 @@ import {
   Workspace,
 } from 'generated';
 
-const CDR_VERSION = 1;
-
 function isChoiceFilter(filter): filter is ChoiceFilterComponent {
   return (filter instanceof ChoiceFilterComponent);
 }
@@ -114,13 +112,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
       }
     }
 
-    const {ns, wsid, cid} = this.pathParams;
+    const {ns, wsid, cid, cdr} = this.pathParams;
 
     console.log('Participant page request parameters:');
     console.dir(query);
 
     return this.reviewAPI
-      .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
+      .getParticipantCohortStatuses(ns, wsid, cid, cdr, query)
       .do(_ => this.loading = false)
       .subscribe(review => this.state.review.next(review));
   }
@@ -128,11 +126,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   private get pathParams() {
     const paths = this.route.snapshot.pathFromRoot;
     const params: any = paths.reduce((p, r) => ({...p, ...r.params}), {});
+    const data: any = paths.reduce((p, r) => ({...p, ...r.data}), {});
 
     const ns: Workspace['namespace'] = params.ns;
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
-    return {ns, wsid, cid};
+    const cdr = +(data.workspace.cdrVersionId);
+    return {ns, wsid, cid, cdr};
   }
 
   private extractDemographics(arr: ConceptIdName[]): string[] {
