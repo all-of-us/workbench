@@ -111,6 +111,7 @@ def run_public_api_and_db()
   common = Common.new
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
+  common.run_inline %W{docker-compose run db-public-migration}
   common.status "Starting public API."
   common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
 end
@@ -930,6 +931,7 @@ def circle_deploy(cmd_name, args)
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
+      migrate_public_database
       load_config(ctx.project)
     end
   end
@@ -1041,11 +1043,13 @@ def create_project_resources(gcc)
   common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
 end
 
-def setup_project_data(gcc, root_password, workbench_password, public_password, args)
+def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
+                       root_password, workbench_password, public_password, args)
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, root_password, workbench_password, public_password)
+  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password, workbench_password,
+                      public_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -1064,6 +1068,7 @@ def setup_project_data(gcc, root_password, workbench_password, public_password, 
       common.status "Running schema migrations..."
       migrate_database
       migrate_cdr_database
+      migrate_public_database
       migrate_workbench_data
       migrate_cdr_data
 
@@ -1077,14 +1082,28 @@ def random_password()
   return rand(36**20).to_s(36)
 end
 
+# TODO: add a goal which updates passwords but nothing else
+# TODO: add a goal which updates CDR DBs but nothing else
+
 def setup_cloud_project(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--cdr-db-name [CDR_DB]",
+    lambda {|opts, v| opts.cdr_db_name = v},
+    "Name of the default CDR db to use"
+  )
+  op.add_option(
+    "--public-db-name [PUBLIC_DB]",
+    lambda {|opts, v| opts.public_db_name = v},
+    "Name of the public db to use for the data browser"
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
   create_project_resources(gcc)
-  setup_project_data(gcc, random_password(), random_password(), random_password(), args)
+  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
+                     random_password(), random_password(), random_password(), args)
 end
 
 Common.register_command({
