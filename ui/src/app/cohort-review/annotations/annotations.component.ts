@@ -19,7 +19,7 @@ interface Annotation {
  */
 const byDefinitionId =
   ({cohortAnnotationDefinitionId}: CohortAnnotationDefinition) =>
-  ({annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
+  ({cohortAnnotationDefinitionId: annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
   (cohortAnnotationDefinitionId === annotationDefinitionId);
 
 /*
