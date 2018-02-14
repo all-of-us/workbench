@@ -161,12 +161,12 @@ public class ParticipantCohortStatusDaoTest {
     public void findAll_SearchCriteria() throws Exception {
         PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
         List<Filter> filters = new ArrayList<>();
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).value("1"));
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).value(CohortStatus.INCLUDED.toString()));
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).value(new Date(System.currentTimeMillis()).toString()));
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.GENDER).operator(Operator.EQUAL).value("MALE"));
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.RACE).operator(Operator.EQUAL).value("Asian"));
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.ETHNICITY).operator(Operator.EQUAL).value("Not Hispanic"));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("1")));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).values(Arrays.asList(CohortStatus.INCLUDED.toString())));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).values(Arrays.asList(new Date(System.currentTimeMillis()).toString())));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.GENDER).operator(Operator.EQUAL).values(Arrays.asList("MALE")));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.RACE).operator(Operator.EQUAL).values(Arrays.asList("Asian")));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.ETHNICITY).operator(Operator.EQUAL).values(Arrays.asList("Not Hispanic")));
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, filters, pageRequest);
 
         assertEquals(1, results.size());
@@ -263,15 +263,15 @@ public class ParticipantCohortStatusDaoTest {
         PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
         List<Filter> filters = new ArrayList<>();
 
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).value("z"));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("z")));
         assertBadRequest(pageRequest, filters, "Problems parsing participantId: For input string: \"z\"");
 
         filters.clear();
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).value("z"));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).values(Arrays.asList("z")));
         assertBadRequest(pageRequest, filters, "Problems parsing status: No enum constant org.pmiops.workbench.model.CohortStatus.z");
 
         filters.clear();
-        filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).value("z"));
+        filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).values(Arrays.asList("z")));
         assertBadRequest(pageRequest, filters, "Problems parsing birthDate: Unparseable date: \"z\"");
     }
 

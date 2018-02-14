@@ -2,12 +2,13 @@ package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.ParticipantsDatabaseInfo;
+import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -119,13 +120,13 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
-        String sortColumn = ParticipantsDatabaseInfo.fromName(pageRequest.getSortColumn()).getDbName();
+        String sortColumn = ParticipantCohortStatusDbInfo.fromName(pageRequest.getSortColumn()).getDbName();
         String schemaPrefix = CdrVersionContext.getCdrVersion().getCdrDbName();
         schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
 
-        sortColumn = (sortColumn.equals(ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName()))
-                ? ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
-                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName();
+        sortColumn = (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
+                ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
+                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("cohortReviewId", cohortReviewId);
@@ -141,28 +142,23 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     }
 
     private String buildFilteringSql(List<Filter> filtersList, MapSqlParameterSource parameters) {
-        Filter fromJson;
         List<String> sqlParts = new ArrayList<>();
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
         sqlParts.add(WHERE_CLAUSE_TEMPLATE);
         for (Filter filter : filtersList) {
-            if (ParticipantsDatabaseInfo.fromName(filter.getProperty()) == null) {
-                throw new BadRequestException("Bad Filter in request: " + filter.getProperty());
-            }
-            sqlParts.add(ParticipantsDatabaseInfo.fromName(filter.getProperty()).getDbName() +
-                    " " + filter.getOperator().toString() + " :" + filter.getProperty().toString() + "\n");
+            sqlParts.add(buildFilterSqlPart(filter));
             try {
-                if (ParticipantsDatabaseInfo.isDatabaseTypeLong(filter.getProperty())) {
-                    if (filter.getProperty().equals(ParticipantsDatabaseInfo.STATUS.getName())) {
-                        parameters.addValue(filter.getProperty().toString(), new Long(CohortStatus.valueOf(filter.getValue()).ordinal()));
+                if (ParticipantCohortStatusDbInfo.isDatabaseTypeLong(filter.getProperty())) {
+                    if (filter.getProperty().equals(ParticipantCohortStatusDbInfo.STATUS.getName())) {
+                        parameters.addValue(filter.getProperty().toString(), new Long(CohortStatus.valueOf(filter.getValues().get(0)).ordinal()));
                     } else {
-                        parameters.addValue(filter.getProperty().toString(), new Long(filter.getValue()));
+                        parameters.addValue(filter.getProperty().toString(), new Long(filter.getValues().get(0)));
                     }
-                } else if (ParticipantsDatabaseInfo.isDatabaseTypeDate(filter.getProperty())) {
-                    parameters.addValue(filter.getProperty().toString(), new Date(df.parse(filter.getValue()).getTime()));
+                } else if (ParticipantCohortStatusDbInfo.isDatabaseTypeDate(filter.getProperty())) {
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                    parameters.addValue(filter.getProperty().toString(), new Date(df.parse(filter.getValues().get(0)).getTime()));
                 } else {
-                    parameters.addValue(filter.getProperty().toString(), filter.getValue());
+                    parameters.addValue(filter.getProperty().toString(), filter.getValues().get(0));
                 }
 
             } catch (Exception ex) {
@@ -172,6 +168,15 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
         }
 
         return (!sqlParts.isEmpty()) ? String.join(" and ", sqlParts) : "";
+    }
+
+    private String buildFilterSqlPart(Filter filter) {
+        if (filter.getOperator().equals(Operator.IN)) {
+            return ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getDbName() +
+                    " " + filter.getOperator().toString() + " (:" + filter.getProperty().toString() + ")\n";
+        }
+        return ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getDbName() +
+                " " + filter.getOperator().toString() + " :" + filter.getProperty().toString() + "\n";
     }
 
     private class ParticipantCohortStatusRowMapper implements RowMapper<ParticipantCohortStatus> {
