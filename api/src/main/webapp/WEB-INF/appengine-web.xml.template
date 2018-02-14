@@ -2,6 +2,8 @@
   <service>api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
+  <!-- Deploy complains about this tag, bug BigQuery needs it. -->
+  <application>all-of-us-researcher-workbench</application>
 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
