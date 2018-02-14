@@ -26,7 +26,9 @@ implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   subscription: Subscription;
 
   ngOnInit() {
-    this.selection.valueChanges.subscribe(_ => this.changes.next(true));
+    this.subscription = this.selection.valueChanges.subscribe(
+      _ => this.changes.next(true)
+    );
   }
 
   ngOnDestroy() {
