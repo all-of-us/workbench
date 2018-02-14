@@ -101,6 +101,7 @@ def run_public_api_and_db()
   common = Common.new
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
+  common.run_inline %W{docker-compose run db-public-migration}
   common.status "Starting public API."
   common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
 end
@@ -385,7 +386,7 @@ end
 # Fetches a credentials file. Passes the path of the credentials to a block.
 # For all-of-us-workbench-test only, it leaves the (lazy-fetched) creds on disk;
 # for any other project, it cleans them up after the block is run.
-def do_run_with_creds(project, account, creds_file, delete_after=True)
+def do_run_with_creds(project, account, creds_file, delete_after=true)
   if creds_file == nil
     creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
     if project == "all-of-us-workbench-test"
@@ -481,6 +482,7 @@ def run_local_all_migrations(*args)
 
   common.run_inline %W{docker-compose run db-migration}
   common.run_inline %W{docker-compose run db-cdr-migration}
+  common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-cdr-data-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 end
@@ -608,7 +610,7 @@ Common.register_command({
   :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, root_password, workbench_password, public_password)
+def write_db_creds_file(project, cdr_db_name, public_db_name, root_password, workbench_password, public_password)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -617,14 +619,17 @@ def write_db_creds_file(project, root_password, workbench_password, public_passw
       db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
       db_creds_file.puts "DB_HOST=127.0.0.1"
       db_creds_file.puts "DB_NAME=workbench"
-      db_creds_file.puts "CDR_DB_NAME=cdr"
+      # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
+      # table of the workbench DB; then this shouldn't be needed anymore.
+      db_creds_file.puts "CDR_DB_NAME=${cdr_db_name}"
+      db_creds_file.puts "PUBLIC_DB_NAME=${public_db_name}"
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/publicXXX?rewriteBatchedStatements=true"
+      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/${public_db_name}?rewriteBatchedStatements=true"
       db_creds_file.puts "PUBLIC_DB_USER=public"
       db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
       db_creds_file.close
@@ -991,6 +996,15 @@ def migrate_cdr_database()
   end
 end
 
+def migrate_public_database()
+  common = Common.new
+  common.status "Migrating public database..."
+  Dir.chdir("db-cdr") do
+    common.run_inline(%W{CDR_DB_NAME=#{ENV["PUBLIC_DB_NAME"] && gradle --info update -PrunList=schema})
+  end
+end
+
+
 def migrate_cdr_data()
   common = Common.new
   common.status "Migrating CDR data..."
@@ -1066,6 +1080,7 @@ def circle_deploy(cmd_name, args)
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
+      migrate_public_database
       load_config(ctx.project)
     end
   end
@@ -1110,7 +1125,10 @@ Common.register_command({
 
 def run_cloud_cdr_migrations(cmd_name, args)
   ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_cdr_database }
+  with_cloud_proxy_and_db_env(cmd_name, args) {
+    migrate_cdr_database
+    migrate_public_database
+  }
 end
 
 Common.register_command({
@@ -1190,11 +1208,13 @@ def create_project_resources(gcc)
   common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
 end
 
-def setup_project_data(gcc, root_password, workbench_password, public_password, args)
+def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
+                       root_password, workbench_password, public_password, args)
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, root_password, workbench_password, public_password)
+  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password, workbench_password,
+                      public_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -1213,6 +1233,7 @@ def setup_project_data(gcc, root_password, workbench_password, public_password, 
       common.status "Running schema migrations..."
       migrate_database
       migrate_cdr_database
+      migrate_public_database
       migrate_workbench_data
       migrate_cdr_data
 
@@ -1226,14 +1247,28 @@ def random_password()
   return rand(36**20).to_s(36)
 end
 
+# TODO: add a goal which updates passwords but nothing else
+# TODO: add a goal which updates CDR DBs but nothing else
+
 def setup_cloud_project(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--cdr-db-name [CDR_DB]",
+    lambda {|opts, v| opts.cdr_db_name = v},
+    "Name of the default CDR db to use"
+  )
+  op.add_option(
+    "--public-db-name [PUBLIC_DB]",
+    lambda {|opts, v| opts.public_db_name = v},
+    "Name of the public db to use for the data browser"
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
   create_project_resources(gcc)
-  setup_project_data(gcc, random_password(), random_password(), random_password(), args)
+  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
+                     random_password(), random_password(), random_password(), args)
 end
 
 Common.register_command({
