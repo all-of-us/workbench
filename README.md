@@ -267,6 +267,7 @@ Description of arguments for these scripts are as follows. See examples below.
 * cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets, csv folders, and databases. 
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
 * db-name: Name of local mysql database
+* instance: Cloud Sql Instance 
 
 ###Examples:
 #### Generate count data in BigQuery from a cdr release 
