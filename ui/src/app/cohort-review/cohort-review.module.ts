@@ -8,6 +8,7 @@ import {ChartsModule} from '../charts/charts.module';
 
 import {AnnotationManagerComponent} from './annotation-manager/annotation-manager.component';
 import {AnnotationsComponent} from './annotations/annotations.component';
+import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
 import {OverviewComponent} from './overview/overview.component';
@@ -27,26 +28,7 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 /* tslint:enable:max-line-length */
 
 import {WorkspacesService} from 'generated';
-
-const components = [
-  AnnotationManagerComponent,
-  AnnotationsComponent,
-  CohortReviewComponent,
-  CreateReviewComponent,
-  OverviewComponent,
-  ParticipantAnnotationComponent,
-  ParticipantDetailComponent,
-  ParticipantStatusComponent,
-  ParticipantTableComponent,
-  ReviewNavComponent,
-  SetAnnotationDetailComponent,
-  SetAnnotationMasterComponent,
-];
-
-const directives = [
-  FullPageDirective,
-  SidebarDirective,
-];
+import { StatusFilterComponent } from './status-filter/status-filter.component';
 
 @NgModule({
   imports: [
@@ -57,8 +39,25 @@ const directives = [
     ChartsModule,
   ],
   declarations: [
-    ...components,
-    ...directives,
+    /* Components */
+    AnnotationManagerComponent,
+    AnnotationsComponent,
+    ChoiceFilterComponent,
+    CohortReviewComponent,
+    CreateReviewComponent,
+    OverviewComponent,
+    ParticipantAnnotationComponent,
+    ParticipantDetailComponent,
+    ParticipantStatusComponent,
+    ParticipantTableComponent,
+    ReviewNavComponent,
+    SetAnnotationDetailComponent,
+    SetAnnotationMasterComponent,
+
+    /* Directives */
+    FullPageDirective,
+    SidebarDirective,
+    StatusFilterComponent,
   ],
   providers: [ReviewStateService]
 })

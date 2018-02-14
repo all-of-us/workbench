@@ -34,6 +34,13 @@ end
 
 def read_db_vars_v2(gcc)
   Workbench::assert_in_docker
+  vars = Common.new.capture_stdout(%W{
+    gsutil cat gs://#{gcc.project}-credentials/vars.env
+  })
+  if vars.empty?
+    Common.new.error "Failed to read gs://#{gcc.project}-credentials/vars.env"
+    exit 1
+  end
   Workbench::read_vars(Common.new.capture_stdout(%W{
     gsutil cat gs://#{gcc.project}-credentials/vars.env
   }))
@@ -992,7 +999,8 @@ end
 
 def load_config(project)
   configs = {
-    'all-of-us-workbench-test' => 'config_test.json'
+    "all-of-us-workbench-test" => "config_test.json",
+    "aou-res-workbench-stable" => "config_stable.json",
   }
   config_json = configs[project]
   unless config_json
@@ -1117,4 +1125,14 @@ Common.register_command({
   :invocation => "update-cloud-config",
   :description => "Updates configuration in Cloud SQL database for the specified project.",
   :fn => lambda { |*args| update_cloud_config("update-cloud-config", args) }
+})
+
+def docker_run(cmd_name, args)
+  Common.new.run_inline %W{docker-compose run --rm scripts} + args
+end
+
+Common.register_command({
+  :invocation => "docker-run",
+  :description => "Runs the specified command in a docker container.",
+  :fn => lambda { |*args| docker_run("docker-run", args) }
 })

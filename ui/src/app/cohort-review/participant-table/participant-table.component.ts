@@ -3,21 +3,32 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
+import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+// TODO make this dynamic (jms)
 const CDR_VERSION = 1;
-const getProperty = filt => (<{property: string, value: string}>filt).property;
-const getValue = filt => (<{property: string, value: string}>filt).value;
 
 import {
+  Cohort,
   CohortReview,
   CohortReviewService,
+  ConceptIdName,
+  Filter,
+  Operator,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatusesRequest as Request,
+  ParticipantDemographics,
   SortOrder,
+  Workspace,
 } from 'generated';
+
+function isChoiceFilter(filter): filter is ChoiceFilterComponent {
+  return (filter instanceof ChoiceFilterComponent);
+}
+
 
 @Component({
   selector: 'app-participant-table',
@@ -25,7 +36,8 @@ import {
 })
 export class ParticipantTableComponent implements OnInit, OnDestroy {
 
-  readonly columnsEnum = {
+  readonly ColumnEnum = Columns;
+  readonly ReverseColumnEnum = {
     participantId: Columns.ParticipantId,
     gender: Columns.Gender,
     race: Columns.Race,
@@ -39,6 +51,10 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
+  concepts: ParticipantDemographics;
+  genders: string[] = [];
+  races: string[] = [];
+  ethnicities: string[] = [];
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -49,16 +65,16 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = false;
-    // console.log('Route for participant table: ');
-    // console.dir(this.route);
-
-    this.subscription = this.route.data.subscribe(data => {
-      this.participants = data.participants.map(Participant.fromStatus);
+    this.subscription = this.state.review$.subscribe(review => {
+      this.review = review;
+      this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
     });
 
-    this.subscription.add(this.route.parent.data.subscribe(data => {
-      this.review = data.review;
-    }));
+    const {concepts} = this.route.snapshot.data;
+    this.concepts = concepts;
+    this.races = this.extractDemographics(concepts.raceList);
+    this.genders = this.extractDemographics(concepts.genderList);
+    this.ethnicities = this.extractDemographics(concepts.ethnicityList);
   }
 
   ngOnDestroy() {
@@ -66,26 +82,63 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   }
 
   refresh(state: ClrDatagridStateInterface) {
-    // console.log('Datagrid state: ');
-    // console.dir(state);
+    setTimeout(() => this.loading = true, 0);
+    console.log('Datagrid state: ');
+    console.dir(state);
 
-    const query = <Request>{};
-
-    query.page = Math.floor(state.page.from / state.page.size) + 1;
-    query.pageSize = state.page.size;
+    /* Populate the query with page / pagesize and then defaults */
+    const query = <Request>{
+      page: Math.floor(state.page.from / state.page.size),
+      pageSize: state.page.size,
+      sortColumn: Columns.ParticipantId,
+      sortOrder: SortOrder.Asc,
+      filters: {items: []},
+    };
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
-      query.sortColumn = this.columnsEnum[sortby];
+      query.sortColumn = this.ReverseColumnEnum[sortby];
       query.sortOrder = state.sort.reverse
         ? SortOrder.Desc
         : SortOrder.Asc;
     }
 
     if (state.filters) {
-      // TODO(jms) - do filter stuff here
+      for (const filter of state.filters) {
+        if (isChoiceFilter(filter)) {
+          query.filters.items.push(...filter.toFilters());
+        } else {
+          const {property, value} = <Partial<Filter>>filter;
+          const operator = Operator.Equal;
+          query.filters.items.push(<Filter>{property, value, operator});
+        }
+      }
     }
 
-    this.router.navigate(['.'], {relativeTo: this.route, queryParams: query});
+    const {ns, wsid, cid} = this.pathParams;
+
+    console.log('Participant page request parameters:');
+    console.dir(query);
+
+    return this.reviewAPI
+      .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
+      .do(_ => this.loading = false)
+      .subscribe(review => this.state.review.next(review));
+  }
+
+  private get pathParams() {
+    const paths = this.route.snapshot.pathFromRoot;
+    const params: any = paths.reduce((p, r) => ({...p, ...r.params}), {});
+
+    const ns: Workspace['namespace'] = params.ns;
+    const wsid: Workspace['id'] = params.wsid;
+    const cid: Cohort['id'] = +(params.cid);
+    return {ns, wsid, cid};
+  }
+
+  private extractDemographics(arr: ConceptIdName[]): string[] {
+    const names = arr.map(item => item.conceptName);
+    const vals = new Set<string>(names);
+    return Array.from(vals);
   }
 }

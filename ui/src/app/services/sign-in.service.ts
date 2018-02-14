@@ -5,6 +5,7 @@ import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -39,8 +40,7 @@ export class SignInService {
   // Expose "current user details" as an Observable
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
-  // TODO(calbach): Move into server config?
-  public clientId = '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com';
+  public clientId = environment.clientId;
   constructor(private zone: NgZone, serverConfigService: ServerConfigService) {
     this.zone = zone;
     this.user = this.makeUserSubject();

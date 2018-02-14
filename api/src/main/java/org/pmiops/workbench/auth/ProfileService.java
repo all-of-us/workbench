@@ -51,8 +51,7 @@ public class ProfileService {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
     } else if (user.getBlockscoreVerificationIsValid() == false) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.REJECTED);
-    }
-    else {
+    } else {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.VERIFIED);
     }
 
@@ -72,30 +71,19 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    String userEmailVerificationStatus = null;
-    if (user.getEmailVerificationStatus().equals(EmailVerificationStatus.PENDING)) {
-      // Verification is pending, need to query mailchimp.
-      try {
-        userEmailVerificationStatus = mailChimpService.getMember(user.getContactEmail());
-      } catch (NotFoundException e) {
-        profile.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-        user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-        userDao.save(user);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+    EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
+    // if verification is pending or unverified, need to query MailChimp and update DB accordingly
+    if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
+      if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED)) {
+        mailChimpService.addUserContactEmail(user.getContactEmail());
+        userEmailVerificationStatus = EmailVerificationStatus.PENDING;
+      } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {
+        userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
       }
-      if (userEmailVerificationStatus != null) {
-        if (userEmailVerificationStatus.equals(MailChimpService.MAILCHIMP_SUBSCRIBED)) {
-          profile.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-        } else {
-          profile.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-          user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-          userDao.save(user);
-        }
-      }
-    } else {
-      profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
+      user.setEmailVerificationStatus(userEmailVerificationStatus);
+      userDao.save(user);
     }
+    profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
     return profile;
   }
 }

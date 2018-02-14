@@ -113,7 +113,7 @@ public class CohortsControllerTest {
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+    user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 
