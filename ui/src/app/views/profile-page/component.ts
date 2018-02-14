@@ -12,12 +12,11 @@ export class ProfilePageComponent implements OnInit {
   profileLoaded = false;
   editHover = false;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
+    this.profileService.getMe().subscribe(
         (profile: Profile) => {
       this.profile = profile;
       this.profileLoaded = true;

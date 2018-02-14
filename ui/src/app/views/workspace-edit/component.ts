@@ -41,7 +41,6 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
@@ -74,7 +73,7 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.mode === WorkspaceEditMode.Create || this.mode === WorkspaceEditMode.Clone) {
       // There is a new workspace to be created via this flow.
       this.accessLevel = WorkspaceAccessLevel.OWNER;
-      this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
+      this.profileService.getMe().subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
     }
@@ -141,9 +140,7 @@ export class WorkspaceEditComponent implements OnInit {
       return;
     }
     this.savingWorkspace = true;
-    this.errorHandlingService.retryApi(
-      this.workspacesService.createWorkspace(this.workspace))
-      .subscribe(
+    this.workspacesService.createWorkspace(this.workspace).subscribe(
         () => {
           this.navigateBack();
         },
@@ -157,10 +154,10 @@ export class WorkspaceEditComponent implements OnInit {
       return;
     }
     this.savingWorkspace = true;
-    this.errorHandlingService.retryApi(this.workspacesService.updateWorkspace(
+    this.workspacesService.updateWorkspace(
       this.oldWorkspaceNamespace,
       this.oldWorkspaceName,
-      {workspace: this.workspace}))
+      {workspace: this.workspace})
       .subscribe(
         () => {
           this.navigateBack();
@@ -179,12 +176,11 @@ export class WorkspaceEditComponent implements OnInit {
       return;
     }
     this.savingWorkspace = true;
-    this.errorHandlingService.retryApi(this.workspacesService.cloneWorkspace(
+    this.workspacesService.cloneWorkspace(
       this.oldWorkspaceNamespace,
       this.oldWorkspaceName, {
         workspace: this.workspace,
-      }))
-      .subscribe(
+      }).subscribe(
         (r: CloneWorkspaceResponse) => {
           this.router.navigate(['/workspace', r.workspace.namespace, r.workspace.id]);
         },

@@ -33,7 +33,6 @@ export class WorkspaceShareComponent implements OnInit {
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,
@@ -41,17 +40,13 @@ export class WorkspaceShareComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(
-        this.loadWorkspace())
-      .subscribe((workspace) => {
-        this.errorHandlingService.retryApi(
-            this.profileService.getMe()).subscribe(profile => {
-          this.usersLoading = false;
-          this.loadingWorkspace = false;
-          this.userEmail = profile.username;
-        });
-      }
-    );
+    this.loadWorkspace().subscribe((workspace) => {
+      this.profileService.getMe().subscribe(profile => {
+        this.usersLoading = false;
+        this.loadingWorkspace = false;
+        this.userEmail = profile.username;
+      });
+    });
   }
 
   navigateBack(): void {
@@ -78,30 +73,32 @@ export class WorkspaceShareComponent implements OnInit {
     if (!this.usersLoading) {
       this.usersLoading = true;
       const updateList = Array.from(this.workspace.userRoles);
-      updateList.push({email: this.convertToEmail(this.toShare),
-          role: this.selectedAccessLevel});
+      updateList.push({
+        email: this.convertToEmail(this.toShare),
+        role: this.selectedAccessLevel
+      });
 
-      this.errorHandlingService.retryApi(
-        this.workspacesService.shareWorkspace(
+      this.workspacesService.shareWorkspace(
           this.workspace.namespace,
           this.workspace.id, {
             workspaceEtag: this.workspace.etag,
-            items: updateList})).subscribe(
-        (resp: ShareWorkspaceResponse) => {
-          this.workspace.etag = resp.workspaceEtag;
-          this.usersLoading = false;
-          this.workspace.userRoles = updateList;
-          this.toShare = '';
-          this.input.nativeElement.focus();
-        },
-        (error) => {
-          if (error.status === 400) {
-            this.userNotFound = true;
-          } else if (error.status === 409) {
-            this.workspaceUpdateConflictError = true;
+            items: updateList
+          }).subscribe(
+          (resp: ShareWorkspaceResponse) => {
+            this.workspace.etag = resp.workspaceEtag;
+            this.usersLoading = false;
+            this.workspace.userRoles = updateList;
+            this.toShare = '';
+            this.input.nativeElement.focus();
+          },
+          (error) => {
+            if (error.status === 400) {
+              this.userNotFound = true;
+            } else if (error.status === 409) {
+              this.workspaceUpdateConflictError = true;
+            }
+            this.usersLoading = false;
           }
-          this.usersLoading = false;
-        }
       );
     }
   }
