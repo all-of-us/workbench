@@ -40,7 +40,6 @@ export class AppComponent implements OnInit {
   constructor(
     /* Ours */
     private signInService: SignInService,
-    private errorHandlingService: ErrorHandlingService,
     private profileService: ProfileService,
     /* Angular's */
     private activatedRoute: ActivatedRoute,

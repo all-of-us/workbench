@@ -10,8 +10,7 @@ import {ConfigResponse, ConfigService} from 'generated';
 export class ServerConfigService {
   private configObs: Observable<ConfigResponse>;
   constructor(
-    private configService: ConfigService,
-    private errorHandlingService: ErrorHandlingService
+    private configService: ConfigService
   ) {}
 
   public getConfig(): Observable<ConfigResponse> {

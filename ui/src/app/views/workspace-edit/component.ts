@@ -41,7 +41,6 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,

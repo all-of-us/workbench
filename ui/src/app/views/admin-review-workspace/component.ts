@@ -23,7 +23,6 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   contentLoaded = false;
 
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private workspacesService: WorkspacesService
   ) {}
 

@@ -111,7 +111,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       private route: ActivatedRoute,
       private cohortsService: CohortsService,
       private clusterService: ClusterService,
-      private errorHandlingService: ErrorHandlingService,
       private http: Http,
       private router: Router,
       private signInService: SignInService,

@@ -33,7 +33,6 @@ export class WorkspaceShareComponent implements OnInit {
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,

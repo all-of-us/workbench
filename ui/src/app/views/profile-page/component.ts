@@ -12,7 +12,6 @@ export class ProfilePageComponent implements OnInit {
   profileLoaded = false;
   editHover = false;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
   ) {}
 

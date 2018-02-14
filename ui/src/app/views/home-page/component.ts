@@ -50,7 +50,6 @@ export class HomePageComponent implements OnInit {
   workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
       private route: ActivatedRoute,
-      private errorHandlingService: ErrorHandlingService,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}

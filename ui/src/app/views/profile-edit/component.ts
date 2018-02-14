@@ -12,7 +12,6 @@ export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,

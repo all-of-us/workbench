@@ -22,7 +22,6 @@ export class AdminReviewIdVerificationComponent implements OnInit {
   contentLoaded = false;
 
   constructor(
-    private errorHandlingService: ErrorHandlingService,
     private profileService: ProfileService
   ) {}
 

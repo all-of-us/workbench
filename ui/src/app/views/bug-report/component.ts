@@ -21,7 +21,6 @@ export class BugReportComponent implements OnInit {
 
   constructor(
     private bugReportService: BugReportService,
-    private errorHandlingService: ErrorHandlingService,
     private profileService: ProfileService
   ) {}
 

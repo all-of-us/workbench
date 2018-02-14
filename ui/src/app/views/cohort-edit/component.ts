@@ -23,7 +23,6 @@ export class CohortEditComponent {
     private router: Router,
     private fb: FormBuilder,
     private cohortService: CohortsService,
-    private errorHandlingService: ErrorHandlingService,
   ) {
     this.form = fb.group({
       name: [this.cohort.name, Validators.required],
