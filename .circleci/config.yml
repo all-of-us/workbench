@@ -138,33 +138,12 @@ jobs:
               echo "Not master branch, skipping deploy"
             fi
 
-  py-client-test:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.10
-    working_directory: ~/workbench
-    environment: []
-    steps:
-      - checkout
-      - run:
-          name: Fetch Submodules
-          command: git submodule update --init --recursive
-      - run:
-          name: Generate Swagger Python Client
-          command: client/project.rb swagger-regen
-      - run:
-          name: Lint
-          command: client/project.rb pylint
-      - run:
-          name: Test Python Client
-          command: client/project.rb test
-
 workflows:
   version: 2
   build-test-deploy:
     jobs:
       - api-build-test-deploy
-      - ui-build-test-deploy
-      - py-client-test
+      - ui-build-test-deploy      
   integration-test:
     triggers:
       - schedule:
