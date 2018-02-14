@@ -111,7 +111,6 @@ def run_public_api_and_db()
   common = Common.new
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
-  common.run_inline %W{docker-compose run db-public-migration}
   common.status "Starting public API."
   common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
 end
@@ -1043,7 +1042,7 @@ def create_project_resources(gcc)
   common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
 end
 
-def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
+def setup_project_data(gcc, cdr_db_name, public_db_name,
                        root_password, workbench_password, public_password, args)
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
@@ -1063,14 +1062,11 @@ def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
 
       common.status "Setting up databases and users..."
       create_workbench_db
-      create_cdr_db
 
       common.status "Running schema migrations..."
       migrate_database
-      migrate_cdr_database
-      migrate_public_database
+      # This will insert a CDR version row pointing at the CDR and public DB.
       migrate_workbench_data
-      migrate_cdr_data
 
       common.status "Loading configuration..."
       load_config(gcc.project)
@@ -1091,16 +1087,22 @@ def setup_cloud_project(cmd_name, *args)
   op.add_option(
     "--cdr-db-name [CDR_DB]",
     lambda {|opts, v| opts.cdr_db_name = v},
-    "Name of the default CDR db to use"
+    "Name of the default CDR db to use; required. (example: cdr20180206) This will subsequently " +
+    "be created by cloudsql-import."
   )
   op.add_option(
     "--public-db-name [PUBLIC_DB]",
     lambda {|opts, v| opts.public_db_name = v},
-    "Name of the public db to use for the data browser"
+    "Name of the public db to use for the data browser. (example: public20180206) This will " +
+    "subsequently be created by cloudsql-import."
   )
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.cdr_db_name}
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.public_db_name}
   gcc = GcloudContextV2.new(op)
+
   op.parse.validate
   gcc.validate
+
   create_project_resources(gcc)
   setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
                      random_password(), random_password(), random_password(), args)
