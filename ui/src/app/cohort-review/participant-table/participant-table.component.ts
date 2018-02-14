@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+// TODO make this dynamic (jms)
 const CDR_VERSION = 1;
 
 import {

@@ -14,6 +14,7 @@ import {
   CreateReviewRequest,
 } from 'generated';
 
+// TODO make this dynamic (jms)
 const CDR_VERSION = 1;
 
 @Component({
