@@ -100,7 +100,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createCohortReview_ReviewAlreadyCreated() throws Exception {
+    public void createCohortReviewReviewAlreadyCreated() throws Exception {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(1, cohortId, cohortReviewId, cdrVersionId, null));
 
@@ -117,7 +117,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createCohortReview_MoreThanTenThousand() throws Exception {
+    public void createCohortReviewMoreThanTenThousand() throws Exception {
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(20000));
@@ -130,7 +130,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createCohortReview_NoCohortDefinitionFound() throws Exception {
+    public void createCohortReviewNoCohortDefinitionFound() throws Exception {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
@@ -276,7 +276,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createParticipantCohortAnnotation_InvalidCohortAnnotationDefinitionId() throws Exception {
+    public void createParticipantCohortAnnotationInvalidCohortAnnotationDefinitionId() throws Exception {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
                 WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
@@ -291,7 +291,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createParticipantCohortAnnotation_NotFoundCohortAnnotationDefinition() throws Exception {
+    public void createParticipantCohortAnnotationNotFoundCohortAnnotationDefinition() throws Exception {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
                 WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
@@ -307,7 +307,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createParticipantCohortAnnotation_NotFoundParticipantCohortStatus() throws Exception {
+    public void createParticipantCohortAnnotationNotFoundParticipantCohortStatus() throws Exception {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
                 WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
@@ -323,7 +323,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaiton_ParticipantAnnotationExists() throws Exception {
+    public void assertParticipantCohortAnnotaitonParticipantAnnotationExists() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.STRING);
 
@@ -346,7 +346,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaiton_InvalidDateString() throws Exception {
+    public void assertParticipantCohortAnnotaitonInvalidDateString() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.DATE);
 
@@ -367,7 +367,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaiton_InvalidEnumValue() throws Exception {
+    public void assertParticipantCohortAnnotaitonInvalidEnumValue() throws Exception {
         CohortAnnotationEnumValue cohortAnnotationEnumValue = new CohortAnnotationEnumValue().name("11");
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.ENUM).enumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
@@ -389,15 +389,15 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createParticipantCohortAnnotation_NullBooleanAnnotation() throws Exception {
-        assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType.BOOLEAN);
-        assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType.STRING);
-        assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType.DATE);
-        assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType.INTEGER);
-        assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType.ENUM);
+    public void createParticipantCohortAnnotationAll() throws Exception {
+        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.BOOLEAN);
+        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.STRING);
+        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.DATE);
+        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.INTEGER);
+        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.ENUM);
     }
 
-    private void assertParticipantCohortAnnotaiton_ValidateAnnotationTypes(AnnotationType annotationType) {
+    private void assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType annotationType) {
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(annotationType);
 
