@@ -7,6 +7,9 @@ import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+// TODO make this dynamic (jms)
+const CDR_VERSION = 1;
+
 import {
   Cohort,
   CohortReview,
@@ -21,8 +24,6 @@ import {
   SortOrder,
   Workspace,
 } from 'generated';
-
-const CDR_VERSION = 1;
 
 function isChoiceFilter(filter): filter is ChoiceFilterComponent {
   return (filter instanceof ChoiceFilterComponent);

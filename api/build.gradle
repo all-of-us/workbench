@@ -215,7 +215,6 @@ dependencies {
   compile 'com.blockscore:blockscore-java:4.0.2'
   compile 'com.ecwid:maleorang:3.0-0.9.6'
   compile 'com.google.guava:guava:22.0'
-  compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
