@@ -67,6 +67,7 @@ def dev_up(*args)
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-migration}
   common.run_inline %W{docker-compose run db-cdr-migration}
+  common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 
   common.status "Updating configuration..."
@@ -101,7 +102,6 @@ def run_public_api_and_db()
   common = Common.new
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
-  common.run_inline %W{docker-compose run db-public-migration}
   common.status "Starting public API."
   common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
 end
@@ -596,14 +596,6 @@ Common.register_command({
 })
 
 
-def run_cloud_data_migrations(cmd_name, args)
-  ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) do
-    migrate_cdr_data
-    migrate_workbench_data
-  end
-end
-
 Common.register_command({
   :invocation => "run-cloud-data-migrations",
   :description => "Runs data migrations in the cdr and workbench schemas on the Cloud SQL database for the specified project.",
@@ -964,14 +956,6 @@ def create_workbench_db()
   )
 end
 
-def create_cdr_db()
-  run_with_redirects(
-    "cat db-cdr/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-  )
-end
-
 def migrate_database()
   common = Common.new
   common.status "Migrating main database..."
@@ -984,36 +968,6 @@ def migrate_workbench_data()
   common = Common.new
   common.status "Migrating workbench data..."
   Dir.chdir("db") do
-    common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
-  end
-end
-
-def migrate_cdr_database()
-  common = Common.new
-  common.status "Migrating CDR database..."
-  Dir.chdir("db-cdr") do
-    common.run_inline(%W{gradle --info update -PrunList=schema})
-  end
-end
-
-def migrate_public_database()
-  common = Common.new
-  common.status "Migrating public database..."
-  Dir.chdir("db-cdr") do
-    common.run_inline(%W{CDR_DB_NAME=#{ENV["PUBLIC_DB_NAME"] && gradle --info update -PrunList=schema})
-  end
-end
-
-
-def migrate_cdr_data()
-  common = Common.new
-  common.status "Migrating CDR data..."
-  run_with_redirects(
-    "cat db-cdr/create_db.sql | envsubst | " \
-    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
-    to_redact=ENV["MYSQL_ROOT_PASSWORD"]
-  )
-  Dir.chdir("db-cdr") do
     common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
   end
 end
@@ -1122,22 +1076,6 @@ Common.register_command({
   :fn => lambda { |*args| run_cloud_migrations("run-cloud-migrations", args) }
 })
 
-
-def run_cloud_cdr_migrations(cmd_name, args)
-  ensure_docker cmd_name, args
-  with_cloud_proxy_and_db_env(cmd_name, args) {
-    migrate_cdr_database
-    migrate_public_database
-  }
-end
-
-Common.register_command({
-  :invocation => "run-cloud-cdr-migrations",
-  :description => "Runs database migrations for cdr schema on the Cloud SQL database for the specified project.",
-  :fn => lambda { |*args| run_cloud_cdr_migrations("run-cloud-cdr-migrations", args) }
-})
-
-
 def update_cloud_config(cmd_name, args)
   ensure_docker cmd_name, args
   with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
@@ -1208,7 +1146,7 @@ def create_project_resources(gcc)
   common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
 end
 
-def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
+def setup_project_data(gcc, cdr_db_name, public_db_name,
                        root_password, workbench_password, public_password, args)
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
@@ -1228,14 +1166,11 @@ def setup_project_data(gcc, cdr_db_name="cdr", public_db_name="public",
 
       common.status "Setting up databases and users..."
       create_workbench_db
-      create_cdr_db
 
       common.status "Running schema migrations..."
       migrate_database
-      migrate_cdr_database
-      migrate_public_database
+      # This will insert a CDR version row pointing at the CDR and public DB.
       migrate_workbench_data
-      migrate_cdr_data
 
       common.status "Loading configuration..."
       load_config(gcc.project)
@@ -1256,16 +1191,22 @@ def setup_cloud_project(cmd_name, *args)
   op.add_option(
     "--cdr-db-name [CDR_DB]",
     lambda {|opts, v| opts.cdr_db_name = v},
-    "Name of the default CDR db to use"
+    "Name of the default CDR db to use; required. (example: cdr20180206) This will subsequently " +
+    "be created by cloudsql-import."
   )
   op.add_option(
     "--public-db-name [PUBLIC_DB]",
     lambda {|opts, v| opts.public_db_name = v},
-    "Name of the public db to use for the data browser"
+    "Name of the public db to use for the data browser. (example: public20180206) This will " +
+    "subsequently be created by cloudsql-import."
   )
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.cdr_db_name}
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.public_db_name}
   gcc = GcloudContextV2.new(op)
+
   op.parse.validate
   gcc.validate
+
   create_project_resources(gcc)
   setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
                      random_password(), random_password(), random_password(), args)
