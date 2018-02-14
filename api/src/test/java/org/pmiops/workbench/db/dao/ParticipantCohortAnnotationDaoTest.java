@@ -26,7 +26,7 @@ public class ParticipantCohortAnnotationDaoTest {
     private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     private long annotationId;
 
