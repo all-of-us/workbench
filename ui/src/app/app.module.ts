@@ -1,6 +1,6 @@
 import {ErrorHandler, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Http, HttpModule} from '@angular/http';
+import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
@@ -42,6 +42,7 @@ import {
   ConfigService,
   Configuration,
 } from 'generated';
+import {InterceptedHttp} from './factory/InterceptedHttp';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -117,6 +118,11 @@ export function getConfiguration(signInService: SignInService): Configuration {
     },
     SignInService,
     GoogleAnalyticsEventsService,
+    {
+      provide: Http,
+      useClass: InterceptedHttp,
+      deps: [XHRBackend, RequestOptions, ErrorHandlingService]
+    },
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
