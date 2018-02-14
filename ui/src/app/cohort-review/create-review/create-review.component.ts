@@ -14,12 +14,12 @@ import {
   CreateReviewRequest,
 } from 'generated';
 
+// TODO make this dynamic (jms)
 const CDR_VERSION = 1;
 
 @Component({
   selector: 'app-create-review',
   templateUrl: './create-review.component.html',
-  styleUrls: ['./create-review.component.css']
 })
 export class CreateReviewComponent implements OnInit {
   reviewParamForm = new FormGroup({

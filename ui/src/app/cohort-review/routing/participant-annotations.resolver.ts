@@ -10,6 +10,9 @@ import {
   ParticipantCohortAnnotationListResponse,
 } from 'generated';
 
+// TODO make this dynamic (jms)
+const CDR_VERSION = 1;
+
 @Injectable()
 export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohortAnnotation[]> {
 
@@ -22,6 +25,7 @@ export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohort
     const ns = route.parent.paramMap.get('ns');
     const wsid = route.parent.paramMap.get('wsid');
     const pid = +route.paramMap.get('pid');
+    const cid = +route.paramMap.get('cid');
 
     // TODO (jms) This is a temporary fix while backend is being implemented
     const empty = <ParticipantCohortAnnotationListResponse>{
@@ -35,7 +39,7 @@ export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohort
     // console.dir(route);
 
     const call = this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, rid, pid)
+      .getParticipantCohortAnnotations(ns, wsid, cid, CDR_VERSION, pid)
       .catch(err => Observable.of(empty))
       .pluck('items')
       .do(vals => this.state.annotationValues.next(<ParticipantCohortAnnotation[]>vals));

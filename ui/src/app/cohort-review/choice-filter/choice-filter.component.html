@@ -1,0 +1,12 @@
+<div class="form-group">
+  <label for="option-{{ property }}-picker">
+    Select {{ property | titlecase }}(s)
+  </label>
+  <div class="select multiple">
+    <select id="option-{{ property }}-picker" multiple [formControl]="selection">
+      <option *ngFor="let option of options" [value]="option">
+        {{ option | titlecase }}
+      </option>
+    </select>
+  </div>
+</div>

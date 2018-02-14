@@ -1,0 +1,21 @@
+<div class="form-group">
+  <label for="option-status-picker">
+    Select Status(es)
+  </label>
+  <div class="select multiple">
+    <select id="option-status-picker" multiple [formControl]="selection">
+      <option [value]="CohortStatus.INCLUDED">
+        {{ formatStatus(CohortStatus.INCLUDED) }}
+      </option>
+      <option [value]="CohortStatus.EXCLUDED">
+        {{ formatStatus(CohortStatus.EXCLUDED) }}
+      </option>
+      <option [value]="CohortStatus.NEEDSFURTHERREVIEW">
+        {{ formatStatus(CohortStatus.NEEDSFURTHERREVIEW) }}
+      </option>
+      <option [value]="CohortStatus.NOTREVIEWED">
+        Unreviewed
+      </option>
+    </select>
+  </div>
+</div>
