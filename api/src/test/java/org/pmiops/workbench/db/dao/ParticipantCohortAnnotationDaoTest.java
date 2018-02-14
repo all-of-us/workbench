@@ -31,7 +31,7 @@ public class ParticipantCohortAnnotationDaoTest {
     private long annotationId;
 
     @Before
-    public void setup() throws Exception {
+    public void setUp() throws Exception {
         ParticipantCohortAnnotation pca = new ParticipantCohortAnnotation()
                 .annotationId(1L)
                 .cohortAnnotationDefinitionId(1L)
