@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortreview.util;
 
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 
-public enum ParticipantsDatabaseInfo {
+public enum ParticipantCohortStatusDbInfo {
     PARTICIPANT_ID(ParticipantCohortStatusColumns.PARTICIPANTID, "participant_id", DatabaseType.LONG),
     STATUS(ParticipantCohortStatusColumns.STATUS, "status", DatabaseType.LONG),
     GENDER(ParticipantCohortStatusColumns.GENDER, "gender.concept_name", DatabaseType.STRING),
@@ -15,7 +15,7 @@ public enum ParticipantsDatabaseInfo {
     private final String dbName;
     private final DatabaseType databaseType;
 
-    private ParticipantsDatabaseInfo(ParticipantCohortStatusColumns name, String dbName, DatabaseType databaseType) {
+    private ParticipantCohortStatusDbInfo(ParticipantCohortStatusColumns name, String dbName, DatabaseType databaseType) {
         this.name = name;
         this.dbName = dbName;
         this.databaseType = databaseType;
@@ -33,10 +33,10 @@ public enum ParticipantsDatabaseInfo {
         return databaseType;
     }
 
-    public static ParticipantsDatabaseInfo fromName(ParticipantCohortStatusColumns name) {
-        for (ParticipantsDatabaseInfo sortColumn : ParticipantsDatabaseInfo.values()) {
-            if (sortColumn.name.equals(name)) {
-                return sortColumn;
+    public static ParticipantCohortStatusDbInfo fromName(ParticipantCohortStatusColumns name) {
+        for (ParticipantCohortStatusDbInfo column : values()) {
+            if (column.name.equals(name)) {
+                return column;
             }
         }
         return null;
@@ -53,4 +53,6 @@ public enum ParticipantsDatabaseInfo {
     public enum DatabaseType {
         STRING, LONG, DATE;
     }
+
+    public enum
 }
