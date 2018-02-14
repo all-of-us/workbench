@@ -6,7 +6,7 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 # Todo maybe have arg be cdr-db-name?
-USAGE="./init-new-cdr-db.sh --cdr-db-name <cdrYYYYMMDD|publicYYYYMMDD>"
+USAGE="./generate-cdr/init-new-cdr-db.sh --cdr-db-name <cdrYYYYMMDD|publicYYYYMMDD>"
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
