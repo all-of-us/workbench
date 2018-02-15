@@ -1055,10 +1055,13 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
                      to_redact=root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
-  do_run_with_creds(gcc.project, gcc.account, nil, false) do |creds_file|
+  CloudSqlProxyContext.new(gcc.project).run do
     with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
       common.status "Copying service account key to GCS..."
-      common.run_inline("gsutil cp #{creds_file} gs://#{gcc.project}-credentials/app-engine-default-sa.json")
+      gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json")
+      common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
+          --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+      common.run_inline("gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json")
 
       common.status "Setting up databases and users..."
       create_workbench_db
