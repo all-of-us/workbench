@@ -334,6 +334,7 @@ public class ProfileController implements ProfileApiDelegate {
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
   }
+
   @Override
   public ResponseEntity updateProfile(Profile updatedProfile) {
     User user = userProvider.get();
@@ -341,7 +342,12 @@ public class ProfileController implements ProfileApiDelegate {
     user.setFamilyName(updatedProfile.getFamilyName());
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+        // send new email address to MailChimp to add to the list
         mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
+        // if user already had an email address sent to MailChimp, remove it from the list
+        if (user.getContactEmail() != null) {
+          mailChimpService.deleteUserContactEmail(user.getContactEmail());
+        }
         user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
