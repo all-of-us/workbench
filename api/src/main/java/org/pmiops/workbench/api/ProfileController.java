@@ -210,6 +210,15 @@ public class ProfileController implements ProfileApiDelegate {
         user.setFreeTierBillingProjectName(billingProjectName);
       }
 
+      // If the user has not been granted the BQ job user Google role on the billing project yet,
+      // give it to them (so they can run BQ queries from notebooks.)
+      try {
+        fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
+            FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
+      } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        throw ExceptionUtils.convertFirecloudException(e);
+      }
+
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       try {
         return userDao.save(user);

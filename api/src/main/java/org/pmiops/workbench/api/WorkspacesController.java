@@ -341,7 +341,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
    * Creates a JSON configuration file in GCS with properties that can be used in notebooks.
    * This file will be localized when launching a notebook.
    */
-  private void createConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+  private void writeWorkspaceConfigFile(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
       CdrVersion cdrVersion) {
     JSONObject config = new JSONObject();
 
@@ -377,15 +377,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspace.getNamespace(), workspace.getName()));
     }
 
-    // If the user has not been granted the BQ job user Google role on the billing project yet,
-    // give it to them (so they can run BQ queries from notebooks.)
-    try {
-      fireCloudService.grantGoogleRoleToUser(workspace.getNamespace(),
-          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
-
+    // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId = generateFirecloudWorkspaceId(workspace.getNamespace(),
         workspace.getName());
     FirecloudWorkspaceId fcWorkspaceId = workspaceId;
@@ -416,7 +408,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setVersion(1);
     setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    createConfigFile(fcWorkspace, dbWorkspace.getCdrVersion());
+    writeWorkspaceConfigFile(fcWorkspace, dbWorkspace.getCdrVersion());
 
     org.pmiops.workbench.db.model.Workspace reqWorkspace = FROM_CLIENT_WORKSPACE.apply(workspace);
     // TODO: enforce data access level authorization
@@ -634,12 +626,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.cloneWorkspace(workspaceNamespace, workspaceId,
         fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName());
 
-    String toBucket = null;
+    org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace = null;
     try {
-      toBucket = fireCloudService.getWorkspace(
+      toFcWorkspace = fireCloudService.getWorkspace(
           fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName())
-          .getWorkspace()
-          .getBucketName();
+          .getWorkspace();
     } catch (ApiException e) {
       log.log(Level.SEVERE, "Firecloud error retrieving newly cloned workspace", e);
       throw new ServerErrorException();
@@ -659,7 +650,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             "remove this notebook, reduce its size, or contact the workspace owner",
             workspaceNamespace, workspaceId, MAX_NOTEBOOK_SIZE_MB, b.getName()));
       }
-      cloudStorageService.copyBlob(b.getBlobId(), BlobId.of(toBucket, b.getName()));
+      cloudStorageService.copyBlob(
+          b.getBlobId(), BlobId.of(toFcWorkspace.getBucketName(), b.getName()));
     }
 
     // The final step in the process is to clone the AoU representation of the
@@ -698,6 +690,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
+    writeWorkspaceConfigFile(toFcWorkspace, dbWorkspace.getCdrVersion());
 
     org.pmiops.workbench.db.model.WorkspaceUserRole permissions = new org.pmiops.workbench.db.model.WorkspaceUserRole();
     permissions.setRole(WorkspaceAccessLevel.OWNER);
