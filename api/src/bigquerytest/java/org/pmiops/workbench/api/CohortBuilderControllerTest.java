@@ -67,7 +67,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private CdrVersionDao mockCdrVersionDao;
 
     @Autowired
-    TestWorkbenchConfig testWorkbenchConfig;
+    private TestWorkbenchConfig testWorkbenchConfig;
 
     @Override
     public List<String> getTableNames() {
