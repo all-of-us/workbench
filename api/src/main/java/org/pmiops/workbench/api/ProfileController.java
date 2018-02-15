@@ -32,6 +32,7 @@ import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -205,18 +206,12 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
+      // TODO(calbach): After the next DB wipe, switch this null check to
+      // instead use the freeTierBillingProjectStatus.
       if (user.getFreeTierBillingProjectName() == null) {
         String billingProjectName = createFirecloudUserAndBillingProject(user);
         user.setFreeTierBillingProjectName(billingProjectName);
-      }
-
-      // If the user has not been granted the BQ job user Google role on the billing project yet,
-      // give it to them (so they can run BQ queries from notebooks.)
-      try {
-        fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
-            FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-      } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        throw ExceptionUtils.convertFirecloudException(e);
+        user.setFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -226,6 +221,26 @@ public class ProfileController implements ProfileApiDelegate {
         log.log(Level.WARNING, "version conflict for user update", e);
         throw new ConflictException("Failed due to concurrent modification");
       }
+    }
+
+    // On subsequent sign-ins, complete the setup of the FC billing project. There is an
+    // initialization period for Firecloud projects, so it is not possible to do this immediately
+    // after project creation (on first sign-in).
+    if (BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
+      // If the user has not been granted the BQ job user Google role on the billing project yet,
+      // give it to them (so they can run BQ queries from notebooks).
+      try {
+        fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
+            FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
+      } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        log.log(Level.INFO, String.format(
+            "granting BigQuery role on free tier billing project failed, this is expected " +
+            "shortly after creation of the project; will retry on next initialization attempt", e));
+        // Allow the user to continue, as most workbench functionality will still be usable.
+        return user;
+      }
+      user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+      return userDao.save(user);
     }
     return user;
   }
