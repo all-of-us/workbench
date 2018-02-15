@@ -5,10 +5,7 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,12 +14,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -146,37 +140,11 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
         sqlParts.add(WHERE_CLAUSE_TEMPLATE);
         for (Filter filter : filtersList) {
-            sqlParts.add(buildFilterSqlPart(filter));
-            try {
-                if (ParticipantCohortStatusDbInfo.isDatabaseTypeLong(filter.getProperty())) {
-                    if (filter.getProperty().equals(ParticipantCohortStatusDbInfo.STATUS.getName())) {
-                        parameters.addValue(filter.getProperty().toString(), new Long(CohortStatus.valueOf(filter.getValues().get(0)).ordinal()));
-                    } else {
-                        parameters.addValue(filter.getProperty().toString(), new Long(filter.getValues().get(0)));
-                    }
-                } else if (ParticipantCohortStatusDbInfo.isDatabaseTypeDate(filter.getProperty())) {
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                    parameters.addValue(filter.getProperty().toString(), new Date(df.parse(filter.getValues().get(0)).getTime()));
-                } else {
-                    parameters.addValue(filter.getProperty().toString(), filter.getValues().get(0));
-                }
-
-            } catch (Exception ex) {
-                throw new BadRequestException("Problems parsing " + filter.getProperty().toString() + ": " + ex.getMessage());
-            }
-
+            String sql = ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getFunction().apply(filter, parameters);
+            sqlParts.add(sql);
         }
 
         return (!sqlParts.isEmpty()) ? String.join(" and ", sqlParts) : "";
-    }
-
-    private String buildFilterSqlPart(Filter filter) {
-        if (filter.getOperator().equals(Operator.IN)) {
-            return ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getDbName() +
-                    " " + filter.getOperator().toString() + " (:" + filter.getProperty().toString() + ")\n";
-        }
-        return ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getDbName() +
-                " " + filter.getOperator().toString() + " :" + filter.getProperty().toString() + "\n";
     }
 
     private class ParticipantCohortStatusRowMapper implements RowMapper<ParticipantCohortStatus> {
