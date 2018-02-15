@@ -93,14 +93,6 @@ export class ParticipantAnnotationComponent implements OnInit  {
     this.expandText = !this.expandText;
   }
 
-  setEditMode() {
-    this.state.annotationMgrState.next({
-      open: true,
-      mode: 'edit',
-      defn: this.definition
-    });
-  }
-
   get valuePropertyName() {
     return {
       [this.kinds.STRING]:   'valueString',
