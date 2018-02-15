@@ -38,7 +38,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   private CdrVersion cdrVersion = new CdrVersion();
 
   @Autowired
-  TestWorkbenchConfig testWorkbenchConfig;
+  private TestWorkbenchConfig testWorkbenchConfig;
 
   @Before
   public void setUp() {
