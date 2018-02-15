@@ -11,7 +11,6 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.inject.Provider;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -43,8 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class,
-    CodeDomainLookupService.class})
+@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -61,9 +58,6 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private CodeDomainLookupService codeDomainLookupService;
 
     @Autowired
-    private Provider<WorkbenchConfig> workbenchConfig;
-
-    @Autowired
     private BigQueryService bigQueryService;
 
     @Mock
@@ -73,7 +67,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private CdrVersionDao mockCdrVersionDao;
 
     @Autowired
-    TestWorkbenchConfig testWorkbenchConfig;
+    private TestWorkbenchConfig testWorkbenchConfig;
 
     @Override
     public List<String> getTableNames() {
