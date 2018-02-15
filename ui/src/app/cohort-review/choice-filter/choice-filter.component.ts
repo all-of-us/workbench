@@ -47,6 +47,6 @@ implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   toFilters(): Filter[] {
     const property = this.property;
     const operator = Operator.In;
-    return this.selection.value.map(value1 => (<Filter>{property, values:[value1], operator}));
+    return this.selection.value.map(value1 => (<Filter>{property, values: [value1], operator}));
   }
 }
