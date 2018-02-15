@@ -4,6 +4,7 @@ require "json"
 
 class GcloudContextV2
   attr_reader :account, :creds_file, :project
+  SA_KEY_PATH = "src/main/webapp/WEB-INF/sa-key.json"
 
   def initialize(options_parser)
     Workbench::assert_in_docker
