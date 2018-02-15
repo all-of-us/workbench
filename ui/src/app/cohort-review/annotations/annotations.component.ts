@@ -45,7 +45,7 @@ export class AnnotationsComponent implements OnInit {
   annotations$: Observable<Annotation[]>;
 
   /* Determines if the children should show the datatype of the annotation */
-  verbosity = false;
+  showDataType = false;
 
   constructor(private state: ReviewStateService) {}
 
@@ -69,5 +69,9 @@ export class AnnotationsComponent implements OnInit {
           const value = vals.find(byDefinitionId(definition)) || factoryFunc();
           return <Annotation>{definition, value};
         }));
+  }
+
+  openManager(): void {
+    this.state.annotationManagerOpen.next(true);
   }
 }
