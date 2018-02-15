@@ -17,20 +17,20 @@
     Please contact a system administrator to inquire about the status of your account.
   </div>
 </clr-modal>
-<clr-modal [(clrModalOpen)]="this.errorHandlingService.firecloudDown">
+<clr-modal [(clrModalOpen)]="this.statusCheckService.firecloudDown">
   <h3 class="modal-title">Firecloud Down</h3>
   <div class="modal-body">
     Our workspaces service is currently down. Please try again later.
   </div>
 </clr-modal>
-<clr-modal [(clrModalOpen)]="this.errorHandlingService.notebooksDown">
+<clr-modal [(clrModalOpen)]="this.statusCheckService.notebooksDown">
   <h3 class="modal-title">Notebooks Down</h3>
   <div class="modal-body">
     Our notebooks service is currently experiencing downtime. Please try again later.
   </div>
 </clr-modal>
 
-<clr-modal [(clrModalOpen)]="this.errorHandlingService.apiDown">
+<clr-modal [(clrModalOpen)]="this.statusCheckService.apiDown">
   <h3 class="modal-title">Server Down</h3>
   <div class="modal-body">
     Our server is currently experiencing downtime. Please try again later.

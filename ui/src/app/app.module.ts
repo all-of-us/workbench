@@ -12,6 +12,7 @@ import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
+import {StatusCheckService} from './services/status-check.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -56,10 +57,6 @@ function getBasePath() {
 
 export function getConfigService(http: Http) {
   return new ConfigService(http, getBasePath(), null);
-}
-
-export function getStatusService(http: Http) {
-  return new StatusService(http, getBasePath(), null);
 }
 
 // "Configuration" means Swagger API Client configuration.
@@ -122,12 +119,13 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useClass: ErrorReporterService,
     },
     SignInService,
+    StatusCheckService,
     GoogleAnalyticsEventsService,
     {
       provide: Http,
       useClass: InterceptedHttp,
       deps: [XHRBackend, RequestOptions, ErrorHandlingService]
-    },
+    }
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
