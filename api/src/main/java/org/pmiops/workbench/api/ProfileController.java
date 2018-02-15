@@ -35,7 +35,6 @@ import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
@@ -224,10 +223,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
     try {
-      return ResponseEntity.ok(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
+      Profile profile = profileService.getProfile(user);
+      return ResponseEntity.ok(profile);
+    } catch (BadRequestException e) {
+      throw e;
     }
   }
 
@@ -342,12 +341,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setFamilyName(updatedProfile.getFamilyName());
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        try {
-          mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
-        }
-        catch (BadRequestException e) {
-          return ResponseEntity.ok(e.getErrorResponse());
-        }
+        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
         user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
@@ -363,13 +357,8 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
-    try {
-      for (User user : userService.getNonVerifiedUsers()) {
-        responseList.add(profileService.getProfile(user));
-      }
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
+    for (User user : userService.getNonVerifiedUsers()) {
+      responseList.add(profileService.getProfile(user));
     }
 
     response.setProfileList(responseList);

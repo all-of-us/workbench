@@ -1,10 +1,12 @@
 package org.pmiops.workbench.auth;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileService {
 
+  private static final Logger log = Logger.getLogger(ProfileController.class.getName());
   private final FireCloudService fireCloudService;
   private final MailChimpService mailChimpService;
   private final UserDao userDao;
@@ -29,15 +32,20 @@ public class ProfileService {
     this.userDao = userDao;
   }
 
-  public Profile getProfile(User user) throws ApiException {
+  public Profile getProfile(User user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
     User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
     if (userWithAuthorities != null) {
       // If the user is already written to the database, use it and whatever authorities are there.
       user = userWithAuthorities;
     }
+    boolean enabledInFireCloud = false;
+    try {
+      enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
+    } catch (ApiException e) {
+      log.log(Level.SEVERE, "Error calling FireCloud", e);
+    }
 
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
@@ -76,19 +84,10 @@ public class ProfileService {
     // if verification is pending or unverified, need to query MailChimp and update DB accordingly
     if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
       if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED)) {
-        try {
-          mailChimpService.addUserContactEmail(user.getContactEmail());
-        } catch (BadRequestException e) {
-          throw new ApiException(e);
-        }
+        mailChimpService.addUserContactEmail(user.getContactEmail());
         userEmailVerificationStatus = EmailVerificationStatus.PENDING;
       } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {
-        try {
-          userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
-        }
-        catch (BadRequestException e) {
-          throw new ApiException(e);
-        }
+        userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
       }
       user.setEmailVerificationStatus(userEmailVerificationStatus);
       userDao.save(user);

@@ -32,8 +32,8 @@ export class ProfileEditComponent implements OnInit {
         this.profileService.updateProfile(this.profile)).subscribe(() => {
           this.router.navigate(['../'], {relativeTo : this.route});
       },
-        error => {
-          this.errorText = error.toString();
-      })
+      error => {
+        this.errorText  = JSON.parse(error._body).message;
+      });
   }
 }

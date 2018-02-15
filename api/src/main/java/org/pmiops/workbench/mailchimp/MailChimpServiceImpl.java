@@ -14,8 +14,6 @@ import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -47,7 +45,7 @@ public class MailChimpServiceImpl implements MailChimpService {
           .mapping.get(MailChimpService.MAILCHIMP_KEY_ID).toString();
     } catch (MailchimpException e) {
       if (e.code == 400) {
-        throw new BadRequestException(e);
+        throw new BadRequestException(e.description);
       } else {
         throw ExceptionUtils.convertMailchimpError(e);
       }
@@ -66,7 +64,7 @@ public class MailChimpServiceImpl implements MailChimpService {
               contactEmail)).mapping;
     } catch (MailchimpException e) {
       if (e.code == 400) {
-        throw new BadRequestException(e);
+        throw new BadRequestException(e.description);
       } else {
         throw ExceptionUtils.convertMailchimpError(e);
       }

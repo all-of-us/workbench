@@ -1,4 +1,14 @@
 <h2>Profile</h2>
+<div class="alert alert-danger" *ngIf="profileLoaded && (errorText !== null)">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+      </div>
+      <span class="alert-text">{{errorText}}</span>
+    </div>
+  </div>
+</div>
 <span *ngIf="!profileLoaded;else publicInfo" class="spinner spinner-sm"></span>
 <ng-template #publicInfo>
   <div class="static info">
@@ -14,7 +24,7 @@
   <div class="field">
     <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
     <input *ngIf="profileLoaded else loading" type="text"
-      [(ngModel)]="profile.familyName" id="givenName">
+      [(ngModel)]="profile.familyName" id="familyName">
   </div>
 </div>
 <div class="field-wrapper">
@@ -22,16 +32,6 @@
     <label for="contactEmail" class="long-text-field">Contact Email:</label>
     <input *ngIf="profileLoaded else loading" type="text"
       [(ngModel)]="profile.contactEmail" id="contactEmail">
-  </div>
-  <div class="alert alert-danger" *ngIf="profileLoaded && errortext">
-    <div class="alert-items">
-      <div class="alert-item static">
-        <div class="alert-icon-wrapper">
-          <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
-        </div>
-        <span class="alert-text">[{{errorText}}]</span>
-      </div>
-    </div>
   </div>
 </div>
 <h5>Username:</h5>
