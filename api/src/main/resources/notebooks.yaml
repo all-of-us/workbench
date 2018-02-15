@@ -16,7 +16,7 @@ tags:
   - name: cluster
     description: Clusters API
 # This will only work inside the Broad's network
-host: leonardo.dsde-dev.broadinstitute.org
+host:  notebooks.firecloud.org
 
 security:
   - googleoauth:
