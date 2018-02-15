@@ -7,6 +7,7 @@ require_relative "../../aou-utils/workbench"
 require_relative "cloudsqlproxycontext"
 require_relative "gcloudcontext"
 require_relative "wboptionsparser"
+require_relative "serviceaccounts"
 require "fileutils"
 require "io/console"
 require "json"
@@ -14,6 +15,8 @@ require "optparse"
 require "ostruct"
 require "tempfile"
 
+TEST_PROJECT = "all-of-us-workbench-test"
+GSUITE_ADMIN_KEY_PATH = "src/main/webapp/WEB-INF/gsuite-admin-sa.json"
 INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com
@@ -75,7 +78,7 @@ def dev_up(*args)
     docker-compose run update-config
     -Pconfig_file=../config/config_local.json
   }
-  run_api(account)
+  run_api()
 end
 
 Common.register_command({
@@ -85,11 +88,17 @@ Common.register_command({
   :fn => lambda { |*args| dev_up(*args) }
 })
 
+def get_gsuite_admin_key(project)
+  unless File.exist? GSUITE_ADMIN_KEY_PATH
+    common = Common.new
+    common.run_inline("gsutil cp gs://#{project}-credentials/gsuite-admin-sa.json #{GSUITE_ADMIN_KEY_PATH}")
+  end
+end
 
-def run_api(account)
+def run_api()
   common = Common.new
-  # TODO(dmohs): This can be simplified now that we are using a shared service account.
-  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
+  CloudSqlProxyContext.new(TEST_PROJECT).run do
+    get_gsuite_admin_key(TEST_PROJECT)
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
@@ -125,21 +134,17 @@ Common.register_command({
 })
 
 
-def run_api_and_db(*args)
+def run_api_and_db()
   common = Common.new
-  account = get_auth_login_account()
-  if account == nil
-    raise("Please run 'gcloud auth login' before starting the server.")
-  end
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
-  run_api(account)
+  run_api()
 end
 
 Common.register_command({
   :invocation => "run-api",
   :description => "Runs the api server (assumes database and config are already up-to-date.)",
-  :fn => lambda { |*args| run_api_and_db(*args) }
+  :fn => lambda { |*args| run_api_and_db() }
 })
 
 
@@ -207,6 +212,10 @@ def run_integration_tests(cmd_name, *args)
   gcc.ensure_service_account
   ENV["GOOGLE_APPLICATION_CREDENTIALS"] = GcloudContextV2::SA_KEY_PATH
   common.run_inline %W{gradle integration} + op.remaining
+  account = get_auth_login_account()
+  ServiceAccountContext(TEST_PROJECT).run do
+    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
+  end
 end
 
 Common.register_command({
@@ -215,13 +224,11 @@ Common.register_command({
   :fn => lambda { |*args| run_integration_tests("integration", *args) }
 })
 
-
 def run_bigquery_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
-
   op.parse.validate
   gcc.validate
   gcc.ensure_service_account
@@ -234,7 +241,6 @@ Common.register_command({
   :description => "Runs bigquerytest tests.",
   :fn => lambda { |*args| run_bigquery_tests("bigquerytest", *args) }
 })
-
 
 def run_gradle(cmd_name, args)
   ensure_docker cmd_name, args
@@ -383,54 +389,17 @@ def get_auth_login_account()
   return `gcloud config get-value account`.strip()
 end
 
-# Fetches a credentials file. Passes the path of the credentials to a block.
-# For all-of-us-workbench-test only, it leaves the (lazy-fetched) creds on disk;
-# for any other project, it cleans them up after the block is run.
-def do_run_with_creds(project, account, creds_file, delete_after=true)
-  if creds_file == nil
-    creds_filename = "src/main/webapp/WEB-INF/sa-key.json"
-    if project == "all-of-us-workbench-test"
-      service_account_creds_file = Tempfile.new("#{project}-creds.json")
-      # For test, use a locally stored key file copied from GCS (which we leave hanging
-      # around.)
-      if !File.file?(creds_filename)
-        # Create a temporary creds file for accessing GCS.
-        get_service_account_creds_file(project, account, service_account_creds_file.path)
-        begin
-          activate_service_account(service_account_creds_file.path)
-          # Copy the stable creds file from its path in GCS to sa-key.json.
-          # Important: we must leave this key file in GCS, and not delete it in Cloud Console,
-          # or local development will stop working.
-          get_file_from_gcs("all-of-us-workbench-test-credentials",
-              "app-engine-default-sa.json", creds_filename)
-        ensure
-          # Delete the temporary creds we created.
-          delete_service_accounts_creds(project, account, service_account_creds_file.path)
-        end
-      end
-      yield(creds_filename)
-    else
-      # Create a creds file and use it; clean up when done.
-      get_service_account_creds_file(project, account, creds_filename)
-      begin
-        yield(creds_filename)
-      ensure
-        if delete_after
-          delete_service_accounts_creds(project, account, creds_filename)
-        end
-      end
-    end
-  else
-    yield(creds_file)
-  end
-end
-
-def register_service_account(*args)
-  GcloudContext.new("register-service-account", args).run do |ctx|
+def register_service_account(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  ServiceAccountContext.new(gcc.project).run do
     Dir.chdir("../firecloud-tools") do
       ctx.common.run_inline(
           "./run.sh register_service_account/register_service_account.py" \
-          " -j #{cts.opts.creds_file} -o #{ctx.opts.account}")
+          " -j #{cts.opts.creds_file} -o #{gcc.project}@appspot.gserviceaccount.com")
     end
   end
 end
@@ -438,12 +407,17 @@ end
 Common.register_command({
   :invocation => "register-service-account",
   :description => "Registers a service account with Firecloud; do this once per account we use.",
-  :fn => lambda { |*args| register_service_account(*args) }
+  :fn => lambda { |*args| register_service_account("register-service-account", *args) }
 })
 
 
-def drop_cloud_db(*args)
-  GcloudContext.new("drop-cloud-db", args, true).run do |ctx|
+def drop_cloud_db(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  CloudSqlProxyContext.new(gcc.project).run do
     puts "Dropping database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
@@ -456,11 +430,16 @@ end
 Common.register_command({
   :invocation => "drop-cloud-db",
   :description => "Drops the Cloud SQL database for the specified project",
-  :fn => lambda { |*args| drop_cloud_db(*args) }
+  :fn => lambda { |*args| drop_cloud_db("drop-cloud-db", *args) }
 })
 
-def drop_cloud_cdr(*args)
-  GcloudContext.new("drop-cloud-cdr", args, true).run do |ctx|
+def drop_cloud_cdr(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  CloudSqlProxyContext.new(gcc.project).run do
     puts "Dropping cdr database..."
     pw = ENV["MYSQL_ROOT_PASSWORD"]
     run_with_redirects(
@@ -473,7 +452,7 @@ end
 Common.register_command({
   :invocation => "drop-cloud-cdr",
   :description => "Drops the cdr schema of Cloud SQL database for the specified project",
-  :fn => lambda { |*args| drop_cloud_cdr(*args) }
+  :fn => lambda { |*args| drop_cloud_cdr("drop-cloud-cdr", *args) }
 })
 
 
@@ -706,151 +685,60 @@ Common.register_command({
   :fn => lambda { |*args| update_user_registered_status("update_user_registered_status", args) }
 })
 
-
-# Run commands with various gcloud setup/teardown: authorization and,
-# optionally, a CloudSQL proxy.
-class GcloudContext
-  attr_reader :common, :gradlew_path, :opts
-
-  def initialize(command_name, args, use_cloudsql_proxy = false)
-    @common = Common.new
-    @args = args
-    @parser = create_parser(command_name)
-    # Clients may access options to get default options (project etc)
-    # as well as their own custom options.
-    @opts = Options.new
-    @use_cloudsql_proxy = use_cloudsql_proxy
-
-    @gradlew_path = File.join(Workbench::WORKBENCH_ROOT, "api", "gradlew")
-  end
-
-  # Clients may override add_options and validate_options to add flags.
-  def add_options
-    @parser.on("--project [PROJECT]",
-        "Project to create credentials for (e.g. all-of-us-workbench-test)") do |project|
-      @opts.project = project
-    end
-    @parser.on("--account [ACCOUNT]",
-         "Account to use when creating credentials (your.name@pmi-ops.org); "\
-         "use this or --creds_file") do |account|
-      @opts.account = account
-    end
-    @parser.on("--creds_file [CREDS_FILE]",
-         "Path to a file containing credentials; use this or --account.") do |creds_file|
-      @opts.creds_file = creds_file
-    end
-  end
-
-  def validate_options
-    if @opts.project == nil || !((@opts.account == nil) ^ (@opts.creds_file == nil))
-      puts @parser.help
-      exit 1
-    end
-  end
-
-  # Sets up credentials (and optionally CloudSQL proxy), yields to a provided
-  # block (passing the block itself / the GcloudContext), and then tears down.
-  def run
-    add_options
-    @parser.parse @args
-    validate_options
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @opts.creds_file
-    do_run_with_creds(@opts.project, @opts.account, @opts.creds_file) do |creds_file|
-      @opts.creds_file = creds_file
-      begin
-        if @use_cloudsql_proxy
-          cloudsql_proxy_pid = run_cloud_sql_proxy(@opts.project, @opts.creds_file)
-          read_db_vars(@opts.creds_file, @opts.project)
-        end
-
-        yield(self)
-      ensure
-        if @use_cloudsql_proxy
-          puts "Cleaning up CloudSQL proxy (PID #{cloudsql_proxy_pid})."
-          Process.kill("HUP", cloudsql_proxy_pid)
-        end
-      end
-    end
-  end
-end
-
-# Command-line parsing and main "run" implementation for set-authority.
-class SetAuthority < GcloudContext
-  # Adds command-line flags specific to set-authority.
-  def add_options
-    super
-    @parser.on(
-        "--email [EMAIL,...]",
-        "Comma-separated list of user accounts to change. Required."
-        ) do |email|
-      @opts.email = email
-    end
-    @parser.on(
-        "--add_authority [AUTHORITY,...]",
-        "Comma-separated list of user authorities to add for the users. " \
-        "One of added or removed authorities is required.") do |authority|
-      @opts.add_authority = authority
-    end
-    @parser.on(
-        "--rm_authority [AUTHORITY,...]",
-        "Comma-separated list of user authorities to remove from the users."
-        ) do |authority|
-      @opts.rm_authority = authority
-    end
-    @parser.on("--dry_run", "Make no changes.") do |dry_run|
-      @opts.dry_run = "true"
-    end
-    @opts.dry_run = "false"  # default
-  end
-
-  def validate_options
-    super
-    if @opts.email == nil || (@opts.add_authority == nil && @opts.rm_authority == nil)
-      puts @parser.help
-      exit 1
-    end
-  end
-
-  def run
-    super do
-      Dir.chdir("tools") do
-        @common.run_inline %W{
-            #{@gradlew_path} --info setAuthority
-            -PappArgs=['#{@opts.email}','#{@opts.add_authority}','#{@opts.rm_authority}',#{@opts.dry_run}]}
-      end
-    end
-  end
+def set_authority(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+       "--email [EMAIL,...]",
+       lambda {|opts, v| opts.email = v},
+       "Comma-separated list of user accounts to change. Required."
+   )
+   op.add_option(
+       "--add_authority [AUTHORITY,...]",
+       lambda {|opts, v| opts.add_authority = v},
+       "Comma-separated list of user authorities to add for the users. ")
+   op.add_option(
+       "--rm_authority [AUTHORITY,...]",
+       lambda {|opts, v| opts.rm_authority = v},
+       "Comma-separated list of user authorities to remove from the users.")
+   op.add_option(
+       "--dry_run",
+       lambda {|opts, v| opts.dry_run = "true"},
+       "Make no changes.")
+   op.add_validator lambda {|opts| raise ArgumentError unless opts.email and opts.add_authority and opts.rm_authority}
+   gcc = GcloudContextV2.new(op)
+   op.parse.validate
+   gcc.validate
+   CloudSqlProxyContext.new(gcc.project).run do
+     Dir.chdir("tools") do
+       @common.run_inline %W{
+         gradle --info setAuthority
+        -PappArgs=['#{op.opts.email}','#{op.opts.add_authority}','#{op.opts.rm_authority}',#{op.opts.dry_run}]}
+     end
+   end
 end
 
 Common.register_command({
   :invocation => "set-authority",
   :description => "Set user authorities (permissions). See set-authority --help.",
-  :fn => lambda { |*args| SetAuthority.new("set-authority", args, true).run }
+  :fn => lambda { |*args| set_authority("set-authority", *args) }
 })
 
-
-# The test creds are always left in api/sa-key.json. This simply adds validation
-# that the command is only run for the test project, and logs the path of
-# the file written.
-class GetTestServiceAccountCreds < GcloudContext
-  def validate_options
-    super
-    if @opts.project != "all-of-us-workbench-test"
-      raise("Only call this with all-of-us-workbench-test")
-    end
-  end
-
-  def run
-    super do
-      puts "Creds file is now at: #{File.absolute_path(@opts.creds_file)}"
-    end
+def get_test_service_account(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  ServiceAccountContext.new(gcc.project).run do
+    print "Service account key is now in sa-key.json"
   end
 end
 
 Common.register_command({
   :invocation => "get-service-creds",
   :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
-  :fn => lambda { |*args| GetTestServiceAccountCreds.new("get-service-creds", args).run }
+  :fn => lambda { |*args| get_rest_service_account("get-service-creds", *args)}
 })
 
 def connect_to_cloud_db(cmd_name, *args)
@@ -861,7 +749,7 @@ def connect_to_cloud_db(cmd_name, *args)
   op.parse.validate
   gcc.validate
   env = read_db_vars_v2(gcc)
-  CloudSqlProxyContext.new(gcc).run do
+  CloudSqlProxyContext.new(gcc.project).run do
     password = env["WORKBENCH_DB_PASSWORD"]
     common.run_inline %W{
       mysql --host=127.0.0.1 --port=3307 --user=#{env["WORKBENCH_DB_USER"]}
@@ -909,6 +797,9 @@ def deploy(cmd_name, args, with_cron)
   promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? " --quiet" : ""
+
+  common.run_inline %W{rm #{GSUITE_ADMIN_KEY_PATH}}
+  get_gsuite_admin_key(gcc.project)
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
@@ -974,7 +865,7 @@ end
 
 def load_config(project)
   configs = {
-    "all-of-us-workbench-test" => "config_test.json",
+    TEST_PROJECT => "config_test.json",
     "aou-res-workbench-stable" => "config_stable.json",
   }
   config_json = configs[project]
@@ -999,7 +890,7 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
   gcc.validate
   ENV.update(read_db_vars_v2(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
-  CloudSqlProxyContext.new(gcc).run do
+  CloudSqlProxyContext.new(gcc.project).run do
     yield(gcc)
   end
 end
@@ -1159,10 +1050,13 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
                      to_redact=root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
-  do_run_with_creds(gcc.project, gcc.account, nil, false) do |creds_file|
+  CloudSqlProxyContext.new(gcc.project).run do
     with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
       common.status "Copying service account key to GCS..."
-      common.run_inline("gsutil cp #{creds_file} gs://#{gcc.project}-credentials/app-engine-default-sa.json")
+      gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json")
+      common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
+          --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+      common.run_inline("gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json")
 
       common.status "Setting up databases and users..."
       create_workbench_db

@@ -53,15 +53,4 @@ class GcloudContextV2
       end
     end
   end
-
-  def ensure_service_account()
-    # TODO(dmohs): Also ensure project_id in this file matches @project.
-    unless File.exist? SA_KEY_PATH
-      Common.new.run_inline %W{
-        gsutil cp
-          gs://#{@project}-credentials/app-engine-default-sa.json
-          #{SA_KEY_PATH}
-      }
-    end
-  end
 end
