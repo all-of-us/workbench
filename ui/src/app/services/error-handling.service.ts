@@ -1,7 +1,6 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
-import {StatusService} from 'generated';
 
 @Injectable()
 export class ErrorHandlingService {
@@ -15,8 +14,7 @@ export class ErrorHandlingService {
 
   public userDisabledError: boolean;
 
-  constructor(private statusService: StatusService,
-      private zone: NgZone) {
+  constructor(private zone: NgZone) {
     this.serverError = false;
     this.noServerResponse = false;
   }
@@ -60,6 +58,7 @@ export class ErrorHandlingService {
       toRun = 3;
     }
     let numberRuns = 0;
+
     return observable.retryWhen((errors) => {
       return errors.do((e) => {
         numberRuns++;
@@ -69,40 +68,22 @@ export class ErrorHandlingService {
         }
         switch (e.status) {
           case 503:
-          this.getApiStatus();
             break;
           case 500:
-            this.getApiStatus();
             this.setServerError();
             throw e;
           case 403:
             this.setUserDisabledError();
             throw e;
           case 0:
-            console.log(e);
             this.setNoServerResponse();
             throw e;
           default:
             throw e;
-
         }
       });
     });
-  }
 
-  private getApiStatus(): void {
-    this.statusService.getStatus().subscribe((resp) => {
-      if (resp.firecloudStatus === false) {
-        this.firecloudDown = true;
-      }
-      if (resp.notebooksStatus === false) {
-        this.notebooksDown = true;
-      }
-      return;
-    }, () => {
-      this.apiDown = true;
-      return;
-    });
-  }
 
+  }
 }

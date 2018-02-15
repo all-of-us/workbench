@@ -41,6 +41,7 @@ import {
   ApiModule,
   ConfigService,
   Configuration,
+  StatusService
 } from 'generated';
 import {InterceptedHttp} from './factory/InterceptedHttp';
 
@@ -55,6 +56,10 @@ function getBasePath() {
 
 export function getConfigService(http: Http) {
   return new ConfigService(http, getBasePath(), null);
+}
+
+export function getStatusService(http: Http) {
+  return new StatusService(http, getBasePath(), null);
 }
 
 // "Configuration" means Swagger API Client configuration.

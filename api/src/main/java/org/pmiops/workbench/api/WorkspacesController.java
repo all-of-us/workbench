@@ -445,16 +445,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
-        workspaceNamespace, workspaceId);
-    try {
-      // This automatically handles access control to the workspace.
-      fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
-    workspaceService.getDao().delete(dbWorkspace);
-    return ResponseEntity.ok(new EmptyResponse());
+    throw new ServerErrorException("SOMETHING IS WRONG!");
+    // org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
+    //     workspaceNamespace, workspaceId);
+    // try {
+    //   // This automatically handles access control to the workspace.
+    //   fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
+    // } catch (org.pmiops.workbench.firecloud.ApiException e) {
+    //   throw ExceptionUtils.convertFirecloudException(e);
+    // }
+    // workspaceService.getDao().delete(dbWorkspace);
+    // return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
