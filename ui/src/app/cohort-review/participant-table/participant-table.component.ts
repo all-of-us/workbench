@@ -112,7 +112,7 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
         } else {
           const {property, value} = <any>filter;
           const operator = Operator.Equal;
-          query.filters.items.push(<Filter>{property, values:[value], operator});
+          query.filters.items.push(<Filter>{property, values: [value], operator});
         }
       }
     }
