@@ -232,7 +232,7 @@ public class ProfileController implements ProfileApiDelegate {
       try {
         fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
             FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-      } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      } catch (ApiException e) {
         log.log(Level.INFO, String.format(
             "granting BigQuery role on free tier billing project failed, this is expected " +
             "shortly after creation of the project; will retry on next initialization attempt", e));
