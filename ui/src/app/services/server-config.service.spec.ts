@@ -2,8 +2,6 @@ import {fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ServerConfigService} from './server-config.service';
 
 import {ConfigResponse, ConfigService} from 'generated';
@@ -40,7 +38,6 @@ describe('ServerConfigService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ConfigService, useValue: configServiceStub },
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         ServerConfigService
       ]
     });

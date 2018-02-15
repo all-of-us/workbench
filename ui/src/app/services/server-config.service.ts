@@ -2,8 +2,6 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-
 import {ConfigResponse, ConfigService} from 'generated';
 
 @Injectable()
