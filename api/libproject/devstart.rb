@@ -1085,7 +1085,6 @@ def circle_deploy(cmd_name, args)
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
-      migrate_cdr_database
       load_config(ctx.project)
     end
   end
