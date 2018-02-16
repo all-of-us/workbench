@@ -28,6 +28,7 @@ export class StatusCheckService {
   }
 
   private getApiStatus(): void {
+    (<InterceptedHttp> this.http).shouldPingStatus = false;
     this.statusService.getStatus().subscribe((resp) => {
       if (resp.firecloudStatus === false) {
         this.firecloudDown = true;
@@ -35,11 +36,11 @@ export class StatusCheckService {
       if (resp.notebooksStatus === false) {
         this.notebooksDown = true;
       }
-      (<InterceptedHttp> this.http).shouldPingStatus = false;
+      (<InterceptedHttp> this.http).shouldPingStatus = true;
       return;
     }, () => {
       this.apiDown = true;
-      (<InterceptedHttp> this.http).shouldPingStatus = false;
+      (<InterceptedHttp> this.http).shouldPingStatus = true;
       return;
     });
   }

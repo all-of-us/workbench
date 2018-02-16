@@ -125,7 +125,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       provide: Http,
       useClass: InterceptedHttp,
       deps: [XHRBackend, RequestOptions, ErrorHandlingService]
-    }
+    },
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
