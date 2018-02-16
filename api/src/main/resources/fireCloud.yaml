@@ -17,7 +17,7 @@ info:
     url: http://opensource.org/licenses/BSD-3-Clause
   termsOfService: https://github.com/broadinstitute/firecloud-orchestration
 
-host: "firecloud-orchestration.dsde-dev.broadinstitute.org"
+host: "api.firecloud.org"
 schemes:
   - "https"
 basePath: /

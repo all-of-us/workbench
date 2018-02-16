@@ -658,6 +658,23 @@ Common.register_command({
   :fn => lambda { |*args| create_db_creds(*args) }
 })
 
+def create_auth_domain()
+  common = Common.new
+  common.run_inline %W{gcloud auth login}
+  token = common.capture_stdout %W{gcloud auth print-access-token}
+  token = token.chomp
+  header = "Authorization: Bearer #{token}"
+  content_type = "Content-type: application/json"
+  # TODO: make this project-specific
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
+     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test}
+end
+
+Common.register_command({
+  :invocation => "create-auth-domain",
+  :description => "Creates an authorization domain in Firecloud for registered users",
+    :fn => lambda { |*args| create_auth_domain() }
+})
 
 def update_user_registered_status(cmd_name, args)
   common = Common.new
@@ -693,6 +710,7 @@ def update_user_registered_status(cmd_name, args)
     common.run_inline %W{curl -H #{header}
     -H #{content_type}
     -d #{payload}
+    # TODO: make this project-specific
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 
@@ -1067,7 +1085,6 @@ def circle_deploy(cmd_name, args)
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
-      migrate_cdr_database
       load_config(ctx.project)
     end
   end
@@ -1143,4 +1160,35 @@ Common.register_command({
   :invocation => "docker-run",
   :description => "Runs the specified command in a docker container.",
   :fn => lambda { |*args| docker_run("docker-run", args) }
+})
+
+def print_scoped_access_token(cmd_name, args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+    "--scopes s1,s2,s3",
+    Array,
+    lambda {|opts, v| opts.scopes = v},
+    "Action to perform: add/remove."
+  )
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  gcc.ensure_service_account
+  scopes = %W{profile email} + op.opts.scopes
+
+  require "googleauth"
+  creds = Google::Auth::ServiceAccountCredentials.make_creds(
+    json_key_io: File.open(GcloudContextV2::SA_KEY_PATH),
+    scope: scopes
+  )
+
+  token_data = creds.fetch_access_token!
+  puts "\n#{token_data["access_token"]}"
+end
+
+Common.register_command({
+  :invocation => "print-scoped-sa-access-token",
+  :description => "Prints access token for the service account that has been scoped for API access.",
+  :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
 })

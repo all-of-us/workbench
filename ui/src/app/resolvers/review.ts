@@ -12,9 +12,6 @@ import {
   Workspace,
 } from 'generated';
 
-// TODO make this dynamic (jms)
-const CDR_VERSION = 1;
-
 @Injectable()
 export class ReviewResolver implements Resolve<CohortReview> {
 
@@ -24,9 +21,10 @@ export class ReviewResolver implements Resolve<CohortReview> {
     const ns: Workspace['namespace'] = route.params.ns;
     const wsid: Workspace['id'] = route.params.wsid;
     const cid: Cohort['id'] = +(route.params.cid);
+    const cdrid = route.parent.data.workspace.cdrVersionId;
 
-    // console.log(`Resolving review for ${ns}/${wsid}:${cid} @ CDR ${CDR_VERSION}`);
-    // console.dir(route);
+    console.log(`Resolving review for ${ns}/${wsid}:${cid} @ cdr id ${cdrid}`);
+    console.dir(route);
 
     /* Default values */
     const request = <ParticipantCohortStatusesRequest>{
@@ -36,6 +34,6 @@ export class ReviewResolver implements Resolve<CohortReview> {
       sortOrder: SortOrder.Asc,
     };
 
-    return this.api.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
+    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }
 }

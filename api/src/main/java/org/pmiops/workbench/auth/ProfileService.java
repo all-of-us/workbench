@@ -74,7 +74,7 @@ public class ProfileService {
     EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
     // if verification is pending or unverified, need to query MailChimp and update DB accordingly
     if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
-      if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED)) {
+      if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED) && user.getContactEmail() != null) {
         mailChimpService.addUserContactEmail(user.getContactEmail());
         userEmailVerificationStatus = EmailVerificationStatus.PENDING;
       } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {

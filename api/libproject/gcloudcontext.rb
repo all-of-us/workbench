@@ -53,13 +53,12 @@ class GcloudContextV2
   end
 
   def ensure_service_account()
-    sa_key_path = "src/main/webapp/WEB-INF/sa-key.json"
     # TODO(dmohs): Also ensure project_id in this file matches @project.
-    unless File.exist? sa_key_path
+    unless File.exist? SA_KEY_PATH
       Common.new.run_inline %W{
         gsutil cp
           gs://#{@project}-credentials/app-engine-default-sa.json
-          #{sa_key_path}
+          #{SA_KEY_PATH}
       }
     end
   end
