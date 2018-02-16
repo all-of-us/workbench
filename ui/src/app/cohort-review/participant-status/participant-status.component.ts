@@ -15,9 +15,6 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
-// TODO make this dynamic (jms)
-const CDR_VERSION = 1;
-
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
@@ -71,14 +68,13 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private callApi = ([status, participantId]): Observable<ParticipantCohortStatus> => {
+  private callApi = ([status, pid]): Observable<ParticipantCohortStatus> => {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
-    return this.reviewAPI.updateParticipantCohortStatus(
-      ns, wsid, cid, CDR_VERSION, participantId, request
-    );
+    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }
 
   private emit = (newStatus: ParticipantCohortStatus) => {
