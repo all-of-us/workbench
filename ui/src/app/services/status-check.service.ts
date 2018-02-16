@@ -29,7 +29,6 @@ export class StatusCheckService {
 
   private getApiStatus(): void {
     this.statusService.getStatus().subscribe((resp) => {
-      console.log("Hello");
       if (resp.firecloudStatus === false) {
         this.firecloudDown = true;
       }
@@ -39,8 +38,6 @@ export class StatusCheckService {
       (<InterceptedHttp> this.http).shouldPingStatus = false;
       return;
     }, () => {
-      console.log("Hello");
-
       this.apiDown = true;
       (<InterceptedHttp> this.http).shouldPingStatus = false;
       return;
