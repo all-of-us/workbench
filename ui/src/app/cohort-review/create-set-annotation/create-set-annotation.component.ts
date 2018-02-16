@@ -21,7 +21,7 @@ import {
 export class CreateSetAnnotationComponent {
   readonly kinds = AnnotationType;
   private posting = false;
-  @Output('onFinish') finished = new EventEmitter<boolean>();
+  @Output() onFinish = new EventEmitter<boolean>();
   private defn: CohortAnnotationDefinition | null;
   private form: FormGroup;
   private subscription: Subscription;
@@ -76,12 +76,12 @@ export class CreateSetAnnotationComponent {
       .subscribe(_ => {
         this.posting = false;
         this.form.reset();
-        this.finished.emit(true);
+        this.onFinish.emit(true);
       });
   }
 
   cancel() {
     // this.form.reset();
-    this.finished.emit(true);
+    this.onFinish.emit(true);
   }
 }

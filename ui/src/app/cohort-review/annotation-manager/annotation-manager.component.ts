@@ -25,7 +25,7 @@ export class AnnotationManagerComponent {
     this.state.annotationDefinitions$;
 
 
-  posting: boolean = false;
+  posting = false;
   editSet: Set<DefnId> = new Set<DefnId>();
   mode: 'list' | 'create' = 'list';
 
