@@ -27,6 +27,11 @@ class WbOptionsParser
     self
   end
 
+  def add_typed_option(option, type, assign, help)
+    @parser.on(option, type, help) {|v| assign.call(@opts, v)}
+    self
+  end
+
   def add_validator(fn)
     @validators.push(fn)
     self
