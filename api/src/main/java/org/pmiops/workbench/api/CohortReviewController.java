@@ -186,7 +186,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
-            cohortReview = initializeCohortReview(cohortId, cdrVersionId, cohort);
+            cohortReview = initializeCohortReview(cdrVersionId, cohort);
             cohortReviewService.saveCohortReview(cohortReview);
         }
         if(cohortReview.getReviewSize() > 0) {
@@ -352,7 +352,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
-            cohortReview = initializeCohortReview(cohortId, cdrVersionId, cohort);
+            cohortReview = initializeCohortReview(cdrVersionId, cohort);
         }
 
         PageRequest pageRequest = createPageRequest(request.getPage(),
@@ -490,12 +490,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     /**
      * Helper method to create a new {@link CohortReview} and persist it to the workbench database.
-     *  @param cohortId
      * @param cdrVersionId
      * @param cohort
      */
-    private CohortReview initializeCohortReview(Long cohortId,
-                                                Long cdrVersionId, Cohort cohort) {
+    private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
         codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
@@ -507,7 +505,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         List<FieldValue> row = result.iterateAll().iterator().next();
         long cohortCount = bigQueryService.getLong(row, rm.get("count"));
 
-        return createNewCohortReview(cohortId, cdrVersionId, cohortCount);
+        return createNewCohortReview(cohort.getCohortId(), cdrVersionId, cohortCount);
     }
 
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
