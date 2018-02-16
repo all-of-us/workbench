@@ -658,6 +658,23 @@ Common.register_command({
   :fn => lambda { |*args| create_db_creds(*args) }
 })
 
+def create_auth_domain()
+  common = Common.new
+  common.run_inline %W{gcloud auth login}
+  token = common.capture_stdout %W{gcloud auth print-access-token}
+  token = token.chomp
+  header = "Authorization: Bearer #{token}"
+  content_type = "Content-type: application/json"
+  # TODO: make this project-specific
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
+     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test}
+end
+
+Common.register_command({
+  :invocation => "create-auth-domain",
+  :description => "Creates an authorization domain in Firecloud for registered users",
+    :fn => lambda { |*args| create_auth_domain() }
+})
 
 def update_user_registered_status(cmd_name, args)
   common = Common.new
@@ -693,6 +710,7 @@ def update_user_registered_status(cmd_name, args)
     common.run_inline %W{curl -H #{header}
     -H #{content_type}
     -d #{payload}
+    # TODO: make this project-specific
     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
   end
 
