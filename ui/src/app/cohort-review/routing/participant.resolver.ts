@@ -7,9 +7,6 @@ import {ReviewStateService} from '../review-state.service';
 
 import {CohortReviewService} from 'generated';
 
-// TODO make this dynamic (jms)
-const CDR_VERSION = 1;
-
 @Injectable()
 export class ParticipantResolver implements Resolve<Participant> {
 
@@ -20,13 +17,14 @@ export class ParticipantResolver implements Resolve<Participant> {
 
   resolve(route: ActivatedRouteSnapshot): Observable<Participant> {
     const {ns, wsid, cid} = route.parent.params;
+    const cdrid = route.parent.data.workspace.cdrVersionId;
     const {pid} = route.params;
 
     // console.log(`Resolving participant at ${ns}/${wsid}, cohort ${cid} and pid ${pid}`);
     // console.dir(route);
 
     return <Observable<Participant>>this.reviewAPI
-      .getParticipantCohortStatus(ns, wsid, +cid, CDR_VERSION, +pid)
+      .getParticipantCohortStatus(ns, wsid, +cid, cdrid, +pid)
       .map(Participant.fromStatus)
       .do(participant => this.state.participant.next(participant));
   }

@@ -7,9 +7,6 @@ import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
-// TODO make this dynamic (jms)
-const CDR_VERSION = 1;
-
 import {
   Cohort,
   CohortReview,
@@ -117,13 +114,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
       }
     }
 
-    const {ns, wsid, cid} = this.pathParams;
+    const {ns, wsid, cid, cdrid} = this.pathParams;
 
     console.log('Participant page request parameters:');
     console.dir(query);
 
     return this.reviewAPI
-      .getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, query)
+      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
       .do(_ => this.loading = false)
       .subscribe(review => this.state.review.next(review));
   }
@@ -131,11 +128,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
   private get pathParams() {
     const paths = this.route.snapshot.pathFromRoot;
     const params: any = paths.reduce((p, r) => ({...p, ...r.params}), {});
+    const data: any = paths.reduce((p, r) => ({...p, ...r.data}), {});
 
     const ns: Workspace['namespace'] = params.ns;
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
-    return {ns, wsid, cid};
+    const cdrid = +(data.workspace.cdrVersionId);
+    return {ns, wsid, cid, cdrid};
   }
 
   private extractDemographics(arr: ConceptIdName[]): string[] {
