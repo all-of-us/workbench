@@ -4,13 +4,13 @@
 # It is called twice from generate-local-count-dbs.sh to make the cdr and public mysql dbs the workbench uses
 
 # Example
-# ../project.rb generate-cloudsql-cdr --cdr-version 20180130 --cdr-db-prefix cdr --bucket all-of-us-workbench-cloudsql-create
+# ../project.rb generate-local-cdr --cdr-version 20180130 --cdr-db-prefix cdr --bucket all-of-us-workbench-cloudsql-create
 
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-cdr/generate-cloudsql-cdr --cdr-version YYYYMMDD --cdr-db-prefix <cdr|public> --bucket <BUCKET>"
-USAGE="$USAGE \n Local mysql or remote cloudsql database named cdr<cdr-version> and public<cdr-version> are created and populated."
+USAGE="./generate-cdr/generate-local-cdr --cdr-version YYYYMMDD --cdr-db-prefix <cdr|public> --bucket <BUCKET>"
+USAGE="$USAGE \n Local mysql cdr database created and  populated."
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"

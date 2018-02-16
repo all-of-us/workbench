@@ -1,3 +1,7 @@
+/* Note -- this is general script and these vars get envsubst in scripts.
+ * CDR_DB_NAME , WORKBENCH_DB_USER AND PASSWORD,  may be substituted in scripts for PUBLIC versions,  .. etc
+ * if creating a a differnt db with this script
+ */
 CREATE DATABASE IF NOT EXISTS ${CDR_DB_NAME} CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE USER IF NOT EXISTS '${WORKBENCH_DB_USER}'@'%' IDENTIFIED BY '${WORKBENCH_DB_PASSWORD}';

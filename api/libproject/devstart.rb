@@ -600,7 +600,7 @@ Common.register_command({
 })
 
 
-def do_create_db_creds(project, account, creds_file)
+def do_create_db_creds(project, account, creds_file, cdr_db_name, public_db_name)
   puts "Enter the root DB user password:"
   root_password = STDIN.noecho(&:gets)
   puts "Enter the root DB user password again:"
@@ -631,13 +631,15 @@ def do_create_db_creds(project, account, creds_file)
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
       # TODO: replace with public DB, user, password
-      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/cdr?rewriteBatchedStatements=true"
+      # Todo -- where is cdr db connection string ?
+      db_creds_file.puts "CDR_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{cdr_db_name}?rewriteBatchedStatements=true"
+      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{public_db_name}?rewriteBatchedStatements=true"
       db_creds_file.puts "PUBLIC_DB_USER=workbench"
       db_creds_file.puts "PUBLIC_DB_PASSWORD=#{workbench_password}"
       db_creds_file.close
 
       activate_service_account(creds_file)
-      copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
+      copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "peter_vars.env")
     ensure
       db_creds_file.unlink
     end
@@ -648,7 +650,7 @@ end
 
 def create_db_creds(*args)
   GcloudContext.new("create-db-creds", args, true).run do |ctx|
-    do_create_db_creds(ctx.opts.project, ctx.opts.account, ctx.opts.creds_file)
+    do_create_db_creds(ctx.opts.project, ctx.opts.account, ctx.opts.creds_file, ctx.opts.cdr_db_name, ctx.opts.public_db_name)
   end
 end
 
