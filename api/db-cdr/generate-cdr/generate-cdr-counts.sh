@@ -17,7 +17,7 @@ IFS=$'\n\t'
 
 
 USAGE="./generate-cdr/generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
-USAGE="$USAGE --cdr-version=YYYYMMDD --bucket all-of-us-workbench-cloudsql-create"
+USAGE="$USAGE --bucket all-of-us-workbench-cloudsql-create --cdr-version=YYYYMMDD"
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
 
 while [ $# -gt 0 ]; do
@@ -27,8 +27,8 @@ while [ $# -gt 0 ]; do
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
     --public-project) PUBLIC_PROJECT=$2; shift 2;;
-    --cdr-version) CDR_VERSION=$2; shift 2;;
     --bucket) BUCKET=$2; shift;;
+    --cdr-version) CDR_VERSION=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac

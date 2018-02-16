@@ -394,46 +394,33 @@ where co1.observation_concept_id > 0 and (extract(year from co1.observation_date
 group by co1.observation_concept_id, stratum_2"
 
 # PPI Observation (3000)
-# Todo , we co count > 0 to eliminate all the junk data now
-# Note, we only want counts related to 3 survery modules which have concept id
-# (1586134, 1585855,1585710)
-echo "Querying PPI observation"
+echo "Querying PPI observation "
 # Get ones with value as string
 ppi_modules="(1586134, 1585855,1585710)"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
-value_as_string as stratum_2, count(*) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
-on co1.observation_source_concept_id = c.concept_id
-inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
-on r.concept_id_2 = c.concept_id
-where c.vocabulary_id = 'PPI' and
-c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\` i)
-and  r.concept_id_1 in $ppi_modules and r.relationship_id = 'Module of' and
-value_as_string is not null
-group by c.concept_id, value_as_string"
+SELECT 0 as id, 3000 as analysis_id, CAST(o.observation_source_concept_id as string) as stratum_1,
+cast(o.value_source_concept_id as string) as stratum_2, count(*) as count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on o.observation_source_concept_id = c.concept_id
+where o.observation_source_concept_id > 0 and o.value_source_concept_id > 0 and c.vocabulary_id = 'PPI'
+and c.concept_class_id = 'Question'
+group by observation_source_concept_id, o.value_source_concept_id"
+
 
 # Get PPI ones with value as number.
+# Todo ,we exclude zip concept 1585966. We can allow this some time
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
-CAST(value_as_number as STRING) as stratum_2, count(*) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
-on co1.observation_source_concept_id = c.concept_id
-inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
-on r.concept_id_2 = c.concept_id
-where c.vocabulary_id = 'PPI' and
-c.concept_id not in (select i.concept_id from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.ignore_ppi\` i)
-and  r.concept_id_1 in $ppi_modules and r.relationship_id = 'Module of' and value_as_number is not null
+SELECT 0 as id, 3000 as analysis_id, cast(c.concept_id as string) as stratum_1, cast(value_as_number as string) as stratum_2, count(*)
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\`
+c on o.observation_source_concept_id = c.concept_id
+where c.vocabulary_id = 'PPI' and c.concept_class_id = 'Question' and value_as_number > 0
+and c.concept_id != 1585966
 group by c.concept_id, value_as_number"
 
-# Todo maybe for real data None were in test data
-# Get ones with value as concept_id .
 
 # 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
