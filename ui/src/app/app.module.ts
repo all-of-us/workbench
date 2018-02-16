@@ -12,6 +12,7 @@ import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
+import {StatusCheckService} from './services/status-check.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -41,6 +42,7 @@ import {
   ApiModule,
   ConfigService,
   Configuration,
+  StatusService
 } from 'generated';
 import {InterceptedHttp} from './factory/InterceptedHttp';
 
@@ -117,6 +119,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useClass: ErrorReporterService,
     },
     SignInService,
+    StatusCheckService,
     GoogleAnalyticsEventsService,
     {
       provide: Http,

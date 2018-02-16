@@ -10,10 +10,23 @@
   Server is currently busy (503)
   <clr-icon shape="times" (click)="this.closeServerBusy()"></clr-icon>
 </div>
-
 <clr-modal [(clrModalOpen)]="this.errorHandlingService.userDisabledError">
   <h3 class="modal-title">This account has been disabled</h3>
   <div class="modal-body">
     Please contact a system administrator to inquire about the status of your account.
+  </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="this.statusCheckService.firecloudDown ||
+                           this.statusCheckService.notebooksDown ||
+                           this.statusCheckService.apiDown">
+  <h3 class="modal-title">Service Problems</h3>
+  <div class="modal-body">
+    <div>One or more of our services is currently down:</div>
+    <ul>
+      <li *ngIf="this.statusCheckService.firecloudDown">Workspaces Service</li>
+      <li *ngIf="this.statusCheckService.notebooksDown">Notebooks Service</li>
+      <li *ngIf="this.statusCheckService.apiDown">Server</li>
+    </ul>
+    <div>Please try again later.</div>
   </div>
 </clr-modal>
