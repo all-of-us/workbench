@@ -96,6 +96,18 @@ export class WorkspaceEditComponent implements OnInit {
         } else if (this.mode === WorkspaceEditMode.Clone) {
           this.workspace.name = 'Clone of ' + resp.workspace.name;
           this.workspace.description = resp.workspace.description;
+          const fromPurpose = resp.workspace.researchPurpose;
+          this.workspace.researchPurpose = {
+            ...fromPurpose,
+            // Heuristic for whether the user will want to request a review,
+            // assuming minimal changes to the existing research purpose.
+            reviewRequested: (
+              fromPurpose.reviewRequested && !fromPurpose.approved),
+            timeRequested: null,
+            approved: null,
+            timeReviewed: null,
+            additionalNotes: null
+          };
         }
       },
       (error) => {
