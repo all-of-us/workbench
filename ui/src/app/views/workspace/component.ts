@@ -179,7 +179,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   initializeNotebookCookies(): Observable<Response> {
     // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://leonardo.dsde-dev.broadinstitute.org';
+    const leoBaseUrl = 'https://notebooks.firecloud.org';
     const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + this.cluster.clusterNamespace + '/'
         + this.cluster.clusterName;
@@ -222,7 +222,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   openCluster(): void {
     // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://leonardo.dsde-dev.broadinstitute.org';
+    const leoBaseUrl = 'https://notebooks.firecloud.org';
     const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + this.cluster.clusterNamespace + '/'
         + this.cluster.clusterName;
