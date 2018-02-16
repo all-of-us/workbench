@@ -186,7 +186,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         try {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
-            cohortReview = initializeCohortReview(cdrVersionId, cohort);
+            cohortReview = initializeCohortReview(cdrVersionId, cohort)
+                    .reviewStatus(ReviewStatus.CREATED)
+                    .reviewSize(0L);
             cohortReviewService.saveCohortReview(cohortReview);
         }
         if(cohortReview.getReviewSize() > 0) {
@@ -196,7 +198,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
-
 
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
         codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
@@ -209,9 +210,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 createParticipantCohortStatusesList(cohortReview.getCohortReviewId(), result, rm);
 
         cohortReview
-                .reviewSize(participantCohortStatuses.size())
-                .reviewedCount(0L)
-                .reviewStatus(ReviewStatus.CREATED);
+                .reviewSize(participantCohortStatuses.size());
 
         //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
