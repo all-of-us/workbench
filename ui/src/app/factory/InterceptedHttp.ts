@@ -9,6 +9,7 @@ import {Observable, Subject} from 'rxjs/Rx';
 @Injectable()
 export class InterceptedHttp extends Http {
   private statusSubject = new Subject<boolean>();
+  public statusSubject$ = this.statusSubject.asObservable();
   public shouldPingStatus = true;
 
 
@@ -18,20 +19,13 @@ export class InterceptedHttp extends Http {
   }
 
   request(url: string | Request, options?: RequestOptionsArgs): Observable<Response> {
-    const response = this.errorHandlingService.retryApi(
-        super.request(url, options));
-    response.subscribe(() => {}, (e) => {
-      if ((e.status === 500 || e.status === 503) &&
-          this.shouldPingStatus) {
-        this.statusSubject.next(true);
-      }
-    });
-    return response;
+    return this.errorHandlingService.retryApi(
+        super.request(url, options)).catch((e) => {
+          if ((e.status === 500 || e.status === 503) &&
+              this.shouldPingStatus) {
+            this.statusSubject.next(true);
+          }
+          throw e;
+        });
   }
-
-  public getStatusSubjectAsObservable(): Observable<boolean> {
-    return this.statusSubject.asObservable();
-  }
-
-
 }

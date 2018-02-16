@@ -21,8 +21,7 @@ export class StatusCheckService {
     this.apiDown = false;
     this.firecloudDown = false;
     this.notebooksDown = false;
-    this.obs = (<InterceptedHttp> http).getStatusSubjectAsObservable();
-    this.obs.subscribe(() => {
+    (<InterceptedHttp> http).statusSubject$.subscribe(() => {
       this.getApiStatus();
     });
   }
