@@ -78,7 +78,7 @@ else
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
+copy_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain ignore_ppi vocabulary )
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
@@ -87,4 +87,3 @@ done
 
 # Todo, Run queries to make counts suitable for public
 
-# Todo, fill achilles_results_concept table possibly if we need to.

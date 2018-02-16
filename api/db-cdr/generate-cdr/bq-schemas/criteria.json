@@ -13,7 +13,12 @@
         "mode": "NULLABLE", 
         "name": "type", 
         "type": "STRING"
-      }, 
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "subtype",
+        "type": "STRING"
+      },
       {
         "mode": "NULLABLE", 
         "name": "code", 
@@ -38,15 +43,15 @@
         "mode": "NULLABLE", 
         "name": "est_count", 
         "type": "INTEGER"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "concept_id", 
-        "type": "INTEGER"
-      }, 
+      },
       {
         "mode": "NULLABLE", 
         "name": "domain_id", 
         "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "concept_id",
+        "type": "INTEGER"
       }
 ]

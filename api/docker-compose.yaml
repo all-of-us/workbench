@@ -170,7 +170,7 @@ services:
           - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
         env_file:
           - db-cdr/vars.env
-  db-mysqldump-db:
+  db-mysqldump-local-db:
           depends_on:
             - db
           build:
