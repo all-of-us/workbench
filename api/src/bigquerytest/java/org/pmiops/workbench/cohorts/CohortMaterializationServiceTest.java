@@ -1,39 +1,31 @@
 package org.pmiops.workbench.cohorts;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-
 import com.google.common.collect.ImmutableMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryBaseTest;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({ParticipantCounter.class, BigQueryService.class, CohortMaterializationService.class,
@@ -44,6 +36,17 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   private CohortMaterializationService cohortMaterializationService;
 
   private CdrVersion cdrVersion = new CdrVersion();
+
+  @Autowired
+  private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Before
+  public void setUp() {
+    cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    CdrVersionContext.setCdrVersion(cdrVersion);
+  }
 
   @Override
   public List<String> getTableNames() {

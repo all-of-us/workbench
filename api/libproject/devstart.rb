@@ -188,35 +188,43 @@ Common.register_command({
 })
 
 
-def run_integration_tests(*args)
+def run_integration_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
 
-  account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
-    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
-  end
+  op.parse.validate
+  gcc.validate
+  gcc.ensure_service_account
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = GcloudContextV2::SA_KEY_PATH
+  common.run_inline %W{gradle integration} + op.remaining
 end
 
 Common.register_command({
   :invocation => "integration",
   :description => "Runs integration tests.",
-  :fn => lambda { |*args| run_integration_tests(*args) }
+  :fn => lambda { |*args| run_integration_tests("integration", *args) }
 })
 
 
-def run_bigquery_tests(*args)
+def run_bigquery_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
 
-  account = get_auth_login_account()
-  do_run_with_creds("all-of-us-workbench-test", account, nil) do |creds_file|
-    common.run_inline %W{docker-compose run --rm api ./gradlew bigquerytest} + args
-  end
+  op.parse.validate
+  gcc.validate
+  gcc.ensure_service_account
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = GcloudContextV2::SA_KEY_PATH
+  common.run_inline %W{gradle bigquerytest} + op.remaining
 end
 
 Common.register_command({
   :invocation => "bigquerytest",
   :description => "Runs bigquerytest tests.",
-  :fn => lambda { |*args| run_bigquery_tests(*args) }
+  :fn => lambda { |*args| run_bigquery_tests("bigquerytest", *args) }
 })
 
 

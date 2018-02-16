@@ -2210,18 +2210,20 @@ definitions:
     required:
       - property
       - operator
-      - value
+      - values
     properties:
       property:
         $ref: "#/definitions/ParticipantCohortStatusColumns"
       operator:
         $ref: "#/definitions/Operator"
-      value:
-        type: string
+      values:
+        type: "array"
+        items:
+          type: string
 
   Operator:
     type: string
-    enum: ['=', '<', '>', '<=', '>=', 'like']
+    enum: ['=', '<', '>', '<=', '>=', 'like', 'in']
 
   ParticipantDemographics:
     type: object

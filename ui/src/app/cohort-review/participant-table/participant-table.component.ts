@@ -106,11 +106,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     if (state.filters) {
       for (const filter of state.filters) {
         if (isChoiceFilter(filter)) {
-          query.filters.items.push(...filter.toFilters());
+          const property = filter.property;
+          const operator = Operator.In;
+          query.filters.items.push(<Filter>{property, values: filter.selection.value, operator});
         } else {
-          const {property, value} = <Partial<Filter>>filter;
+          const {property, value} = <any>filter;
           const operator = Operator.Equal;
-          query.filters.items.push(<Filter>{property, value, operator});
+          query.filters.items.push(<Filter>{property, values: [value], operator});
         }
       }
     }
