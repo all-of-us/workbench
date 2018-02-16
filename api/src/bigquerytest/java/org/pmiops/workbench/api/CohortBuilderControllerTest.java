@@ -357,7 +357,6 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                         createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
                                 .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
                         1);
-        System.out.println("here");
     }
 
     @Test
