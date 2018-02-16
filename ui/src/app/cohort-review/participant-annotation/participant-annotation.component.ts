@@ -46,36 +46,36 @@ export class ParticipantAnnotationComponent implements OnInit  {
   }
 
   create(value): Observable<Annotation> {
-    const {ns, wsid, cid, cdr, pid} = this.pathParams;
+    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
     const request = <Annotation>{
       ...this.value,
       [this.valuePropertyName]: value
     };
     return this.reviewAPI
-      .createParticipantCohortAnnotation(ns, wsid, cid, cdr, pid, request);
+      .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
   }
 
   update(value): Observable<Annotation> {
-    const {ns, wsid, cid, cdr, pid} = this.pathParams;
+    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
     const aid = this.definition.cohortAnnotationDefinitionId;
     const request = <Request>{
       [this.valuePropertyName]: value
     };
     return this.reviewAPI
-      .updateParticipantCohortAnnotation(ns, wsid, cid, cdr, pid, aid, request);
+      .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, aid, request);
   }
 
   delete(): Observable<{}> {
-    const {ns, wsid, cid, cdr, pid} = this.pathParams;
+    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
     const aid = this.definition.cohortAnnotationDefinitionId;
     return this.reviewAPI
-      .deleteParticipantCohortAnnotation(ns, wsid, cid, cdr, pid, aid);
+      .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, aid);
   }
 
   refresh(): Observable<Annotation[]> {
-    const {ns, wsid, cid, cdr, pid} = this.pathParams;
+    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
     return (this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, cid, cdr, pid)
+      .getParticipantCohortAnnotations(ns, wsid, cid, cdrid, pid)
       .pluck('items') as Observable<Annotation[]>);
   }
 
@@ -94,8 +94,8 @@ export class ParticipantAnnotationComponent implements OnInit  {
   private get pathParams() {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const pid = this.value.participantId;
-    const cdr = +(this.route.snapshot.data.workspace.cdrVersionId);
-    return {ns, wsid, cid, pid, cdr};
+    const cdrid = +(this.route.snapshot.data.workspace.cdrVersionId);
+    return {ns, wsid, cid, pid, cdrid};
   }
 
   get valuePropertyName() {

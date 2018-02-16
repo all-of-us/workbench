@@ -17,14 +17,14 @@ export class ParticipantResolver implements Resolve<Participant> {
 
   resolve(route: ActivatedRouteSnapshot): Observable<Participant> {
     const {ns, wsid, cid} = route.parent.params;
-    const cdr = route.parent.data.workspace.cdrVersionId;
+    const cdrid = route.parent.data.workspace.cdrVersionId;
     const {pid} = route.params;
 
     // console.log(`Resolving participant at ${ns}/${wsid}, cohort ${cid} and pid ${pid}`);
     // console.dir(route);
 
     return <Observable<Participant>>this.reviewAPI
-      .getParticipantCohortStatus(ns, wsid, +cid, cdr, +pid)
+      .getParticipantCohortStatus(ns, wsid, +cid, cdrid, +pid)
       .map(Participant.fromStatus)
       .do(participant => this.state.participant.next(participant));
   }

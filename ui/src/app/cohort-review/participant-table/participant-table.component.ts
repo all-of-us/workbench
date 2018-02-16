@@ -112,13 +112,13 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
       }
     }
 
-    const {ns, wsid, cid, cdr} = this.pathParams;
+    const {ns, wsid, cid, cdrid} = this.pathParams;
 
     console.log('Participant page request parameters:');
     console.dir(query);
 
     return this.reviewAPI
-      .getParticipantCohortStatuses(ns, wsid, cid, cdr, query)
+      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
       .do(_ => this.loading = false)
       .subscribe(review => this.state.review.next(review));
   }
@@ -131,8 +131,8 @@ export class ParticipantTableComponent implements OnInit, OnDestroy {
     const ns: Workspace['namespace'] = params.ns;
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
-    const cdr = +(data.workspace.cdrVersionId);
-    return {ns, wsid, cid, cdr};
+    const cdrid = +(data.workspace.cdrVersionId);
+    return {ns, wsid, cid, cdrid};
   }
 
   private extractDemographics(arr: ConceptIdName[]): string[] {

@@ -68,10 +68,10 @@ export class CreateReviewComponent implements OnInit {
   createReview() {
     this.creating = true;
     const {ns, wsid, cid} = this.route.snapshot.params;
-    const cdr = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
     Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
-      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, cdr, request))
+      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request))
       .subscribe(review => {
         this.creating = false;
         this.state.review.next(review);

@@ -72,9 +72,9 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
-    const cdr = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
-    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdr, pid, request);
+    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }
 
   private emit = (newStatus: ParticipantCohortStatus) => {

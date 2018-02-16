@@ -21,9 +21,9 @@ export class ReviewResolver implements Resolve<CohortReview> {
     const ns: Workspace['namespace'] = route.params.ns;
     const wsid: Workspace['id'] = route.params.wsid;
     const cid: Cohort['id'] = +(route.params.cid);
-    const cdr = route.parent.data.workspace.cdrVersionId;
+    const cdrid = route.parent.data.workspace.cdrVersionId;
 
-    console.log(`Resolving review for ${ns}/${wsid}:${cid} @ CDR ${cdr}`);
+    console.log(`Resolving review for ${ns}/${wsid}:${cid} @ cdr id ${cdrid}`);
     console.dir(route);
 
     /* Default values */
@@ -34,6 +34,6 @@ export class ReviewResolver implements Resolve<CohortReview> {
       sortOrder: SortOrder.Asc,
     };
 
-    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdr, request);
+    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }
 }
