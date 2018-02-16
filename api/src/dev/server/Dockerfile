@@ -64,3 +64,5 @@ RUN curl https://services.gradle.org/distributions/gradle-4.3.1-bin.zip -L > /tm
   && cd /tmp && unzip gradle.zip && rm gradle.zip \
   && mv gradle-* /gradle
 ENV PATH="$PATH:/gradle/bin"
+
+RUN gem install --no-document googleauth

@@ -1162,3 +1162,34 @@ Common.register_command({
   :description => "Runs the specified command in a docker container.",
   :fn => lambda { |*args| docker_run("docker-run", args) }
 })
+
+def print_scoped_access_token(cmd_name, args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+    "--scopes s1,s2,s3",
+    Array,
+    lambda {|opts, v| opts.scopes = v},
+    "Action to perform: add/remove."
+  )
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  gcc.ensure_service_account
+  scopes = %W{profile email} + op.opts.scopes
+
+  require "googleauth"
+  creds = Google::Auth::ServiceAccountCredentials.make_creds(
+    json_key_io: File.open(GcloudContextV2::SA_KEY_PATH),
+    scope: scopes
+  )
+
+  token_data = creds.fetch_access_token!
+  puts "\n#{token_data["access_token"]}"
+end
+
+Common.register_command({
+  :invocation => "print-scoped-sa-access-token",
+  :description => "Prints access token for the service account that has been scoped for API access.",
+  :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
+})
