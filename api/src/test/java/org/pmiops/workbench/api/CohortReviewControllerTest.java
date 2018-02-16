@@ -103,6 +103,9 @@ public class CohortReviewControllerTest {
     public void createCohortReviewReviewAlreadyCreated() throws Exception {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(1, cohortId, cohortReviewId, cdrVersionId, null));
+        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+                WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -113,6 +116,8 @@ public class CohortReviewControllerTest {
         }
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
+        verify(cohortReviewService, times(1)).findCohort(cohortId);
+        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verifyNoMoreMockInteractions();
     }
 
