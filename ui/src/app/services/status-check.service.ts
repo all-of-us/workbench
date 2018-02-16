@@ -24,7 +24,7 @@ export class StatusCheckService {
     this.obs = (<InterceptedHttp> http).getStatusSubjectAsObservable();
     this.obs.subscribe(() => {
       this.getApiStatus();
-    })
+    });
   }
 
   private getApiStatus(): void {
