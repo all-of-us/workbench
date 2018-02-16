@@ -8,8 +8,8 @@ import {Observable, Subject} from 'rxjs/Rx';
 
 @Injectable()
 export class InterceptedHttp extends Http {
-  private statusSubject = new Subject<boolean>();
-  public statusSubject$ = this.statusSubject.asObservable();
+  private shouldCheckStatus = new Subject<boolean>();
+  public shouldCheckStatus$ = this.shouldCheckStatus.asObservable();
   public shouldPingStatus = true;
 
 
@@ -23,7 +23,7 @@ export class InterceptedHttp extends Http {
         super.request(url, options)).catch((e) => {
           if ((e.status === 500 || e.status === 503) &&
               this.shouldPingStatus) {
-            this.statusSubject.next(true);
+            this.shouldCheckStatus.next(true);
           }
           throw e;
         });

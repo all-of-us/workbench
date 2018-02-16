@@ -12,7 +12,6 @@ export class StatusCheckService {
   public apiDown: boolean;
   public firecloudDown: boolean;
   public notebooksDown: boolean;
-  private obs: Observable<boolean>;
 
   constructor(
     private http: Http,
@@ -21,7 +20,7 @@ export class StatusCheckService {
     this.apiDown = false;
     this.firecloudDown = false;
     this.notebooksDown = false;
-    (<InterceptedHttp> http).statusSubject$.subscribe(() => {
+    (<InterceptedHttp> http).shouldCheckStatus$.subscribe(() => {
       this.getApiStatus();
     });
   }
