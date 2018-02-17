@@ -44,7 +44,7 @@ public class FireCloudServiceImplTest {
   public void setup() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(statusApi), Providers.of(workspacesApi));
+        Providers.of(workspacesApi), statusApi);
   }
 
   @Test(expected = ApiException.class)
