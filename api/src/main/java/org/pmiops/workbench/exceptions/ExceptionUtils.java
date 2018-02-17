@@ -57,14 +57,24 @@ public class ExceptionUtils {
 
   public static RuntimeException convertFirecloudException(ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
-    if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
-      throw new NotFoundException();
-    } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-      throw new ForbiddenException();
-    } else if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
-      throw new ServerUnavailableException();
+    throw codeToException(e.getCode());
+  }
+
+  public static RuntimeException convertNotebookException(
+      org.pmiops.workbench.notebooks.ApiException e) {
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling notebooks API", e);
+    throw codeToException(e.getCode());
+  }
+
+  private static RuntimeException codeToException(int code) {
+    if (code == HttpServletResponse.SC_NOT_FOUND) {
+      return new NotFoundException();
+    } else if (code == HttpServletResponse.SC_FORBIDDEN) {
+      return new ForbiddenException();
+    } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+      return new ServerUnavailableException();
     } else {
-      throw new ServerErrorException();
+      return new ServerErrorException();
     }
   }
 
