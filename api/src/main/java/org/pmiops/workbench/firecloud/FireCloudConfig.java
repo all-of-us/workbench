@@ -93,12 +93,11 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StatusApi statusApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
-    // Group/Auth Domain creation and addition are made by the AllOfUs service account
-    StatusApi api = new StatusApi();
-    api.setApiClient(apiClient);
-    return api;
+  // For some reason, Spring boot binding doesn't work on the StatusApi class
+  // key, but do work when string-qualified.
+  @Bean("statusApi")
+  public StatusApi statusApi() {
+    // Auth not required.
+    return new StatusApi();
   }
 }
