@@ -14,9 +14,9 @@
   </button>
 </div>
 
-<app-participant-annotation
+<app-annotation-item
   *ngFor="let anno of (annotations$ | async)"
   [definition]="anno.definition"
   [value]="anno.value"
   [showDataType]="showDataType">
-</app-participant-annotation>
+</app-annotation-item>

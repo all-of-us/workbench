@@ -14,11 +14,11 @@ import {
 } from 'generated';
 
 @Component({
-  selector: 'app-create-set-annotation',
-  templateUrl: './create-set-annotation.component.html',
-  styleUrls: ['./create-set-annotation.component.css']
+  selector: 'app-set-annotation-create',
+  templateUrl: './set-annotation-create.component.html',
+  styleUrls: ['./set-annotation-create.component.css']
 })
-export class CreateSetAnnotationComponent {
+export class SetAnnotationCreateComponent {
   readonly kinds = AnnotationType;
   private posting = false;
   @Output() onFinish = new EventEmitter<boolean>();

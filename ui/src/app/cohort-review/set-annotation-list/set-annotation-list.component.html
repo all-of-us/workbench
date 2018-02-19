@@ -1,0 +1,11 @@
+<div class="container" [class.is-posting]="posting">
+  <app-set-annotation-item
+    *ngFor="let defn of definitions"
+    [definition]="defn"
+    (isPosting)="isPosting($event, defn)">
+  </app-set-annotation-item>
+
+  <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
+    Loading...
+  </div>
+</div>

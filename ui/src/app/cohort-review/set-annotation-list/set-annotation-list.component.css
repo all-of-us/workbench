@@ -1,0 +1,14 @@
+.is-posting {
+	color: transparent;
+	text-shadow: 0 0 3px #aaa;
+}
+
+.container {
+  position: relative;
+}
+
+.spin-in-overlay {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+}
