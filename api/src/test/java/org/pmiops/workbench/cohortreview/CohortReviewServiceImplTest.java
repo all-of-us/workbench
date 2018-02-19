@@ -160,39 +160,6 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void findCohortReview_CohortReviewId_NotFound() throws Exception {
-        long cohortReviewId = 1;
-
-        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(null);
-
-        try {
-            cohortReviewService.findCohortReview(cohortReviewId);
-            fail("Should have thrown NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: Cohort Review does not exist for cohortReviewId: "
-                    + cohortReviewId, e.getMessage());
-        }
-
-        verify(cohortReviewDao).findOne(cohortReviewId);
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void findCohortReview_CohortReviewId() throws Exception {
-        long cohortReviewId = 1;
-
-        CohortReview cohortReview = new CohortReview();
-        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(cohortReview);
-
-        CohortReview actualCohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-
-        assertEquals(cohortReview, actualCohortReview);
-
-        verify(cohortReviewDao).findOne(cohortReviewId);
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
     public void saveCohortReview() throws Exception {
         CohortReview cohortReview = new CohortReview();
 

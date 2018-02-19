@@ -98,18 +98,6 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public CohortReview findCohortReview(Long cohortReviewId) {
-        CohortReview cohortReview = cohortReviewDao.findOne(cohortReviewId);
-
-        if (cohortReview == null) {
-            throw new NotFoundException(
-                    String.format("Not Found: Cohort Review does not exist for cohortReviewId: %s",
-                            cohortReviewId));
-        }
-        return cohortReview;
-    }
-
-    @Override
     public CohortReview saveCohortReview(CohortReview cohortReview) {
         return cohortReviewDao.save(cohortReview);
     }

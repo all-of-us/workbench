@@ -42,14 +42,6 @@ public interface CohortReviewService {
     CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
     /**
-     * Find the {@link CohortReview} for the specified cohortReviewId.
-     *
-     * @param cohortReviewId
-     * @return
-     */
-    CohortReview findCohortReview(Long cohortReviewId);
-
-    /**
      * Save the specified {@link CohortReview}.
      *
      * @param cohortReview

@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -282,6 +281,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                            Long cdrVersionId,
                                                                            Long participantId,
                                                                            Long annotationId) {
+
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+
+        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
     }
 
@@ -480,7 +486,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
     }
 
-    @NotNull
+    /**
+     * Helper method that creates a {@link BadRequestException} from the specified parameters.
+     *
+     * @param annotationType
+     * @param cohortAnnotationDefinitionId
+     * @return
+     */
     private BadRequestException createBadRequestException(String annotationType, Long cohortAnnotationDefinitionId) {
         return new BadRequestException(
                 String.format("Invalid Request: Please provide a valid %s value for annotation defintion id: %s", annotationType, cohortAnnotationDefinitionId)
@@ -489,6 +501,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     /**
      * Helper method to create a new {@link CohortReview} and persist it to the workbench database.
+     *
      * @param cdrVersionId
      * @param cohort
      */
