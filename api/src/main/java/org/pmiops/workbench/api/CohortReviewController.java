@@ -187,7 +187,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
         } catch (NotFoundException nfe) {
             cohortReview = initializeCohortReview(cdrVersionId, cohort)
-                    .reviewStatus(ReviewStatus.CREATED)
+                    .reviewStatus(ReviewStatus.NONE)
                     .reviewSize(0L);
             cohortReviewService.saveCohortReview(cohortReview);
         }
@@ -210,7 +210,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 createParticipantCohortStatusesList(cohortReview.getCohortReviewId(), result, rm);
 
         cohortReview
-                .reviewSize(participantCohortStatuses.size());
+                .reviewSize(participantCohortStatuses.size())
+                .reviewStatus(ReviewStatus.CREATED);
 
         //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
