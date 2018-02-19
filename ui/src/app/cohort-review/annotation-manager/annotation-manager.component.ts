@@ -17,13 +17,10 @@ type DefnId = CohortAnnotationDefinition['cohortAnnotationDefinitionId'];
   templateUrl: './annotation-manager.component.html',
   styleUrls: ['./annotation-manager.component.css']
 })
-export class AnnotationManagerComponent {
+export class AnnotationManagerComponent implements OnInit, OnDestroy {
 
   subscription: Subscription;
-
-  annotations$: Observable<CohortAnnotationDefinition[]> =
-    this.state.annotationDefinitions$;
-
+  annotations: CohortAnnotationDefinition[];
 
   posting = false;
   editSet: Set<DefnId> = new Set<DefnId>();
@@ -34,6 +31,15 @@ export class AnnotationManagerComponent {
     private route: ActivatedRoute,
     private state: ReviewStateService,
   ) {}
+
+  ngOnInit() {
+    this.subscription = this.state.annotationDefinitions$
+      .subscribe(defns => this.annotations = defns);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   /* Edit the annotation name functions */
   isEditing(defn: CohortAnnotationDefinition): boolean {

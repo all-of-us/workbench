@@ -22,7 +22,7 @@ import {
 export class ParticipantAnnotationComponent implements OnInit  {
   @Input() definition: Definition;
   @Input() value: Annotation;
-  @Input() verbose: boolean;
+  @Input() showDataType: boolean;
 
   private control = new FormControl();
   private subscription: Subscription;
@@ -105,7 +105,7 @@ export class ParticipantAnnotationComponent implements OnInit  {
   }
 
   get datatypeDisplay() {
-    return this.verbose
+    return this.showDataType
       ? ` (${this.definition.annotationType})`
       : '';
   }

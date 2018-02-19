@@ -7,7 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {ChartsModule} from '../charts/charts.module';
 
 import {AnnotationManagerComponent} from './annotation-manager/annotation-manager.component';
-import {AnnotationsComponent} from './annotations/annotations.component';
+import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
 import {CohortReviewComponent} from './cohort-review/cohort-review.component';
 import {CreateReviewComponent} from './create-review/create-review.component';
@@ -40,7 +40,7 @@ import { StatusFilterComponent } from './status-filter/status-filter.component';
   declarations: [
     /* Components */
     AnnotationManagerComponent,
-    AnnotationsComponent,
+    AnnotationListComponent,
     ChoiceFilterComponent,
     CohortReviewComponent,
     CreateReviewComponent,

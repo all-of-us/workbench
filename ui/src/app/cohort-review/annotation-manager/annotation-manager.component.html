@@ -27,37 +27,40 @@
           </tr>
         </thead>
         <tbody [class.is-posting]="posting">
-          <tr *ngFor="let defn of (annotations$ | async)">
-
-            <!-- Definition name -->
-            <td class="left">
-              <input *ngIf="isEditing(defn)"
-                type="text"
-                (blur)="doneEditing(defn)"
-                autofocus>
-              <span *ngIf="!isEditing(defn)">
-                {{ defn.columnName }}
-                <clr-icon shape="pencil" (click)="setEditing(defn)">
-                </clr-icon>
-              </span>
-            </td>
-
-            <!-- Definition data type -->
-            <td class="left">
-              {{ defn.annotationType | titlecase }}
-            </td>
-
-            <!-- Definition deletion function (and place for other such things) -->
-            <td>
-              <button
-                type="button"
-                class="btn btn-link btn-sm text-danger defn-delete"
-                (click)="delete(defn)">
-                <clr-icon shape="close"></clr-icon>
-              </button>
-            </td>
-
-          </tr>
+          <ng-container *ngIf="annotations.length > 0; else noDefns">
+            <tr *ngFor="let defn of annotations">
+              <!-- Definition name -->
+              <td class="left">
+                <input *ngIf="isEditing(defn)"
+                  type="text"
+                  (blur)="doneEditing(defn)"
+                  autofocus>
+                <span *ngIf="!isEditing(defn)">
+                  {{ defn.columnName }}
+                  <clr-icon shape="pencil" (click)="setEditing(defn)">
+                  </clr-icon>
+                </span>
+              </td>
+              <!-- Definition data type -->
+              <td class="left">
+                {{ defn.annotationType | titlecase }}
+              </td>
+              <!-- Definition deletion function (and place for other such things) -->
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-link btn-sm text-danger defn-delete"
+                  (click)="delete(defn)">
+                  <clr-icon shape="close"></clr-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #noDefns>
+            <tr>
+              <td rowspan="3"><em>This review set does not appear to have any annotation definitions.</em></td>
+            </tr>
+          </ng-template>
         </tbody>
       </table>
       <div *ngIf="posting" class="spinner spinner-md spinner-overlay">
