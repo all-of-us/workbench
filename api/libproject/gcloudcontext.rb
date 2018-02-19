@@ -33,7 +33,7 @@ class GcloudContextV2
     if @creds_file
       common.run_inline %W{gcloud auth activate-service-account --key-file #{@creds_file}}
     else
-      common.status "Reading glcoud configuration..."
+      common.status "Reading gcloud configuration..."
       configs = common.capture_stdout %W{gcloud --format=json config configurations list}
       active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
       common.status "Using '#{active_config["name"]}' gcloud configuration"

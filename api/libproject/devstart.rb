@@ -1029,17 +1029,17 @@ def create_project_resources(gcc)
   common = Common.new
   common.status "Enabling APIs..."
   for service in SERVICES
-    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+    common.run_inline %W{gcloud service-management enable #{service} --project #{gcc.project}}
   end
   common.status "Creating GCS bucket to store credentials..."
-  common.run_inline("gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/")
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating Cloud SQL instances..."
-  common.run_inline("gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2 " +
-                    "--activation-policy=ALWAYS --backup-start-time 00:00 " +
-                    "--failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log " +
-                    "--database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase")
+  common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
+                       --activation-policy=ALWAYS --backup-start-time 00:00
+                       --failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log
+                       --database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase}
   common.status "Creating AppEngine app..."
-  common.run_inline("gcloud app create --region us-central --project #{gcc.project}")
+  common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
 def setup_project_data(gcc, cdr_db_name, public_db_name,
@@ -1060,7 +1060,7 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
   common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file.path}
       --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
   begin
-    common.run_inline("gsutil cp #{gsuite_admin_creds_file.path} gs://#{gcc.project}-credentials/gsuite-admin-sa.json")
+    common.run_inline %W{gsutil cp #{gsuite_admin_creds_file.path} gs://#{gcc.project}-credentials/gsuite-admin-sa.json"}
   ensure
     gsuite_admin_creds_file.unlink
   end
