@@ -41,7 +41,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
-  private final StatusApi statusApi;
 
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
@@ -56,20 +55,18 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider,
-      @Qualifier("statusApi") StatusApi statusApi) {
+      Provider<WorkspacesApi> workspacesApiProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
-    this.statusApi = statusApi;
   }
 
   @Override
   public boolean getFirecloudStatus() {
     try {
-      statusApi.status();
+      new StatusApi().status();
     } catch (ApiException e) {
       String response = e.getResponseBody();
       JSONObject errorBody = new JSONObject(response);

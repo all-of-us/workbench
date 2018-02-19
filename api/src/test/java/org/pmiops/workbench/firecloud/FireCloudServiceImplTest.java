@@ -1,8 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,11 +10,13 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Enabled;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.test.Providers;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
 
@@ -34,8 +33,6 @@ public class FireCloudServiceImplTest {
   private WorkspacesApi workspacesApi;
   @Mock
   private GroupsApi groupsApi;
-  @Mock
-  private StatusApi statusApi;
 
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -44,7 +41,7 @@ public class FireCloudServiceImplTest {
   public void setup() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(workspacesApi), statusApi);
+        Providers.of(workspacesApi));
   }
 
   @Test(expected = ApiException.class)
