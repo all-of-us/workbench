@@ -92,12 +92,4 @@ public class FireCloudConfig {
     api.setApiClient(apiClient);
     return api;
   }
-
-  // For some reason, Spring boot binding doesn't work on the StatusApi class
-  // key, but do work when string-qualified.
-  @Bean("statusApi")
-  public StatusApi statusApi() {
-    // Auth not required.
-    return new StatusApi();
-  }
 }
