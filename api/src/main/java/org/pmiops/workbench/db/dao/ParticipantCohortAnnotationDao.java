@@ -10,4 +10,9 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
             @Param("cohortReviewId") long cohortReviewId,
             @Param("cohortAnnotationDefinitionId") long cohortAnnotationDefinitionId,
             @Param("participantId") long participantId);
+
+    ParticipantCohortAnnotation findByAnnotationIdAndCohortReviewIdAndParticipantId(
+            @Param("annotationId") long annotationId,
+            @Param("cohortReviewId") long cohortReviewId,
+            @Param("participantId") long participantId);
 }

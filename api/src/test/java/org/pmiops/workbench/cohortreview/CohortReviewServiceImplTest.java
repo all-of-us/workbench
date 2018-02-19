@@ -7,12 +7,16 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -40,6 +44,12 @@ public class CohortReviewServiceImplTest {
     private ParticipantCohortStatusDao participantCohortStatusDao;
 
     @Mock
+    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+
+    @Mock
+    private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+
+    @Mock
     private WorkspaceService workspaceService;
 
     @Mock
@@ -49,7 +59,7 @@ public class CohortReviewServiceImplTest {
     private CohortReviewServiceImpl cohortReviewService;
 
     @Test
-    public void findCohort_NotFound() throws Exception {
+    public void findCohortNotFound() throws Exception {
         long cohortId = 1;
 
         when(cohortDao.findOne(cohortId)).thenReturn(null);
@@ -79,7 +89,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void validateMatchingWorkspace_NotFound() throws Exception {
+    public void validateMatchingWorkspaceNotFound() throws Exception {
         String workspaceNamespace = "test-workspace";
         String workspaceName = "test";
         long workspaceId = 1;
@@ -125,7 +135,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void findCohortReview_CohortIdAndCdrVersionId_NotFound() throws Exception {
+    public void findCohortReviewCohortIdAndCdrVersionIdNotFound() throws Exception {
         long cohortReviewId = 1;
         long cdrVersionId = 1;
 
@@ -144,7 +154,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void findCohortReview_CohortIdAndCdrVersionId() throws Exception {
+    public void findCohortReviewCohortIdAndCdrVersionId() throws Exception {
         long cohortReviewId = 1;
         long cdrVersionId = 1;
 
@@ -156,39 +166,6 @@ public class CohortReviewServiceImplTest {
         assertEquals(cohortReview, actualCohortReview);
 
         verify(cohortReviewDao).findCohortReviewByCohortIdAndCdrVersionId(cohortReviewId, cdrVersionId);
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void findCohortReview_CohortReviewId_NotFound() throws Exception {
-        long cohortReviewId = 1;
-
-        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(null);
-
-        try {
-            cohortReviewService.findCohortReview(cohortReviewId);
-            fail("Should have thrown NotFoundException!");
-        } catch (NotFoundException e) {
-            assertEquals("Not Found: Cohort Review does not exist for cohortReviewId: "
-                    + cohortReviewId, e.getMessage());
-        }
-
-        verify(cohortReviewDao).findOne(cohortReviewId);
-        verifyNoMoreMockInteractions();
-    }
-
-    @Test
-    public void findCohortReview_CohortReviewId() throws Exception {
-        long cohortReviewId = 1;
-
-        CohortReview cohortReview = new CohortReview();
-        when(cohortReviewDao.findOne(cohortReviewId)).thenReturn(cohortReview);
-
-        CohortReview actualCohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-
-        assertEquals(cohortReview, actualCohortReview);
-
-        verify(cohortReviewDao).findOne(cohortReviewId);
         verifyNoMoreMockInteractions();
     }
 
@@ -219,7 +196,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void findParticipantCohortStatus_NotFound() throws Exception {
+    public void findParticipantCohortStatusNotFound() throws Exception {
         long cohortReviewId = 1;
         long participantId = 1;
 
@@ -271,6 +248,91 @@ public class CohortReviewServiceImplTest {
         cohortReviewService.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest);
 
         verify(participantCohortStatusDao).findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortAnnotationDefinitionNotFound() throws Exception {
+        long cohortAnnotationDefinitionId = 1;
+
+        when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(null);
+
+        try {
+            cohortReviewService.findCohortAnnotationDefinition(cohortAnnotationDefinitionId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No cohort annotation definition found for id: "
+                    + cohortAnnotationDefinitionId, e.getMessage());
+        }
+
+        verify(cohortAnnotationDefinitionDao).findOne(cohortAnnotationDefinitionId);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void findCohortAnnotationDefinition() throws Exception {
+        long cohortAnnotationDefinitionId = 1;
+
+        when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(new CohortAnnotationDefinition());
+
+        cohortReviewService.findCohortAnnotationDefinition(cohortAnnotationDefinitionId);
+
+        verify(cohortAnnotationDefinitionDao).findOne(cohortAnnotationDefinitionId);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteParticipantCohortAnnotationNotFound() throws Exception {
+        long annotationId = 1;
+        long cohortReviewId = 2;
+        long participantId = 3;
+
+        when(participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                annotationId,
+                cohortReviewId,
+                participantId)).thenReturn(null);
+
+        try {
+            cohortReviewService.deleteParticipantCohortAnnotation(annotationId,
+                    cohortReviewId,
+                    participantId);
+            fail("Should have thrown NotFoundException!");
+        } catch (NotFoundException e) {
+            assertEquals("Not Found: No participant cohort annotation found for annotationId: "
+                    + annotationId + ", cohortReviewId: " + cohortReviewId + ", participantId: "
+                    + participantId, e.getMessage());
+        }
+
+        verify(participantCohortAnnotationDao).findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                annotationId,
+                cohortReviewId,
+                participantId);
+
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteParticipantCohortAnnotation() throws Exception {
+        long annotationId = 1;
+        long cohortReviewId = 2;
+        long participantId = 3;
+
+        when(participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                annotationId,
+                cohortReviewId,
+                participantId)).thenReturn(new ParticipantCohortAnnotation());
+
+        cohortReviewService.deleteParticipantCohortAnnotation(annotationId,
+                    cohortReviewId,
+                    participantId);
+
+        verify(participantCohortAnnotationDao).findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                annotationId,
+                cohortReviewId,
+                participantId);
 
         verifyNoMoreMockInteractions();
     }
