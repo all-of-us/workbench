@@ -7,9 +7,10 @@ require_relative "../../aou-utils/utils/common"
 # For environments other than test, deletes the credentials after use.
 class ServiceAccountContext
 
+  SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
+
   def initialize(project)
     @project = project
-    @sa_key_path = "sa-key.json"
   end
 
   def run()
@@ -17,20 +18,20 @@ class ServiceAccountContext
     common = Common.new
     if @project == "all-of-us-workbench-test"
       common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
-            #{@sa_key_path}}
+            #{SERVICE_ACCOUNT_KEY_PATH}}
       yield
     else
       service_account = "#{@project}@appspot.gserviceaccount.com"
-      common.run_inline %W{gcloud iam service-accounts keys create #{@sa_key_path}
+      common.run_inline %W{gcloud iam service-accounts keys create #{SERVICE_ACCOUNT_KEY_PATH}
           --iam-account=#{service_account} --project=#{@project}}
       begin
         yield
       ensure
-        tmp_private_key = `grep private_key_id #{@sa_key_path} | cut -d\\\" -f4`.strip()
+        tmp_private_key = `grep private_key_id #{SERVICE_ACCOUNT_KEY_PATH} | cut -d\\\" -f4`.strip()
         service_account ="#{@project}@appspot.gserviceaccount.com"
         common.run_inline %W{gcloud iam service-accounts keys delete #{tmp_private_key} -q
            --iam-account=#{service_account} --project=#{@project}}
-        common.run_inline %W{rm #{@sa_key_path}}
+        common.run_inline %W{rm #{SERVICE_ACCOUNT_KEY_PATH}}
       end
     end
   end
