@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {StatusCheckService} from 'app/services/status-check.service';
 
 @Component({
   selector: 'app-error-handler',
@@ -11,6 +12,7 @@ export class ErrorHandlerComponent implements OnInit {
 
   constructor(
     private errorHandlingService: ErrorHandlingService,
+    private statusCheckService: StatusCheckService
   ) {}
 
   ngOnInit(): void {}

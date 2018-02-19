@@ -28,6 +28,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,8 +40,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
-  private final Provider<StatusApi> statusApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final StatusApi statusApi;
 
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
@@ -55,19 +56,18 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
-      Provider<StatusApi> statusApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider) {
+      Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier("statusApi") StatusApi statusApi) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
-    this.statusApiProvider = statusApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.statusApi = statusApi;
   }
 
   @Override
   public boolean getFirecloudStatus() {
-    StatusApi statusApi = statusApiProvider.get();
     try {
       statusApi.status();
     } catch (ApiException e) {
@@ -220,6 +220,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return workspacesApi.getWorkspace(projectName, workspaceName);
   }
 
+  @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     workspacesApi.deleteWorkspace(projectName, workspaceName);

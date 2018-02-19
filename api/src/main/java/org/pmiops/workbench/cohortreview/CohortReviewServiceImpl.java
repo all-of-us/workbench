@@ -117,7 +117,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     @Override
     @Transactional
     public void saveFullCohortReview(CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
-        cohortReview = saveCohortReview(cohortReview);
+        saveCohortReview(cohortReview);
         participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
     }
 

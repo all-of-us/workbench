@@ -1,9 +1,13 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
+
 @Injectable()
 export class ErrorHandlingService {
 
+  public apiDown: boolean;
+  public firecloudDown: boolean;
+  public notebooksDown: boolean;
   public serverError: boolean;
   public noServerResponse: boolean;
   public serverBusy: boolean;
@@ -54,6 +58,7 @@ export class ErrorHandlingService {
       toRun = 3;
     }
     let numberRuns = 0;
+
     return observable.retryWhen((errors) => {
       return errors.do((e) => {
         numberRuns++;
@@ -71,15 +76,12 @@ export class ErrorHandlingService {
             this.setUserDisabledError();
             throw e;
           case 0:
-            console.log(e);
             this.setNoServerResponse();
             throw e;
           default:
             throw e;
-
         }
       });
     });
   }
-
 }
