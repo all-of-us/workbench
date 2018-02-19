@@ -296,7 +296,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaitonParticipantAnnotationExists() throws Exception {
+    public void createParticipantCohortAnnotaitonParticipantAnnotationExists() throws Exception {
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortReviewId).participantId(participantId);
         ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus().participantKey(key);
 
@@ -322,7 +322,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaitonInvalidDateString() throws Exception {
+    public void createParticipantCohortAnnotaitonInvalidDateString() throws Exception {
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.DATE);
 
@@ -343,7 +343,7 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void assertParticipantCohortAnnotaitonInvalidEnumValue() throws Exception {
+    public void createParticipantCohortAnnotaitonInvalidEnumValue() throws Exception {
         CohortAnnotationEnumValue cohortAnnotationEnumValue = new CohortAnnotationEnumValue().name("11");
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
                 .annotationType(AnnotationType.ENUM).enumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
@@ -361,6 +361,35 @@ public class CohortReviewControllerTest {
         } catch (Exception e) {
             assertEquals("Invalid Request: Please provide a valid ENUM value for annotation defintion id: " +
                     request.getCohortAnnotationDefinitionId(), e.getMessage());
+        }
+    }
+
+    @Test
+    public void deleteParticipantCohortAnnotation() throws Exception {
+        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
+                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
+        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
+        doNothing().when(cohortReviewService).deleteParticipantCohortAnnotation(1L, cohortReviewId, participantId);
+
+        reviewController.deleteParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, 1L);
+
+        verify(cohortReviewService).findCohort(cohortId);
+        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService).findCohortReview(cohortId, cdrVersionId);
+        verify(cohortReviewService).findParticipantCohortStatus(cohortReviewId, participantId);
+        verify(cohortReviewService).deleteParticipantCohortAnnotation(1L, cohortReviewId, participantId);
+        verifyNoMoreMockInteractions();
+    }
+
+    @Test
+    public void deleteParticipantCohortAnnotationNullAnnotationId() throws Exception {
+        try{
+            reviewController.deleteParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, null);
+            fail("Should have thrown a BadRequestException!");
+        } catch (BadRequestException e) {
+            assertEquals("Invalid Request: Please provide a valid cohort annotation definition id.", e.getMessage());
         }
     }
 
