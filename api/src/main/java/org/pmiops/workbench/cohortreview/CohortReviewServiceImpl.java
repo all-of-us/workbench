@@ -140,12 +140,28 @@ public class CohortReviewServiceImpl implements CohortReviewService {
 
     @Override
     public CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId) {
-        return cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
+        CohortAnnotationDefinition cohortAnnotationDefinition = cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
+
+        if (cohortAnnotationDefinition == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No cohort annotation definition found for id: %s", cohortAnnotationDefinitionId));
+        }
+        return cohortAnnotationDefinition;
     }
 
     @Override
-    public void deleteParticipantCohortAnnotation(Long annotationId) {
-        //TODO implement this
+    public void deleteParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId) {
+        ParticipantCohortAnnotation participantCohortAnnotation =
+                participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                        annotationId,
+                        cohortReviewId,
+                        participantId);
+        if (participantCohortAnnotation == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: No participant cohort annotation found for annotationId: %s," +
+                            " cohortReviewId: %s, participantId: %s", annotationId, cohortReviewId, participantId));
+        }
+        participantCohortAnnotationDao.delete(participantCohortAnnotation);
     }
 
     @Override

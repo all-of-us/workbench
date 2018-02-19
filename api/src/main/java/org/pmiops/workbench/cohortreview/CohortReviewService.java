@@ -80,7 +80,7 @@ public interface CohortReviewService {
 
     CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
 
-    void deleteParticipantCohortAnnotation(Long annotationId);
+    void deleteParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId);
 
     ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId);
 

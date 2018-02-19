@@ -234,19 +234,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long cdrVersionId,
                                                                                          Long participantId,
                                                                                          ParticipantCohortAnnotation request) {
+
+        if (request.getCohortAnnotationDefinitionId() == null) {
+            throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+        }
+
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        if (cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId) == null) {
-            throw new BadRequestException(String.format("Invalid Request: No participant found for id: %s", participantId));
-        }
-
-        if (request.getCohortAnnotationDefinitionId() == null) {
-            throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
-        }
+        ParticipantCohortStatus participantCohortStatus =
+                cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
 
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
                 FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
@@ -254,16 +254,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
                 cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId());
 
-        if (cohortAnnotationDefinition == null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: No cohort annotation definition found for id: %s",
-                            request.getCohortAnnotationDefinitionId()));
-        }
-
         validateParticipantCohortAnnotation(participantCohortAnnotation, cohortAnnotationDefinition);
 
         if(cohortReviewService.findParticipantCohortAnnotation(cohortReview.getCohortReviewId(),
-                request.getCohortAnnotationDefinitionId(), participantId) != null) {
+                request.getCohortAnnotationDefinitionId(),
+                participantCohortStatus.getParticipantKey().getParticipantId()) != null) {
             throw new BadRequestException(
                     String.format("Invalid Request: Cohort annotation definition exists for id: %s",
                             request.getCohortAnnotationDefinitionId()));
@@ -271,7 +266,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         cohortReviewService.saveParticipantCohortAnnotation(participantCohortAnnotation);
 
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
     }
 
     @Override
@@ -282,13 +277,23 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                            Long participantId,
                                                                            Long annotationId) {
 
+        if (annotationId == null) {
+            throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+        }
+
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new EmptyResponse());
+        //will throw a NotFoundException if participant does not exist
+        cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
+
+        //will throw a NotFoundException if participant cohort annotation does not exist
+        cohortReviewService.deleteParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId);
+
+        return ResponseEntity.ok(new EmptyResponse());
     }
 
     @Override
