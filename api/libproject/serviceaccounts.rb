@@ -27,9 +27,9 @@ class ServiceAccountContext
         yield
       ensure
         tmp_private_key = `grep private_key_id #{@sa_key_path} | cut -d\\\" -f4`.strip()
-        service_account ="#{project}@appspot.gserviceaccount.com"
+        service_account ="#{@project}@appspot.gserviceaccount.com"
         common.run_inline %W{gcloud iam service-accounts keys delete #{tmp_private_key} -q
-           --iam-account=#{service_account} --project=#{project}}
+           --iam-account=#{service_account} --project=#{@project}}
         common.run_inline %W{rm #{@sa_key_path}}
       end
     end

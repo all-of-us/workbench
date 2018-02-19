@@ -883,16 +883,20 @@ def load_config(project)
   end
 end
 
-def with_cloud_proxy_and_db_env(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
+def with_cloud_proxy_and_db(gcc)
   ENV.update(read_db_vars_v2(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   CloudSqlProxyContext.new(gcc.project).run do
     yield(gcc)
   end
+end
+
+def with_cloud_proxy_and_db_env(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  with_cloud_proxy_and_db(gcc)
 end
 
 def circle_deploy(cmd_name, args)
@@ -925,7 +929,6 @@ def circle_deploy(cmd_name, args)
     common.status "Running database migrations..."
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
-      migrate_public_database
       load_config(ctx.project)
     end
   end
@@ -1019,6 +1022,7 @@ Common.register_command({
   :invocation => "print-scoped-sa-access-token",
   :description => "Prints access token for the service account that has been scoped for API access.",
   :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
+})
 
 def create_project_resources(gcc)
   common = Common.new
@@ -1050,25 +1054,27 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
                      to_redact=root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
-  CloudSqlProxyContext.new(gcc.project).run do
-    with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
-      common.status "Copying service account key to GCS..."
-      gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json")
-      common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
-          --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
-      common.run_inline("gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json")
+  common.status "Copying service account key to GCS..."
+  gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json")
+  common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file.path}
+      --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+  begin
+    common.run_inline("gsutil cp #{gsuite_admin_creds_file.path} gs://#{gcc.project}-credentials/gsuite-admin-sa.json")
+  ensure
+    gsuite_admin_creds_file.unlink
+  end
 
-      common.status "Setting up databases and users..."
-      create_workbench_db
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    common.status "Setting up databases and users..."
+    create_workbench_db
 
-      common.status "Running schema migrations..."
-      migrate_database
-      # This will insert a CDR version row pointing at the CDR and public DB.
-      migrate_workbench_data
+    common.status "Running schema migrations..."
+    migrate_database
+    # This will insert a CDR version row pointing at the CDR and public DB.
+    migrate_workbench_data
 
-      common.status "Loading configuration..."
-      load_config(gcc.project)
-    end
+    common.status "Loading configuration..."
+    load_config(gcc.project)
   end
 end
 
@@ -1101,7 +1107,7 @@ def setup_cloud_project(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  create_project_resources(gcc)
+  #create_project_resources(gcc)
   setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
                      random_password(), random_password(), random_password(), args)
 end
