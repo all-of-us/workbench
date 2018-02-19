@@ -336,8 +336,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         Workspace workspace =
             cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
                 cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         ParticipantCohortStatus status =
                 cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
         lookupGenderRaceEthnicityValues(Arrays.asList(status));
