@@ -228,8 +228,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
      *
      * @param participantCohortAnnotation
      */
-    private void validateParticipantCohortAnnotation(org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation,
-                                                     org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
+    private void validateParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation,
+                                                     CohortAnnotationDefinition cohortAnnotationDefinition) {
 
         if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.BOOLEAN)) {
             if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
