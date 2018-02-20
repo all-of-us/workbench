@@ -32,5 +32,12 @@ export class SetAnnotationModalComponent {
     this.state.annotationManagerOpen.next(value);
   }
 
+  get modalTitle() {
+    return {
+      'list': 'Cohort Annotation Definitions',
+      'create': 'Create New Annotation Definition',
+    }[this.mode];
+  }
+
   constructor(private state: ReviewStateService) {}
 }

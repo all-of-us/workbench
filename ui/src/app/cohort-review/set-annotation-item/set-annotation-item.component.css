@@ -1,6 +1,7 @@
 .item {
   display: flex;
   justify-content: space-between;
+  align-items: middle;
 }
 
 .name {
@@ -9,4 +10,8 @@
 
 .type {
   flex: 1;
+}
+
+.name-edit {
+  width: 94%;
 }

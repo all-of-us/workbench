@@ -1,3 +1,21 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: middle;
+}
+
+.name {
+  flex: 1;
+}
+
+.type {
+  flex: 1;
+}
+
+.delete {
+  min-width: 72px;
+}
+
 .is-posting {
 	color: transparent;
 	text-shadow: 0 0 3px #aaa;

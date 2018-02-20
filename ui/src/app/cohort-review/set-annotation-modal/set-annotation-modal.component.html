@@ -2,12 +2,15 @@
   [(clrModalOpen)]="open"
   [clrModalSize]="'lg'">
   <h3 class="modal-title">
-    Cohort Annotations
+    {{ modalTitle }}
     <button
+      *ngIf="mode === 'list'"
       type="button"
-      class="btn btn-link btn-sm"
+      class="btn btn-sm"
+      title="Create a new Cohort Annotation Definition"
       (click)="mode = 'create'">
       <clr-icon shape="plus"></clr-icon>
+      Create
     </button>
   </h3>
 
