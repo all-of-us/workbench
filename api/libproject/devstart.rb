@@ -798,7 +798,7 @@ def deploy(cmd_name, args, with_cron)
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? " --quiet" : ""
 
-  common.run_inline %W{rm #{GSUITE_ADMIN_KEY_PATH}}
+  common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
   get_gsuite_admin_key(gcc.project)
   common.run_inline %W{
     gcloud app deploy
