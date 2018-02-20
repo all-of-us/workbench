@@ -1,0 +1,22 @@
+<div class="container" [class.is-posting]="posting">
+  <div class="item">
+    <span class="name">Name</span>
+    <span class="type">Type</span>
+    <span class="delete">Remove</span>
+  </div>
+  <hr />
+
+  <app-set-annotation-item
+    *ngFor="let defn of definitions"
+    [definition]="defn"
+    (isPosting)="isPosting($event, defn)">
+  </app-set-annotation-item>
+
+  <div *ngIf="definitions.length === 0">
+    <em>No review annotations defined yet.</em>
+  </div>
+
+  <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
+    Loading...
+  </div>
+</div>

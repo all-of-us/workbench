@@ -11,12 +11,6 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 
-export interface AnnotationManagerState {
-  open: boolean;
-  mode: 'overview' | 'edit' | 'create';
-  defn?: CohortAnnotationDefinition;
-}
-
 @Injectable()
 export class ReviewStateService {
   /* Data Subjects */
@@ -25,10 +19,6 @@ export class ReviewStateService {
   participant = new BehaviorSubject<Participant | null>(null);
   annotationValues = new ReplaySubject<ParticipantCohortAnnotation[]>(1);
   annotationDefinitions = new ReplaySubject<CohortAnnotationDefinition[]>(1);
-  annotationMgrState = new BehaviorSubject<AnnotationManagerState>({
-    open: false,
-    mode: 'overview',
-  });
 
   /* Observable views on the data Subjects */
   review$ = this.review.asObservable();
@@ -36,9 +26,10 @@ export class ReviewStateService {
   participant$ = this.participant.asObservable();
   annotationValues$ = this.annotationValues.asObservable();
   annotationDefinitions$ = this.annotationDefinitions.asObservable();
-  annotationMgrState$ = this.annotationMgrState.asObservable();
 
   /* Flags */
   sidebarOpen = new BehaviorSubject<boolean>(false);
   sidebarOpen$ = this.sidebarOpen.asObservable();
+
+  annotationManagerOpen = new BehaviorSubject<boolean>(false);
 }
