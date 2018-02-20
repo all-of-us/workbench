@@ -219,9 +219,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId) {
-        //TODO implement this
-        return null;
+    public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long cohortReviewId, Long participantId) {
+        return participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
     }
 
     /**

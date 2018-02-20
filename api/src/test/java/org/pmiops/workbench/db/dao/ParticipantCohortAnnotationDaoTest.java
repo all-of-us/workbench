@@ -14,6 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -88,6 +90,20 @@ public class ParticipantCohortAnnotationDaoTest {
                 cohortReviewId,
                 participantId);
         assertEquals(expectedPCA, actualPCA);
+    }
+
+    @Test
+    public void findByCohortReviewIdAndParticipantId() throws Exception {
+        ParticipantCohortAnnotation expectedPCA = new ParticipantCohortAnnotation()
+            .annotationId(annotationId)
+            .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+            .cohortReviewId(cohortReviewId)
+            .participantId(participantId)
+            .annotationValueBoolean(Boolean.TRUE);
+        List<ParticipantCohortAnnotation> annotations =
+        participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
+        assertEquals(1, annotations.size());
+        assertEquals(expectedPCA, annotations.get(0));
     }
 
 }
