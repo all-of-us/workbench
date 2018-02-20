@@ -28,7 +28,7 @@ services:
       - ~/.gsutil:/.gsutil:cached
     command: gradle appengineRun
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/w/api/src/main/webapp/WEB-INF/sa-key.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
     env_file:
       - db/vars.env
     ports:
@@ -73,9 +73,22 @@ services:
     volumes:
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./run-migrations.sh schema
+    command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr
     env_file:
       - db-cdr/vars.env
+  db-public-migration:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+      command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public
+      env_file:
+        - db-cdr/vars.env
   db-cdr-data-migration:
     depends_on:
       - db
@@ -86,7 +99,7 @@ services:
     volumes:
       - gradle-cache:/.gradle
       - .:/w:cached
-    command: wait-for db:3306 -- ./run-migrations.sh data local
+    command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr --run-list data --context local
     env_file:
       - db-cdr/vars.env
   db-data-migration:
@@ -131,7 +144,7 @@ services:
 
       entrypoint: ["./generate-cdr/generate-cdr-counts.sh"]
       environment:
-        - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
       env_file:
         - db-cdr/vars.env
   db-generate-local-cdr-db:
@@ -149,7 +162,7 @@ services:
 
         entrypoint: ["./generate-cdr/generate-local-cdr-db.sh"]
         environment:
-          - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+          - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
         env_file:
           - db-cdr/vars.env
   db-generate-local-count-dbs:
@@ -167,7 +180,7 @@ services:
 
         entrypoint: ["./generate-cdr/generate-local-count-dbs.sh"]
         environment:
-          - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+          - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
         env_file:
           - db-cdr/vars.env
   db-mysqldump-db:
@@ -185,7 +198,7 @@ services:
 
           entrypoint: ["./generate-cdr/make-mysqldump.sh"]
           environment:
-            - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+            - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
           env_file:
             - db-cdr/vars.env
   db-cloudsql-import:
@@ -201,7 +214,7 @@ services:
 
             entrypoint: ["./generate-cdr/cloudsql-import.sh"]
             environment:
-              - GOOGLE_APPLICATION_CREDENTIALS=/w/src/main/webapp/WEB-INF/sa-key.json
+              - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
             env_file:
               - db/vars.env
   drop-cdr-db:
@@ -229,7 +242,7 @@ services:
     command: |
       cloud_sql_proxy
         -instances all-of-us-workbench-test:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
-        -credential_file=src/main/webapp/WEB-INF/sa-key.json
+        -credential_file=/w/sa-key.json
   mysql-cloud:
     depends_on:
       - cloud-sql-proxy
