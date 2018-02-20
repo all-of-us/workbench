@@ -73,7 +73,9 @@ export class ErrorHandlingService {
             this.setServerError();
             throw e;
           case 403:
-            this.setUserDisabledError();
+            if (JSON.parse(e._body).code === 'User Disabled') {
+              this.setUserDisabledError();
+            }
             throw e;
           case 0:
             this.setNoServerResponse();

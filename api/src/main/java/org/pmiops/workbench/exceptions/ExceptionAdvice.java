@@ -28,6 +28,10 @@ public class ExceptionAdvice {
             ErrorResponse errorResponse = ((BadRequestException) e).getErrorResponse();
             return ResponseEntity.status(statusCode).body(
                 ((BadRequestException) e).getErrorResponse());
+          } else if (e instanceof ForbiddenException) {
+            ErrorResponse errorResponse = ((ForbiddenException) e).getErrorResponse();
+            return ResponseEntity.status(statusCode).body(
+                ((ForbiddenException) e).getErrorResponse());
           }
           return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(
               e.getMessage()));

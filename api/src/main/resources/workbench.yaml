@@ -1797,6 +1797,9 @@ definitions:
       message:
         description: General error message for the response.
         type: string
+      code:
+        description: Short description of the type of error
+        type: string
       # TODO: add list of field-level error messages with field names.
 
   IdVerificationRequest:
