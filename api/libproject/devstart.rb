@@ -552,15 +552,22 @@ Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => lambda { |*args| mysqldump_db(*args) }
 })
 
-def cloudsql_import(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cloudsql-import} + args
+def cloudsql_import(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  ServiceAccountContext.new(gcc.project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-cloudsql-import} + args
+  end
 end
 Common.register_command({
                             :invocation => "cloudsql-import",
                             :description => "cloudsql-import --account <SERVICE_ACCOUNT> --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
 Imports .sql file to cloudsql instance",
-                            :fn => lambda { |*args| cloudsql_import(*args) }
+                            :fn => lambda { |*args| cloudsql_import("cloudsql-import", *args) }
                         })
 
 def run_drop_cdr_db(*args)

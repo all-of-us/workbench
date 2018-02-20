@@ -12,7 +12,6 @@ USAGE="./generate-clousql-cdr/make-cloudsql-db.sh --instance <INSTANCE> --sql-du
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --project) PROJECT=$2; shift 2;;
     --instance) INSTANCE=$2; shift 2;;
     --sql-dump-file) SQL_DUMP_FILE=$2; shift 2;;
@@ -21,12 +20,6 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${PROJECT}" ]
 then
@@ -53,8 +46,7 @@ then
 fi
 
 echo "Creating cloudsql DB from dump file $SQL_DUMP_FILE \n"
-# SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
-SERVICE_ACCOUNT=$ACCOUNT
+SERVICE_ACCOUNT="${PROJECT}@appspot.gserviceaccount.com"
 
 gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
