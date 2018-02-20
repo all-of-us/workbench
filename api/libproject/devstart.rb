@@ -1024,6 +1024,7 @@ Common.register_command({
   :invocation => "print-scoped-sa-access-token",
   :description => "Prints access token for the service account that has been scoped for API access.",
   :fn => lambda { |*args| print_scoped_access_token("print-scoped-sa-access-token", args) }
+})
 
 def create_project_resources(gcc)
   common = Common.new
