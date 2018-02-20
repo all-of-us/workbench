@@ -97,7 +97,7 @@ end
 
 def run_api()
   common = Common.new
-  CloudSqlProxyContext.new(TEST_PROJECT).run do
+  ServiceAccountContext.new(TEST_PROJECT).run do
     get_gsuite_admin_key(TEST_PROJECT)
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
