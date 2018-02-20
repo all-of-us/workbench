@@ -164,6 +164,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                                                                        ModifyParticipantCohortAnnotationRequest modifyRequest) {
         ParticipantCohortAnnotation participantCohortAnnotation =
                 participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(annotationId, cohortReviewId, participantId);
+        if (participantCohortAnnotation == null) {
+            throw new NotFoundException(
+                    String.format("Not Found: Participant Cohort Annotation does not exist for annotationId: %s, cohortReviewId: %s, participantId: %s",
+                            annotationId, cohortReviewId, participantId));
+        }
         participantCohortAnnotation.annotationValueString(modifyRequest.getValueString())
                 .annotationValueEnum(modifyRequest.getValueEnum())
                 .annotationValueDateString(modifyRequest.getValueDate())
