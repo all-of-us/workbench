@@ -897,7 +897,9 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  with_cloud_proxy_and_db(gcc)
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    yield ctx
+  end
 end
 
 def circle_deploy(cmd_name, args)
