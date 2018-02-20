@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
@@ -12,7 +11,6 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -28,8 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,26 +242,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        ParticipantCohortStatus participantCohortStatus =
-                cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
+        //will throw a NotFoundException if ParticipantCohortStatus does not exist
+        cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
 
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
                 FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
 
-        org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
-                cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId());
-
-        validateParticipantCohortAnnotation(participantCohortAnnotation, cohortAnnotationDefinition);
-
-        if(cohortReviewService.findParticipantCohortAnnotation(cohortReview.getCohortReviewId(),
-                request.getCohortAnnotationDefinitionId(),
-                participantCohortStatus.getParticipantKey().getParticipantId()) != null) {
-            throw new BadRequestException(
-                    String.format("Invalid Request: Cohort annotation definition exists for id: %s",
-                            request.getCohortAnnotationDefinitionId()));
-        }
-
-        cohortReviewService.saveParticipantCohortAnnotation(participantCohortAnnotation);
+        participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(cohortReview.getCohortReviewId(), participantCohortAnnotation);
 
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
     }
@@ -415,6 +398,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long participantId,
                                                                                          Long annotationId,
                                                                                          ModifyParticipantCohortAnnotationRequest request) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
+
+        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
 
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
     }
@@ -443,67 +433,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewService.saveCohortReview(cohortReview);
 
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
-    }
-
-    /**
-     * Helper method to validate that requested annotations are proper.
-     *
-     * @param participantCohortAnnotation
-     */
-    private void validateParticipantCohortAnnotation(org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation,
-                                                     org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
-
-        if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.BOOLEAN)) {
-            if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
-                throw createBadRequestException(AnnotationType.BOOLEAN.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.STRING)) {
-            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueString())) {
-                throw createBadRequestException(AnnotationType.STRING.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.DATE)) {
-            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueDateString())) {
-                throw createBadRequestException(AnnotationType.DATE.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                Date date = new Date(sdf.parse(participantCohortAnnotation.getAnnotationValueDateString()).getTime());
-                participantCohortAnnotation.setAnnotationValueDate(date);
-            } catch (ParseException e) {
-                throw new BadRequestException(String.format("Invalid Request: Please provide a valid %s value (%s) for annotation defintion id: %s",
-                        AnnotationType.DATE.name(),
-                        sdf.toPattern(),
-                        participantCohortAnnotation.getCohortAnnotationDefinitionId()));
-            }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.INTEGER)) {
-            if (participantCohortAnnotation.getAnnotationValueInteger() == null) {
-                throw createBadRequestException(AnnotationType.INTEGER.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.ENUM)) {
-            if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueEnum())) {
-                throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-            List<CohortAnnotationEnumValue> enumValues = cohortAnnotationDefinition.getEnumValues().stream()
-                    .filter(enumValue -> participantCohortAnnotation.getAnnotationValueEnum().equals(enumValue.getName()))
-                    .collect(Collectors.toList());
-            if (enumValues.isEmpty()) {
-                throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
-            }
-            participantCohortAnnotation.setCohortAnnotationEnumValueId(enumValues.get(0).getCohortAnnotationEnumValueId());
-        }
-    }
-
-    /**
-     * Helper method that creates a {@link BadRequestException} from the specified parameters.
-     *
-     * @param annotationType
-     * @param cohortAnnotationDefinitionId
-     * @return
-     */
-    private BadRequestException createBadRequestException(String annotationType, Long cohortAnnotationDefinitionId) {
-        return new BadRequestException(
-                String.format("Invalid Request: Please provide a valid %s value for annotation defintion id: %s", annotationType, cohortAnnotationDefinitionId)
-        );
     }
 
     /**

@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,8 +105,7 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(1, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -139,8 +139,7 @@ public class CohortReviewControllerTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-            WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -185,8 +184,7 @@ public class CohortReviewControllerTest {
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, definition));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-            WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
         doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(searchRequest, 200, 0L)).thenReturn(null);
@@ -202,7 +200,8 @@ public class CohortReviewControllerTest {
         when(genderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(createGenderRaceEthnicityConcept()));
         doNothing().when(cohortReviewService).saveFullCohortReview(createCohortReview(1, cohortId, cohortReviewId, cdrVersionId, ReviewStatus.CREATED),
                 Arrays.asList(createParticipantCohortStatus(cohortReviewId, 0, CohortStatus.NOT_REVIEWED)));
-        when(cohortReviewService.findAll(isA(Long.class), isA(List.class), isA(PageRequest.class))).thenReturn(Arrays.asList(createParticipantCohortStatus(cohortReviewId, 0, CohortStatus.INCLUDED)));
+        when(cohortReviewService.findAll(isA(Long.class), isA(List.class), isA(PageRequest.class)))
+                .thenReturn(Arrays.asList(createParticipantCohortStatus(cohortReviewId, 0, CohortStatus.INCLUDED)));
 
         reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
 
@@ -258,16 +257,14 @@ public class CohortReviewControllerTest {
         ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
 
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(genderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(concepts));
 
         ParticipantDemographics response = reviewController.getParticipantDemographics(namespace, name, cohortId, cdrVersionId).getBody();
         assertEquals(expected, response);
 
         verify(cohortReviewService).findCohort(cohortId);
-        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.READER);
+        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
         verifyNoMoreMockInteractions();
     }
 
@@ -281,94 +278,9 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void createParticipantCohortAnnotationInvalidCohortAnnotationDefinitionId() throws Exception {
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
-        try {
-            reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, new ParticipantCohortAnnotation());
-            fail("Should have thrown a BadRequestException!");
-        } catch (Exception e) {
-            assertEquals("Invalid Request: Please provide a valid cohort annotation definition id.", e.getMessage());
-        }
-    }
-
-    @Test
-    public void createParticipantCohortAnnotaitonParticipantAnnotationExists() throws Exception {
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortReviewId).participantId(participantId);
-        ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus().participantKey(key);
-
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
-                .annotationType(AnnotationType.STRING);
-
-        ParticipantCohortAnnotation request = new ParticipantCohortAnnotation().cohortAnnotationDefinitionId(1L).annotationValueString("12");
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(participantCohortStatus);
-        when(cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId())).thenReturn(cohortAnnotationDefinition);
-        when(cohortReviewService.findParticipantCohortAnnotation(cohortReviewId, request.getCohortAnnotationDefinitionId(), participantId))
-                .thenReturn(new org.pmiops.workbench.db.model.ParticipantCohortAnnotation());
-        try {
-            reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (Exception e) {
-            assertEquals("Invalid Request: Cohort annotation definition exists for id: " +
-                    request.getCohortAnnotationDefinitionId(), e.getMessage());
-        }
-    }
-
-    @Test
-    public void createParticipantCohortAnnotaitonInvalidDateString() throws Exception {
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
-                .annotationType(AnnotationType.DATE);
-
-        ParticipantCohortAnnotation request = new ParticipantCohortAnnotation().cohortAnnotationDefinitionId(1L).annotationValueDate("12");
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
-        when(cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId())).thenReturn(cohortAnnotationDefinition);
-        try {
-            reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (Exception e) {
-            assertEquals("Invalid Request: Please provide a valid DATE value (yyyy-MM-dd) for annotation defintion id: " +
-                    request.getCohortAnnotationDefinitionId(), e.getMessage());
-        }
-    }
-
-    @Test
-    public void createParticipantCohortAnnotaitonInvalidEnumValue() throws Exception {
-        CohortAnnotationEnumValue cohortAnnotationEnumValue = new CohortAnnotationEnumValue().name("11");
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
-                .annotationType(AnnotationType.ENUM).enumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
-
-        ParticipantCohortAnnotation request = new ParticipantCohortAnnotation().cohortAnnotationDefinitionId(1L).annotationValueEnum("12");
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
-        when(cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId())).thenReturn(cohortAnnotationDefinition);
-        try {
-            reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (Exception e) {
-            assertEquals("Invalid Request: Please provide a valid ENUM value for annotation defintion id: " +
-                    request.getCohortAnnotationDefinitionId(), e.getMessage());
-        }
-    }
-
-    @Test
     public void deleteParticipantCohortAnnotation() throws Exception {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
         doNothing().when(cohortReviewService).deleteParticipantCohortAnnotation(1L, cohortReviewId, participantId);
@@ -393,35 +305,6 @@ public class CohortReviewControllerTest {
         }
     }
 
-    @Test
-    public void createParticipantCohortAnnotationAll() throws Exception {
-        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.BOOLEAN);
-        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.STRING);
-        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.DATE);
-        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.INTEGER);
-        assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType.ENUM);
-    }
-
-    private void assertParticipantCohortAnnotaitonValidateAnnotationTypes(AnnotationType annotationType) {
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition()
-                .annotationType(annotationType);
-
-        ParticipantCohortAnnotation request = new ParticipantCohortAnnotation().cohortAnnotationDefinitionId(1L);
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
-        when(cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId())).thenReturn(cohortAnnotationDefinition);
-        try {
-            reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, request);
-            fail("Should have thrown a BadRequestException!");
-        } catch (Exception e) {
-            assertEquals(String.format("Invalid Request: Please provide a valid %s value for annotation defintion id: %s",
-                    annotationType.name(), request.getCohortAnnotationDefinitionId()), e.getMessage());
-        }
-    }
-
     private ParticipantCohortAnnotation createParticipantCohortAnnotation(Boolean booleanValue, String stringValue, Integer integerValue, String dateValue, String enumValue) {
         return new ParticipantCohortAnnotation()
                 .cohortAnnotationDefinitionId(1L)
@@ -435,6 +318,21 @@ public class CohortReviewControllerTest {
                 .annotationValueEnum(enumValue);
     }
 
+    private org.pmiops.workbench.db.model.ParticipantCohortAnnotation createParticipantCohortAnnotation(ParticipantCohortAnnotation request) throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = request.getAnnotationValueDate() == null ? null : new Date(sdf.parse(request.getAnnotationValueDate().toString()).getTime());
+        return new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(request.getCohortAnnotationDefinitionId())
+                .annotationId(request.getAnnotationId())
+                .participantId(request.getParticipantId())
+                .cohortReviewId(request.getCohortReviewId())
+                .annotationValueBoolean(request.getAnnotationValueBoolean())
+                .annotationValueString(request.getAnnotationValueString())
+                .annotationValueInteger(request.getAnnotationValueInteger())
+                .annotationValueDate(date)
+                .annotationValueEnum(request.getAnnotationValueEnum());
+    }
+
     private void assertCreateParticipantCohortAnnotation(ParticipantCohortAnnotation request, AnnotationType annotationType) throws Exception {
 
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortReviewId).participantId(participantId);
@@ -446,14 +344,11 @@ public class CohortReviewControllerTest {
             cohortAnnotationDefinition.setEnumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
         }
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(participantCohortStatus);
-        when(cohortReviewService.findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId())).thenReturn(cohortAnnotationDefinition);
-        when(cohortReviewService.findParticipantCohortAnnotation(cohortReviewId, request.getCohortAnnotationDefinitionId(), participantId)).thenReturn(null);
-        when(cohortReviewService.saveParticipantCohortAnnotation(isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class)))
-                .thenReturn(isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class));
+        when(cohortReviewService.saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class)))
+                .thenReturn(createParticipantCohortAnnotation(request));
 
         ParticipantCohortAnnotation response =
                 reviewController.createParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, request).getBody();
@@ -461,13 +356,10 @@ public class CohortReviewControllerTest {
         assertEquals(request, response);
 
         verify(cohortReviewService, atLeastOnce()).findCohort(cohortId);
-        verify(cohortReviewService, atLeastOnce()).validateMatchingWorkspace(namespace, name, workspaceId,
-                WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService, atLeastOnce()).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService, atLeastOnce()).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, atLeastOnce()).findParticipantCohortStatus(cohortReviewId, participantId);
-        verify(cohortReviewService, atLeastOnce()).findCohortAnnotationDefinition(request.getCohortAnnotationDefinitionId());
-        verify(cohortReviewService, atLeastOnce()).findParticipantCohortAnnotation(cohortReviewId, request.getCohortAnnotationDefinitionId(), participantId);
-        verify(cohortReviewService, atLeastOnce()).saveParticipantCohortAnnotation(isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class));
+        verify(cohortReviewService, atLeastOnce()).saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class));
         verifyNoMoreMockInteractions();
     }
 
