@@ -143,7 +143,7 @@ public class ParticipantCounter {
      * @return
      */
     private static String getAgeRangeSql(int lo, int hi) {
-        return "when CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) >= " + lo +
-                " and CAST(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12 as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
+        return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= " + lo +
+                " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }
