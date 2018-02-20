@@ -1,0 +1,12 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.name {
+  flex: 1;
+}
+
+.type {
+  flex: 1;
+}
