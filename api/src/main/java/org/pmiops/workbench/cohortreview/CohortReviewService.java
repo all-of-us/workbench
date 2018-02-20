@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 import java.util.List;
@@ -74,17 +75,70 @@ public interface CohortReviewService {
      */
     ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
+    /**
+     * Find a list of {@link ParticipantCohortStatus} for the specified cohortReviewId, filtering and paging.
+     *
+     * @param cohortReviewId
+     * @param filtersList
+     * @param pageRequest
+     * @return
+     */
     List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
 
-    ParticipantCohortAnnotation saveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation);
+    /**
+     * Save the specified {@link ParticipantCohortAnnotation}.
+     *
+     * @param cohortReviewId
+     * @param participantCohortAnnotation
+     * @return
+     */
+    ParticipantCohortAnnotation saveParticipantCohortAnnotation(Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation);
 
+    /**
+     * Save the {@link ParticipantCohortAnnotation} for the specified participantId, annotationId and
+     * {@link ModifyParticipantCohortAnnotationRequest}.
+     *
+     * @param participantId
+     * @param annotationId
+     * @param modifyParticipantCohortAnnotationRequest
+     * @return
+     */
+    ParticipantCohortAnnotation saveParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId,
+                                                                ModifyParticipantCohortAnnotationRequest modifyParticipantCohortAnnotationRequest);
+
+    /**
+     * Find the {@link CohortAnnotationDefinition} for the specified cohortAnnotationDefinitionId.
+     *
+     * @param cohortAnnotationDefinitionId
+     * @return
+     */
     CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
 
+    /**
+     * Delete the {@link ParticipantCohortAnnotation} for the specified annotationId, cohortReviewId and participantId.
+     *
+     * @param annotationId
+     * @param cohortReviewId
+     * @param participantId
+     */
     void deleteParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId);
 
-    ParticipantCohortAnnotation findParticipantCohortAnnotation(Long annotationId);
-
+    /**
+     * Find the {@link ParticipantCohortAnnotation} for the specified cohortReviewId, cohortAnnotationDefinitonId and
+     * participantId.
+     *
+     * @param cohortReviewId
+     * @param cohortAnnotationDefinitionId
+     * @param participantId
+     * @return
+     */
     ParticipantCohortAnnotation findParticipantCohortAnnotation(Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId);
 
+    /**
+     * Find a list of {@link ParticipantCohortAnnotation} for the specified participantId.
+     *
+     * @param participantId
+     * @return
+     */
     List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId);
 }
