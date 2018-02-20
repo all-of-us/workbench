@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 
 /**
@@ -109,7 +110,7 @@ public class ExceptionUtils {
     return errorResponse(null, message);
   }
 
-  public static ErrorResponse errorResponse(String code, String message) {
+  public static ErrorResponse errorResponse(ErrorCode code, String message) {
     ErrorResponse response = new ErrorResponse();
     response.setMessage(message);
     response.setCode(code);
