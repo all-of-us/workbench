@@ -1070,9 +1070,6 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
       migrate_database
       # This will insert a CDR version row pointing at the CDR and public DB.
       migrate_workbench_data
-
-      common.status "Loading configuration..."
-      load_config(gcc.project)
     end
   end
 end
