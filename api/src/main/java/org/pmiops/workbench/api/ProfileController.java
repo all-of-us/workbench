@@ -2,11 +2,13 @@ package org.pmiops.workbench.api;
 
 import com.blockscore.models.Address;
 import com.blockscore.models.Person;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,12 +28,12 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
-import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
@@ -50,7 +52,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-
+  private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
+      new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
+      .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
+      .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
+      .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
+      .build();
   private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
       BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
       new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
@@ -58,10 +65,10 @@ public class ProfileController implements ProfileApiDelegate {
         public BillingProjectMembership apply(
             org.pmiops.workbench.firecloud.model.BillingProjectMembership billingProjectMembership) {
           BillingProjectMembership result = new BillingProjectMembership();
-          result.setMessage(billingProjectMembership.getMessage());
           result.setProjectName(billingProjectMembership.getProjectName());
           result.setRole(billingProjectMembership.getRole());
-          result.setStatus(StatusEnum.fromValue(billingProjectMembership.getStatus().toString()));
+          result.setStatus(
+              fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
           return result;
         }
       };
@@ -223,26 +230,57 @@ public class ProfileController implements ProfileApiDelegate {
       }
     }
 
-    // On subsequent sign-ins, complete the setup of the FC billing project. There is an
-    // initialization period for Firecloud projects, so it is not possible to do this immediately
-    // after project creation (on first sign-in).
-    if (BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
-      // If the user has not been granted the BQ job user Google role on the billing project yet,
-      // give it to them (so they can run BQ queries from notebooks).
-      try {
-        fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
-            FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-      } catch (ApiException e) {
-        log.log(Level.INFO, String.format(
-            "granting BigQuery role on free tier billing project failed, this is expected " +
-            "shortly after creation of the project; will retry on next initialization attempt", e));
-        // Allow the user to continue, as most workbench functionality will still be usable.
-        return user;
-      }
-      user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
-      return userDao.save(user);
+    // Free tier billing project setup is complete; nothing to do.
+    if (!BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
+      return user;
     }
-    return user;
+
+    // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
+    // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
+    // first confirm whether Firecloud claims the project setup is complete.
+    BillingProjectStatus status = null;
+    try {
+      status = fireCloudService.getBillingProjectMemberships().stream()
+          .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
+          .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
+          // Should be at most one matching billing project; though we're not asserting this.
+          .findFirst()
+          .orElse(BillingProjectStatus.NONE);
+    } catch (ApiException e) {
+      log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
+      return user;
+    }
+    switch (status) {
+      case NONE:
+      case PENDING:
+        log.log(Level.INFO, "free tier project is still initializing, continuing");
+        return user;
+
+      case ERROR:
+        log.log(Level.SEVERE, String.format(
+            "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
+        user.setFreeTierBillingProjectStatus(status);
+        return userDao.save(user);
+
+      case READY:
+        break;
+    }
+
+    // Grant the user BQ job access on the billing project so that they can run BQ queries from
+    // notebooks.
+    try {
+      fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
+          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
+    } catch (ApiException e) {
+      log.log(Level.INFO,
+          "granting BigQuery role on free tier billing project failed, this is expected " +
+              "shortly after creation of the project; will retry on next initialization attempt", e);
+      // Allow the user to continue, as most workbench functionality will still be usable.
+      return user;
+    }
+    log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
+    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+    return userDao.save(user);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

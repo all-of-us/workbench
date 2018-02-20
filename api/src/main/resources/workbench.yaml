@@ -1343,17 +1343,13 @@ definitions:
         type: string
         description: the role of the current user in the project
       status:
-        type: string
-        enum: ["Creating", "Ready", "Error"]
-      message:
-        type: string
-        description: informational message about the project
+        $ref: "#/definitions/BillingProjectStatus"
 
   BillingProjectStatus:
     type: string
     description: >
       Initialization status of a Firecloud billing project for use with Workbench.
-    enum: &BILLING_PROJECT_STATUS [none, pending, ready]
+    enum: &BILLING_PROJECT_STATUS [none, pending, ready, error]
 
   DataAccessLevel:
     type: string

@@ -545,12 +545,9 @@ definitions:
       role:
         type: string
         description: the role of the current user in the project
-      status:
+      creationStatus:
         type: string
         enum: ["Creating", "Ready", "Error"]
-      message:
-        type: string
-        description: informational message about the project
 
   CreateRawlsBillingProjectFullRequest:
     description: ''

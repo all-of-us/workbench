@@ -33,11 +33,12 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectMembership.StatusEnum;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -369,9 +370,8 @@ public class ProfileControllerTest {
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setProjectName("a");
-    membership.setMessage("b");
     membership.setRole("c");
-    membership.setStatus(StatusEnum.CREATING);
+    membership.setCreationStatus(CreationStatusEnum.CREATING);
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(
         ImmutableList.of(membership));
     List<BillingProjectMembership> memberships =
@@ -379,9 +379,8 @@ public class ProfileControllerTest {
     assertThat(memberships.size()).isEqualTo(1);
     BillingProjectMembership result = memberships.get(0);
     assertThat(result.getProjectName()).isEqualTo("a");
-    assertThat(result.getMessage()).isEqualTo("b");
     assertThat(result.getRole()).isEqualTo("c");
-    assertThat(result.getStatus()).isEqualTo(BillingProjectMembership.StatusEnum.CREATING);
+    assertThat(result.getStatus()).isEqualTo(BillingProjectStatus.PENDING);
   }
 
   private Profile createUser() throws Exception {
