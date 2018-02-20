@@ -328,9 +328,7 @@ public class CohortReviewControllerTest {
 
     @Test
     public void getParticipantCohortAnnotations() throws Exception {
-        long annotationId = 1;
         long cohortReviewId = 1;
-        ModifyParticipantCohortAnnotationRequest request = new ModifyParticipantCohortAnnotationRequest();
 
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
