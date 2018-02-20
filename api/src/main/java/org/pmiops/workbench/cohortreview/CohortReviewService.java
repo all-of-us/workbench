@@ -135,10 +135,11 @@ public interface CohortReviewService {
     ParticipantCohortAnnotation findParticipantCohortAnnotation(Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId);
 
     /**
-     * Find a list of {@link ParticipantCohortAnnotation} for the specified participantId.
+     * Find a list of {@link ParticipantCohortAnnotation} for the specified cohortReviewId and participantId.
      *
+     * @param cohortReviewId
      * @param participantId
      * @return
      */
-    List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long participantId);
+    List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(Long cohortReviewId, Long participantId);
 }

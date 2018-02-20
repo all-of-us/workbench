@@ -305,7 +305,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                    Long cohortId,
                                                                                                    Long cdrVersionId,
                                                                                                    Long participantId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotationListResponse());
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+                        cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        List<org.pmiops.workbench.db.model.ParticipantCohortAnnotation> annotations =
+                cohortReviewService.findParticipantCohortAnnotations(review.getCohortReviewId(), participantId);
+
+        ParticipantCohortAnnotationListResponse response = new ParticipantCohortAnnotationListResponse();
+        response.setItems(annotations.stream().map(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION).collect(Collectors.toList()));
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -404,9 +415,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
+        org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
+                cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
 
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
+        return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
     }
 
     @Override
