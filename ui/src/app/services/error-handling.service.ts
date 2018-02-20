@@ -28,10 +28,6 @@ export class ErrorHandlingService {
     this.badRequestError = true;
   }
 
-  public clearBadRequestError(): void {
-    this.badRequestError = false;
-  }
-
   public setUserDisabledError(): void {
     this.userDisabledError = true;
   }
@@ -76,23 +72,29 @@ export class ErrorHandlingService {
             break;
           case 500:
             this.setServerError();
-            throw e;
+            throw this.formatError(e);
           case 403:
             this.setUserDisabledError();
-            throw e;
+            throw this.formatError(e);
           case 400:
             this.setBadRequestError();
-            throw e;
+            throw this.formatError(e);
           case 0:
             console.log(e);
             this.setNoServerResponse();
-            throw e;
+            throw this.formatError(e);
           default:
-            throw e;
+            throw this.formatError(e);
 
         }
       });
     });
   }
 
+  private formatError (e) {
+    return {
+      'code': e.status,
+      'message': JSON.parse(e._body).message,
+    }
+  }
 }

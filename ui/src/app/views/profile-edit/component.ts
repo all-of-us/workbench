@@ -33,7 +33,8 @@ export class ProfileEditComponent implements OnInit {
           this.router.navigate(['../'], {relativeTo : this.route});
       },
       error => {
-        this.errorText  = JSON.parse(error._body).message;
+        this.errorText  = error.message;
+        console.log(error);
       });
   }
 }

@@ -30,8 +30,4 @@ export class ErrorHandlerComponent implements OnInit {
   acceptedUserDisabled(): void {
     this.errorHandlingService.clearUserDisabledError();
   }
-
-  closeBadRequestError(): void {
-    this.errorHandlingService.clearBadRequestError();
-  }
 }
