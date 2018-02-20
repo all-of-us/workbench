@@ -386,7 +386,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void saveParticipantCohortAnnotationModify() throws Exception {
+    public void updateParticipantCohortAnnotationModify() throws Exception {
         long annotationId = 1;
         long cohortAnnotationDefinitionId = 1;
         long cohortReviewId = 1;
@@ -407,7 +407,7 @@ public class CohortReviewServiceImplTest {
                 cohortReviewId, participantId)).thenReturn(participantCohortAnnotation);
         when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
 
-        cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
+        cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
 
         verify(participantCohortAnnotationDao).findByAnnotationIdAndCohortReviewIdAndParticipantId(annotationId,
                 cohortReviewId, participantId);
@@ -416,7 +416,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void saveParticipantCohortAnnotationModifyNotFoundCohortAnnotationDefinition() throws Exception {
+    public void updateParticipantCohortAnnotationModifyNotFoundCohortAnnotationDefinition() throws Exception {
         long annotationId = 1;
         long cohortAnnotationDefinitionId = 1;
         long cohortReviewId = 1;
@@ -436,7 +436,7 @@ public class CohortReviewServiceImplTest {
         when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(null);
 
         try {
-            cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
+            cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
             fail("Should have thrown NotFoundException!");
         } catch(NotFoundException e) {
             assertEquals("Not Found: No cohort annotation definition found for id: " + cohortAnnotationDefinitionId, e.getMessage());
@@ -449,7 +449,7 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void saveParticipantCohortAnnotationModifyNotFoundParticipantCohortAnnotation() throws Exception {
+    public void updateParticipantCohortAnnotationModifyNotFoundParticipantCohortAnnotation() throws Exception {
         long annotationId = 1;
         long cohortAnnotationDefinitionId = 1;
         long cohortReviewId = 1;
@@ -462,7 +462,7 @@ public class CohortReviewServiceImplTest {
                 cohortReviewId, participantId)).thenReturn(null);
 
         try {
-            cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
+            cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, modifyRequest);
             fail("Should have thrown NotFoundException!");
         } catch(NotFoundException e) {
             assertEquals("Not Found: Participant Cohort Annotation does not exist for annotationId: " + annotationId + ", cohortReviewId: "
@@ -590,7 +590,7 @@ public class CohortReviewServiceImplTest {
         when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
 
         try {
-            cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, new ModifyParticipantCohortAnnotationRequest());
+            cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, new ModifyParticipantCohortAnnotationRequest());
             fail("Should have thrown BadRequestExcpetion!");
         } catch (BadRequestException e) {
             assertEquals("Invalid Request: Please provide a valid " + cohortAnnotationDefinition.getAnnotationType().name()
