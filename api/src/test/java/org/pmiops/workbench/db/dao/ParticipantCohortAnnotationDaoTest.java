@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,16 +30,23 @@ public class ParticipantCohortAnnotationDaoTest {
     private JdbcTemplate jdbcTemplate;
 
     private long annotationId;
+    private long cohortAnnotationDefinitionId = 2L;
+    private long cohortReviewId = 3L;
+    private long participantId = 4L;
 
     @Before
     public void setUp() throws Exception {
         ParticipantCohortAnnotation pca = new ParticipantCohortAnnotation()
-                .annotationId(1L)
-                .cohortAnnotationDefinitionId(1L)
-                .cohortReviewId(1L)
-                .participantId(1L)
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
                 .annotationValueBoolean(Boolean.TRUE);
         annotationId = participantCohortAnnotationDao.save(pca).getAnnotationId();
+    }
+
+    @After
+    public void onTearDown() {
+        jdbcTemplate.execute("delete from participant_cohort_annotations");
     }
 
     @Test
@@ -48,6 +56,38 @@ public class ParticipantCohortAnnotationDaoTest {
         final Integer expectedCount = new Integer("1");
 
         assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+    }
+
+    @Test
+    public void findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId() throws Exception {
+        ParticipantCohortAnnotation expectedPCA = new ParticipantCohortAnnotation()
+                .annotationId(annotationId)
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueBoolean(Boolean.TRUE);
+        ParticipantCohortAnnotation actualPCA =
+                participantCohortAnnotationDao.findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
+                        cohortReviewId,
+                        cohortAnnotationDefinitionId,
+                        participantId);
+        assertEquals(expectedPCA, actualPCA);
+    }
+
+    @Test
+    public void findByAnnotationIdAndCohortReviewIdAndParticipantId() throws Exception {
+        ParticipantCohortAnnotation expectedPCA = new ParticipantCohortAnnotation()
+                .annotationId(annotationId)
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueBoolean(Boolean.TRUE);
+        ParticipantCohortAnnotation actualPCA =
+        participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                annotationId,
+                cohortReviewId,
+                participantId);
+        assertEquals(expectedPCA, actualPCA);
     }
 
 }
