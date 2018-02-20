@@ -1,0 +1,25 @@
+<div class="item">
+  <span class="name">
+    <span *ngIf="!editing" class="name-display">
+      {{ definition.columnName }}
+      <button type="button" class="btn btn-sm btn-link" (click)="edit()">
+        <clr-icon shape="pencil"></clr-icon>
+      </button>
+    </span>
+    <input *ngIf="editing"
+      #nameInput
+      id="{{ definition.columnName }}-edit-form"
+      class="name-edit"
+      type="text"
+      [formControl]="name"
+      (blur)="saveEdit()"
+      (keyup.enter)="saveEdit()"
+      (keyup.esc)="cancelEdit($event)">
+  </span>
+  <span class="type">
+    {{ definition.annotationType | titlecase }}
+  </span>
+  <button type="button" class="btn btn-sm btn-link text-danger" (click)="delete()">
+    <clr-icon shape="remove" size="16"></clr-icon>
+  </button>
+</div>

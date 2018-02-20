@@ -24,7 +24,7 @@
       <label for="kind">Annotation Type</label>
 
       <!-- STRING -->
-      <div class="radio" [class.disabled]="editing">
+      <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-string"
@@ -34,7 +34,7 @@
       </div>
 
       <!-- ENUM -->
-      <div class="radio" [class.disabled]="editing">
+      <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-enum"
@@ -44,7 +44,7 @@
       </div>
 
       <!-- DATE -->
-      <div class="radio" [class.disabled]="editing">
+      <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-date"
@@ -55,7 +55,7 @@
 
       <!-- Provisional Datatypes -->
       <!-- BOOLEAN -->
-      <div class="radio" [class.disabled]="editing">
+      <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-boolean"
@@ -65,7 +65,7 @@
       </div>
 
       <!-- INTEGER -->
-      <div class="radio" [class.disabled]="editing">
+      <div class="radio">
         <input type="radio"
           name="kind"
           id="kind-integer"
@@ -80,8 +80,8 @@
   <section *ngIf="kind.value === kinds.ENUM" class="form-block">
     <label for="enum-values">
       Enumerated Values
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn btn-sm btn-icon btn-primary"
         (click)="addEnumValue()"
         title="Add a value to the enumeration">
@@ -89,13 +89,13 @@
       </button>
     </label>
     <div formArrayName="enumValues">
-      <div 
-        *ngFor="let valControl of enumValues.controls; let i=index" 
+      <div
+        *ngFor="let valControl of enumValues.controls; let i=index"
         [formGroupName]="i"
         class="form-group">
         <label>
           {{ i }}
-          <button 
+          <button
             type="button"
             class="btn btn-sm btn-icon btn-danger"
             (click)="removeEnumValue(i)"
@@ -110,22 +110,16 @@
 
   <button
     type="button"
-    class="btn btn-outline"
-    (click)="toOverview()">
-    Cancel
-  </button>
-  <button
-    type="button"
-    class="btn btn-outline"
-    (click)="clear()">
-    {{ clearButtonText }}
-  </button>
-  <button
-    type="button"
-    class="btn btn-success-outline"
-    (click)="save()"
+    class="btn btn-primary-outline"
+    (click)="create()"
     [clrLoading]="posting"
-    [disabled]="!canSave">
-    {{ saveButtonText }}
+    [disabled]="form.invalid">
+    Create
+  </button>
+  <button
+    type="button"
+    class="btn btn-danger-outline"
+    (click)="cancel()">
+    Cancel
   </button>
 </form>

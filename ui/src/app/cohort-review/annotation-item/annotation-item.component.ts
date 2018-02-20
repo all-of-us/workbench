@@ -15,14 +15,14 @@ import {
 } from 'generated';
 
 @Component({
-  selector: 'app-participant-annotation',
-  templateUrl: './participant-annotation.component.html',
-  styleUrls: ['./participant-annotation.component.css']
+  selector: 'app-annotation-item',
+  templateUrl: './annotation-item.component.html',
+  styleUrls: ['./annotation-item.component.css']
 })
-export class ParticipantAnnotationComponent implements OnInit  {
+export class AnnotationItemComponent implements OnInit  {
   @Input() definition: Definition;
   @Input() value: Annotation;
-  @Input() verbose: boolean;
+  @Input() showDataType: boolean;
 
   private control = new FormControl();
   private subscription: Subscription;
@@ -83,14 +83,6 @@ export class ParticipantAnnotationComponent implements OnInit  {
     this.expandText = !this.expandText;
   }
 
-  setEditMode() {
-    this.state.annotationMgrState.next({
-      open: true,
-      mode: 'edit',
-      defn: this.definition
-    });
-  }
-
   private get pathParams() {
     const {ns, wsid, cid} = this.route.snapshot.params;
     const pid = this.value.participantId;
@@ -113,7 +105,7 @@ export class ParticipantAnnotationComponent implements OnInit  {
   }
 
   get datatypeDisplay() {
-    return this.verbose
+    return this.showDataType
       ? ` (${this.definition.annotationType})`
       : '';
   }
