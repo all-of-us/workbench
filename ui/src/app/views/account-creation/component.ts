@@ -29,7 +29,6 @@ export class AccountCreationComponent {
   username: string;
   password: string;
   passwordAgain: string;
-  contactEmail: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
   showPasswordLengthError: boolean;
@@ -50,7 +49,7 @@ export class AccountCreationComponent {
     this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
-          this.profile.username, this.contactEmail, this.password, this.passwordAgain];
+         this.profile.username, this.profile.contactEmail, this.password, this.passwordAgain];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
