@@ -1028,17 +1028,17 @@ Common.register_command({
 
 def create_project_resources(gcc)
   common = Common.new
-  #common.status "Enabling APIs..."
-  #for service in SERVICES
-  #  common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
-  #end
-  #common.status "Creating GCS bucket to store credentials..."
-  #common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
-  #common.status "Creating Cloud SQL instances..."
-  #common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
-  #                     --activation-policy=ALWAYS --backup-start-time 00:00
-  #                     --failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log
-  #                     --database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase --async}
+  common.status "Enabling APIs..."
+  for service in SERVICES
+    common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
+  end
+  common.status "Creating GCS bucket to store credentials..."
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
+  common.status "Creating Cloud SQL instances..."
+  common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
+                       --activation-policy=ALWAYS --backup-start-time 00:00
+                       --failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log
+                       --database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase --async}
   common.status "Waiting for database instance to become ready..."
   loop do
     sleep 3.0
@@ -1170,9 +1170,6 @@ def setup_project_data(gcc, cdr_db_name, public_db_name,
     migrate_database
     # This will insert a CDR version row pointing at the CDR and public DB.
     migrate_workbench_data
-
-    common.status "Loading configuration..."
-    load_config(gcc.project)
   end
 end
 
