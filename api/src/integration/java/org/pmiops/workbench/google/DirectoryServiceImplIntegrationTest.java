@@ -42,7 +42,7 @@ public class DirectoryServiceImplIntegrationTest {
 
   private static GoogleCredential getGoogleCredential() {
     try {
-      String saKeyPath = "src/main/webapp/WEB-INF/sa-key.json";
+      String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
       return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
     } catch (IOException e) {
       throw new RuntimeException(e);

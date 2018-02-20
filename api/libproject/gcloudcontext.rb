@@ -4,7 +4,6 @@ require "json"
 
 class GcloudContextV2
   attr_reader :account, :creds_file, :project
-  SA_KEY_PATH = "src/main/webapp/WEB-INF/sa-key.json"
 
   def initialize(options_parser)
     Workbench::assert_in_docker
@@ -33,7 +32,7 @@ class GcloudContextV2
     if @creds_file
       common.run_inline %W{gcloud auth activate-service-account --key-file #{@creds_file}}
     else
-      common.status "Reading glcoud configuration..."
+      common.status "Reading gcloud configuration..."
       configs = common.capture_stdout %W{gcloud --format=json config configurations list}
       active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
       common.status "Using '#{active_config["name"]}' gcloud configuration"
@@ -51,17 +50,6 @@ class GcloudContextV2
             "  gcloud auth login your.name@pmi-ops.org"
         exit 1
       end
-    end
-  end
-
-  def ensure_service_account()
-    # TODO(dmohs): Also ensure project_id in this file matches @project.
-    unless File.exist? SA_KEY_PATH
-      Common.new.run_inline %W{
-        gsutil cp
-          gs://#{@project}-credentials/app-engine-default-sa.json
-          #{SA_KEY_PATH}
-      }
     end
   end
 end
