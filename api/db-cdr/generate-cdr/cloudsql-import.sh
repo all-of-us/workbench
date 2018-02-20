@@ -65,7 +65,8 @@ gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R gs://$BUCKET/$SQL_DUMP_FILE
 # Import asynch
 gcloud sql instances import --project $PROJECT --account $SERVICE_ACCOUNT $INSTANCE gs://$BUCKET/$SQL_DUMP_FILE --async
 
-echo "Import started, waiting for it to complete..."
+echo "Import started, waiting for it to complete."
+echo "You can also kill this script and check status at at https://console.cloud.google.com/sql/instances/${INSTANCE}/operations?project=${PROJECT}."
 minutes_waited=0
 while true; do
   sleep 1m
