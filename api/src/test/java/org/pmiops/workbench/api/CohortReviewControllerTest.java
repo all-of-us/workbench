@@ -315,14 +315,14 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request)).thenReturn(new org.pmiops.workbench.db.model.ParticipantCohortAnnotation());
+        when(cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request)).thenReturn(new org.pmiops.workbench.db.model.ParticipantCohortAnnotation());
 
         reviewController.updateParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, 1L, request);
 
         verify(cohortReviewService).findCohort(cohortId);
         verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService).findCohortReview(cohortId, cdrVersionId);
-        verify(cohortReviewService).saveParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request);
+        verify(cohortReviewService).updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request);
         verifyNoMoreMockInteractions();
     }
 

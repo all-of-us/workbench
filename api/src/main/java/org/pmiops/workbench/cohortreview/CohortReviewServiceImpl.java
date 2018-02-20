@@ -160,8 +160,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public ParticipantCohortAnnotation saveParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId,
-                                                                       ModifyParticipantCohortAnnotationRequest modifyRequest) {
+    public ParticipantCohortAnnotation updateParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId,
+                                                                         ModifyParticipantCohortAnnotationRequest modifyRequest) {
         ParticipantCohortAnnotation participantCohortAnnotation =
                 participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(annotationId, cohortReviewId, participantId);
         if (participantCohortAnnotation == null) {

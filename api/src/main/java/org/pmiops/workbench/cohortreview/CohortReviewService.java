@@ -98,13 +98,13 @@ public interface CohortReviewService {
      * Save the {@link ParticipantCohortAnnotation} for the specified participantId, annotationId and
      * {@link ModifyParticipantCohortAnnotationRequest}.
      *
-     * @param participantId
      * @param annotationId
+     * @param participantId
      * @param modifyParticipantCohortAnnotationRequest
      * @return
      */
-    ParticipantCohortAnnotation saveParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId,
-                                                                ModifyParticipantCohortAnnotationRequest modifyParticipantCohortAnnotationRequest);
+    ParticipantCohortAnnotation updateParticipantCohortAnnotation(Long annotationId, Long cohortReviewId, Long participantId,
+                                                                  ModifyParticipantCohortAnnotationRequest modifyParticipantCohortAnnotationRequest);
 
     /**
      * Find the {@link CohortAnnotationDefinition} for the specified cohortAnnotationDefinitionId.

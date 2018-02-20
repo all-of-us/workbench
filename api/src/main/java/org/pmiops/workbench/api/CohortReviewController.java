@@ -416,7 +416,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
-                cohortReviewService.saveParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
+                cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
 
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
     }
