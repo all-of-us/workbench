@@ -436,7 +436,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     /**
-     * Helper method to create a new {@link CohortReview} and persist it to the workbench database.
+     * Helper method to create a new {@link CohortReview}.
      *
      * @param cdrVersionId
      * @param cohort
@@ -456,6 +456,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return createNewCohortReview(cohort.getCohortId(), cdrVersionId, cohortCount);
     }
 
+    /**
+     * Helper method that builds a list of {@link ParticipantCohortStatus} from BigQuery results.
+     *
+     * @param cohortReviewId
+     * @param result
+     * @param rm
+     * @return
+     */
     private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
                                                                               QueryResult result,
                                                                               Map<String, Integer> rm) {
@@ -481,6 +489,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return participantCohortStatuses;
     }
 
+    /**
+     * Helper to method that consolidates access to Cohort Definition. Will throw a
+     * {@link NotFoundException} if {@link Cohort#getCriteria()} return null.
+     *
+     * @param cohort
+     * @return
+     */
     private String getCohortDefinition(Cohort cohort) {
         String definition = cohort.getCriteria();
         if (definition == null) {
@@ -490,6 +505,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return definition;
     }
 
+    /**
+     * Helper method that builds a {@link PageRequest} from the specified parameters.
+     *
+     * @param page
+     * @param pageSize
+     * @param sortOrder
+     * @param sortColumn
+     * @return
+     */
     private PageRequest createPageRequest(Integer page, Integer pageSize, SortOrder sortOrder, ParticipantCohortStatusColumns sortColumn) {
         int pageParam = Optional.ofNullable(page).orElse(PAGE);
         int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
@@ -498,9 +522,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumnParam);
     }
 
+    /**
+     * Helper method that constructs a {@link CohortReview} with the specified ids and count.
+     *
+     * @param cohortId
+     * @param cdrVersionId
+     * @param cohortCount
+     * @return
+     */
     private CohortReview createNewCohortReview(Long cohortId, Long cdrVersionId, long cohortCount) {
-        CohortReview cohortReview;
-        cohortReview = new CohortReview();
+        CohortReview cohortReview = new CohortReview();
         cohortReview.setCohortId(cohortId);
         cohortReview.setCdrVersionId(cdrVersionId);
         cohortReview.matchedParticipantCount(cohortCount);
@@ -510,6 +541,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return cohortReview;
     }
 
+    /**
+     * Helper method that will populate all gender, race and ethnicity per the spcecified list of
+     * {@link ParticipantCohortStatus}.
+     *
+     * @param participantCohortStatuses
+     */
     private void lookupGenderRaceEthnicityValues(List<ParticipantCohortStatus> participantCohortStatuses) {
         Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
         participantCohortStatuses.forEach(pcs -> {
