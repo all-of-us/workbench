@@ -31,4 +31,5 @@
   <include file="changelog/db.changelog-21.xml"/>
   <include file="changelog/db.changelog-22-email-verification-status.xml"/>
   <include file="changelog/db.changelog-23.xml"/>
+  <include file="changelog/db.changelog-25.xml"/>
 </databaseChangeLog>
