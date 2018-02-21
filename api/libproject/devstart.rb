@@ -656,9 +656,10 @@ def create_auth_domain(cmd_name, args)
   token = token.chomp
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  # TODO: make this project-specific
+
+  domain_name = get_auth_domain(op.opts.project)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
-     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/all-of-us-registered-test}
+     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
@@ -670,6 +671,11 @@ Common.register_command({
 def update_user_registered_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    lambda {|opts, v| opts.project = v},
+    "Project to update registered status for"
+  )
   op.add_option(
     "--action [action]",
     lambda {|opts, v| opts.action = v},
@@ -697,19 +703,15 @@ def update_user_registered_status(cmd_name, args)
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
   payload = "{\"email\": \"#{op.opts.user}\"}"
+  domain_name = get_auth_domain(op.opts.project)
   if op.opts.action == "add"
-    common.run_inline %W{curl -H #{header}
-    -H #{content_type}
-    -d #{payload}
-    # TODO: make this project-specific
-    https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
+    common.run_inline %W{curl -H #{header} -H #{content_type}
+      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
   end
 
   if op.opts.action == "remove"
-    common.run_inline %W{curl -X DELETE -H #{header}
-    -H #{content_type}
-    -d #{payload}
-    https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test/users}
+    common.run_inline %W{curl -X DELETE -H #{header} -H #{content_type}
+      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
   end
 end
 
@@ -908,12 +910,23 @@ def migrate_workbench_data()
   end
 end
 
-def load_config(project)
+def get_config(project)
   configs = {
     TEST_PROJECT => "config_test.json",
     "all-of-us-rw-stable" => "config_stable.json",
   }
-  config_json = configs[project]
+  return configs[project]
+end
+
+def get_auth_domain(project)
+  config_json = get_config(project)
+  config_line = `grep registeredDomainName config/config_stable.json`
+  config_line = config_line[0, config_line.rindex('"') - 1]
+  return config_line[config_line.rindex('"') + 1, config_line.length]
+end
+
+def load_config(project)
+  config_json = get_config(project)
   unless config_json
     raise("unknown project #{project}, expected one of #{configs.keys}")
   end
