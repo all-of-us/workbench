@@ -24,10 +24,10 @@ public class ExceptionAdvice {
         log.log(Level.WARNING, "[{0}] {1}: {2}",
             new Object[]{statusCode, e.getClass().getSimpleName(), e.getMessage()});
         if (statusCode < 500) {
-          if (e instanceof BadRequestException) {
-            ErrorResponse errorResponse = ((BadRequestException) e).getErrorResponse();
+          if (e instanceof WorkbenchException) {
+            ErrorResponse errorResponse = ((WorkbenchException) e).getErrorResponse();
             return ResponseEntity.status(statusCode).body(
-                ((BadRequestException) e).getErrorResponse());
+                ((WorkbenchException) e).getErrorResponse());
           }
           return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(
               e.getMessage()));
