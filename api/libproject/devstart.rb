@@ -790,7 +790,7 @@ Common.register_command({
 })
 
 
-def deploy(cmd_name, args, with_cron)
+def deploy(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -823,8 +823,10 @@ def deploy(cmd_name, args, with_cron)
     : (op.opts.promote ? "--promote" : "--no-promote")
   quiet = op.opts.quiet ? " --quiet" : ""
 
-  common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
-  get_gsuite_admin_key(gcc.project)
+  if with_gsuite_admin
+    common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
+    get_gsuite_admin_key(gcc.project)
+  end
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
@@ -838,7 +840,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy(cmd_name, args, with_cron=true)
+  deploy(cmd_name, args, with_cron=true, with_gsuite_admin=true)
 end
 
 Common.register_command({
@@ -853,7 +855,7 @@ def deploy_public_api(cmd_name, args)
   common = Common.new
   common.status "Deploying public-api..."
   Dir.chdir('../public-api') do
-    deploy(cmd_name, args, with_cron=false)
+    deploy(cmd_name, args, with_cron=false, with_gsuite_admin=false)
   end
 end
 
