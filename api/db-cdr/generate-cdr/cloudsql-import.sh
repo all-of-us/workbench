@@ -71,7 +71,7 @@ minutes_waited=0
 while true; do
   sleep 1m
   minutes_waited=$((minutes_waited + 1))
-  import_status=`gcloud sql operations list --instance workbenchmaindb --project $PROJECT | grep "IMPORT"`
+  import_status=`gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT"`
   if [[ $import_status =~ .*RUNNING* ]]
   then
      echo "Import is still running after ${minutes_waited} minutes."
