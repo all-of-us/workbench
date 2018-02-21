@@ -385,7 +385,6 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
-        when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(participantCohortStatus);
         when(cohortReviewService.saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class)))
                 .thenReturn(createParticipantCohortAnnotation(request));
 
@@ -397,7 +396,6 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, atLeastOnce()).findCohort(cohortId);
         verify(cohortReviewService, atLeastOnce()).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService, atLeastOnce()).findCohortReview(cohortId, cdrVersionId);
-        verify(cohortReviewService, atLeastOnce()).findParticipantCohortStatus(cohortReviewId, participantId);
         verify(cohortReviewService, atLeastOnce()).saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class));
         verifyNoMoreMockInteractions();
     }

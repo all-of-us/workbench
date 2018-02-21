@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -27,8 +28,12 @@ import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 import javax.inject.Provider;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -288,28 +293,77 @@ public class CohortReviewServiceImplTest {
     }
 
     @Test
-    public void saveParticipantCohortAnnotation() throws Exception {
+    public void saveParticipantCohortAnnotationAllTypes() throws Exception {
         long cohortAnnotationDefinitionId = 1;
         long cohortReviewId = 1;
         long participantId = 1;
 
-        ParticipantCohortAnnotation participantCohortAnnotation = new ParticipantCohortAnnotation()
-                .annotationValueBoolean(Boolean.TRUE)
+        //Boolean Type
+        ParticipantCohortAnnotation expectedAnnotation = new ParticipantCohortAnnotation()
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
                 .cohortReviewId(cohortReviewId)
-                .participantId(participantId);
+                .participantId(participantId)
+                .annotationValueBoolean(Boolean.TRUE);
 
-        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition(cohortAnnotationDefinitionId, AnnotationType.BOOLEAN);
+        assertSaveParticipantCohortAnnotation(expectedAnnotation, AnnotationType.BOOLEAN);
+
+        //Date Type
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        expectedAnnotation = new ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueDateString("1999-02-01")
+                .annotationValueDate(new Date(sdf.parse("1999-02-01").getTime()));
+
+        assertSaveParticipantCohortAnnotation(expectedAnnotation, AnnotationType.DATE);
+
+        //Enum Type
+        expectedAnnotation = new ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueEnum("enumValue");
+
+        assertSaveParticipantCohortAnnotation(expectedAnnotation, AnnotationType.ENUM);
+
+        //Integer Type
+        expectedAnnotation = new ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueInteger(1);
+
+        assertSaveParticipantCohortAnnotation(expectedAnnotation, AnnotationType.INTEGER);
+
+        //String Type
+        expectedAnnotation = new ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueString("String");
+
+        assertSaveParticipantCohortAnnotation(expectedAnnotation, AnnotationType.STRING);
+    }
+
+    private void assertSaveParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation, AnnotationType annotationType) {
+        long cohortAnnotationDefinitionId = participantCohortAnnotation.getCohortAnnotationDefinitionId();
+        long cohortReviewId = participantCohortAnnotation.getCohortReviewId();
+        long participantId = participantCohortAnnotation.getParticipantId();
+
+        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition(cohortAnnotationDefinitionId, annotationType);
 
         when(cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId)).thenReturn(cohortAnnotationDefinition);
         when(participantCohortAnnotationDao.findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(cohortReviewId,
                 cohortAnnotationDefinitionId, participantId)).thenReturn(null);
+        when(participantCohortAnnotationDao.save(participantCohortAnnotation)).thenReturn(participantCohortAnnotation);
 
         cohortReviewService.saveParticipantCohortAnnotation(cohortReviewId, participantCohortAnnotation);
 
-        verify(cohortAnnotationDefinitionDao).findOne(cohortAnnotationDefinitionId);
-        verify(participantCohortAnnotationDao).findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(cohortReviewId,
+        verify(cohortAnnotationDefinitionDao, atLeastOnce()).findOne(cohortAnnotationDefinitionId);
+        verify(participantCohortAnnotationDao, atLeastOnce()).findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(cohortReviewId,
                 cohortAnnotationDefinitionId, participantId);
+        verify(participantCohortAnnotationDao, atLeastOnce()).save(participantCohortAnnotation);
         verifyNoMoreMockInteractions();
     }
 
@@ -559,7 +613,8 @@ public class CohortReviewServiceImplTest {
                 .annotationType(annotationType)
                 .columnName("name")
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
-                .cohortId(1);
+                .cohortId(1)
+                .enumValues(new TreeSet<CohortAnnotationEnumValue>(Arrays.asList(new CohortAnnotationEnumValue().name("enumValue"))));
     }
 
     private void assertParticipantCohortAnnotationBadRequest(ParticipantCohortAnnotation participantCohortAnnotation, CohortAnnotationDefinition cohortAnnotationDefinition) {
