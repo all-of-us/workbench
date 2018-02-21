@@ -11,7 +11,7 @@ SET PASSWORD FOR '${PUBLIC_DB_USER}'@'%' = '${PUBLIC_DB_PASSWORD}';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON ${DB_NAME}.* TO '${WORKBENCH_DB_USER}'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, INDEX, REFERENCES, CREATE TEMPORARY TABLES, CREATE VIEW ON ${DB_NAME}.* TO '${LIQUIBASE_DB_USER}'@'%';
 
-# Give wildcard permission to cdr databases for workbench (ALL permissions required)
-GRANT ALL ON `cdr%.*` TO '${WORKBENCH_DB_USER}'@'%';
-# Give wildcard permission to public databases for public user (ALL permissions required)
-GRANT ALL ON `public%.*` TO '${PUBLIC_DB_USER}'@'%';
+# Give wildcard permission to cdr databases for workbench
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `cdr%`.* TO '${WORKBENCH_DB_USER}'@'%';
+# Give wildcard permission to public databases for public user
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `public%`.* TO '${PUBLIC_DB_USER}'@'%';
