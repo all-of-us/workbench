@@ -641,7 +641,15 @@ def write_db_creds_file(project, cdr_db_name, public_db_name, root_password, wor
   end
 end
 
-def create_auth_domain()
+def create_auth_domain(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    lambda {|opts, v| opts.project = v},
+    "Project to register the service account for"
+  )
+  op.parse.validate
+
   common = Common.new
   common.run_inline %W{gcloud auth login}
   token = common.capture_stdout %W{gcloud auth print-access-token}
@@ -650,13 +658,13 @@ def create_auth_domain()
   content_type = "Content-type: application/json"
   # TODO: make this project-specific
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
-     https://api-dot-all-of-us-workbench-test.appspot.com/v1/auth-domain/all-of-us-registered-test}
+     https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/all-of-us-registered-test}
 end
 
 Common.register_command({
   :invocation => "create-auth-domain",
   :description => "Creates an authorization domain in Firecloud for registered users",
-    :fn => lambda { |*args| create_auth_domain() }
+    :fn => lambda { |*args| create_auth_domain("create-auth-domain", args) }
 })
 
 def update_user_registered_status(cmd_name, args)
@@ -715,32 +723,35 @@ Common.register_command({
 def set_authority(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.remove = "false"
+  op.opts.dry_run = "false"
   op.add_option(
        "--email [EMAIL,...]",
        lambda {|opts, v| opts.email = v},
-       "Comma-separated list of user accounts to change. Required."
-   )
+       "Comma-separated list of user accounts to change. Required.")
    op.add_option(
-       "--add_authority [AUTHORITY,...]",
-       lambda {|opts, v| opts.add_authority = v},
-       "Comma-separated list of user authorities to add for the users. ")
+       "--authority [AUTHORITY,...]",
+       lambda {|opts, v| opts.authority = v},
+       "Comma-separated list of user authorities to add or remove for the users. ")
    op.add_option(
-       "--rm_authority [AUTHORITY,...]",
-       lambda {|opts, v| opts.rm_authority = v},
-       "Comma-separated list of user authorities to remove from the users.")
+       "--remove",
+       lambda {|opts, v| opts.remove = "true"},
+       "Remove authorities (rather than adding them.)")
    op.add_option(
        "--dry_run",
        lambda {|opts, v| opts.dry_run = "true"},
        "Make no changes.")
-   op.add_validator lambda {|opts| raise ArgumentError unless opts.email and opts.add_authority and opts.rm_authority}
+   op.add_validator lambda {|opts| raise ArgumentError unless opts.email and opts.authority}
    gcc = GcloudContextV2.new(op)
    op.parse.validate
    gcc.validate
-   CloudSqlProxyContext.new(gcc.project).run do
+
+   with_cloud_proxy_and_db(gcc) do |ctx|
      Dir.chdir("tools") do
-       @common.run_inline %W{
+       common = Common.new
+       common.run_inline %W{
          gradle --info setAuthority
-        -PappArgs=['#{op.opts.email}','#{op.opts.add_authority}','#{op.opts.rm_authority}',#{op.opts.dry_run}]}
+        -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
      end
    end
 end
