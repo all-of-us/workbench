@@ -3,7 +3,6 @@ import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CreateReviewComponent} from '../create-review/create-review.component';
-import {SidebarDirective} from '../directives/sidebar.directive';
 import {ReviewStateService} from '../review-state.service';
 
 import {ReviewStatus} from 'generated';

@@ -1,5 +1,5 @@
 <div appFullPage>
-  <!-- CohortReview main content -->
+  <!-- CohortReview main content container -->
   <div class="cohort-review-main" [class.sidebar-open]="sidebarOpen">
     <router-outlet></router-outlet>
   </div>
@@ -12,11 +12,8 @@
     </div>
     <!-- Sidebar content -->
     <div class="sidebar-content" [class.sidebar-open]="sidebarOpen">
-      <h3>Hellooooooo Sidebar</h3>
-      <!--
-      <app-detail-sidebar>
-      </app-detail-sidebar>
-      -->
+      <app-sidebar-content>
+      </app-sidebar-content>
     </div>
   </div>
 

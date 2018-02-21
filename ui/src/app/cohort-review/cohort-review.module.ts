@@ -6,6 +6,11 @@ import {ClarityModule} from '@clr/angular';
 
 import {ChartsModule} from '../charts/charts.module';
 
+import {CohortReviewComponent} from './cohort-review/cohort-review.component';
+import {CreateReviewComponent} from './create-review/create-review.component';
+import {OverviewComponent} from './overview/overview.component';
+import {ReviewNavComponent} from './review-nav/review-nav.component';
+
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -13,16 +18,13 @@ import {SetAnnotationItemComponent} from './set-annotation-item/set-annotation-i
 import {SetAnnotationListComponent} from './set-annotation-list/set-annotation-list.component';
 import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation-modal.component';
 
+import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 
-import {CohortReviewComponent} from './cohort-review/cohort-review.component';
-import {CreateReviewComponent} from './create-review/create-review.component';
-import {OverviewComponent} from './overview/overview.component';
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
-import {ParticipantTableComponent} from './participant-table/participant-table.component';
-import {ReviewNavComponent} from './review-nav/review-nav.component';
+import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
 import {ReviewStateService} from './review-state.service';
@@ -64,6 +66,7 @@ import {WorkspacesService} from 'generated';
     /* Participant Detail */
     ParticipantDetailComponent,
     ParticipantStatusComponent,
+    SidebarContentComponent,
 
     /* Directives */
     FullPageDirective,

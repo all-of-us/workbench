@@ -39,6 +39,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.state.sidebarOpen.next(true);
     this.subscription = this.state.participant$
       .merge(this.route.data.pluck('participant'))
       .do(participant => this.participant = <Participant>participant)
