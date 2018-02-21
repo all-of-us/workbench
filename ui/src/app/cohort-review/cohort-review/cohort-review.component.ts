@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -13,48 +13,40 @@ import {ReviewStatus} from 'generated';
   templateUrl: './cohort-review.component.html',
   styleUrls: ['./cohort-review.component.css']
 })
-export class CohortReviewComponent implements OnInit, OnDestroy {
+export class CohortReviewComponent {
   @ViewChild('createReviewModal') createReviewModal: CreateReviewComponent;
-  @ViewChild('sidebar') sidebar: SidebarDirective;
-  private subscription: Subscription;
 
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
-    this.broadcast();
-    this.subscription = this.newReviewSub();
-    this.subscription.add(this.sidebarSub());
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
-  private broadcast() {
     const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
-    const {workspace} = this.route.parent.snapshot.data;
-
     this.state.annotationDefinitions.next(annotationDefinitions);
     this.state.cohort.next(cohort);
     this.state.review.next(review);
+
+    if (review.reviewStatus === ReviewStatus.NONE) {
+      this.createReviewModal.modal.open();
+    }
   }
 
-  private newReviewSub = () => this.route.data
-    .map(({review}) => review.reviewStatus)
-    .map(status => status === ReviewStatus.NONE)
-    .subscribe(val => val
-      ? this.createReviewModal.modal.open()
-      : this.createReviewModal.modal.close())
+  get angleDir() {
+    return this.sidebarOpen ? 'right' : 'left';
+  }
 
-  private sidebarSub = () =>
-    this.state.sidebarOpen$.subscribe(val => val
-      ? this.sidebar.open()
-      : this.sidebar.close())
+  get sidebarOpen() {
+    return this.state.sidebarOpen.getValue();
+  }
 
-  closeSidebar() {
-    this.state.sidebarOpen.next(false);
+  set sidebarOpen(value: boolean) {
+    this.state.sidebarOpen.next(value);
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+    this.cd.detectChanges();
   }
 }

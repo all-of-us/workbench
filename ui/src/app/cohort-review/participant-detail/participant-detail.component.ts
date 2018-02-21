@@ -80,7 +80,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
-    this.state.sidebarOpen$
+    this.state.sidebarOpen.asObservable()
       .take(1)
       .subscribe(val => this.state.sidebarOpen.next(!val));
   }

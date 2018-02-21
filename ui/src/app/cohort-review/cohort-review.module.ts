@@ -25,7 +25,6 @@ import {ParticipantTableComponent} from './participant-table/participant-table.c
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {FullPageDirective} from './directives/fullPage.directive';
-import {SidebarDirective} from './directives/sidebar.directive';
 import {ReviewStateService} from './review-state.service';
 
 import {CohortReviewRoutingModule} from './routing/routing.module';
@@ -68,7 +67,6 @@ import {WorkspacesService} from 'generated';
 
     /* Directives */
     FullPageDirective,
-    SidebarDirective,
   ],
   providers: [ReviewStateService]
 })
