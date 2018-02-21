@@ -770,14 +770,19 @@ def connect_to_cloud_db(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--root",
+    lambda {|opts, v| opts.root = true },
+    "Connect as root")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
   env = read_db_vars_v2(gcc)
   CloudSqlProxyContext.new(gcc.project).run do
-    password = env["WORKBENCH_DB_PASSWORD"]
+    password = op.opts.root ? env["MYSQL_ROOT_PASSWORD"] : env["WORKBENCH_DB_PASSWORD"]
+    user = op.opts.root ? "root" : env["WORKBENCH_DB_USER"]
     common.run_inline %W{
-      mysql --host=127.0.0.1 --port=3307 --user=#{env["WORKBENCH_DB_USER"]}
+      mysql --host=127.0.0.1 --port=3307 --user=#{user}
       --database=#{env["DB_NAME"]} --password=#{password}},
       redact=password
   end
