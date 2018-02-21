@@ -47,4 +47,7 @@ export const initialState = fromJS({
   },
 
   chartData: [],
+
+  initShowChart: false,
+
 });

@@ -1,26 +1,28 @@
-<div class="overview-header">
-  <div class="save-cohort">
-    <button
-      type="button"
-      class="btn btn-success"
-      [style.margin-left]="'0'"
-      (click)="saveModal.open()">
-      <clr-icon shape="floppy"></clr-icon>
-      Save Cohort
-    </button>
+<div *ngIf="(initShowChart$ | async)">
+  <div class="overview-header">
+    <h3 id="total-count">
+      Total Count:
+      <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
+        Loading...
+      </span>
+      <span *ngIf="!(isRequesting$ | async)">
+        {{ total$ | async }}
+      </span>
+    </h3>
+    <div>
+      <button
+        type="button"
+        class="btn btn-success"
+        [style.margin-left]="'0'"
+        (click)="saveModal.open()">
+        <clr-icon shape="floppy"></clr-icon>
+        Save Cohort
+      </button>
+    </div>
   </div>
-  <h3 id="total-count">
-    Total Count:
-    <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
-      Loading...
-    </span>
-    <span *ngIf="!(isRequesting$ | async)">
-      {{ total$ | async }}
-    </span>
-  </h3>
-</div>
 
-<app-charts [data]="(chartData$ | async)"></app-charts>
+  <app-charts [data]="(chartData$ | async)"></app-charts>
+</div>
 
 <clr-modal
   #saveModal
