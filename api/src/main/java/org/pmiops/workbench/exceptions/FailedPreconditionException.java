@@ -5,30 +5,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-public class FailedPreconditionException extends RuntimeException {
-
-  private ErrorResponse errorResponse;
+public class FailedPreconditionException extends WorkbenchException {
+  public FailedPreconditionException() {
+    super();
+  }
 
   public FailedPreconditionException(String message) {
-    this(errorResponse(message));
+    super(message);
   }
 
   public FailedPreconditionException(ErrorResponse errorResponse) {
-    super(errorResponse.getMessage());
-    this.errorResponse = errorResponse;
+    super(errorResponse);
   }
 
   public FailedPreconditionException(Throwable t) {
     super(t);
   }
 
-  public ErrorResponse getErrorResponse() {
-    return errorResponse;
-  }
-
-  private static ErrorResponse errorResponse(String message) {
-    ErrorResponse response = new ErrorResponse();
-    response.setMessage(message);
-    return response;
+  public FailedPreconditionException(String message, Throwable t) {
+    super(message, t);
   }
 }

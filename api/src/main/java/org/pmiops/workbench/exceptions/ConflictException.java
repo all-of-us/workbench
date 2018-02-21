@@ -5,30 +5,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
-public class ConflictException extends RuntimeException {
-
-  private ErrorResponse errorResponse;
+public class ConflictException extends WorkbenchException {
+  public ConflictException() {
+    super();
+  }
 
   public ConflictException(String message) {
-    this(errorResponse(message));
+    super(message);
   }
 
   public ConflictException(ErrorResponse errorResponse) {
-    super(errorResponse.getMessage());
-    this.errorResponse = errorResponse;
+    super(errorResponse);
   }
 
   public ConflictException(Throwable t) {
     super(t);
   }
 
-  public ErrorResponse getErrorResponse() {
-    return errorResponse;
-  }
-
-  private static ErrorResponse errorResponse(String message) {
-    ErrorResponse response = new ErrorResponse();
-    response.setMessage(message);
-    return response;
+  public ConflictException(String message, Throwable t) {
+    super(message, t);
   }
 }
