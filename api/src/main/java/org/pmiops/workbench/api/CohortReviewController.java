@@ -242,9 +242,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-        //will throw a NotFoundException if ParticipantCohortStatus does not exist
-        cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
-
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
                 FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
 
