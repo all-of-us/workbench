@@ -891,7 +891,7 @@ end
 def load_config(project)
   configs = {
     TEST_PROJECT => "config_test.json",
-    "aou-res-workbench-stable" => "config_stable.json",
+    "all-of-us-rw-stable" => "config_stable.json",
   }
   config_json = configs[project]
   unless config_json
