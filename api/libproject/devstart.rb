@@ -390,16 +390,18 @@ def get_auth_login_account()
 end
 
 def register_service_account(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
+  op.add_option(
+        "--project [project]",
+        lambda {|opts, v| opts.project = v},
+        "Project to register the service account for"
+  )
   op.parse.validate
-  gcc.validate
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(op.opts.project).run do
     Dir.chdir("../firecloud-tools") do
-      ctx.common.run_inline(
-          "./run.sh register_service_account/register_service_account.py" \
-          " -j #{cts.opts.creds_file} -o #{gcc.project}@appspot.gserviceaccount.com")
+      common = Common.new
+      common.run_inline %W{./run.sh scripts/register_service_account/register_service_account.py
+           -j #{ENV["GOOGLE_APPLICATION_CREDENTIALS"]} -e all-of-us-research-tools@googlegroups.com}
     end
   end
 end
