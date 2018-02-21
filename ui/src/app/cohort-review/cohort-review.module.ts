@@ -1,3 +1,4 @@
+/* tslint:disable:max-line-length */
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -5,51 +6,32 @@ import {ClarityModule} from '@clr/angular';
 
 import {ChartsModule} from '../charts/charts.module';
 
-import {AnnotationItemComponent
-} from './annotation-item/annotation-item.component';
-import {AnnotationListComponent
-} from './annotation-list/annotation-list.component';
-import {SetAnnotationCreateComponent
-} from './set-annotation-create/set-annotation-create.component';
-import {SetAnnotationItemComponent
-} from './set-annotation-item/set-annotation-item.component';
-import {SetAnnotationListComponent
-} from './set-annotation-list/set-annotation-list.component';
-import {SetAnnotationModalComponent
-} from './set-annotation-modal/set-annotation-modal.component';
+import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
+import {AnnotationListComponent} from './annotation-list/annotation-list.component';
+import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
+import {SetAnnotationItemComponent} from './set-annotation-item/set-annotation-item.component';
+import {SetAnnotationListComponent} from './set-annotation-list/set-annotation-list.component';
+import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation-modal.component';
 
-import {ChoiceFilterComponent
-} from './choice-filter/choice-filter.component';
-import {StatusFilterComponent
-} from './status-filter/status-filter.component';
+import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
+import {StatusFilterComponent} from './status-filter/status-filter.component';
 
-import {CohortReviewComponent
-} from './cohort-review/cohort-review.component';
-import {CreateReviewComponent
-} from './create-review/create-review.component';
-import {OverviewComponent
-} from './overview/overview.component';
-import {ParticipantDetailComponent
-} from './participant-detail/participant-detail.component';
-import {ParticipantStatusComponent
-} from './participant-status/participant-status.component';
-import {ParticipantTableComponent
-} from './participant-table/participant-table.component';
-import {ReviewNavComponent
-} from './review-nav/review-nav.component';
+import {CohortReviewComponent} from './cohort-review/cohort-review.component';
+import {CreateReviewComponent} from './create-review/create-review.component';
+import {OverviewComponent} from './overview/overview.component';
+import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
+import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+import {ParticipantTableComponent} from './participant-table/participant-table.component';
+import {ReviewNavComponent} from './review-nav/review-nav.component';
 
-import {FullPageDirective
-} from './directives/fullPage.directive';
-import {SidebarDirective
-} from './directives/sidebar.directive';
-import {ReviewStateService
-} from './review-state.service';
+import {FullPageDirective} from './directives/fullPage.directive';
+import {SidebarDirective} from './directives/sidebar.directive';
+import {ReviewStateService} from './review-state.service';
 
-import {CohortReviewRoutingModule
-} from './routing/routing.module';
+import {CohortReviewRoutingModule} from './routing/routing.module';
 
-import {WorkspacesService
-} from 'generated';
+import {WorkspacesService} from 'generated';
+/* tslint:enable:max-line-length */
 
 
 @NgModule({
