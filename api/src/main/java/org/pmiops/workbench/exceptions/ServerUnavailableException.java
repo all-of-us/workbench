@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -11,14 +12,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * how to handle yet.
  */
 @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-public class ServerUnavailableException extends RuntimeException {
-
+public class ServerUnavailableException extends WorkbenchException {
   public ServerUnavailableException() {
     super();
   }
 
   public ServerUnavailableException(String message) {
     super(message);
+  }
+
+  public ServerUnavailableException(ErrorResponse errorResponse) {
+    super(errorResponse);
   }
 
   public ServerUnavailableException(Throwable t) {
