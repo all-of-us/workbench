@@ -105,7 +105,8 @@ export const rootReducer: Reducer<CohortSearchState> =
               count: action.chartData.reduce((sum, data) => sum + data.count, 0),
               isRequesting: false,
             })
-          );
+          )
+          .set('initShowChart', true);
 
       case LOAD_COUNT_RESULTS:
         return state
