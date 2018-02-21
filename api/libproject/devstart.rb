@@ -921,7 +921,7 @@ end
 def get_auth_domain(project)
   config_json = get_config(project)
   config_line = `grep registeredDomainName config/config_stable.json`
-  config_line = config_line[0, config_line.rindex('"') - 1]
+  config_line = config_line[0, config_line.rindex('"')]
   return config_line[config_line.rindex('"') + 1, config_line.length]
 end
 
