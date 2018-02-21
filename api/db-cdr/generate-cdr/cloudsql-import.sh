@@ -12,7 +12,6 @@ USAGE="./generate-clousql-cdr/make-cloudsql-db.sh --instance <INSTANCE> --sql-du
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
-    --account) ACCOUNT=$2; shift 2;;
     --project) PROJECT=$2; shift 2;;
     --instance) INSTANCE=$2; shift 2;;
     --sql-dump-file) SQL_DUMP_FILE=$2; shift 2;;
@@ -21,12 +20,6 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-
-if [ -z "${ACCOUNT}" ]
-then
-  echo "Usage: $USAGE"
-  exit 1
-fi
 
 if [ -z "${PROJECT}" ]
 then
@@ -53,9 +46,9 @@ then
 fi
 
 echo "Creating cloudsql DB from dump file $SQL_DUMP_FILE \n"
-# SERVICE_ACCOUNT=all-of-us-workbench-test@appspot.gserviceaccount.com
-SERVICE_ACCOUNT=$ACCOUNT
+SERVICE_ACCOUNT="${PROJECT}@appspot.gserviceaccount.com"
 
+gsutil acl ch -u $SERVICE_ACCOUNT:O gs://$BUCKET/$SQL_DUMP_FILE
 gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
 # Grant access to buckets for service account for cloudsql
@@ -71,6 +64,19 @@ gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R gs://$BUCKET/$SQL_DUMP_FILE
 
 # Import asynch
 gcloud sql instances import --project $PROJECT --account $SERVICE_ACCOUNT $INSTANCE gs://$BUCKET/$SQL_DUMP_FILE --async
-echo "Importing asynch. A 3 GB dump takes about 1 hr. When this is done you can run this command again to import another database."
-echo "Check status at https://console.cloud.google.com/sql/instances/"$INSTANCE"/operations?project="$PROJECT
 
+echo "Import started, waiting for it to complete."
+echo "You can also kill this script and check status at at https://console.cloud.google.com/sql/instances/${INSTANCE}/operations?project=${PROJECT}."
+minutes_waited=0
+while true; do
+  sleep 1m
+  minutes_waited=$((minutes_waited + 1))
+  import_status=`gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT"`
+  if [[ $import_status =~ .*RUNNING* ]]
+  then
+     echo "Import is still running after ${minutes_waited} minutes."
+  else
+    echo "Import finished after ${minutes_waited} minutes."
+    break
+  fi
+done

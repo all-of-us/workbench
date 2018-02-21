@@ -47,7 +47,7 @@ public class DemoQueryBuilderTest {
                 "union distinct\n" +
                 "select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where CAST(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12 as INT64) =\n" +
+                "where CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) =\n" +
                 "@" + ageNamedParameter + "\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());

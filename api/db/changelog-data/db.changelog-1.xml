@@ -23,12 +23,13 @@
       <column name="name" type="varchar(80)" value="Test Registered CDR"/>
       <column name="data_access_level" type="tinyint" value="1"/>
       <column name="release_number" type="smallint" value="1"/>
+      <!-- TODO: parameterize this -->
       <column name="bigquery_project" type="varchar(80)" value="all-of-us-ehr-dev"/>
       <column name="bigquery_dataset" type="varchar(80)" value="test_merge_dec26"/>
       <column name="creation_time" type="datetime" valueDate="${now}"/>
       <column name="num_participants" type="bigint" value="946237"/>
-      <column name="cdr_db_name" type="varchar(20)" value="cdr"/>
-      <column name="public_db_name" type="varchar(20)" value="public"/>
+      <column name="cdr_db_name" type="varchar(20)" value="${CDR_DB_NAME}"/>
+      <column name="public_db_name" type="varchar(20)" value="${PUBLIC_DB_NAME}"/>
     </insert>
 
   </changeSet>

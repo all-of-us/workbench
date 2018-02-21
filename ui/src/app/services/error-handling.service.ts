@@ -1,11 +1,15 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
+import {ErrorCode} from 'generated';
+
 @Injectable()
 export class ErrorHandlingService {
 
+  public apiDown: boolean;
+  public firecloudDown: boolean;
+  public notebooksDown: boolean;
   public serverError: boolean;
-  public badRequestError: boolean;
   public noServerResponse: boolean;
   public serverBusy: boolean;
 
@@ -22,10 +26,6 @@ export class ErrorHandlingService {
 
   public clearServerError(): void {
     this.serverError = false;
-  }
-
-  public setBadRequestError(): void {
-    this.badRequestError = true;
   }
 
   public setUserDisabledError(): void {
@@ -59,6 +59,7 @@ export class ErrorHandlingService {
       toRun = 3;
     }
     let numberRuns = 0;
+
     return observable.retryWhen((errors) => {
       return errors.do((e) => {
         numberRuns++;
@@ -66,35 +67,30 @@ export class ErrorHandlingService {
           this.setServerBusy();
           throw e;
         }
-
         switch (e.status) {
           case 503:
             break;
           case 500:
             this.setServerError();
-            throw this.formatError(e);
+            throw e;
           case 403:
-            this.setUserDisabledError();
-            throw this.formatError(e);
-          case 400:
-            this.setBadRequestError();
-            throw this.formatError(e);
+            let code;
+            try {
+              code = JSON.parse(e._body).code;
+            } catch {
+              code = ErrorCode.PARSEERROR;
+            }
+            if (code === ErrorCode.USERDISABLED) {
+              this.setUserDisabledError();
+            }
+            throw e;
           case 0:
-            console.log(e);
             this.setNoServerResponse();
-            throw this.formatError(e);
+            throw e;
           default:
-            throw this.formatError(e);
-
+            throw e;
         }
       });
     });
-  }
-
-  private formatError (e) {
-    return {
-      'code': e.status,
-      'message': JSON.parse(e._body).message,
-    }
   }
 }

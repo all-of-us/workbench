@@ -17,7 +17,7 @@
   </env-variables>
 
   <resource-files>
-    <include path="WEB-INF/sa-key.json"></include>
+    <include path="WEB-INF/gsuite-admin-sa.json"></include>
   </resource-files>
 
   <static-error-handlers>

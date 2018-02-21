@@ -84,7 +84,7 @@ export class SignInService {
       gapi.auth2.getAuthInstance().currentUser.listen((e: any) => {
         const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
         const details = this.extractSignInDetails(currentUser);
-
+        this.currentAccessToken = details.authResponse['access_token'];
         // Without this, Angular views won't "notice" the externally-triggered
         // event, though the Angular models will update... so the change
         // won't propagate to UI automatically. Calling `zone.run`

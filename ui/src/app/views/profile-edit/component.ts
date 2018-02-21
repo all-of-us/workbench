@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Profile, ProfileService} from 'generated';
 
 @Component({
@@ -11,16 +10,14 @@ import {Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
-  errorText: string = null;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(
+    this.profileService.getMe().subscribe(
         (profile: Profile) => {
       this.profile = profile;
       this.profileLoaded = true;
@@ -28,13 +25,9 @@ export class ProfileEditComponent implements OnInit {
   }
 
   submitChanges(): void {
-    this.errorHandlingService.retryApi(
-        this.profileService.updateProfile(this.profile)).subscribe(() => {
-          this.router.navigate(['../'], {relativeTo : this.route});
-      },
-      error => {
-        this.errorText  = error.message;
-        console.log(error);
-      });
+    this.profileService.updateProfile(this.profile).subscribe(() => {
+        this.router.navigate(['../'], {relativeTo : this.route});
+      }
+    );
   }
 }

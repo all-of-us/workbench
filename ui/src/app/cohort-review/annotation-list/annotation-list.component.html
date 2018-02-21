@@ -1,22 +1,22 @@
 <div>
   <h4>Annotations</h4>
-  <clr-checkbox [clrInline]="true" [(clrChecked)]="verbosity" [name]="'verbosity'">
-    Verbose
+  <clr-checkbox
+    [clrInline]="true"
+    [(clrChecked)]="showDataType"
+    [name]="'show-data-type'">
+    Show Type
   </clr-checkbox>
   <button
     type="button"
     class="btn btn-icon btn-link"
-    (click)="state.annotationMgrState.next({
-      open: true,
-      mode: 'overview'
-    })">
+    (click)="openManager()">
     <clr-icon shape="cog" size="24" title="Manage Annotations"></clr-icon>
   </button>
 </div>
 
-<app-participant-annotation
+<app-annotation-item
   *ngFor="let anno of (annotations$ | async)"
   [definition]="anno.definition"
   [value]="anno.value"
-  [verbose]="verbosity">
-</app-participant-annotation>
+  [showDataType]="showDataType">
+</app-annotation-item>

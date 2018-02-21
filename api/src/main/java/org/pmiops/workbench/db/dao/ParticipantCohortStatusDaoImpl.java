@@ -2,11 +2,9 @@ package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.ParticipantsDatabaseInfo;
+import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -16,12 +14,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -119,13 +114,13 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
-        String sortColumn = ParticipantsDatabaseInfo.fromName(pageRequest.getSortColumn()).getDbName();
+        String sortColumn = ParticipantCohortStatusDbInfo.fromName(pageRequest.getSortColumn()).getDbName();
         String schemaPrefix = CdrVersionContext.getCdrVersion().getCdrDbName();
         schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
 
-        sortColumn = (sortColumn.equals(ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName()))
-                ? ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
-                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantsDatabaseInfo.PARTICIPANT_ID.getDbName();
+        sortColumn = (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
+                ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
+                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName();
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("cohortReviewId", cohortReviewId);
@@ -141,34 +136,12 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     }
 
     private String buildFilteringSql(List<Filter> filtersList, MapSqlParameterSource parameters) {
-        Filter fromJson;
         List<String> sqlParts = new ArrayList<>();
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
         sqlParts.add(WHERE_CLAUSE_TEMPLATE);
         for (Filter filter : filtersList) {
-            if (ParticipantsDatabaseInfo.fromName(filter.getProperty()) == null) {
-                throw new BadRequestException("Bad Filter in request: " + filter.getProperty());
-            }
-            sqlParts.add(ParticipantsDatabaseInfo.fromName(filter.getProperty()).getDbName() +
-                    " " + filter.getOperator().toString() + " :" + filter.getProperty().toString() + "\n");
-            try {
-                if (ParticipantsDatabaseInfo.isDatabaseTypeLong(filter.getProperty())) {
-                    if (filter.getProperty().equals(ParticipantsDatabaseInfo.STATUS.getName())) {
-                        parameters.addValue(filter.getProperty().toString(), new Long(CohortStatus.valueOf(filter.getValue()).ordinal()));
-                    } else {
-                        parameters.addValue(filter.getProperty().toString(), new Long(filter.getValue()));
-                    }
-                } else if (ParticipantsDatabaseInfo.isDatabaseTypeDate(filter.getProperty())) {
-                    parameters.addValue(filter.getProperty().toString(), new Date(df.parse(filter.getValue()).getTime()));
-                } else {
-                    parameters.addValue(filter.getProperty().toString(), filter.getValue());
-                }
-
-            } catch (Exception ex) {
-                throw new BadRequestException("Problems parsing " + filter.getProperty().toString() + ": " + ex.getMessage());
-            }
-
+            String sql = ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getFunction().apply(filter, parameters);
+            sqlParts.add(sql);
         }
 
         return (!sqlParts.isEmpty()) ? String.join(" and ", sqlParts) : "";
