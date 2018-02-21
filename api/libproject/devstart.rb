@@ -617,8 +617,8 @@ def write_db_creds_file(project, cdr_db_name, public_db_name, root_password, wor
       db_creds_file.puts "DB_NAME=workbench"
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
       # table of the workbench DB; then this shouldn't be needed anymore.
-      db_creds_file.puts "CDR_DB_NAME=${cdr_db_name}"
-      db_creds_file.puts "PUBLIC_DB_NAME=${public_db_name}"
+      db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
+      db_creds_file.puts "PUBLIC_DB_NAME=#{public_db_name}"
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
