@@ -1,52 +1,54 @@
 <div style="padding: 1rem;">
-  <div *ngIf="!accountCreated" class="form-area">
-    <div class="form-section">
-      <label>Given Name:</label>
-      <input type="text" class="input" autofocus [(ngModel)]="profile.givenName">
+  <form (ngSubmit)="createAccount()">
+    <div *ngIf="!accountCreated" class="form-area">
+      <div class="form-section">
+        <label for="givenName">Given Name:</label>
+        <input type="text" class="input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName">
+      </div>
+      <div class="form-section">
+        <label for="familyName">Family Name:</label>
+        <input type="text" class="input" id="familyName" name="familyName" [(ngModel)]="profile.familyName">
+      </div>
+      <div class="form-section">
+        <label for="username">Username:</label>
+        <input type="text" class="input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()">
+      </div>
+      <div *ngIf="conflictError" class="error">
+        Username is already taken.
+      </div>
+      <div class="form-section">
+        <label for="contactEmail">Contact Email:</label>
+        <input type="text" class="input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail">
+      </div>
+      <div class="form-section">
+        <label for="password">Password:</label>
+        <input type="password" class="input" id="password" name="password" [(ngModel)]="password">
+      </div>
+      <div class="form-section">
+        <label for="passwordAgain">Password Again:</label>
+        <input type="password" class="input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain">
+      </div>
+      <div class="form-section">
+        <button (click)="createAccount()" class="btn btn-primary">Create Account</button>
+        <span class="spinner spinner-inline" *ngIf="creatingAcccount">
+          Creating account...
+        </span>
+      </div>
+      <div *ngIf="showAllFieldsRequiredError" class="error">
+        All fields are required.
+      </div>
+      <div *ngIf="showPasswordsDoNotMatchError" class="error">
+        Passwords do not match.
+      </div>
+      <div *ngIf="showPasswordLengthError" class="error">
+        Password must be between 8 and 100 characters long.
+      </div>
+      <div style="margin-top: 2rem; text-align: center;">Already have an account?</div>
+      <div style="display: flex; justify-content: space-around;">
+        <button (click)="signIn()" class="btn btn-primary">Sign In</button>
+      </div>
     </div>
-    <div class="form-section">
-      <label>Family Name:</label>
-      <input type="text" class="input" [(ngModel)]="profile.familyName">
-    </div>
-    <div class="form-section">
-      <label>Username:</label>
-      <input type="text" class="input" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()">
-    </div>
-    <div *ngIf="conflictError" class="error">
-      Username is already taken.
-    </div>
-    <div class="form-section">
-      <label>Contact Email:</label>
-      <input type="text" class="input" [(ngModel)]="profile.contactEmail">
-    </div>
-    <div class="form-section">
-      <label>Password:</label>
-      <input type="password" class="input" [(ngModel)]="password">
-    </div>
-    <div class="form-section">
-      <label>Password Again:</label>
-      <input type="password" class="input" [(ngModel)]="passwordAgain">
-    </div>
-    <div class="form-section">
-      <button (click)="createAccount()" class="btn btn-primary">Create Account</button>
-      <span class="spinner spinner-inline" *ngIf="creatingAcccount">
-        Creating account...
-      </span>
-    </div>
-    <div *ngIf="showAllFieldsRequiredError" class="error">
-      All fields are required.
-    </div>
-    <div *ngIf="showPasswordsDoNotMatchError" class="error">
-      Passwords do not match.
-    </div>
-    <div *ngIf="showPasswordLengthError" class="error">
-      Password must be between 8 and 100 characters long.
-    </div>
-    <div style="margin-top: 2rem; text-align: center;">Already have an account?</div>
-    <div style="display: flex; justify-content: space-around;">
-      <button (click)="signIn()" class="btn btn-primary">Sign In</button>
-    </div>
-  </div>
+  </form>
   <div *ngIf="accountCreated">
     <div style="text-align: center; color: darkgreen;">Account created successfully.</div>
     <div style="text-align: center;">Sign-in to your new account below.</div>
