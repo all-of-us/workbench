@@ -1,6 +1,7 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
+import {ErrorCode} from 'generated';
 
 @Injectable()
 export class ErrorHandlingService {
@@ -73,7 +74,15 @@ export class ErrorHandlingService {
             this.setServerError();
             throw e;
           case 403:
-            this.setUserDisabledError();
+            let code;
+            try {
+              code = JSON.parse(e._body).code;
+            } catch {
+              code = ErrorCode.PARSEERROR;
+            }
+            if (code === ErrorCode.USERDISABLED) {
+              this.setUserDisabledError();
+            }
             throw e;
           case 0:
             this.setNoServerResponse();
