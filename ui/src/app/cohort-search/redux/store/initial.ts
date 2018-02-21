@@ -48,6 +48,6 @@ export const initialState = fromJS({
 
   chartData: [],
 
-  initShowChart: true,
+  initShowChart: false,
 
 });
