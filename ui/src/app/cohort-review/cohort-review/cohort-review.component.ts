@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -12,13 +12,12 @@ import {ReviewStatus} from 'generated';
   templateUrl: './cohort-review.component.html',
   styleUrls: ['./cohort-review.component.css']
 })
-export class CohortReviewComponent {
+export class CohortReviewComponent implements OnInit {
   @ViewChild('createReviewModal') createReviewModal: CreateReviewComponent;
 
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -46,6 +45,5 @@ export class CohortReviewComponent {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
-    this.cd.detectChanges();
   }
 }

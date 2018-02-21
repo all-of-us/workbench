@@ -18,8 +18,8 @@ import {SetAnnotationItemComponent} from './set-annotation-item/set-annotation-i
 import {SetAnnotationListComponent} from './set-annotation-list/set-annotation-list.component';
 import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation-modal.component';
 
-import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
+import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 
 import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
