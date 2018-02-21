@@ -1,6 +1,7 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { SidebarContentComponent } from './sidebar-content.component';
+import {SidebarContentComponent} from './sidebar-content.component';
 
 describe('SidebarContentComponent', () => {
   let component: SidebarContentComponent;
@@ -8,7 +9,8 @@ describe('SidebarContentComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SidebarContentComponent ]
+      declarations: [SidebarContentComponent],
+      schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents();
   }));
