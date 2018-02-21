@@ -1,5 +1,4 @@
-import {NgZone} from '@angular/core';
-import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
@@ -9,7 +8,8 @@ import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
 
 import {
-  updateAndTick
+  queryByCss,
+  updateAndTick,
 } from 'testing/test-helpers';
 
 import {
@@ -24,6 +24,12 @@ class StubRoute {
     wsid: 'workspaceId',
     cid: 1
   }};
+}
+
+class ApiSpy {
+  updateCohortAnnotationDefinition = jasmine.createSpy('updateCohortAnnotationDefinition');
+  deleteCohortAnnotationDefinition = jasmine.createSpy('deleteCohortAnnotationDefinition');
+  getCohortAnnotationDefinitions = jasmine.createSpy('getCohortAnnotationDefinitions');
 }
 
 
@@ -49,18 +55,14 @@ describe('SetAnnotationItemComponent', () => {
           ReactiveFormsModule,
         ],
         providers: [
-          // (A)
-          // NgZone,
-          // (B)
-          // {provide: NgZone, useValue: NgZone},
           ReviewStateService,
-          {provide: CohortAnnotationDefinitionService, useValue: {}},
+          {provide: CohortAnnotationDefinitionService, useValue: new ApiSpy()},
           {provide: ActivatedRoute, useClass: StubRoute},
         ],
       }).compileComponents().then((resp) => {
         fixture = TestBed.createComponent(SetAnnotationItemComponent);
 
-        tick();
+        // tick();
         component = fixture.componentInstance;
 
         // Default Inputs for tests
@@ -72,16 +74,81 @@ describe('SetAnnotationItemComponent', () => {
         };
         updateAndTick(fixture);
       });
-      tick();
-
+    // tick();
   }));
 
-  it('Should render', fakeAsync(() => {
+  it('Should render', () => {
     expect(component).toBeTruthy();
-    // (C)
+  });
+
+  it('Should set the form focus when editing', fakeAsync(() => {
     component.editing = true;
-    fixture.detectChanges();
-    component.edit();
+    updateAndTick(fixture);
+    component.setFocus();
+    // component.edit() calls setTimeout so there's still a timer on the stack
+    // without this call to tick
     tick();
+    const inpElem = component.nameInput.nativeElement;
+    expect(inpElem).toBeTruthy();
+    // Query By css doesn't work here for some reason; just use the real DOM api
+    const focusElem = document.activeElement;
+    expect(focusElem).toBeTruthy();
+    expect(inpElem).toBe(focusElem);
+  }));
+
+  it('Should set the form value to the existing definition value', fakeAsync(() => {
+    // Monkey patch this method b/c it misbehaves in the test environment
+    // unless treated in isolation
+    component.setFocus = () => {};
+    updateAndTick(fixture);
+    component.edit();
+    expect(component.definition.columnName).toEqual(component.name.value);
+  }));
+
+  it('Should refuse to save an empty name value', fakeAsync(() => {
+    // Set up an API spy
+    const spy = fixture.debugElement.injector.get(CohortAnnotationDefinitionService) as any;
+    // Make sure the form input exists
+    component.editing = true;
+    updateAndTick(fixture);
+    // Set the name to something invalid (e.g. the empty string)
+    component.name.setValue('');
+    updateAndTick(fixture);
+    // Save edit should refuse to call the API
+    component.saveEdit();
+    expect(spy.updateCohortAnnotationDefinition).not.toHaveBeenCalled();
+  }));
+
+  it('Should refuse to save if the name value has not changed', fakeAsync(() => {
+    // Set up an API spy
+    const spy = fixture.debugElement.injector.get(CohortAnnotationDefinitionService) as any;
+    // Make sure the form input exists
+    component.editing = true;
+    updateAndTick(fixture);
+    // ... and then don't do anything (leave the name equal to the form value)
+    // Save edit should refuse to call the API
+    component.saveEdit();
+    expect(spy.updateCohortAnnotationDefinition).not.toHaveBeenCalled();
+  }));
+
+  it('Should cancel the edit on ESC', fakeAsync(() => {
+    // Set up an API spy
+    const spy = fixture.debugElement.injector.get(CohortAnnotationDefinitionService) as any;
+    // Make sure the form input exists
+    component.editing = true;
+    updateAndTick(fixture);
+    // Alter the value
+    component.name.setValue('Some test value');
+    // Dispatch the keypress event
+    const input = component.nameInput.nativeElement;
+    const event = new KeyboardEvent('keyup', {'key': 'Escape'});
+    input.dispatchEvent(event);
+    updateAndTick(fixture);
+    // Update was never called
+    expect(spy.updateCohortAnnotationDefinition).not.toHaveBeenCalled();
+    // We are no longer editing
+    expect(component.editing).toBe(false);
+    // The input no longer exists
+    expect(component.nameInput).not.toBeDefined();
   }));
 });

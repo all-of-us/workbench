@@ -43,6 +43,10 @@ export class SetAnnotationItemComponent {
   edit(): void {
     this.editing = true;
     this.name.setValue(this.definition.columnName);
+    this.setFocus();
+  }
+
+  setFocus() {
     // tslint:disable
     /* For all the reasons behind this TOTALLY OBVIOUS solution to the
      * extremely complex problem of focusing an input (/s), please see the
