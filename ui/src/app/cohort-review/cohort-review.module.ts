@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -31,7 +30,6 @@ import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
-/* tslint:enable:max-line-length */
 
 
 @NgModule({
