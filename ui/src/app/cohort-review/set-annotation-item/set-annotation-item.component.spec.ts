@@ -1,11 +1,16 @@
 import {NgZone} from '@angular/core';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
+import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
+
+import {
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {
   AnnotationType,
@@ -21,6 +26,7 @@ class StubRoute {
   }};
 }
 
+
 /*
  * The test as written actually passes. Uncommenting various combinations of
  * (A) (B) and (C), however, leads to various unhelpful and confusing error
@@ -32,7 +38,7 @@ describe('SetAnnotationItemComponent', () => {
   let fixture: ComponentFixture<SetAnnotationItemComponent>;
   let component: SetAnnotationItemComponent;
 
-  beforeEach(async(() => {
+  beforeEach(fakeAsync(() => {
     TestBed
       .configureTestingModule({
         declarations: [
@@ -46,32 +52,36 @@ describe('SetAnnotationItemComponent', () => {
           // (A)
           // NgZone,
           // (B)
-          // {provide: NgZone, useValue: {}},
+          // {provide: NgZone, useValue: NgZone},
           ReviewStateService,
           {provide: CohortAnnotationDefinitionService, useValue: {}},
           {provide: ActivatedRoute, useClass: StubRoute},
         ],
-      })
-      .compileComponents();
+      }).compileComponents().then((resp) => {
+        fixture = TestBed.createComponent(SetAnnotationItemComponent);
+
+        tick();
+        component = fixture.componentInstance;
+
+        // Default Inputs for tests
+        component.definition = <CohortAnnotationDefinition>{
+          cohortAnnotationDefinitionId: 1,
+          cohortId: 1,
+          columnName: 'Test Defn',
+          annotationType: AnnotationType.STRING,
+        };
+        updateAndTick(fixture);
+      });
+      tick();
+
   }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SetAnnotationItemComponent);
-    component = fixture.componentInstance;
-
-    // Default Inputs for tests
-    component.definition = <CohortAnnotationDefinition>{
-      cohortAnnotationDefinitionId: 1,
-      cohortId: 1,
-      columnName: 'Test Defn',
-      annotationType: AnnotationType.STRING,
-    };
-    fixture.detectChanges();
-  });
-
-  it('Should render', () => {
+  it('Should render', fakeAsync(() => {
     expect(component).toBeTruthy();
     // (C)
-    // component.edit();
-  });
+    component.editing = true;
+    fixture.detectChanges();
+    component.edit();
+    tick();
+  }));
 });
