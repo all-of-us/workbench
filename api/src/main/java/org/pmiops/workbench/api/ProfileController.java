@@ -264,6 +264,10 @@ public class ProfileController implements ProfileApiDelegate {
 
       case READY:
         break;
+
+      default:
+        log.log(Level.SEVERE, String.format("unrecognized status '%s'", status));
+        return user;
     }
 
     // Grant the user BQ job access on the billing project so that they can run BQ queries from
@@ -272,9 +276,8 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
           FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
     } catch (ApiException e) {
-      log.log(Level.INFO,
-          "granting BigQuery role on free tier billing project failed, this is expected " +
-              "shortly after creation of the project; will retry on next initialization attempt", e);
+      log.log(Level.WARNING,
+          "granting BigQuery role on created free tier billing project failed", e);
       // Allow the user to continue, as most workbench functionality will still be usable.
       return user;
     }
