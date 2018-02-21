@@ -1791,12 +1791,23 @@ definitions:
       emailVerificationStatus:
         $ref: "#/definitions/EmailVerificationStatus"
 
+  ErrorCode:
+    type: string
+    description: Short parsable error descriptions
+    enum: [
+      PARSE_ERROR,
+      USER_DISABLED
+    ]
+
   ErrorResponse:
     type: object
     properties:
       message:
         description: General error message for the response.
         type: string
+      code:
+        description: Short description of the type of error
+        $ref: "#/definitions/ErrorCode"
       # TODO: add list of field-level error messages with field names.
 
   IdVerificationRequest:
