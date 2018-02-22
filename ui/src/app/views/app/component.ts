@@ -14,7 +14,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {Authority, BlockscoreIdVerificationStatus, ProfileService} from 'generated';
+import {Authority, ProfileService} from 'generated';
 
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -38,15 +38,14 @@ export class AppComponent implements OnInit {
   private overriddenPublicUrl: string = null;
 
   constructor(
-    /* Ours */
-    private signInService: SignInService,
-    private errorHandlingService: ErrorHandlingService,
-    private profileService: ProfileService,
-    /* Angular's */
-    private activatedRoute: ActivatedRoute,
-    private locationService: Location,
-    private router: Router,
-    private titleService: Title,
+      /* Ours */
+      private signInService: SignInService,
+      private profileService: ProfileService,
+      /* Angular's */
+      private activatedRoute: ActivatedRoute,
+      private locationService: Location,
+      private router: Router,
+      private titleService: Title,
   ) {}
 
   ngOnInit(): void {
@@ -78,24 +77,9 @@ export class AppComponent implements OnInit {
       }
       window.location.reload();
     };
-    this.user = this.signInService.user;
-    this.user.subscribe(user => {
-      if (user.isSignedIn) {
-      console.log('user signed in');
-  
-        this.profileService.getMe().subscribe(profile => {
-         this.hasReviewResearchPurpose =
-            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-          this.hasReviewIdVerification =
-            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-            // this.email = profile.username;
-            
-        });
-      }
-    });
     console.log('To override the API URLs, try:\n' +
-      'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
-      'setPublicApiUrl(\'https://host.example.com:5678\')');
+        'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
+        'setPublicApiUrl(\'https://host.example.com:5678\')');
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
@@ -109,7 +93,18 @@ export class AppComponent implements OnInit {
       this.setTitleFromRoute(event);
     });
 
-    
+    this.user = this.signInService.user;
+    this.user.subscribe(user => {
+      if (user.isSignedIn) {
+        this.profileService.getMe().subscribe(profile => {
+          this.hasReviewResearchPurpose =
+              profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+          this.hasReviewIdVerification =
+              profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+          // this.email = profile.username;
+        });
+      }
+    });
   }
 
   /**
@@ -148,6 +143,7 @@ export class AppComponent implements OnInit {
 
   get workspacesActive(): boolean {
     return this.locationService.path() === ''
-      || this.locationService.path().startsWith('/workspace');
+        || this.locationService.path().startsWith('/workspace');
   }
 }
+

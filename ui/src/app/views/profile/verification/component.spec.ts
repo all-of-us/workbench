@@ -3,13 +3,13 @@ import {FormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
+import {ProfilePageComponent} from './component';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileService} from 'generated';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
-import {ProfilePageComponent} from './component';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {updateAndTick} from 'testing/test-helpers';
 
