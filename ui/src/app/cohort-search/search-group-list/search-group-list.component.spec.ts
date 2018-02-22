@@ -83,14 +83,4 @@ describe('SearchGroupListComponent', () => {
       groupId: 'TestId',
     });
   });
-
-  it('Should Display the correct title', () => {
-    component.role = 'includes';
-    fixture.detectChanges();
-    expect(component.title).toEqual('Included Participants');
-
-    component.role = 'excludes';
-    fixture.detectChanges();
-    expect(component.title).toEqual('Excluded Participants');
-  });
 });

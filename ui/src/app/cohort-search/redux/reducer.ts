@@ -75,7 +75,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case BEGIN_CHARTS_REQUEST:
-        return state.setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+        return state
+            .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
             .set('initShowChart', true);
       case BEGIN_COUNT_REQUEST:
         return state

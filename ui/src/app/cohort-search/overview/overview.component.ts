@@ -32,9 +32,7 @@ export class OverviewComponent {
     private cohortApi: CohortsService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {
-    console.log(this.initShowChart$);
-  }
+  ) {}
 
   get name() {
     return this.cohortForm.get('name');
