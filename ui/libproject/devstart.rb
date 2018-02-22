@@ -109,8 +109,12 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{docker-compose run --rm ui yarn run build
-        --environment=#{environment_name}}
+    command = %W{yarn run build --environment=#{environment_name}}
+    if Workbench::in_docker?
+      common.run_inline command
+    else
+      common.run_inline %W{docker-compose run --rm ui} + command
+    end
     common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
                          --version #{@opts.version} --#{@opts.promote}}
   end
