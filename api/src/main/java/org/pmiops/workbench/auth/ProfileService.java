@@ -3,7 +3,6 @@ package org.pmiops.workbench.auth;
 import java.util.ArrayList;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
@@ -45,6 +44,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
+    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatus());
     profile.setEnabledInFireCloud(enabledInFireCloud);
 
     if (user.getBlockscoreVerificationIsValid() == null) {
