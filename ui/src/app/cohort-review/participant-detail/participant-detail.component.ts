@@ -39,6 +39,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.state.sidebarOpen.next(true);
     this.subscription = this.state.participant$
       .merge(this.route.data.pluck('participant'))
       .do(participant => this.participant = <Participant>participant)
@@ -80,7 +81,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
-    this.state.sidebarOpen$
+    this.state.sidebarOpen.asObservable()
       .take(1)
       .subscribe(val => this.state.sidebarOpen.next(!val));
   }
