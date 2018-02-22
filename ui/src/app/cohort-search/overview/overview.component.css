@@ -6,7 +6,7 @@
   margin: 0.125rem 0;
 }
 
-h3 {
+#total-count {
   margin: 0;
   flex: 1;
   white-space: nowrap;

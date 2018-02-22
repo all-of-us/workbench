@@ -23,7 +23,6 @@ export class SearchGroupListComponent {
   }
 
   get title() {
-    const verb = this.role.charAt(0).toUpperCase() + this.role.slice(1, -1);
-    return `${verb} Participants Where`;
+    return this.role.slice(0, -1) + ` Participants Where`;
   }
 }
