@@ -2,12 +2,12 @@
 # to cause system() or spawn() to run the command in a shell. Calls with arrays
 # are not run in a shell, which can break usage of the CloudSQL proxy.
 
+require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 require_relative "cloudsqlproxycontext"
 require_relative "gcloudcontext"
 require_relative "wboptionsparser"
-require_relative "serviceaccounts"
 require "fileutils"
 require "io/console"
 require "json"
