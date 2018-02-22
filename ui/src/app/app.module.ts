@@ -25,9 +25,9 @@ import {InvitationKeyComponent} from './views/invitation-key/component';
 import {ProfileDashboardComponent} from './views/profile/dashboard/component';
 import {ProfileDemographicComponent} from './views/profile/demographics/component';
 import {ProfileEditComponent} from './views/profile/edit/component';
-import {ProfileEthicsComponent} from './views/profile/ethics/component'
-import {ProfilePageComponent} from './views/profile/verification/component';
+import {ProfileEthicsComponent} from './views/profile/ethics/component';
 import {ProfileTermsOfServiceComponent} from './views/profile/termsOfService/component';
+import {ProfilePageComponent} from './views/profile/verification/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';

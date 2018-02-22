@@ -4,12 +4,12 @@ import {Http} from '@angular/http';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {IconsModule} from 'app/icons/icons.module';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileService} from 'generated';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
-import {IconsModule} from 'app/icons/icons.module';
 import {ProfilePageComponent} from './component';
-import {ProfileService} from 'generated';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {updateAndTick} from 'testing/test-helpers';
 
@@ -53,11 +53,10 @@ describe('ProfileComponent', () => {
   }));
 
   it('calculates Progress information correctly', fakeAsync(() => {
-    let expectedCohorts: number;
     const fixture = profilePage.fixture;
     const app = fixture.debugElement.componentInstance;
     tick();
-    expect(app.progressPercent).toBe("50%");
+    expect(app.progressPercent).toBe('50%');
     expect(app.progressCount).toBe(2);
   }));
 });

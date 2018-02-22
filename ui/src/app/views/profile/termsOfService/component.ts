@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
-import {ProfileDashboardComponent} from '../dashboard/component';
 import {Profile, ProfileService} from 'generated';
+import {ProfileDashboardComponent} from '../dashboard/component';
 
 @Component({
   selector : 'app-profile-tos',
@@ -22,9 +22,10 @@ export class ProfileTermsOfServiceComponent {
   }
 
   submitTermsOfService(): void {
-    this.profileService.submitTermsOfService().subscribe(() =>{
+    this.profileService.submitTermsOfService().subscribe(() => {
     this.profileDashboard.profile.termsOfServiceCompletionTime = new Date().getTime();
     this.profileDashboard.calculateProgress();
     });
   }
 }
+

@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
-import {ProfileDashboardComponent} from '../dashboard/component';
 import {ProfileService} from 'generated';
+
+import {ProfileDashboardComponent} from '../dashboard/component';
 
 @Component({
  selector : 'app-profile-ethics',
@@ -19,3 +20,4 @@ export class ProfileEthicsComponent {
     });
   }
 }
+

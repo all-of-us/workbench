@@ -48,7 +48,7 @@ export class ProfileDashboardComponent implements OnInit {
     this.profileEthics = false;
     this.profileVerification = false;
     this.profileDemographic = false;
-    switch(action) {
+    switch (action) {
       case 'verification' : {
         this.profileVerification = true;
         break;
@@ -90,3 +90,4 @@ export class ProfileDashboardComponent implements OnInit {
   }
 
 }
+
