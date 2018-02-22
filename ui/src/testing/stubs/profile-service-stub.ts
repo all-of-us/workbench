@@ -1,7 +1,7 @@
-import {DataAccessLevel} from 'generated';
-import {Profile} from 'generated';
+import {
+  BlockscoreIdVerificationStatus, DataAccessLevel, InvitationVerificationRequest, Profile
+} from 'generated';
 import {Observable} from 'rxjs/Observable';
-import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -14,7 +14,9 @@ export class ProfileStubVariables {
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
-    invitationKey: 'dummyKey'
+    invitationKey: 'dummyKey',
+    blockscoreIdVerificationStatus: BlockscoreIdVerificationStatus.VERIFIED,
+    termsOfServiceCompletionTime: new Date().getTime()
   };
 }
 

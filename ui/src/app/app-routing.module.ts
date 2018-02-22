@@ -9,8 +9,8 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
-import {ProfileEditComponent} from './views/profile-edit/component';
-import {ProfilePageComponent} from './views/profile-page/component';
+import {ProfileDashboardComponent} from './views/profile/dashboard/component';
+import {ProfileEditComponent} from './views/profile/edit/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
@@ -93,8 +93,8 @@ const routes: Routes = [
     data: {title: 'ID Verification'}
   }, {
     path: 'profile',
-    component: ProfilePageComponent,
-    data: {title: 'Profile'}
+    component: ProfileDashboardComponent,
+    data: {title: 'Profile Dashboard'}
   }, {
     path: 'profile/edit',
     component: ProfileEditComponent,

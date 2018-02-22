@@ -1,0 +1,17 @@
+<div>Text for terms of service</div>
+<div class="form-group">
+  <div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-3">
+      <input type="checkbox" [(ngModel)]="termsAccepted"/> I agree to the Terms
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <button class="btn" [disabled]="!termsAccepted" (click)="submitTermsOfService()">Accept</button>
+    </div>
+    <div class="col-sm-6">
+      <button class="btn">Decline</button>
+    </div>
+  </div>
+</div>

@@ -14,7 +14,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {Authority, ProfileService} from 'generated';
+import {Authority, BlockscoreIdVerificationStatus, ProfileService} from 'generated';
 
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -78,6 +78,21 @@ export class AppComponent implements OnInit {
       }
       window.location.reload();
     };
+    this.user = this.signInService.user;
+    this.user.subscribe(user => {
+      if (user.isSignedIn) {
+      console.log('user signed in');
+  
+        this.profileService.getMe().subscribe(profile => {
+         this.hasReviewResearchPurpose =
+            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+          this.hasReviewIdVerification =
+            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+            // this.email = profile.username;
+            
+        });
+      }
+    });
     console.log('To override the API URLs, try:\n' +
       'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
       'setPublicApiUrl(\'https://host.example.com:5678\')');
@@ -94,18 +109,7 @@ export class AppComponent implements OnInit {
       this.setTitleFromRoute(event);
     });
 
-    this.user = this.signInService.user;
-    this.user.subscribe(user => {
-      if (user.isSignedIn) {
-        this.errorHandlingService.retryApi(this.profileService.getMe()).subscribe(profile => {
-          this.hasReviewResearchPurpose =
-            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-          this.hasReviewIdVerification =
-            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-            // this.email = profile.username;
-        });
-      }
-    });
+    
   }
 
   /**
