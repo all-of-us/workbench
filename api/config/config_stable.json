@@ -10,13 +10,13 @@
     "defaultCdrVersion": "Test Registered CDR"
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "aou-res-workbench-stable-credentials"
+    "credentialsBucketName": "all-of-us-rw-stable-credentials"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "stable.fake-research-aou.org"
   },
   "server": {
-    "stackdriverApiKey": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
-    "projectId": "aou-rw-stable"
+    "stackdriverApiKey": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
+    "projectId": "all-of-us-rw-stable"
   }
 }

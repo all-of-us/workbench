@@ -13,7 +13,7 @@ def dbProperties = [
   'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
   // Our database isn't configured to allow outside connections (which is good), so our connections
   // are either local or through the proxy, which encrypts all traffic.
-  'spring.datasource.url': 'jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false',
+  'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
   'spring.datasource.username': '${workbench_db_user}',
   'spring.datasource.password': '${workbench_db_password}'
 ]
