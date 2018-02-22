@@ -106,10 +106,11 @@ class DeployUI
     validate_options
     environment_names = {
       "all-of-us-workbench-test" => "test",
-      "aou-res-workbench-stable" => "stable",
+      "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=#{environment_name}}
+    common.run_inline %W{docker-compose run --rm ui yarn run build
+        --environment=#{environment_name}}
     common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
                          --version #{@opts.version} --#{@opts.promote}}
   end
