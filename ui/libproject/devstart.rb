@@ -104,7 +104,12 @@ class DeployUI
     add_options
     @parser.parse @args
     validate_options
-    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=test}
+    environment_names = {
+      "all-of-us-workbench-test" => "test",
+      "aou-res-workbench-stable" => "stable",
+    }
+    environment_name = environment_names[@opts.project]
+    common.run_inline %W{node_modules/@angular/cli/bin/ng build --environment=#{environment_name}}
     common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
                          --version #{@opts.version} --#{@opts.promote}}
   end
@@ -161,4 +166,26 @@ Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
   :fn => Proc.new { |*args| rebuild_image(*args) }
+})
+
+def docker_run(cmd_name, args)
+  Common.new.run_inline %W{docker-compose run --rm ui} + args
+end
+
+Common.register_command({
+  :invocation => "docker-run",
+  :description => "Runs the specified command in a docker container.",
+  :fn => lambda { |*args| docker_run("docker-run", args) }
+})
+
+def clean_environment(cmd_name, args)
+  common = Common.new
+  common.run_inline %W{rm -rf node_modules}
+  Common.new.run_inline %W{docker-compose down --volumes --rmi=local}
+end
+
+Common.register_command({
+  :invocation => "clean-environment",
+  :description => "Removes node modules, docker volumes and images.",
+  :fn => lambda { |*args| clean_environment("clean-environment", args) }
 })

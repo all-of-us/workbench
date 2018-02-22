@@ -32,7 +32,7 @@ class GcloudContextV2
     if @creds_file
       common.run_inline %W{gcloud auth activate-service-account --key-file #{@creds_file}}
     else
-      common.status "Reading glcoud configuration..."
+      common.status "Reading gcloud configuration..."
       configs = common.capture_stdout %W{gcloud --format=json config configurations list}
       active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
       common.status "Using '#{active_config["name"]}' gcloud configuration"
@@ -43,22 +43,13 @@ class GcloudContextV2
             "  gcloud auth login your.name@pmi-ops.org"
         exit 1
       end
-      unless @account.end_with?("@pmi-ops.org") || @creds_file
+      unless @account.end_with?("@pmi-ops.org") \
+          || @account.end_with?("@all-of-us-workbench-test.iam.gserviceaccount.com") \
+          || @creds_file
         common.error "Account is not a pmi-ops.org account: #{@account}. Try:\n" \
             "  gcloud auth login your.name@pmi-ops.org"
         exit 1
       end
-    end
-  end
-
-  def ensure_service_account()
-    sa_key_path = "src/main/webapp/WEB-INF/sa-key.json"
-    unless File.exist? sa_key_path
-      Common.new.run_inline %W{
-        gsutil cp
-          gs://#{@project}-credentials/all-of-us-workbench-test-9b5c623a838e.json
-          #{sa_key_path}
-      }
     end
   end
 end

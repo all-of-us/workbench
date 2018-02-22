@@ -50,14 +50,12 @@ export class HomePageComponent implements OnInit {
   workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
       private route: ActivatedRoute,
-      private errorHandlingService: ErrorHandlingService,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.errorHandlingService.retryApi(this.workspacesService
-        .getWorkspaces())
+    this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;

@@ -23,11 +23,13 @@
 /api/sa-key.json
 /api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/main/webapp/WEB-INF/sa-key.json
+/api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
 /api/src/generated
 /api/tools/build/*
 /api/tools/.gradle/*
 /build/*
 /ui/package-lock.json
+/ui/coverage
 /ui/ui.iml
 /ui/.idea/*
 /ui/**/*.js

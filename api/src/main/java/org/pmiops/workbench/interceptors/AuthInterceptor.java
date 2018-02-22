@@ -21,10 +21,13 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -143,7 +146,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             userInfo.getEmail(), null);
     } else {
       if (user.getDisabled()) {
-        throw new ForbiddenException("This user account has been disabled.");
+        throw new ForbiddenException(ExceptionUtils.errorResponse(ErrorCode.USER_DISABLED, "This user account has been disabled."));
       }
     }
 

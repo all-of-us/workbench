@@ -25,7 +25,7 @@ export class ProfileEditComponent implements OnInit {
   }
 
   submitChanges(): void {
-        this.profileService.updateProfile(this.profile).subscribe(() => {
+    this.profileService.updateProfile(this.profile).subscribe(() => {
         this.router.navigate(['../'], {relativeTo : this.route});
       }
     );

@@ -1,3 +1,4 @@
+import {select} from '@angular-redux/store';
 import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -19,6 +20,7 @@ export class OverviewComponent {
   @Input() chartData$: Observable<List<any>>;
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
+  @select(s => s.get('initShowChart')) initShowChart$: Observable<boolean>;
 
   private cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),

@@ -2,6 +2,7 @@
   <service>api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
+  <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>
 
   <system-properties>
@@ -16,7 +17,7 @@
   </env-variables>
 
   <resource-files>
-    <include path="WEB-INF/sa-key.json"></include>
+    <include path="WEB-INF/gsuite-admin-sa.json"></include>
   </resource-files>
 
   <static-error-handlers>

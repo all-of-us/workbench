@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import com.ecwid.maleorang.MailchimpException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 
 /**
@@ -56,14 +58,24 @@ public class ExceptionUtils {
 
   public static RuntimeException convertFirecloudException(ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
-    if (e.getCode() == HttpServletResponse.SC_NOT_FOUND) {
-      throw new NotFoundException();
-    } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-      throw new ForbiddenException();
-    } else if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
-      throw new ServerUnavailableException();
+    throw codeToException(e.getCode());
+  }
+
+  public static RuntimeException convertNotebookException(
+      org.pmiops.workbench.notebooks.ApiException e) {
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling notebooks API", e);
+    throw codeToException(e.getCode());
+  }
+
+  private static RuntimeException codeToException(int code) {
+    if (code == HttpServletResponse.SC_NOT_FOUND) {
+      return new NotFoundException();
+    } else if (code == HttpServletResponse.SC_FORBIDDEN) {
+      return new ForbiddenException();
+    } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+      return new ServerUnavailableException();
     } else {
-      throw new ServerErrorException();
+      return new ServerErrorException();
     }
   }
 
@@ -95,9 +107,29 @@ public class ExceptionUtils {
   }
 
   public static ErrorResponse errorResponse(String message) {
+    return errorResponse(null, message);
+  }
+
+  public static ErrorResponse errorResponse(ErrorCode code, String message) {
     ErrorResponse response = new ErrorResponse();
     response.setMessage(message);
+    response.setCode(code);
     return response;
+  }
+
+  public static RuntimeException convertMailchimpError(MailchimpException e) {
+    switch (e.code) {
+      case 400: case 414: case 422:
+        throw new BadRequestException(e);
+      case 401: case 403: case 405:
+        throw new ForbiddenException();
+      case 404:
+        throw new NotFoundException();
+      case 429:
+        throw new ServerUnavailableException();
+      default:
+        throw new ServerErrorException(e);
+    }
   }
 
   private ExceptionUtils() {}

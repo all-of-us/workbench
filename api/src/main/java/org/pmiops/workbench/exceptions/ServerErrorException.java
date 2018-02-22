@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -11,14 +12,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * unable to handle a request temporarily.
  */
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class ServerErrorException extends RuntimeException {
-
+public class ServerErrorException extends WorkbenchException {
   public ServerErrorException() {
     super();
   }
 
   public ServerErrorException(String message) {
     super(message);
+  }
+
+  public ServerErrorException(ErrorResponse errorResponse) {
+    super(errorResponse);
   }
 
   public ServerErrorException(Throwable t) {

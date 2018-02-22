@@ -23,7 +23,6 @@ export class CohortEditComponent {
     private router: Router,
     private fb: FormBuilder,
     private cohortService: CohortsService,
-    private errorHandlingService: ErrorHandlingService,
   ) {
     this.form = fb.group({
       name: [this.cohort.name, Validators.required],
@@ -47,8 +46,7 @@ export class CohortEditComponent {
       newCohort
     );
 
-    this.errorHandlingService.retryApi(call)
-      .do(_ => this.loading = false)
+    call.do(_ => this.loading = false)
       .subscribe(_ => this.backToWorkspace());
   }
 

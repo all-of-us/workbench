@@ -1,0 +1,31 @@
+<clr-modal
+  [(clrModalOpen)]="open"
+  [clrModalSize]="'lg'">
+  <h3 class="modal-title">
+    {{ modalTitle }}
+    <button
+      *ngIf="mode === 'list'"
+      type="button"
+      class="btn btn-sm"
+      title="Create a new Cohort Annotation Definition"
+      (click)="mode = 'create'">
+      <clr-icon shape="plus"></clr-icon>
+      Create
+    </button>
+  </h3>
+
+  <!-- The modal operates in one of two modes: show a list, or show a create form -->
+  <div class="modal-body">
+
+    <!-- New set annotation form -->
+    <div *ngIf="mode ==='create'">
+      <!-- onFinish is just a sentinal to indicate the form is done -->
+      <app-set-annotation-create (onFinish)="mode = 'list'"></app-set-annotation-create>
+    </div>
+
+    <!-- Show the set annotation list -->
+    <div *ngIf="mode === 'list'">
+      <app-set-annotation-list></app-set-annotation-list>
+    </div>
+  </div>
+</clr-modal>

@@ -1,0 +1,32 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: middle;
+}
+
+.name {
+  flex: 1;
+}
+
+.type {
+  flex: 1;
+}
+
+.delete {
+  min-width: 72px;
+}
+
+.is-posting {
+	color: transparent;
+	text-shadow: 0 0 3px #aaa;
+}
+
+.container {
+  position: relative;
+}
+
+.spin-in-overlay {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+}

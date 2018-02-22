@@ -9,6 +9,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cluster;
@@ -90,8 +91,7 @@ public class ClusterController implements ClusterApiDelegate {
       // TODO: Replace with real workspaceNamespace/billing-project
       createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster(workspaceNamespace, clusterName, createFirecloudClusterRequest()));
     } catch (ApiException e) {
-      // TODO: Actually handle errors reasonably
-      throw new RuntimeException(e);
+      throw ExceptionUtils.convertNotebookException(e);
     }
     return ResponseEntity.ok(createdCluster);
   }
@@ -110,8 +110,7 @@ public class ClusterController implements ClusterApiDelegate {
       // TODO: Replace with real workspaceNamespace/billing-project
       this.notebooksService.deleteCluster(workspaceNamespace, clusterName);
     } catch (ApiException e) {
-      // TODO: Actually handle errors reasonably
-      throw new RuntimeException(e);
+      throw ExceptionUtils.convertNotebookException(e);
     }
     EmptyResponse e = new EmptyResponse();
     return ResponseEntity.ok(e);
@@ -132,8 +131,7 @@ public class ClusterController implements ClusterApiDelegate {
       // TODO: Replace with real workspaceNamespace/billing-project
       cluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.getCluster(workspaceNamespace, clusterName));
     } catch(ApiException e) {
-      // TODO: Actually handle errors reasonably
-      throw new RuntimeException(e);
+      throw ExceptionUtils.convertNotebookException(e);
     }
     return ResponseEntity.ok(cluster);
   }
@@ -145,8 +143,7 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       oldClusters = this.notebooksService.listClusters(labels);
     } catch(ApiException e) {
-      // TODO: Actually handle errors reasonably
-      throw new RuntimeException(e);
+      throw ExceptionUtils.convertNotebookException(e);
     }
     ClusterListResponse response = new ClusterListResponse();
     response.setItems(oldClusters.stream().map(TO_ALL_OF_US_CLUSTER).collect(Collectors.toList()));

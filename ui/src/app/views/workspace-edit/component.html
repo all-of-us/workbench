@@ -34,7 +34,7 @@
               Disease focused research
             </clr-checkbox>
             <input type="text" class="input" name="disease-specification"
-                [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="!adding">
+                [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit">
           </div>
           <div class="checkbox-group">
             <clr-checkbox

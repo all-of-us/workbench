@@ -14,12 +14,9 @@ import {
   CreateReviewRequest,
 } from 'generated';
 
-const CDR_VERSION = 1;
-
 @Component({
   selector: 'app-create-review',
   templateUrl: './create-review.component.html',
-  styleUrls: ['./create-review.component.css']
 })
 export class CreateReviewComponent implements OnInit {
   reviewParamForm = new FormGroup({
@@ -71,9 +68,10 @@ export class CreateReviewComponent implements OnInit {
   createReview() {
     this.creating = true;
     const {ns, wsid, cid} = this.route.snapshot.params;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
     Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
-      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, CDR_VERSION, request))
+      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request))
       .subscribe(review => {
         this.creating = false;
         this.state.review.next(review);

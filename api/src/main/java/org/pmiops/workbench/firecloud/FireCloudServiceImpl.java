@@ -28,6 +28,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,7 +40,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
-  private final Provider<StatusApi> statusApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
 
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -55,21 +55,18 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
-      Provider<StatusApi> statusApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
-    this.statusApiProvider = statusApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
   }
 
   @Override
   public boolean getFirecloudStatus() {
-    StatusApi statusApi = statusApiProvider.get();
     try {
-      statusApi.status();
+      new StatusApi().status();
     } catch (ApiException e) {
       String response = e.getResponseBody();
       JSONObject errorBody = new JSONObject(response);
@@ -220,6 +217,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     return workspacesApi.getWorkspace(projectName, workspaceName);
   }
 
+  @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     workspacesApi.deleteWorkspace(projectName, workspaceName);

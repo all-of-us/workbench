@@ -13,7 +13,7 @@ end
 class WbOptionsParser
   # Allows parsing of command line options without requiring any subclassing.
 
-  attr_reader :opts
+  attr_reader :opts, :remaining
 
   def initialize(command_name, args)
     @opts = OpenStruct.new
@@ -27,13 +27,18 @@ class WbOptionsParser
     self
   end
 
+  def add_typed_option(option, type, assign, help)
+    @parser.on(option, type, help) {|v| assign.call(@opts, v)}
+    self
+  end
+
   def add_validator(fn)
     @validators.push(fn)
     self
   end
 
   def parse()
-    @parser.parse @args
+    @remaining = @parser.parse @args
     self
   end
 

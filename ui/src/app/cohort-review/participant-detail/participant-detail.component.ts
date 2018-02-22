@@ -17,12 +17,9 @@ import {
   SortOrder
 } from 'generated';
 
-const CDR_VERSION = 1;
-
 @Component({
   selector: 'app-participant-detail',
   templateUrl: './participant-detail.component.html',
-  styleUrls: ['./participant-detail.component.css']
 })
 export class ParticipantDetailComponent implements OnInit, OnDestroy {
   participant: Participant;
@@ -42,6 +39,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.state.sidebarOpen.next(true);
     this.subscription = this.state.participant$
       .merge(this.route.data.pluck('participant'))
       .do(participant => this.participant = <Participant>participant)
@@ -83,7 +81,7 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
-    this.state.sidebarOpen$
+    this.state.sidebarOpen.asObservable()
       .take(1)
       .subscribe(val => this.state.sidebarOpen.next(!val));
   }
@@ -129,13 +127,14 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     const request = {
         page: page,
         pageSize: size,
         sortColumn: ParticipantCohortStatusColumns.ParticipantId,
         sortOrder: SortOrder.Asc
     };
-    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, CDR_VERSION, request);
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }
 
   private navigateById = (id: number): void => {

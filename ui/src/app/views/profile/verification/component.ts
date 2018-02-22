@@ -26,7 +26,6 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
-
   verifyEmail(): void {
     const request = {
       verifyEmail: this.profile.contactEmail,
