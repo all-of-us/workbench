@@ -1,0 +1,8 @@
+.participant-browser-header {
+    margin: 0px;
+    flex: 1 1 0%;
+}
+
+.participant-browser-navigation {
+    display: flex;
+}
