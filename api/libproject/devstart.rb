@@ -204,17 +204,9 @@ Common.register_command({
 def run_integration_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-
-  op.parse.validate
-  gcc.validate
-  gcc.ensure_service_account
-  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = GcloudContextV2::SA_KEY_PATH
-  common.run_inline %W{gradle integration} + op.remaining
-  account = get_auth_login_account()
-  ServiceAccountContext(TEST_PROJECT).run do
-    common.run_inline %W{docker-compose run --rm api ./gradlew integration} + args
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    get_gsuite_admin_key(TEST_PROJECT)
+    common.run_inline %W{gradle integration} + args
   end
 end
 
@@ -227,13 +219,9 @@ Common.register_command({
 def run_bigquery_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  gcc.ensure_service_account
-  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = GcloudContextV2::SA_KEY_PATH
-  common.run_inline %W{gradle bigquerytest} + op.remaining
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    common.run_inline %W{gradle bigquerytest} + args
+  end
 end
 
 Common.register_command({
@@ -1033,17 +1021,18 @@ def print_scoped_access_token(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  gcc.ensure_service_account
-  scopes = %W{profile email} + op.opts.scopes
+  ServiceAccountContext.new(gcc.project).run do
+    scopes = %W{profile email} + op.opts.scopes
 
-  require "googleauth"
-  creds = Google::Auth::ServiceAccountCredentials.make_creds(
-    json_key_io: File.open(GcloudContextV2::SA_KEY_PATH),
-    scope: scopes
-  )
+    require "googleauth"
+    creds = Google::Auth::ServiceAccountCredentials.make_creds(
+      json_key_io: File.open(GcloudContextV2::SA_KEY_PATH),
+      scope: scopes
+    )
 
-  token_data = creds.fetch_access_token!
-  puts "\n#{token_data["access_token"]}"
+    token_data = creds.fetch_access_token!
+    puts "\n#{token_data["access_token"]}"
+  end
 end
 
 Common.register_command({

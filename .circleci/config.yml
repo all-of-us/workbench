@@ -85,7 +85,7 @@ jobs:
               api/src/main/webapp/WEB-INF/sa-key.json
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb integration --project all-of-us-workbench-test
+          command: ./project.rb integration
       - save_cache:
           paths:
             - ~/.gradle
