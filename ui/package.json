@@ -14,8 +14,8 @@
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/workbench.yaml --output src/generated --additional-properties ngVersion=2",
     "post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/generated/variables.ts",
     "public-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../public-api/src/main/resources/public-api.yaml --output src/publicGenerated --additional-properties ngVersion=2",
-    "public-post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/publicGenerated/variables.ts"
-
+    "public-post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/publicGenerated/variables.ts",
+    "coverage": "ng test --sourcemaps=false --watch=false --code-coverage"
   },
   "private": true,
   "dependencies": {
