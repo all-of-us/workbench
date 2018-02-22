@@ -646,7 +646,7 @@ def create_auth_domain(cmd_name, args)
   op.add_option(
     "--project [project]",
     lambda {|opts, v| opts.project = v},
-    "Project to register the service account for"
+    "Project to create the authorization domain"
   )
   op.parse.validate
 
@@ -725,8 +725,8 @@ Common.register_command({
 def set_authority(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.remove = "false"
-  op.opts.dry_run = "false"
+  op.opts.remove = false
+  op.opts.dry_run = false
   op.add_option(
        "--email [EMAIL,...]",
        lambda {|opts, v| opts.email = v},
@@ -845,6 +845,7 @@ def deploy(cmd_name, args, with_cron, with_gsuite_admin)
 
   if with_gsuite_admin
     common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
+    # TODO: generate new key here
     get_gsuite_admin_key(gcc.project)
   end
   common.run_inline %W{
@@ -920,9 +921,7 @@ end
 
 def get_auth_domain(project)
   config_json = get_config(project)
-  config_line = `grep registeredDomainName config/config_stable.json`
-  config_line = config_line[0, config_line.rindex('"')]
-  return config_line[config_line.rindex('"') + 1, config_line.length]
+  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
 end
 
 def load_config(project)

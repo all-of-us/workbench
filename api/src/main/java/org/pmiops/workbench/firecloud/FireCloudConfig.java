@@ -43,7 +43,7 @@ public class FireCloudConfig {
     return apiClient;
   }
 
-  private String getAccessToken(WorkbenchEnvironment workbenchEnvironment) throws IOException {
+  private String getWorkbenchServiceAccountAccessToken(WorkbenchEnvironment workbenchEnvironment) throws IOException {
     // When running locally, we get application default credentials in a different way than
     // when running in Cloud.
     if (workbenchEnvironment.isDevelopment()) {
@@ -66,7 +66,7 @@ public class FireCloudConfig {
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
-      apiClient.setAccessToken(getAccessToken(workbenchEnvironment));
+      apiClient.setAccessToken(getWorkbenchServiceAccountAccessToken(workbenchEnvironment));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
