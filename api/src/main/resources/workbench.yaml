@@ -1343,11 +1343,13 @@ definitions:
         type: string
         description: the role of the current user in the project
       status:
-        type: string
-        enum: ["Creating", "Ready", "Error"]
-      message:
-        type: string
-        description: informational message about the project
+        $ref: "#/definitions/BillingProjectStatus"
+
+  BillingProjectStatus:
+    type: string
+    description: >
+      Initialization status of a Firecloud billing project for use with Workbench.
+    enum: &BILLING_PROJECT_STATUS [none, pending, ready, error]
 
   DataAccessLevel:
     type: string
@@ -1754,6 +1756,12 @@ definitions:
       freeTierBillingProjectName:
         description: name of the AllOfUs free tier billing project created for this user
         type: string
+      freeTierBillingProjectStatus:
+        description: >
+          the initialization status of the free tier billing project, some
+          workbench functionality may not work fully with this project until it
+          is fully initialized
+        $ref: "#/definitions/BillingProjectStatus"
       dataAccessLevel:
         description: what level of data access the user has
         $ref: "#/definitions/DataAccessLevel"
