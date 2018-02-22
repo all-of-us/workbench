@@ -48,24 +48,16 @@ public class SetAuthority {
       // argument parsing here.
       if (args.length != 4) {
         throw new IllegalArgumentException(
-            "Expected 3 args (email_list, authorities_to_add, authorities_to_rm, dry_run). Got "
+            "Expected 4 args (email_list, authorities, remove, dry_run). Got "
             + Arrays.asList(args));
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
-      Set<Authority> authoritiesToAdd = commaDelimitedStringToAuthoritySet(args[1]);
-      Set<Authority> authoritiesToRemove = commaDelimitedStringToAuthoritySet(args[2]);
+      Set<Authority> authorities = commaDelimitedStringToAuthoritySet(args[1]);
+      boolean remove = Boolean.valueOf(args[2]);
       boolean dryRun = Boolean.valueOf(args[3]);
       int numUsers = 0;
       int numErrors = 0;
       int numChanged = 0;
-
-      Set<Authority> intersection = new HashSet(authoritiesToAdd);
-      intersection.retainAll(authoritiesToRemove);
-      if (!intersection.isEmpty()) {
-        throw new IllegalArgumentException(
-            "Authorities lists overlap with " + intersection + ". Add: " + authoritiesToAdd
-            + " Remove: " + authoritiesToRemove);
-      }
 
       for (String email : emails) {
         numUsers++;
@@ -80,8 +72,11 @@ public class SetAuthority {
 
         Set<Authority> granted = user.getAuthorities();
         Set<Authority> updated = new HashSet(granted);
-        updated.addAll(authoritiesToAdd);
-        updated.removeAll(authoritiesToRemove);
+        if (remove) {
+          updated.removeAll(authorities);
+        } else {
+          updated.addAll(authorities);
+        }
         if (!updated.equals(granted)) {
           if (!dryRun) {
             user.setAuthorities(updated);

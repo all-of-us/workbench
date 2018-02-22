@@ -14,7 +14,7 @@ class ServiceAccountContext
   end
 
   def run()
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY_PATH
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
     common = Common.new
     if @project == "all-of-us-workbench-test"
       common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
