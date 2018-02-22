@@ -7,13 +7,6 @@
 }
 
 #total-count {
-  text-align: right;
-  margin: 0;
-  flex: 1;
-  white-space: nowrap;
-}
-
-.save-cohort {
   margin: 0;
   flex: 1;
   white-space: nowrap;

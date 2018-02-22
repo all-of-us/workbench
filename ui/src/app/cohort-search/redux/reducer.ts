@@ -75,10 +75,14 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case BEGIN_CHARTS_REQUEST:
+        return state
+            .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+            .set('initShowChart', true);
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
-          .deleteIn(['entities', action.entityType, action.entityId, 'error']);
+          .deleteIn(['entities', action.entityType, action.entityId, 'error'])
+          .set('initShowChart', true);
 
       case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
