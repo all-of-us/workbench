@@ -1,5 +1,11 @@
 FROM node:alpine
 
+# We set the UID to the host's UID to ensure written files get proper permissions. The default UID
+# for node is 1000, which conflicts with some of our host machines.
+RUN apk --no-cache add shadow
+RUN groupmod -g 9999 node \
+  && usermod -u 9999 -g 9999 node
+
 #
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
 #
