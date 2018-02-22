@@ -1,11 +1,18 @@
 # UI project management commands and command-line flag definitions.
 
 require "optparse"
+require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 require_relative "../../aou-utils/swagger"
 
 class Options < OpenStruct
+end
+
+def ensure_docker(cmd_name, args)
+  unless Workbench::in_docker?
+    exec *(%W{docker-compose run --rm ui ./project.rb #{cmd_name}} + args)
+  end
 end
 
 # Creates a default command-line argument parser.
@@ -109,17 +116,22 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{docker-compose run --rm ui yarn run build
-        --environment=#{environment_name}}
-    common.run_inline %W{gcloud app deploy --project #{@opts.project} --account #{@opts.account}
-                         --version #{@opts.version} --#{@opts.promote}}
+    common.run_inline %W{yarn run build --environment=#{environment_name}}
+    ServiceAccountContext.new(@opts.project).run do
+      common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
+    end
   end
+end
+
+def deploy_ui(cmd_name, args)
+  ensure_docker cmd_name, args
+  DeployUI.new("deploy-ui", args).run
 end
 
 Common.register_command({
   :invocation => "deploy-ui",
   :description => "Deploys the UI to the specified cloud project.",
-  :fn => lambda { |*args| DeployUI.new("deploy-ui", args).run }
+  :fn => lambda { |*args| deploy_ui("deploy-ui", args) }
 })
 
 def dev_up(*args)

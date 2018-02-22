@@ -1,6 +1,6 @@
+require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
-require_relative "serviceaccounts"
 
 class CloudSqlProxyContext < ServiceAccountContext
 

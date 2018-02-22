@@ -7,7 +7,11 @@ services:
     working_dir: /w/ui
     volumes:
       - ..:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
     command: yarn start --host=0.0.0.0 ${ENV_FLAG}
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/ui/sa-key.json
     ports:
       - 4200:4200
   tests:
