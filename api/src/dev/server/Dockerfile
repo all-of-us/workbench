@@ -54,10 +54,6 @@ ENV GRADLE_USER_HOME /.gradle
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-ADD with-uid.sh /usr/local/bin
-
-ENTRYPOINT ["with-uid.sh"]
-
 RUN apk --no-cache add ruby ruby-json ruby-io-console
 
 RUN curl https://services.gradle.org/distributions/gradle-4.3.1-bin.zip -L > /tmp/gradle.zip \
@@ -66,3 +62,7 @@ RUN curl https://services.gradle.org/distributions/gradle-4.3.1-bin.zip -L > /tm
 ENV PATH="$PATH:/gradle/bin"
 
 RUN gem install --no-document googleauth
+
+ADD with-uid.sh /usr/local/bin
+
+ENTRYPOINT ["with-uid.sh"]
