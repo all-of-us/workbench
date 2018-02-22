@@ -1,4 +1,21 @@
 /* Master Styles */
+@font-face {
+    font-family: GothamBook;
+    src: url('/assets/fonts/Gotham Book.otf');
+}
+@font-face {
+    font-family: GothamBold;
+    src: url('/assets/fonts/Gotham Bold.otf');
+}
+@font-face {
+    font-family: GothamLight;
+    src: url('/assets/fonts/Gotham Light.otf');
+}
+@font-face {
+    font-family: GothamMedium;
+    src: url('/assets/fonts/Gotham Medium.otf');
+}
+
 h1 {
   color: #369;
   font-family: Arial, Helvetica, sans-serif;
@@ -34,24 +51,6 @@ input[type=text] {
 
 input[type=text]:focus {
   border: 1px solid #0094d2;
-}
-
-button {
-  font-family: Arial;
-  background-color: #eee;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.3rem;
-  cursor: pointer;
-  cursor: hand;
-}
-button:hover {
-  background-color: #cfd8dc;
-}
-button:disabled {
-  background-color: #eee;
-  color: #aaa;
-  cursor: auto;
 }
 
 .loading-text {
