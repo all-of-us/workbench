@@ -395,8 +395,7 @@ group by co1.observation_concept_id, stratum_2"
 
 # PPI Observation (3000)
 echo "Querying PPI observation "
-# Get ones with value as string
-ppi_modules="(1586134, 1585855,1585710)"
+# Get ones with value source concept id, ie survey answer is
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
