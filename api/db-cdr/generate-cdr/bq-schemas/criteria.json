@@ -32,12 +32,12 @@
       {
         "mode": "NULLABLE", 
         "name": "is_group", 
-        "type": "BOOLEAN"
+        "type": "INTEGER"
       }, 
       {
         "mode": "NULLABLE", 
         "name": "is_selectable", 
-        "type": "BOOLEAN"
+        "type": "INTEGER"
       }, 
       {
         "mode": "NULLABLE", 
