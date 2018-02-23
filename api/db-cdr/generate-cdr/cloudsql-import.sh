@@ -8,7 +8,7 @@ IFS=$'\n\t'
 
 
 # get options
-USAGE="./generate-clousql-cdr/cloudsql-import.sh --account <ACCOUNT> --project <PROJECT> --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --bucket <BUCKET>"
+USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --bucket <BUCKET>"
 # example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
   echo "1 is $1"
