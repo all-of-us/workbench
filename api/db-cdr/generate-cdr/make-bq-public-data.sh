@@ -87,3 +87,6 @@ done
 
 # Todo, Run queries to make counts suitable for public
 
+# Business logic
+# Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will
+# be rounded up or down to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1240 .
