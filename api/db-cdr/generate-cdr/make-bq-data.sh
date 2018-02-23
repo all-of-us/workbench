@@ -193,3 +193,16 @@ Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',subst
 c.invalid_reason
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 
+###########################
+# achilles_results_concept#
+###########################
+# This make a table with achilles_results and concept names to go with it for java api simplicity
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_concept\`
+(id, analysis_id, stratum_1, stratum_1_name, stratum_2, stratum_2_name, count_value)
+SELECT a.id AS id, a.analysis_id AS analysis_id, a.stratum_1 AS stratum_1,
+c1.concept_name AS stratum_1_name, a.stratum_2 AS stratum_2,c2.concept_name AS stratum_2_name,
+a.count_value AS count_value
+FROM \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a
+left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1 on a.stratum_1 = cast(c1.concept_id as STRING)
+left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c2  on a.stratum_2 = cast(c2.concept_id as STRING)"
