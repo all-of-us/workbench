@@ -826,16 +826,18 @@ def deploy(cmd_name, args, with_cron, with_gsuite_admin)
   gcc.validate
   env = read_db_vars_v2(gcc)
   ENV.update(env)
-  common.run_inline %W{gradle :appengineStage}
-  promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
-    : (op.opts.promote ? "--promote" : "--no-promote")
-  quiet = op.opts.quiet ? " --quiet" : ""
 
   if with_gsuite_admin
     common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
     # TODO: generate new key here
     get_gsuite_admin_key(gcc.project)
   end
+
+  common.run_inline %W{gradle :appengineStage}
+  promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
+    : (op.opts.promote ? "--promote" : "--no-promote")
+  quiet = op.opts.quiet ? " --quiet" : ""
+
   common.run_inline %W{
     gcloud app deploy
       build/staged-app/app.yaml
