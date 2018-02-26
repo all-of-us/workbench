@@ -196,6 +196,20 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/request-invitation-key:
+    post:
+      tags:
+        - profile
+      description: Sends support a request for the invitation key.
+      operationId: requestInvitationKey
+      security: []
+      parameters:
+        - in: query
+          name: contactEmail
+          type: string
+      responses:
+        200:
+          description: Request received
 
   /v1/google-account:
     post:
