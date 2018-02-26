@@ -27,26 +27,26 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   changingStatus = false;
 
+  private _participant: Participant | null;
+
   cohortStatusList(): Array<any> {
     const statuses = new Array<any>();
       statuses.push({
-          key: '',
-          value: 'Select a Status'});
+        key: '',
+        value: 'Select a Status'});
       statuses.push({
-          key: CohortStatus.EXCLUDED,
-          value: Participant.formatStatusForText(CohortStatus.EXCLUDED)});
+        key: CohortStatus.EXCLUDED,
+        value: Participant.formatStatusForText(CohortStatus.EXCLUDED)});
       statuses.push({
-          key: CohortStatus.INCLUDED,
-          value: Participant.formatStatusForText(CohortStatus.INCLUDED)});
+        key: CohortStatus.INCLUDED,
+        value: Participant.formatStatusForText(CohortStatus.INCLUDED)});
       statuses.push({
-          key: CohortStatus.NEEDSFURTHERREVIEW,
-          value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
+        key: CohortStatus.NEEDSFURTHERREVIEW,
+        value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
       });
 
     return statuses;
   }
-
-  private _participant: Participant | null;
 
   set participant(value) {
     this._participant = value;
