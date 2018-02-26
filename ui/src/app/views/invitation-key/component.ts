@@ -8,7 +8,10 @@ function isBlank(s: string) {
 
 @Component ({
   selector : 'app-invitation-key',
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css',
+              '../../styles/inputs.css',
+              '../../styles/headers.css'],
   templateUrl: './component.html'
 })
 
@@ -17,12 +20,15 @@ export class InvitationKeyComponent {
   invitationKeyVerifed: boolean;
   invitationKeyReq: boolean;
   invitationKeyInvalid: boolean;
+  invitationKeyRequestEmail: string;
+  requestSent: boolean;
   constructor(
     private profileService: ProfileService
   ) {
       this.invitationKeyVerifed = false;
       this.invitationKeyReq = false;
       this.invitationKeyInvalid = false;
+      this.requestSent = false;
     }
 
   next(): void {
@@ -41,6 +47,12 @@ export class InvitationKeyComponent {
       this.invitationKeyVerifed = true;
     }, () => {
       this.invitationKeyInvalid = true;
+    });
+  }
+
+  requestKey(): void {
+    this.profileService.requestInvitationKey(this.invitationKeyRequestEmail).subscribe(() => {
+      this.requestSent = true;
     });
   }
 
