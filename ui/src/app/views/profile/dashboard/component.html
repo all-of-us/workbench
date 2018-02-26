@@ -1,0 +1,67 @@
+<h2> Profile Completion Progress</h2>
+
+<div class="form-group">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="progress">
+        <div class="progress-bar" role="progressbar" [style.width]=progressPercent [attr.aria-valuenow]=progressCount
+             [attr.aria-valuemin]="0" [attr.aria-valuemax]="100">
+          {{progressPercent}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="form-group">
+  <div class="row">
+    <div class="col-sm-6">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <button class="nav-link" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                  [class.active]="profileVerification" (click)="navBarClick('verification')">
+            <clr-icon shape="check" size="36" class="is-success" *ngIf=verificationImage></clr-icon>
+            Profile Verification &nbsp;&nbsp;
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="profileTOS" (click)="navBarClick('tos')">
+            <clr-icon shape="check" size="36" class="is-success" *ngIf=termsOfServiceImage></clr-icon>
+            Terms of Service &nbsp;&nbsp;
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="profileEthics" (click)="navBarClick('ethics')">
+            <clr-icon shape="check" size="36" class="is-success" *ngIf=ethicsImage></clr-icon>
+            Ethics Training &nbsp;&nbsp;
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="demo" [class.active]="profileDemographic" (click)="navBarClick('demographic')">
+            <clr-icon shape="check" size="36" class="is-success" *ngIf=demographicSurveyImage></clr-icon>
+            DemographicSurvey &nbsp;&nbsp;
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-block">
+    <div *ngIf="profileVerification">
+      <app-profile-page></app-profile-page>
+    </div>
+    <div *ngIf="profileTOS">
+      <app-profile-tos></app-profile-tos>
+    </div>
+    <div *ngIf="profileEthics">
+      <app-profile-ethics></app-profile-ethics>
+    </div>
+    <div *ngIf="profileDemographic">
+      <app-profile-demographics></app-profile-demographics>
+    </div>
+  </div>
+</div>
+

@@ -1,18 +1,19 @@
 import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Profile, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-export class ProfilePageComponent implements OnInit {
+export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
-  editHover = false;
   constructor(
       private profileService: ProfileService,
+      private route: ActivatedRoute,
+      private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -23,16 +24,10 @@ export class ProfilePageComponent implements OnInit {
     });
   }
 
-  submitTermsOfService(): void {
-    this.profileService.submitTermsOfService().subscribe();
-  }
-
-
-  completeEthicsTraining(): void {
-    this.profileService.completeEthicsTraining().subscribe();
-  }
-
-  submitDemographicSurvey(): void {
-    this.profileService.submitDemographicsSurvey().subscribe();
+  submitChanges(): void {
+    this.profileService.updateProfile(this.profile).subscribe(() => {
+        this.router.navigate(['../'], {relativeTo : this.route});
+      }
+    );
   }
 }

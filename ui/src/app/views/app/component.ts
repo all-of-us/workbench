@@ -10,7 +10,6 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
@@ -147,3 +146,4 @@ export class AppComponent implements OnInit {
       || this.locationService.path().startsWith('/workspace');
   }
 }
+

@@ -1,4 +1,3 @@
-<h2>Profile</h2>
 <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
     routerLink="edit" class="btn btn-icon">
   <app-edit-icon [editHover]="editHover"></app-edit-icon>
@@ -90,22 +89,4 @@
       </div>
     </div>
   </ng-template>
-</div>
-<div *ngIf="profileLoaded">
-  <button class="btn" (click)="submitTermsOfService()"
-      [disabled]="email===null || this.profile.termsOfServiceCompletionTime !== null">
-    Submit Terms of Service
-  </button>
-</div>
-<div *ngIf="profileLoaded">
-  <button class="btn" (click)="completeEthicsTraining()"
-      [disabled]="email===null || this.profile.ethicsTrainingCompletionTime !== null">
-    Complete Ethics Training
-  </button>
-</div>
-<div *ngIf="profileLoaded">
-  <button class="btn" (click)="submitDemographicSurvey()"
-      [disabled]="email===null || this.profile.demographicSurveyCompletionTime !== null">
-    Submit Demographics Survey
-  </button>
 </div>
