@@ -362,7 +362,7 @@ public class ProfileController implements ProfileApiDelegate {
       msg.setSubject("[AofU Invitation Key Request]");
       msg.setText(email + " is requesting the invitation key.");
       Transport.send(msg);
-    } catch (MessagingException e | UnsupportedEncodingException e) {
+    } catch (MessagingException | UnsupportedEncodingException e) {
       throw new EmailException("Error sending invitation key request", e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
