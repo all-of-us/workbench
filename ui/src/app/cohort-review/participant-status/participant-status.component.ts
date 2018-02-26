@@ -18,6 +18,7 @@ import {
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
+    styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 

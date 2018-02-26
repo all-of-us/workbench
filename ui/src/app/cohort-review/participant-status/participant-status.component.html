@@ -1,11 +1,11 @@
 <div>
   <h4 class="participant-status-margin-top">Participant {{ participant?.participantId }}</h4>
   <hr/>
-  <div>
-    <div style="color: #000;">DOB: {{ participant.dob | date:'yyyy-MM-dd'}}</div>
-    <div style="color: #000;">Gender: {{ participant.gender | titlecase }}</div>
-    <div style="color: #000;">Race: {{ participant.race }}</div>
-    <div style="color: #000;">Ethnicity: {{ participant.ethnicity }}</div>
+  <div class="participant-status-text-black">
+    <div>DOB: {{ participant.dob | date:'yyyy-MM-dd'}}</div>
+    <div>Gender: {{ participant.gender | titlecase }}</div>
+    <div>Race: {{ participant.race }}</div>
+    <div>Ethnicity: {{ participant.ethnicity }}</div>
   </div>
   <hr/>
   <h4 class="participant-status-margin-top">Status</h4>
