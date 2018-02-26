@@ -531,13 +531,13 @@ Creates and populates local mysql databases cdr<VERSION> and public<VERSION> fro
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-mysqldump-db} + args
+  common.run_inline %W{docker-compose run db-mysqldump-local-db} + args
 end
 
 
 Common.register_command({
-  :invocation => "mysqldump-db",
-  :description => "mysqldump-db db-name <LOCALDB> --bucket <BUCKET>
+  :invocation => "mysqldump-local-db",
+  :description => "mysqldump-local-db db-name <LOCALDB> --bucket <BUCKET>
 Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => lambda { |*args| mysqldump_db(*args) }
 })
@@ -573,7 +573,7 @@ def cloudsql_import(cmd_name, *args)
 end
 Common.register_command({
                             :invocation => "cloudsql-import",
-                            :description => "cloudsql-import --account <SERVICE_ACCOUNT> --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
+                            :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE> --sql-dump-file <FILE.sql> --bucket <BUCKET>
 Imports .sql file to cloudsql instance",
                             :fn => lambda { |*args| cloudsql_import("cloudsql-import", *args) }
                         })
