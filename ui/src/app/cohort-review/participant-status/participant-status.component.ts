@@ -27,6 +27,25 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   changingStatus = false;
 
+  cohortStatusList(): Array<any> {
+    const statuses = new Array<any>();
+      statuses.push({
+          key: '',
+          value: 'Select a Status'});
+      statuses.push({
+          key: CohortStatus.EXCLUDED,
+          value: Participant.formatStatusForText(CohortStatus.EXCLUDED)});
+      statuses.push({
+          key: CohortStatus.INCLUDED,
+          value: Participant.formatStatusForText(CohortStatus.INCLUDED)});
+      statuses.push({
+          key: CohortStatus.NEEDSFURTHERREVIEW,
+          value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
+      });
+
+    return statuses;
+  }
+
   private _participant: Participant | null;
 
   set participant(value) {
@@ -50,7 +69,11 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.state.participant$
-      .subscribe(participant => this.participant = participant);
+      .subscribe(participant => {
+        this.participant = participant;
+        this.statusControl.setValue(this.participant
+            ? this.participant.status : '', {emitEvent: false});
+      });
 
     const participantId = this.state.participant$
       .filter(participant => participant !== null)
@@ -69,6 +92,9 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   }
 
   private callApi = ([status, pid]): Observable<ParticipantCohortStatus> => {
+    if (status === '') {
+      return Observable.of(this.participant);
+    }
     this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
