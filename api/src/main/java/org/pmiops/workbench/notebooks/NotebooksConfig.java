@@ -21,8 +21,6 @@ public class NotebooksConfig {
 
   private static final String NOTEBOOKS_CLIENT = "notebooksApiClient";
 
-
-
   @Bean(name=NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient notebooksApiClient(UserAuthentication userAuthentication,
@@ -34,22 +32,11 @@ public class NotebooksConfig {
     return apiClient;
   }
 
-
-    @Bean
-    @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public ClusterApi clusterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
-      ClusterApi api = new ClusterApi();
-      api.setApiClient(apiClient);
-      return api;
-    }
-
-    @Bean
-    @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public StatusApi statusApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
-      // Group/Auth Domain creation and addition are made by the AllOfUs service account
-      StatusApi api = new StatusApi();
-      api.setApiClient(apiClient);
-      return api;
-    }
-
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public ClusterApi clusterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+    ClusterApi api = new ClusterApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
 }

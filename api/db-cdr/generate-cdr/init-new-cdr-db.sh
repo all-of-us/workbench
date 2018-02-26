@@ -10,6 +10,7 @@ USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD|publicY
 DROP_IF_EXISTS="N"
 RUN_LIST="schema"
 CONTEXT=
+
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in

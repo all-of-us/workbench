@@ -225,7 +225,7 @@
     </createIndex>
 
     <createTable tableName="achilles_results_concept">
-      <column name="id" type="BIGINT">
+      <column name="id" type="BIGINT" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="analysis_id" type="BIGINT">

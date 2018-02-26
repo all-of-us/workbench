@@ -1,8 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import java.util.List;
-import java.util.Map;
-import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -11,19 +8,20 @@ import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
 
   private final Provider<ClusterApi> clusterApiProvider;
-  private final Provider<StatusApi> statusApiProvider;
   private final Provider<User> userProvider;
 
   @Autowired
   public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
-      Provider<StatusApi> statusApiProvider,
       Provider<User> userProvider) {
     this.clusterApiProvider = clusterApiProvider;
-    this.statusApiProvider = statusApiProvider;
     this.userProvider = userProvider;
   }
 
@@ -80,9 +78,8 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public boolean getNotebooksStatus() {
-    StatusApi statusApi = statusApiProvider.get();
     try {
-      statusApi.status();
+      new StatusApi().status();
     } catch (ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       return false;
