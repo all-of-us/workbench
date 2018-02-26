@@ -8,7 +8,8 @@ IFS=$'\n\t'
 
 
 # get options
-USAGE="./generate-clousql-cdr/make-cloudsql-db.sh --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --db-name <DBNAME> --bucket <BUCKET>"
+USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --bucket <BUCKET>"
+# example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
