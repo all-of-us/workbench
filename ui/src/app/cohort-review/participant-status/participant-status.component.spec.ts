@@ -33,7 +33,8 @@ class ApiSpy {
             ));
 }
 
-const PARTICIPANT: Participant = new Participant({participantId: 1, status: '', birthDate: 1});
+const PARTICIPANT: Participant =
+    new Participant({participantId: 1, status: CohortStatus.NOTREVIEWED, birthDate: 1});
 
 describe('ParticipantStatusComponent', () => {
     let component:    ParticipantStatusComponent;
@@ -64,28 +65,17 @@ describe('ParticipantStatusComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('Init null then set Participant', () => {
-        component.ngOnInit();
-        expect(component.participant).toBe(null);
-        reviewStateService.participant.next(PARTICIPANT);
-        fixture.detectChanges();
-        expect(component.participant).toBe(PARTICIPANT);
-        expect(component.statusControl.value).toBe('');
-    });
-
     it('Should make api call for save', fakeAsync(() => {
         component.ngOnInit();
         expect(component.participant).toBe(null);
         reviewStateService.participant.next(PARTICIPANT);
         fixture.detectChanges();
         expect(component.participant).toBe(PARTICIPANT);
-        expect(component.statusControl.value).toBe('');
+        expect(component.statusControl.value).toBe(CohortStatus.NOTREVIEWED);
 
         // Set up an API spy
         const spy = fixture.debugElement.injector.get(CohortReviewService);
 
-        component.changingStatus = true;
-        updateAndTick(fixture);
         component.statusControl.setValue(CohortStatus.INCLUDED);
         updateAndTick(fixture);
         expect(spy.updateParticipantCohortStatus).toHaveBeenCalled();

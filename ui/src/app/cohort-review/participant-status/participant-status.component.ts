@@ -25,9 +25,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   statusControl = new FormControl();
   subscription: Subscription;
-  changingStatus = false;
 
-  private _participant: Participant | null;
+  participant: Participant | null;
 
   cohortStatusList(): Array<any> {
     const statuses = new Array<any>();
@@ -46,19 +45,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       });
 
     return statuses;
-  }
-
-  set participant(value) {
-    this._participant = value;
-    if (value !== null) {
-      this.statusControl.enable({emitEvent: false});
-    } else {
-      this.statusControl.disable({emitEvent: false});
-    }
-  }
-
-  get participant() {
-    return this._participant;
   }
 
   constructor(
@@ -95,7 +81,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     if (status === '') {
       return Observable.of(this.participant);
     }
-    this.changingStatus = true;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
@@ -104,7 +89,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   }
 
   private emit = (newStatus: ParticipantCohortStatus) => {
-    this.changingStatus = false;
     const participant = Participant.fromStatus(newStatus);
     this.state.participant.next(participant);
 
