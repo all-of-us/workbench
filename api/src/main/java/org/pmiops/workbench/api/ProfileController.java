@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.blockscore.models.Address;
 import com.blockscore.models.Person;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -11,7 +12,14 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.Properties;
 import javax.inject.Provider;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.blockscore.BlockscoreService;
@@ -22,6 +30,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -334,6 +343,34 @@ public class ProfileController implements ProfileApiDelegate {
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
   }
+
+  @Override
+  public ResponseEntity<Void> requestInvitationKey(String email) {
+    Properties props = new Properties();
+    Session session = Session.getDefaultInstance(props, null);
+    try {
+      Message msg = new MimeMessage(session);
+      msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
+      InternetAddress[] replyTo = new InternetAddress[1];
+      replyTo[0] = new InternetAddress(email);
+      msg.setReplyTo(replyTo);
+      // To test the bug reporting functionality, change the recipient email to your email rather
+      // than the group.
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
+          "all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
+      msg.setSubject("[AofU Invitation Code Request]");
+      msg.setText(email + " is requesting the invitation code.");
+      Transport.send(msg);
+    } catch (MessagingException e) {
+      throw new EmailException("Error sending bug report", e);
+    } catch (UnsupportedEncodingException e) {
+      throw new EmailException("Error sending bug report", e);
+    }
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     User user = userProvider.get();
