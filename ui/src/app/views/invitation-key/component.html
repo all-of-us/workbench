@@ -1,27 +1,27 @@
 <div style="padding: 5rem;">
   <div *ngIf="!invitationKeyVerifed" class="form-area">
     <div class="form-section">
-      <h2>Enter your Invitation Code:</h2>
+      <h2>Enter your Invitation Key:</h2>
       <div class="invitation-help-text">Lorem ipsum dolor sit amet, conser adipiscing elit. Aenean euisimod bibendum laoreet. Proin gravida sit amet lacus accumsan et viverra justo commodo.</div>
-      <input type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Code">
+      <input type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key">
       <div *ngIf="invitationKeyReq" class="alert alert-danger">
-        <strong> Invitation Code is required.</strong>
+        <strong> Invitation Key is required.</strong>
       </div>
       <div *ngIf="invitationKeyInvalid" class="alert alert-danger">
-        <strong> Invitation Code is not Valid.</strong>
+        <strong> Invitation Key is not Valid.</strong>
       </div>
     </div>
     <button id="next" (click)="next()" class="btn btn-primary" style="width: 10rem; height: 2rem">
       Next
     </button>
-    <h4>Need an invitation code?</h4>
+    <h4>Need an invitation key?</h4>
     <div class="invitation-help-text">Lorem ipsum dolor sit amet, conser adipiscing elit. Aenean euisimod bibendum laoreet.</div>
     <input type="text" class="input" [(ngModel)]="invitationKeyRequestEmail" placeholder="Email Address">
-    <button id="requestCode" (click)="requestCode()" class="btn btn-secondary" style="width: 9rem; height: 1.8rem">
-      Request Invite Code
+    <button id="requestKey" (click)="requestKey()" class="btn btn-secondary" style="width: 9rem; height: 1.8rem">
+      Request Invite Key
     </button>
     <div *ngIf="requestSent">
-      <strong> The invitation code request has been sent.</strong>
+      <strong> The invitation key request has been sent.</strong>
     </div>
   </div>
   <div *ngIf="invitationKeyVerifed">

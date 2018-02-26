@@ -50,7 +50,7 @@ export class InvitationKeyComponent {
     });
   }
 
-  requestCode(): void {
+  requestKey(): void {
     this.profileService.requestInvitationKey(this.invitationKeyRequestEmail).subscribe(() => {
       this.requestSent = true;
     });

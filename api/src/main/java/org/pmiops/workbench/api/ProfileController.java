@@ -359,15 +359,12 @@ public class ProfileController implements ProfileApiDelegate {
       // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
           "all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
-      msg.setSubject("[AofU Invitation Code Request]");
-      msg.setText(email + " is requesting the invitation code.");
+      msg.setSubject("[AofU Invitation Key Request]");
+      msg.setText(email + " is requesting the invitation key.");
       Transport.send(msg);
-    } catch (MessagingException e) {
-      throw new EmailException("Error sending bug report", e);
-    } catch (UnsupportedEncodingException e) {
-      throw new EmailException("Error sending bug report", e);
+    } catch (MessagingException e | UnsupportedEncodingException e) {
+      throw new EmailException("Error sending invitation key request", e);
     }
-
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
