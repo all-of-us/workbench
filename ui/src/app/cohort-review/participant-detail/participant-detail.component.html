@@ -1,45 +1,36 @@
-<div
-  [style.display]="'flex'"
-  [style.align-items]="'center'"
-  [style.justify-content]="flex-start">
+<div class="participant-browser-navigation">
   <div class="btn-group btn-sm btn-icon">
     <button
-      class="btn"
-      title="Prior Participant"
-      [disabled]="isFirstParticipant"
-      (click)="previous()">
+            class="btn"
+            title="Participant Browser"
+            (click)="up()">
+      <clr-icon shape="angle-double" dir="left"></clr-icon>
+      Table
+    </button>
+  </div>
+  <div class="btn-group">
+    <h3 class="participant-browser-header">
+      Participant {{ participant.id }}
+    </h3>
+  </div>
+  <div class="btn-group btn-sm btn-icon">
+    <button
+            class="btn"
+            title="Prior Participant"
+            [disabled]="isFirstParticipant"
+            (click)="previous()">
       <clr-icon shape="caret" dir="left"></clr-icon>
+      Prev
     </button>
     <button
-      class="btn"
-      title="Participant Browser"
-      (click)="up()">
-      <clr-icon shape="caret" dir="up"></clr-icon>
-    </button>
-    <button
-      class="btn"
-      title="Next Participant"
-      [disabled]="isLastParticipant"
-      (click)="next()">
+            class="btn"
+            title="Next Participant"
+            [disabled]="isLastParticipant"
+            (click)="next()">
+      Next
       <clr-icon shape="caret" dir="right"></clr-icon>
     </button>
   </div>
-
-  <h3
-    [style.margin]="'0'"
-    [style.flex]="'1'">
-    Participant {{ participant.id }}</h3>
-  <span>
-    <span class="label">{{ participant.dob }} (DOB)</span>
-    <span class="label">{{ participant.gender }} (Gender)</span>
-    <span class="label">{{ participant.race }} (Race)</span>
-    <span class="label">{{ participant.ethnicity }} (Ethnicity)</span>
-    <span
-      (click)="toggleSidebar()"
-      class="label clickable"
-      [ngClass]="participant.statusLabelClass">
-      {{ participant.formattedStatusText }} (Status)</span>
-  </span>
 </div>
 
 <clr-tabs>

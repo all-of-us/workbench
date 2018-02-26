@@ -13,6 +13,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +112,7 @@ public class UserService {
     user.setGivenName(givenName);
     user.setDisabled(false);
     user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

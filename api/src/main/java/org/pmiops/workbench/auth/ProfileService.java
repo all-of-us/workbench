@@ -53,6 +53,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
+    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatus());
     profile.setEnabledInFireCloud(enabledInFireCloud);
 
     if (user.getBlockscoreVerificationIsValid() == null) {

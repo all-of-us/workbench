@@ -11,6 +11,8 @@ apply plugin: 'org.liquibase.gradle'
 
 def db_host = System.getenv("DB_HOST") ?: "db"
 def db_port = System.getenv("DB_PORT") ?: "3306"
+def cdr_db_name = System.getenv("CDR_DB_NAME") ?: "cdr"
+def public_db_name = System.getenv("PUBLIC_DB_NAME") ?: "public"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
 
 liquibase {
@@ -29,6 +31,8 @@ liquibase {
             url "jdbc:mysql://${db_host}:${db_port}/workbench"
             username "liquibase"
             password "${liquibase_password}"
+            parameters=["CDR_DB_NAME": "${cdr_db_name}",
+                        "PUBLIC_DB_NAME": "${public_db_name}"]
         }
         runList = project.ext.runList
     }

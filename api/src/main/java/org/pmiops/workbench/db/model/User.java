@@ -1,9 +1,8 @@
 package org.pmiops.workbench.db.model;
 
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -16,9 +15,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingProjectStatus;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
@@ -35,6 +35,7 @@ public class User {
   private String familyName;
   private String phoneNumber;
   private String freeTierBillingProjectName;
+  private BillingProjectStatus freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
@@ -46,7 +47,6 @@ public class User {
   private boolean disabled;
   private Timestamp disabledTime;
   private Long disablingAdminId;
-  private String mailchimpHash;
   private EmailVerificationStatus emailVerificationStatus;
 
   @Id
@@ -128,6 +128,15 @@ public class User {
 
   public void setFreeTierBillingProjectName(String freeTierBillingProjectName) {
     this.freeTierBillingProjectName = freeTierBillingProjectName;
+  }
+
+  @Column(name = "free_tier_billing_project_status")
+  public BillingProjectStatus getFreeTierBillingProjectStatus() {
+    return freeTierBillingProjectStatus;
+  }
+
+  public void setFreeTierBillingProjectStatus(BillingProjectStatus freeTierBillingProjectStatus) {
+    this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
   }
 
   @Column(name = "first_sign_in_time")

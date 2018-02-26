@@ -43,7 +43,7 @@ echo "Dumping tables to csv from $BUCKET\n"
 # Get tables in project, stripping out tableId.
 # Note tables larger than 1 G need to be dumped into more than one file.
 # concept_relationship and concept are only big ones now.
-tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary)
+tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"

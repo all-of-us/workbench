@@ -1,16 +1,18 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.appengine.api.appidentity.AppIdentityService;
+import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -41,16 +43,30 @@ public class FireCloudConfig {
     return apiClient;
   }
 
+  private String getWorkbenchServiceAccountAccessToken(WorkbenchEnvironment workbenchEnvironment) throws IOException {
+    // When running locally, we get application default credentials in a different way than
+    // when running in Cloud.
+    if (workbenchEnvironment.isDevelopment()) {
+      GoogleCredential credential = GoogleCredential.getApplicationDefault()
+          .createScoped(Arrays.asList(BILLING_SCOPES));
+      credential.refreshToken();
+      return credential.getAccessToken();
+    } else {
+      AppIdentityService appIdentity = AppIdentityServiceFactory.getAppIdentityService();
+      final AppIdentityService.GetAccessTokenResult accessTokenResult =
+          appIdentity.getAccessToken(Arrays.asList(BILLING_SCOPES));
+      return accessTokenResult.getAccessToken();
+    }
+
+  }
+
   @Bean(name=ALL_OF_US_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(GoogleCredential googleCredential,
+  public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
-      GoogleCredential credential = googleCredential.createScoped(Arrays.asList(BILLING_SCOPES));
-      credential.refreshToken();
-      String accessToken = credential.getAccessToken();
-      apiClient.setAccessToken(accessToken);
+      apiClient.setAccessToken(getWorkbenchServiceAccountAccessToken(workbenchEnvironment));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
