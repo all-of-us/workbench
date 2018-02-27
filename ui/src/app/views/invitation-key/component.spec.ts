@@ -10,15 +10,15 @@ import {ProfileService} from 'generated';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
-import {IconsModule} from '../../icons/icons.module';
 import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
+import {IconsModule} from '../../icons/icons.module';
 import {SignInService} from '../../services/sign-in.service';
 
-import {AppComponent} from '../app/component';
 import {AccountCreationComponent} from '../account-creation/component';
+import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {PageTemplateComponent} from '../page-template/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
