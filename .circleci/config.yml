@@ -18,6 +18,7 @@ jobs:
       # have room in Circle's 4G to get our work done.
       JAVA_TOOL_OPTIONS: -Xmx3g
       TERM: dumb
+      MYSQL_ROOT_PASSWORD: ubuntu
     steps:
       - checkout
       - run:
