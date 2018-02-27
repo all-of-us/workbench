@@ -43,7 +43,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   constructor(private state: ReviewStateService,
               private reviewAPI: CohortReviewService,
-              private route: ActivatedRoute,) {
+              private route: ActivatedRoute) {
   }
 
   ngOnInit() {
