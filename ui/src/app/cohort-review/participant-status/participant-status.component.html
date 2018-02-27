@@ -1,42 +1,19 @@
-<div class="form-group">
-  <label>Participant {{ participant?.participantId }} Review Status</label>
-  <span [style.margin-left]="'0.25rem'">
-    <div *ngIf="changingStatus" class="spinner spinner-inline">Loading...</div>
-  </span>
-  <div class="radio" [class.disable]="statusControl.disabled">
-    <input type="radio"
-      name="statusControl"
-      id="participant-included-status"
-      [checked]="participant?.status === CohortStatus.INCLUDED"
-      [formControl]="statusControl"
-      [value]="CohortStatus.INCLUDED">
-    <label for="participant-included-status">Include</label>
+<div>
+  <h4 class="sidebar-header">Participant {{ participant?.participantId }}</h4>
+  <hr/>
+  <div class="text-black">
+    <div>DOB: {{ participant.dob | date:'yyyy-MM-dd'}}</div>
+    <div>Gender: {{ participant.gender | titlecase }}</div>
+    <div>Race: {{ participant.race }}</div>
+    <div>Ethnicity: {{ participant.ethnicity }}</div>
   </div>
-  <div class="radio" [class.disable]="statusControl.disabled">
-    <input type="radio"
-      name="statusControl"
-      id="participant-excluded-status"
-      [checked]="participant?.status === CohortStatus.EXCLUDED"
-      [formControl]="statusControl"
-      [value]="CohortStatus.EXCLUDED">
-    <label for="participant-excluded-status">Exclude</label>
-  </div>
-  <div class="radio" [class.disable]="statusControl.disabled">
-    <input type="radio"
-      name="statusControl"
-      id="participant-needs-further-review"
-      [checked]="participant?.status === CohortStatus.NEEDSFURTHERREVIEW"
-      [formControl]="statusControl"
-      [value]="CohortStatus.NEEDSFURTHERREVIEW">
-    <label for="participant-needs-further-review">Needs Further Review</label>
-  </div>
-  <div class="radio" [class.disable]="statusControl.disabled">
-    <input type="radio"
-      name="statusControl"
-      id="participant-unreviewed"
-      [checked]="participant?.status === CohortStatus.NOTREVIEWED"
-      [formControl]="statusControl"
-      [value]="CohortStatus.NOTREVIEWED">
-    <label for="participant-unreviewed">Unreviewed</label>
+  <hr/>
+  <h4 class="participant-status-margin-top">Status</h4>
+  <div class="select form-group">
+    <select [formControl]="statusControl">
+      <option *ngFor="let status of cohortStatusList"
+              [value]="status.key">{{status.value}}
+      </option>
+    </select>
   </div>
 </div>

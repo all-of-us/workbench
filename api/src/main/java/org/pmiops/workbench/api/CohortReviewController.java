@@ -436,6 +436,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
         cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
+        lookupGenderRaceEthnicityValues(Arrays.asList(participantCohortStatus));
 
         cohortReview.lastModifiedTime(new Timestamp(System.currentTimeMillis()));
         cohortReview.incrementReviewedCount();
