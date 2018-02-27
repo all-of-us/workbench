@@ -114,8 +114,10 @@ def run_local_servers()
 end
 
 def run_local_apis_without_docker()
+  root_password = ENV["MYSQL_ROOT_PASSWORD"]
   ENV.update(Workbench::read_vars_file("db/vars.env"))
   ENV["DB_HOST"] = "127.0.0.1"
+  ENV["MYSQL_ROOT_PASSWORD"] = root_password
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
   ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
   run_local_migrations
