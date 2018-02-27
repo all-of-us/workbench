@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 
 @Component({
-  selector: 'pageTemplate',
+  selector: 'app-page-template',
   templateUrl: './component.html',
   styleUrls: ['./component.css']
 })

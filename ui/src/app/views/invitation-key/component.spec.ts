@@ -1,4 +1,4 @@
-import {DebugElement} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {UrlSegment} from '@angular/router';
@@ -17,6 +17,10 @@ import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
+import {IconsModule} from '../../icons/icons.module';
+import {AppComponent} from '../app/component';
+import {PageTemplateComponent} from '../page-template/component';
+import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
@@ -41,16 +45,20 @@ describe('InvitationKeyComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+          IconsModule,
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
+        AppComponent,
         AccountCreationComponent,
-        InvitationKeyComponent
+        InvitationKeyComponent,
+        PageTemplateComponent,
+        RoutingSpinnerComponent
       ],
       providers: [
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
+        { provide: AppComponent, useValue: {}},
         { provide: SignInService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {

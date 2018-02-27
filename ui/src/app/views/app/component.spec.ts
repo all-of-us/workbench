@@ -1,3 +1,4 @@
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {async, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -9,6 +10,7 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
+import {PageTemplateComponent} from '../page-template/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 
@@ -30,8 +32,10 @@ describe('AppComponent', () => {
         AccountCreationComponent,
         AppComponent,
         InvitationKeyComponent,
+        PageTemplateComponent,
         RoutingSpinnerComponent,
       ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: AuthDomainService, useValue: {} },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },

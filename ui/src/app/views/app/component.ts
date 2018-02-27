@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-
+  backgroundImgSrc: string;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;

@@ -1,10 +1,13 @@
 import {Component} from '@angular/core';
+import {AppComponent} from '../app/component';
+import {InvitationKeyComponent} from '../invitation-key/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
-import {InvitationKeyComponent} from '../invitation-key/component';
+
+
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -39,14 +42,15 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   conflictError = false;
   usernameCheckTimeout: NodeJS.Timer;
-  backgroundImgSrc: string = '/assets/images/create-account-male@2x.jpg';
+  backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
 
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
-    private invitationKeyService: InvitationKeyComponent
+    private invitationKeyService: InvitationKeyComponent,
+    private appComponent : AppComponent
   ) {
-    this.invitationKeyService.backgroundImgSrc = this.backgroundImgSrc;
+    this.appComponent.backgroundImgSrc = this.backgroundImgSrc;
   }
 
   createAccount(): void {
