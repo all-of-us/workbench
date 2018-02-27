@@ -71,7 +71,9 @@ module Workbench
       line = line.strip()
       if !line.empty?
         parts = line.split("=")
-        hash[parts[0].strip()] = parts[1].strip()
+        if parts.length > 1
+          hash[parts[0].strip()] = parts[1].strip()
+        end
       end
     end
     hash
