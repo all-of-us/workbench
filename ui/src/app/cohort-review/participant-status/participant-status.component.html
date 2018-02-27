@@ -12,7 +12,8 @@
   <div class="select form-group">
     <select [formControl]="statusControl">
       <option *ngFor="let status of cohortStatusList()"
-              [value]="status.key">{{status.value}}</option>
+              [value]="status.key">{{status.value}}
+      </option>
     </select>
   </div>
 </div>

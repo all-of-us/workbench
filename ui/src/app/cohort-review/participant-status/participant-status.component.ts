@@ -18,48 +18,40 @@ import {
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
-    styleUrls: ['./participant-status.component.css']
+  styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   readonly CohortStatus = CohortStatus;
+  readonly cohortStatusList = [{
+    key: '',
+    value: 'Select a Status',
+  }, {
+    key: CohortStatus.EXCLUDED,
+    value: Participant.formatStatusForText(CohortStatus.EXCLUDED)
+  }, {
+    key: CohortStatus.INCLUDED,
+    value: Participant.formatStatusForText(CohortStatus.INCLUDED)
+  }, {
+    key: CohortStatus.NEEDSFURTHERREVIEW,
+    value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
+  }];
 
   statusControl = new FormControl();
   subscription: Subscription;
-
   participant: Participant | null;
 
-  cohortStatusList(): Array<any> {
-    const statuses = new Array<any>();
-      statuses.push({
-        key: '',
-        value: 'Select a Status'});
-      statuses.push({
-        key: CohortStatus.EXCLUDED,
-        value: Participant.formatStatusForText(CohortStatus.EXCLUDED)});
-      statuses.push({
-        key: CohortStatus.INCLUDED,
-        value: Participant.formatStatusForText(CohortStatus.INCLUDED)});
-      statuses.push({
-        key: CohortStatus.NEEDSFURTHERREVIEW,
-        value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
-      });
-
-    return statuses;
+  constructor(private state: ReviewStateService,
+              private reviewAPI: CohortReviewService,
+              private route: ActivatedRoute,) {
   }
-
-  constructor(
-    private state: ReviewStateService,
-    private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
-  ) {}
 
   ngOnInit() {
     this.subscription = this.state.participant$
       .subscribe(participant => {
         this.participant = participant;
-        this.statusControl.setValue(this.participant
-            ? this.participant.status : '', {emitEvent: false});
+        const status = this.participant ? this.participant.status : '';
+        this.statusControl.setValue(status, {emitEvent: false});
       });
 
     const participantId = this.state.participant$
@@ -67,6 +59,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
       .map(participant => participant.id);
 
     const statusChanger = this.statusControl.valueChanges
+      .filter(status => status !== '')
       .withLatestFrom(participantId)
       .switchMap(this.callApi)
       .subscribe(this.emit);
@@ -79,9 +72,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   }
 
   private callApi = ([status, pid]): Observable<ParticipantCohortStatus> => {
-    if (status === '') {
-      return Observable.of(this.participant);
-    }
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.snapshot.params;
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
