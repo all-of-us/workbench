@@ -714,11 +714,10 @@ def local_mysql_import(cmd_name, *args)
     "Name of the GCS bucket containing the SQL dump"
   )
   op.parse.validate
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    common.run_inline %W{docker-compose run db-local-mysql-import
+
+  common = Common.new
+  common.run_inline %W{docker-compose run db-local-mysql-import
         --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
-  end
 end
 Common.register_command({
                             :invocation => "local-mysql-import",
