@@ -46,7 +46,7 @@ describe('InvitationKeyComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-          IconsModule,
+        IconsModule,
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()

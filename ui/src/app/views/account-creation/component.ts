@@ -10,8 +10,6 @@ import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
 
-
-
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
