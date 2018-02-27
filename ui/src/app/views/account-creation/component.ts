@@ -1,7 +1,10 @@
 import {Component} from '@angular/core';
+
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
+
 import {SignInService} from 'app/services/sign-in.service';
+
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
@@ -48,7 +51,7 @@ export class AccountCreationComponent {
     private profileService: ProfileService,
     private signInService: SignInService,
     private invitationKeyService: InvitationKeyComponent,
-    private appComponent : AppComponent
+    private appComponent: AppComponent
   ) {
     this.appComponent.backgroundImgSrc = this.backgroundImgSrc;
   }

@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
+
 import {AppComponent} from '../app/component';
+
 import {InvitationVerificationRequest, ProfileService} from 'generated';
 
 function isBlank(s: string) {

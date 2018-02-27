@@ -1,24 +1,25 @@
-import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
+
 import {ProfileService} from 'generated';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
+import {IconsModule} from '../../icons/icons.module';
 import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
-import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
+
+import {AppComponent} from '../app/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
-import {IconsModule} from '../../icons/icons.module';
-import {AppComponent} from '../app/component';
 import {PageTemplateComponent} from '../page-template/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
