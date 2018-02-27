@@ -14,7 +14,6 @@ import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
-import {IconsModule} from '../../icons/icons.module';
 import {SignInService} from '../../services/sign-in.service';
 
 import {AccountCreationComponent} from '../account-creation/component';
@@ -46,7 +45,6 @@ describe('InvitationKeyComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        IconsModule,
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
