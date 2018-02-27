@@ -9,8 +9,8 @@ export const initialState = fromJS({
   entities: {
     searchRequests: {
       [SR_ID]: {
-        includes: ['include0'],
-        excludes: ['exclude0'],
+        includes: [],
+        excludes: [],
         count: 0,
         isRequesting: false
       }
