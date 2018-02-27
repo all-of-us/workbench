@@ -700,6 +700,34 @@ Imports .sql file to cloudsql instance",
                             :fn => lambda { |*args| cloudsql_import("cloudsql-import", *args) }
                         })
 
+def local_mysql_import(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_option(
+    "--sql-dump-file [filename]",
+    lambda {|opts, v| opts.file = v},
+    "File name of the SQL dump to import"
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    lambda {|opts, v| opts.bucket = v},
+    "Name of the GCS bucket containing the SQL dump"
+  )
+  op.parse.validate
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-local-mysql-import
+        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
+  end
+end
+Common.register_command({
+                            :invocation => "local-mysql-import",
+                            :description => "local-mysql-import --sql-dump-file <FILE.sql> --bucket <BUCKET>
+Imports .sql file to local mysql instance",
+                            :fn => lambda { |*args| local_mysql_import("local-mysql-import", *args) }
+                        })
+
+
 def run_drop_cdr_db(*args)
   common = Common.new
   common.run_inline %W{docker-compose run drop-cdr-db}
