@@ -3,9 +3,9 @@
 <ng-template #notSignedIn>
 
   <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
-    <app-page-template style="width: 100%" [imageSrc]=backgroundImgSrc>
+    <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc>
       <app-invitation-key></app-invitation-key>
-    </app-page-template>
+    </app-page-template-signed-out>
   </div>
 </ng-template>
 <ng-template #signedIn>

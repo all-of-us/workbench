@@ -25,7 +25,7 @@ import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
-import {PageTemplateComponent} from './views/page-template/component';
+import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -92,7 +92,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     HomePageComponent,
     IdVerificationPageComponent,
     InvitationKeyComponent,
-    PageTemplateComponent,
+    PageTemplateSignedOutComponent,
     ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,

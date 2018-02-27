@@ -1,11 +1,11 @@
 import {Component, Input} from '@angular/core';
 
 @Component({
-  selector: 'app-page-template',
+  selector: 'app-page-template-signed-out',
   templateUrl: './component.html',
   styleUrls: ['./component.css']
 })
-export class PageTemplateComponent {
+export class PageTemplateSignedOutComponent {
   @Input() imageSrc: string;
   headerImg: string;
 

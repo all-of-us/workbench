@@ -10,7 +10,7 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
-import {PageTemplateComponent} from '../page-template/component';
+import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 
@@ -32,7 +32,7 @@ describe('AppComponent', () => {
         AccountCreationComponent,
         AppComponent,
         InvitationKeyComponent,
-        PageTemplateComponent,
+        PageTemplateSignedOutComponent,
         RoutingSpinnerComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
