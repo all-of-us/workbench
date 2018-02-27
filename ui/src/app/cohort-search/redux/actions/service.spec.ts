@@ -53,6 +53,8 @@ const DEMO_crit = fromJS({
 });
 
 const dummyState = initialState
+  .setIn(['entities', 'searchRequests', SR_ID, 'includes'], List(['include0']))
+  .setIn(['entities', 'searchRequests', SR_ID, 'excludes'], List(['exclude0']))
   .setIn(['entities', 'groups', 'include0', 'items'], List([dummyItem.get('id')]))
   .setIn(['entities', 'parameters', 'param0'], zeroCrit)
   .setIn(['entities', 'parameters', 'param1'], oneCrit)

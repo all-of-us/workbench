@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 import {CRITERIA_TYPES} from '../constant';
 import {CohortSearchActions} from '../redux';
@@ -10,15 +10,12 @@ import {SearchRequest} from 'generated';
   templateUrl: './search-group-select.component.html',
   styleUrls: ['./search-group-select.component.css']
 })
-export class SearchGroupSelectComponent implements OnInit {
+export class SearchGroupSelectComponent {
   @Input() role: keyof SearchRequest;
 
   readonly criteriaTypes = CRITERIA_TYPES;
 
   constructor(private actions: CohortSearchActions) {}
-
-  ngOnInit() {
-  }
 
   launchWizard(criteriaType: string) {
     const itemId = this.actions.generateId('items');
@@ -28,5 +25,4 @@ export class SearchGroupSelectComponent implements OnInit {
     const context = {criteriaType, role, groupId, itemId};
     this.actions.openWizard(itemId, context);
   }
-
 }

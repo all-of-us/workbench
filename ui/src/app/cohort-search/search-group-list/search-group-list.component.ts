@@ -15,13 +15,6 @@ export class SearchGroupListComponent {
   @Input() role: keyof SearchRequest;
   @Input() groups$: Observable<List<any>>;
 
-  constructor(private actions: CohortSearchActions) {}
-
-  initGroup() {
-    const newId = this.actions.generateId(this.role);
-    this.actions.initGroup(this.role, newId);
-  }
-
   get title() {
     return this.role.slice(0, -1) + ` Participants Where`;
   }
