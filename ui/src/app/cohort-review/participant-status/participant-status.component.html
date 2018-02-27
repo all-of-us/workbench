@@ -11,7 +11,7 @@
   <h4 class="participant-status-margin-top">Status</h4>
   <div class="select form-group">
     <select [formControl]="statusControl">
-      <option *ngFor="let status of cohortStatusList()"
+      <option *ngFor="let status of cohortStatusList"
               [value]="status.key">{{status.value}}
       </option>
     </select>
