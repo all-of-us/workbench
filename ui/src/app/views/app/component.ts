@@ -46,7 +46,7 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private locationService: Location,
     private router: Router,
-    private titleService: Title,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {

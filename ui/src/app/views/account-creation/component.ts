@@ -36,12 +36,15 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   conflictError = false;
   usernameCheckTimeout: NodeJS.Timer;
+  backgroundImgSrc: string = "/assets/images/create-account-male@2x.jpg";
 
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
     private invitationKeyService: InvitationKeyComponent
-  ) {}
+  ) {
+    this.invitationKeyService.backgroundImgSrc = this.backgroundImgSrc;
+  }
 
   createAccount(): void {
     this.showAllFieldsRequiredError = false;

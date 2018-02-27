@@ -22,6 +22,7 @@ export class InvitationKeyComponent {
   invitationKeyInvalid: boolean;
   invitationKeyRequestEmail: string;
   requestSent: boolean;
+  backgroundImgSrc: string = '/assets/images/invitation-female@2x.jpg';
   constructor(
     private profileService: ProfileService
   ) {

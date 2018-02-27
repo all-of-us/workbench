@@ -1,12 +1,11 @@
 .sign-in-container {
-  background-image: url('/assets/images/group.jpg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  height: 95vh;
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
+  width: auto;
 }
 
 .sign-in-inner-container {
