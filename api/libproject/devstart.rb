@@ -88,6 +88,77 @@ Common.register_command({
   :fn => lambda { |*args| dev_up(*args) }
 })
 
+def run_local_migrations()
+  # Runs migrations against the local database.
+  common = Common.new
+  Dir.chdir('db') do
+    common.run_inline %W{./run-migrations.sh main}
+    common.run_inline %W{./run-migrations.sh data local}
+  end
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
+    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  end
+  common.run_inline %W{./gradlew :tools:loadConfig -Pconfig_file=../config/config_local.json}
+end
+
+def run_local_servers()
+  # Starts up API and public-api servers and waits for them to come all the way up.
+  common = Common.new
+  common.status "Starting API server..."
+  common.run_inline %W{./gradlew appengineStart}
+  Dir.chdir('../public-api') do
+    common.status "Starting public API server..."
+    common.run_inline %W{../api/gradlew appengineStart}
+  end
+end
+
+def run_local_apis_without_docker()
+  ENV.update(Workbench::read_vars_file("db/vars.env"))
+  ENV["DB_HOST"] = "127.0.0.1"
+  ENV["MYSQL_ROOT_PASSWORD"] = "root"
+  ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
+  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
+  run_local_migrations
+  run_local_servers
+end
+
+Common.register_command({
+  :invocation => "run-local-apis-without-docker",
+  :description => "Runs migrations and api and public-api asynchronously, using the local MySQL instance; does not use docker",
+  :fn => lambda { |*args| run_local_apis_without_docker() }
+})
+
+def eval_cmd(cmd)
+  Common.new.put_command(cmd)
+  return `#{cmd}`
+end
+
+def run_local_api_tests()
+  common = Common.new
+  status = eval_cmd('curl http://localhost:8081/')
+  if status != 'AllOfUs Workbench API'
+    common.error "Error probing api; received: #{status}"
+    common.error "Server logs:"
+    common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
+    exit 1
+  end
+  status_2 = eval_cmd('curl http://localhost:8083/')
+  if status_2 != 'AllOfUs Public API'
+    common.error "Error probing public-api; received: #{status_2}"
+    common.error "Server logs:"
+    common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
+    exit 1
+  end
+  common.status "All API tests passed."
+end
+
+Common.register_command({
+  :invocation => "run-local-api-tests",
+  :description => "Runs smoke tests against local api and public-api servers",
+  :fn => lambda { |*args| run_local_api_tests() }
+})
+
 def get_gsuite_admin_key(project)
   unless File.exist? GSUITE_ADMIN_KEY_PATH
     common = Common.new
