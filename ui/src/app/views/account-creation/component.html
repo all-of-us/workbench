@@ -1,59 +1,58 @@
-<div style="padding: 1rem;">
-  <form (ngSubmit)="createAccount()">
-    <div *ngIf="!accountCreated" class="form-area">
-      <div class="form-section">
-        <label for="givenName">Given Name:</label>
-        <input type="text" class="input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName">
-      </div>
-      <div class="form-section">
-        <label for="familyName">Family Name:</label>
-        <input type="text" class="input" id="familyName" name="familyName" [(ngModel)]="profile.familyName">
-      </div>
-      <div class="form-section">
-        <label for="username">Username:</label>
-        <input type="text" class="input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()">
-      </div>
+<form (ngSubmit)="createAccount()">
+  <h2>Create your account</h2>
+  <div>Lorem ipsum dolor sit amet, conser adipscing elit.</div>
+  <div *ngIf="!accountCreated" class="form-area">
+    <div class="form-section">
+      <input type="text" class="long-input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName" placeholder="Given Name">
+    </div>
+    <div class="form-section">
+      <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Family Name">
+    </div>
+    <div class="form-section">
+      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Email Address">
+    </div>
+    <div class="form-section">
+      <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="Create Account">
+      <h5 style="display: inline-block;">@fake-research-aou.org</h5>
       <div *ngIf="conflictError" class="error">
         Username is already taken.
       </div>
-      <div class="form-section">
-        <label for="contactEmail">Contact Email:</label>
-        <input type="text" class="input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail">
-      </div>
-      <div class="form-section">
-        <label for="password">Password:</label>
-        <input type="password" class="input" id="password" name="password" [(ngModel)]="password">
-      </div>
-      <div class="form-section">
-        <label for="passwordAgain">Password Again:</label>
-        <input type="password" class="input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain">
-      </div>
-      <div class="form-section">
-        <button (click)="createAccount()" class="btn btn-primary">Create Account</button>
-        <span class="spinner spinner-inline" *ngIf="creatingAcccount">
-          Creating account...
-        </span>
-      </div>
-      <div *ngIf="showAllFieldsRequiredError" class="error">
-        All fields are required.
-      </div>
-      <div *ngIf="showPasswordsDoNotMatchError" class="error">
-        Passwords do not match.
-      </div>
-      <div *ngIf="showPasswordLengthError" class="error">
-        Password must be between 8 and 100 characters long.
-      </div>
-      <div style="margin-top: 2rem; text-align: center;">Already have an account?</div>
-      <div style="display: flex; justify-content: space-around;">
-        <button (click)="signIn()" class="btn btn-primary">Sign In</button>
+    </div>
+    <div class="form-section">
+      <input type="password" class="short-input" id="password" name="password" [(ngModel)]="password" placeholder="Password">
+      <div class="hint-section">
+        <!-- TODO (blrubenstein) Put info icon here -->
+        <div style="font-size: 8pt; line-height: 0.6rem;">Contains at least one lowercase and one uppercase letter</div>
       </div>
     </div>
-  </form>
-  <div *ngIf="accountCreated">
-    <div style="text-align: center; color: darkgreen;">Account created successfully.</div>
-    <div style="text-align: center;">Sign-in to your new account below.</div>
-    <div style="display: flex; justify-content: space-around;">
-      <button (click)="signIn()" class="btn btn-primary">Sign In</button>
+    <div class="form-section">
+      <input type="password" class="short-input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain" placeholder="Confirm Password">
     </div>
+
+    <div class="form-section">
+      <button (click)="createAccount()" class="btn btn-primary short-button">Next</button>
+      <span class="spinner spinner-inline" *ngIf="creatingAcccount">
+        Creating account...
+      </span>
+    </div>
+    <div *ngIf="showAllFieldsRequiredError" class="error">
+      All fields are required.
+    </div>
+    <div *ngIf="showPasswordsDoNotMatchError" class="error">
+      Passwords do not match.
+    </div>
+    <div *ngIf="showPasswordLengthError" class="error">
+      Password must be between 8 and 100 characters long.
+    </div>
+    <div *ngIf="containsLowerAndUpperError" class="error">
+      Password must contain one lowercase and one uppercase letter.
+    </div>
+  </div>
+</form>
+<div *ngIf="accountCreated">
+  <div style="text-align: center; color: darkgreen;">Account created successfully.</div>
+  <div style="text-align: center;">Sign-in to your new account below.</div>
+  <div style="display: flex; justify-content: space-around;">
+    <button (click)="signIn()" class="btn btn-primary">Sign In</button>
   </div>
 </div>
