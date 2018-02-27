@@ -116,7 +116,6 @@ end
 def run_local_apis_without_docker()
   ENV.update(Workbench::read_vars_file("db/vars.env"))
   ENV["DB_HOST"] = "127.0.0.1"
-  ENV["MYSQL_ROOT_PASSWORD"] = "root"
   ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
   ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
   run_local_migrations
@@ -125,7 +124,7 @@ end
 
 Common.register_command({
   :invocation => "run-local-apis-without-docker",
-  :description => "Runs migrations and api and public-api asynchronously, using the local MySQL instance; does not use docker",
+  :description => "Runs migrations and api and public-api asynchronously, using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => lambda { |*args| run_local_apis_without_docker() }
 })
 
