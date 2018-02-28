@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
  */
 public interface MailChimpService {
   static final String MAILCHIMP_PENDING = "pending";
-  static final String MAILCHIMP_ERROR_MESSAGE = "detail";
   static final String MAILCHIMP_KEY_ID = "id";
   static final String MAILCHIMP_KEY_STATUS = "status";
 

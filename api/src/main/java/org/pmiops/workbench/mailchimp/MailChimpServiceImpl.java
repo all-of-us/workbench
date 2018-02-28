@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Provider;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class MailChimpServiceImpl implements MailChimpService {
   // TO-DO: create a general "call MailChimp API" that handles an IOException so addUserContactEmail and getMember don't have to
 
   @Override
-  public String addUserContactEmail(String contactEmail) throws BadRequestException {
+  public String addUserContactEmail(String contactEmail) {
     String userId;
     Create createRequest = new Create(
         getListId(),
@@ -50,7 +49,7 @@ public class MailChimpServiceImpl implements MailChimpService {
   }
 
   @Override
-  public void deleteUserContactEmail(String contactEmail) throws BadRequestException {
+  public void deleteUserContactEmail(String contactEmail) {
     try {
       getClient().execute(new DeleteMemberMethod(getListId(), contactEmail));
     } catch (IOException | MailchimpException e) {
