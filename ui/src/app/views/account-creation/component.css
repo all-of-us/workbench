@@ -1,7 +1,3 @@
-.input {
-  width: 100%;
-}
-
 .error {
   background-color: #ffeeee;
   padding: 0 0.5rem;
@@ -12,6 +8,27 @@
   margin-top: 1rem;
 }
 
-.form-section:first-child {
-  margin-top: 0;
+.form-section:first {
+  margin-top: 0rem;
+}
+
+.long-input {
+  width: 20rem;
+}
+
+.short-input {
+  width: 12rem;
+}
+
+.short-button {
+  width: 12rem;
+  height: 2rem;
+  margin: 0rem;
+}
+
+.hint-section {
+  display: inline-block;
+  width: 8rem;
+  vertical-align: middle;
+  color: black;
 }
