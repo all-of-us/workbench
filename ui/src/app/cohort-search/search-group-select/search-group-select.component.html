@@ -1,0 +1,23 @@
+<div
+  class="card bg-faded"
+  [style.margin-top]="'0.6rem'"
+  [style.margin-bottom]="'0.6rem'">
+
+  <div class="card-header">
+    <clr-dropdown>
+      <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+        Add Criteria <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <button
+          *ngFor="let criteria of criteriaTypes"
+          id="criteria.type"
+          class="dropdown-item"
+          type="button"
+          (click)="launchWizard(criteria.type)"
+          clrDropdownItem>{{criteria.name}}</button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </div>
+
+</div>
