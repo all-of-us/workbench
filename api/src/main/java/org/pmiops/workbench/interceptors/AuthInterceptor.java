@@ -123,7 +123,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     String userEmail = userInfo.getEmail();
     if (userEmail.equals(workbenchEnvironmentProvider.get().getApplicationServiceAccountName())) {
-      // The application service account is able to make any API call.
+      // the application service account is able to make any API call.
       return true;
     }
     String gsuiteDomainSuffix =
