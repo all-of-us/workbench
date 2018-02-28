@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
+import {InterceptedHttp} from './factory/InterceptedHttp';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
@@ -15,23 +16,22 @@ import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
+import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomePageComponent} from './views/home-page/component';
-
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
+import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
-
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
-import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -44,7 +44,6 @@ import {
   Configuration,
   StatusService
 } from 'generated';
-import {InterceptedHttp} from './factory/InterceptedHttp';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -93,6 +92,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     HomePageComponent,
     IdVerificationPageComponent,
     InvitationKeyComponent,
+    PageTemplateSignedOutComponent,
     ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,

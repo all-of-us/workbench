@@ -1,55 +1,17 @@
 <ng-template *ngIf="(user | async).isSignedIn; then signedIn else notSignedIn"></ng-template>
-<ng-template #logoImages>
-  <a class="image-link-wrapper" routerLink="/">
-    <img class="main-logo" src="assets/images/all-of-us-logo.svg" alt="All of Us"
-    style="height: 100%;">
-  </a>
-  <img class="portal-logo" src="assets/images/portal-logo.svg" alt="Researcher Portal"
-    style="margin-left: 0.5rem; height: 100%;">
-</ng-template>
+
 <ng-template #notSignedIn>
 
-  <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === 0">
-    <div class="page-container">
-      <div style="height: 3rem;">
-        <ng-template *ngIf="true; then logoImages"></ng-template>
-      </div>
-      <div>
-        <button (click)="signIn()" class="btn">Sign In to Workbench</button>
-      </div>
-    </div>
-    <div>
-      <!--
-        Angular's builtin Router module will attach specific views here
-        based on clicking routerLink elements (above) or router.navigate calls.
-      -->
-      <router-outlet></router-outlet>
-    </div>
-  </div>
-
   <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
-    <div class="sign-in-inner-container" [style.margin-top]="getTopMargin()">
-      <div style="height: 2rem; margin: 0.5rem 2rem;">
-        <ng-template *ngIf="true; then logoImages"></ng-template>
-      </div>
-      <div *ngIf="!showCreateAccount;" style="margin-top: 1.5rem;">
-        <div style="display: flex; justify-content: space-around;">
-          <button (click)="showCreateAccount = true" class="btn btn-primary">Create Account</button>
-        </div>
-        <div style="display: flex; justify-content: space-around;">
-          <button (click)="signIn()" class="btn btn-primary">Sign In</button>
-        </div>
-      </div>
-      <div *ngIf="showCreateAccount;">
-        <app-invitation-key></app-invitation-key>
-      </div>
-    </div>
+    <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc>
+      <app-invitation-key></app-invitation-key>
+    </app-page-template-signed-out>
   </div>
 </ng-template>
 <ng-template #signedIn>
   <div class="page-container">
     <div style="height: 2rem;">
-      <ng-template *ngIf="true; then logoImages"></ng-template>
+     // <ng-template *ngIf="true; then logoImages"></ng-template>
     </div>
     <clr-dropdown>
       <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
