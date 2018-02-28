@@ -16,6 +16,7 @@ import {
 } from '../../../testing/test-helpers';
 import {SignInService} from '../../services/sign-in.service';
 
+import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -52,6 +53,7 @@ describe('InvitationKeyComponent', () => {
       declarations: [
         AppComponent,
         AccountCreationComponent,
+        AccountCreationSuccessComponent,
         InvitationKeyComponent,
         PageTemplateSignedOutComponent,
         RoutingSpinnerComponent
