@@ -15,20 +15,7 @@ export const initialState = fromJS({
         isRequesting: false
       }
     },
-    groups: {
-      include0: {
-        id: 'include0',
-        items: [],
-        count: null,
-        isRequesting: false,
-      },
-      exclude0: {
-        id: 'exclude0',
-        items: [],
-        count: null,
-        isRequesting: false,
-      },
-    },
+    groups: {},
     items: {},
     parameters: {},
   },
