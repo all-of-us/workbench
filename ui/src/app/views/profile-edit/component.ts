@@ -10,7 +10,6 @@ import {ErrorResponse, Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
-  errorResponse: ErrorResponse = {message:null};
 
   constructor(
       private profileService: ProfileService,
