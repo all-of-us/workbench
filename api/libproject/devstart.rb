@@ -118,73 +118,96 @@ Common.register_command({
   :fn => lambda { |*args| run_local_migrations() }
 })
 
-def run_local_api()
+def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
-  common.run_inline %W{./gradlew appengineRun}
+  common.run_inline %W{./gradlew appengineStart}
 end
 
 Common.register_command({
-  :invocation => "run-local-api",
-  :description => "Runs api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => lambda { |*args| run_local_api() }
+  :invocation => "start-local-api",
+  :description => "Starts api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| start_local_api() }
 })
 
-def run_local_public_api()
+def stop_local_api()
+  setup_local_environment
+  common = Common.new
+  common.status "Stopping API server..."
+  common.run_inline %W{./gradlew appengineStop}
+end
+
+Common.register_command({
+  :invocation => "stop-local-api",
+  :description => "Stops locally running api.",
+  :fn => lambda { |*args| stop_local_api() }
+})
+
+def start_local_public_api()
   setup_local_environment
   common = Common.new
   Dir.chdir('../public-api') do
     common.status "Starting public API server..."
-    common.run_inline %W{../api/gradlew appengineRun}
+    common.run_inline %W{../api/gradlew appengineStart}
   end
 end
 
 Common.register_command({
-  :invocation => "run-local-public-api",
-  :description => "Runs public-api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => lambda { |*args| run_local_public_api() }
+  :invocation => "start-local-public-api",
+  :description => "Starts public-api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| start_local_public_api() }
+})
+
+def stop_local_public_api()
+  setup_local_environment
+  common = Common.new
+  Dir.chdir('../public-api') do
+    common.status "Stopping public API server..."
+    common.run_inline %W{../api/gradlew appengineStop}
+  end
+end
+
+Common.register_command({
+  :invocation => "stop-local-public-api",
+  :description => "Stops locally running public api.",
+  :fn => lambda { |*args| stop_local_public_api() }
 })
 
 def run_local_api_tests()
   common = Common.new
-  num_tries = 0
-  common.status "Waiting for api to start up..."
-  loop do
-    status = `curl --output /dev/null --silent --fail http://localhost:8081/`
-    break if status == 'AllOfUs Workbench API' or num_tries > 120
-    num_tries += 1
-    sleep 1
-  end
+  status = common.capture_stdout %W{curl --silent --fail http://localhost:8081/}
   if status != 'AllOfUs Workbench API'
-    common.error "Error probing api after two minutes; received: #{status}"
+    common.error "Error probing api; received: #{status}"
     common.error "Server logs:"
     common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
     exit 1
   end
   common.status "api started up."
-  num_tries = 0
-  common.status "Waiting for public-api to start up..."
-  loop do
-    status_2 = `curl --output /dev/null --silent --fail http://localhost:8083/`
-    break if status_2 == 'AllOfUs Workbench API' or num_tries > 120
-    num_tries += 1
-    sleep 1
-  end
-  if status_2 != 'AllOfUs Public API'
-    common.error "Error probing public-api after two minutes; received: #{status_2}"
+end
+
+Common.register_command({
+  :invocation => "run-local-api-tests",
+  :description => "Runs smoke tests against local api server",
+  :fn => lambda { |*args| run_local_api_tests() }
+})
+
+def run_local_public_api_tests()
+  common = Common.new
+  status = common.capture_stdout %W{curl --silent --fail http://localhost:8083/}
+  if status != 'AllOfUs Public API'
+    common.error "Error probing public-api; received: #{status}"
     common.error "Server logs:"
     common.run_inline %W{cat ../public-api/build/dev-appserver-out/dev_appserver.out}
     exit 1
   end
   common.status "public-api started up."
-  common.status "All API tests passed."
 end
 
 Common.register_command({
-  :invocation => "run-local-api-tests",
-  :description => "Runs smoke tests against local api and public-api servers",
-  :fn => lambda { |*args| run_local_api_tests() }
+  :invocation => "run-local-public-api-tests",
+  :description => "Runs smoke tests against public-api server",
+  :fn => lambda { |*args| run_local_public_api_tests() }
 })
 
 def get_gsuite_admin_key(project)

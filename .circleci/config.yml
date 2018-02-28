@@ -46,15 +46,10 @@ jobs:
           command: ./project.rb run-local-migrations
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-api
-          background: true
+          command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-public-api
-          background: true
-      - run:
-          working_directory: ~/workbench/api
-          command: ./project.rb run-local-api-tests
+          command: ./project.rb start-local-public-api && ./project.rb run-local-public-api-tests && ./project.rb stop-local-public-api
       - save_cache:
           paths:
             - ~/.gradle
