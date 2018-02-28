@@ -4,9 +4,7 @@ import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {HomePageComponent} from 'app/views/home-page/component';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   queryAllByCss,
@@ -50,8 +48,7 @@ describe('HomePageComponent', () => {
         HomePageComponent
       ],
       providers: [
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() }
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
       ] }).compileComponents().then(() => {
         homePage = new HomePage(TestBed);
       });

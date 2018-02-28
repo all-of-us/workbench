@@ -5,10 +5,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
@@ -57,7 +55,6 @@ describe('WorkspaceEditComponent', () => {
         ClarityModule.forRoot()
       ],
       providers: [
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: WorkspacesService, useValue: workspacesService },
         // Wrap in a factory function so we can later mutate the value if needed
         // for testing.

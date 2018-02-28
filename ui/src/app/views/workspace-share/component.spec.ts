@@ -5,10 +5,8 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
@@ -87,7 +85,6 @@ describe('WorkspaceShareComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
