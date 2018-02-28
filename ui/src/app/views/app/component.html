@@ -4,14 +4,24 @@
 
   <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
     <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc>
-      <app-invitation-key></app-invitation-key>
+      <div *ngIf="!showCreateAccount;" style="margin-top: 6.5rem;margin-left: -13rem;">
+        <div style="display: flex; justify-content: space-around;">
+          <button (click)="showCreateAccount = true" class="btn btn-primary">Create Account</button>
+        </div>
+        <div style="display: flex; justify-content: space-around;">
+          <button (click)="signIn()" class="btn btn-primary">Sign In</button>
+        </div>
+      </div>
+      <div *ngIf="showCreateAccount;">
+        <app-invitation-key></app-invitation-key>
+      </div>
     </app-page-template-signed-out>
   </div>
 </ng-template>
 <ng-template #signedIn>
   <div class="page-container">
     <div style="height: 2rem;">
-     // <ng-template *ngIf="true; then logoImages"></ng-template>
+      <ng-template *ngIf="true; then logoImages"></ng-template>
     </div>
     <clr-dropdown>
       <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
