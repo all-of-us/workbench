@@ -49,7 +49,7 @@ services:
       - db/vars.env
     ports:
       - 8083:8083
-      - 8084:8001
+      - 8084:8002
   db-migration:
     depends_on:
       - db
