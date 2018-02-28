@@ -206,7 +206,8 @@ workflows:
   build-test-deploy:
     jobs:
       - api-build-test-deploy
-      - ui-build-test-deploy
+      - api-local-tests
+      - ui-build-test-deploy      
   integration-test:
     triggers:
       - schedule:
