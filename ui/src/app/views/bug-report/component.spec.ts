@@ -5,10 +5,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {
   queryByCss,
@@ -61,7 +59,6 @@ describe('BugReportComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
         bugReportPage = new BugReportPage(TestBed);

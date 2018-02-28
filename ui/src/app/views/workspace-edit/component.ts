@@ -3,7 +3,6 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {isBlank} from 'app/utils';
 
 import {

@@ -3,8 +3,6 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {ShareWorkspaceResponse} from 'generated';
