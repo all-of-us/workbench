@@ -54,6 +54,5 @@ const routes: Routes = [{
   ]
 })
 export class CohortSearchModule {
-  constructor(store: ConfigureStore) {
-  }
+  constructor(store: ConfigureStore) {}
 }
