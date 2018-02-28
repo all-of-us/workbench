@@ -6,12 +6,9 @@ import {Component, Input} from '@angular/core';
   styleUrls: ['./component.css']
 })
 export class PageTemplateSignedOutComponent {
-  @Input() imageSrc: string;
-  headerImg: string;
+  @Input() imageSrc = '';
+  headerImg = '/assets/images/logo-registration_nonSignedIn.png';
 
-  constructor() {
-    this.imageSrc = '';
-    this.headerImg = '/assets/images/AoU-logo-registration_nonSignedIn.png';
-  }
+  constructor() {}
 }
 

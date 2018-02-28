@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Profile, ProfileService} from 'generated';
 
 @Component({

@@ -2,9 +2,9 @@
   background-color: #dedfe1;
   height:50rem;
   background-repeat: no-repeat;
-  background-position: top center;
+  background-position: center;
   width: 100%;
-  background-size: contain;
+  background-size: 100% 100%;
 }
 
 .headerImage {

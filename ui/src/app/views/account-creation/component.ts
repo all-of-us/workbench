@@ -43,7 +43,6 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   conflictError = false;
   usernameCheckTimeout: NodeJS.Timer;
-  backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
 
   constructor(
     private profileService: ProfileService,
@@ -51,7 +50,7 @@ export class AccountCreationComponent {
     private invitationKeyService: InvitationKeyComponent,
     private appComponent: AppComponent
   ) {
-    this.appComponent.backgroundImgSrc = this.backgroundImgSrc;
+    this.appComponent.backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
   }
 
   createAccount(): void {

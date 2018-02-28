@@ -58,7 +58,7 @@ describe('InvitationKeyComponent', () => {
       ],
       providers: [
         { provide: AppComponent, useValue: {}},
-        { provide: SignInService, useValue: {} },
+        { provide: SignInService, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
         invitationKeyPage = new InvitationKeyPage(TestBed);
