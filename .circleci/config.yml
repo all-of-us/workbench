@@ -43,7 +43,11 @@ jobs:
           command: ./project.rb test
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-apis-without-docker && ./project.rb run-local-api-tests
+          command: ./project.rb run-local-apis-without-docker
+          background: true
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-api-tests
       - save_cache:
           paths:
             - ~/.gradle

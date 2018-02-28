@@ -137,20 +137,33 @@ end
 
 def run_local_api_tests()
   common = Common.new
-  status = eval_cmd('curl http://127.0.0.1:8081/')
+  num_tries = 0
+  common.status "Waiting for api to start up..."
+  loop do
+    status = eval_cmd('curl --output /dev/null --silent --fail http://localhost:8081/')
+    break if status == 'AllOfUs Workbench API' or num_tries > 120
+    sleep 1
+  end
   if status != 'AllOfUs Workbench API'
-    common.error "Error probing api; received: #{status}"
+    common.error "Error probing api after two minutes; received: #{status}"
     common.error "Server logs:"
     common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
     exit 1
   end
-  status_2 = eval_cmd('curl http://127.0.0.1:8083/')
+  common.status "api started up."
+  common.status "Waiting for public-api to start up..."
+  loop do
+    status_2 = eval_cmd('curl --output /dev/null --silent --fail http://localhost:8083/')
+    break if status_2 == 'AllOfUs Workbench API' or num_tries > 120
+    sleep 1
+  end
   if status_2 != 'AllOfUs Public API'
-    common.error "Error probing public-api; received: #{status_2}"
+    common.error "Error probing public-api after two minutes; received: #{status_2}"
     common.error "Server logs:"
-    common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
+    common.run_inline %W{cat ../public-api/build/dev-appserver-out/dev_appserver.out}
     exit 1
   end
+  common.status "public-api started up."
   common.status "All API tests passed."
 end
 
