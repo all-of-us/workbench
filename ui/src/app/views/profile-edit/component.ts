@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {ErrorResponse, Profile, ProfileService} from 'generated';
+import {Profile, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -10,7 +10,6 @@ import {ErrorResponse, Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
-
   constructor(
       private profileService: ProfileService,
       private route: ActivatedRoute,
@@ -18,7 +17,7 @@ export class ProfileEditComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-      this.profileService.getMe().subscribe(
+    this.profileService.getMe().subscribe(
         (profile: Profile) => {
       this.profile = profile;
       this.profileLoaded = true;

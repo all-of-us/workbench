@@ -21,7 +21,7 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
-                        UserDao userDao) {
+      UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.mailChimpService = mailChimpService;
     this.userDao = userDao;

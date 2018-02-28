@@ -1,9 +1,9 @@
 package org.pmiops.workbench.exceptions;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.ecwid.maleorang.MailchimpException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.http.ResponseEntity;
