@@ -13,13 +13,14 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     List<Criteria> findCriteriaByTypeAndParentIdOrderByCodeAsc(@Param("type") String type, @Param("parentId") Long parentId);
 
     /** TODO: implement dynamic switching of schemas **/
-    @Query(value = "select c.code, c.domain_id as domainId from criteria c " +
+    @Query(value = "select distinct c.code, c.domain_id as domainId from criteria c " +
             "where c.parent_id in (" +
             "select id from criteria " +
             "where type = :type " +
-            "and code = :code " +
+            "and code like :code% " +
             "and is_selectable = 1 " +
-            "and is_group = 1) order by c.code asc", nativeQuery = true)
+            "and is_group = 1) " +
+            "and c.is_group = 0 and c.is_selectable = 1 order by c.code asc", nativeQuery = true)
     List<CodeDomainLookup> findCriteriaByTypeAndCode(@Param("type") String type, @Param("code") String code);
 
     /** TODO: implement dynamic switching of schemas **/
