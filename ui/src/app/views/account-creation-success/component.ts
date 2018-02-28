@@ -10,7 +10,7 @@ import {AppComponent} from '../app/component';
   templateUrl: './component.html'
 })
 export class AccountCreationSuccessComponent {
-  email:string;
+  email: string;
 
   constructor(
       private app: AppComponent,

@@ -16,7 +16,7 @@ import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 
 import {AccountCreationComponent} from './views/account-creation/component';
-import {AccountCreationSuccessComponent} from './views/account-creation-success/component'
+import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
