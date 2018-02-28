@@ -88,7 +88,17 @@ Common.register_command({
   :fn => lambda { |*args| dev_up(*args) }
 })
 
+def setup_local_environment()
+  root_password = ENV["MYSQL_ROOT_PASSWORD"]
+  ENV.update(Workbench::read_vars_file("db/vars.env"))
+  ENV["DB_HOST"] = "127.0.0.1"
+  ENV["MYSQL_ROOT_PASSWORD"] = root_password
+  ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
+  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
+end
+
 def run_local_migrations()
+  setup_local_environment
   # Runs migrations against the local database.
   common = Common.new
   Dir.chdir('db') do
@@ -102,46 +112,48 @@ def run_local_migrations()
   common.run_inline %W{./gradlew :tools:loadConfig -Pconfig_file=../config/config_local.json}
 end
 
-def run_local_servers()
-  # Starts up API and public-api servers and waits for them to come all the way up.
+Common.register_command({
+  :invocation => "run-local-migrations",
+  :description => "Runs DB migrations with the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| run_local_migrations() }
+})
+
+def run_local_api()
+  setup_local_environment
   common = Common.new
   common.status "Starting API server..."
-  common.run_inline %W{./gradlew appengineStart}
-  Dir.chdir('../public-api') do
-    common.status "Starting public API server..."
-    common.run_inline %W{../api/gradlew appengineStart}
-  end
-end
-
-def run_local_apis_without_docker()
-  root_password = ENV["MYSQL_ROOT_PASSWORD"]
-  ENV.update(Workbench::read_vars_file("db/vars.env"))
-  ENV["DB_HOST"] = "127.0.0.1"
-  ENV["MYSQL_ROOT_PASSWORD"] = root_password
-  ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
-  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
-  run_local_migrations
-  run_local_servers
+  common.run_inline %W{./gradlew appengineRun}
 end
 
 Common.register_command({
-  :invocation => "run-local-apis-without-docker",
-  :description => "Runs migrations and api and public-api asynchronously, using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => lambda { |*args| run_local_apis_without_docker() }
+  :invocation => "run-local-api",
+  :description => "Runs api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| run_local_api() }
 })
 
-def eval_cmd(cmd)
-  Common.new.put_command(cmd)
-  return `#{cmd}`
+def run_local_public_api()
+  setup_local_environment
+  common = Common.new
+  Dir.chdir('../public-api') do
+    common.status "Starting public API server..."
+    common.run_inline %W{../api/gradlew appengineRun}
+  end
 end
+
+Common.register_command({
+  :invocation => "run-local-public-api",
+  :description => "Runs public-api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| run_local_public_api() }
+})
 
 def run_local_api_tests()
   common = Common.new
   num_tries = 0
   common.status "Waiting for api to start up..."
   loop do
-    status = eval_cmd('curl --output /dev/null --silent --fail http://localhost:8081/')
+    status = `curl --output /dev/null --silent --fail http://localhost:8081/`
     break if status == 'AllOfUs Workbench API' or num_tries > 120
+    num_tries += 1
     sleep 1
   end
   if status != 'AllOfUs Workbench API'
@@ -151,10 +163,12 @@ def run_local_api_tests()
     exit 1
   end
   common.status "api started up."
+  num_tries = 0
   common.status "Waiting for public-api to start up..."
   loop do
-    status_2 = eval_cmd('curl --output /dev/null --silent --fail http://localhost:8083/')
+    status_2 = `curl --output /dev/null --silent --fail http://localhost:8083/`
     break if status_2 == 'AllOfUs Workbench API' or num_tries > 120
+    num_tries += 1
     sleep 1
   end
   if status_2 != 'AllOfUs Public API'

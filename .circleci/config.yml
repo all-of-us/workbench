@@ -43,7 +43,14 @@ jobs:
           command: ./project.rb test
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb run-local-apis-without-docker
+          command: ./project.rb run-local-migrations
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-api
+          background: true
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-public-api
           background: true
       - run:
           working_directory: ~/workbench/api
