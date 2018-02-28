@@ -17,6 +17,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -54,15 +55,18 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
+  private final Provider<WorkbenchEnvironment> workbenchEnvironmentProvider;
 
   @Autowired
   public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService) {
+      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService,
+      Provider<WorkbenchEnvironment> workbenchEnvironmentProvider) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
+    this.workbenchEnvironmentProvider = workbenchEnvironmentProvider;
   }
 
   /**
@@ -118,6 +122,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // TODO: check Google group membership to ensure user is in registered user group
 
     String userEmail = userInfo.getEmail();
+    if (userEmail.equals(workbenchEnvironmentProvider.get().getApplicationServiceAccountName())) {
+      // The application service account is able to make any API call.
+      return true;
+    }
     String gsuiteDomainSuffix =
         "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
     if (!userEmail.endsWith(gsuiteDomainSuffix)) {
