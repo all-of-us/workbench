@@ -1,10 +1,14 @@
 import {Component} from '@angular/core';
+
+import {AppComponent} from '../app/component';
+import {InvitationKeyComponent} from '../invitation-key/component';
+
 import {SignInService} from 'app/services/sign-in.service';
+
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
-import {InvitationKeyComponent} from '../invitation-key/component';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -43,8 +47,11 @@ export class AccountCreationComponent {
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
-    private invitationKeyService: InvitationKeyComponent
-  ) {}
+    private invitationKeyService: InvitationKeyComponent,
+    private appComponent: AppComponent
+  ) {
+    this.appComponent.backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
+  }
 
   createAccount(): void {
     this.containsLowerAndUpperError = false;

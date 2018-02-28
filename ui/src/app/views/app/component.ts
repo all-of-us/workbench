@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-
+  backgroundImgSrc: string;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -45,7 +45,7 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private locationService: Location,
     private router: Router,
-    private titleService: Title,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {
