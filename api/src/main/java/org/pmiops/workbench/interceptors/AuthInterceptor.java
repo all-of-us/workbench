@@ -55,18 +55,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
   private final UserService userService;
-  private final Provider<WorkbenchEnvironment> workbenchEnvironmentProvider;
 
   @Autowired
   public AuthInterceptor(UserInfoService userInfoService, FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService,
-      Provider<WorkbenchEnvironment> workbenchEnvironmentProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider, UserDao userDao, UserService userService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userDao = userDao;
     this.userService = userService;
-    this.workbenchEnvironmentProvider = workbenchEnvironmentProvider;
   }
 
   /**
@@ -122,12 +119,22 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // TODO: check Google group membership to ensure user is in registered user group
 
     String userEmail = userInfo.getEmail();
-    if (userEmail.equals(workbenchEnvironmentProvider.get().getApplicationServiceAccountName())) {
-      // the application service account is able to make any API call.
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userEmail)) {
+      // Whitelisted service accounts are able to make API calls, too.
+      // TODO: stop treating service accounts as normal users, have a separate table for them,
+      // administrators.
+      User user = userDao.findUserByEmail(userEmail);
+      if (user == null) {
+        user = userService.createUser(null, null, userEmail, null);
+      }
+      SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
+          token));
+      log.log(Level.INFO, "{0} service account in use", userInfo.getEmail());
       return true;
     }
     String gsuiteDomainSuffix =
-        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+        "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
     if (!userEmail.endsWith(gsuiteDomainSuffix)) {
       try {
         // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a

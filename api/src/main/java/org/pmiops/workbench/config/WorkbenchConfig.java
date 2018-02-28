@@ -1,5 +1,7 @@
 package org.pmiops.workbench.config;
 
+import java.util.ArrayList;
+
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
  * See {@link CacheSpringConfiguration}. This should be kept in sync with files in the config/ directory.
@@ -15,6 +17,12 @@ public class WorkbenchConfig {
   }
 
   public FireCloudConfig firecloud;
+
+  public static class AuthConfig {
+    public ArrayList<String> serviceAccountApiUsers;
+  }
+
+  public AuthConfig auth;
 
   public static class CdrConfig {
     public String defaultCdrVersion;
