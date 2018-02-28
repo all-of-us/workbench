@@ -137,14 +137,14 @@ end
 
 def run_local_api_tests()
   common = Common.new
-  status = eval_cmd('curl http://localhost:8081/')
+  status = eval_cmd('curl http://127.0.0.1:8081/')
   if status != 'AllOfUs Workbench API'
     common.error "Error probing api; received: #{status}"
     common.error "Server logs:"
     common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
     exit 1
   end
-  status_2 = eval_cmd('curl http://localhost:8083/')
+  status_2 = eval_cmd('curl http://127.0.0.1:8083/')
   if status_2 != 'AllOfUs Public API'
     common.error "Error probing public-api; received: #{status_2}"
     common.error "Server logs:"
