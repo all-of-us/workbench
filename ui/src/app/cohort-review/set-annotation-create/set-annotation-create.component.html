@@ -1,4 +1,4 @@
-<form [formGroup]="form" ngSubmit="submit()">
+<form [formGroup]="form" ngSubmit="submit()" class="compact">
   <section class="form-block">
     <label>Create a new Cohort-wide Annotation</label>
 
@@ -7,7 +7,7 @@
       <label
         aria-haspopup="true"
         role="tooltip"
-        class="tooltip tooltip-validation tooltip-sm"
+        class="tooltip tooltip-validation tooltip-sm tooltip-right"
         [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
           name="name"
@@ -21,99 +21,53 @@
     </div>
 
     <div class="form-group">
-      <label for="kind">Annotation Type</label>
-
-      <!-- STRING -->
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-string"
-          formControlName="kind"
-          [value]="kinds.STRING">
-        <label for="kind-string">Text</label>
-      </div>
-
-      <!-- ENUM -->
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-enum"
-          formControlName="kind"
-          [value]="kinds.ENUM">
-        <label for="kind-enum">Enumeration</label>
-      </div>
-
-      <!-- DATE -->
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-date"
-          formControlName="kind"
-          [value]="kinds.DATE">
-        <label for="kind-date">Date</label>
-      </div>
-
-      <!-- Provisional Datatypes -->
-      <!-- BOOLEAN -->
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-boolean"
-          formControlName="kind"
-          [value]="kinds.BOOLEAN">
-        <label for="kind-boolean">Boolean</label>
-      </div>
-
-      <!-- INTEGER -->
-      <div class="radio">
-        <input type="radio"
-          name="kind"
-          id="kind-integer"
-          formControlName="kind"
-          [value]="kinds.INTEGER">
-        <label for="kind-integer">Integer</label>
+      <label for="kind" class="required">Annotation Data Type</label>
+      <div class="select">
+        <select id="kind" name="kind" formControlName="kind">
+          <option *ngFor="let dt of datatypes" [value]="dt.value">
+              {{ dt.displayName }}
+          </option>
+        </select>
       </div>
     </div>
   </section>
 
   <!-- Specify the enumeration -->
-  <section *ngIf="kind.value === kinds.ENUM" class="form-block">
-    <label for="enum-values">
-      Enumerated Values
-      <button
-        type="button"
-        class="btn btn-sm btn-icon btn-primary"
-        (click)="addEnumValue()"
-        title="Add a value to the enumeration">
-        <clr-icon shape="plus"></clr-icon>
-      </button>
-    </label>
-    <div formArrayName="enumValues">
-      <div
-        *ngFor="let valControl of enumValues.controls; let i=index"
-        [formGroupName]="i"
-        class="form-group">
-        <label>
-          {{ i }}
-          <button
-            type="button"
-            class="btn btn-sm btn-icon btn-danger"
-            (click)="removeEnumValue(i)"
-            title="Remove this value from the enumeration">
-            <clr-icon shape="trash"></clr-icon>
-          </button>
-        </label>
-        <input type="text" formControlName="value">
+  <ng-container *ngIf="isEnum">
+    <hr />
+    <section class="form-block">
+      <label for="enum-values">Values</label>
+      <div class="form-group">
+        <label for="add-value">Add a Value</label>
+        <input type="text"
+          name="add-value"
+          id="add-value"
+          formControlName="addValue">
+        <button type="button"
+          class="btn btn-icon btn-sm"
+          (click)="addEnumValue()">
+          <clr-icon shape="plus" size="18"></clr-icon>
+        </button>
       </div>
-    </div>
-  </section>
+      <ul>
+        <li *ngFor="let val of enumValues">
+          <button type="button"
+            class="btn btn-icon btn-link btn-sm text-danger"
+            (click)="removeEnumValue(val)">
+            <clr-icon shape="close" size="18"></clr-icon>
+          </button>
+          {{ val }}
+        </li>
+      </ul>
+    </section>
+  </ng-container>
 
   <button
     type="button"
     class="btn btn-primary-outline"
     (click)="create()"
     [clrLoading]="posting"
-    [disabled]="form.invalid">
+    [disabled]="formIsInvalid">
     Create
   </button>
   <button
