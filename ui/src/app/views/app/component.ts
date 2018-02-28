@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-  backgroundImgSrc: string;
+  backgroundImgSrc = '/assets/images/group.jpg';
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
