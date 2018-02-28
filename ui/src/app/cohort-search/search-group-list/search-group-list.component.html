@@ -5,6 +5,7 @@
 <!-- .size, not .length => this is an immutable.js list -->
 <div class="search-groups">
   <div *ngFor="let group of (groups$ | async); let i = index">
+    <!--<div *ngIf="i > 0" class="text-center font-weight-bold">AND</div>-->
     <app-search-group [group]="group" [role]="role">
     </app-search-group>
     <div *ngIf="(groups$ | async)?.size > 0" class="text-center font-weight-bold">AND</div>

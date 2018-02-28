@@ -16,6 +16,7 @@ export class SearchGroupListComponent {
   @Input() groups$: Observable<List<any>>;
 
   get title() {
-    return this.role.slice(0, -1) + ` Participants Where`;
+    const prefix = this.role === 'excludes' ? 'And ' : '';
+    return prefix + this.role.slice(0, -1) + ` Participants Where`;
   }
 }

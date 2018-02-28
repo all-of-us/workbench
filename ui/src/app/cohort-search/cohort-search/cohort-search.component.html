@@ -7,7 +7,7 @@
       </app-search-group-list>
     </div>
 
-    <div class="col-xl-4 col-lg-6" id="exclude-groups">
+    <div *ngIf="(initShowChart$ | async)" class="col-xl-4 col-lg-6" id="exclude-groups">
       <app-search-group-list
         [role]="'excludes'"
         [groups$]="excludeGroups$">
