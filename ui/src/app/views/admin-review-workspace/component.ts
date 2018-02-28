@@ -1,7 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-
 import {
   ResearchPurposeReviewRequest,
   Workspace,

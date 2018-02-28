@@ -4,11 +4,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorHandlingService} from '../../services/error-handling.service';
 import {CohortEditComponent} from './component';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 
 import {CohortsService} from 'generated';
 
@@ -42,7 +40,6 @@ describe('CohortEditComponent', () => {
       providers: [
         { provide: Router, useClass: RouterStub },
         { provide: CohortsService, useClass: CohortsServiceStub },
-        { provide: ErrorHandlingService, useClass: ErrorHandlingServiceStub },
         {
           provide: ActivatedRoute,
           deps: [CohortsServiceStub],
