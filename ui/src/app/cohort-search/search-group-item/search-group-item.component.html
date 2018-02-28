@@ -16,7 +16,8 @@
       <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
       <span class="text-muted">Contains</span>
       <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
-      <span class="hidden">{{ codes }}</span>
+      <!--<span class="hidden">{{ codes }}</span>-->
+      <span class="text-muted">{{ codes }}</span>
     </small>
     <small class="text-muted padding-right">|</small>
     <span *ngIf="isRequesting"

@@ -3,8 +3,9 @@
 }
 
 .line-item {
+  justify-content: flex-start;
   min-width: 0;
-  flex: 4;
+  flex: 6;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
