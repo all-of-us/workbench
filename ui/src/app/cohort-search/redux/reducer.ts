@@ -5,6 +5,7 @@ import {
   activeGroupId,
   activeItem,
   activeParameterList,
+  activeRole,
   CohortSearchState,
   getGroup,
   initialState,
@@ -45,7 +46,6 @@ import {
   RESET_STORE,
   RootAction,
 } from './actions/types';
-import {activeRole} from './store/selectors';
 /* tslint:enable:ordered-imports */
 
 /**
