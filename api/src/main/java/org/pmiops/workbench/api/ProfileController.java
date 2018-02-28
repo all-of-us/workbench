@@ -63,10 +63,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileController implements ProfileApiDelegate {
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
-      .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
-      .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
-      .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
-      .build();
+          .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
+          .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
+          .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
+          .build();
   private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
       BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
       new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
@@ -100,13 +100,13 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
-      UserDao userDao,
-      Clock clock, UserService userService, FireCloudService fireCloudService,
-      DirectoryService directoryService,
-      CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
-      MailChimpService mailChimpService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkbenchEnvironment workbenchEnvironment) {
+                    UserDao userDao,
+                    Clock clock, UserService userService, FireCloudService fireCloudService,
+                    DirectoryService directoryService,
+                    CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
+                    MailChimpService mailChimpService,
+                    Provider<WorkbenchConfig> workbenchConfigProvider,
+                    WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userDao = userDao;
@@ -205,7 +205,7 @@ public class ProfileController implements ProfileApiDelegate {
         // environments (and hopefully never, given the prefix we're using.) If it happens,
         // we may need to pick a different prefix.
         log.log(Level.SEVERE, String.format("Unable to add user to billing project %s: %s; " +
-            "consider changing billing project prefix", billingProjectName,
+                "consider changing billing project prefix", billingProjectName,
             e.getResponseBody()), e);
         throw new ServerErrorException("Unable to add user to billing project", e);
       } else {
@@ -297,10 +297,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
     try {
-      Profile profile = profileService.getProfile(user);
-      return ResponseEntity.ok(profile);
-    } catch (BadRequestException e) {
-      throw e;
+      return ResponseEntity.ok(profileService.getProfile(user));
+    } catch (ApiException e) {
+      log.log(Level.INFO, "Error calling FireCloud", e);
+      return ResponseEntity.status(e.getCode()).build();
     }
   }
 
@@ -333,8 +333,8 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       verifyInvitationKey(request.getInvitationKey());
       googleUser = directoryService.createUser(request.getProfile().getGivenName(),
-      request.getProfile().getFamilyName(), request.getProfile().getUsername(),
-      request.getPassword());
+          request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+          request.getPassword());
     }
     catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
@@ -365,13 +365,13 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> submitIdVerification(IdVerificationRequest request) {
     // TODO(dmohs): Prevent this if the user has already attempted verification?
     Person person = blockscoreService.createPerson(
-      request.getFirstName(), request.getLastName(),
-      new Address()
-        .setStreet1(request.getStreetLine1()).setStreet2(request.getStreetLine2())
-        .setCity(request.getCity()).setSubdivision(request.getState())
-        .setPostalCode(request.getZip()).setCountryCode("US"),
-      request.getDob(),
-      request.getDocumentType(), request.getDocumentNumber()
+        request.getFirstName(), request.getLastName(),
+        new Address()
+            .setStreet1(request.getStreetLine1()).setStreet2(request.getStreetLine2())
+            .setCity(request.getCity()).setSubdivision(request.getState())
+            .setPostalCode(request.getZip()).setCountryCode("US"),
+        request.getDob(),
+        request.getDocumentType(), request.getDocumentNumber()
     );
 
     User user = userService.setBlockscoreIdVerification(person.getId(), person.isValid());
@@ -405,7 +405,7 @@ public class ProfileController implements ProfileApiDelegate {
   private void verifyInvitationKey(String invitationKey){
     if(invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
-        "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
   }
 
@@ -434,18 +434,13 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity updateProfile(Profile updatedProfile) {
+  public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        // send new email address to MailChimp to add to the list
         mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
-        // if user already had an email address sent to MailChimp, remove it from the list
-        if (user.getContactEmail() != null) {
-          mailChimpService.deleteUserContactEmail(user.getContactEmail());
-        }
         user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
@@ -461,8 +456,13 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
-    for (User user : userService.getNonVerifiedUsers()) {
-      responseList.add(profileService.getProfile(user));
+    try {
+      for (User user : userService.getNonVerifiedUsers()) {
+        responseList.add(profileService.getProfile(user));
+      }
+    } catch (ApiException e) {
+      log.log(Level.INFO, "Error calling FireCloud", e);
+      return ResponseEntity.status(e.getCode()).build();
     }
 
     response.setProfileList(responseList);

@@ -1,9 +1,6 @@
 package org.pmiops.workbench.auth;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -18,33 +15,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileService {
 
-  private static final Logger log = Logger.getLogger(ProfileController.class.getName());
   private final FireCloudService fireCloudService;
   private final MailChimpService mailChimpService;
   private final UserDao userDao;
 
   @Autowired
   public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
-      UserDao userDao) {
+                        UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.mailChimpService = mailChimpService;
     this.userDao = userDao;
   }
 
-  public Profile getProfile(User user) {
+  public Profile getProfile(User user) throws ApiException {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
     User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
     if (userWithAuthorities != null) {
       // If the user is already written to the database, use it and whatever authorities are there.
       user = userWithAuthorities;
     }
-    boolean enabledInFireCloud = false;
-    try {
-      enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
-    } catch (ApiException e) {
-      log.log(Level.SEVERE, "Error calling FireCloud", e);
-    }
 
+    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
