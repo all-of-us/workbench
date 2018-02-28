@@ -4,6 +4,11 @@ jobs:
   api-build-test-deploy:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
+      - image: mysql:5.7
+        environment:
+          - MYSQL_ROOT_PASSWORD=ubuntu
+          - MYSQL_USER=ubuntu
+          - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
       # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
@@ -13,6 +18,7 @@ jobs:
       # have room in Circle's 4G to get our work done.
       JAVA_TOOL_OPTIONS: -Xmx3g
       TERM: dumb
+      MYSQL_ROOT_PASSWORD: ubuntu
     steps:
       - checkout
       - run:
@@ -35,6 +41,15 @@ jobs:
       - run:
           working_directory: ~/workbench/api
           command: ./project.rb test
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb run-local-migrations
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb start-local-api && ./project.rb run-local-api-tests && ./project.rb stop-local-api
+      - run:
+          working_directory: ~/workbench/api
+          command: ./project.rb start-local-public-api && ./project.rb run-local-public-api-tests && ./project.rb stop-local-public-api
       - save_cache:
           paths:
             - ~/.gradle

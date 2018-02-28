@@ -88,6 +88,128 @@ Common.register_command({
   :fn => lambda { |*args| dev_up(*args) }
 })
 
+def setup_local_environment()
+  root_password = ENV["MYSQL_ROOT_PASSWORD"]
+  ENV.update(Workbench::read_vars_file("db/vars.env"))
+  ENV["DB_HOST"] = "127.0.0.1"
+  ENV["MYSQL_ROOT_PASSWORD"] = root_password
+  ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
+  ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
+end
+
+def run_local_migrations()
+  setup_local_environment
+  # Runs migrations against the local database.
+  common = Common.new
+  Dir.chdir('db') do
+    common.run_inline %W{./run-migrations.sh main}
+    common.run_inline %W{./run-migrations.sh data local}
+  end
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
+    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  end
+  common.run_inline %W{gradle :tools:loadConfig -Pconfig_file=../config/config_local.json}
+end
+
+Common.register_command({
+  :invocation => "run-local-migrations",
+  :description => "Runs DB migrations with the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| run_local_migrations() }
+})
+
+def start_local_api()
+  setup_local_environment
+  common = Common.new
+  common.status "Starting API server..."
+  common.run_inline %W{gradle appengineStart}
+end
+
+Common.register_command({
+  :invocation => "start-local-api",
+  :description => "Starts api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| start_local_api() }
+})
+
+def stop_local_api()
+  setup_local_environment
+  common = Common.new
+  common.status "Stopping API server..."
+  common.run_inline %W{gradle appengineStop}
+end
+
+Common.register_command({
+  :invocation => "stop-local-api",
+  :description => "Stops locally running api.",
+  :fn => lambda { |*args| stop_local_api() }
+})
+
+def start_local_public_api()
+  setup_local_environment
+  common = Common.new
+  Dir.chdir('../public-api') do
+    common.status "Starting public API server..."
+    common.run_inline %W{gradle appengineStart}
+  end
+end
+
+Common.register_command({
+  :invocation => "start-local-public-api",
+  :description => "Starts public-api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :fn => lambda { |*args| start_local_public_api() }
+})
+
+def stop_local_public_api()
+  setup_local_environment
+  common = Common.new
+  Dir.chdir('../public-api') do
+    common.status "Stopping public API server..."
+    common.run_inline %W{gradle appengineStop}
+  end
+end
+
+Common.register_command({
+  :invocation => "stop-local-public-api",
+  :description => "Stops locally running public api.",
+  :fn => lambda { |*args| stop_local_public_api() }
+})
+
+def run_local_api_tests()
+  common = Common.new
+  status = common.capture_stdout %W{curl --silent --fail http://localhost:8081/}
+  if status != 'AllOfUs Workbench API'
+    common.error "Error probing api; received: #{status}"
+    common.error "Server logs:"
+    common.run_inline %W{cat build/dev-appserver-out/dev_appserver.out}
+    exit 1
+  end
+  common.status "api started up."
+end
+
+Common.register_command({
+  :invocation => "run-local-api-tests",
+  :description => "Runs smoke tests against local api server",
+  :fn => lambda { |*args| run_local_api_tests() }
+})
+
+def run_local_public_api_tests()
+  common = Common.new
+  status = common.capture_stdout %W{curl --silent --fail http://localhost:8083/}
+  if status != 'AllOfUs Public API'
+    common.error "Error probing public-api; received: #{status}"
+    common.error "Server logs:"
+    common.run_inline %W{cat ../public-api/build/dev-appserver-out/dev_appserver.out}
+    exit 1
+  end
+  common.status "public-api started up."
+end
+
+Common.register_command({
+  :invocation => "run-local-public-api-tests",
+  :description => "Runs smoke tests against public-api server",
+  :fn => lambda { |*args| run_local_public_api_tests() }
+})
+
 def get_gsuite_admin_key(project)
   unless File.exist? GSUITE_ADMIN_KEY_PATH
     common = Common.new
@@ -124,7 +246,7 @@ Common.register_command({
 
 def clean()
   common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew clean}
+  common.run_inline %W{docker-compose run --rm api gradle clean}
 end
 
 Common.register_command({
