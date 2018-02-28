@@ -109,7 +109,7 @@ def run_local_migrations()
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
   end
-  common.run_inline %W{./gradlew :tools:loadConfig -Pconfig_file=../config/config_local.json}
+  common.run_inline %W{gradle :tools:loadConfig -Pconfig_file=../config/config_local.json}
 end
 
 Common.register_command({
@@ -122,12 +122,12 @@ def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
-  common.run_inline %W{./gradlew appengineStart}
+  common.run_inline %W{gradle appengineStart}
 end
 
 Common.register_command({
   :invocation => "start-local-api",
-  :description => "Starts api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :description => "Starts api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => lambda { |*args| start_local_api() }
 })
 
@@ -135,7 +135,7 @@ def stop_local_api()
   setup_local_environment
   common = Common.new
   common.status "Stopping API server..."
-  common.run_inline %W{./gradlew appengineStop}
+  common.run_inline %W{gradle appengineStop}
 end
 
 Common.register_command({
@@ -149,13 +149,13 @@ def start_local_public_api()
   common = Common.new
   Dir.chdir('../public-api') do
     common.status "Starting public API server..."
-    common.run_inline %W{../api/gradlew appengineStart}
+    common.run_inline %W{gradle appengineStart}
   end
 end
 
 Common.register_command({
   :invocation => "start-local-public-api",
-  :description => "Starts public-api using the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :description => "Starts public-api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => lambda { |*args| start_local_public_api() }
 })
 
@@ -164,7 +164,7 @@ def stop_local_public_api()
   common = Common.new
   Dir.chdir('../public-api') do
     common.status "Stopping public API server..."
-    common.run_inline %W{../api/gradlew appengineStop}
+    common.run_inline %W{gradle appengineStop}
   end
 end
 
@@ -246,7 +246,7 @@ Common.register_command({
 
 def clean()
   common = Common.new
-  common.run_inline %W{docker-compose run --rm api ./gradlew clean}
+  common.run_inline %W{docker-compose run --rm api gradle clean}
 end
 
 Common.register_command({
