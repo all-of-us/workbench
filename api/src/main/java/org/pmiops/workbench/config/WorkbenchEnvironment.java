@@ -26,8 +26,4 @@ public class WorkbenchEnvironment {
   public String getApplicationId() {
     return applicationId;
   }
-
-  public String getApplicationServiceAccountName() {
-    return applicationId + "@appspot.gserviceaccount.com";
-  }
 }

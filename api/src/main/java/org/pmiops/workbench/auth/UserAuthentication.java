@@ -10,7 +10,9 @@ import org.springframework.security.core.GrantedAuthority;
 public class UserAuthentication implements Authentication {
 
   public enum UserType {
+    // A researcher or their pet service account
     RESEARCHER,
+    // A GCP service account (not affiliated with a researcher)
     SERVICE_ACCOUNT
   }
 

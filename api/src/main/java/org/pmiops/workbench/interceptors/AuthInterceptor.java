@@ -18,7 +18,6 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -29,7 +28,6 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
-import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -127,7 +125,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // administrators.
       User user = userDao.findUserByEmail(userEmail);
       if (user == null) {
-        user = userService.createUser(null, null, userEmail, null);
+        user = userService.createServiceAccountUser(userEmail);
       }
       SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
           token, UserType.SERVICE_ACCOUNT));
