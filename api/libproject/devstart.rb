@@ -1184,7 +1184,7 @@ def print_scoped_access_token(cmd_name, args)
 
     require "googleauth"
     creds = Google::Auth::ServiceAccountCredentials.make_creds(
-      json_key_io: File.open(GcloudContextV2::SA_KEY_PATH),
+      json_key_io: File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH),
       scope: scopes
     )
 

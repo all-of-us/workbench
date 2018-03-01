@@ -8,6 +8,7 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AuthConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -78,6 +80,9 @@ public class AuthInterceptorTest {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
+    workbenchConfig.auth = new AuthConfig();
+    workbenchConfig.auth.serviceAccountApiUsers = new ArrayList<>();
+    workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
     this.interceptor = new AuthInterceptor(userInfoService, fireCloudService,
         Providers.of(workbenchConfig), userDao, userService);
     this.user = new User();

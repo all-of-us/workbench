@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
@@ -78,6 +80,8 @@ public class ProfileControllerTest {
 
   @Mock
   private Provider<User> userProvider;
+  @Mock
+  private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired
   private UserDao userDao;
   @Mock
@@ -132,10 +136,10 @@ public class ProfileControllerTest {
     idVerificationRequest.setFirstName("Bob");
     UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
-    this.profileController = new ProfileController(profileService, userProvider,
+    this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment);
-    this.cloudProfileController = new ProfileController(profileService, userProvider,
+    this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), cloudEnvironment);
   }
@@ -474,6 +478,8 @@ public class ProfileControllerTest {
     user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(user);
     when(userProvider.get()).thenReturn(user);
+    when(userAuthenticationProvider.get()).thenReturn(
+        new UserAuthentication(user, null, null, UserType.RESEARCHER));
     return result;
   }
 

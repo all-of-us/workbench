@@ -9,14 +9,23 @@ import org.springframework.security.core.GrantedAuthority;
 
 public class UserAuthentication implements Authentication {
 
+  public enum UserType {
+    // A researcher or their pet service account
+    RESEARCHER,
+    // A GCP service account (not affiliated with a researcher)
+    SERVICE_ACCOUNT
+  }
+
   private final User user;
   private final Userinfoplus userInfo;
   private final String bearerToken;
+  private final UserType userType;
 
-  public UserAuthentication(User user, Userinfoplus userInfo, String bearerToken) {
+  public UserAuthentication(User user, Userinfoplus userInfo, String bearerToken, UserType userType) {
     this.user = user;
     this.userInfo = userInfo;
     this.bearerToken = bearerToken;
+    this.userType = userType;
   }
 
   @Override
@@ -55,5 +64,9 @@ public class UserAuthentication implements Authentication {
 
   public User getUser() {
     return user;
+  }
+
+  public UserType getUserType() {
+    return userType;
   }
 }

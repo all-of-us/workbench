@@ -6,6 +6,9 @@
     "registeredDomainName": "all-of-us-registered-stable",
     "enforceRegistered": false
   },
+  "auth": {
+    "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
+  },
   "cdr": {
     "defaultCdrVersion": "Test Registered CDR"
   },
