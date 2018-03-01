@@ -44,7 +44,8 @@ export class WorkspacesServiceStub {
         ancestry: false,
         commercialPurpose: false,
         population: false,
-        reviewRequested: false
+        reviewRequested: false,
+        underservedPopulation: false
       },
       userRoles: [
         {

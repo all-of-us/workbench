@@ -5,24 +5,28 @@
     <h2 *ngSwitchCase="Mode.Clone">Clone workspace "{{oldWorkspaceName}}"</h2>
   </ng-container>
   <div>* is a required field</div>
-  <div class="form-area">
+  <div style="width: 50rem;">
     <div class="name-area" [class.validation-error]="nameNotEntered">
-      <label class="text-label required">Name:</label>
       <input type="text" class="input name" name="workspace-name" autofocus
-          [(ngModel)]="workspace.name" [disabled]="!hasPermission">
+          [(ngModel)]="workspace.name" [disabled]="!hasPermission"
+          placeholder="Workspace Name">
+      <span style="display: inline-block; vertical-align: bottom">
+        <div>Billing Account:</div>
+        <div>National Institute of Health:</div>
+      </span>
     </div>
 
     <div>
       <h3>Research Purpose</h3>
       <!-- TODO: Real description of workspace purpose -->
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-      <div>
-        <label class="text-label">Describe your research purpose:</label>
+      <div class="card">
+        <h4>Describe your research purpose:</h4>
         <textarea class="input description" name="workspace-description"
             [(ngModel)]="workspace.description" [disabled]="!hasPermission">
         </textarea>
       </div>
-      <section class="form-block">
+      <div class="card">
         <h4>Please select all that apply</h4>
         <div class="form-group">
           <div class="checkbox-group">
@@ -34,78 +38,513 @@
               Disease focused research
             </clr-checkbox>
             <input type="text" class="input" name="disease-specification"
-                [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit">
+                [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
+                placeholder="Name of Disease">
+            <span style="display: inline-block; vertical-align: bottom; padding-left: 1rem; width: 25rem">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+            </span>
           </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="methods-development"
-                id="methods-development"
-                [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
-                [clrDisabled]="mode == Mode.Edit">
-              Methods development/validation study
-            </clr-checkbox>
+          <div class="two-column">
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="methods-development"
+                  id="methods-development"
+                  [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
+                  [clrDisabled]="mode == Mode.Edit">
+                Methods development/validation study
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="control-set"
+                  id="control-set"
+                  [(ngModel)]="workspace.researchPurpose.controlSet"
+                  [clrDisabled]="mode == Mode.Edit">
+                Control set
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="commercial-purpose"
+                  id="commercial-purpose"
+                  [(ngModel)]="workspace.researchPurpose.commercialPurpose"
+                  [clrDisabled]="mode == Mode.Edit">
+                Commercial purpose/entity
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <clr-icon *ngIf="workspace.researchPurpose.underservedPopulation === true"
+                  shape="minus-circle"
+                  (click)="workspace.researchPurpose.underservedPopulation = false"></clr-icon>
+              <clr-icon *ngIf="workspace.researchPurpose.underservedPopulation === false"
+                  shape="plus-circle"
+                  (click)="workspace.researchPurpose.underservedPopulation = true"></clr-icon>
+              <div style="display: inline-block;">
+                Includes an underserved population
+              </div>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
           </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="control-set"
-                id="control-set"
-                [(ngModel)]="workspace.researchPurpose.controlSet"
-                [clrDisabled]="mode == Mode.Edit">
-              Control set
-            </clr-checkbox>
+          <div class="two-column">
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="aggregate-analysis"
+                  id="aggregate-analysis"
+                  [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
+                  [clrDisabled]="mode == Mode.Edit">
+                Aggregate analysis to understand variation in general population
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="ancestry"
+                  id="ancestry"
+                  [(ngModel)]="workspace.researchPurpose.ancestry"
+                  [clrDisabled]="mode == Mode.Edit">
+                Population origins or ancestry
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="population"
+                  id="population"
+                  [(ngModel)]="workspace.researchPurpose.population"
+                  [clrDisabled]="mode == Mode.Edit">
+                Restricted to a specific population
+              </clr-checkbox>
+              <!-- TODO: Dropdown for population-->
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
+            <!-- TODO: Replace with real request approval text. -->
+            <div class="checkbox-group">
+              <clr-checkbox
+                  name="requestApproval"
+                  id="requestApproval"
+                  [(ngModel)]="workspace.researchPurpose.reviewRequested"
+                  [clrDisabled]="mode == Mode.Edit">
+                Request a Review of Your Research Purpose
+              </clr-checkbox>
+              <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              </div>
+            </div>
           </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="aggregate-analysis"
-                id="aggregate-analysis"
-                [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
-                [clrDisabled]="mode == Mode.Edit">
-              Aggregate analysis to understand variation in general population
-            </clr-checkbox>
-          </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="ancestry"
-                id="ancestry"
-                [(ngModel)]="workspace.researchPurpose.ancestry"
-                [clrDisabled]="mode == Mode.Edit">
-              Population origins or ancestry
-            </clr-checkbox>
-          </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="commercial-purpose"
-                id="commercial-purpose"
-                [(ngModel)]="workspace.researchPurpose.commercialPurpose"
-                [clrDisabled]="mode == Mode.Edit">
-              Commercial purpose/entity
-            </clr-checkbox>
-          </div>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="population"
-                id="population"
-                [(ngModel)]="workspace.researchPurpose.population"
-                [clrDisabled]="mode == Mode.Edit">
-              Restricted to a specific population
-            </clr-checkbox>
-            <!-- TODO: Dropdown for population-->
-          </div>
-          <!-- TODO: Add includes an underserved population -->
-          <h4>Request a Review of Your Research Purpose</h4>
-          <!-- TODO: Replace with real request approval text. -->
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="requestApproval"
-                id="requestApproval"
-                [(ngModel)]="workspace.researchPurpose.reviewRequested"
-                [clrDisabled]="mode == Mode.Edit">
-              Review my workspace
-            </clr-checkbox>
+          <div *ngIf="workspace.researchPurpose.underservedPopulation === true" style="padding-top: 1rem">
+            <h5>Additional information underserved population</h5>
+            <div>Select all that apply. Only options for underserved populations are provided.</div>
+            <h4 class="underserved-header">Race/Ethnicity</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="americanIndianOrAlaskaNative"
+                    id="americanIndianOrAlaskaNative"
+                    [(ngModel)]="underservedList.race.americanIndianOrAlaskaNative.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  American Indian or Alaska Native
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="asian"
+                    id="asian"
+                    [(ngModel)]="underservedList.race.asian.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Asian
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="blackAfricanOrAfricanAmerican"
+                    id="blackAfricanOrAfricanAmerican"
+                    [(ngModel)]="underservedList.race.blackAfricanOrAfricanAmerican.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Black, African or African American
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="hispanicOrLatino"
+                    id="hispanicOrLatino"
+                    [(ngModel)]="underservedList.race.hispanicOrLatino.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Hispanic or Latino
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="middleEasternOrNorthAfrican"
+                    id="middleEasternOrNorthAfrican"
+                    [(ngModel)]="underservedList.race.middleEasternOrNorthAfrican.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Middle Eastern or North African
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="nativeHawaiianOrPacificIslander"
+                    id="nativeHawaiianOrPacificIslander"
+                    [(ngModel)]="underservedList.race.nativeHawaiianOrPacificIslander.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Native Hawaiian or Pacific Islander
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="moreThanOneRace"
+                    id="moreThanOneRace"
+                    [(ngModel)]="underservedList.race.moreThanOneRace.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  More than one race
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Age</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="children"
+                    id="children"
+                    [(ngModel)]="underservedList.age.children.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Children (0-11)
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="elderly"
+                    id="elderly"
+                    [(ngModel)]="underservedList.age.elderly.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Elderly (75+)
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="adolescents"
+                    id="adolescents"
+                    [(ngModel)]="underservedList.age.adolescents.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Adolescents (12-17)
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="olderAdults"
+                    id="olderAdults"
+                    [(ngModel)]="underservedList.age.olderAdults.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Older Adults (65-74)
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Sex</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="female"
+                    id="female"
+                    [(ngModel)]="underservedList.sex.female.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Female
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="intersex"
+                    id="intersex"
+                    [(ngModel)]="underservedList.sex.intersex.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Intersex
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Gender Identity</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="woman"
+                    id="woman"
+                    [(ngModel)]="underservedList.genderIdentity.woman.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Woman
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="nonBinary"
+                    id="nonBinary"
+                    [(ngModel)]="underservedList.genderIdentity.nonBinary.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Non-Binary
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="transman"
+                    id="transman"
+                    [(ngModel)]="underservedList.genderIdentity.transman.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Transman/Transgender Man/FTM
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="transwoman"
+                    id="transwoman"
+                    [(ngModel)]="underservedList.genderIdentity.transwoman.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Transwoman/Transgender Woman/MTF
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="genderqueer"
+                    id="genderqueer"
+                    [(ngModel)]="underservedList.genderIdentity.genderqueer.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Genderqueer
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="genderfluid"
+                    id="genderfluid"
+                    [(ngModel)]="underservedList.genderIdentity.genderfluid.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Genderfluid
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="genderVariant"
+                    id="genderVariant"
+                    [(ngModel)]="underservedList.genderIdentity.genderVariant.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Gender Variant
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="questioning"
+                    id="questioning"
+                    [(ngModel)]="underservedList.genderIdentity.questioning.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Questioning or unsure of their identity
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Sexual Orientation</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="gay"
+                    id="gay"
+                    [(ngModel)]="underservedList.sexualOrientation.gay.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Gay
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="lesbian"
+                    id="lesbian"
+                    [(ngModel)]="underservedList.sexualOrientation.lesbian.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Lesbian
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="bisexual"
+                    id="bisexual"
+                    [(ngModel)]="underservedList.sexualOrientation.bisexual.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Bisexual
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="polysexualOmnisexualSapiosexualOrPansexual"
+                    id="polysexualOmnisexualSapiosexualOrPansexual"
+                    [(ngModel)]="underservedList.sexualOrientation.polysexualOmnisexualSapiosexualOrPansexual.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Polysexual, omnisexual, sapiosexual or pansexual
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="asexual"
+                    id="asexual"
+                    [(ngModel)]="underservedList.sexualOrientation.asexual.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Asexual
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="twoSpirit"
+                    id="twoSpirit"
+                    [(ngModel)]="underservedList.sexualOrientation.twoSpirit.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Two-Spirit
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="figuringOutSexuality"
+                    id="figuringOutSexuality"
+                    [(ngModel)]="underservedList.sexualOrientation.figuringOutSexuality.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Have not figured out or are in the process of figuring out their sexuality
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="mostlyStraight"
+                    id="mostlyStraight"
+                    [(ngModel)]="underservedList.sexualOrientation.mostlyStraight.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Mostly straight, but are sometimes attracted to people of their own sex
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="doesNotThinkOfHavingSexuality"
+                    id="doesNotThinkOfHavingSexuality"
+                    [(ngModel)]="underservedList.sexualOrientation.doesNotThinkOfHavingSexuality.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Does not think of themselves as having sexuality
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="doesNotUseLabels"
+                    id="doesNotUseLabels"
+                    [(ngModel)]="underservedList.sexualOrientation.doesNotUseLabels.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Does not use labels to identify themselves
+                </clr-checkbox>
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="doesNotKnowAnswer"
+                    id="doesNotKnowAnswer"
+                    [(ngModel)]="underservedList.sexualOrientation.doesNotKnowAnswer.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Does not know the answer
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Geography</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="urbanClusters"
+                    id="urbanClusters"
+                    [(ngModel)]="underservedList.geography.urbanClusters.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Urban clusters (2,500-50,000 people)
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="rural"
+                    id="rural"
+                    [(ngModel)]="underservedList.geography.rural.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Rural (All population, housing and territory not included within an urban area)
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Disability</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="mental"
+                    id="mental"
+                    [(ngModel)]="underservedList.disability.mental.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Mental disability
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="physical"
+                    id="physical"
+                    [(ngModel)]="underservedList.disability.physical.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Physical disability
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Access to Care</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="notPastTwelveMonths"
+                    id="notPastTwelveMonths"
+                    [(ngModel)]="underservedList.accessToCare.notPastTwelveMonths.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Have not had a clinic visit in the past 12 months
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="cannotObtainOrPayFor"
+                    id="cannotObtainOrPayFor"
+                    [(ngModel)]="underservedList.accessToCare.cannotObtainOrPayFor.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Cannot easily obtain or pay for medical care
+                </clr-checkbox>
+              </div>
+            </div>
+            <h4 class="underserved-header">Education/Income</h4>
+            <div class="underservedSection">
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="lessThanHighSchoolGraduate"
+                    id="lessThanHighSchoolGraduate"
+                    [(ngModel)]="underservedList.educationIncome.lessThanHighSchoolGraduate.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Less than a High School graduate
+                </clr-checkbox>
+              </div>
+              <div class="three-column">
+                <clr-checkbox
+                    class="underserved-checkbox"
+                    name="lessThanTwentyFiveThousandForFourPeople"
+                    id="lessThanTwentyFiveThousandForFourPeople"
+                    [(ngModel)]="underservedList.educationIncome.lessThanTwentyFiveThousandForFourPeople.included"
+                    [clrDisabled]="mode == Mode.Edit">
+                  Less than $25,000 for 4 people
+                </clr-checkbox>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
     <div style="display: flex; flex: 0 0 0; padding: 0">
       <div class="button">

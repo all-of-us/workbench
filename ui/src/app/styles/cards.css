@@ -1,0 +1,9 @@
+.card {
+  padding: 1rem;
+  border-radius: 0.2rem;
+  box-shadow: 0 0.125rem 0.125rem 0.125rem #d7d7d7;
+}
+
+.card * {
+  margin-top: 0rem;
+}

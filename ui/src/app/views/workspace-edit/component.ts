@@ -9,6 +9,7 @@ import {
   CloneWorkspaceResponse,
   DataAccessLevel,
   ProfileService,
+  UnderservedPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResponse,
@@ -18,7 +19,10 @@ import {
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css',
+              '../../styles/cards.css',
+              '../../styles/inputs.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceEditComponent implements OnInit {
@@ -39,6 +43,69 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
+  underservedList = {
+    race: {
+      americanIndianOrAlaskaNative: {value: UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE, included: false},
+      asian: {value: UnderservedPopulationEnum.RACEASIAN, included: false},
+      blackAfricanOrAfricanAmerican: {value: UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN, included: false},
+      hispanicOrLatino: {value: UnderservedPopulationEnum.RACEHISPANICORLATINO, included: false},
+      middleEasternOrNorthAfrican: {value: UnderservedPopulationEnum.RACEMIDDLEEASTERNORNORTHAFRICAN, included: false},
+      nativeHawaiianOrPacificIslander: {value: UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER, included: false},
+      moreThanOneRace: {value: UnderservedPopulationEnum.RACEMORETHANONERACE, included: false}
+    },
+    age: {
+      children: {value: UnderservedPopulationEnum.AGECHILDREN, included: false},
+      adolescents: {value: UnderservedPopulationEnum.AGEADOLESCENTS, included: false},
+      olderAdults: {value: UnderservedPopulationEnum.AGEOLDERADULTS, included: false},
+      elderly: {value: UnderservedPopulationEnum.AGEELDERLY, included: false}
+    },
+    sex: {
+      female: {value: UnderservedPopulationEnum.SEXFEMALE, included: false},
+      intersex: {value: UnderservedPopulationEnum.SEXINTERSEX, included: false}
+    },
+    sexualOrientation: {
+      gay: {value: UnderservedPopulationEnum.SEXUALORIENTATIONGAY, included: false},
+      lesbian: {value: UnderservedPopulationEnum.SEXUALORIENTATIONLESBIAN, included: false},
+      bisexual: {value: UnderservedPopulationEnum.SEXUALORIENTATIONBISEXUAL, included: false},
+      polysexualOmnisexualSapiosexualOrPansexual: {
+          value: UnderservedPopulationEnum.SEXUALORIENTATIONPOLYSEXUALOMNISEXUALSAPIOSEXUALORPANSEXUAL,
+          included: false
+        },
+      asexual: {value: UnderservedPopulationEnum.SEXUALORIENTATIONASEXUAL, included: false},
+      twoSpirit: {value: UnderservedPopulationEnum.SEXUALORIENTATIONTWOSPIRIT, included: false},
+      figuringOutSexuality: {value: UnderservedPopulationEnum.SEXUALORIENTATIONFIGURINGOUTSEXUALITY, included: false},
+      mostlyStraight: {value: UnderservedPopulationEnum.SEXUALORIENTATIONMOSTLYSTRAIGHT, included: false},
+      doesNotThinkOfHavingSexuality: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTTHINKOFHAVINGSEXUALITY, included: false},
+      doesNotUseLabels: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTUSELABELS, included: false},
+      doesNotKnowAnswer: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTKNOWANSWER, included: false}
+    },
+    genderIdentity: {
+      woman: {value: UnderservedPopulationEnum.GENDERIDENTITYWOMAN, included: false},
+      nonBinary: {value: UnderservedPopulationEnum.GENDERIDENTITYNONBINARY, included: false},
+      transman: {value: UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN, included: false},
+      transwoman: {value: UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN, included: false},
+      genderqueer: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER, included: false},
+      genderfluid: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID, included: false},
+      genderVariant: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT, included: false},
+      questioning: {value: UnderservedPopulationEnum.GENDERIDENTITYQUESTIONING, included: false}
+    },
+    geography: {
+      urbanClusters: {value: UnderservedPopulationEnum.GEOGRAPHYURBANCLUSTERS, included: false},
+      rural: {value: UnderservedPopulationEnum.GEOGRAPHYRURAL, included: false}
+    },
+    disability: {
+      physical: {value: UnderservedPopulationEnum.DISABILITYPHYSICAL, included: false},
+      mental: {value: UnderservedPopulationEnum.DISABILITYMENTAL, included: false}
+    },
+    accessToCare: {
+      notPastTwelveMonths: {value: UnderservedPopulationEnum.ACCESSTOCARENOTPASTTWELVEMONTHS, included: false},
+      cannotObtainOrPayFor: {value: UnderservedPopulationEnum.ACCESSTOCARECANNOTOBTAINORPAYFOR, included: false}
+    },
+    educationIncome: {
+      lessThanHighSchoolGraduate: {value: UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANHIGHSCHOOLGRADUATE, included: false},
+      lessThanTwentyFiveThousandForFourPeople: {value: UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANTWENTYFIVETHOUSANDFORFOURPEOPLE, included: false}
+    }
+  }
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
@@ -62,7 +129,8 @@ export class WorkspaceEditComponent implements OnInit {
         ancestry: false,
         commercialPurpose: false,
         population: false,
-        reviewRequested: false
+        reviewRequested: false,
+        underservedPopulation: false
       }};
     this.mode = WorkspaceEditMode.Edit;
     if (this.route.routeConfig.data.mode) {
@@ -147,17 +215,25 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    if (!this.validateForm()) {
-      return;
+    if (this.workspace.researchPurpose.underservedPopulation) {
+      this.workspace.researchPurpose.underservedPopulationDetails = [];
+      Object.values(this.underservedList).forEach((category) => {
+        this.workspace.researchPurpose.underservedPopulationDetails.concat(
+            Object.values(category).filter(item => item.included === true));
+      });
     }
-    this.savingWorkspace = true;
-    this.workspacesService.createWorkspace(this.workspace).subscribe(
-        () => {
-          this.navigateBack();
-        },
-        (error) => {
-          this.workspaceCreationError = true;
-        });
+
+    // if (!this.validateForm()) {
+    //   return;
+    // }
+    // this.savingWorkspace = true;
+    // this.workspacesService.createWorkspace(this.workspace).subscribe(
+    //     () => {
+    //       this.navigateBack();
+    //     },
+    //     (error) => {
+    //       this.workspaceCreationError = true;
+    //     });
   }
 
   updateWorkspace(): void {
@@ -185,6 +261,13 @@ export class WorkspaceEditComponent implements OnInit {
   cloneWorkspace(): void {
     if (!this.validateForm()) {
       return;
+    }
+    if (this.workspace.researchPurpose.underservedPopulation) {
+      this.workspace.researchPurpose.underservedPopulationDetails = [];
+      Object.values(this.underservedList).forEach((category) => {
+        this.workspace.researchPurpose.underservedPopulationDetails.concat(
+            Object.values(category).filter(item => item.included === true));
+      });
     }
     this.savingWorkspace = true;
     this.workspacesService.cloneWorkspace(
