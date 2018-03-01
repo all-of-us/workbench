@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -129,7 +130,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         user = userService.createUser(null, null, userEmail, null);
       }
       SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
-          token));
+          token, UserType.SERVICE_ACCOUNT));
       log.log(Level.INFO, "{0} service account in use", userInfo.getEmail());
       return true;
     }
@@ -166,7 +167,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
-        token));
+        token, UserType.RESEARCHER));
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
