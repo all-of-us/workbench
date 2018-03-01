@@ -12,7 +12,6 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
     List<Criteria> findCriteriaByTypeAndParentIdOrderByCodeAsc(@Param("type") String type, @Param("parentId") Long parentId);
 
-    /** TODO: implement dynamic switching of schemas **/
     @Query(value = "select distinct c.code, c.domain_id as domainId from criteria c " +
             "where c.parent_id in (" +
             "select id from criteria " +
@@ -23,7 +22,17 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
             "and c.is_group = 0 and c.is_selectable = 1 order by c.code asc", nativeQuery = true)
     List<CodeDomainLookup> findCriteriaByTypeAndCode(@Param("type") String type, @Param("code") String code);
 
-    /** TODO: implement dynamic switching of schemas **/
+    @Query(value = "select distinct c.code, c.domain_id as domainId from criteria c " +
+            "where c.parent_id in (" +
+            "select id from criteria " +
+            "where type = :type " +
+            "and subtype = :subtype " +
+            "and code like :code% " +
+            "and is_selectable = 1 " +
+            "and is_group = 1) " +
+            "and c.is_group = 0 and c.is_selectable = 1 order by c.code asc", nativeQuery = true)
+    List<CodeDomainLookup> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
+
     @Query(value = "select * from criteria c " +
             "where c.type = :type " +
             "and (match(c.name) against(:value in boolean mode) or match(c.code) against(:value in boolean mode)) " +
