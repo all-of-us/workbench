@@ -28,16 +28,18 @@ public class CodeDomainLookupService {
                 .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
                 .forEach(item -> {
                     List<SearchParameter> paramsWithDomains = new ArrayList<>();
-                    for (SearchParameter parameter : item.getSearchParameters()) {
+                        for (SearchParameter parameter : item.getSearchParameters()) {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
                             List<CodeDomainLookup> codeDomainLookups =
-                                    criteriaDao.findCriteriaByTypeAndCode(parameter.getType(), parameter.getValue());
+                                    (parameter.getSubtype() == null)
+                                            ? criteriaDao.findCriteriaByTypeAndCode(parameter.getType(), parameter.getValue())
+                                            : criteriaDao.findCriteriaByTypeAndSubtypeAndCode(parameter.getType(),
+                                            parameter.getSubtype(), parameter.getValue());
 
                             for (CodeDomainLookup row : codeDomainLookups) {
                                 paramsWithDomains.add(new SearchParameter()
                                         .domain(row.getDomainId())
-                                        .value(row.getCode())
-                                        .type(parameter.getType()));
+                                        .value(row.getCode()));
                             }
                         }
                         else {
