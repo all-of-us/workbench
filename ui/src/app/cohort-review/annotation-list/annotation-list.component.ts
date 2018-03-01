@@ -8,10 +8,12 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 
+
 interface Annotation {
   definition: CohortAnnotationDefinition;
   value: ParticipantCohortAnnotation;
 }
+
 
 /*
  * Curried predicate function that matches CohortAnnotationDefinitions to
@@ -68,7 +70,8 @@ export class AnnotationListComponent implements OnInit {
         defs.map(definition => {
           const value = vals.find(byDefinitionId(definition)) || factoryFunc();
           return <Annotation>{definition, value};
-        }));
+        }))
+      .do(console.dir);
   }
 
   openManager(): void {

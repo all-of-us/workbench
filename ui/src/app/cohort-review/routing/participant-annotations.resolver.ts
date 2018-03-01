@@ -21,11 +21,11 @@ export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohort
   resolve(route: ActivatedRouteSnapshot): Observable<ParticipantCohortAnnotation[]> {
     const ns = route.parent.paramMap.get('ns');
     const wsid = route.parent.paramMap.get('wsid');
-    const pid = +route.paramMap.get('pid');
-    const cid = +route.paramMap.get('cid');
+    const cid = +route.parent.paramMap.get('cid');
     const cdrid = +route.parent.data.workspace.cdrVersionId;
 
-    // TODO (jms) This is a temporary fix while backend is being implemented
+    const pid = +route.paramMap.get('pid');
+
     const empty = <ParticipantCohortAnnotationListResponse>{
       items: <ParticipantCohortAnnotation[]>[],
     };
@@ -33,7 +33,7 @@ export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohort
     const rid = route.parent.data.review.cohortReviewId;
 
     // console.log(`Loading annotations from resolver for ${pid}`);
-    // console.log(`ns: ${ns}, wsid: ${wsid}, rid: ${rid}`);
+    // console.log(`ns: ${ns}, wsid: ${wsid}, cid: ${cid}, cdrid: ${cdrid}`);
     // console.dir(route);
 
     const call = this.reviewAPI
