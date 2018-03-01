@@ -36,7 +36,8 @@ public class CodeDomainLookupService {
                             for (CodeDomainLookup row : codeDomainLookups) {
                                 paramsWithDomains.add(new SearchParameter()
                                         .domain(row.getDomainId())
-                                        .value(row.getCode()));
+                                        .value(row.getCode())
+                                        .type(parameter.getType()));
                             }
                         }
                         else {

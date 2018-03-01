@@ -1,12 +1,6 @@
 <div class="flex-container">
-  <div class="line-item">
-    <button
-        type="button"
-        class="btn btn-link btn-sm text-danger"
-        (click)="remove()">
-      <clr-icon shape="close"></clr-icon>
-    </button>
 
+  <div class="line-item">
     <button
       type="button"
       class="btn btn-link btn-sm"
@@ -18,24 +12,32 @@
       [popper]="codesPopper"
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
-      class="trigger">
+      class="trigger padding-right">
       <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
       <span class="text-muted">Contains</span>
       <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
-      <span class="text-muted">{{ codes }}</span>
+      <span class="hidden">{{ codes }}</span>
     </small>
-  </div>
-
-  <div class="count">
+    <small class="text-muted padding-right">|</small>
     <span *ngIf="isRequesting"
-       class="spinner spinner-inline"
-       [style.vertical-align]="'middle'">
+          class="spinner spinner-inline"
+          [style.vertical-align]="'middle'">
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="font-weight-bold">
       {{ item.get('count', 0) }}
     </small>
   </div>
+
+  <div>
+    <button
+      type="button"
+      class="btn btn-link btn-sm text-danger margin-right"
+      (click)="remove()">
+      <clr-icon shape="close"></clr-icon>
+    </button>
+  </div>
+
 </div>
 
 <popper-content #codesPopper>
