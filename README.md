@@ -303,6 +303,12 @@ Description of arguments for these scripts are as follows. See examples below.
 ##### Result
 1) databases are live in cloudsql 
 
+#### Import a dump to local mysql db.
+`./project.rb local-mysql-import --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+
+##### Result
+1) mysql db is in your local mysql for development
+2) Update cdr_version table in workbench to switch to it for using 
 ###
 ## Cohort Builder
 

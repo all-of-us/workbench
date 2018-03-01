@@ -717,7 +717,7 @@ def local_mysql_import(cmd_name, *args)
 
   common = Common.new
   common.run_inline %W{docker-compose run db-local-mysql-import
-        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
+        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket}}
 end
 Common.register_command({
                             :invocation => "local-mysql-import",

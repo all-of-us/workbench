@@ -29,7 +29,7 @@ then
   exit 1
 fi
 
-echo "Creating local mysql DB from dump file $SQL_DUMP_FILE \n"
+echo "Creating local mysql DB from dump file $SQL_DUMP_FILE"
 
 
 # Make a dir for the csvs
