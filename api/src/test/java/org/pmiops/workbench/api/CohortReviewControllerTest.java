@@ -360,6 +360,11 @@ public class CohortReviewControllerTest {
     private org.pmiops.workbench.db.model.ParticipantCohortAnnotation createParticipantCohortAnnotation(ParticipantCohortAnnotation request) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = request.getAnnotationValueDate() == null ? null : new Date(sdf.parse(request.getAnnotationValueDate().toString()).getTime());
+        CohortAnnotationEnumValue enumValue = null;
+        if (request.getAnnotationValueEnum() != null) {
+            enumValue = new CohortAnnotationEnumValue();
+            enumValue.setName(request.getAnnotationValueEnum());
+        }
         return new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
                 .cohortAnnotationDefinitionId(request.getCohortAnnotationDefinitionId())
                 .annotationId(request.getAnnotationId())
@@ -369,7 +374,8 @@ public class CohortReviewControllerTest {
                 .annotationValueString(request.getAnnotationValueString())
                 .annotationValueInteger(request.getAnnotationValueInteger())
                 .annotationValueDate(date)
-                .annotationValueEnum(request.getAnnotationValueEnum());
+                .annotationValueEnum(request.getAnnotationValueEnum())
+                .cohortAnnotationEnumValue(enumValue);
     }
 
     private void assertCreateParticipantCohortAnnotation(ParticipantCohortAnnotation request, AnnotationType annotationType) throws Exception {

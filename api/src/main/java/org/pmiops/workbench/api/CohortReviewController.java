@@ -122,13 +122,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 public ParticipantCohortAnnotation apply(org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation) {
                     String date = participantCohortAnnotation.getAnnotationValueDate() == null ? null :
                             participantCohortAnnotation.getAnnotationValueDate().toString();
+                    String enumValue = participantCohortAnnotation.getCohortAnnotationEnumValue() == null ?
+                                    null : participantCohortAnnotation.getCohortAnnotationEnumValue().getName();
                     return new ParticipantCohortAnnotation()
                             .annotationId(participantCohortAnnotation.getAnnotationId())
                             .cohortAnnotationDefinitionId(participantCohortAnnotation.getCohortAnnotationDefinitionId())
                             .cohortReviewId(participantCohortAnnotation.getCohortReviewId())
                             .participantId(participantCohortAnnotation.getParticipantId())
                             .annotationValueString(participantCohortAnnotation.getAnnotationValueString())
-                            .annotationValueEnum(participantCohortAnnotation.getAnnotationValueEnum())
+                            .annotationValueEnum(enumValue)
                             .annotationValueDate(date)
                             .annotationValueBoolean(participantCohortAnnotation.getAnnotationValueBoolean())
                             .annotationValueInteger(participantCohortAnnotation.getAnnotationValueInteger());

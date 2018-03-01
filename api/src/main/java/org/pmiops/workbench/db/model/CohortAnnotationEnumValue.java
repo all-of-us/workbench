@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
@@ -20,6 +21,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     private String name;
     private int order;
     private CohortAnnotationDefinition cohortAnnotationDefinition;
+    private ParticipantCohortAnnotation participantCohortAnnotation;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,6 +79,20 @@ public class CohortAnnotationEnumValue implements Comparable {
 
     public CohortAnnotationEnumValue cohortAnnotationDefinition(CohortAnnotationDefinition cohortAnnotationDefinition) {
         this.cohortAnnotationDefinition = cohortAnnotationDefinition;
+        return this;
+    }
+
+    @OneToOne(mappedBy = "cohortAnnotationEnumValue")
+    public ParticipantCohortAnnotation getParticipantCohortAnnotation() {
+        return participantCohortAnnotation;
+    }
+
+    public void setParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation) {
+        this.participantCohortAnnotation = participantCohortAnnotation;
+    }
+
+    public CohortAnnotationEnumValue participantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation) {
+        this.participantCohortAnnotation = participantCohortAnnotation;
         return this;
     }
 

@@ -267,7 +267,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             if (enumValues.isEmpty()) {
                 throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
-            participantCohortAnnotation.setCohortAnnotationEnumValueId(enumValues.get(0).getCohortAnnotationEnumValueId());
+            participantCohortAnnotation.setCohortAnnotationEnumValue(enumValues.get(0));
         }
     }
 
