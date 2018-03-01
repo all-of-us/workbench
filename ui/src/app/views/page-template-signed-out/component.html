@@ -1,0 +1,10 @@
+<div class="template" [ngStyle]="{ 'background-image': 'url(' + imageSrc + ')'}">
+  <div class="row">
+    <img [src]="headerImg" class="headerImage">
+  </div>
+  <div class="row">
+    <div class="col-sm-5">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+.template {
+  background-color: #dedfe1;
+  height:50rem;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  background-size: 100% 100%;
+}
+
+.headerImage {
+  width:23rem;
+  height:1.75rem;
+  margin-left: 1rem;
+  margin-top: 1rem;
+}
+
+.logoImage {
+  width:33rem;
+  height:auto;
+}
+
+@media all and (max-width: 1100px) {
+  .template {
+    background-size: 0% 0%;
+  }
+}
+
