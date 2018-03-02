@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       return me.getEnabled() != null
           && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
     } catch (ApiException e) {
-      if (e.getCode() == NOT_FOUND.value()) {
+      if (e.getCode() == NOT_FOUND.value() || e.getCode() == UNAUTHORIZED.value()) {
         return false;
       }
       throw e;
