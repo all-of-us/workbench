@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -126,13 +125,9 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId,
       List<FileDetail> fileList) {
-    try {
-      String clusterName = convertClusterName(workspaceId);
-      this.notebooksService.localize(workspaceNamespace, clusterName,
-          convertfileDetailsToMap(fileList));
-    } catch (NotFoundException e) {
-      throw new NotFoundException("Cluster not found.");
-    }
+    String clusterName = convertClusterName(workspaceId);
+    this.notebooksService.localize(workspaceNamespace, clusterName,
+        convertfileDetailsToMap(fileList));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
