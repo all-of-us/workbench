@@ -1575,7 +1575,7 @@ definitions:
       reviewRequested:
         type: boolean
         default: false
-      underservedPopulation:
+      containsUnderservedPopulation:
         type: boolean
         default: false
       underservedPopulationDetails:

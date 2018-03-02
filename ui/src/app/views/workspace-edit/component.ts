@@ -43,69 +43,77 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
-  underservedList = {
-    race: {
-      americanIndianOrAlaskaNative: {value: UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE, included: false},
-      asian: {value: UnderservedPopulationEnum.RACEASIAN, included: false},
-      blackAfricanOrAfricanAmerican: {value: UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN, included: false},
-      hispanicOrLatino: {value: UnderservedPopulationEnum.RACEHISPANICORLATINO, included: false},
-      middleEasternOrNorthAfrican: {value: UnderservedPopulationEnum.RACEMIDDLEEASTERNORNORTHAFRICAN, included: false},
-      nativeHawaiianOrPacificIslander: {value: UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER, included: false},
-      moreThanOneRace: {value: UnderservedPopulationEnum.RACEMORETHANONERACE, included: false}
-    },
-    age: {
-      children: {value: UnderservedPopulationEnum.AGECHILDREN, included: false},
-      adolescents: {value: UnderservedPopulationEnum.AGEADOLESCENTS, included: false},
-      olderAdults: {value: UnderservedPopulationEnum.AGEOLDERADULTS, included: false},
-      elderly: {value: UnderservedPopulationEnum.AGEELDERLY, included: false}
-    },
-    sex: {
-      female: {value: UnderservedPopulationEnum.SEXFEMALE, included: false},
-      intersex: {value: UnderservedPopulationEnum.SEXINTERSEX, included: false}
-    },
-    sexualOrientation: {
-      gay: {value: UnderservedPopulationEnum.SEXUALORIENTATIONGAY, included: false},
-      lesbian: {value: UnderservedPopulationEnum.SEXUALORIENTATIONLESBIAN, included: false},
-      bisexual: {value: UnderservedPopulationEnum.SEXUALORIENTATIONBISEXUAL, included: false},
-      polysexualOmnisexualSapiosexualOrPansexual: {
-          value: UnderservedPopulationEnum.SEXUALORIENTATIONPOLYSEXUALOMNISEXUALSAPIOSEXUALORPANSEXUAL,
-          included: false
-        },
-      asexual: {value: UnderservedPopulationEnum.SEXUALORIENTATIONASEXUAL, included: false},
-      twoSpirit: {value: UnderservedPopulationEnum.SEXUALORIENTATIONTWOSPIRIT, included: false},
-      figuringOutSexuality: {value: UnderservedPopulationEnum.SEXUALORIENTATIONFIGURINGOUTSEXUALITY, included: false},
-      mostlyStraight: {value: UnderservedPopulationEnum.SEXUALORIENTATIONMOSTLYSTRAIGHT, included: false},
-      doesNotThinkOfHavingSexuality: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTTHINKOFHAVINGSEXUALITY, included: false},
-      doesNotUseLabels: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTUSELABELS, included: false},
-      doesNotKnowAnswer: {value: UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTKNOWANSWER, included: false}
-    },
-    genderIdentity: {
-      woman: {value: UnderservedPopulationEnum.GENDERIDENTITYWOMAN, included: false},
-      nonBinary: {value: UnderservedPopulationEnum.GENDERIDENTITYNONBINARY, included: false},
-      transman: {value: UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN, included: false},
-      transwoman: {value: UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN, included: false},
-      genderqueer: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER, included: false},
-      genderfluid: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID, included: false},
-      genderVariant: {value: UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT, included: false},
-      questioning: {value: UnderservedPopulationEnum.GENDERIDENTITYQUESTIONING, included: false}
-    },
-    geography: {
-      urbanClusters: {value: UnderservedPopulationEnum.GEOGRAPHYURBANCLUSTERS, included: false},
-      rural: {value: UnderservedPopulationEnum.GEOGRAPHYRURAL, included: false}
-    },
-    disability: {
-      physical: {value: UnderservedPopulationEnum.DISABILITYPHYSICAL, included: false},
-      mental: {value: UnderservedPopulationEnum.DISABILITYMENTAL, included: false}
-    },
-    accessToCare: {
-      notPastTwelveMonths: {value: UnderservedPopulationEnum.ACCESSTOCARENOTPASTTWELVEMONTHS, included: false},
-      cannotObtainOrPayFor: {value: UnderservedPopulationEnum.ACCESSTOCARECANNOTOBTAINORPAYFOR, included: false}
-    },
-    educationIncome: {
-      lessThanHighSchoolGraduate: {value: UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANHIGHSCHOOLGRADUATE, included: false},
-      lessThanTwentyFiveThousandForFourPeople: {value: UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANTWENTYFIVETHOUSANDFORFOURPEOPLE, included: false}
-    }
+  raceList = {
+    "American Indian or Alaska Native": UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE,
+    "Hispanic or Latino": UnderservedPopulationEnum.RACEHISPANICORLATINO,
+    "More than one race": UnderservedPopulationEnum.RACEMORETHANONERACE,
+    "Asian": UnderservedPopulationEnum.RACEASIAN,
+    "Middle Eastern or North African": UnderservedPopulationEnum.RACEMIDDLEEASTERNORNORTHAFRICAN,
+    "Black, African or African American": UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN,
+    "Native Hawaiian or Pacific Islander": UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER
   }
+  ageList = {
+    "Children (0-11)": UnderservedPopulationEnum.AGECHILDREN,
+    "Adolescents (12-17)": UnderservedPopulationEnum.AGEADOLESCENTS,
+    "Older Adults (65-74)": UnderservedPopulationEnum.AGEOLDERADULTS,
+    "Elderly (75+)": UnderservedPopulationEnum.AGEELDERLY
+  }
+  sexList = {
+    "Female": UnderservedPopulationEnum.SEXFEMALE,
+    "Intersex": UnderservedPopulationEnum.SEXINTERSEX
+  }
+  sexualOrientationList = {
+    "Gay": UnderservedPopulationEnum.SEXUALORIENTATIONGAY,
+    "Lesbian": UnderservedPopulationEnum.SEXUALORIENTATIONLESBIAN,
+    "Bisexual": UnderservedPopulationEnum.SEXUALORIENTATIONBISEXUAL,
+    "Polysexual, omnisexual, sapiosexual or pansexual": UnderservedPopulationEnum.SEXUALORIENTATIONPOLYSEXUALOMNISEXUALSAPIOSEXUALORPANSEXUAL,
+    "Asexual": UnderservedPopulationEnum.SEXUALORIENTATIONASEXUAL,
+    "Two-Spirit": UnderservedPopulationEnum.SEXUALORIENTATIONTWOSPIRIT,
+    "Have not figured out or are in the process of figuring out their sexuality": UnderservedPopulationEnum.SEXUALORIENTATIONFIGURINGOUTSEXUALITY,
+    "Mostly straight, but sometimes attracted to people of their own sex": UnderservedPopulationEnum.SEXUALORIENTATIONMOSTLYSTRAIGHT,
+    "Does not think of themselves as having sexuality": UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTTHINKOFHAVINGSEXUALITY,
+    "Does not use labels to identify themselves": UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTUSELABELS,
+    "Does not know the answer": UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTKNOWANSWER
+  }
+  genderIdentityList = {
+    "Woman": UnderservedPopulationEnum.GENDERIDENTITYWOMAN,
+    "Non-Binary": UnderservedPopulationEnum.GENDERIDENTITYNONBINARY,
+    "Transman/Transgender Man/FTM": UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
+    "Transwoman/Transgender Woman/MTF": UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
+    "Genderqueer": UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER,
+    "Genderfluid": UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID,
+    "Gender Variant": UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT,
+    "Questioning or unsure of their identity": UnderservedPopulationEnum.GENDERIDENTITYQUESTIONING
+  }
+  geographyList = {
+    "Urban clusters (2,500-50,000 people)": UnderservedPopulationEnum.GEOGRAPHYURBANCLUSTERS,
+    "Rural (All population, housing and territory not included within an urban area)": UnderservedPopulationEnum.GEOGRAPHYRURAL
+  }
+  disabilityList = {
+    "Physical Disability": UnderservedPopulationEnum.DISABILITYPHYSICAL,
+    "Mental Disability": UnderservedPopulationEnum.DISABILITYMENTAL
+  }
+  accessToCareList = {
+    "Have not had a clinic visit in the past 12 months": UnderservedPopulationEnum.ACCESSTOCARENOTPASTTWELVEMONTHS,
+    "Cannot easily obtain or pay for medical care": UnderservedPopulationEnum.ACCESSTOCARECANNOTOBTAINORPAYFOR
+  }
+  educationIncomeList = {
+    "Less than a high school graduate": UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANHIGHSCHOOLGRADUATE,
+    "Less than $25,000 for 4 people": UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANTWENTYFIVETHOUSANDFORFOURPEOPLE
+  }
+
+  underservedCategories = {
+    "Race/Ethnicity": this.raceList,
+    "Age": this.ageList,
+    "Sex": this.sexList,
+    "Gender Identity": this.genderIdentityList,
+    "Sexual Orientation": this.sexualOrientationList,
+    "Geography": this.geographyList,
+    "Disability": this.disabilityList,
+    "Access to Care": this.accessToCareList,
+    "Education/Income": this.educationIncomeList
+  }
+
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
@@ -130,7 +138,8 @@ export class WorkspaceEditComponent implements OnInit {
         commercialPurpose: false,
         population: false,
         reviewRequested: false,
-        underservedPopulation: false
+        containsUnderservedPopulation: false,
+        underservedPopulationDetails: []
       }};
     this.mode = WorkspaceEditMode.Edit;
     if (this.route.routeConfig.data.mode) {
@@ -215,25 +224,17 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   addWorkspace(): void {
-    if (this.workspace.researchPurpose.underservedPopulation) {
-      this.workspace.researchPurpose.underservedPopulationDetails = [];
-      Object.values(this.underservedList).forEach((category) => {
-        this.workspace.researchPurpose.underservedPopulationDetails.concat(
-            Object.values(category).filter(item => item.included === true));
-      });
+    if (!this.validateForm()) {
+      return;
     }
-
-    // if (!this.validateForm()) {
-    //   return;
-    // }
-    // this.savingWorkspace = true;
-    // this.workspacesService.createWorkspace(this.workspace).subscribe(
-    //     () => {
-    //       this.navigateBack();
-    //     },
-    //     (error) => {
-    //       this.workspaceCreationError = true;
-    //     });
+    this.savingWorkspace = true;
+    this.workspacesService.createWorkspace(this.workspace).subscribe(
+        () => {
+          this.navigateBack();
+        },
+        (error) => {
+          this.workspaceCreationError = true;
+        });
   }
 
   updateWorkspace(): void {
@@ -262,13 +263,6 @@ export class WorkspaceEditComponent implements OnInit {
     if (!this.validateForm()) {
       return;
     }
-    if (this.workspace.researchPurpose.underservedPopulation) {
-      this.workspace.researchPurpose.underservedPopulationDetails = [];
-      Object.values(this.underservedList).forEach((category) => {
-        this.workspace.researchPurpose.underservedPopulationDetails.concat(
-            Object.values(category).filter(item => item.included === true));
-      });
-    }
     this.savingWorkspace = true;
     this.workspacesService.cloneWorkspace(
       this.oldWorkspaceNamespace,
@@ -287,5 +281,51 @@ export class WorkspaceEditComponent implements OnInit {
   get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+
+  keys(input: Object) : Array<string> {
+    return Object.keys(input);
+  }
+
+  bucketAsThree(input: Array<string>) {
+    const output: Array<Array<string>> = [];
+    let inputIterator = 0;
+    let currentBucket = -1;
+    input.forEach((inputValue) => {
+      if(inputIterator == 3) {
+        inputIterator = 0;
+      }
+      if(inputIterator == 0) {
+        output.push([]);
+        currentBucket += 1;
+      }
+      output[currentBucket].push(inputValue);
+      inputIterator += 1;
+    });
+    return output;
+  }
+
+  containsUnderserved(enumValue: UnderservedPopulationEnum): boolean {
+    if (this.workspace.researchPurpose.underservedPopulationDetails
+        .find(item => item === enumValue) === undefined) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
+    if(this.mode == WorkspaceEditMode.Edit) {
+      return;
+    }
+    const positionOfValue = this.workspace.researchPurpose.
+        underservedPopulationDetails.findIndex(item => item === enumValue);
+    if (positionOfValue !== -1) {
+      this.workspace.researchPurpose.underservedPopulationDetails
+          .splice(positionOfValue, 1);
+    } else {
+      this.workspace.researchPurpose.underservedPopulationDetails
+          .push(enumValue);
+    }
   }
 }

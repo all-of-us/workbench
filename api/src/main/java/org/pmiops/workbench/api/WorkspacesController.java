@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -313,6 +314,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setPopulation(purpose.getPopulation());
     dbWorkspace.setPopulationOfFocus(purpose.getPopulationOfFocus());
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
+    dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
+    if (purpose.getContainsUnderservedPopulation()) {
+      List<UnderservedPopulationEnum> list = purpose.getUnderservedPopulationDetails();
+      Set<UnderservedPopulationEnum> dbSet = new HashSet<UnderservedPopulationEnum>();
+      for (UnderservedPopulationEnum population : list) {
+        dbSet.add(population);
+      }
+      dbWorkspace.setUnderservedPopulationSet(dbSet);
+    }
   }
 
   private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
