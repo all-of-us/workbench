@@ -24,18 +24,12 @@ public class ExceptionAdvice {
   public ResponseEntity<?> serverError(Exception e) {
     ErrorResponse errorResponse = new ErrorResponse();
     Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-    Throwable cause = e;
 
+    // if this error was thrown by another error, get the info from that exception
+    Throwable cause = e;
     if (e.getCause() != null) {
       cause = e.getCause();
     }
-
-    // TODO: figure out how to get ErrorCode content from internal errors
-//    ResponseStatus responseStatus = null;
-//    responseStatus = e.getClass().getAnnotation(ResponseStatus.class);
-//    if (responseStatus != null) {
-//      errorResponse.setErrorCode(ErrorCode.fromValue(responseStatus.code().toString()));
-//    }
 
     errorResponse.setMessage(cause.getMessage());
 
@@ -50,6 +44,10 @@ public class ExceptionAdvice {
     } else if (cause instanceof FailedPreconditionException) {
       statusCode = HttpStatus.PRECONDITION_FAILED.value();
     } else if (cause instanceof ForbiddenException) {
+      ForbiddenException fe = (ForbiddenException) cause;
+      if (fe.getErrorResponse() != null && fe.getErrorResponse().getErrorCode() != null) {
+        errorResponse.setErrorCode(fe.getErrorResponse().getErrorCode());
+      }
       statusCode = HttpStatus.FORBIDDEN.value();
     } else if (cause instanceof NotFoundException) {
       statusCode = HttpStatus.NOT_FOUND.value();
