@@ -470,8 +470,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> localizeAllFiles(String workspaceNamespace,
-      String workspaceId) {
+  public ResponseEntity<Void> localizeAllFiles(String workspaceNamespace, String workspaceId) {
     List<FileDetail> fileList = new ArrayList<>();
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
@@ -490,14 +489,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             workspaceNamespace, workspaceId));
       }
       throw new ServerErrorException(ex);
-    } catch (org.pmiops.workbench.notebooks.ApiException ex) {
-      if (ex.getCode() == 400) {
-        throw new BadRequestException(ex.getResponseBody());
-      } else if (ex.getCode() == 404) {
-        throw new NotFoundException(String.format("Cluster %s/%s not found",
-            workspaceNamespace, workspaceId));
-      }
-      throw new ServerErrorException(ex);
+    } catch (NotFoundException ex) {
+      throw new NotFoundException(String.format("Cluster %s/%s not found",
+          workspaceNamespace, workspaceId));
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -764,6 +758,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private String convertClusterName(String workspaceId) {
+    // TODO(calbach): This conversion method is flawed as cluster creation
+    // retries by appending digits to the cluster name. Clean this up.
     String clusterName = workspaceId + this.userProvider.get().getUserId();
     clusterName = clusterName.toLowerCase();
     return clusterName;
