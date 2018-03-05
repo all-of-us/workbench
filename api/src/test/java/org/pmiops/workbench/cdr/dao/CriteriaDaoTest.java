@@ -4,7 +4,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -37,6 +36,8 @@ public class CriteriaDaoTest {
     private Criteria cptCriteria2;
     private Criteria parentIcd9;
     private Criteria childIcd9;
+    private Criteria parentIcd10;
+    private Criteria childIcd10;
 
     @Before
     public void setUp() {
@@ -49,7 +50,6 @@ public class CriteriaDaoTest {
         cptCriteria1 = createCriteria("CPT", null, "0039T", "zzzcptzzz");
         cptCriteria2 = createCriteria("CPT", null, "0001T", "zzzCPTxxx");
         parentIcd9 = new Criteria()
-                .id(1L)
                 .code("003")
                 .count("10")
                 .conceptId("1000")
@@ -60,18 +60,17 @@ public class CriteriaDaoTest {
                 .parentId(0)
                 .type("ICD9")
                 .subtype(null);
-
-        childIcd9 = new Criteria()
-                .code("003.1")
+        parentIcd10 = new Criteria()
+                .code("003")
                 .count("10")
                 .conceptId("1000")
-                .domainId("Condition")
-                .group(false)
+                .domainId(null)
+                .group(true)
                 .selectable(true)
                 .name("name")
-                .parentId(1L)
-                .type("ICD9")
-                .subtype(null);
+                .parentId(0)
+                .type("ICD10")
+                .subtype("ICD10PCS");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -82,7 +81,31 @@ public class CriteriaDaoTest {
         criteriaDao.save(cptCriteria1);
         criteriaDao.save(cptCriteria2);
         criteriaDao.save(parentIcd9);
+        criteriaDao.save(parentIcd10);
+        childIcd9 = new Criteria()
+                .code("003.1")
+                .count("10")
+                .conceptId("1000")
+                .domainId("Condition")
+                .group(false)
+                .selectable(true)
+                .name("name")
+                .parentId(parentIcd9.getId())
+                .type("ICD9")
+                .subtype(null);
         criteriaDao.save(childIcd9);
+        childIcd10 = new Criteria()
+                .code("003.1")
+                .count("10")
+                .conceptId("1000")
+                .domainId("Condition")
+                .group(false)
+                .selectable(true)
+                .name("name")
+                .parentId(parentIcd10.getId())
+                .type("ICD10")
+                .subtype("ICD10PCS");
+        criteriaDao.save(childIcd10);
     }
 
     @After
@@ -97,6 +120,8 @@ public class CriteriaDaoTest {
         criteriaDao.delete(cptCriteria2);
         criteriaDao.delete(parentIcd9);
         criteriaDao.delete(childIcd9);
+        criteriaDao.delete(parentIcd10);
+        criteriaDao.delete(childIcd10);
     }
 
     @Test
@@ -120,12 +145,18 @@ public class CriteriaDaoTest {
 
     @Test
     public void findCriteriaByTypeAndCode() throws Exception {
-        final List<CodeDomainLookup> icd9DomainList = criteriaDao.findCriteriaByTypeAndCode("ICD9", "003");
+        final List<String> icd9DomainList = criteriaDao.findCriteriaByTypeAndCode("ICD9", "003");
 
-        final CodeDomainLookup icd9Domain1 = icd9DomainList.get(0);
         assertEquals(1, icd9DomainList.size());
-        assertEquals("003.1", icd9Domain1.getCode());
-        assertEquals("Condition", icd9Domain1.getDomainId());
+        assertEquals("Condition", icd9DomainList.get(0));
+    }
+
+    @Test
+    public void findCriteriaByTypeAndSubtypeAndCode() throws Exception {
+        final List<String> icd10DomainList = criteriaDao.findCriteriaByTypeAndSubtypeAndCode("ICD10", "ICD10PCS", "003");
+
+        assertEquals(1, icd10DomainList.size());
+        assertEquals("Condition", icd10DomainList.get(0));
     }
 
     private Criteria createCriteria(String type, String subtype, String code, String name) {
