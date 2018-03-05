@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {Profile, ProfileService} from 'generated';
+import {ErrorResponse, Profile, ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['./component.css'],
@@ -10,13 +11,16 @@ import {Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
+  errorText : string;
   constructor(
+      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,
   ) {}
 
   ngOnInit(): void {
+    this.errorText = null;
     this.profileService.getMe().subscribe(
         (profile: Profile) => {
       this.profile = profile;
@@ -31,7 +35,11 @@ export class ProfileEditComponent implements OnInit {
           this.router.navigate(['../'], {relativeTo : this.route});
         },
           error => {
-          // TODO: handle error
+          // if MailChimp throws an error, display to the user
+          const response: ErrorResponse = this.errorHandlingService.convertErrorToErrorResponse(error);
+          if (response.message != null && response.errorClassName == "com.ecwid.maleorang.MailchimpException") {
+            this.errorText = response.message;
+          }
         }
       );
   }

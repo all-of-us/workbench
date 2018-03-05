@@ -1,7 +1,7 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorCode} from 'generated';
+import {ErrorCode, ErrorResponse} from 'generated';
 
 @Injectable()
 export class ErrorHandlingService {
@@ -12,6 +12,7 @@ export class ErrorHandlingService {
   public serverError: boolean;
   public noServerResponse: boolean;
   public serverBusy: boolean;
+  public errorResponse: ErrorResponse;
 
   public userDisabledError: boolean;
 
@@ -67,20 +68,16 @@ export class ErrorHandlingService {
           this.setServerBusy();
           throw e;
         }
-        switch (e.status) {
+
+        this.errorResponse = this.convertErrorToErrorResponse(e);
+        switch (this.errorResponse.statusCode) {
           case 503:
             break;
           case 500:
             this.setServerError();
             throw e;
           case 403:
-            let code;
-            try {
-              code = JSON.parse(e._body).code;
-            } catch {
-              code = ErrorCode.PARSEERROR;
-            }
-            if (code === ErrorCode.USERDISABLED) {
+            if (this.errorResponse.errorCode === ErrorCode.USERDISABLED) {
               this.setUserDisabledError();
             }
             throw e;
@@ -92,5 +89,18 @@ export class ErrorHandlingService {
         }
       });
     });
+  }
+
+  public convertErrorToErrorResponse (e: any) {
+    if (JSON.parse(e._body) != null) {
+      const convertedError: ErrorResponse = {
+        'errorClassName': JSON.parse(e._body).errorClassName || '',
+        'errorCode': JSON.parse(e._body).errorCode || '',
+        'message': JSON.parse(e._body).message || '',
+        'statusCode': JSON.parse(e._body).statusCode || ''
+      };
+      return convertedError;
+    }
+    return {};
   }
 }

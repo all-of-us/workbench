@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 
 @ControllerAdvice
 public class ExceptionAdvice {
@@ -19,25 +21,24 @@ public class ExceptionAdvice {
     Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
     // if this error was thrown by another error, get the info from that exception
-    Throwable cause = e;
+    Throwable relevantError = e;
     if (e.getCause() != null) {
-      cause = e.getCause();
+      relevantError = e.getCause();
     }
 
-    errorResponse.setMessage(cause.getMessage());
-    errorResponse.setErrorClassName(cause.getClass().getSimpleName());
+    errorResponse.setMessage(relevantError.getMessage());
+    errorResponse.setErrorClassName(relevantError.getClass().getName());
 
-    // get properties based on class of error thrown
-    if (cause instanceof DefinesHttpResponseCode) {
-      DefinesHttpResponseCode exceptionWithHttpStatus = (DefinesHttpResponseCode) cause;
-      statusCode = exceptionWithHttpStatus.statusCode().value();
+    // if exception class has an HTTP status associated with it, grab it
+    if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
+      statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
     }
-    if (cause instanceof MailchimpException) {
-      MailchimpException mailchimpException = (MailchimpException) cause;
+    if (relevantError instanceof MailchimpException) {
+      MailchimpException mailchimpException = (MailchimpException) relevantError;
       statusCode = mailchimpException.code;
       errorResponse.setMessage(mailchimpException.description);
-    } else if (cause instanceof WorkbenchException) {
-      WorkbenchException workbenchException = (WorkbenchException) cause;
+    } else if (relevantError instanceof WorkbenchException) {
+      WorkbenchException workbenchException = (WorkbenchException) relevantError;
       if (workbenchException.getErrorResponse() != null && workbenchException.getErrorResponse().getErrorCode() != null) {
         errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());
       }
@@ -46,7 +47,7 @@ public class ExceptionAdvice {
     // only log error if it's a server error
     if (statusCode >= 500) {
       Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
-      log.log(Level.SEVERE, cause.getClass().getName(), e);
+      log.log(Level.SEVERE, relevantError.getClass().getName(), e);
     }
 
     errorResponse.setStatusCode(statusCode);

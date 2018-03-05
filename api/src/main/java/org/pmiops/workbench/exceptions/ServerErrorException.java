@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * unable to handle a request temporarily.
  */
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class ServerErrorException extends WorkbenchException implements DefinesHttpResponseCode {
+public class ServerErrorException extends WorkbenchException {
   public ServerErrorException() {
     super();
   }
@@ -31,10 +31,5 @@ public class ServerErrorException extends WorkbenchException implements DefinesH
 
   public ServerErrorException(String message, Throwable t) {
     super(message, t);
-  }
-
-  @Override
-  public HttpStatus statusCode() {
-    return HttpStatus.INTERNAL_SERVER_ERROR;
   }
 }

@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class BadRequestException extends WorkbenchException implements DefinesHttpResponseCode {
+public class BadRequestException extends WorkbenchException {
   public BadRequestException() {
     super();
   }
@@ -24,10 +24,5 @@ public class BadRequestException extends WorkbenchException implements DefinesHt
 
   public BadRequestException(String message, Throwable t) {
     super(message, t);
-  }
-
-  @Override
-  public HttpStatus statusCode() {
-    return HttpStatus.BAD_REQUEST;
   }
 }

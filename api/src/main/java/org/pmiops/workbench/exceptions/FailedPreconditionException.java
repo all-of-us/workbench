@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-public class FailedPreconditionException extends WorkbenchException implements DefinesHttpResponseCode{
+public class FailedPreconditionException extends WorkbenchException {
   public FailedPreconditionException() {
     super();
   }
@@ -24,10 +24,5 @@ public class FailedPreconditionException extends WorkbenchException implements D
 
   public FailedPreconditionException(String message, Throwable t) {
     super(message, t);
-  }
-
-  @Override
-  public HttpStatus statusCode() {
-    return HttpStatus.PRECONDITION_FAILED;
   }
 }
