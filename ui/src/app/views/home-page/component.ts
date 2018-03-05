@@ -57,7 +57,6 @@ export class HomePageComponent implements OnInit {
         .subscribe(
             workspacesReceived => {
               this.workspaceList = workspacesReceived.items;
-              console.log(this.workspaceList);
               this.workspacesLoading = false;
             },
             error => {

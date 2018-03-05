@@ -318,8 +318,7 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   containsUnderserved(enumValue: UnderservedPopulationEnum): boolean {
-    if (this.workspace.researchPurpose.underservedPopulationDetails
-        .find(item => item === enumValue) === undefined) {
+    if (this.workspacePopulationDetails.find(item => item === enumValue) === undefined) {
       return false;
     } else {
       return true;
@@ -330,14 +329,19 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.mode === WorkspaceEditMode.Edit) {
       return;
     }
-    const positionOfValue = this.workspace.researchPurpose.
-        underservedPopulationDetails.findIndex(item => item === enumValue);
+    const positionOfValue = this.workspacePopulationDetails.findIndex(item => item === enumValue);
     if (positionOfValue !== -1) {
-      this.workspace.researchPurpose.underservedPopulationDetails
-          .splice(positionOfValue, 1);
+      this.workspacePopulationDetails.splice(positionOfValue, 1);
     } else {
-      this.workspace.researchPurpose.underservedPopulationDetails
-          .push(enumValue);
+      this.workspacePopulationDetails.push(enumValue);
     }
+  }
+
+  get workspacePopulationDetails() {
+    return this.workspace.researchPurpose.underservedPopulationDetails;
+  }
+
+  set workspacePopulationDetails(val) {
+    this.workspace.researchPurpose.underservedPopulationDetails = val;
   }
 }
