@@ -205,21 +205,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private static final BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>
-      TO_CLIENT_WORKSPACE_FROM_FC_AND_DB =
-      new BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>() {
-        @Override
-        public Workspace apply(org.pmiops.workbench.db.model.Workspace workspace,
-            org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
-          ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-
-          Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace, researchPurpose);
-
-
-
-          return result;
-        }
-      };
-  private static final BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>
       TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB =
       new BiFunction<org.pmiops.workbench.db.model.Workspace, org.pmiops.workbench.firecloud.model.Workspace, Workspace>() {
         @Override
@@ -576,6 +561,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+    if (response.getAccessLevel == null) {
+      throw new ServerErrorException("Firecloud access level not handled properly.")
+    }
     response.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);
   }
