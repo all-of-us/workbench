@@ -102,6 +102,19 @@ services:
     command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr --run-list data --context local
     env_file:
       - db-cdr/vars.env
+  db-public-data-migration:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+      command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public --run-list data --context local
+      env_file:
+        - db-cdr/vars.env
   db-data-migration:
     depends_on:
       - db

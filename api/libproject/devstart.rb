@@ -575,6 +575,7 @@ def run_local_all_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-migration}
   common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-cdr-data-migration}
+  common.run_inline %W{docker-compose run db-public-data-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 end
 
@@ -587,7 +588,6 @@ Common.register_command({
 
 def run_local_data_migrations(*args)
   common = Common.new
-
   common.run_inline %W{docker-compose run db-cdr-data-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 end
