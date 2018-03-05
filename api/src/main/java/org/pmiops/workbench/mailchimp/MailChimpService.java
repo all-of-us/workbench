@@ -1,9 +1,6 @@
 package org.pmiops.workbench.mailchimp;
 
 
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.springframework.http.ResponseEntity;
-
 /**
  * Encapsulate mailchimp API interaction details and provide a simple/mockable interface
  * for internal use.
