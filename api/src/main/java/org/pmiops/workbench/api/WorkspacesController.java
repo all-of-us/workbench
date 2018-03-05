@@ -561,8 +561,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-    if (response.getAccessLevel == null) {
-      throw new ServerErrorException("Firecloud access level not handled properly.")
+    if (response.getAccessLevel() == null) {
+      throw new ServerErrorException("Firecloud access level not handled properly.");
     }
     response.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);
