@@ -20,10 +20,6 @@ public enum DomainTableEnum {
         this.sourceConceptId = sourceConceptId;
     }
 
-    public String getDomainId() {
-        return this.domainId;
-    }
-
     public static String getTableName(String domainId) {
         for (DomainTableEnum item: values()) {
             if (item.domainId.equals(domainId)) {
@@ -37,15 +33,6 @@ public enum DomainTableEnum {
         for (DomainTableEnum item: values()) {
             if (item.domainId.equals(domainId)) {
                 return item.sourceConceptId;
-            }
-        }
-        return null;
-    }
-
-    public static DomainTableEnum fromGroupDomainId(String domainId) {
-        for (DomainTableEnum item: values()) {
-            if (item.domainId.equals("Group-" + domainId)) {
-                return item;
             }
         }
         return null;
