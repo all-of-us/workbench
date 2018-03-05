@@ -300,29 +300,15 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   bucketAsThree(input: Array<string>): Array<Array<string>> {
-    const output: Array<Array<string>> = [];
-    let inputIterator = 0;
-    let currentBucket = -1;
-    input.forEach((inputValue) => {
-      if (inputIterator === 3) {
-        inputIterator = 0;
-      }
-      if (inputIterator === 0) {
-        output.push([]);
-        currentBucket += 1;
-      }
-      output[currentBucket].push(inputValue);
-      inputIterator += 1;
-    });
+    const output = [];
+    for (let i = 0; i < input.length; i += 3) {
+      output.push(input.slice(i, i + 3));
+    }
     return output;
   }
 
   containsUnderserved(enumValue: UnderservedPopulationEnum): boolean {
-    if (this.workspacePopulationDetails.find(item => item === enumValue) === undefined) {
-      return false;
-    } else {
-      return true;
-    }
+    return this.workspacePopulationDetails.includes(enumValue);
   }
 
   switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
