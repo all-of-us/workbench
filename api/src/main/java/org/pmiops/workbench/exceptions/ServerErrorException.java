@@ -29,7 +29,9 @@ public class ServerErrorException extends WorkbenchException implements DefinesH
     super(t);
   }
 
-  public ServerErrorException(String message, Throwable t) { super(message, t); }
+  public ServerErrorException(String message, Throwable t) {
+    super(message, t);
+  }
 
   @Override
   public HttpStatus statusCode() {

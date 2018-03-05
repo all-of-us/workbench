@@ -25,7 +25,6 @@ public class ExceptionAdvice {
     }
 
     errorResponse.setMessage(cause.getMessage());
-    errorResponse.setStatusCode(statusCode);
     errorResponse.setErrorClassName(cause.getClass().getSimpleName());
 
     // get properties based on class of error thrown
@@ -50,6 +49,7 @@ public class ExceptionAdvice {
       log.log(Level.SEVERE, cause.getClass().getName(), e);
     }
 
+    errorResponse.setStatusCode(statusCode);
     return ResponseEntity.status(statusCode).body(errorResponse);
   }
 }
