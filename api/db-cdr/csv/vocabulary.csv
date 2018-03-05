@@ -1,25 +1,51 @@
-vocabulary_id,vocabulary_name,vocabulary_reference,vocabulary_version,vocabulary_concept_id
-Observation Type,OMOP Observation Type,OMOP generated,,44819129
-Relationship,OMOP Relationship,OMOP generated,,44819235
-Procedure Type,OMOP Procedure Occurrence Type,OMOP generated,,44819128
-Note Type,OMOP Note Type,OMOP generated,,44819146
-Cohort Type,OMOP Cohort Type,OMOP generated,,44819234
-Obs Period Type,OMOP Observation Period Type,OMOP generated,,44819149
-Vocabulary,OMOP Vocabulary,OMOP generated,,44819232
-Visit Type,OMOP Visit Type,OMOP generated,,44819150
-Death Type,OMOP Death Type,OMOP generated,,44819135
-Visit,OMOP Visit,OMOP generated,,44819119
-Device Type,OMOP Device Type,OMOP generated,,44819151
-Cost Type,OMOP Cost Type,OMOP generated,,5029
-Drug Type,OMOP Drug Exposure Type,OMOP generated,,44819126
-Concept Class,OMOP Concept Class,OMOP generated,,44819233
-None,OMOP Standardized Vocabularies,OMOP generated,v5.0 13-SEP-17,44819096
-Domain,OMOP Domain,OMOP generated,,44819147
-Meas Type,OMOP Measurement Type,OMOP generated,,44819152
-Gender,OMOP Gender,OMOP generated,,44819108
-Condition Type,OMOP Condition Occurrence Type,OMOP generated,,44819127
-LOINC,Logical Observation Identifiers Names and Codes (Regenstrief Institute),http://loinc.org/downloads/loinc,LOINC 2.61,44819102
-PPI,PPI,http://terminology.pmi-ops.org/CodeSystem/ppi,Codebook Version 0.2.59,581404
-Race,Race and Ethnicity Code Set (USBC),http://www.cdc.gov/nchs/data/dvs/Race_Ethnicity_CodeSet.pdf,Version 1.0,44819109
-UCUM,Unified Code for Units of Measure (Regenstrief Institute),http://aurora.regenstrief.org/~ucum/ucum.html#section-Alphabetic-Index,Version 1.8.2,44819107
-SNOMED,Systematic Nomenclature of Medicine - Clinical Terms (IHTSDO),http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html,SnomedCT Release 20170401,44819097
+"vocabulary_id","vocabulary_name","vocabulary_reference","vocabulary_version",vocabulary_concept_id
+"ABMS","Provider Specialty (American Board of Medical Specialties)","http://www.abms.org/member-boards/specialty-subspecialty-certificates","",45756746
+"ATC","WHO Anatomic Therapeutic Chemical Classification","FDB UK distribution package","RxNorm Full 20170807",44819117
+"Cohort Type","OMOP Cohort Type","OMOP generated","",44819234
+"Concept Class","OMOP Concept Class","OMOP generated","",44819233
+"Condition Type","OMOP Condition Occurrence Type","OMOP generated","",44819127
+"Cost Type","OMOP Cost Type","OMOP generated","",5029
+"CPT4","Current Procedural Terminology version 4 (AMA)","http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html","2017AA",44819100
+"CVX","CDC Vaccine Administered CVX (NCIRD)","https://www2a.cdc.gov/vaccines/iis/iisstandards/vaccines.asp?rpt=cvx","CVX code set 31-JUL-17",581400
+"Death Type","OMOP Death Type","OMOP generated","",44819135
+"Device Type","OMOP Device Type","OMOP generated","",44819151
+"Domain","OMOP Domain","OMOP generated","",44819147
+"DRG","Diagnosis-related group (CMS)","http://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/Acute-Inpatient-Files-for-Download.html","2011-18-02",44819130
+"Drug Type","OMOP Drug Exposure Type","OMOP generated","",44819126
+"Ethnicity","OMOP Ethnicity","OMOP generated","",44819134
+"Gender","OMOP Gender","OMOP generated","",44819108
+"HCPCS","Healthcare Common Procedure Coding System (CMS)","http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html","2017 Alpha Numeric HCPCS File",44819101
+"ICD10CM","International Classification of Diseases, Tenth Revision, Clinical Modification (NCHS)","http://www.cdc.gov/nchs/icd/icd10cm.htm","ICD10CM FY2018 code descriptions",44819098
+"ICD10PCS","ICD-10 Procedure Coding System (CMS)","http://www.cms.gov/Medicare/Coding/ICD10/index.html","ICD10PCS 20160518",44819125
+"ICD9CM","International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 1 and 2 (NCHS)","http://www.cms.gov/Medicare/Coding/ICD9ProviderDiagnosticCodes/codes.html","ICD9CM v32 master descriptions",5046
+"ICD9Proc","International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 3 (NCHS)","http://www.cms.gov/Medicare/Coding/ICD9ProviderDiagnosticCodes/codes.html","ICD9CM v32 master descriptions",44819099
+"ISBT","ISBT 128 Product Description Code Database","http://www.iccbba.org/tech-library/iccbba-documents/databases-and-reference-tables/product-description-codes-database2","7.9.0",581441
+"ISBT Attribute","ISBT 128 Product Description Code Database","http://www.iccbba.org/tech-library/iccbba-documents/databases-and-reference-tables/product-description-codes-database2","7.9.0",581442
+"LOINC","Logical Observation Identifiers Names and Codes (Regenstrief Institute)","http://loinc.org/downloads/loinc","LOINC 2.61",44819102
+"Meas Type","OMOP Measurement Type","OMOP generated","",44819152
+"Multum","Cerner Multum (Cerner)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html","2013-07-10",44819112
+"NDC","National Drug Code (FDA and manufacturers)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html, http://www.fda.gov/downloads/Drugs/DevelopmentApprovalProcess/UCM070838.zip","NDC 20171214",44819105
+"NDFRT","National Drug File - Reference Terminology (VA)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html","RxNorm Full 20170807",44819103
+"None","OMOP Standardized Vocabularies","OMOP generated","v5.0 22-DEC-17",44819096
+"Note Type","OMOP Note Type","OMOP generated","",44819146
+"NUCC","National Uniform Claim Committee Health Care Provider Taxonomy Code Set (NUCC)","http://www.nucc.org/index.php?option=com_content&view=article&id=107&Itemid=132","2013-07-01",44819137
+"Obs Period Type","OMOP Observation Period Type","OMOP generated","",44819149
+"Observation Type","OMOP Observation Type","OMOP generated","",44819129
+"Place of Service","Place of Service Codes for Professional Claims (CMS)","http://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/PhysicianFeeSched/downloads//Website_POS_database.pdf","2009-01-11",44819110
+"PPI","AllOfUs_PPI","http://terminology.pmi-ops.org/CodeSystem/ppi","Codebook Version 0.2.62",581404
+"Procedure Type","OMOP Procedure Occurrence Type","OMOP generated","",44819128
+"Race","Race and Ethnicity Code Set (USBC)","http://www.cdc.gov/nchs/data/dvs/Race_Ethnicity_CodeSet.pdf","Version 1.0",44819109
+"Relationship","OMOP Relationship","OMOP generated","",44819235
+"Revenue Code","UB04/CMS1450 Revenue Codes (CMS)","http://www.mpca.net/?page=ERC_finance","2010 Release",44819133
+"RxNorm","RxNorm (NLM)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html","RxNorm Full 20170807",44819104
+"RxNorm Extension","RxNorm Extension (OMOP)","OMOP generated","RxNorm Extension 15-OCT-17",252
+"SNOMED","Systematic Nomenclature of Medicine - Clinical Terms (IHTSDO)","http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html","SnomedCT Release 20170731",44819097
+"Specialty","Medicare provider/supplier specialty codes (CMS)","http://www.cms.gov/Medicare/Provider-Enrollment-and-Certification/MedicareProviderSupEnroll/Taxonomy.html","",44819138
+"Specimen Type","OMOP Specimen Type","OMOP generated","",581376
+"SPL","Structured Product Labeling (FDA)","http://www.fda.gov/Drugs/InformationOnDrugs/ucm142438.htm","NDC 20171214",44819140
+"UCUM","Unified Code for Units of Measure (Regenstrief Institute)","http://aurora.regenstrief.org/~ucum/ucum.html#section-Alphabetic-Index","Version 1.8.2",44819107
+"VA Class","VA National Drug File Class (VA)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html","RxNorm Full 20170807",44819122
+"VA Product","VA National Drug File Product (VA)","http://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html","RxNorm Full 20170807",44819120
+"Visit","OMOP Visit","OMOP generated","",44819119
+"Visit Type","OMOP Visit Type","OMOP generated","",44819150
+"Vocabulary","OMOP Vocabulary","OMOP generated","",44819232
