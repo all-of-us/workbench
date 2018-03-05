@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * how to handle yet.
  */
 @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-public class ServerUnavailableException extends WorkbenchException {
+public class ServerUnavailableException extends WorkbenchException implements DefinesHttpResponseCode {
   public ServerUnavailableException() {
     super();
   }
@@ -31,5 +31,10 @@ public class ServerUnavailableException extends WorkbenchException {
 
   public ServerUnavailableException(String message, Throwable t) {
     super(message, t);
+  }
+
+  @Override
+  public HttpStatus statusCode() {
+    return HttpStatus.SERVICE_UNAVAILABLE;
   }
 }

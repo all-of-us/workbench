@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
-public class ConflictException extends WorkbenchException {
+public class ConflictException extends WorkbenchException implements DefinesHttpResponseCode {
   public ConflictException() {
     super();
   }
@@ -24,5 +24,10 @@ public class ConflictException extends WorkbenchException {
 
   public ConflictException(String message, Throwable t) {
     super(message, t);
+  }
+
+  @Override
+  public HttpStatus statusCode() {
+    return HttpStatus.CONFLICT;
   }
 }

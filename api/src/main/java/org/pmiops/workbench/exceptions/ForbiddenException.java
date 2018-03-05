@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenException extends WorkbenchException {
+public class ForbiddenException extends WorkbenchException implements DefinesHttpResponseCode{
   public ForbiddenException() {
     super();
   }
@@ -24,5 +24,10 @@ public class ForbiddenException extends WorkbenchException {
 
   public ForbiddenException(String message, Throwable t) {
     super(message, t);
+  }
+
+  @Override
+  public HttpStatus statusCode() {
+    return HttpStatus.FORBIDDEN;
   }
 }

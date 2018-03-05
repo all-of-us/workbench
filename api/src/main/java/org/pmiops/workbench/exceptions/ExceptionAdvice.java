@@ -4,21 +4,14 @@ package org.pmiops.workbench.exceptions;
 import com.ecwid.maleorang.MailchimpException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.aspectj.weaver.ast.Not;
-import org.pmiops.workbench.mailchimp.MailChimpService;
-import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class ExceptionAdvice {
-
-  private static final Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
@@ -32,40 +25,31 @@ public class ExceptionAdvice {
     }
 
     errorResponse.setMessage(cause.getMessage());
+    errorResponse.setStatusCode(statusCode);
+    errorResponse.setErrorClassName(cause.getClass().getSimpleName());
 
+    // get properties based on class of error thrown
+    if (cause instanceof DefinesHttpResponseCode) {
+      DefinesHttpResponseCode de = (DefinesHttpResponseCode) cause;
+      statusCode = de.statusCode().value();
+    }
     if (cause instanceof MailchimpException) {
       MailchimpException me = (MailchimpException) cause;
       statusCode = me.code;
       errorResponse.setMessage(me.description);
-    } else if (cause instanceof BadRequestException) {
-      statusCode = HttpStatus.BAD_REQUEST.value();
-    } else if (cause instanceof ConflictException) {
-      statusCode = HttpStatus.CONFLICT.value();
-    } else if (cause instanceof FailedPreconditionException) {
-      statusCode = HttpStatus.PRECONDITION_FAILED.value();
-    } else if (cause instanceof ForbiddenException) {
-      ForbiddenException fe = (ForbiddenException) cause;
-      if (fe.getErrorResponse() != null && fe.getErrorResponse().getErrorCode() != null) {
-        errorResponse.setErrorCode(fe.getErrorResponse().getErrorCode());
+    } else if (cause instanceof WorkbenchException) {
+      WorkbenchException we = (WorkbenchException) cause;
+      if (we.getErrorResponse() != null && we.getErrorResponse().getErrorCode() != null) {
+        errorResponse.setErrorCode(we.getErrorResponse().getErrorCode());
       }
-      statusCode = HttpStatus.FORBIDDEN.value();
-    } else if (cause instanceof NotFoundException) {
-      statusCode = HttpStatus.NOT_FOUND.value();
-    } else if (cause instanceof ServerUnavailableException) {
-      statusCode = HttpStatus.SERVICE_UNAVAILABLE.value();
     }
 
-    errorResponse.setStatusCode(statusCode);
-    errorResponse.setErrorClassName(cause.getClass().getSimpleName());
-
-    // different logging levels for different error codes
-    Level level = Level.INFO;
+    // only log error if it's a server error
     if (statusCode >= 500) {
-      level = Level.SEVERE;
-    } else if (statusCode >= 400) {
-      level = Level.WARNING;
+      Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
+      log.log(Level.SEVERE, cause.getClass().getName(), e);
     }
-    log.log(level, cause.getClass().getName(), e);
+
     return ResponseEntity.status(statusCode).body(errorResponse);
   }
 }

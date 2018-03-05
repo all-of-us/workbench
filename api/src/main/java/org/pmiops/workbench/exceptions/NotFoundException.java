@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class NotFoundException extends WorkbenchException {
+public class NotFoundException extends WorkbenchException implements DefinesHttpResponseCode {
   public NotFoundException() {
     super();
   }
@@ -24,5 +24,10 @@ public class NotFoundException extends WorkbenchException {
 
   public NotFoundException(String message, Throwable t) {
     super(message, t);
+  }
+
+  @Override
+  public HttpStatus statusCode() {
+    return HttpStatus.NOT_FOUND;
   }
 }
