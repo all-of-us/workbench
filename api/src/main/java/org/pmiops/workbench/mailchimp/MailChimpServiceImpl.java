@@ -3,12 +3,12 @@ package org.pmiops.workbench.mailchimp;
 
 import com.ecwid.maleorang.MailchimpClient;
 import com.ecwid.maleorang.MailchimpException;
+import com.ecwid.maleorang.MailchimpMethod;
+import com.ecwid.maleorang.MailchimpObject;
 import com.ecwid.maleorang.method.v3_0.lists.members.DeleteMemberMethod;
 import com.ecwid.maleorang.method.v3_0.lists.members.EditMemberMethod.Create;
 import com.ecwid.maleorang.method.v3_0.lists.members.GetMemberMethod;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.inject.Provider;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,43 +31,46 @@ public class MailChimpServiceImpl implements MailChimpService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
 
-  // TO-DO: create a general "call MailChimp API" that handles an IOException so addUserContactEmail and getMember don't have to
-
   @Override
   public String addUserContactEmail(String contactEmail) {
     String userId;
-    Create createRequest = new Create(
-        getListId(),
-        contactEmail);
+    Create createRequest = new Create(getListId(), contactEmail);
     createRequest.status = MailChimpService.MAILCHIMP_PENDING;
-    try {
-      userId = getClient().execute(createRequest)
+    userId = executeMailChimpRequest(createRequest)
           .mapping.get(MailChimpService.MAILCHIMP_KEY_ID).toString();
-    } catch (IOException | MailchimpException e) {
-      throw new RuntimeException(e);
-    }    return userId;
+    return userId;
   }
 
   @Override
   public void deleteUserContactEmail(String contactEmail) {
-    try {
-      getClient().execute(new DeleteMemberMethod(getListId(), contactEmail));
-    } catch (IOException | MailchimpException e) {
-      throw new RuntimeException(e);
-    }
+    DeleteMemberMethod delete = new DeleteMemberMethod(getListId(), contactEmail);
+    executeMailChimpRequest(delete);
   }
 
   @Override
   public String getMember(String contactEmail) {
-    Map<String, Object> mailchimpResponse = new HashMap<String, Object>();
+    String status;
+    GetMemberMethod getMember = new GetMemberMethod(getListId(), contactEmail);
+    status = executeMailChimpRequest(getMember)
+        .mapping.get(MailChimpService.MAILCHIMP_KEY_STATUS).toString();
+    return status;
+  }
+
+  // general function that handles MailChimp client creation and error handling
+  private MailchimpObject executeMailChimpRequest(MailchimpMethod method) {
+    if (apiKey == null) {
+      apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
+    }
+    MailchimpClient client = new MailchimpClient(apiKey);
+    MailchimpObject result;
+
     try {
-      mailchimpResponse = getClient().execute(
-          new GetMemberMethod(getListId(),
-              contactEmail)).mapping;
+      result = client.execute(method);
     } catch (IOException | MailchimpException e) {
       throw new RuntimeException(e);
     }
-    return mailchimpResponse.get(MailChimpService.MAILCHIMP_KEY_STATUS).toString();
+
+    return result;
   }
 
   private String getListId() {
@@ -75,12 +78,5 @@ public class MailChimpServiceImpl implements MailChimpService {
       listId = cloudStorageServiceProvider.get().readMailChimpListId();
     }
     return listId;
-  }
-
-  MailchimpClient getClient() {
-    if (apiKey == null) {
-      apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
-    }
-    return new MailchimpClient(apiKey);
   }
 }
