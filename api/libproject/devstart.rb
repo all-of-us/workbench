@@ -598,18 +598,17 @@ Common.register_command({
   :fn => lambda { |*args| run_local_data_migrations(*args) }
 })
 
-
-def run_local_bigdata_migrations(*args)
+def run_local_public_data_migrations(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
+  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-public-data-migration}
 end
 
 Common.register_command({
-  :invocation => "run-local-bigdata-migrations",
-  :description => "Runs big data migrations for cdr schemas.",
-  :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
-})
-
+                            :invocation => "run-local-public-data-migrations",
+                            :description => "Runs local data migrations for public schemas.",
+                            :fn => lambda { |*args| run_local_public_data_migrations(*args) }
+                        })
 
 def generate_cdr_counts(*args)
   common = Common.new
