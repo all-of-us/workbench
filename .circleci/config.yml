@@ -151,7 +151,7 @@ jobs:
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench/api
-          command: ./project.rb bigquerytest --project all-of-us-workbench-test
+          command: ./project.rb bigquerytest
       - save_cache:
           paths:
             - ~/.gradle

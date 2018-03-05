@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,11 +16,13 @@ public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
   private final GoogleCredential googleCredential = getGoogleCredential();
   private final WorkbenchConfig workbenchConfig = createConfig();
+  private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
+
 
   @Before
   public void setup() {
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig));
+        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport);
   }
 
   @Test
