@@ -88,6 +88,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
 
+  // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
@@ -177,6 +178,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return researchPurpose;
   }
 
+  // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromFCAndDb(org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace, ResearchPurpose researchPurpose) {
     Workspace result = new Workspace()
