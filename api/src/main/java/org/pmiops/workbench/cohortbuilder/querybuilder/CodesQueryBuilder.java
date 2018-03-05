@@ -24,11 +24,13 @@ import java.util.stream.Collectors;
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
-    static final ImmutableMap<String, String> TYPE_PROC =
+    private static final ImmutableMap<String, String> TYPE_PROC =
             ImmutableMap.of("ICD9", "ICD9Proc", "CPT", "CPT4");
 
-    static final ImmutableMap<String, String> TYPE_CM =
+    private static final ImmutableMap<String, String> TYPE_CM =
             ImmutableMap.of("ICD9", "ICD9CM", "CPT", "CPT4");
+
+    public static final String ICD_10 = "ICD10";
 
     public enum GroupType {
         GROUP, NOT_GROUP
@@ -132,7 +134,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         final String namedParameter = domain + uniqueName;
 
         queryParams.put(namedParameter, codes);
-        if (type.equals("ICD10")) {
+        if (type.equals(ICD_10)) {
             queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(subtype));
             inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
             paramNames = new ImmutableMap.Builder<String, String>()
