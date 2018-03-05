@@ -312,7 +312,8 @@ Description of arguments for these scripts are as follows. See examples below.
 
 ##### Result
 1) mysql db is in your local mysql for development
-2) Update cdr_version table in workbench to switch to it for using 
+2) Switch your local environment to use it with your favorite method (TODO auto switch at somepoint maybe???)
+
 ###
 ## Cohort Builder
 
