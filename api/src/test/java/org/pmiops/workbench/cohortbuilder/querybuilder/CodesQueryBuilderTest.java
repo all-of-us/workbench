@@ -186,13 +186,13 @@ public class CodesQueryBuilderTest {
                 .getNamedParameters()
                 .get(measurementNamedParameter)
                 .getValue();
-        assertTrue(measurementCode.equals("0%"));
+        assertTrue("0%".equals(measurementCode));
 
         String procedureCode = queryJobConfiguration
                 .getNamedParameters()
                 .get(procedureNamedParameter)
                 .getValue();
-        assertTrue(procedureCode.equals("1%"));
+        assertTrue("1%".equals(procedureCode));
 
         assertEquals("ICD9CM", queryJobConfiguration.getNamedParameters().get(cmConditionParameter).getValue());
         assertEquals("ICD9Proc", queryJobConfiguration.getNamedParameters().get(procConditionParameter).getValue());
