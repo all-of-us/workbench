@@ -575,6 +575,7 @@ def run_local_all_migrations(*args)
   common.run_inline %W{docker-compose run db-cdr-migration}
   common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-cdr-data-migration}
+  common.run_inline %W{docker-compose run db-public-data-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 end
 
@@ -587,7 +588,6 @@ Common.register_command({
 
 def run_local_data_migrations(*args)
   common = Common.new
-
   common.run_inline %W{docker-compose run db-cdr-data-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 end
@@ -598,18 +598,17 @@ Common.register_command({
   :fn => lambda { |*args| run_local_data_migrations(*args) }
 })
 
-
-def run_local_bigdata_migrations(*args)
+def run_local_public_data_migrations(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-bigdata-migration}
+  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-public-data-migration}
 end
 
 Common.register_command({
-  :invocation => "run-local-bigdata-migrations",
-  :description => "Runs big data migrations for cdr schemas.",
-  :fn => lambda { |*args| run_local_bigdata_migrations(*args) }
-})
-
+                            :invocation => "run-local-public-data-migrations",
+                            :description => "Runs local data migrations for public schemas.",
+                            :fn => lambda { |*args| run_local_public_data_migrations(*args) }
+                        })
 
 def generate_cdr_counts(*args)
   common = Common.new
@@ -699,6 +698,33 @@ Common.register_command({
 Imports .sql file to cloudsql instance",
                             :fn => lambda { |*args| cloudsql_import("cloudsql-import", *args) }
                         })
+
+def local_mysql_import(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_option(
+    "--sql-dump-file [filename]",
+    lambda {|opts, v| opts.file = v},
+    "File name of the SQL dump to import"
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    lambda {|opts, v| opts.bucket = v},
+    "Name of the GCS bucket containing the SQL dump"
+  )
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{docker-compose run db-local-mysql-import
+        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket}}
+end
+Common.register_command({
+                            :invocation => "local-mysql-import",
+                            :description => "local-mysql-import --sql-dump-file <FILE.sql> --bucket <BUCKET>
+Imports .sql file to local mysql instance",
+                            :fn => lambda { |*args| local_mysql_import("local-mysql-import", *args) }
+                        })
+
 
 def run_drop_cdr_db(*args)
   common = Common.new

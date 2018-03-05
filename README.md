@@ -73,11 +73,15 @@ local API server under http://localhost:8081/api/.
 ./project.rb run-local-data-migrations
 ```
 
-**Big data such as concept and concept_relationship required for some functionality can be populated by  
+If you want to run the public api also do this to load the public db
 ```Shell
-./project.rb run-local-bigdata-migrations
+./project.rb run-local-public-data-migrations
 ```
 
+Or you can do both of the above at once by doing run-local-all-migrations
+```Shell
+./project.rb run-local-all-migrations
+```
 You can run the server (skipping config and db setup) by running:
 
 ```Shell
@@ -93,7 +97,7 @@ Other available operations may be discovered by running:
 ### Public API: dev AppEngine appserver
 
 After running dev-up, run-local-data-migrations, and
-run-local-bigdata-migrations, run in the api dir:
+run-local-public-data-migrations, run in the api dir:
 
 ```Shell
 ./project.rb run-public-api
@@ -302,6 +306,13 @@ Description of arguments for these scripts are as follows. See examples below.
  
 ##### Result
 1) databases are live in cloudsql 
+
+#### Import a dump to local mysql db.
+`./project.rb local-mysql-import --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+
+##### Result
+1) mysql db is in your local mysql for development
+2) Switch your local environment to use it with your favorite method (TODO auto switch at somepoint maybe???)
 
 ###
 ## Cohort Builder
