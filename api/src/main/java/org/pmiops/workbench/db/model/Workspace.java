@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -18,6 +20,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.UnderservedPopulationEnum;
+
 
 @Entity
 @Table(name = "workspace")
@@ -79,6 +83,10 @@ public class Workspace {
   private boolean population;
   private String populationOfFocus;
   private String additionalNotes;
+  private boolean containsUnderservedPopulation;
+  private Set<UnderservedPopulationEnum> underservedPopulationSet =
+      new HashSet<UnderservedPopulationEnum>();
+
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -278,6 +286,26 @@ public class Workspace {
 
   public void setAdditionalNotes(String additionalNotes) {
     this.additionalNotes = additionalNotes;
+  }
+
+  @Column(name = "rp_contains_underserved_population")
+  public Boolean getContainsUnderservedPopulation() {
+    return this.containsUnderservedPopulation;
+  }
+
+  public void setContainsUnderservedPopulation(Boolean containsUnderservedPopulation) {
+    this.containsUnderservedPopulation = containsUnderservedPopulation;
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
+  @Column(name = "underserved_population")
+  public Set<UnderservedPopulationEnum> getUnderservedPopulationSet() {
+    return underservedPopulationSet;
+  }
+
+  public void setUnderservedPopulationSet(Set<UnderservedPopulationEnum> newUnderservedPopulationSet) {
+    this.underservedPopulationSet = newUnderservedPopulationSet;
   }
 
   @Column(name = "rp_review_requested")

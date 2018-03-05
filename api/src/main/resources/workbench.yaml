@@ -1545,6 +1545,7 @@ definitions:
      - commercialPurpose
      - population
      - reviewRequested
+     - underservedPopulation
     properties:
       diseaseFocusedResearch:
         type: boolean
@@ -1574,6 +1575,13 @@ definitions:
       reviewRequested:
         type: boolean
         default: false
+      containsUnderservedPopulation:
+        type: boolean
+        default: false
+      underservedPopulationDetails:
+        type: array
+        items:
+          $ref: "#/definitions/underservedPopulationEnum"
       timeRequested:
         type: integer
         format: int64
@@ -1586,6 +1594,52 @@ definitions:
         description: Milliseconds since the UNIX epoch.
       additionalNotes:
         type: string
+
+  underservedPopulationEnum:
+    type: string
+    description: Short parsable descriptions of underserved populations
+    enum: [
+      RACE_AMERICAN_INDIAN_OR_ALASKA_NATIVE,
+      RACE_ASIAN,
+      RACE_BLACK_AFRICAN_OR_AFRICAN_AMERICAN,
+      RACE_HISPANIC_OR_LATINO,
+      RACE_MIDDLE_EASTERN_OR_NORTH_AFRICAN,
+      RACE_NATIVE_HAWAIIAN_OR_PACIFIC_ISLANDER,
+      RACE_MORE_THAN_ONE_RACE,
+      AGE_CHILDREN,
+      AGE_ADOLESCENTS,
+      AGE_OLDER_ADULTS,
+      AGE_ELDERLY,
+      SEX_FEMALE,
+      SEX_INTERSEX,
+      SEXUAL_ORIENTATION_GAY,
+      SEXUAL_ORIENTATION_LESBIAN,
+      SEXUAL_ORIENTATION_BISEXUAL,
+      SEXUAL_ORIENTATION_POLYSEXUAL_OMNISEXUAL_SAPIOSEXUAL_OR_PANSEXUAL,
+      SEXUAL_ORIENTATION_ASEXUAL,
+      SEXUAL_ORIENTATION_TWO_SPIRIT,
+      SEXUAL_ORIENTATION_FIGURING_OUT_SEXUALITY,
+      SEXUAL_ORIENTATION_MOSTLY_STRAIGHT,
+      SEXUAL_ORIENTATION_DOES_NOT_THINK_OF_HAVING_SEXUALITY,
+      SEXUAL_ORIENTATION_DOES_NOT_USE_LABELS,
+      SEXUAL_ORIENTATION_DOES_NOT_KNOW_ANSWER,
+      GENDER_IDENTITY_WOMAN,
+      GENDER_IDENTITY_NON_BINARY,
+      GENDER_IDENTITY_TRANSMAN,
+      GENDER_IDENTITY_TRANSWOMAN,
+      GENDER_IDENTITY_GENDERQUEER,
+      GENDER_IDENTITY_GENDERFLUID,
+      GENDER_IDENTITY_GENDER_VARIANT,
+      GENDER_IDENTITY_QUESTIONING,
+      GEOGRAPHY_URBAN_CLUSTERS,
+      GEOGRAPHY_RURAL,
+      DISABILITY_PHYSICAL,
+      DISABILITY_MENTAL,
+      ACCESS_TO_CARE_NOT_PAST_TWELVE_MONTHS,
+      ACCESS_TO_CARE_CANNOT_OBTAIN_OR_PAY_FOR,
+      EDUCATION_INCOME_LESS_THAN_HIGH_SCHOOL_GRADUATE,
+      EDUCATION_INCOME_LESS_THAN_TWENTY_FIVE_THOUSAND_FOR_FOUR_PEOPLE
+    ]
 
   ResearchPurposeReviewRequest:
     description: Approve or reject a workspace's research purpose.
