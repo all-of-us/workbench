@@ -5,19 +5,33 @@
 }
 
 .input {
-  width: 100%;
-}
-
-.form-area {
-  width: 40em;
-  padding: 0.6rem;
+  width: 20rem;
 }
 
 .checkbox-group {
   padding: 0.6rem 0;
 }
 
+.two-column {
+  width: 20rem;
+  display: inline-block;
+  padding-right: 2rem;
+  vertical-align: top;
+}
 
-div.form-area > div {
-  padding: 0.6rem 0.2rem;
+.three-column {
+  width: 15rem;
+  display: inline-block;
+  padding-right: 2rem;
+  vertical-align: top;
+}
+
+.underserved-header {
+  padding-top: 1rem;
+  border-bottom: 1px solid #4356a7;
+  margin-bottom: 0.6rem;
+}
+
+.underserved-checkbox {
+  padding-bottom: 0.6rem;
 }
