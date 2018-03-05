@@ -29,17 +29,17 @@ public class ExceptionAdvice {
 
     // get properties based on class of error thrown
     if (cause instanceof DefinesHttpResponseCode) {
-      DefinesHttpResponseCode de = (DefinesHttpResponseCode) cause;
-      statusCode = de.statusCode().value();
+      DefinesHttpResponseCode exceptionWithHttpStatus = (DefinesHttpResponseCode) cause;
+      statusCode = exceptionWithHttpStatus.statusCode().value();
     }
     if (cause instanceof MailchimpException) {
-      MailchimpException me = (MailchimpException) cause;
-      statusCode = me.code;
-      errorResponse.setMessage(me.description);
+      MailchimpException mailchimpException = (MailchimpException) cause;
+      statusCode = mailchimpException.code;
+      errorResponse.setMessage(mailchimpException.description);
     } else if (cause instanceof WorkbenchException) {
-      WorkbenchException we = (WorkbenchException) cause;
-      if (we.getErrorResponse() != null && we.getErrorResponse().getErrorCode() != null) {
-        errorResponse.setErrorCode(we.getErrorResponse().getErrorCode());
+      WorkbenchException workbenchException = (WorkbenchException) cause;
+      if (workbenchException.getErrorResponse() != null && workbenchException.getErrorResponse().getErrorCode() != null) {
+        errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());
       }
     }
 
