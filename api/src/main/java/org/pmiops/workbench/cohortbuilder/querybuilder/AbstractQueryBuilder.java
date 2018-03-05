@@ -21,7 +21,7 @@ public abstract class AbstractQueryBuilder {
 
     public abstract FactoryKey getType();
 
-    protected String getUniqueNamedParameter(String parameterName) {
-        return parameterName + UUID.randomUUID().toString().replaceAll("-", "");
+    protected String getUniqueNamedParameterPostfix() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 }

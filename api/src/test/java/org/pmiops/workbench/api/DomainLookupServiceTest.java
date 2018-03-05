@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -19,16 +18,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CodeDomainLookupServiceTest {
+public class DomainLookupServiceTest {
 
     @Mock
     private CriteriaDao criteriaDao;
 
-    @Mock
-    private CodeDomainLookup codeDomainLookup;
-
     @InjectMocks
-    CodeDomainLookupService codeDomainLookupService;
+    DomainLookupService domainLookupService;
 
     @Test
     public void findCodesForEmptyDomains() throws Exception {
@@ -50,15 +46,13 @@ public class CodeDomainLookupServiceTest {
                 .addIncludesItem(new SearchGroup()
                         .addItemsItem(searchGroupItem1));
 
-        List<CodeDomainLookup> lookups = new ArrayList<>();
-        lookups.add(codeDomainLookup);
+        List<String> lookups = new ArrayList<>();
+        lookups.add("Procedure");
 
         when(criteriaDao.findCriteriaByTypeAndCode(searchParameter2.getType(), searchParameter2.getValue()))
                 .thenReturn(lookups);
-        when(codeDomainLookup.getDomainId()).thenReturn("Procedure");
-        when(codeDomainLookup.getCode()).thenReturn("002");
 
-        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
 
         assertEquals(2, searchGroupItem1.getSearchParameters().size());
         assertEquals("001", searchGroupItem1.getSearchParameters().get(0).getValue());
