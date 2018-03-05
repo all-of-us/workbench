@@ -900,21 +900,16 @@ Common.register_command({
   :fn => lambda { |*args| set_authority("set-authority", *args) }
 })
 
-def get_test_service_account(cmd_name, *args)
-  ensure_docker cmd_name, args
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  ServiceAccountContext.new(gcc.project).run do
+def get_test_service_account()
+  ServiceAccountContext.new(TEST_PROJECT).run do
     print "Service account key is now in sa-key.json"
   end
 end
 
 Common.register_command({
-  :invocation => "get-service-creds",
+  :invocation => "get-test-service-creds",
   :description => "Copies sa-key.json locally (for use when running tests from an IDE, etc).",
-  :fn => lambda { |*args| get_rest_service_account("get-service-creds", *args)}
+  :fn => lambda { |*args| get_test_service_account()}
 })
 
 def connect_to_cloud_db(cmd_name, *args)
