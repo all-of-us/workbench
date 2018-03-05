@@ -125,6 +125,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.workspacesService.getWorkspace(this.wsNamespace, this.wsId)
         .subscribe(
           workspaceResponse => {
+            console.log(workspaceResponse);
             this.workspace = workspaceResponse.workspace;
             this.accessLevel = workspaceResponse.accessLevel;
             this.workspaceLoading = false;

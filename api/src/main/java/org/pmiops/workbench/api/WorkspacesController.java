@@ -111,8 +111,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .populationOfFocus(workspace.getPopulationOfFocus())
               .additionalNotes(workspace.getAdditionalNotes())
               .reviewRequested(workspace.getReviewRequested())
-              .approved(workspace.getApproved());
+              .approved(workspace.getApproved())
+              .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
 
+
+          if(workspace.getContainsUnderservedPopulation()) {
+            Set<UnderservedPopulationEnum> dbSet = workspace.getUnderservedPopulationSet();
+            List<UnderservedPopulationEnum> clientList = new ArrayList<UnderservedPopulationEnum>();
+            for (UnderservedPopulationEnum population : dbSet) {
+              clientList.add(population);
+            }
+            researchPurpose.setUnderservedPopulationDetails(clientList);
+          }
+          
           if(workspace.getTimeRequested() != null){
             researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
           }
@@ -161,7 +172,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   .populationOfFocus(workspace.getPopulationOfFocus())
                   .additionalNotes(workspace.getAdditionalNotes())
                   .reviewRequested(workspace.getReviewRequested())
-                  .approved(workspace.getApproved());
+                  .approved(workspace.getApproved())
+                  .containsUnderservedPopulation(workspace.getContainsUnderservedPopulation());
+
+
+              if(workspace.getContainsUnderservedPopulation()) {
+                Set<UnderservedPopulationEnum> dbSet = workspace.getUnderservedPopulationSet();
+                List<UnderservedPopulationEnum> clientList = new ArrayList<UnderservedPopulationEnum>();
+                for (UnderservedPopulationEnum population : dbSet) {
+                  clientList.add(population);
+                }
+                researchPurpose.setUnderservedPopulationDetails(clientList);
+              }
 
               if(workspace.getTimeRequested() != null){
                 researchPurpose.timeRequested(workspace.getTimeRequested().getTime());

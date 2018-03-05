@@ -12,7 +12,7 @@
       <column name="workspace_id" type="bigint">
         <constraints nullable="false" primaryKey="true"/>
       </column>
-      <column name="underserved_population" type="int(60)">
+      <column name="underserved_population" type="tinyint">
         <constraints nullable="false" primaryKey="true"/>
       </column>
     </createTable>
