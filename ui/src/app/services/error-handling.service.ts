@@ -12,8 +12,6 @@ export class ErrorHandlingService {
   public serverError: boolean;
   public noServerResponse: boolean;
   public serverBusy: boolean;
-  public errorResponse: ErrorResponse;
-
   public userDisabledError: boolean;
 
   constructor(private zone: NgZone) {
@@ -69,15 +67,15 @@ export class ErrorHandlingService {
           throw e;
         }
 
-        this.errorResponse = this.convertAPIError(e);
-        switch (this.errorResponse.statusCode) {
+        const errorResponse = this.convertAPIError(e);
+        switch (errorResponse.statusCode) {
           case 503:
             break;
           case 500:
             this.setServerError();
             throw e;
           case 403:
-            if (this.errorResponse.errorCode === ErrorCode.USERDISABLED) {
+            if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
               this.setUserDisabledError();
             }
             throw e;
@@ -91,7 +89,8 @@ export class ErrorHandlingService {
     });
   }
 
-  // convert error response from API to ErrorResponse object
+  // convert error response from API to ErrorResponse object,
+  // otherwise, report parse error
   public convertAPIError (e: any) {
     if (e._body != null && JSON.parse(e._body) != null) {
       const convertedError: ErrorResponse = {
@@ -101,7 +100,11 @@ export class ErrorHandlingService {
         'statusCode': JSON.parse(e._body).statusCode || null
       };
       return convertedError;
+    } else {
+      const nonApiError: ErrorResponse = {
+        'statusCode': ErrorCode.PARSEERROR
+      };
+      return nonApiError;
     }
-    return {};
   }
 }
