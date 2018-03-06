@@ -88,6 +88,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
 
+  private static final String PROJECT_OWNER = "PROJECT_OWNER";
+
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
@@ -554,9 +556,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw ExceptionUtils.convertFirecloudException(e);
     }
 
-    response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-    if (response.getAccessLevel() == null) {
-      throw new ServerErrorException("Firecloud access level not handled properly.");
+    if (fcResponse.getAccessLevel().equals(PROJECT_OWNER)) {
+      // We don't expose PROJECT_OWNER in our API; just use OWNER.
+      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
+    } else {
+      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+      if (response.getAccessLevel() == null) {
+        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
+      }
     }
     response.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);
