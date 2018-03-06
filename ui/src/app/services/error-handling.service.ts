@@ -69,7 +69,7 @@ export class ErrorHandlingService {
           throw e;
         }
 
-        this.errorResponse = this.convertErrorToErrorResponse(e);
+        this.errorResponse = this.convertAPIError(e);
         switch (this.errorResponse.statusCode) {
           case 503:
             break;
@@ -91,8 +91,9 @@ export class ErrorHandlingService {
     });
   }
 
-  public convertErrorToErrorResponse (e: any) {
-    if (JSON.parse(e._body) != null) {
+  // convert error response from API to ErrorResponse object
+  public convertAPIError (e: any) {
+    if (e._body != null && JSON.parse(e._body) != null) {
       const convertedError: ErrorResponse = {
         'errorClassName': JSON.parse(e._body).errorClassName || '',
         'errorCode': JSON.parse(e._body).errorCode || '',

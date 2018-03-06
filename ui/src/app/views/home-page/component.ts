@@ -1,8 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {
+  ErrorResponse,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
@@ -38,20 +40,18 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
   templateUrl: './component.html',
 })
 export class HomePageComponent implements OnInit {
-
-  private workspaceNameFilter = new WorkspaceNameFilter();
-  private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
-  private workspaceNameComparator = new WorkspaceNameComparator();
-
+  errorText : string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
+      private errorHandlingService: ErrorHandlingService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
+    this.errorText = null;
     this.workspacesLoading = true;
     this.workspacesService.getWorkspaces()
         .subscribe(
@@ -60,7 +60,11 @@ export class HomePageComponent implements OnInit {
               this.workspacesLoading = false;
             },
             error => {
-              // TODO: Add Error Message.
+              // if loading workspaces throws an error, display to the user
+              const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
+              if (response.message !== null) {
+                this.errorText = response.message;
+              }
               this.workspacesLoading = false;
             });
   }

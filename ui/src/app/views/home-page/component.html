@@ -4,6 +4,16 @@
     <h3 class="table-header-descriptor">Workspaces</h3>
     <a class="btn btn-link" (click)="addWorkspace()">Add a Workspace</a>
   </div>
+  <div class="alert alert-danger" *ngIf="errorText">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+        </div>
+        <span class="alert-text">{{errorText}}</span>
+      </div>
+    </div>
+  </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="workspacesLoading">
       <clr-dg-column [style.width.%]="5">Status</clr-dg-column>
