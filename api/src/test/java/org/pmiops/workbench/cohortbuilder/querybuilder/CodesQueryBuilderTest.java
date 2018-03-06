@@ -146,12 +146,6 @@ public class CodesQueryBuilderTest {
                 "select person_id\n" +
                         "from `${projectId}.${dataSetId}.person` p\n" +
                         "where person_id in (select distinct person_id\n" +
-                        "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.condition_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                        " union distinct\n" +
-                        "select distinct person_id\n" +
                         "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.measurement_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
@@ -162,6 +156,12 @@ public class CodesQueryBuilderTest {
                         "where a.procedure_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
                         "and b.concept_code like @" + procedureNamedParameter + "\n" +
+                        " union distinct\n" +
+                        "select distinct person_id\n" +
+                        "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+                        "where a.condition_source_concept_id = b.concept_id\n" +
+                        "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                         ")\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());

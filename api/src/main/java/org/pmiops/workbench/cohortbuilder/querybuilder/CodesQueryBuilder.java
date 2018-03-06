@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -166,7 +167,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     protected Map<GroupType, ListMultimap<String, SearchParameter>> getMappedParameters(List<SearchParameter> searchParameters) {
-        Map<GroupType, ListMultimap<String, SearchParameter>> fullMap = new HashMap<>();
+        Map<GroupType, ListMultimap<String, SearchParameter>> fullMap = new LinkedHashMap<>();
         ListMultimap<String, SearchParameter> groupParameters = ArrayListMultimap.create();
         ListMultimap<String, SearchParameter> notGroupParameters = ArrayListMultimap.create();
         for (SearchParameter parameter : searchParameters) {
