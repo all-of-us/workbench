@@ -17,8 +17,10 @@ class ServiceAccountContext
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
     common = Common.new
     if @project == "all-of-us-workbench-test"
-      common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
+      unless File.exists?(SERVICE_ACCOUNT_KEY_PATH)
+        common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
             #{SERVICE_ACCOUNT_KEY_PATH}}
+      end
       yield
     else
       service_account = "#{@project}@appspot.gserviceaccount.com"
