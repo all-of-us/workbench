@@ -21,6 +21,7 @@
 /api/db-cdr/.gradle
 /api/out/*
 /api/sa-key.json
+/api/src/main/resources/merged.yaml
 /api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/main/webapp/WEB-INF/sa-key.json
 /api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
