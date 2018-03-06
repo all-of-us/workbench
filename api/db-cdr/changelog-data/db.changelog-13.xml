@@ -11,7 +11,7 @@
 
     <delete tableName="achilles_results"/>
 
-    <loadData tableName="achilles_results" file="csv/ACHILLES_results.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="achilles_results" file="csv/achilles_results.csv" encoding="UTF-8" quotchar='"'>
       <column name="analysis_id" type="NUMERIC"/>
       <column name="stratum_1" type="STRING"/>
       <column name="stratum_2" type="STRING"/>
@@ -23,32 +23,27 @@
 
   </changeSet>
 
-  <changeSet author="biopete" id="changelog-13.1 fill achilles_results_concept">
-    <sql
-            splitStatements="true"
-            stripComments="true">INSERT INTO achilles_results_concept
-            SELECT
-            `a`.id AS `id`,
-            `a`.`analysis_id` AS `analysis_id`,
-            `a`.`stratum_1` AS `stratum_1`,
-            `c1`.`concept_name` AS `stratum_1_name`,
-            `a`.`stratum_2` AS `stratum_2`,
-            `c2`.`concept_name` AS `stratum_2_name`,
-            `a`.`stratum_3` AS `stratum_3`,
-            `c3`.`concept_name` AS `stratum_3_name`,
-            `a`.`stratum_4` AS `stratum_4`,
-            `c4`.`concept_name` AS `stratum_4_name`,
-            `a`.`stratum_5` AS `stratum_5`,
-            `c5`.`concept_name` AS `stratum_5_name`,
-            `a`.`count_value` AS `count_value`
-            FROM (((((`achilles_results` `a`
-            left join `concept` `c1` on((`a`.`stratum_1` = `c1`.`concept_id`)))
-            left join `concept` `c2` on((`a`.`stratum_2` = `c2`.`concept_id`)))
-            left join `concept` `c3` on((`a`.`stratum_3` = `c3`.`concept_id`)))
-            left join `concept` `c4` on((`a`.`stratum_4` = `c4`.`concept_id`)))
-            left join `concept` `c5` on((`a`.`stratum_5` = `c5`.`concept_id`)))
+  <changeSet author="biopete" id="changelog-13.1" runAlways="true" context="local or cloud">
 
-      <comment>Populate the achilles_results_concept table for api </comment>
-    </sql>
+    <validCheckSum>ANY</validCheckSum>
+
+    <delete tableName="achilles_results_concept"/>
+
+    <loadData tableName="achilles_results_concept" file="csv/achilles_results_concept.csv" encoding="UTF-8" quotchar='"'>
+      <column name="analysis_id" type="NUMERIC"/>
+      <column name="stratum_1" type="STRING"/>
+      <column name="stratum_1_name" type="STRING"/>
+      <column name="stratum_2" type="STRING"/>
+      <column name="stratum_2_name" type="STRING"/>
+      <column name="stratum_3" type="STRING"/>
+      <column name="stratum_3_name" type="STRING"/>
+      <column name="stratum_4" type="STRING"/>
+      <column name="stratum_4_name" type="STRING"/>
+      <column name="stratum_5" type="STRING"/>
+      <column name="stratum_5_name" type="STRING"/>
+      <column name="count_value" type="NUMERIC"/>
+    </loadData>
+
   </changeSet>
+
 </databaseChangeLog>

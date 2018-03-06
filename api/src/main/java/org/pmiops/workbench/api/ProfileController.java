@@ -24,6 +24,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -87,6 +89,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
+  private final Provider<UserAuthentication> userAuthenticationProvider;
   private final UserDao userDao;
   private final Clock clock;
   private final UserService userService;
@@ -100,6 +103,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
+      Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
@@ -109,6 +113,7 @@ public class ProfileController implements ProfileApiDelegate {
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
+    this.userAuthenticationProvider = userAuthenticationProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.userService = userService;
@@ -219,7 +224,12 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private User initializeUserIfNeeded() {
-    User user = userProvider.get();
+    UserAuthentication userAuthentication = userAuthenticationProvider.get();
+    User user = userAuthentication.getUser();
+    if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
+      // Service accounts don't need further initialization.
+      return user;
+    }
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       // TODO(calbach): After the next DB wipe, switch this null check to

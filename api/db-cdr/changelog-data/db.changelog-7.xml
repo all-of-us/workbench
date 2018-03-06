@@ -10,7 +10,7 @@
     <validCheckSum>ANY</validCheckSum>
 
     <delete tableName="achilles_analysis"/>
-    <loadData tableName="achilles_analysis" file="csv/ACHILLES_analysis.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="achilles_analysis" file="csv/achilles_analysis.csv" encoding="UTF-8" quotchar='"'>
       <column name="analysis_id" type="NUMERIC"/>
       <column name="analysis_name" type="STRING"/>
       <column name="stratum_1_name" type="STRING"/>

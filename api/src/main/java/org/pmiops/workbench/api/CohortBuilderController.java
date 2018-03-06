@@ -3,10 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -21,11 +17,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
-    private CodeDomainLookupService codeDomainLookupService;
+    private DomainLookupService domainLookupService;
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private CdrVersionDao cdrVersionDao;
@@ -55,12 +56,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Autowired
     CohortBuilderController(BigQueryService bigQueryService,
-                            CodeDomainLookupService codeDomainLookupService,
+                            DomainLookupService domainLookupService,
                             ParticipantCounter participantCounter,
                             CriteriaDao criteriaDao,
                             CdrVersionDao cdrVersionDao) {
         this.bigQueryService = bigQueryService;
-        this.codeDomainLookupService = codeDomainLookupService;
+        this.domainLookupService = domainLookupService;
         this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
         this.cdrVersionDao = cdrVersionDao;
@@ -87,8 +88,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
+
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
@@ -103,8 +105,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         ChartInfoListResponse response = new ChartInfoListResponse();
 
-        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);

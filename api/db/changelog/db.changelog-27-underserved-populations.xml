@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="blrubenstein" id="changelog-27-underserved-populations">
+    <addColumn tableName="workspace">
+      <column name="rp_contains_underserved_population" type="boolean"/>
+    </addColumn>
+    <createTable tableName="underserved_populations">
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="underserved_population" type="tinyint">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+        baseTableName="underserved_populations"
+        constraintName="fk_underserved_population_workspace_id"
+        referencedColumnNames="workspace_id"
+        referencedTableName="workspace"/>
+  </changeSet>
+</databaseChangeLog>

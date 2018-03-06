@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.admin.directory.Directory;
@@ -40,19 +41,22 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   final Provider<GoogleCredential> googleCredentialProvider;
   final Provider<WorkbenchConfig> configProvider;
+  final HttpTransport httpTransport;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      HttpTransport httpTransport) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
+    this.httpTransport = httpTransport;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
     GoogleCredential googleCredential = googleCredentialProvider.get();
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return new GoogleCredential.Builder()
-        .setTransport(UrlFetchTransport.getDefaultInstance())
+        .setTransport(httpTransport)
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
         .setServiceAccountUser("directory-service@"+gSuiteDomain)
@@ -65,7 +69,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private Directory getGoogleDirectoryService() {
-    return new Directory.Builder(UrlFetchTransport.getDefaultInstance(), getDefaultJsonFactory(),
+    return new Directory.Builder(httpTransport, getDefaultJsonFactory(),
           createCredentialWithImpersonation())
         .setApplicationName(APPLICATION_NAME)
         .build();

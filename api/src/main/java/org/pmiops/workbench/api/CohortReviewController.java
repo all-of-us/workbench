@@ -46,7 +46,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
-    private CodeDomainLookupService codeDomainLookupService;
+    private DomainLookupService domainLookupService;
     private ParticipantCounter participantCounter;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
@@ -139,13 +139,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     @Autowired
     CohortReviewController(CohortReviewService cohortReviewService,
-        BigQueryService bigQueryService,
-        CodeDomainLookupService codeDomainLookupService,
-        ParticipantCounter participantCounter,
-        Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
+                           BigQueryService bigQueryService,
+                           DomainLookupService domainLookupService,
+                           ParticipantCounter participantCounter,
+                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
-        this.codeDomainLookupService = codeDomainLookupService;
+        this.domainLookupService = domainLookupService;
         this.participantCounter = participantCounter;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
@@ -196,8 +196,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-        codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
-        codeDomainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
+        domainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
                 participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
@@ -456,8 +456,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-        codeDomainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        codeDomainLookupService.findCodesForEmptyDomains(request.getExcludes());
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(
                 bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
