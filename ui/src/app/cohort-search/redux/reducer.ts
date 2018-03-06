@@ -5,7 +5,9 @@ import {
   activeGroupId,
   activeItem,
   activeParameterList,
+  activeRole,
   CohortSearchState,
+  getGroup,
   initialState,
   SR_ID,
 } from './store';
@@ -75,10 +77,14 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case BEGIN_CHARTS_REQUEST:
+        return state
+            .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+            .set('initShowChart', true);
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
-          .deleteIn(['entities', action.entityType, action.entityId, 'error']);
+          .deleteIn(['entities', action.entityType, action.entityId, 'error'])
+          .set('initShowChart', true);
 
       case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
@@ -244,8 +250,20 @@ export const rootReducer: Reducer<CohortSearchState> =
           .set('wizard', Map({open: false}));
       }
 
-      case WIZARD_CANCEL:
+      case WIZARD_CANCEL: {
+        const groupId = activeGroupId(state);
+        const group = getGroup(groupId)(state);
+        const count = group.get('items').size;
+        const role = activeRole(state);
+        if (count === 0) {
+          state = state.deleteIn(['entities', 'groups', groupId]);
+          const index = state.getIn(['entities', 'searchRequests', SR_ID, role]).indexOf(groupId);
+          if (index > -1) {
+            state = state.deleteIn(['entities', 'searchRequests', SR_ID, role, index]);
+          }
+        }
         return state.set('wizard', Map({open: false}));
+      }
 
       case SET_WIZARD_CONTEXT:
         return state.mergeDeepIn(['wizard'], action.context);

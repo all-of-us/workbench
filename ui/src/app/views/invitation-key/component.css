@@ -18,3 +18,8 @@
 .form-section:first-child {
   margin-top: 0;
 }
+
+.invitation-help-text {
+  width: 20rem;
+  color: black;
+}

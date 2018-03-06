@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -23,34 +25,30 @@ import java.util.Map;
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
-    private static final Map<String, String> typeCM = new HashMap<>();
-    private static final Map<String, String> typeProc = new HashMap<>();
-    static {
-        typeCM.put("ICD9", "ICD9CM");
-        typeCM.put("ICD10", "ICD10CM");
-        typeCM.put("CPT", "CPT4");
+    private static final ImmutableMap<String, String> TYPE_PROC =
+            ImmutableMap.of("ICD9", "ICD9Proc", "CPT", "CPT4");
 
-        typeProc.put("ICD9", "ICD9Proc");
-        typeProc.put("ICD10", "ICD10PCS");
-        typeProc.put("CPT", "CPT4");
+    private static final ImmutableMap<String, String> TYPE_CM =
+            ImmutableMap.of("ICD9", "ICD9CM", "CPT", "CPT4");
+
+    public static final String ICD_10 = "ICD10";
+
+    public enum GroupType {
+        GROUP, NOT_GROUP
     }
 
-    /*
-     * The format placeholders stand for, in order:
-     *  - the table prefix (e.g., something like "pmi-drc-api-test.synpuf")
-     *  - the table name
-     *  - the table prefix again
-     *  - the *_source_concept_id column identifier for that table
-     *  - a BigQuery "named parameter" indicating the list of codes to search by
-     *  See the link below about IN and UNNEST
-     * https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#in-operators
-     */
     private static final String INNER_SQL_TEMPLATE =
             "select distinct person_id\n" +
                     "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n"+
-                    "where a.${tableId} = b.concept_id\n"+
-                    "and b.vocabulary_id in (${cm},${proc})\n" +
-                    "and b.concept_code in unnest(${conceptCodes})\n";
+                    "where a.${tableId} = b.concept_id\n";
+
+    private static final String ICD9_VOCABULARY_ID_IN_CLAUSE_TEMPLATE = "and b.vocabulary_id in (${cm},${proc})\n";
+
+    private static final String ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE = "and b.vocabulary_id = ${cmOrProc}\n";
+
+    private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE = "and b.concept_code in unnest(${conceptCodes})\n";
+
+    private static final String GROUP_CODE_LIKE_TEMPLATE = "and b.concept_code like ${conceptCodes}\n";
 
     private static final String UNION_TEMPLATE = " union distinct\n";
 
@@ -61,27 +59,27 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
     @Override
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
-        ListMultimap<String, String> paramMap = getMappedParameters(params.getParameters());
+        Map<GroupType, ListMultimap<String, SearchParameter>> paramMap = getMappedParameters(params.getParameters());
         List<String> queryParts = new ArrayList<String>();
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-        final String cmUniqueParam = getUniqueNamedParameter("cm" + params.getType());
-        final String procUniqueParam = getUniqueNamedParameter("proc" + params.getType());
-        queryParams.put(cmUniqueParam, QueryParameterValue.string(typeCM.get(params.getType())));
-        queryParams.put(procUniqueParam, QueryParameterValue.string(typeProc.get(params.getType())));
+        for (GroupType group : paramMap.keySet()) {
+            ListMultimap<String, SearchParameter> domainMap = paramMap.get(group);
 
-        for (String key : paramMap.keySet()) {
-            String namedParameter = getUniqueNamedParameter(key);
-            queryParams.put(namedParameter,
-                    QueryParameterValue.array(paramMap.get(key).stream().toArray(String[]::new), String.class));
-            queryParts.add(filterSql(INNER_SQL_TEMPLATE,
-                    ImmutableMap.of("${tableName}", DomainTableEnum.getTableName(key),
-                            "${tableId}", DomainTableEnum.getSourceConceptId(key),
-                            "${conceptCodes}", "@" + namedParameter,
-                            "${cm}", "@" + cmUniqueParam,
-                            "${proc}", "@" + procUniqueParam)));
+            for (String domain : domainMap.keySet()) {
+                final List<SearchParameter> searchParameterList = domainMap.get(domain);
+                final SearchParameter parameter = searchParameterList.get(0);
+                final String type = parameter.getType();
+                final String subtype = parameter.getSubtype();
+                List<String> codes =
+                        searchParameterList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
+                if (group.equals(GroupType.NOT_GROUP)) {
+                    buildNotGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+                } else {
+                    buildGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+                }
+            }
         }
-
 
         String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", String.join(UNION_TEMPLATE, queryParts));
 
@@ -92,16 +90,100 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                 .build();
     }
 
+    private void buildGroupQuery(String type,
+                                 String subtype,
+                                 List<String> queryParts,
+                                 Map<String, QueryParameterValue> queryParams,
+                                 String domain, List<String> codes) {
+        for (String code : codes) {
+            buildInnerQuery(type,
+                    subtype,
+                    queryParts,
+                    queryParams,
+                    domain,
+                    QueryParameterValue.string(code + "%"),
+                    GROUP_CODE_LIKE_TEMPLATE);
+        }
+    }
+
+    private void buildNotGroupQuery(String type,
+                                    String subtype,
+                                    List<String> queryParts,
+                                    Map<String, QueryParameterValue> queryParams,
+                                    String domain, List<String> codes) {
+        buildInnerQuery(type,
+                subtype,
+                queryParts,
+                queryParams,
+                domain,
+                QueryParameterValue.array(codes.stream().toArray(String[]::new), String.class),
+                CHILD_CODE_IN_CLAUSE_TEMPLATE);
+    }
+
+    private void buildInnerQuery(String type,
+                                 String subtype,
+                                 List<String> queryParts,
+                                 Map<String, QueryParameterValue> queryParams,
+                                 String domain, QueryParameterValue codes,
+                                 String groupOrChildSql) {
+        String inClauseSql = "";
+        ImmutableMap paramNames = null;
+        final String uniqueName = getUniqueNamedParameterPostfix();
+        final String cmUniqueParam = "cm" + uniqueName;
+        final String procUniqueParam = "proc" + uniqueName;
+        final String cmOrProcUniqueParam = "cmOrProc" + uniqueName;
+        final String namedParameter = domain + uniqueName;
+
+        queryParams.put(namedParameter, codes);
+        if (type.equals(ICD_10)) {
+            queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(subtype));
+            inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
+            paramNames = new ImmutableMap.Builder<String, String>()
+                    .put("${tableName}", DomainTableEnum.getTableName(domain))
+                    .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
+                    .put("${conceptCodes}", "@" + namedParameter)
+                    .put("${cmOrProc}", "@" + cmOrProcUniqueParam)
+                    .build();
+        } else {
+            queryParams.put(cmUniqueParam, QueryParameterValue.string(TYPE_CM.get(type)));
+            queryParams.put(procUniqueParam, QueryParameterValue.string(TYPE_PROC.get(type)));
+            inClauseSql = ICD9_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
+            paramNames = new ImmutableMap.Builder<String, String>()
+                    .put("${tableName}", DomainTableEnum.getTableName(domain))
+                    .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
+                    .put("${conceptCodes}", "@" + namedParameter)
+                    .put("${cm}", "@" + cmUniqueParam)
+                    .put("${proc}", "@" + procUniqueParam)
+                    .build();
+        }
+
+        queryParts.add(filterSql(INNER_SQL_TEMPLATE + inClauseSql +
+                groupOrChildSql, paramNames));
+    }
+
     @Override
     public FactoryKey getType() {
         return FactoryKey.CODES;
     }
 
-    protected ListMultimap<String, String> getMappedParameters(List<SearchParameter> searchParameters) {
-        ListMultimap<String, String> mappedParameters = ArrayListMultimap.create();
-        for (SearchParameter parameter : searchParameters)
-            mappedParameters.put(parameter.getDomain(), parameter.getValue());
-        return mappedParameters;
+    protected Map<GroupType, ListMultimap<String, SearchParameter>> getMappedParameters(List<SearchParameter> searchParameters) {
+        Map<GroupType, ListMultimap<String, SearchParameter>> fullMap = new LinkedHashMap<>();
+        ListMultimap<String, SearchParameter> groupParameters = ArrayListMultimap.create();
+        ListMultimap<String, SearchParameter> notGroupParameters = ArrayListMultimap.create();
+        for (SearchParameter parameter : searchParameters) {
+            if (parameter.getGroup()) {
+                groupParameters.put(parameter.getDomain(), parameter);
+            } else {
+                notGroupParameters.put(parameter.getDomain(), parameter);
+            }
+        }
+        if (!groupParameters.isEmpty()) {
+            fullMap.put(GroupType.GROUP, groupParameters);
+        }
+        if (!notGroupParameters.isEmpty()) {
+            fullMap.put(GroupType.NOT_GROUP, notGroupParameters);
+        }
+        return fullMap;
     }
 
     private String filterSql(String sqlStatement, ImmutableMap replacements) {

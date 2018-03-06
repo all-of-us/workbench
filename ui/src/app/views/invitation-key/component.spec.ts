@@ -5,18 +5,22 @@ import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
+
 import {ProfileService} from 'generated';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 
 import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
-import {ErrorHandlingService} from '../../services/error-handling.service';
 import {SignInService} from '../../services/sign-in.service';
+
 import {AccountCreationComponent} from '../account-creation/component';
+import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
+import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
+import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
@@ -46,12 +50,15 @@ describe('InvitationKeyComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
+        AppComponent,
         AccountCreationComponent,
-        InvitationKeyComponent
+        InvitationKeyComponent,
+        PageTemplateSignedOutComponent,
+        RoutingSpinnerComponent
       ],
       providers: [
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
-        { provide: SignInService, useValue: {} },
+        { provide: AppComponent, useValue: {}},
+        { provide: SignInService, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
         invitationKeyPage = new InvitationKeyPage(TestBed);

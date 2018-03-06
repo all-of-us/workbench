@@ -1,10 +1,14 @@
 import {Component} from '@angular/core';
+
+import {AppComponent} from '../app/component';
+import {InvitationKeyComponent} from '../invitation-key/component';
+
 import {SignInService} from 'app/services/sign-in.service';
+
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 import {CreateAccountRequest} from 'generated';
-import {InvitationKeyComponent} from '../invitation-key/component';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -13,9 +17,12 @@ function isBlank(s: string) {
 @Component({
   selector: 'app-account-creation',
   templateUrl: './component.html',
-  styleUrls: ['./component.css']
+  styleUrls: ['./component.css',
+              '../../styles/inputs.css',
+              '../../styles/buttons.css']
 })
 export class AccountCreationComponent {
+  containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -40,10 +47,14 @@ export class AccountCreationComponent {
   constructor(
     private profileService: ProfileService,
     private signInService: SignInService,
-    private invitationKeyService: InvitationKeyComponent
-  ) {}
+    private invitationKeyService: InvitationKeyComponent,
+    private appComponent: AppComponent
+  ) {
+    this.appComponent.backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
+  }
 
   createAccount(): void {
+    this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;
     this.showPasswordLengthError = false;
@@ -59,8 +70,8 @@ export class AccountCreationComponent {
     } else if (this.password.length < 8 || this.password.length > 100) {
       this.showPasswordLengthError = true;
       return;
-    } else if (this.passwordAgain.length < 8 || this.passwordAgain.length > 100) {
-      this.showPasswordLengthError = true;
+    } else if (!(this.hasLowerCase(this.password) && this.hasUpperCase(this.password))) {
+      this.containsLowerAndUpperError = true;
       return;
     }
 
@@ -89,6 +100,14 @@ export class AccountCreationComponent {
         this.conflictError = response.isTaken;
       });
     }, 300);
+  }
+
+  hasLowerCase(str: string): boolean {
+    return (/[a-z]/.test(str));
+  }
+
+  hasUpperCase(str: string): boolean {
+    return (/[A-Z]/.test(str));
   }
 
 }

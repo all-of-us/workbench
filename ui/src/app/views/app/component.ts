@@ -10,7 +10,6 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
@@ -22,7 +21,8 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-
+  backgroundImgSrc = '/assets/images/group.jpg';
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -45,7 +45,7 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private locationService: Location,
     private router: Router,
-    private titleService: Title,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {

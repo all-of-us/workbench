@@ -1,6 +1,8 @@
 import {Component} from '@angular/core';
-import {InvitationVerificationRequest, ProfileService} from 'generated';
 
+import {AppComponent} from '../app/component';
+
+import {InvitationVerificationRequest, ProfileService} from 'generated';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -8,7 +10,10 @@ function isBlank(s: string) {
 
 @Component ({
   selector : 'app-invitation-key',
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css',
+              '../../styles/inputs.css',
+              '../../styles/headers.css'],
   templateUrl: './component.html'
 })
 
@@ -17,12 +22,18 @@ export class InvitationKeyComponent {
   invitationKeyVerifed: boolean;
   invitationKeyReq: boolean;
   invitationKeyInvalid: boolean;
+  invitationKeyRequestEmail: string;
+  requestSent: boolean;
+
   constructor(
-    private profileService: ProfileService
+      private profileService: ProfileService,
+      private appComponent: AppComponent
   ) {
       this.invitationKeyVerifed = false;
       this.invitationKeyReq = false;
       this.invitationKeyInvalid = false;
+      this.requestSent = false;
+      this.appComponent.backgroundImgSrc = '/assets/images/invitation-female@2x.jpg';
     }
 
   next(): void {
@@ -41,6 +52,12 @@ export class InvitationKeyComponent {
       this.invitationKeyVerifed = true;
     }, () => {
       this.invitationKeyInvalid = true;
+    });
+  }
+
+  requestKey(): void {
+    this.profileService.requestInvitationKey(this.invitationKeyRequestEmail).subscribe(() => {
+      this.requestSent = true;
     });
   }
 

@@ -7,13 +7,11 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {ClusterService, CohortsService, WorkspacesService} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
@@ -90,7 +88,6 @@ describe('WorkspaceComponent', () => {
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
-        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: Http, useValue: new HttpStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },

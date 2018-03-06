@@ -13,6 +13,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,26 @@ public class UserService {
     }
   }
 
+  public User createServiceAccountUser(String email) {
+    User user = new User();
+    user.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    user.setEmail(email);
+    user.setDisabled(false);
+    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
+    try {
+      userDao.save(user);
+    } catch (DataIntegrityViolationException e) {
+      user = userDao.findUserByEmail(email);
+      if (user == null) {
+        throw e;
+      }
+      // If a user already existed (due to multiple requests trying to create a user simultaneously)
+      // just return it.
+    }
+    return user;
+  }
+
   public User createUser(String givenName, String familyName, String email, String contactEmail) {
     User user = new User();
     user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
@@ -111,6 +132,7 @@ public class UserService {
     user.setGivenName(givenName);
     user.setDisabled(false);
     user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
+    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

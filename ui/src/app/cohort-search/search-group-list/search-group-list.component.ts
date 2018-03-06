@@ -15,15 +15,8 @@ export class SearchGroupListComponent {
   @Input() role: keyof SearchRequest;
   @Input() groups$: Observable<List<any>>;
 
-  constructor(private actions: CohortSearchActions) {}
-
-  initGroup() {
-    const newId = this.actions.generateId(this.role);
-    this.actions.initGroup(this.role, newId);
-  }
-
   get title() {
-    const verb = this.role.charAt(0).toUpperCase() + this.role.slice(1, -1) + 'd';
-    return `${verb} Participants`;
+    const prefix = this.role === 'excludes' ? 'And ' : '';
+    return prefix + this.role.slice(0, -1) + ` Participants Where`;
   }
 }

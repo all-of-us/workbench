@@ -1,0 +1,4 @@
+engines:
+  tslint:
+    enabled: true
+    base_sub_dir: ui

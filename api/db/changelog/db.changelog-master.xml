@@ -31,4 +31,9 @@
   <include file="changelog/db.changelog-21.xml"/>
   <include file="changelog/db.changelog-22-email-verification-status.xml"/>
   <include file="changelog/db.changelog-23.xml"/>
+  <include file="changelog/db.changelog-24-email-verification-status-default.xml"/>
+  <include file="changelog/db.changelog-25.xml"/>
+  <include file="changelog/db.changelog-26-billing-status.xml"/>
+  <include file="changelog/db.changelog-27-underserved-populations.xml"/>
+  <include file="changelog/db.changelog-28-default-rp-values.xml"/>
 </databaseChangeLog>

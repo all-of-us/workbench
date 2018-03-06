@@ -2,8 +2,6 @@ import {Component} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {ErrorHandlingService} from '../../services/error-handling.service';
-
 import {Cohort, CohortsService, Workspace} from 'generated';
 
 @Component({templateUrl: './component.html'})

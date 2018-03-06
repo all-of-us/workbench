@@ -1,7 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
-
 import {BugReportService} from 'generated';
 import {BugReport} from 'generated';
 import {ProfileService} from 'generated';
@@ -9,7 +7,8 @@ import {ProfileService} from 'generated';
 @Component({
   selector: 'app-bug-report',
   templateUrl: './component.html',
-  styleUrls: ['./component.css']
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css']
 })
 export class BugReportComponent implements OnInit {
   reporting = false;

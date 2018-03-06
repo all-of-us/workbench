@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -27,7 +28,6 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
-import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -118,8 +118,22 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // TODO: check Google group membership to ensure user is in registered user group
 
     String userEmail = userInfo.getEmail();
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    if (workbenchConfig.auth.serviceAccountApiUsers.contains(userEmail)) {
+      // Whitelisted service accounts are able to make API calls, too.
+      // TODO: stop treating service accounts as normal users, have a separate table for them,
+      // administrators.
+      User user = userDao.findUserByEmail(userEmail);
+      if (user == null) {
+        user = userService.createServiceAccountUser(userEmail);
+      }
+      SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
+          token, UserType.SERVICE_ACCOUNT));
+      log.log(Level.INFO, "{0} service account in use", userInfo.getEmail());
+      return true;
+    }
     String gsuiteDomainSuffix =
-        "@" + workbenchConfigProvider.get().googleDirectoryService.gSuiteDomain;
+        "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
     if (!userEmail.endsWith(gsuiteDomainSuffix)) {
       try {
         // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
@@ -151,7 +165,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     SecurityContextHolder.getContext().setAuthentication(new UserAuthentication(user, userInfo,
-        token));
+        token, UserType.RESEARCHER));
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());

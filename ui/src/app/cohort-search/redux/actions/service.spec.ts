@@ -52,7 +52,25 @@ const DEMO_crit = fromJS({
   attribute: null,
 });
 
+const groups = fromJS({
+  include0: {
+    id: 'include0',
+    items: [],
+    count: null,
+    isRequesting: false,
+  },
+  exclude0: {
+    id: 'exclude0',
+    items: [],
+    count: null,
+    isRequesting: false,
+  },
+});
+
 const dummyState = initialState
+  .setIn(['entities', 'groups'], groups)
+  .setIn(['entities', 'searchRequests', SR_ID, 'includes'], List(['include0']))
+  .setIn(['entities', 'searchRequests', SR_ID, 'excludes'], List(['exclude0']))
   .setIn(['entities', 'groups', 'include0', 'items'], List([dummyItem.get('id')]))
   .setIn(['entities', 'parameters', 'param0'], zeroCrit)
   .setIn(['entities', 'parameters', 'param1'], oneCrit)

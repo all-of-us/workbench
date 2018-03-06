@@ -1,26 +1,28 @@
 <div appFullPage>
-  <!-- Annotations & Status sidebar -->
-  <div appSidebar
-    #sidebar="appSidebar"
-    [position]="{top: 0, right: 0}">
-    <a class="closebtn" (click)="closeSidebar()">&times;</a>
-    <div class="status-wrapper">
-      <app-participant-status></app-participant-status>
-      <hr />
-      <app-annotation-list></app-annotation-list>
-    </div>
-  </div>
-
-  <!-- CohortReview main content -->
-  <div class="cohort-review-main"
-    [style.margin-right]="sidebar.isOpen ? '300px' : 0">
+  <!-- CohortReview main content container -->
+  <div class="cohort-review-main" [class.sidebar-open]="sidebarOpen">
     <router-outlet></router-outlet>
   </div>
 
+  <!-- Sidebar container -->
+  <div class="sidebar" *ngIf="state.participant$ | async">
+    <!-- Sidebar left column (always visible) -->
+    <div class="sidebar-handle" (click)="toggleSidebar()">
+      <clr-icon shape="angle-double" [dir]="angleDir" size="24"></clr-icon>
+    </div>
+    <!-- Sidebar content -->
+    <div class="sidebar-content" [class.sidebar-open]="sidebarOpen">
+      <app-sidebar-content>
+      </app-sidebar-content>
+    </div>
+  </div>
+
+  <!-- Modals and other not in the flow stuff -->
   <!-- CohortReview first time creation modal -->
   <app-create-review #createReviewModal>
   </app-create-review>
 
+  <!-- Annotation manager - create / edit / delete set-wide annotations -->
   <app-set-annotation-modal>
   </app-set-annotation-modal>
 </div>

@@ -11,6 +11,7 @@ import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
+import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
 
 /* Other Objects */
@@ -44,6 +45,7 @@ const routes: Routes = [{
     SearchGroupItemComponent,
     SearchGroupListComponent,
     OverviewComponent,
+    SearchGroupSelectComponent,
   ],
   providers: [
     CohortSearchActions,

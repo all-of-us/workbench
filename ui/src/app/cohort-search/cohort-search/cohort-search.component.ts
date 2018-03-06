@@ -38,6 +38,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(chartData) chartData$: Observable<List<any>>;
   @select(isRequstingTotal) isRequesting$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
+  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
 

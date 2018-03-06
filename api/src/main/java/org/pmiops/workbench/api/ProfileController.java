@@ -2,18 +2,30 @@ package org.pmiops.workbench.api;
 
 import com.blockscore.models.Address;
 import com.blockscore.models.Person;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.Properties;
 import javax.inject.Provider;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -22,16 +34,18 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
-import org.pmiops.workbench.model.BillingProjectMembership.StatusEnum;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -49,7 +63,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-
+  private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
+      new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
+      .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
+      .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
+      .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
+      .build();
   private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
       BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
       new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
@@ -57,10 +76,10 @@ public class ProfileController implements ProfileApiDelegate {
         public BillingProjectMembership apply(
             org.pmiops.workbench.firecloud.model.BillingProjectMembership billingProjectMembership) {
           BillingProjectMembership result = new BillingProjectMembership();
-          result.setMessage(billingProjectMembership.getMessage());
           result.setProjectName(billingProjectMembership.getProjectName());
           result.setRole(billingProjectMembership.getRole());
-          result.setStatus(StatusEnum.fromValue(billingProjectMembership.getStatus().toString()));
+          result.setStatus(
+              fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
           return result;
         }
       };
@@ -70,6 +89,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
+  private final Provider<UserAuthentication> userAuthenticationProvider;
   private final UserDao userDao;
   private final Clock clock;
   private final UserService userService;
@@ -83,6 +103,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
+      Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
@@ -92,6 +113,7 @@ public class ProfileController implements ProfileApiDelegate {
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
     this.userProvider = userProvider;
+    this.userAuthenticationProvider = userAuthenticationProvider;
     this.userDao = userDao;
     this.clock = clock;
     this.userService = userService;
@@ -202,12 +224,20 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private User initializeUserIfNeeded() {
-    User user = userProvider.get();
+    UserAuthentication userAuthentication = userAuthenticationProvider.get();
+    User user = userAuthentication.getUser();
+    if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
+      // Service accounts don't need further initialization.
+      return user;
+    }
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
+      // TODO(calbach): After the next DB wipe, switch this null check to
+      // instead use the freeTierBillingProjectStatus.
       if (user.getFreeTierBillingProjectName() == null) {
         String billingProjectName = createFirecloudUserAndBillingProject(user);
         user.setFreeTierBillingProjectName(billingProjectName);
+        user.setFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -218,7 +248,61 @@ public class ProfileController implements ProfileApiDelegate {
         throw new ConflictException("Failed due to concurrent modification");
       }
     }
-    return user;
+
+    // Free tier billing project setup is complete; nothing to do.
+    if (!BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
+      return user;
+    }
+
+    // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
+    // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
+    // first confirm whether Firecloud claims the project setup is complete.
+    BillingProjectStatus status = null;
+    try {
+      status = fireCloudService.getBillingProjectMemberships().stream()
+          .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
+          .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
+          // Should be at most one matching billing project; though we're not asserting this.
+          .findFirst()
+          .orElse(BillingProjectStatus.NONE);
+    } catch (ApiException e) {
+      log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
+      return user;
+    }
+    switch (status) {
+      case NONE:
+      case PENDING:
+        log.log(Level.INFO, "free tier project is still initializing, continuing");
+        return user;
+
+      case ERROR:
+        log.log(Level.SEVERE, String.format(
+            "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
+        user.setFreeTierBillingProjectStatus(status);
+        return userDao.save(user);
+
+      case READY:
+        break;
+
+      default:
+        log.log(Level.SEVERE, String.format("unrecognized status '%s'", status));
+        return user;
+    }
+
+    // Grant the user BQ job access on the billing project so that they can run BQ queries from
+    // notebooks.
+    try {
+      fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
+          FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
+    } catch (ApiException e) {
+      log.log(Level.WARNING,
+          "granting BigQuery role on created free tier billing project failed", e);
+      // Allow the user to continue, as most workbench functionality will still be usable.
+      return user;
+    }
+    log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
+    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+    return userDao.save(user);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
@@ -334,6 +418,31 @@ public class ProfileController implements ProfileApiDelegate {
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
   }
+
+  @Override
+  public ResponseEntity<Void> requestInvitationKey(String email) {
+    Properties props = new Properties();
+    Session session = Session.getDefaultInstance(props, null);
+    try {
+      Message msg = new MimeMessage(session);
+      msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
+      InternetAddress[] replyTo = new InternetAddress[1];
+      replyTo[0] = new InternetAddress(email);
+      msg.setReplyTo(replyTo);
+      // To test the bug reporting functionality, change the recipient email to your email rather
+      // than the group.
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
+          "all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
+      msg.setSubject("[AofU Invitation Key Request]");
+      msg.setText(email + " is requesting the invitation key.");
+      Transport.send(msg);
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      throw new EmailException("Error sending invitation key request", e);
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     User user = userProvider.get();

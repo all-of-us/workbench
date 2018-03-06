@@ -118,18 +118,7 @@ select 0, 3000 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
 group by vo1.visit_concept_id"
 
-# Condition gender
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-select 0, 3101 as analysis_id,
-	CAST(co1.condition_concept_id AS STRING) as stratum_1,
-	CAST(p1.gender_concept_id AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
-on p1.person_id = co1.person_id
-group by co1.condition_concept_id, p1.gender_concept_id"
+
 
 # 400 (3000)	Number of persons with at least one condition occurrence, by condition_concept_id
 echo "Querying condition_occurrence ..."
@@ -160,7 +149,6 @@ group by co1.condition_concept_id, p1.gender_concept_id"
 #  children are 0-17 and we don't have children for now . Want all adults in a bucket thus 18 - 29 .
 #Ex yob = 2000  , start date : 2017 -- , sd - yob = 17  / 10 = 1.7 floor(1.7 ) = 1
 # 30 - 39 , 2017 - 1980 = 37 / 10 = 3
-
 
 # Get the 30-39, 40 - 49 , ... groups
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -406,42 +394,32 @@ where co1.observation_concept_id > 0 and (extract(year from co1.observation_date
 group by co1.observation_concept_id, stratum_2"
 
 # PPI Observation (3000)
-# Todo , we co count > 0 to eliminate all the junk data now
-# Note, we only want counts related to 3 survery modules which have concept id
-# (1586134, 1585855,1855710)
-echo "Querying PPI observation"
-# Get ones with value as string
-
+echo "Querying PPI observation "
+# Get ones with value source concept id, ie survey answer is
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
-value_as_string as stratum_2, count(*) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
-on co1.observation_source_concept_id = c.concept_id
-inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
-on r.concept_id_2 = c.concept_id
-where r.concept_id_1 in (1586134, 1585855,1855710) and value_as_string is not null
-group by c.concept_id, value_as_string"
+SELECT 0 as id, 3000 as analysis_id, CAST(o.observation_source_concept_id as string) as stratum_1,
+cast(o.value_source_concept_id as string) as stratum_2, count(*) as count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on o.observation_source_concept_id = c.concept_id
+where o.observation_source_concept_id > 0 and o.value_source_concept_id > 0 and c.vocabulary_id = 'PPI'
+and c.concept_class_id = 'Question'
+group by observation_source_concept_id, o.value_source_concept_id"
 
-# Get ones with value as number.
 
+# Get PPI ones with value as number.
+# Todo ,we exclude zip concept 1585966. We can allow this some time
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0, 3000 as analysis_id, CAST(c.concept_id AS STRING) as stratum_1,
-CAST(value_as_number as STRING) as stratum_2, count(*) as count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
-on co1.observation_source_concept_id = c.concept_id
-inner join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` r
-on r.concept_id_2 = c.concept_id
-where r.concept_id_1 in(1586134, 1585855,1855710) and value_as_number is not null
+SELECT 0 as id, 3000 as analysis_id, cast(c.concept_id as string) as stratum_1, cast(value_as_number as string) as stratum_2, count(*)
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\`
+c on o.observation_source_concept_id = c.concept_id
+where c.vocabulary_id = 'PPI' and c.concept_class_id = 'Question' and value_as_number > 0
+and c.concept_id != 1585966
 group by c.concept_id, value_as_number"
 
-# Todo maybe for real data None were in test data
-# Get ones with value as concept_id .
 
 # 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -493,6 +471,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
 group by co1.measurement_concept_id, stratum_2"
+
 
 # Measurement Distributions
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
