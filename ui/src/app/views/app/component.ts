@@ -151,7 +151,4 @@ export class AppComponent implements OnInit {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
   }
-  test() {
-    return window.innerHeight - 103;
-  }
 }
