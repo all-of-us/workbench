@@ -43,7 +43,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
         for (SearchParameter parameter : parameters.getParameters()) {
             if (parameter.getSubtype().equals(DEMOTYPE.GEN.name())) {
-                final String namedParameter = getUniqueNamedParameter(parameter.getSubtype().toLowerCase());
+                final String namedParameter = parameter.getSubtype().toLowerCase() + getUniqueNamedParameterPostfix();
                 queryParts.add(DEMO_GEN.replace("${gen}", "@" + namedParameter));
                 queryParams.put(namedParameter, QueryParameterValue.int64(parameter.getConceptId()));
             } else if (parameter.getSubtype().equals(DEMOTYPE.AGE.name())) {
@@ -51,7 +51,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                 if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
                     List<String> operandParts = new ArrayList<>();
                     for (String operand : attribute.get().getOperands()) {
-                        final String namedParameter = getUniqueNamedParameter(parameter.getSubtype().toLowerCase());
+                        final String namedParameter = parameter.getSubtype().toLowerCase() + getUniqueNamedParameterPostfix();
                         operandParts.add("@" + namedParameter);
                         queryParams.put(namedParameter, QueryParameterValue.int64(new Long(operand)));
                     }

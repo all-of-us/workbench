@@ -8,16 +8,11 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +32,8 @@ public class ClusterController implements ClusterApiDelegate {
         Cluster allOfUsCluster = new Cluster();
         allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
         allOfUsCluster.setClusterNamespace(firecloudCluster.getGoogleProject());
-        allOfUsCluster.setStatus(firecloudCluster.getStatus());
+        // TODO(calbach): Use an enum in the Workbench notebooks API.
+        allOfUsCluster.setStatus(firecloudCluster.getStatus().toString());
         allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
         allOfUsCluster.setDestroyedDate(firecloudCluster.getDestroyedDate());
         allOfUsCluster.setLabels(firecloudCluster.getLabels());
@@ -47,9 +43,6 @@ public class ClusterController implements ClusterApiDelegate {
 
   private org.pmiops.workbench.notebooks.model.ClusterRequest createFirecloudClusterRequest() {
     org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
-    // TODO: Use real paths and accounts.
-    firecloudClusterRequest.setBucketPath("");
-    firecloudClusterRequest.setServiceAccount("");
     Map<String, String> labels = new HashMap<String, String>();
     labels.put("all-of-us", "true");
     labels.put("created-by", userProvider.get().getEmail());
@@ -83,16 +76,10 @@ public class ClusterController implements ClusterApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
         workspaceId, WorkspaceAccessLevel.WRITER);
 
-
-    Cluster createdCluster;
-
     String clusterName = this.convertClusterName(workspaceId);
-    try {
-      // TODO: Replace with real workspaceNamespace/billing-project
-      createdCluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.createCluster(workspaceNamespace, clusterName, createFirecloudClusterRequest()));
-    } catch (ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
-    }
+    Cluster createdCluster = TO_ALL_OF_US_CLUSTER.apply(
+        this.notebooksService.createCluster(
+            workspaceNamespace, clusterName, createFirecloudClusterRequest()));
     return ResponseEntity.ok(createdCluster);
   }
 
@@ -106,14 +93,8 @@ public class ClusterController implements ClusterApiDelegate {
         workspaceId, WorkspaceAccessLevel.WRITER);
 
     String clusterName = this.convertClusterName(workspaceId);
-    try {
-      // TODO: Replace with real workspaceNamespace/billing-project
-      this.notebooksService.deleteCluster(workspaceNamespace, clusterName);
-    } catch (ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
-    }
-    EmptyResponse e = new EmptyResponse();
-    return ResponseEntity.ok(e);
+    this.notebooksService.deleteCluster(workspaceNamespace, clusterName);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
 
@@ -126,13 +107,8 @@ public class ClusterController implements ClusterApiDelegate {
         workspaceId, WorkspaceAccessLevel.WRITER);
 
     String clusterName = this.convertClusterName(workspaceId);
-    Cluster cluster;
-    try {
-      // TODO: Replace with real workspaceNamespace/billing-project
-      cluster = TO_ALL_OF_US_CLUSTER.apply(this.notebooksService.getCluster(workspaceNamespace, clusterName));
-    } catch(ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
-    }
+    Cluster cluster = TO_ALL_OF_US_CLUSTER.apply(
+        this.notebooksService.getCluster(workspaceNamespace, clusterName));
     return ResponseEntity.ok(cluster);
   }
 
@@ -140,11 +116,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterListResponse> listClusters(String labels) {
     List<org.pmiops.workbench.notebooks.model.Cluster> oldClusters;
-    try {
-      oldClusters = this.notebooksService.listClusters(labels);
-    } catch(ApiException e) {
-      throw ExceptionUtils.convertNotebookException(e);
-    }
+    oldClusters = this.notebooksService.listClusters(labels, /* includeDeleted */ false);
     ClusterListResponse response = new ClusterListResponse();
     response.setItems(oldClusters.stream().map(TO_ALL_OF_US_CLUSTER).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -153,18 +125,9 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<Void> localizeNotebook(String workspaceNamespace, String workspaceId,
       List<FileDetail> fileList) {
-    try {
-      String clusterName = convertClusterName(workspaceId);
-      this.notebooksService.localize(workspaceNamespace, clusterName,
-          convertfileDetailsToMap(fileList));
-    } catch (ApiException e) {
-      if (e.getCode() == 400) {
-        throw new BadRequestException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException("Cluster not found.");
-      }
-      throw new ServerErrorException(e);
-    }
+    String clusterName = convertClusterName(workspaceId);
+    this.notebooksService.localize(workspaceNamespace, clusterName,
+        convertfileDetailsToMap(fileList));
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 

@@ -15,8 +15,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 301633,301622,CPT,,0007T,[EXPIRED]-Perc cath stent/brain cv,0,1,4,42739906,Procedure
 301634,301621,CPT,,0008M,"Oncology (breast), mRNA analysis of 58 genes using hybrid capture, on formalin-fixed paraffin-embedded (FFPE) tissue, prognostic algorithm reported as a risk score",0,1,0,46257431,Procedure
 301635,301622,CPT,,0008T,[EXPIRED]-Upper gi endoscopy w/sut,0,1,10,42739907,Procedure
-301636,301621,CPT,,0009M,"Fetal aneuploidy (trisomy 21, and 18) DNA sequence analysis of selected regions using maternal plasma, algorithm reported as a risk score for each trisomy",0,1,0,,
-301637,301621,CPT,,0010M,"[EXPIRED]-Oncology (High-Grade Prostate Cancer), biochemical assay of four proteins (Total PSA, Free PSA, Intact PSA and human kallikrein 2 [hK2]) plus patient age, digital rectal examination status, and no history of positive prostate biopsy, utilizing plasma, prognostic algorithm reported as a probability score",0,1,0,,
 301638,301622,CPT,,0013T,[EXPIRED]-Osteochondral knee allog,0,1,1,42739911,Procedure
 301639,301622,CPT,,0016T,"[EXPIRED]-Destruction of localized lesion of choroid (eg, choroidal neovascularization), transpupillary thermotherapy",0,1,0,42739912,Procedure
 301640,301622,CPT,,0017T,"[EXPIRED]-Destruction of macular drusen, photocoagulation",0,1,0,42739913,Procedure
@@ -232,48 +230,19 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 301850,301622,CPT,,Level 2: 0383T-0384T,External heart rate and 3-axis accelerometer data recording from 15 to 30 days to assess changes in heart rate and to monitor motion analysis for the purposes of diagnosing nocturnal epilepsy seizure events,1,0,,,
 301851,301622,CPT,,Level 2: 0385T-0386T,External heart rate and 3-axis accelerometer data recording more than 30 days to assess changes in heart rate and to monitor motion analysis for the purposes of diagnosing nocturnal epilepsy seizure events,1,0,,,
 301852,301622,CPT,,Level 2: 0387T-0391T,Pacemaker Procedures - Leadless and Pocketless System,1,0,,,
-301853,301622,CPT,,0392T,"[EXPIRED]-Laparoscopy, surgical, esophageal sphincter augmentation procedure, placement of sphincter augmentation device (ie, magnetic band)",0,1,0,,
-301854,301622,CPT,,0393T,[EXPIRED]-Removal of esophageal sphincter augmentation device,0,1,0,,
-301855,301622,CPT,,0394T,"High dose rate electronic brachytherapy, skin surface application, per fraction, includes basic dosimetry, when performed",0,1,0,,
-301856,301622,CPT,,0395T,"High dose rate electronic brachytherapy, interstitial or intracavitary treatment, per fraction, includes basic dosimetry, when performed",0,1,0,,
-301857,301622,CPT,,0396T,Intra-operative use of kinetic balance sensor for implant stability during knee replacement arthroplasty (List separately in addition to code for primary procedure),0,1,0,,
 301858,301622,CPT,,0397T,"Endoscopic retrograde cholangiopancreatography (ERCP), with optical endomicroscopy (List separately in addition to code for primary procedure)",0,1,5,700000002,Observation
-301859,301622,CPT,,0398T,"Magnetic resonance image guided high intensity focused ultrasound (MRgFUS), stereotactic ablation lesion, intracranial for movement disorder including stereotactic navigation and frame placement when performed",0,1,0,,
-301860,301622,CPT,,0399T,Myocardial strain imaging (quantitative assessment of myocardial mechanics using image-based analysis of local myocardial dynamics) (List separately in addition to code for primary procedure),0,1,0,,
 301861,301622,CPT,,Level 2: 0400T-0401T,Multi-spectral digital skin lesion analysis of clinically atypical cutaneous pigmented lesions for detection of melanomas and high risk melanocytic atypia,1,0,,,
-301862,301622,CPT,,0402T,Collagen cross-linking of cornea (including removal of the corneal epithelium and intraoperative pachymetry when performed),0,1,0,,
-301863,301622,CPT,,0403T,"Preventive behavior change, intensive program of prevention of diabetes using a standardized diabetes prevention program curriculum, provided to individuals in a group setting, minimum 60 minutes, per day",0,1,0,,
-301864,301622,CPT,,0404T,"Transcervical uterine fibroid(s) ablation with ultrasound guidance, radiofrequency",0,1,0,,
-301865,301622,CPT,,0405T,"Oversight of the care of an extracorporeal liver assist system patient requiring review of status, review of laboratories and other studies, and revision of orders and liver assist care plan (as appropriate), within a calendar month, 30 minutes or more of non-face-to-face time",0,1,0,,
 301866,301622,CPT,,Level 2: 0406T-0407T,"Nasal endoscopy, surgical, ethmoid sinus, placement of drug eluting implant",1,0,,,
 301867,301622,CPT,,Level 2: 0408T-0418T,Cardiac Contractility Modulation System Procedures,1,0,,,
 301868,301622,CPT,,Level 2: 0419T-0420T,"Destruction of neurofibroma, extensive (cutaneous, dermal extending into subcutaneous)",1,0,,,
-301869,301622,CPT,,0421T,"Transurethral waterjet ablation of prostate, including control of post-operative bleeding, including ultrasound guidance, complete (vasectomy, meatotomy, cystourethroscopy, urethral calibration and/or dilation, and internal urethrotomy are included when performed)",0,1,0,,
-301870,301622,CPT,,0422T,"Tactile breast imaging by computer-aided tactile sensors, unilateral or bilateral",0,1,0,,
-301871,301622,CPT,,0423T,Secretory type II phospholipase A2 (sPLA2-IIA),0,1,0,,
 301872,301622,CPT,,Level 2: 0424T-0436T,Phrenic Nerve Stimulation System Procedures,1,0,,,
 301873,301622,CPT,,0437T,"Implantation of non-biologic or synthetic implant (eg, polypropylene) for fascial reinforcement of the abdominal wall (List separately in addition to code for primary procedure)",0,1,2,700000002,Observation
 301874,301622,CPT,,0438T,"Transperineal placement of biodegradable material, peri-prostatic (via needle), single or multiple, includes image guidance",0,1,11,700000002,Observation
-301875,301622,CPT,,0439T,"Myocardial contrast perfusion echocardiography, at rest or with stress, for assessment of myocardial ischemia or viability (List separately in addition to code for primary procedure)",0,1,0,,
 301876,301622,CPT,,Level 2: 0440T-0442T,"Ablation, percutaneous, cryoablation, includes imaging guidance",1,0,,,
-301877,301622,CPT,,0443T,"Real-time spectral analysis of prostate tissue by fluorescence spectroscopy, including imaging guidance (List separately in addition to code for primary procedure)",0,1,0,,
-301878,301622,CPT,,0444T,"Initial placement of a drug-eluting ocular insert under one or more eyelids, including fitting, training, and insertion, unilateral or bilateral",0,1,0,,
-301879,301622,CPT,,0445T,"Subsequent placement of a drug-eluting ocular insert under one or more eyelids, including re-training, and removal of existing insert, unilateral or bilateral",0,1,0,,
-301880,301622,CPT,,0446T,"Creation of subcutaneous pocket with insertion of implantable interstitial glucose sensor, including system activation and patient training",0,1,0,,
-301881,301622,CPT,,0447T,Removal of implantable interstitial glucose sensor from subcutaneous pocket via incision,0,1,0,,
-301882,301622,CPT,,0448T,"Removal of implantable interstitial glucose sensor with creation of subcutaneous pocket at different anatomic site and insertion of new implantable sensor, including system activation",0,1,0,,
 301883,301622,CPT,,Level 2: 0449T-0450T,"Insertion of aqueous drainage device, without extraocular reservoir, internal approach, into the subconjunctival space",1,0,,,
 301884,301622,CPT,,Level 2: 0451T-0463T,Permanent Aortic Counterpulsation Ventricular Assistance Device Procedures,1,0,,,
-301885,301622,CPT,,0464T,"Visual evoked potential, testing for glaucoma, with interpretation and report",0,1,0,,
-301886,301622,CPT,,0465T,Suprachoroidal injection of a pharmacologic agent (does not include supply of medication),0,1,0,,
 301887,301622,CPT,,0466T,"Insertion of chest wall respiratory sensor electrode or electrode array, including connection to pulse generator (List separately in addition to code for primary procedure)",0,1,4,700000002,Observation
-301888,301622,CPT,,0467T,"Revision or replacement of chest wall respiratory sensor electrode or electrode array, including connection to existing pulse generator",0,1,0,,
-301889,301622,CPT,,0468T,Removal of chest wall respiratory sensor electrode or electrode array,0,1,0,,
-301890,301622,CPT,,0469T,"Retinal polarization scan, ocular screening with on-site automated results, bilateral",0,1,0,,
 301891,301622,CPT,,Level 2: 0470T-0471T,"Optical coherence tomography (OCT) for microstructural and morphological imaging of skin, image acquisition, interpretation, and report",1,0,,,
-301892,301622,CPT,,0472T,"Device evaluation, interrogation, and initial programming of intra-ocular retinal electrode array (eg, retinal prosthesis), in person, with iterative adjustment of the implantable device to test functionality, select optimal permanent programmed values with analysis, including visual training, with review and report by a qualified health care professional",0,1,0,,
-301893,301622,CPT,,0473T,"Device evaluation and interrogation of intra-ocular retinal electrode array (eg, retinal prosthesis), in person, including reprogramming and visual training, when performed, with review and report by a qualified health care professional",0,1,0,,
-301894,301622,CPT,,0474T,"Insertion of anterior segment aqueous drainage device, with creation of intraocular reservoir, internal approach, into the supraciliary space",0,1,0,,
 301895,301622,CPT,,Level 2: 0475T-0478T,Recording of fetal magnetic cardiac signal using at least 3 channels,1,0,,,
 301896,301620,CPT,,Level 2: 0500F-0584F,Patient Management,1,0,,,
 301897,301620,CPT,,Level 2: 1000F-1505F,Patient History,1,0,,,
@@ -393,42 +362,15 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 302011,301852,CPT,,0389T,"Programming device evaluation (in person) with iterative adjustment of the implantable device to test the function of the device and select optimal permanent programmed values with analysis, review and report, leadless pacemaker system",0,1,0,46257694,Procedure
 302012,301852,CPT,,0390T,"Peri-procedural device evaluation (in person) and programming of device system parameters before or after a surgery, procedure or test with analysis, review and report, leadless pacemaker system",0,1,8,46257437,Procedure
 302013,301852,CPT,,0391T,"Interrogation device evaluation (in person) with analysis, review and report, includes connection, recording and disconnection per patient encounter, leadless pacemaker system",0,1,1,46257726,Procedure
-302014,301861,CPT,,0400T,Multi-spectral digital skin lesion analysis of clinically atypical cutaneous pigmented lesions for detection of melanomas and high risk melanocytic atypia; one to five lesions,0,1,0,,
-302015,301861,CPT,,0401T,Multi-spectral digital skin lesion analysis of clinically atypical cutaneous pigmented lesions for detection of melanomas and high risk melanocytic atypia; six or more lesions,0,1,0,,
-302016,301866,CPT,,0406T,"Nasal endoscopy, surgical, ethmoid sinus, placement of drug eluting implant",0,1,0,,
-302017,301866,CPT,,0407T,"Nasal endoscopy, surgical, ethmoid sinus, placement of drug eluting implant; with biopsy, polypectomy or debridement",0,1,0,,
 302018,301867,CPT,,Level 3: 0408T-0411T,"Insertion or replacement of permanent cardiac contractility modulation system, including contractility evaluation when performed, and programming of sensing and therapeutic parameters",1,0,,,
 302019,301867,CPT,,Level 3: 0412T-0413T,Removal of permanent cardiac contractility modulation system,1,0,,,
-302020,301867,CPT,,0414T,Removal and replacement of permanent cardiac contractility modulation system pulse generator only,0,1,0,,
-302021,301867,CPT,,0415T,Repositioning of previously implanted cardiac contractility modulation transvenous electrode (atrial or ventricular lead),0,1,0,,
-302022,301867,CPT,,0416T,Relocation of skin pocket for implanted cardiac contractility modulation pulse generator,0,1,0,,
-302023,301867,CPT,,0417T,"Programming device evaluation (in person) with iterative adjustment of the implantable device to test the function of the device and select optimal permanent programmed values with analysis, including review and report, implantable cardiac contractility modulation system",0,1,0,,
-302024,301867,CPT,,0418T,"Interrogation device evaluation (in person) with analysis, review and report, includes connection, recording and disconnection per patient encounter, implantable cardiac contractility modulation system",0,1,0,,
-302025,301868,CPT,,0419T,"Destruction of neurofibroma, extensive (cutaneous, dermal extending into subcutaneous); face, head and neck, greater than 50 neurofibromas",0,1,0,,
-302026,301868,CPT,,0420T,"Destruction of neurofibroma, extensive (cutaneous, dermal extending into subcutaneous); trunk and extremities, extensive, greater than 100 neurofibromas",0,1,0,,
 302027,301872,CPT,,Level 3: 0424T-0427T,Insertion or replacement of neurostimulator system for treatment of central sleep apnea,1,0,,,
 302028,301872,CPT,,Level 3: 0428T-0430T,Removal of neurostimulator system for treatment of central sleep apnea,1,0,,,
-302029,301872,CPT,,0431T,"Removal and replacement of neurostimulator system for treatment of central sleep apnea, pulse generator only",0,1,0,,
 302030,301872,CPT,,Level 3: 0432T-0433T,Repositioning of neurostimulator system for treatment of central sleep apnea,1,0,,,
-302031,301872,CPT,,0434T,Interrogation device evaluation implanted neurostimulator pulse generator system for central sleep apnea,0,1,0,,
 302032,301872,CPT,,Level 3: 0435T-0436T,Programming device evaluation of implanted neurostimulator pulse generator system for central sleep apnea,1,0,,,
-302033,301876,CPT,,0440T,"Ablation, percutaneous, cryoablation, includes imaging guidance; upper extremity distal/peripheral nerve",0,1,0,,
-302034,301876,CPT,,0441T,"Ablation, percutaneous, cryoablation, includes imaging guidance; lower extremity distal/peripheral nerve",0,1,0,,
-302035,301876,CPT,,0442T,"Ablation, percutaneous, cryoablation, includes imaging guidance; nerve plexus or other truncal nerve (eg, brachial plexus, pudendal nerve)",0,1,0,,
-302036,301883,CPT,,0449T,"Insertion of aqueous drainage device, without extraocular reservoir, internal approach, into the subconjunctival space; initial device",0,1,0,,
-302037,301883,CPT,,0450T,"Insertion of aqueous drainage device, without extraocular reservoir, internal approach, into the subconjunctival space; each additional device (List separately in addition to code for primary procedure)",0,1,0,,
 302038,301884,CPT,,Level 3: 0451T-0454T,"Insertion or replacement of a permanently implantable aortic counterpulsation ventricular assist system, endovascular approach, and programming of sensing and therapeutic parameters",1,0,,,
 302039,301884,CPT,,Level 3: 0455T-0458T,Removal of permanently implantable aortic counterpulsation ventricular assist system,1,0,,,
-302040,301884,CPT,,0459T,"Relocation of skin pocket with replacement of implanted aortic counterpulsation ventricular assist device, mechano-electrical skin interface and electrodes",0,1,0,,
 302041,301884,CPT,,Level 3: 0460T-0461T,Repositioning of previously implanted aortic counterpulsation ventricular assist device,1,0,,,
-302042,301884,CPT,,0462T,"Programming device evaluation (in person) with iterative adjustment of the implantable mechano-electrical skin interface and/or external driver to test the function of the device and select optimal permanent programmed values with analysis, including review and report, implantable aortic counterpulsation ventricular assist system, per day",0,1,0,,
-302043,301884,CPT,,0463T,"Interrogation device evaluation (in person) with analysis, review and report, includes connection, recording and disconnection per patient encounter, implantable aortic counterpulsation ventricular assist system, per day",0,1,0,,
-302044,301891,CPT,,0470T,"Optical coherence tomography (OCT) for microstructural and morphological imaging of skin, image acquisition, interpretation, and report; first lesion",0,1,0,,
-302045,301891,CPT,,0471T,"Optical coherence tomography (OCT) for microstructural and morphological imaging of skin, image acquisition, interpretation, and report; each additional lesion (List separately in addition to code for primary procedure)",0,1,0,,
-302046,301895,CPT,,0475T,"Recording of fetal magnetic cardiac signal using at least 3 channels; patient recording and storage, data scanning with signal extraction, technical analysis and result, as well as supervision, review, and interpretation of report by a physician or other qualified health care professional",0,1,0,,
-302047,301895,CPT,,0476T,"Recording of fetal magnetic cardiac signal using at least 3 channels; patient recording, data scanning, with raw electronic signal transfer of data and storage",0,1,0,,
-302048,301895,CPT,,0477T,"Recording of fetal magnetic cardiac signal using at least 3 channels; signal extraction, technical analysis, and result",0,1,0,,
-302049,301895,CPT,,0478T,"Recording of fetal magnetic cardiac signal using at least 3 channels; review, interpretation, report by physician or other qualified health care professional",0,1,0,,
 302050,301896,CPT,,0500F,"Initial prenatal care visit (report at first prenatal encounter with health care professional providing obstetrical care. Report also date of visit and, in a separate field, the date of the last menstrual period [LMP]) (Prenatal)",0,1,25238,2101829,Observation
 302051,301896,CPT,,0501F,"Prenatal flow sheet documented in medical record by first prenatal visit (documentation includes at minimum blood pressure, weight, urine protein, uterine size, fetal heart tones, and estimated date of delivery). Report also: date of visit and, in a separate field, the date of the last menstrual period [LMP] (Note: If reporting 0501F Prenatal flow sheet, it is not necessary to report 0500F Initial",0,1,5617,2101830,Observation
 302052,301896,CPT,,0502F,"Subsequent prenatal care visit (Prenatal) [Excludes: patients who are seen for a condition unrelated to pregnancy or prenatal care (eg, an upper respiratory infection; patients seen for consultation only, not for continuing care)]",0,1,31767,2101831,Observation
@@ -1030,33 +972,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 302648,301995,CPT,,0369T,Adaptive behavior treatment with protocol modification administered by physician or other qualified health care professional with one patient; each additional 30 minutes of patient face-to-face time (List separately in addition to code for primary procedure),0,1,21,46257504,Procedure
 302649,301999,CPT,,0373T,"Exposure adaptive behavior treatment with protocol modification requiring two or more technicians for severe maladaptive behavior(s); first 60 minutes of technicians' time, face-to-face with patient",0,1,0,46257541,Procedure
 302650,301999,CPT,,0374T,Exposure adaptive behavior treatment with protocol modification requiring two or more technicians for severe maladaptive behavior(s); each additional 30 minutes of technicians' time face-to-face with patient (List separately in addition to code for primary procedure),0,1,0,46257691,Procedure
-302651,302018,CPT,,0408T,"Insertion or replacement of permanent cardiac contractility modulation system, including contractility evaluation when performed, and programming of sensing and therapeutic parameters; pulse generator with transvenous electrodes",0,1,0,,
-302652,302018,CPT,,0409T,"Insertion or replacement of permanent cardiac contractility modulation system, including contractility evaluation when performed, and programming of sensing and therapeutic parameters; pulse generator only",0,1,0,,
-302653,302018,CPT,,0410T,"Insertion or replacement of permanent cardiac contractility modulation system, including contractility evaluation when performed, and programming of sensing and therapeutic parameters; atrial electrode only",0,1,0,,
-302654,302018,CPT,,0411T,"Insertion or replacement of permanent cardiac contractility modulation system, including contractility evaluation when performed, and programming of sensing and therapeutic parameters; ventricular electrode only",0,1,0,,
-302655,302019,CPT,,0412T,Removal of permanent cardiac contractility modulation system; pulse generator only,0,1,0,,
-302656,302019,CPT,,0413T,Removal of permanent cardiac contractility modulation system; transvenous electrode (atrial or ventricular),0,1,0,,
-302657,302027,CPT,,0424T,"Insertion or replacement of neurostimulator system for treatment of central sleep apnea; complete system (transvenous placement of right or left stimulation lead, sensing lead, implantable pulse generator)",0,1,0,,
-302658,302027,CPT,,0425T,Insertion or replacement of neurostimulator system for treatment of central sleep apnea; sensing lead only,0,1,0,,
-302659,302027,CPT,,0426T,Insertion or replacement of neurostimulator system for treatment of central sleep apnea; stimulation lead only,0,1,0,,
-302660,302027,CPT,,0427T,Insertion or replacement of neurostimulator system for treatment of central sleep apnea; pulse generator only,0,1,0,,
-302661,302028,CPT,,0428T,Removal of neurostimulator system for treatment of central sleep apnea; pulse generator only,0,1,0,,
-302662,302028,CPT,,0429T,Removal of neurostimulator system for treatment of central sleep apnea; sensing lead only,0,1,0,,
-302663,302028,CPT,,0430T,Removal of neurostimulator system for treatment of central sleep apnea; stimulation lead only,0,1,0,,
-302664,302030,CPT,,0432T,Repositioning of neurostimulator system for treatment of central sleep apnea; stimulation lead only,0,1,0,,
-302665,302030,CPT,,0433T,Repositioning of neurostimulator system for treatment of central sleep apnea; sensing lead only,0,1,0,,
-302666,302032,CPT,,0435T,Programming device evaluation of implanted neurostimulator pulse generator system for central sleep apnea; single session,0,1,0,,
-302667,302032,CPT,,0436T,Programming device evaluation of implanted neurostimulator pulse generator system for central sleep apnea; during sleep study,0,1,0,,
-302668,302038,CPT,,0451T,"Insertion or replacement of a permanently implantable aortic counterpulsation ventricular assist system, endovascular approach, and programming of sensing and therapeutic parameters; complete system (counterpulsation device, vascular graft, implantable vascular hemostatic seal, mechano-electrical skin interface and subcutaneous electrodes)",0,1,0,,
-302669,302038,CPT,,0452T,"Insertion or replacement of a permanently implantable aortic counterpulsation ventricular assist system, endovascular approach, and programming of sensing and therapeutic parameters; aortic counterpulsation device and vascular hemostatic seal",0,1,0,,
-302670,302038,CPT,,0453T,"Insertion or replacement of a permanently implantable aortic counterpulsation ventricular assist system, endovascular approach, and programming of sensing and therapeutic parameters; mechano-electrical skin interface",0,1,0,,
-302671,302038,CPT,,0454T,"Insertion or replacement of a permanently implantable aortic counterpulsation ventricular assist system, endovascular approach, and programming of sensing and therapeutic parameters; subcutaneous electrode",0,1,0,,
-302672,302039,CPT,,0455T,"Removal of permanently implantable aortic counterpulsation ventricular assist system; complete system (aortic counterpulsation device, vascular hemostatic seal, mechano-electrical skin interface and electrodes)",0,1,0,,
-302673,302039,CPT,,0456T,Removal of permanently implantable aortic counterpulsation ventricular assist system; aortic counterpulsation device and vascular hemostatic seal,0,1,0,,
-302674,302039,CPT,,0457T,Removal of permanently implantable aortic counterpulsation ventricular assist system; mechano-electrical skin interface,0,1,0,,
-302675,302039,CPT,,0458T,Removal of permanently implantable aortic counterpulsation ventricular assist system; subcutaneous electrode,0,1,0,,
-302676,302041,CPT,,0460T,Repositioning of previously implanted aortic counterpulsation ventricular assist device; subcutaneous electrode,0,1,0,,
-302677,302041,CPT,,0461T,Repositioning of previously implanted aortic counterpulsation ventricular assist device; aortic counterpulsation device,0,1,0,,
 302678,302116,CPT,,1070F,"Alarm symptoms (involuntary weight loss, dysphagia, or gastrointestinal bleeding) assessed; none present (GERD)",0,1,0,2101907,Observation
 302679,302116,CPT,,1071F,"Alarm symptoms (involuntary weight loss, dysphagia, or gastrointestinal bleeding) assessed; 1 or more present (GERD)",0,1,0,2101908,Observation
 302680,302119,CPT,,1100F,Patient screened for future fall risk; documentation of 2 or more falls in the past year or any fall with injury in the past year (GER),0,1,0,2101918,Observation
@@ -1513,7 +1428,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303131,302729,CPT,,Level 3: 75600-75996,Diagnostic Radiology (Diagnostic Imaging) Procedures of the Vascular System,1,0,,,
 303132,302729,CPT,,Level 3: 75998-76499,Other Diagnostic Radiology (Diagnostic Imaging) Related Procedures,1,0,,,
 303133,302730,CPT,,Level 3: 76506-76536,Diagnostic Ultrasound Procedures of the Head and Neck,1,0,,,
-303134,302730,CPT,,76560,[EXPIRED]-(No description available),0,1,0,,
 303135,302730,CPT,,Level 3: 76604-76645,Diagnostic Ultrasound Procedures of the Chest,1,0,,,
 303136,302730,CPT,,Level 3: 76700-76776,Diagnostic Ultrasound Procedures of the Abdomen and Retroperitoneum,1,0,,,
 303137,302730,CPT,,76778,[EXPIRED]-Us exam kidney transplan,0,1,462,42737578,Procedure
@@ -1562,10 +1476,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303180,302734,CPT,,Level 3: 77750-77799,Clinical Brachytherapy Radiation Treatment,1,0,,,
 303181,302735,CPT,,Level 3: 78000-78999,Diagnostic Nuclear Medicine Procedures,1,0,,,
 303182,302735,CPT,,Level 3: 79000-79999,Therapeutic Nuclear Medicine Procedures,1,0,,,
-303183,302736,CPT,,0001U,"Red blood cell antigen typing, DNA, human erythrocyte antigen gene analysis of 35 antigens from 11 blood groups, utilizing whole blood, common RBC alleles reported",0,1,0,,
-303184,302736,CPT,,0002U,"Oncology (colorectal), quantitative assessment of three urine metabolites (ascorbic acid, succinic acid and carnitine) by liquid chromatography with tandem mass spectrometry (LC-MS/MS) using multiple reaction monitoring acquisition, algorithm reported as likelihood of adenomatous polyps",0,1,0,,
 303185,302737,CPT,,Level 3: 80003-80019,[EXPIRED]-Automated multichannel test,1,0,,,
-303186,302736,CPT,,0003U,"Oncology (ovarian) biochemical assays of five proteins (apolipoprotein A-1, CA 125 II, follicle stimulating hormone, human epididymis protein 4, transferrin), utilizing serum, algorithm reported as a likelihood score",0,1,0,,
 303187,302737,CPT,,80047,"Basic metabolic panel (Calcium, ionized) This panel must include the following: Calcium, ionized (82330) Carbon dioxide (bicarbonate) (82374) Chloride (82435) Creatinine (82565) Glucose (82947) Potassium (84132) Sodium (84295) Urea Nitrogen (BUN) (84520)",0,1,0,2212089,Measurement
 303188,302737,CPT,,80048,"Basic metabolic panel (Calcium, total) This panel must include the following: Calcium, total (82310) Carbon dioxide (bicarbonate) (82374) Chloride (82435) Creatinine (82565) Glucose (82947) Potassium (84132) Sodium (84295) Urea nitrogen (BUN) (84520)",0,1,0,2212090,Measurement
 303189,302737,CPT,,80049,"[EXPIRED]-Metabolic panel, basic",0,1,0,2722255,Procedure
@@ -1580,7 +1491,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303198,302737,CPT,,80069,"Renal function panel This panel must include the following: Albumin (82040) Calcium, total (82310) Carbon dioxide (bicarbonate) (82374) Chloride (82435) Creatinine (82565) Glucose (82947) Phosphorus inorganic (phosphate) (84100) Potassium (84132) Sodium (84295) Urea nitrogen (BUN) (84520)",0,1,0,2212096,Measurement
 303199,302737,CPT,,80074,"Acute hepatitis panel This panel must include the following: Hepatitis A antibody (HAAb), IgM antibody (86709) Hepatitis B core antibody (HBcAb), IgM antibody (86705) Hepatitis B surface antigen (HBsAg) (87340) Hepatitis C antibody (86803)",0,1,0,2212098,Measurement
 303200,302737,CPT,,80076,"Hepatic function panel This panel must include the following: Albumin (82040) Bilirubin, total (82247) Bilirubin, direct (82248) Phosphatase, alkaline (84075) Protein, total (84155) Transferase, alanine amino (ALT) (SGPT) (84460) Transferase, aspartate amino (AST) (SGOT) (84450)",0,1,0,2212099,Measurement
-303201,302737,CPT,,80081,Obstetric panel including HIV,0,1,0,,
 303202,302737,CPT,,80090,[EXPIRED]-Torch antibody panel,0,1,0,42738040,Procedure
 303203,302737,CPT,,80091,[EXPIRED]-Thyroid panel,0,1,1,2722259,Procedure
 303204,302737,CPT,,80092,[EXPIRED]-Thyroid panel w/tsh,0,1,127,2722260,Procedure
@@ -1656,24 +1566,18 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303274,302745,CPT,,Level 3: 81413-81414,"Cardiac ion channelopathies (eg, Brugada syndrome, long QT syndrome, short QT syndrome, catecholaminergic polymorphic ventricular tachycardia)",1,0,,,
 303275,302745,CPT,,Level 3: 81415-81417,"Exome (eg, unexplained constitutional or heritable disorder or syndrome)",1,0,,,
 303276,302745,CPT,,81420,"Fetal chromosomal aneuploidy (eg, trisomy 21, monosomy X) genomic sequence analysis panel, circulating cell-free fetal DNA in maternal blood, must include analysis of chromosomes 13, 18, and 21",0,1,0,46257465,Procedure
-303277,302745,CPT,,81422,"Fetal chromosomal microdeletion(s) genomic sequence analysis (eg, DiGeorge syndrome, Cri-du-chat syndrome), circulating cell-free fetal DNA in maternal blood",0,1,0,,
 303278,302745,CPT,,Level 3: 81425-81427,"Genome (eg, unexplained constitutional or heritable disorder or syndrome)",1,0,,,
 303279,302745,CPT,,Level 3: 81430-81431,"Hearing loss (eg, nonsyndromic hearing loss, Usher syndrome, Pendred syndrome)",1,0,,,
 303280,302745,CPT,,Level 3: 81432-81433,"Hereditary breast cancer-related disorders (eg, hereditary breast cancer, hereditary ovarian cancer, hereditary endometrial cancer)",1,0,,,
-303281,302745,CPT,,81434,"Hereditary retinal disorders (eg, retinitis pigmentosa, Leber congenital amaurosis, cone-rod dystrophy), genomic sequence analysis panel, must include sequencing of at least 15 genes, including ABCA4, CNGA1, CRB1, EYS, PDE6A, PDE6B, PRPF31, PRPH2, RDH12, RHO, RP1, RP2, RPE65, RPGR, and USH2A",0,1,0,,
 303282,302745,CPT,,Level 3: 81435-81436,"Hereditary colon cancer disorders (eg, Lynch syndrome, PTEN hamartoma syndrome, Cowden syndrome, familial adenomatosis polyposis)",1,0,,,
 303283,302745,CPT,,Level 3: 81437-81438,"Hereditary neuroendocrine tumor disorders (eg, medullary thyroid carcinoma, parathyroid carcinoma, malignant pheochromocytoma or paraganglioma)",1,0,,,
-303284,302745,CPT,,81439,"Inherited cardiomyopathy (eg, hypertrophic cardiomyopathy, dilated cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy) genomic sequence analysis panel, must include sequencing of at least 5 genes, including DSG2, MYBPC3, MYH7, PKP2, and TTN",0,1,0,,
 303285,302745,CPT,,81440,"Nuclear encoded mitochondrial genes (eg, neurologic or myopathic phenotypes), genomic sequence panel, must include analysis of at least 100 genes, including BCS1L, C10orf2, COQ2, COX10, DGUOK, MPV17, OPA1, PDSS2, POLG, POLG2, RRM2B, SCO1, SCO2, SLC25A4, SUCLA2, SUCLG1, TAZ, TK2, and TYMP",0,1,0,46257419,Procedure
-303286,302745,CPT,,81442,"Noonan spectrum disorders (eg, Noonan syndrome, cardio-facio-cutaneous syndrome, Costello syndrome, LEOPARD syndrome, Noonan-like syndrome), genomic sequence analysis panel, must include sequencing of at least 12 genes, including BRAF, CBL, HRAS, KRAS, MAP2K1, MAP2K2, NRAS, PTPN11, RAF1, RIT1, SHOC2, and SOS1",0,1,0,,
 303287,302745,CPT,,81445,"Targeted genomic sequence analysis panel, solid organ neoplasm, DNA analysis, and RNA analysis when performed, 5-50 genes (eg, ALK, BRAF, CDKN2A, EGFR, ERBB2, KIT, KRAS, NRAS, MET, PDGFRA, PDGFRB, PGR, PIK3CA, PTEN, RET), interrogation for sequence variants and copy number variants or rearrangements, if performed",0,1,265,46257532,Procedure
 303288,302745,CPT,,81450,"Targeted genomic sequence analysis panel, hematolymphoid neoplasm or disorder, DNA analysis, and RNA analysis when performed, 5-50 genes (eg, BRAF, CEBPA, DNMT3A, EZH2, FLT3, IDH1, IDH2, JAK2, KRAS, KIT, MLL, NRAS, NPM1, NOTCH1), interrogation for sequence variants, and copy number variants or rearrangements, or isoform expression or mRNA expression levels, if performed",0,1,333,46257662,Procedure
 303289,302745,CPT,,81455,Test for detecting genes associated with cancer,0,1,506,46257420,Procedure
 303290,302745,CPT,,81460,"Whole mitochondrial genome (eg, Leigh syndrome, mitochondrial encephalomyopathy, lactic acidosis, and stroke-like episodes [MELAS], myoclonic epilepsy with ragged-red fibers [MERFF], neuropathy, ataxia, and retinitis pigmentosa [NARP], Leber hereditary optic neuropathy [LHON]), genomic sequence, must include sequence analysis of entire mitochondrial genome with heteroplasmy detection",0,1,14,46257700,Procedure
 303291,302745,CPT,,81465,"Whole mitochondrial genome large deletion analysis panel (eg, Kearns-Sayre syndrome, chronic progressive external ophthalmoplegia), including heteroplasmy detection, if performed",0,1,4,46257663,Procedure
 303292,302745,CPT,,Level 3: 81470-81471,"X-linked intellectual disability (XLID) (eg, syndromic and non-syndromic XLID)",1,0,,,
-303293,302746,CPT,,81490,"Autoimmune (rheumatoid arthritis), analysis of 12 biomarkers using immunoassays, utilizing serum, prognostic algorithm reported as a disease activity score",0,1,0,,
-303294,302746,CPT,,81493,"Coronary artery disease, mRNA, gene expression profiling by real-time RT-PCR of 23 genes, utilizing whole peripheral blood, algorithm reported as a risk score",0,1,0,,
 303295,302746,CPT,,81500,"Oncology (ovarian), biochemical assays of two proteins (CA-125 and HE4), utilizing serum, with menopausal status, algorithm reported as a risk score",0,1,0,43527956,Observation
 303296,302746,CPT,,81503,"Oncology (ovarian), biochemical assays of five proteins (CA-125, apolipoprotein A1, beta-2 microglobulin, transferrin, and pre-albumin), utilizing serum, algorithm reported as a risk score",0,1,0,43527957,Observation
 303297,302746,CPT,,81504,"Oncology (tissue of origin), microarray gene expression profiling of > 2000 genes, utilizing formalin-fixed paraffin-embedded tissue, algorithm reported as tissue similarity scores",0,1,0,44816439,Observation
@@ -1685,14 +1589,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303303,302746,CPT,,81511,"Fetal congenital abnormalities, biochemical assays of four analytes (AFP, uE3, hCG [any form], DIA) utilizing maternal serum, algorithm reported as a risk score (may include additional results from previous biochemical testing)",0,1,0,43527962,Observation
 303304,302746,CPT,,81512,"Fetal congenital abnormalities, biochemical assays of five analytes (AFP, uE3, total hCG, hyperglycosylated hCG, DIA) utilizing maternal serum, algorithm reported as a risk score",0,1,0,43528050,Observation
 303305,302746,CPT,,81519,"Oncology (breast), mRNA, gene expression profiling by real-time RT-PCR of 21 genes, utilizing formalin-fixed paraffin embedded tissue, algorithm reported as recurrence score",0,1,0,46257495,Observation
-303306,302746,CPT,,81525,"Oncology (colon), mRNA, gene expression profiling by real-time RT-PCR of 12 genes (7 content and 5 housekeeping), utilizing formalin-fixed paraffin-embedded tissue, algorithm reported as a recurrence score",0,1,0,,
-303307,302746,CPT,,81528,"Oncology (colorectal) screening, quantitative real-time target and signal amplification of 10 DNA markers (KRAS mutations, promoter methylation of NDRG4 and BMP3) and fecal hemoglobin, utilizing stool, algorithm reported as a positive or negative result",0,1,0,,
 303308,302746,CPT,,Level 3: 81535-81536,"Oncology (gynecologic), live tumor cell culture and chemotherapeutic response by DAPI stain and morphology, predictive algorithm reported as a drug response score",1,0,,,
-303309,302746,CPT,,81538,"Oncology (lung), mass spectrometric 8-protein signature, including amyloid A, utilizing serum, prognostic and predictive algorithm reported as good versus poor overall survival",0,1,0,,
-303310,302746,CPT,,81539,"Oncology (high-grade prostate cancer), biochemical assay of four proteins (Total PSA, Free PSA, Intact PSA, and human kallikrein-2 [hK2]), utilizing plasma or serum, prognostic algorithm reported as a probability score",0,1,0,,
-303311,302746,CPT,,81540,"Oncology (tumor of unknown origin), mRNA, gene expression profiling by real-time RT-PCR of 92 genes (87 content and 5 housekeeping) to classify tumor into main cancer type and subtype, utilizing formalin-fixed paraffin-embedded tissue, algorithm reported as a probability of a predicted main cancer type and subtype",0,1,0,,
-303312,302746,CPT,,81545,"Oncology (thyroid), gene expression analysis of 142 genes, utilizing fine needle aspirate, algorithm reported as a categorical result (eg, benign or suspicious)",0,1,0,,
-303313,302746,CPT,,81595,"Cardiology (heart transplant), mRNA, gene expression profiling by real-time quantitative PCR of 20 genes (11 content and 9 housekeeping), utilizing subfraction of peripheral blood, algorithm reported as a rejection risk score",0,1,0,,
 303314,302746,CPT,,81599,Unlisted multianalyte assay with algorithmic analysis,0,1,0,43527963,Observation
 303315,302747,CPT,,82000,"[EXPIRED]-Acetaldehyde, blood",0,1,0,2212177,Measurement
 303316,302747,CPT,,82003,[EXPIRED]-Acetaminophen,0,1,0,2212178,Measurement
@@ -2030,7 +1927,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303648,302747,CPT,,84681,C-peptide,0,1,0,2212630,Measurement
 303649,302747,CPT,,Level 3: 84702-84704,"Gonadotropin, chorionic (hCG)",1,0,,,
 303650,302747,CPT,,84830,"Ovulation tests, by visual color comparison methods for human luteinizing hormone",0,1,0,2212634,Measurement
-303651,302747,CPT,,84903,[EXPIRED]-(No description available),0,1,0,,
 303652,302747,CPT,,84999,Unlisted chemistry procedure,0,1,0,2212635,Measurement
 303653,302748,CPT,,85002,Bleeding time,0,1,0,2212636,Measurement
 303654,302748,CPT,,Level 3: 85004-85049,Blood count,1,0,,,
@@ -2080,7 +1976,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303698,302748,CPT,,85705,"Thromboplastin inhibition, tissue",0,1,0,2212741,Measurement
 303699,302748,CPT,,Level 3: 85730-85732,"Thromboplastin time, partial (PTT)",1,0,,,
 303700,302748,CPT,,85810,Viscosity,0,1,0,2212744,Measurement
-303701,302748,CPT,,85820,[EXPIRED]-Viscosity; serum or plasma,0,1,0,,
 303702,302748,CPT,,85999,Unlisted hematology and coagulation procedure,0,1,0,2212745,Measurement
 303703,302749,CPT,,86000,"Agglutinins, febrile (eg, Brucella, Francisella, Murine typhus, Q fever, Rocky Mountain spotted fever, scrub typhus), each antigen",0,1,0,2212746,Measurement
 303704,302749,CPT,,86001,"Allergen specific IgG quantitative or semiquantitative, each allergen",0,1,0,2212747,Measurement
@@ -2114,8 +2009,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303732,302749,CPT,,Level 3: 86300-86304,"Immunoassay for tumor antigen, quantitative",1,0,,,
 303733,302749,CPT,,86305,Human epididymis protein 4 (HE4),0,1,0,40756890,Measurement
 303734,302749,CPT,,Level 3: 86308-86310,Heterophile antibodies,1,0,,,
-303735,302749,CPT,,86311,[EXPIRED]-Hiv antigen test,0,1,0,,
-303736,302749,CPT,,86313,"[EXPIRED]-Immunoassay for infectious agent antigen: qualitative, multiple-step method",0,1,0,,
 303737,302749,CPT,,86316,"Immunoassay for tumor antigen, other antigen, quantitative (eg, CA 50, 72-4, 549), each",0,1,0,2212791,Measurement
 303738,302749,CPT,,86317,"Immunoassay for infectious agent antibody, quantitative, not otherwise specified",0,1,0,2212792,Measurement
 303739,302749,CPT,,86318,"Immunoassay for infectious agent antibody, qualitative or semiquantitative, single step method (eg, reagent strip)",0,1,0,2212793,Measurement
@@ -2191,7 +2084,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303809,302751,CPT,,87172,"Pinworm exam (eg, cellophane tape prep)",0,1,0,2213023,Measurement
 303810,302751,CPT,,87176,"Homogenization, tissue, for culture",0,1,0,2213026,Measurement
 303811,302751,CPT,,87177,"Ova and parasites, direct smears, concentration and identification",0,1,0,2213027,Measurement
-303812,302751,CPT,,87178,"[EXPIRED]-Microbial identification, nucleic acid probes",0,1,0,,
 303813,302751,CPT,,Level 3: 87181-87190,"Susceptibility studies, antimicrobial agent",1,0,,,
 303814,302751,CPT,,87197,Serum bactericidal titer (Schlichter test),0,1,0,2213036,Measurement
 303815,302751,CPT,,Level 3: 87205-87210,"Smear, primary source with interpretation",1,0,,,
@@ -2347,10 +2239,8 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 303965,302761,CPT,,90581,"Anthrax vaccine, for subcutaneous or intramuscular use",0,1,0,2213424,Drug
 303966,302761,CPT,,90585,"Bacillus Calmette-Guerin vaccine (BCG) for tuberculosis, live, for percutaneous use",0,1,0,2213425,Drug
 303967,302761,CPT,,90586,"Bacillus Calmette-Guerin vaccine (BCG) for bladder cancer, live, for intravesical use",0,1,37,2213426,Drug
-303968,302761,CPT,,90587,"Dengue vaccine, quadrivalent, live, 3 dose schedule, for subcutaneous use",0,1,0,,
 303969,302761,CPT,,90620,"Meningococcal recombinant protein and outer membrane vesicle vaccine, serogroup B (MenB-4C), 2 dose schedule, for intramuscular use",0,1,762,46257760,Drug
 303970,302761,CPT,,90621,"Meningococcal recombinant lipoprotein vaccine, serogroup B (MenB-FHbp), 2 or 3 dose schedule, for intramuscular use",0,1,0,46257761,Drug
-303971,302761,CPT,,90625,"Cholera vaccine, live, adult dosage, 1 dose schedule, for oral use",0,1,0,,
 303972,302761,CPT,,90630,"Influenza virus vaccine, quadrivalent (IIV4), split virus, preservative free, for intradermal use",0,1,0,46257714,Drug
 303973,302761,CPT,,90632,"Hepatitis A vaccine (HepA), adult dosage, for intramuscular use",0,1,13833,2213427,Drug
 303974,302761,CPT,,90633,"Hepatitis A vaccine (HepA), pediatric/adolescent dosage-2 dose schedule, for intramuscular use",0,1,26247,2213428,Drug
@@ -2384,12 +2274,10 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 304002,302761,CPT,,90670,"Pneumococcal conjugate vaccine, 13 valent (PCV13), for intramuscular use",0,1,52940,2213448,Drug
 304003,302761,CPT,,90672,"Influenza virus vaccine, quadrivalent, live (LAIV4), for intranasal use",0,1,8351,43527981,Drug
 304004,302761,CPT,,90673,"Influenza virus vaccine, trivalent (RIV3), derived from recombinant DNA, hemagglutinin (HA) protein only, preservative and antibiotic free, for intramuscular use",0,1,234,44816443,Drug
-304005,302761,CPT,,90674,"Influenza virus vaccine, quadrivalent (ccIIV4), derived from cell cultures, subunit, preservative and antibiotic free, 0.5 mL dosage, for intramuscular use",0,1,0,,
 304006,302761,CPT,,90675,"Rabies vaccine, for intramuscular use",0,1,983,2213449,Drug
 304007,302761,CPT,,90676,"Rabies vaccine, for intradermal use",0,1,6,2213450,Drug
 304008,302761,CPT,,90680,"Rotavirus vaccine, pentavalent (RV5), 3 dose schedule, live, for oral use",0,1,15437,2213451,Drug
 304009,302761,CPT,,90681,"Rotavirus vaccine, human, attenuated (RV1), 2 dose schedule, live, for oral use",0,1,59,2213452,Drug
-304010,302761,CPT,,90682,"Influenza virus vaccine, quadrivalent (RIV4), derived from recombinant DNA, hemagglutinin (HA) protein only, preservative and antibiotic free, for intramuscular use",0,1,0,,
 304011,302761,CPT,,90685,"Influenza virus vaccine, quadrivalent (IIV4), split virus, preservative free, 0.25 mL dosage, for intramuscular use",0,1,9037,44816521,Drug
 304012,302761,CPT,,90686,"Influenza virus vaccine, quadrivalent (IIV4), split virus, preservative free, 0.5 mL dosage, for intramuscular use",0,1,65702,44816520,Drug
 304013,302761,CPT,,90687,"Influenza virus vaccine, quadrivalent (IIV4), split virus, 0.25 mL dosage, for intramuscular use",0,1,1580,44816519,Drug
@@ -2444,14 +2332,12 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 304062,302761,CPT,,90747,"Hepatitis B vaccine (HepB), dialysis or immunosuppressed patient dosage, 4 dose schedule, for intramuscular use",0,1,910,2213493,Drug
 304063,302761,CPT,,90748,"Hepatitis B and Haemophilus influenzae type b vaccine (Hib-HepB), for intramuscular use",0,1,86,2213494,Drug
 304064,302761,CPT,,90749,Unlisted vaccine/toxoid,0,1,648,2213495,Drug
-304065,302761,CPT,,90750,"Zoster (shingles) vaccine (HZV), recombinant, sub-unit, adjuvanted, for intramuscular injection",0,1,0,,
 304066,302763,CPT,,Level 3: 90785-90785,Interactive Complexity Psychiatry Services and Procedures,1,0,,,
 304067,302763,CPT,,Level 3: 90791-90862,Psychiatric Diagnostic Procedures,1,0,,,
 304068,302763,CPT,,Level 3: 90832-90853,Psychotherapy Services and Procedures,1,0,,,
 304069,302763,CPT,,Level 3: 90863-90899,Other Psychiatric Services or Procedures,1,0,,,
 304070,302764,CPT,,90901,Biofeedback training by any modality,0,1,11,2213562,Procedure
 304071,302764,CPT,,90911,"Biofeedback training, perineal muscles, anorectal or urethral sphincter, including EMG and/or manometry",0,1,80,2213563,Procedure
-304072,302764,CPT,,90915,[EXPIRED]-Biofeedback training; other,0,1,0,,
 304073,302766,CPT,,Level 3: 90935-90940,Hemodialysis Procedures,1,0,,,
 304074,302766,CPT,,Level 3: 90945-90947,Miscellaneous Dialysis Services and Procedures,1,0,,,
 304075,302766,CPT,,Level 3: 90951-90970,End-Stage Renal Disease Services,1,0,,,
@@ -4015,7 +3901,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305633,303270,CPT,,81210,"BRAF (B-Raf proto-oncogene, serine/threonine kinase) (eg, colon cancer, melanoma), gene analysis, V600 variant(s)",0,1,0,42742564,Measurement
 305634,303270,CPT,,Level 4: 81214-81215,"BRCA1 (breast cancer 1) (eg, hereditary breast and ovarian cancer) gene analysis",1,0,,,
 305635,303270,CPT,,Level 4: 81216-81217,"BRCA2 (breast cancer 2) (eg, hereditary breast and ovarian cancer) gene analysis",1,0,,,
-305636,303270,CPT,,81218,"CEBPA (CCAAT/enhancer binding protein [C/EBP], alpha) (eg, acute myeloid leukemia), gene analysis, full gene sequence",0,1,0,,
 305637,303270,CPT,,81219,"CALR (calreticulin) (eg, myeloproliferative disorders), gene analysis, common variants in exon 9",0,1,114,700000002,Observation
 305638,303270,CPT,,Level 4: 81220-81224,"CFTR (cystic fibrosis transmembrane conductance regulator) (eg, cystic fibrosis) gene analysis",1,0,,,
 305639,303270,CPT,,81225,"CYP2C19 (cytochrome P450, family 2, subfamily C, polypeptide 19) (eg, drug metabolism), gene analysis, common variants (eg, *2, *3, *4, *8, *17)",0,1,0,42742297,Measurement
@@ -4062,7 +3947,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305680,303270,CPT,,Level 4: 81317-81319,"PMS2 (postmeiotic segregation increased 2 [S. cerevisiae]) (eg, hereditary non-polyposis colorectal cancer, Lynch syndrome) gene analysis",1,0,,,
 305681,303270,CPT,,Level 4: 81321-81323,"PTEN (phosphatase and tensin homolog) (eg, Cowden syndrome, PTEN hamartoma tumor syndrome) gene analysis",1,0,,,
 305682,303270,CPT,,Level 4: 81324-81326,"PMP22 (peripheral myelin protein 22) (eg, Charcot-Marie-Tooth, hereditary neuropathy with liability to pressure palsies) gene analysis",1,0,,,
-305683,303270,CPT,,81327,"SEPT9 (Septin9) (eg, colorectal cancer) methylation analysis",0,1,0,,
 305684,303270,CPT,,81330,"SMPD1(sphingomyelin phosphodiesterase 1, acid lysosomal) (eg, Niemann-Pick disease, Type A) gene analysis, common variants (eg, R496L, L302P, fsP330)",0,1,0,42742348,Measurement
 305685,303270,CPT,,81331,"SNRPN/UBE3A (small nuclear ribonucleoprotein polypeptide N and ubiquitin protein ligase E3A) (eg, Prader-Willi syndrome and/or Angelman syndrome), methylation analysis",0,1,0,42742349,Measurement
 305686,303270,CPT,,81332,"SERPINA1 (serpin peptidase inhibitor, clade A, alpha-1 antiproteinase, antitrypsin, member 1) (eg, alpha-1-antitrypsin deficiency), gene analysis, common variants (eg, *S and *Z)",0,1,0,42742350,Measurement
@@ -4082,8 +3966,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305700,303271,CPT,,81408,"Molecular pathology procedure, Level 9",0,1,0,42742378,Measurement
 305701,303272,CPT,,81410,"Aortic dysfunction or dilation (eg, Marfan syndrome, Loeys Dietz syndrome, Ehler Danlos syndrome type IV, arterial tortuosity syndrome); genomic sequence analysis panel, must include sequencing of at least 9 genes, including FBN1, TGFBR1, TGFBR2, COL3A1, MYH11, ACTA2, SLC2A10, SMAD3, and MYLK",0,1,10,46257659,Procedure
 305702,303272,CPT,,81411,"Aortic dysfunction or dilation (eg, Marfan syndrome, Loeys Dietz syndrome, Ehler Danlos syndrome type IV, arterial tortuosity syndrome); duplication/deletion analysis panel, must include analyses for TGFBR1, TGFBR2, MYH11, and COL3A1",0,1,6,46257493,Procedure
-305703,303274,CPT,,81413,"Cardiac ion channelopathies (eg, Brugada syndrome, long QT syndrome, short QT syndrome, catecholaminergic polymorphic ventricular tachycardia); genomic sequence analysis panel, must include sequencing of at least 10 genes, including ANK2, CASQ2, CAV3, KCNE1, KCNE2, KCNH2, KCNJ2, KCNQ1, RYR2, and SCN5A",0,1,0,,
-305704,303274,CPT,,81414,"Cardiac ion channelopathies (eg, Brugada syndrome, long QT syndrome, short QT syndrome, catecholaminergic polymorphic ventricular tachycardia); duplication/deletion gene analysis panel, must include analysis of at least 2 genes, including KCNH2 and KCNQ1",0,1,0,,
 305705,303275,CPT,,81415,"Exome (eg, unexplained constitutional or heritable disorder or syndrome); sequence analysis",0,1,27,46257529,Procedure
 305706,303275,CPT,,81416,"Exome (eg, unexplained constitutional or heritable disorder or syndrome); sequence analysis, each comparator exome (eg, parents, siblings) (List separately in addition to code for primary procedure)",0,1,0,46257417,Procedure
 305707,303275,CPT,,81417,"Exome (eg, unexplained constitutional or heritable disorder or syndrome); re-evaluation of previously obtained exome sequence (eg, updated knowledge or unrelated condition/syndrome)",0,1,0,46257418,Procedure
@@ -4093,16 +3975,11 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305711,303279,CPT,,81430,"Hearing loss (eg, nonsyndromic hearing loss, Usher syndrome, Pendred syndrome); genomic sequence analysis panel, must include sequencing of at least 60 genes, including CDH23, CLRN1, GJB2, GPR98, MTRNR1, MYO7A, MYO15A, PCDH15, OTOF, SLC26A4, TMC1, TMPRSS3, USH1C, USH1G, USH2A, and WFS1",0,1,34,46257661,Procedure
 305712,303279,CPT,,81431,"Hearing loss (eg, nonsyndromic hearing loss, Usher syndrome, Pendred syndrome); duplication/deletion analysis panel, must include copy number analyses for STRC and DFNB1 deletions in GJB2 and GJB6 genes",0,1,34,46257746,Procedure
 305713,303280,CPT,,81432,"Hereditary breast cancer-related disorders (eg, hereditary breast cancer, hereditary ovarian cancer, hereditary endometrial cancer); genomic sequence analysis panel, must include sequencing of at least 14 genes, including ATM, BRCA1, BRCA2, BRIP1, CDH1, MLH1, MSH2, MSH6, NBN, PALB2, PTEN, RAD51C, STK11, and TP53",0,1,0,700000002,Observation
-305714,303280,CPT,,81433,"Hereditary breast cancer-related disorders (eg, hereditary breast cancer, hereditary ovarian cancer, hereditary endometrial cancer); duplication/deletion analysis panel, must include analyses for BRCA1, BRCA2, MLH1, MSH2, and STK11",0,1,0,,
 305715,303282,CPT,,81435,"Hereditary colon cancer disorders (eg, Lynch syndrome, PTEN hamartoma syndrome, Cowden syndrome, familial adenomatosis polyposis); genomic sequence analysis panel, must include sequencing of at least 10 genes, including APC, BMPR1A, CDH1, MLH1, MSH2, MSH6, MUTYH, PTEN, SMAD4, and STK11",0,1,0,46257564,Procedure
 305716,303282,CPT,,81436,"Hereditary colon cancer disorders (eg, Lynch syndrome, PTEN hamartoma syndrome, Cowden syndrome, familial adenomatosis polyposis); duplication/deletion analysis panel, must include analysis of at least 5 genes, including MLH1, MSH2, EPCAM, SMAD4, and STK11",0,1,0,46257531,Procedure
-305717,303283,CPT,,81437,"Hereditary neuroendocrine tumor disorders (eg, medullary thyroid carcinoma, parathyroid carcinoma, malignant pheochromocytoma or paraganglioma); genomic sequence analysis panel, must include sequencing of at least 6 genes, including MAX, SDHB, SDHC, SDHD, TMEM127, and VHL",0,1,0,,
-305718,303283,CPT,,81438,"Hereditary neuroendocrine tumor disorders (eg, medullary thyroid carcinoma, parathyroid carcinoma, malignant pheochromocytoma or paraganglioma); duplication/deletion analysis panel, must include analyses for SDHB, SDHC, SDHD, and VHL",0,1,0,,
 305719,303292,CPT,,81470,"X-linked intellectual disability (XLID) (eg, syndromic and non-syndromic XLID); genomic sequence analysis panel, must include sequencing of at least 60 genes, including ARX, ATRX, CDKL5, FGD1, FMR1, HUWE1, IL1RAPL, KDM5C, L1CAM, MECP2, MED12, MID1, OCRL, RPS6KA3, and SLC16A2",0,1,9,46257701,Procedure
 305720,303292,CPT,,81471,"X-linked intellectual disability (XLID) (eg, syndromic and non-syndromic XLID); duplication/deletion gene analysis, must include analysis of at least 60 genes, including ARX, ATRX, CDKL5, FGD1, FMR1, HUWE1, IL1RAPL, KDM5C, L1CAM, MECP2, MED12, MID1, OCRL, RPS6KA3, and SLC16A2",0,1,0,46257702,Procedure
 305721,303271,CPT,,81479,Unlisted molecular pathology procedure,0,1,0,43527955,Measurement
-305722,303308,CPT,,81535,"Oncology (gynecologic), live tumor cell culture and chemotherapeutic response by DAPI stain and morphology, predictive algorithm reported as a drug response score; first single drug or drug combination",0,1,0,,
-305723,303308,CPT,,81536,"Oncology (gynecologic), live tumor cell culture and chemotherapeutic response by DAPI stain and morphology, predictive algorithm reported as a drug response score; each additional single drug or drug combination (List separately in addition to code for primary procedure)",0,1,0,,
 305724,303317,CPT,,82009,"Ketone body(s) (eg, acetone, acetoacetic acid, beta-hydroxybutyrate); qualitative",0,1,0,2212179,Measurement
 305725,303317,CPT,,82010,"Ketone body(s) (eg, acetone, acetoacetic acid, beta-hydroxybutyrate); quantitative",0,1,0,2212180,Measurement
 305726,303319,CPT,,82016,"Acylcarnitines; qualitative, each specimen",0,1,0,2212182,Measurement
@@ -4174,7 +4051,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305792,303438,CPT,,82784,"Gammaglobulin (immunoglobulin); IgA, IgD, IgG, IgM, each",0,1,0,2212344,Measurement
 305793,303438,CPT,,82785,Gammaglobulin (immunoglobulin); IgE,0,1,0,2212345,Measurement
 305794,303438,CPT,,82787,"Gammaglobulin (immunoglobulin); immunoglobulin subclasses (eg, IgG1, 2, 3, or 4), each",0,1,0,2212346,Measurement
-305795,303440,CPT,,82801,"[EXPIRED]-Gases, blood; pco2",0,1,0,,
 305796,303440,CPT,,82803,"Gases, blood, any combination of pH, pCO2, pO2, CO2, HCO3 (including calculated O2 saturation)",0,1,0,2212348,Measurement
 305797,303440,CPT,,82805,"Gases, blood, any combination of pH, pCO2, pO2, CO2, HCO3 (including calculated O2 saturation); with O2 saturation, by direct measurement, except pulse oximetry",0,1,0,2212349,Measurement
 305798,303451,CPT,,82947,"Glucose; quantitative, blood (except reagent strip)",0,1,0,2212359,Measurement
@@ -4284,7 +4160,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 305902,303611,CPT,,84379,"Sugars (mono-, di-, and oligosaccharides); multiple quantitative, each specimen",0,1,0,2212582,Measurement
 305903,303613,CPT,,84402,Testosterone; free,0,1,0,2212584,Measurement
 305904,303613,CPT,,84403,Testosterone; total,0,1,0,2212585,Measurement
-305905,303613,CPT,,84410,"Testosterone; bioavailable, direct measurement (eg, differential precipitation)",0,1,0,,
 305906,303618,CPT,,84436,Thyroxine; total,0,1,0,2212589,Measurement
 305907,303618,CPT,,84437,"Thyroxine; requiring elution (eg, neonatal)",0,1,0,2212590,Measurement
 305908,303618,CPT,,84439,Thyroxine; free,0,1,0,2212591,Measurement
@@ -4694,7 +4569,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306312,304067,CPT,,Level 4: 90801-90802,[EXPIRED]-Psychiatric Diagnostic or Evaluative Interview Procedures,1,0,,,
 306313,304067,CPT,,Level 4: 90804-90815,"[EXPIRED]-Psychiatric Therapeutic Procedures, Office or Other Outpatient Facility",1,0,,,
 306314,304067,CPT,,Level 4: 90816-90829,"[EXPIRED]-Psychiatric Therapeutic Procedures, Inpatient Hospital, Partial Hospital or Residential Care Facility",1,0,,,
-306315,304067,CPT,,90825,"[EXPIRED]-Psychiatric evaluation of hospital records, other psychiatric reports, psychometric and/or projective tests, and other accumulated data for medical diagnostic purposes",0,1,0,,
 306316,304068,CPT,,90832,"Psychotherapy, 30 minutes with patient",0,1,3616,43527986,Procedure
 306317,304068,CPT,,90833,"Psychotherapy, 30 minutes with patient when performed with an evaluation and management service (List separately in addition to the code for primary procedure)",0,1,6088,43527987,Procedure
 306318,304068,CPT,,90834,"Psychotherapy, 45 minutes with patient",0,1,6000,43527904,Procedure
@@ -4772,7 +4646,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306390,304102,CPT,,92136,Ophthalmic biometry by partial coherence interferometry with intraocular lens power calculation,0,1,4228,2313652,Procedure
 306391,304102,CPT,,92140,"[EXPIRED]-Provocative tests for glaucoma, with interpretation and report, without tonography",0,1,2,2313653,Procedure
 306392,304102,CPT,,92145,"Corneal hysteresis determination, by air impulse stimulation, unilateral or bilateral, with interpretation and report",0,1,0,46257453,Procedure
-306393,304102,CPT,,92211,[EXPIRED]-(No description available),0,1,0,,
 306394,304102,CPT,,Level 4: 92225-92260,Ophthalmoscopy Procedures,1,0,,,
 306395,304102,CPT,,Level 4: 92265-92287,Other Specialized Ophthalmological Services and Procedures,1,0,,,
 306396,304103,CPT,,Level 4: 92310-92313,"Prescription of optical and physical characteristics of and fitting of contact lens, with medical supervision of adaptation",1,0,,,
@@ -4873,7 +4746,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306491,304127,CPT,,93024,Ergonovine provocation test,0,1,6,2313823,Procedure
 306492,304127,CPT,,93025,Microvolt T-wave alternans for assessment of ventricular arrhythmias,0,1,0,2313824,Procedure
 306493,304127,CPT,,Level 4: 93040-93042,"Rhythm ECG, 1-3 leads",1,0,,,
-306494,304127,CPT,,93050,"Arterial pressure waveform analysis for assessment of central arterial pressures, includes obtaining waveform(s), digitization and application of nonlinear mathematical transformations to determine central arterial pressures and augmentation index, with interpretation and report, upper extremity artery, non-invasive",0,1,0,,
 306495,304128,CPT,,Level 4: 93224-93227,External electrocardiographic recording up to 48 hours by continuous rhythm recording and storage,1,0,,,
 306496,304128,CPT,,Level 4: 93228-93229,"External mobile cardiovascular telemetry with electrocardiographic recording, concurrent computerized real time data analysis and greater than 24 hours of accessible ECG data storage (retrievable with query) with ECG triggered and patient selected events transmitted to a remote attended surveillance center for up to 30 days",1,0,,,
 306497,304128,CPT,,Level 4: 93230-93237,[EXPIRED]-Wearable Electrocardiographic Rhythm Derived Monitoring for 24 Hours,1,0,,,
@@ -4979,13 +4851,11 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306597,304134,CPT,,93744,[EXPIRED]-Analyze ht pace device d,0,1,1400,42739971,Procedure
 306598,304134,CPT,,93745,"Initial set-up and programming by a physician or other qualified health care professional of wearable cardioverter-defibrillator includes initial programming of system, establishing baseline electronic ECG, transmission of data to data repository, patient instruction in wearing system and patient reporting of problems or events",0,1,4,2313963,Procedure
 306599,304134,CPT,,93750,"Interrogation of ventricular assist device (VAD), in person, with physician or other qualified health care professional analysis of device parameters (eg, drivelines, alarms, power surges), review of device function (eg, flow and volume status, septum status, recovery), with programming, if performed, and report",0,1,422,40756824,Procedure
-306600,304134,CPT,,93757,[EXPIRED]-(No description available),0,1,0,,
 306601,304134,CPT,,93760,[EXPIRED]-Cephalic thermogram,0,1,0,42734635,Procedure
 306602,304134,CPT,,93770,Determination of venous pressure,0,1,6,2313966,Procedure
 306603,304134,CPT,,Level 4: 93784-93790,"Ambulatory blood pressure monitoring, utilizing a system such as magnetic tape and/or computer disk, for 24 hours or longer",1,0,,,
 306604,304135,CPT,,Level 4: 93797-93798,Physician or other qualified health care professional services for outpatient cardiac rehabilitation,1,0,,,
 306605,304135,CPT,,93799,Unlisted cardiovascular service or procedure,0,1,614,2313973,Procedure
-306606,304136,CPT,,93870,"[EXPIRED]-Non-invasive studies of carotid arteries, imaging (e.g., flow imaging by ultrasonic arteriography, high resolution b-scan with or without pulsed doppler flow evaluation, doppler flow or duplex scan with spectrum analysis)",0,1,0,,
 306607,304136,CPT,,93875,"[EXPIRED]-Noninvasive physiologic studies of extracranial arteries, complete bilateral study (eg, periorbital flow direction with arterial compression, ocular pneumoplethysmography, doppler ultrasound spectral analysis)",0,1,0,2313974,Procedure
 306608,304136,CPT,,Level 4: 93880-93882,Duplex scan of extracranial arteries,1,0,,,
 306609,304136,CPT,,Level 4: 93886-93893,Transcranial Doppler study of the intracranial arteries,1,0,,,
@@ -5013,7 +4883,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306631,304143,CPT,,94060,"Bronchodilation responsiveness, spirometry as in 94010, pre- and post-bronchodilator administration",0,1,35982,2314008,Procedure
 306632,304143,CPT,,94070,"Bronchospasm provocation evaluation, multiple spirometric determinations as in 94010, with administered agents (eg, antigen[s], cold air, methacholine)",0,1,2927,2314009,Procedure
 306633,304143,CPT,,94150,"Vital capacity, total (separate procedure)",0,1,1697,2314010,Procedure
-306634,304143,CPT,,94160,"[EXPIRED]-Vital capacity screening tests: total capacity, with timed forced expiratory volumn (state duration), and peak flow rate",0,1,0,,
 306635,304143,CPT,,94200,"Maximum breathing capacity, maximal voluntary ventilation",0,1,189,2314011,Procedure
 306636,304143,CPT,,94240,"[EXPIRED]-Functional residual capacity or residual volume: helium method, nitrogen open circuit method, or other method",0,1,10126,2314012,Procedure
 306637,304143,CPT,,94250,"Expired gas collection, quantitative, single procedure (separate procedure)",0,1,9,2314013,Procedure
@@ -5063,7 +4932,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306681,304144,CPT,,95024,"Intracutaneous (intradermal) tests with allergenic extracts, immediate type reaction, including test interpretation and report, specify number of tests",0,1,0,2314061,Measurement
 306682,304144,CPT,,95027,"Intracutaneous (intradermal) tests, sequential and incremental, with allergenic extracts for airborne allergens, immediate type reaction, including test interpretation and report, specify number of tests",0,1,0,2314062,Measurement
 306683,304144,CPT,,95028,"Intracutaneous (intradermal) tests with allergenic extracts, delayed type reaction, including reading, specify number of tests",0,1,0,2314063,Measurement
-306684,304144,CPT,,95040,[EXPIRED]-Patch or application tests; up to 10 tests,0,1,0,,
 306685,304144,CPT,,95044,Patch or application test(s) (specify number of tests),0,1,0,2314064,Measurement
 306686,304144,CPT,,95052,Photo patch test(s) (specify number of tests),0,1,0,2314065,Measurement
 306687,304144,CPT,,95056,Photo tests,0,1,0,2314066,Measurement
@@ -5161,12 +5029,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306779,304193,CPT,,96920,Laser treatment for inflammatory skin disease (psoriasis); total area less than 250 sq cm,0,1,158,2314258,Procedure
 306780,304193,CPT,,96921,Laser treatment for inflammatory skin disease (psoriasis); 250 sq cm to 500 sq cm,0,1,25,2314259,Procedure
 306781,304193,CPT,,96922,Laser treatment for inflammatory skin disease (psoriasis); over 500 sq cm,0,1,6,2314260,Procedure
-306782,304194,CPT,,96931,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; image acquisition and interpretation and report, first lesion",0,1,0,,
-306783,304194,CPT,,96932,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; image acquisition only, first lesion",0,1,0,,
-306784,304194,CPT,,96933,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; interpretation and report only, first lesion",0,1,0,,
-306785,304194,CPT,,96934,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; image acquisition and interpretation and report, each additional lesion (List separately in addition to code for primary procedure)",0,1,0,,
-306786,304194,CPT,,96935,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; image acquisition only, each additional lesion (List separately in addition to code for primary procedure)",0,1,0,,
-306787,304194,CPT,,96936,"Reflectance confocal microscopy (RCM) for cellular and sub-cellular imaging of skin; interpretation and report only, each additional lesion (List separately in addition to code for primary procedure)",0,1,0,,
 306788,304202,CPT,,Level 4: 97010-97028,Supervised Physical Medicine and Rehabilitation Modalities,1,0,,,
 306789,304202,CPT,,Level 4: 97032-97039,Constant Attendance Physical Medicine and Rehabilitation Modalities,1,0,,,
 306790,304203,CPT,,Level 4: 97110-97124,"Therapeutic procedure, 1 or more areas, each 15 minutes",1,0,,,
@@ -5182,12 +5044,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306800,304205,CPT,,97166,"Occupational therapy evaluation, moderate complexity, typical time with patient and/or family 45 minutes",0,1,3899,700000002,Observation
 306801,304205,CPT,,97167,"Occupational therapy evaluation, high complexity, typical time with patient and/or family 60 minutes",0,1,636,700000002,Observation
 306802,304205,CPT,,97168,"Occupational therapy re-evaluation, typical time with patient and/or family 10 minutes or less",0,1,235,700000002,Observation
-306803,304206,CPT,,97169,"Athletic training evaluation, low complexity, typical time with patient and/or family 10 minutes",0,1,0,,
-306804,304206,CPT,,97170,"Athletic training evaluation, moderate complexity, typical time with patient and/or family 30 minutes",0,1,0,,
-306805,304206,CPT,,97171,"Evaluation of athletic training, high complexity, typical time with patient and/or family 60 minutes",0,1,0,,
-306806,304206,CPT,,97172,"Athletic training re-evaluation, typical time with patient and/or family 20 minutes",0,1,0,,
 306807,304203,CPT,,97260,[EXPIRED]-Regional manipulation,0,1,0,2722283,Procedure
-306808,304203,CPT,,97501,"[EXPIRED]-Orthotics training (dynamic-bracing, splinting), upper and lower extremities; each additional 15 minutes",0,1,0,,
 306809,304203,CPT,,97504,[EXPIRED]-Orthotic training,0,1,6061,42739016,Procedure
 306810,304203,CPT,,97506,[EXPIRED]-(No description available),0,1,91,700000002,Observation
 306811,304203,CPT,,97530,"Therapeutic activities, direct (one-on-one) patient contact (use of dynamic activities to improve functional performance), each 15 minutes",0,1,114436,2314294,Procedure
@@ -5204,7 +5061,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306822,304207,CPT,,Level 4: 97605-97606,"Negative pressure wound therapy (eg, vacuum assisted drainage collection), utilizing durable medical equipment (DME), including topical application(s), wound assessment, and instruction(s) for ongoing care, per session",1,0,,,
 306823,304207,CPT,,Level 4: 97607-97608,"Negative pressure wound therapy, (eg, vacuum assisted drainage collection), utilizing disposable, non-durable medical equipment including provision of exudate management collection system, topical application(s), wound assessment, and instructions for ongoing care, per session",1,0,,,
 306824,304207,CPT,,97610,"Low frequency, non-contact, non-thermal ultrasound, including topical application(s), when performed, wound assessment, and instruction(s) for ongoing care, per day",0,1,0,44816522,Procedure
-306825,304208,CPT,,97701,"[EXPIRED]-Office visit, including one of the following tests or measurements, with report; a. orthotic ""check out""; b. prosthetic ""check-out""; c. activities of daily living ""check out""; each additional 15 minutes",0,1,0,,
 306826,304208,CPT,,97703,[EXPIRED]-Prosthetic checkout,0,1,1856,42738614,Procedure
 306827,304209,CPT,,97750,"Physical performance test or measurement (eg, musculoskeletal, functional capacity), with written report, each 15 minutes",0,1,341,2314309,Procedure
 306828,304209,CPT,,97755,"Assistive technology assessment (eg, to restore, augment or compensate for existing function, optimize functional tasks and/or maximize environmental accessibility), direct one-on-one contact, with written report, each 15 minutes",0,1,0,2314310,Procedure
@@ -5345,9 +5201,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 306963,304275,CPT,,99348,"Established patient home visit, typically 25 minutes",0,1,125,2514490,Observation
 306964,304275,CPT,,99349,"Established patient home visit, typically 40 minutes",0,1,156,2514491,Observation
 306965,304275,CPT,,99350,"Established patient home visit, typically 60 minutes",0,1,86,2514492,Observation
-306966,304275,CPT,,99351,"[EXPIRED]-Home visit for the ealuation and management of an established patient, which requires at least two of three components: a problem focused interval history; a problem focused examination; and medical decision making that is straightforward or of low complexity.",0,1,0,,
-306967,304275,CPT,,99352,"[EXPIRED]-Home visit for the evaluation and management of an established patient, which requires at least two of three components: an expanded problem focused interval history; an expanded problem focused examination; and medical decision making of moderate complexity.",0,1,0,,
-306968,304275,CPT,,99353,"[EXPIRED]-Home visit for the evaluation and management of an established patient, which requires at least two of three components: a detailed interval history; a detailed examination; and medical decision making of high complexity.",0,1,0,,
 306969,304276,CPT,,Level 4: 99354-99355,Prolonged evaluation and management or psychotherapy service(s) (beyond the typical service time of the primary procedure) in the office or other outpatient setting requiring direct patient contact beyond the usual service,1,0,,,
 306970,304276,CPT,,Level 4: 99356-99357,"Prolonged service in the inpatient or observation setting, requiring unit/floor time beyond the usual service",1,0,,,
 306971,304277,CPT,,Level 4: 99358-99359,Prolonged evaluation and management service before and/or after direct patient care,1,0,,,
@@ -5432,7 +5285,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 307050,304538,CPT,,Level 5: 11600-11606,"Excision, malignant lesion including margins, trunk, arms, or legs",1,0,,,
 307051,304538,CPT,,Level 5: 11620-11626,"Excision, malignant lesion including margins, scalp, neck, hands, feet, genitalia",1,0,,,
 307052,304538,CPT,,Level 5: 11640-11646,"Excision, malignant lesion including margins, face, ears, eyelids, nose, lips",1,0,,,
-307053,304539,CPT,,11700,"[EXPIRED]-Debridement of nails, manual; five or less",0,1,0,,
 307054,304539,CPT,,11720,Debridement of nail(s) by any method(s); 1 to 5,0,1,3266,2102076,Procedure
 307055,304539,CPT,,11721,Debridement of nail(s) by any method(s); 6 or more,0,1,5142,2102077,Procedure
 307056,304541,CPT,,11730,"Avulsion of nail plate, partial or complete, simple; single",0,1,1788,2102078,Procedure
@@ -5517,13 +5369,10 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 307135,304574,CPT,,Level 5: 16020-16030,"Dressings and/or debridement of partial-thickness burns, initial or subsequent",1,0,,,
 307136,304574,CPT,,Level 5: 16035-16036,Escharotomy,1,0,,,
 307137,304574,CPT,,16040,[EXPIRED]-Burn wound excision,0,1,4,700000002,Observation
-307138,304574,CPT,,16041,[EXPIRED]-Burn wound excision,0,1,0,,
-307139,304574,CPT,,16042,[EXPIRED]-Burn wound excision,0,1,0,,
 307140,304575,CPT,,Level 5: 17000-17010,"Destruction (eg, laser surgery, electrosurgery, cryosurgery, chemosurgery, surgical curettement), premalignant lesions (eg, actinic keratoses)",1,0,,,
 307141,304575,CPT,,17004,"Destruction (eg, laser surgery, electrosurgery, cryosurgery, chemosurgery, surgical curettement), premalignant lesions (eg, actinic keratoses), 15 or more lesions",0,1,3911,2102579,Procedure
 307142,304575,CPT,,Level 5: 17100-17111,"Destruction (eg, laser surgery, electrosurgery, cryosurgery, chemosurgery, surgical curettement), of benign lesions other than skin tags or cutaneous vascular proliferative lesions",1,0,,,
 307143,304575,CPT,,Level 5: 17106-17108,"Destruction of cutaneous vascular proliferative lesions (eg, laser technique)",1,0,,,
-307144,304575,CPT,,17200,[EXPIRED]-Electrosurgical destruction of multiple fibrocutaneous tags; up to 15 lesions,0,1,0,,
 307145,304575,CPT,,17250,"Chemical cauterization of granulation tissue (proud flesh, sinus or fistula)",0,1,1965,2102595,Procedure
 307146,304576,CPT,,Level 5: 17260-17266,"Destruction, malignant lesion (eg, laser surgery, electrosurgery, cryosurgery, chemosurgery, surgical curettement), trunk, arms or legs",1,0,,,
 307147,304576,CPT,,Level 5: 17270-17276,"Destruction, malignant lesion (eg, laser surgery, electrosurgery, cryosurgery, chemosurgery, surgical curettement), scalp, neck, hands, feet, genitalia",1,0,,,
@@ -6669,7 +6518,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 308287,304733,CPT,,31235,"Nasal/sinus endoscopy, diagnostic with sphenoid sinusoscopy (via puncture of sphenoidal face or cannulation of ostium)",0,1,14,2106391,Procedure
 308288,304733,CPT,,Level 5: 31237-31240,"Nasal/sinus endoscopy, surgical",1,0,,,
 308289,304733,CPT,,Level 5: 31246-31247,"[EXPIRED]-Nasal/Sinus Endoscopy, Surgical, with Osteomeatal Complex (OMC) Resection and/or Anterior Ethmoidectomy",1,0,,,
-308290,304733,CPT,,31250,"[EXPIRED]-Nasal endoscopy, diagnostic, with or without biopsy (includes examination of the medial meatus, infundibulum and sinus ostia",0,1,0,,
 308291,304733,CPT,,Level 5: 31252-31271,"Nasal/sinus endoscopy, surgical",1,0,,,
 308292,304733,CPT,,Level 5: 31256-31267,"Nasal/sinus endoscopy, surgical, with maxillary antrostomy",1,0,,,
 308293,304733,CPT,,31260,"[EXPIRED]-Maxillary sinus endoscopy, diagnostic, with or without biopsy (separate procedure)",0,1,1,700000002,Observation
@@ -7032,7 +6880,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 308650,304810,CPT,,Level 5: 36904-36906,"Percutaneous transluminal mechanical thrombectomy and/or infusion for thrombolysis, dialysis circuit, any method, including all imaging and radiological supervision and interpretation, diagnostic angiography, fluoroscopic guidance, catheter placement(s), and intraprocedural pharmacological thrombolytic injection(s)",1,0,,,
 308651,304810,CPT,,36907,"Transluminal balloon angioplasty, central dialysis segment, performed through dialysis circuit, including all imaging and radiological supervision and interpretation required to perform the angioplasty (List separately in addition to code for primary procedure)",0,1,23,700000002,Observation
 308652,304810,CPT,,36908,"Transcatheter placement of intravascular stent(s), central dialysis segment, performed through dialysis circuit, including all imaging radiological supervision and interpretation required to perform the stenting, and all angioplasty in the central dialysis segment (List separately in addition to code for primary procedure)",0,1,2,700000002,Observation
-308653,304810,CPT,,36909,"Dialysis circuit permanent vascular embolization or occlusion (including main circuit or any accessory veins), endovascular, including all imaging and radiological supervision and interpretation necessary to complete the intervention (List separately in addition to code for primary procedure)",0,1,0,,
 308654,304811,CPT,,Level 5: 37140-37181,"Venous anastomosis, open",1,0,,,
 308655,304811,CPT,,37182,"Insertion of transvenous intrahepatic portosystemic shunt(s) (TIPS) (includes venous access, hepatic and portal vein catheterization, portography with hemodynamic evaluation, intrahepatic tract formation/dilatation, stent placement and all associated imaging guidance and documentation)",0,1,190,2108311,Procedure
 308656,304811,CPT,,37183,"Revision of transvenous intrahepatic portosystemic shunt(s) (TIPS) (includes venous access, hepatic and portal vein catheterization, portography with hemodynamic evaluation, intrahepatic tract recanulization/dilatation, stent placement and all associated imaging guidance and documentation)",0,1,55,2108322,Procedure
@@ -7258,8 +7105,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 308876,304868,CPT,,43280,"Laparoscopy, surgical, esophagogastric fundoplasty (eg, Nissen, Toupet procedures)",0,1,1433,2108918,Procedure
 308877,304868,CPT,,Level 5: 43281-43282,"Laparoscopy, surgical, repair of paraesophageal hernia, includes fundoplasty, when performed",1,0,,,
 308878,304868,CPT,,43283,"Laparoscopy, surgical, esophageal lengthening procedure (eg, Collis gastroplasty or wedge gastroplasty) (List separately in addition to code for primary procedure)",0,1,59,40757019,Procedure
-308879,304868,CPT,,43284,"Laparoscopy, surgical, esophageal sphincter augmentation procedure, placement of sphincter augmentation device (ie, magnetic band), including cruroplasty when performed",0,1,0,,
-308880,304868,CPT,,43285,Removal of esophageal sphincter augmentation device,0,1,0,,
 308881,304868,CPT,,43289,"Unlisted laparoscopy procedure, esophagus",0,1,240,2108919,Procedure
 308882,304869,CPT,,Level 5: 43300-43305,"Esophagoplasty (plastic repair or reconstruction), cervical approach",1,0,,,
 308883,304869,CPT,,Level 5: 43310-43312,"Esophagoplasty (plastic repair or reconstruction), thoracic approach",1,0,,,
@@ -7362,7 +7207,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 308980,304881,CPT,,Level 5: 44312-44314,Revision of ileostomy,1,0,,,
 308981,304881,CPT,,44316,Continent ileostomy (Kock procedure) (separate procedure),0,1,3,2109082,Procedure
 308982,304881,CPT,,Level 5: 44320-44322,Colostomy or skin level cecostomy,1,0,,,
-308983,304881,CPT,,44328,[EXPIRED]-(No description available),0,1,0,,
 308984,304881,CPT,,Level 5: 44340-44346,Revision of colostomy,1,0,,,
 308985,304882,CPT,,Level 5: 44360-44373,"Small intestinal endoscopy, enteroscopy beyond second portion of duodenum, not including ileum",1,0,,,
 308986,304882,CPT,,Level 5: 44376-44379,"Small intestinal endoscopy, enteroscopy beyond second portion of duodenum, including ileum",1,0,,,
@@ -7520,7 +7364,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309138,304915,CPT,,47536,"Exchange of biliary drainage catheter (eg, external, internal-external, or conversion of internal-external to external only), percutaneous, including diagnostic cholangiography when performed, imaging guidance (eg, fluoroscopy), and all associated radiological supervision and interpretation",0,1,63,700000002,Observation
 309139,304915,CPT,,47537,"Removal of biliary drainage catheter, percutaneous, requiring fluoroscopic guidance (eg, with concurrent indwelling biliary stents), including diagnostic cholangiography when performed, imaging guidance (eg, fluoroscopy), and all associated radiological supervision and interpretation",0,1,8,700000002,Observation
 309140,304915,CPT,,Level 5: 47538-47540,"Placement of stent(s) into a bile duct, percutaneous, including diagnostic cholangiography, imaging guidance (eg, fluoroscopy and/or ultrasound), balloon dilation, catheter exchange(s) and catheter removal(s) when performed, and all associated radiological supervision and interpretation",1,0,,,
-309141,304915,CPT,,47541,"Placement of access through the biliary tree and into small bowel to assist with an endoscopic biliary procedure (eg, rendezvous procedure), percutaneous, including diagnostic cholangiography when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation, new access",0,1,0,,
 309142,304915,CPT,,47542,"Balloon dilation of biliary duct(s) or of ampulla (sphincteroplasty), percutaneous, including imaging guidance (eg, fluoroscopy), and all associated radiological supervision and interpretation, each duct (List separately in addition to code for primary procedure)",0,1,12,700000002,Observation
 309143,304915,CPT,,47543,"Endoluminal biopsy(ies) of biliary tree, percutaneous, any method(s) (eg, brush, forceps, and/or needle), including imaging guidance (eg, fluoroscopy), and all associated radiological supervision and interpretation, single or multiple (List separately in addition to code for primary procedure)",0,1,5,700000002,Observation
 309144,304915,CPT,,47544,"Removal of calculi/debris from biliary duct(s) and/or gallbladder, percutaneous, including destruction of calculi by any method (eg, mechanical, electrohydraulic, lithotripsy) when performed, imaging guidance (eg, fluoroscopy), and all associated radiological supervision and interpretation (List separately in addition to code for primary procedure)",0,1,2,700000002,Observation
@@ -7670,13 +7513,11 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309288,304943,CPT,,50593,"Ablation, renal tumor(s), unilateral, percutaneous, cryotherapy",0,1,241,2109637,Procedure
 309289,304944,CPT,,50600,Ureterotomy with exploration or drainage (separate procedure),0,1,16,2109638,Procedure
 309290,304944,CPT,,50605,"Ureterotomy for insertion of indwelling stent, all types",0,1,77,2109639,Procedure
-309291,304944,CPT,,50606,"Endoluminal biopsy of ureter and/or renal pelvis, non-endoscopic, including imaging guidance (eg, ultrasound and/or fluoroscopy) and all associated radiological supervision and interpretation (List separately in addition to code for primary procedure)",0,1,0,,
 309292,304944,CPT,,Level 5: 50610-50630,Ureterolithotomy,1,0,,,
 309293,304945,CPT,,50650,"Ureterectomy, with bladder cuff (separate procedure)",0,1,48,2109645,Procedure
 309294,304945,CPT,,50660,"Ureterectomy, total, ectopic ureter, combination abdominal, vaginal and/or perineal approach",0,1,24,2109646,Procedure
 309295,304946,CPT,,Level 5: 50684-50695,Other Introduction (Injection/Change/Removal) Procedures on the Ureter,1,0,,,
 309296,304947,CPT,,50700,"Ureteroplasty, plastic operation on ureter (eg, stricture)",0,1,9,2109651,Procedure
-309297,304947,CPT,,50705,"Ureteral embolization or occlusion, including imaging guidance (eg, ultrasound and/or fluoroscopy) and all associated radiological supervision and interpretation (List separately in addition to code for primary procedure)",0,1,0,,
 309298,304947,CPT,,50706,"Balloon dilation, ureteral stricture, including imaging guidance (eg, ultrasound and/or fluoroscopy) and all associated radiological supervision and interpretation (List separately in addition to code for primary procedure)",0,1,8,700000002,Observation
 309299,304947,CPT,,50715,"Ureterolysis, with or without repositioning of ureter for retroperitoneal fibrosis",0,1,195,2109652,Procedure
 309300,304947,CPT,,50722,Ureterolysis for ovarian vein syndrome,0,1,4,2109653,Procedure
@@ -7870,7 +7711,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309488,304970,CPT,,54420,"Corpora cavernosa-saphenous vein shunt (priapism operation), unilateral or bilateral",0,1,7,2109964,Procedure
 309489,304970,CPT,,54430,"Corpora cavernosa-corpus spongiosum shunt (priapism operation), unilateral or bilateral",0,1,30,2109965,Procedure
 309490,304970,CPT,,54435,"Corpora cavernosa-glans penis fistulization (eg, biopsy needle, Winter procedure, rongeur, or punch) for priapism",0,1,6,2109966,Procedure
-309491,304970,CPT,,54437,Repair of traumatic corporeal tear(s),0,1,0,,
 309492,304970,CPT,,54438,"Replantation, penis, complete amputation including urethral repair",0,1,0,700000002,Observation
 309493,304970,CPT,,54440,Plastic operation of penis for injury,0,1,42,2109967,Procedure
 309494,304971,CPT,,54450,Foreskin manipulation including lysis of preputial adhesions and stretching,0,1,194,2109968,Procedure
@@ -7949,9 +7789,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309567,303087,CPT,,56309,[EXPIRED]-Laparoscopy; remove myoma,0,1,11,2722207,Procedure
 309568,303087,CPT,,56310,[EXPIRED]-Laparoscopic enterolysis,0,1,22,2722208,Procedure
 309569,303087,CPT,,56311,[EXPIRED]-Laparoscopic lymph node biop,0,1,5,700000002,Observation
-309570,303087,CPT,,56312,[EXPIRED]-Laparoscopic lymphadenectomy,0,1,0,,
 309571,303087,CPT,,56313,[EXPIRED]-Laparoscopic lymphadenectomy,0,1,1,2722209,Procedure
-309572,303087,CPT,,56314,[EXPIRED]-Lapar; drain lymphocele,0,1,0,,
 309573,303087,CPT,,56315,[EXPIRED]-Laparoscopic appendectomy,0,1,53,2722210,Procedure
 309574,303087,CPT,,56316,[EXPIRED]-Laparoscopic hernia repair,0,1,62,2722211,Procedure
 309575,303087,CPT,,56317,[EXPIRED]-Laparoscopic hernia repair,0,1,27,2722212,Procedure
@@ -7965,8 +7803,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309583,303087,CPT,,56344,[EXPIRED]-Laparoscopic fimbrioplasty,0,1,2,2722218,Procedure
 309584,303087,CPT,,56345,[EXPIRED]-Laparoscopic splenectomy,0,1,10,2722219,Procedure
 309585,303087,CPT,,56346,[EXPIRED]-Laparoscopic gastrostomy,0,1,2,700000002,Observation
-309586,303087,CPT,,56347,[EXPIRED]-Laparoscopic jejunostomy,0,1,0,,
-309587,303087,CPT,,56348,[EXPIRED]-Laparo; resect intestine,0,1,0,,
 309588,303087,CPT,,56349,[EXPIRED]-Laparoscopy; fundoplasty,0,1,52,2722220,Procedure
 309589,303087,CPT,,56350,[EXPIRED]-Hysteroscopy; diagnostic,0,1,38,2722221,Procedure
 309590,303087,CPT,,56351,[EXPIRED]-Hysteroscopy; biopsy,0,1,401,2722222,Procedure
@@ -8092,7 +7928,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309710,305022,CPT,,58611,Ligation or transection of fallopian tube(s) when done at the time of cesarean delivery or intra-abdominal surgery (not a separate procedure) (List separately in addition to code for primary procedure),0,1,3149,2110237,Procedure
 309711,305022,CPT,,58615,"Occlusion of fallopian tube(s) by device (eg, band, clip, Falope ring) vaginal or suprapubic approach",0,1,60,2110238,Procedure
 309712,305023,CPT,,Level 5: 58660-58673,"Laparoscopy, surgical",1,0,,,
-309713,305023,CPT,,58674,"Laparoscopy, surgical, ablation of uterine fibroid(s) including intraoperative ultrasound guidance and monitoring, radiofrequency",0,1,0,,
 309714,305023,CPT,,58679,"Unlisted laparoscopy procedure, oviduct, ovary",0,1,149,2110246,Procedure
 309715,305024,CPT,,58700,"Salpingectomy, complete or partial, unilateral or bilateral (separate procedure)",0,1,139,2110247,Procedure
 309716,305024,CPT,,58720,"Salpingo-oophorectomy, complete or partial, unilateral or bilateral (separate procedure)",0,1,1046,2110248,Procedure
@@ -8298,7 +8133,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 309916,305100,CPT,,Level 5: 62360-62362,Implantation or replacement of device for intrathecal or epidural drug infusion,1,0,,,
 309917,305100,CPT,,62365,"Removal of subcutaneous reservoir or pump, previously implanted for intrathecal or epidural infusion",0,1,163,2110631,Procedure
 309918,305100,CPT,,Level 5: 62367-62370,"Electronic analysis of programmable, implanted pump for intrathecal or epidural drug infusion (includes evaluation of reservoir status, alarm status, drug prescription status)",1,0,,,
-309919,305101,CPT,,62380,"Endoscopic decompression of spinal cord, nerve root(s), including laminotomy, partial facetectomy, foraminotomy, discectomy and/or excision of herniated intervertebral disc, 1 interspace, lumbar",0,1,0,,
 309920,305102,CPT,,Level 5: 63001-63011,"Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), 1 or 2 vertebral segments",1,0,,,
 309921,305102,CPT,,63012,"Laminectomy with removal of abnormal facets and/or pars inter-articularis with decompression of cauda equina and nerve roots for spondylolisthesis, lumbar (Gill type procedure)",0,1,569,2110639,Procedure
 309922,305102,CPT,,Level 5: 63015-63017,"Laminectomy with exploration and/or decompression of spinal cord and/or cauda equina, without facetectomy, foraminotomy or discectomy (eg, spinal stenosis), more than 2 vertebral segments",1,0,,,
@@ -8927,7 +8761,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 310545,305515,CPT,,77768,"Remote afterloading high dose rate radionuclide skin surface brachytherapy, includes basic dosimetry, when performed; lesion diameter over 2.0 cm and 2 or more channels, or multiple lesions",0,1,1,700000002,Observation
 310546,305516,CPT,,77770,"Remote afterloading high dose rate radionuclide interstitial or intracavitary brachytherapy, includes basic dosimetry, when performed; 1 channel",0,1,20,700000002,Observation
 310547,305516,CPT,,77771,"Remote afterloading high dose rate radionuclide interstitial or intracavitary brachytherapy, includes basic dosimetry, when performed; 2-12 channels",0,1,12,700000002,Observation
-310548,305516,CPT,,77772,"Remote afterloading high dose rate radionuclide interstitial or intracavitary brachytherapy, includes basic dosimetry, when performed; over 12 channels",0,1,0,,
 310549,305524,CPT,,78000,[EXPIRED]-Thyroid uptake; single determination,0,1,91,2211909,Procedure
 310550,305524,CPT,,78001,[EXPIRED]-Thyroid uptake; multiple determinations,0,1,685,2211910,Procedure
 310551,305524,CPT,,78003,"[EXPIRED]-Thyroid uptake; stimulation, suppression or discharge (not including initial uptake studies)",0,1,0,2211911,Procedure
@@ -9027,8 +8860,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 310645,305531,CPT,,Level 5: 78700-78710,Kidney imaging morphology,1,0,,,
 310646,305531,CPT,,78715,[EXPIRED]-Renal vascular flow exam,0,1,0,42737670,Procedure
 310647,305531,CPT,,78725,"Kidney function study, non-imaging radioisotopic study",0,1,1023,2212037,Procedure
-310648,305531,CPT,,78726,[EXPIRED]-Kidney function study including pharmacological intervention,0,1,0,,
-310649,305531,CPT,,78727,[EXPIRED]-Kidney transplant evaluation,0,1,0,,
 310650,305531,CPT,,78730,Urinary bladder residual study (List separately in addition to code for primary procedure),0,1,10,2212038,Procedure
 310651,305531,CPT,,78740,Ureteral reflux study (radiopharmaceutical voiding cystogram),0,1,3019,2212039,Procedure
 310652,305531,CPT,,78760,[EXPIRED]-Testicular imaging,0,1,0,42734668,Procedure
@@ -9044,18 +8875,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 310662,305532,CPT,,78891,[EXPIRED]-Nuclear med data proc,0,1,0,42738030,Procedure
 310663,305532,CPT,,78990,[EXPIRED]-Provide diag radionuclid,0,1,14,42738031,Procedure
 310664,305532,CPT,,78999,"Unlisted miscellaneous procedure, diagnostic nuclear medicine",0,1,56,2212062,Procedure
-310665,303185,CPT,,80003,[EXPIRED]-Automated multichannel test 3 clinical chemistry test,0,1,0,,
-310666,303185,CPT,,80004,[EXPIRED]-Automated multichannel test 4 clinical chemistry test,0,1,0,,
-310667,303185,CPT,,80006,[EXPIRED]-Automated multichannel test 6 clinical chemistry test,0,1,0,,
-310668,303185,CPT,,80007,[EXPIRED]-Automated multichannel test 7 clinical chemistry test,0,1,0,,
-310669,303185,CPT,,80008,[EXPIRED]-Automated multichannel test 8 clinical chemistry test,0,1,0,,
-310670,303185,CPT,,80009,[EXPIRED]-Automated multichannel test 9 clinical chemistry test,0,1,0,,
-310671,303185,CPT,,80010,[EXPIRED]-Automated multichannel test 10 clinical chemistry test,0,1,0,,
-310672,303185,CPT,,80012,[EXPIRED]-Automated multichannel test 12 clinical chemistry test,0,1,0,,
-310673,303185,CPT,,80016,[EXPIRED]-Automated multichannel test 13-16 clinical chemistry test,0,1,0,,
-310674,303185,CPT,,80019,[EXPIRED]-Automated multichannel test 19 or more clinical chemistry test,0,1,0,,
 310675,305565,CPT,,80305,"Drug test(s), presumptive, any number of drug classes, any number of devices or procedures (eg, immunoassay); capable of being read by direct optical observation only (eg, dipsticks, cups, cards, cartridges) includes sample validation when performed, per date of service",0,1,236,700000002,Observation
-310676,305565,CPT,,80306,"Drug test(s), presumptive, any number of drug classes, any number of devices or procedures (eg, immunoassay); read by instrument assisted direct optical observation (eg, dipsticks, cups, cards, cartridges), includes sample validation when performed, per date of service",0,1,0,,
 310677,305568,CPT,,80321,Alcohol biomarkers; 1 or 2,0,1,9,46257406,Procedure
 310678,305568,CPT,,80322,Alcohol biomarkers; 3 or more,0,1,0,46257486,Procedure
 310679,305570,CPT,,80324,Amphetamines; 1 or 2,0,1,1669,46257653,Procedure
@@ -9091,7 +8911,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 310709,305602,CPT,,80375,"Drug(s) or substance(s), definitive, qualitative or quantitative, not otherwise specified; 1-3",0,1,1093,46257745,Procedure
 310710,305602,CPT,,80376,"Drug(s) or substance(s), definitive, qualitative or quantitative, not otherwise specified; 4-6",0,1,0,46257698,Procedure
 310711,305602,CPT,,80377,"Drug(s) or substance(s), definitive, qualitative or quantitative, not otherwise specified; 7 or more",0,1,42,46257562,Procedure
-310712,305626,CPT,,81162,"BRCA1, BRCA2 (breast cancer 1 and 2) (eg, hereditary breast and ovarian cancer) gene analysis; full sequence analysis and full duplication/deletion analysis",0,1,0,,
 310713,305629,CPT,,81201,"APC (adenomatous polyposis coli) (eg, familial adenomatosis polyposis [FAP], attenuated FAP) gene analysis; full gene sequence",0,1,0,43527942,Measurement
 310714,305629,CPT,,81202,"APC (adenomatous polyposis coli) (eg, familial adenomatosis polyposis [FAP], attenuated FAP) gene analysis; known familial variants",0,1,0,43527943,Measurement
 310715,305629,CPT,,81203,"APC (adenomatous polyposis coli) (eg, familial adenomatosis polyposis [FAP], attenuated FAP) gene analysis; duplication/deletion variants",0,1,0,43527944,Measurement
@@ -9164,13 +8983,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 310782,303381,CPT,,82489,"[EXPIRED]-Chromatography, qualitative; thin layer, analyte not elsewhere specified",0,1,0,2212274,Measurement
 310783,303382,CPT,,82491,"[EXPIRED]-Chromatography, quantitative, column (eg, gas liquid or HPLC); single analyte not elsewhere specified, single stationary and mobile phase",0,1,0,2212275,Measurement
 310784,303382,CPT,,82492,"[EXPIRED]-Chromatography, quantitative, column (eg, gas liquid or HPLC); multiple analytes, single stationary and mobile phase",0,1,0,2212276,Measurement
-310785,303730,CPT,,86287,[EXPIRED]-Hepatitis b surface antigen (hbsag),0,1,0,,
-310786,303730,CPT,,86289,[EXPIRED]-Hepatitis b core antibody (hbcab); igg and igm,0,1,0,,
-310787,303730,CPT,,86290,[EXPIRED]-Hepatitis b core antibody (hbcab); igm antibody,0,1,0,,
-310788,303730,CPT,,86291,[EXPIRED]-Hepatitis b surface antibody (hbsab),0,1,0,,
-310789,303730,CPT,,86293,[EXPIRED]-Hepatitis be antigen (hbeag),0,1,0,,
-310790,303730,CPT,,86295,[EXPIRED]-Hepatitis be antibody (hbeab),0,1,0,,
-310791,303730,CPT,,86302,[EXPIRED]-Hepatitis c antibody,0,1,0,,
 310792,306060,CPT,,86602,Antibody; actinomyces,0,1,0,2212837,Measurement
 310793,306060,CPT,,86603,Antibody; adenovirus,0,1,0,2212838,Measurement
 310794,306060,CPT,,86606,Antibody; Aspergillus,0,1,0,2212839,Measurement
@@ -9445,7 +9257,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311063,306183,CPT,,88147,"Cytopathology smears, cervical or vaginal; screening by automated system under physician supervision",0,1,0,2213225,Measurement
 311064,306183,CPT,,88148,"Cytopathology smears, cervical or vaginal; screening by automated system with manual rescreening under physician supervision",0,1,0,2213226,Measurement
 311065,306184,CPT,,88150,"Cytopathology, slides, cervical or vaginal; manual screening under physician supervision",0,1,0,2213227,Measurement
-311066,306184,CPT,,88151,"[EXPIRED]-Cytopathology, smears, cervical or vaginal, up to three smears; requiring interpretation by physician",0,1,0,,
 311067,306184,CPT,,88152,"Cytopathology, slides, cervical or vaginal; with manual screening and computer-assisted rescreening under physician supervision",0,1,0,2213228,Measurement
 311068,306184,CPT,,88153,"Cytopathology, slides, cervical or vaginal; with manual screening and rescreening under physician supervision",0,1,0,2213229,Measurement
 311069,306184,CPT,,88154,"Cytopathology, slides, cervical or vaginal; with manual screening and computer-assisted rescreening using cell selection and review under physician supervision",0,1,0,2213230,Measurement
@@ -9459,9 +9270,7 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311077,306190,CPT,,88174,"Cytopathology, cervical or vaginal (any reporting system), collected in preservative fluid, automated thin layer preparation; screening by automated system, under physician supervision",0,1,0,2213243,Measurement
 311078,306190,CPT,,88175,"Cytopathology, cervical or vaginal (any reporting system), collected in preservative fluid, automated thin layer preparation; with screening by automated system and manual rescreening or review, under physician supervision",0,1,0,2213244,Measurement
 311079,306322,CPT,,Level 5: 90839-90840,Psychotherapy for crisis,1,0,,,
-311080,304068,CPT,,90841,"[EXPIRED]-Individual medical psychotherapy by a physician, with continuing medical diagnostic evaluation, and drug management when indicated, including insight oriented, behavior modifying or supportive psychotherapy; (face to face with the patient); time unspecified",0,1,0,,
 311081,304068,CPT,,90843,"[EXPIRED]-Individual medical psychotherapy by a physician, with continuing medical diagnostic evaluation, and drug management when indicated, including insight oriented, behavior modifying or supportive psychotherapy; (face to face with the patient); approximately 20 to 30 minutes",0,1,1,700000002,Observation
-311082,304068,CPT,,90844,"[EXPIRED]-Individual medical psychotherapy by a physician, with continuing medical diagnostic evaluation, and drug management when indicated, including insight oriented, behavior modifying or supportive psychotherapy; (face to face with the patient); approximately 45 to 50 minutes",0,1,0,,
 311083,306323,CPT,,90845,Psychoanalysis,0,1,0,2213544,Procedure
 311084,306323,CPT,,90846,"Family psychotherapy (without the patient present), 50 minutes",0,1,7014,2213545,Procedure
 311085,306323,CPT,,90847,"Family psychotherapy (conjoint psychotherapy) (with patient present), 50 minutes",0,1,8981,2213546,Procedure
@@ -9506,13 +9315,11 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311124,306394,CPT,,92230,Fluorescein angioscopy with interpretation and report,0,1,5,2313656,Procedure
 311125,306394,CPT,,92235,"Fluorescein angiography (includes multiframe imaging) with interpretation and report, unilateral or bilateral",0,1,5181,2313657,Procedure
 311126,306394,CPT,,92240,"Indocyanine-green angiography (includes multiframe imaging) with interpretation and report, unilateral or bilateral",0,1,184,2313658,Procedure
-311127,306394,CPT,,92242,"Fluorescein angiography and indocyanine-green angiography (includes multiframe imaging) performed at the same patient encounter with interpretation and report, unilateral or bilateral",0,1,0,,
 311128,306394,CPT,,92250,Fundus photography with interpretation and report,0,1,23120,2313659,Procedure
 311129,306394,CPT,,92260,Ophthalmodynamometry,0,1,4,2313660,Procedure
 311130,306395,CPT,,92265,"Needle oculoelectromyography, 1 or more extraocular muscles, 1 or both eyes, with interpretation and report",0,1,26,2313661,Procedure
 311131,306395,CPT,,92270,Electro-oculography with interpretation and report,0,1,57,2313662,Procedure
 311132,306395,CPT,,92275,Electroretinography with interpretation and report,0,1,886,2313663,Procedure
-311133,306395,CPT,,92280,"[EXPIRED]-Visually evoked potential (response) study, with medical diagnostic evaluation",0,1,0,,
 311134,306395,CPT,,92283,"Color vision examination, extended, eg, anomaloscope or equivalent",0,1,38,2313664,Procedure
 311135,306395,CPT,,92284,Dark adaptation examination with interpretation and report,0,1,1,2313665,Procedure
 311136,306395,CPT,,92285,"External ocular photography with interpretation and report for documentation of medical progress (eg, close-up photography, slit lamp photography, goniophotography, stereo-photography)",0,1,8029,2313666,Procedure
@@ -9918,8 +9725,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311536,306984,CPT,,Level 5: 99401-99404,"Preventive Medicine, Individual Counseling Services",1,0,,,
 311537,306984,CPT,,Level 5: 99406-99409,"Behavior Change Interventions, Individual Services",1,0,,,
 311538,306984,CPT,,Level 5: 99411-99412,"Preventive Medicine, Group Counseling Services",1,0,,,
-311539,306985,CPT,,99415,"Prolonged clinical staff service (the service beyond the typical service time) during an evaluation and management service in the office or outpatient setting, direct patient contact with physician supervision; first hour (List separately in addition to code for outpatient Evaluation and Management service)",0,1,0,,
-311540,306985,CPT,,99416,"Prolonged clinical staff service (the service beyond the typical service time) during an evaluation and management service in the office or outpatient setting, direct patient contact with physician supervision; each additional 30 minutes (List separately in addition to code for prolonged service)",0,1,0,,
 311541,306994,CPT,,99441,"Physician telephone patient service, 5-10 minutes of medical discussion",0,1,22,2514548,Procedure
 311542,306994,CPT,,99442,"Physician telephone patient service, 11-20 minutes of medical discussion",0,1,15,2514549,Procedure
 311543,306994,CPT,,99443,"Physician telephone patient service, 21-30 minutes of medical discussion",0,1,703,2514550,Procedure
@@ -9936,7 +9741,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311554,307016,CPT,,99601,"Home infusion/specialty drug administration, per visit (up to 2 hours)",0,1,0,2514608,Procedure
 311555,307016,CPT,,99602,"Home infusion/specialty drug administration, per visit (up to 2 hours); each additional hour (List separately in addition to code for primary procedure)",0,1,0,2514609,Procedure
 311556,307021,CPT,,10035,"Placement of soft tissue localization device(s) (eg, clip, metallic pellet, wire/needle, radioactive seeds), percutaneous, including imaging guidance; first lesion",0,1,2,700000002,Observation
-311557,307021,CPT,,10036,"Placement of soft tissue localization device(s) (eg, clip, metallic pellet, wire/needle, radioactive seeds), percutaneous, including imaging guidance; each additional lesion (List separately in addition to code for primary procedure)",0,1,0,,
 311558,307023,CPT,,10060,"Incision and drainage of abscess (eg, carbuncle, suppurative hidradenitis, cutaneous or subcutaneous abscess, cyst, furuncle, or paronychia); simple or single",0,1,16414,2101877,Procedure
 311559,307023,CPT,,10061,"Incision and drainage of abscess (eg, carbuncle, suppurative hidradenitis, cutaneous or subcutaneous abscess, cyst, furuncle, or paronychia); complicated or multiple",0,1,9416,2101878,Procedure
 311560,307024,CPT,,10080,Incision and drainage of pilonidal cyst; simple,0,1,431,2101881,Procedure
@@ -9957,8 +9761,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311575,307035,CPT,,11045,"Debridement, subcutaneous tissue (includes epidermis and dermis, if performed); each additional 20 sq cm, or part thereof (List separately in addition to code for primary procedure)",0,1,472,40756889,Procedure
 311576,307036,CPT,,11046,"Debridement, muscle and/or fascia (includes epidermis, dermis, and subcutaneous tissue, if performed); each additional 20 sq cm, or part thereof (List separately in addition to code for primary procedure)",0,1,819,40757086,Procedure
 311577,307037,CPT,,11047,"Debridement, bone (includes epidermis, dermis, subcutaneous tissue, muscle and/or fascia, if performed); each additional 20 sq cm, or part thereof (List separately in addition to code for primary procedure)",0,1,433,40757040,Procedure
-311578,307038,CPT,,11050,"[EXPIRED]-Paring or curettement of benign hyperkeratotic skin lesion w/ or w/o chemical cauterization (such as verrucae or clavi) not extending through the stratum corneum (e.g., callus or wart) w/ or w/o local anaesthesia; single lesion",0,1,0,,
-311579,307038,CPT,,11051,"[EXPIRED]-Paring or curettement of benign hyperkeratotic skin lesion w/ or w/o chemical cauterization (such as verrucae or clavi) not extending through the stratum corneum (e.g., callus or wart) w/ or w/o local anesthesia; two to four lesions",0,1,0,,
 311580,307038,CPT,,11055,"Paring or cutting of benign hyperkeratotic lesion (eg, corn or callus); single lesion",0,1,1579,2101928,Procedure
 311581,307038,CPT,,11056,"Paring or cutting of benign hyperkeratotic lesion (eg, corn or callus); 2 to 4 lesions",0,1,1586,2101929,Procedure
 311582,307038,CPT,,11057,"Paring or cutting of benign hyperkeratotic lesion (eg, corn or callus); more than 4 lesions",0,1,287,2101930,Procedure
@@ -10170,7 +9972,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 311788,307142,CPT,,17100,"[EXPIRED]-Destruction by any method, including laser, of benign skin lesions other than cutaneous vascular proliferative lesions on any area other than the face, including local anesthesia; one lesion",0,1,6,700000002,Observation
 311789,307142,CPT,,17101,"[EXPIRED]-Destruction by any method, including laser, of benign skin lesions other than cutaneous vascular proliferative lesions on any area other than the face, including local anesthesia; second lesion",0,1,2,700000002,Observation
 311790,307142,CPT,,17102,"[EXPIRED]-Destruction by any method, including laser, of benign skin lesions other than cutaneous vascular proliferative lesions on any area other than the face, including local anesthesia; over two lesions, each additional lesion up to 15 lesions",0,1,2,700000002,Observation
-311791,307142,CPT,,17104,"[EXPIRED]-Destruction by any method, including laser, of benign skin lesions other than cutaneous vascular proliferative lesions on any area other than the face, including local anesthesia; 15 or more lesions",0,1,0,,
 311792,307142,CPT,,17105,"[EXPIRED]-Destruction by any method, including laser, of benign skin lesions other than cutaneous vascular proliferative lesions on any area other than the face, including local anesthesia; complicated or extensive lesions",0,1,245,700000002,Observation
 311793,307143,CPT,,17106,"Destruction of cutaneous vascular proliferative lesions (eg, laser technique); less than 10 sq cm",0,1,1841,2102580,Procedure
 311794,307143,CPT,,17107,"Destruction of cutaneous vascular proliferative lesions (eg, laser technique); 10.0 to 50.0 sq cm",0,1,509,2102581,Procedure
@@ -10490,10 +10291,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 312108,307429,CPT,,22862,"Revision including replacement of total disc arthroplasty (artificial disc), anterior approach, single interspace; lumbar",0,1,0,2103578,Procedure
 312109,307430,CPT,,22864,"Removal of total disc arthroplasty (artificial disc), anterior approach, single interspace; cervical",0,1,0,2103579,Procedure
 312110,307430,CPT,,22865,"Removal of total disc arthroplasty (artificial disc), anterior approach, single interspace; lumbar",0,1,0,2103580,Procedure
-312111,307431,CPT,,22867,"Insertion of interlaminar/interspinous process stabilization/distraction device, without fusion, including image guidance when performed, with open decompression, lumbar; single level",0,1,0,,
-312112,307431,CPT,,22868,"Insertion of interlaminar/interspinous process stabilization/distraction device, without fusion, including image guidance when performed, with open decompression, lumbar; second level (List separately in addition to code for primary procedure)",0,1,0,,
-312113,307432,CPT,,22869,"Insertion of interlaminar/interspinous process stabilization/distraction device, without open decompression or fusion, including image guidance when performed, lumbar; single level",0,1,0,,
-312114,307432,CPT,,22870,"Insertion of interlaminar/interspinous process stabilization/distraction device, without open decompression or fusion, including image guidance when performed, lumbar; second level (List separately in addition to code for primary procedure)",0,1,0,,
 312115,307434,CPT,,22900,"Excision, tumor, soft tissue of abdominal wall, subfascial (eg, intramuscular); less than 5 cm",0,1,238,2103592,Procedure
 312116,307434,CPT,,22901,"Excision, tumor, soft tissue of abdominal wall, subfascial (eg, intramuscular); 5 cm or greater",0,1,48,40757146,Procedure
 312117,307435,CPT,,22902,"Excision, tumor, soft tissue of abdominal wall, subcutaneous; less than 3 cm",0,1,96,40756923,Procedure
@@ -11346,7 +11143,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 312964,308316,CPT,,31551,"Laryngoplasty; for laryngeal stenosis, with graft, without indwelling stent placement, younger than 12 years of age",0,1,5,700000002,Observation
 312965,308316,CPT,,31552,"Laryngoplasty; for laryngeal stenosis, with graft, without indwelling stent placement, age 12 years or older",0,1,1,700000002,Observation
 312966,308316,CPT,,31553,"Laryngoplasty; for laryngeal stenosis, with graft, with indwelling stent placement, younger than 12 years of age",0,1,2,700000002,Observation
-312967,308316,CPT,,31554,"Laryngoplasty; for laryngeal stenosis, with graft, with indwelling stent placement, age 12 years or older",0,1,0,,
 312968,308317,CPT,,31560,"Laryngoscopy, direct, operative, with arytenoidectomy",0,1,35,2106523,Procedure
 312969,308317,CPT,,31561,"Laryngoscopy, direct, operative, with arytenoidectomy; with operating microscope or telescope",0,1,154,2106524,Procedure
 312970,308318,CPT,,31570,"Laryngoscopy, direct, with injection into vocal cord(s), therapeutic",0,1,1060,2106525,Procedure
@@ -11818,7 +11614,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 313436,308630,CPT,,36430,"Transfusion, blood or blood components",0,1,15521,2108119,Procedure
 313437,308630,CPT,,36440,"Push transfusion, blood, 2 years or younger",0,1,3,2108120,Procedure
 313438,308630,CPT,,Level 6: 36450-36455,"Exchange transfusion, blood",1,0,,,
-313439,308630,CPT,,36456,"Partial exchange transfusion, blood, plasma or crystalloid necessitating the skill of a physician or other qualified health care professional, newborn",0,1,0,,
 313440,308630,CPT,,36460,"Transfusion, intrauterine, fetal",0,1,39,2108133,Procedure
 313441,308630,CPT,,Level 6: 36468-36471,Sclerotherapy of Telangiectasia and Incompetent Veins,1,0,,,
 313442,308630,CPT,,36469,"[EXPIRED]-Single or multiple injections of sclerosing solutions, spider veins (telangiectasia); face",0,1,15,2108135,Procedure
@@ -11931,7 +11726,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 313549,308668,CPT,,37250,[EXPIRED]-Intravascular ultrasound (non-coronary vessel) during diagnostic evaluation and/or therapeutic intervention; initial vessel (List separately in addition to code for primary procedure),0,1,194,2108362,Procedure
 313550,308668,CPT,,37251,[EXPIRED]-Intravascular ultrasound (non-coronary vessel) during diagnostic evaluation and/or therapeutic intervention; each additional vessel (List separately in addition to code for primary procedure),0,1,24,2108363,Procedure
 313551,308668,CPT,,37252,"Intravascular ultrasound (noncoronary vessel) during diagnostic evaluation and/or therapeutic intervention, including radiological supervision and interpretation; initial noncoronary vessel (List separately in addition to code for primary procedure)",0,1,2,700000002,Observation
-313552,308668,CPT,,37253,"Intravascular ultrasound (noncoronary vessel) during diagnostic evaluation and/or therapeutic intervention, including radiological supervision and interpretation; each additional noncoronary vessel (List separately in addition to code for primary procedure)",0,1,0,,
 313553,308672,CPT,,37600,Ligation; external carotid artery,0,1,19,2108367,Procedure
 313554,308672,CPT,,37605,Ligation; internal or common carotid artery,0,1,41,2108368,Procedure
 313555,308672,CPT,,37606,"Ligation; internal or common carotid artery, with gradual occlusion, as with Selverstone or Crutchfield clamp",0,1,2,2108369,Procedure
@@ -12432,7 +12226,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 314050,309136,CPT,,47533,"Placement of biliary drainage catheter, percutaneous, including diagnostic cholangiography when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation; external",0,1,21,700000002,Observation
 314051,309136,CPT,,47534,"Placement of biliary drainage catheter, percutaneous, including diagnostic cholangiography when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation; internal-external",0,1,42,700000002,Observation
 314052,309140,CPT,,47538,"Placement of stent(s) into a bile duct, percutaneous, including diagnostic cholangiography, imaging guidance (eg, fluoroscopy and/or ultrasound), balloon dilation, catheter exchange(s) and catheter removal(s) when performed, and all associated radiological supervision and interpretation; existing access",0,1,6,700000002,Observation
-314053,309140,CPT,,47539,"Placement of stent(s) into a bile duct, percutaneous, including diagnostic cholangiography, imaging guidance (eg, fluoroscopy and/or ultrasound), balloon dilation, catheter exchange(s) and catheter removal(s) when performed, and all associated radiological supervision and interpretation; new access, without placement of separate biliary drainage catheter",0,1,0,,
 314054,309140,CPT,,47540,"Placement of stent(s) into a bile duct, percutaneous, including diagnostic cholangiography, imaging guidance (eg, fluoroscopy and/or ultrasound), balloon dilation, catheter exchange(s) and catheter removal(s) when performed, and all associated radiological supervision and interpretation; new access, with placement of separate biliary drainage catheter (eg, external or internal-external)",0,1,2,700000002,Observation
 314055,309146,CPT,,47552,"Biliary endoscopy, percutaneous via T-tube or other tract; diagnostic, with collection of specimen(s) by brushing and/or washing, when performed (separate procedure)",0,1,11,2109356,Procedure
 314056,309146,CPT,,47553,"Biliary endoscopy, percutaneous via T-tube or other tract; with biopsy, single or multiple",0,1,7,2109357,Procedure
@@ -13319,7 +13112,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 314937,310035,CPT,,65775,Corneal wedge resection for correction of surgically induced astigmatism,0,1,4,2110952,Procedure
 314938,310035,CPT,,Level 6: 65778-65779,Placement of amniotic membrane on the ocular surface,1,0,,,
 314939,310035,CPT,,Level 6: 65780-65782,Ocular surface reconstruction,1,0,,,
-314940,310035,CPT,,65785,Implantation of intrastromal corneal ring segments,0,1,0,,
 314941,310036,CPT,,Level 6: 65800-65815,Paracentesis of anterior chamber of eye (separate procedure),1,0,,,
 314942,310036,CPT,,65820,Goniotomy,0,1,83,2110960,Procedure
 314943,310036,CPT,,65850,Trabeculotomy ab externo,0,1,36,2110961,Procedure
@@ -13549,7 +13341,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 315167,310581,CPT,,78231,Salivary gland imaging; with serial images,0,1,0,2211952,Procedure
 315168,310586,CPT,,78264,"Gastric emptying imaging study (eg, solid, liquid, or both)",0,1,3703,2211957,Procedure
 315169,310586,CPT,,78265,"Gastric emptying imaging study (eg, solid, liquid, or both); with small bowel transit",0,1,1,700000002,Observation
-315170,310586,CPT,,78266,"Gastric emptying imaging study (eg, solid, liquid, or both); with small bowel and colon transit, multiple days",0,1,0,,
 315171,310587,CPT,,78267,"Urea breath test, C-14 (isotopic); acquisition for analysis",0,1,18,2211958,Procedure
 315172,310587,CPT,,78268,"Urea breath test, C-14 (isotopic); analysis",0,1,82,2211959,Procedure
 315173,310588,CPT,,78270,"Vitamin B-12 absorption study (eg, Schilling test); without intrinsic factor",0,1,0,2211960,Procedure
@@ -14057,7 +13848,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 315675,313542,CPT,,37238,"Transcatheter placement of an intravascular stent(s), open or percutaneous, including radiological supervision and interpretation and including angioplasty within the same vessel, when performed; initial vein",0,1,108,44816400,Procedure
 315676,313542,CPT,,37239,"Transcatheter placement of an intravascular stent(s), open or percutaneous, including radiological supervision and interpretation and including angioplasty within the same vessel, when performed; each additional vein (List separately in addition to code for primary procedure)",0,1,11,44816357,Procedure
 315677,313547,CPT,,37246,"Transluminal balloon angioplasty (except lower extremity artery(ies) for occlusive disease, intracranial, coronary, pulmonary, or dialysis circuit), open or percutaneous, including all imaging and radiological supervision and interpretation necessary to perform the angioplasty within the same artery; initial artery",0,1,18,700000002,Observation
-315678,313547,CPT,,37247,"Transluminal balloon angioplasty (except lower extremity artery(ies) for occlusive disease, intracranial, coronary, pulmonary, or dialysis circuit), open or percutaneous, including all imaging and radiological supervision and interpretation necessary to perform the angioplasty within the same artery; each additional artery (List separately in addition to code for primary procedure)",0,1,0,,
 315679,313548,CPT,,37248,"Transluminal balloon angioplasty (except dialysis circuit), open or percutaneous, including all imaging and radiological supervision and interpretation necessary to perform the angioplasty within the same vein; initial vein",0,1,39,700000002,Observation
 315680,313548,CPT,,37249,"Transluminal balloon angioplasty (except dialysis circuit), open or percutaneous, including all imaging and radiological supervision and interpretation necessary to perform the angioplasty within the same vein; each additional vein (List separately in addition to code for primary procedure)",0,1,5,700000002,Observation
 315681,313735,CPT,,43191,"Esophagoscopy, rigid, transoral; diagnostic, including collection of specimen(s) by brushing or washing when performed (separate procedure)",0,1,139,44816405,Procedure
@@ -14074,7 +13864,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 315692,313737,CPT,,43204,"Esophagoscopy, flexible, transoral; with injection sclerosis of esophageal varices",0,1,9,2108869,Procedure
 315693,313737,CPT,,43205,"Esophagoscopy, flexible, transoral; with band ligation of esophageal varices",0,1,18,2108870,Procedure
 315694,313737,CPT,,43206,"Esophagoscopy, flexible, transoral; with optical endomicroscopy",0,1,0,43527934,Procedure
-315695,313738,CPT,,43210,"Esophagogastroduodenoscopy, flexible, transoral; with esophagogastric fundoplasty, partial or complete, includes duodenoscopy when performed",0,1,0,,
 315696,313737,CPT,,43211,"Esophagoscopy, flexible, transoral; with endoscopic mucosal resection",0,1,3,44816364,Procedure
 315697,313737,CPT,,43212,"Esophagoscopy, flexible, transoral; with placement of endoscopic stent (includes pre- and post-dilation and guide wire passage, when performed)",0,1,37,44816411,Procedure
 315698,313737,CPT,,43213,"Esophagoscopy, flexible, transoral; with dilation of esophagus, by balloon or dilator, retrograde (includes fluoroscopic guidance, when performed)",0,1,33,44816412,Procedure
@@ -14199,8 +13988,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 315817,314170,CPT,,50430,"Injection procedure for antegrade nephrostogram and/or ureterogram, complete diagnostic procedure including imaging guidance (eg, ultrasound and fluoroscopy) and all associated radiological supervision and interpretation; new access",0,1,18,700000002,Observation
 315818,314170,CPT,,50431,"Injection procedure for antegrade nephrostogram and/or ureterogram, complete diagnostic procedure including imaging guidance (eg, ultrasound and fluoroscopy) and all associated radiological supervision and interpretation; existing access",0,1,64,700000002,Observation
 315819,314204,CPT,,50693,"Placement of ureteral stent, percutaneous, including diagnostic nephrostogram and/or ureterogram when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation; pre-existing nephrostomy tract",0,1,9,700000002,Observation
-315820,314204,CPT,,50694,"Placement of ureteral stent, percutaneous, including diagnostic nephrostogram and/or ureterogram when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation; new access, without separate nephrostomy catheter",0,1,0,,
-315821,314204,CPT,,50695,"Placement of ureteral stent, percutaneous, including diagnostic nephrostogram and/or ureterogram when performed, imaging guidance (eg, ultrasound and/or fluoroscopy), and all associated radiological supervision and interpretation; new access, with separate nephrostomy catheter",0,1,0,,
 315822,314264,CPT,,52234,"Cystourethroscopy, with fulguration (including cryosurgery or laser surgery) and/or resection of; SMALL bladder tumor(s) (0.5 up to 2.0 cm)",0,1,1249,2109774,Procedure
 315823,314264,CPT,,52235,"Cystourethroscopy, with fulguration (including cryosurgery or laser surgery) and/or resection of; MEDIUM bladder tumor(s) (2.0 to 5.0 cm)",0,1,1663,2109775,Procedure
 315824,314264,CPT,,52240,"Cystourethroscopy, with fulguration (including cryosurgery or laser surgery) and/or resection of; LARGE bladder tumor(s)",0,1,765,2109776,Procedure
@@ -14518,8 +14305,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 316136,310436,CPT,,75945,"[EXPIRED]-Intravascular ultrasound (non-coronary vessel), radiological supervision and interpretation; initial vessel",0,1,147,2211640,Procedure
 316137,310436,CPT,,75946,"[EXPIRED]-Intravascular ultrasound (non-coronary vessel), radiological supervision and interpretation; each additional non-coronary vessel (List separately in addition to code for primary procedure)",0,1,16,2211641,Procedure
 316138,315316,CPT,,93590,"Percutaneous transcatheter closure of paravalvular leak; initial occlusion device, mitral valve",0,1,3,700000002,Observation
-316139,315316,CPT,,93591,"Percutaneous transcatheter closure of paravalvular leak; initial occlusion device, aortic valve",0,1,0,,
-316140,315316,CPT,,93592,Percutaneous transcatheter closure of paravalvular leak; each additional occlusion device (List separately in addition to code for primary procedure),0,1,0,,
 316141,315352,CPT,,99401,Preventive medicine counseling and/or risk factor reduction intervention(s) provided to an individual (separate procedure); approximately 15 minutes,0,1,298,2514530,Procedure
 316142,315352,CPT,,99402,Preventive medicine counseling and/or risk factor reduction intervention(s) provided to an individual (separate procedure); approximately 30 minutes,0,1,970,2514531,Procedure
 316143,315352,CPT,,99403,Preventive medicine counseling and/or risk factor reduction intervention(s) provided to an individual (separate procedure); approximately 45 minutes,0,1,547,2514532,Procedure
@@ -14598,8 +14383,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 316216,313419,CPT,,36148,"[EXPIRED]-Introduction of needle and/or catheter, arteriovenous shunt created for dialysis (graft/fistula); additional access for therapeutic intervention (List separately in addition to code for primary procedure)",0,1,124,40757115,Procedure
 316217,315632,CPT,,36470,Injection of sclerosing solution; single vein,0,1,132,2108136,Procedure
 316218,315632,CPT,,36471,"Injection of sclerosing solution; multiple veins, same leg",0,1,244,2108137,Procedure
-316219,315633,CPT,,36473,"Endovenous ablation therapy of incompetent vein, extremity, inclusive of all imaging guidance and monitoring, percutaneous, mechanochemical; first vein treated",0,1,0,,
-316220,315633,CPT,,36474,"Endovenous ablation therapy of incompetent vein, extremity, inclusive of all imaging guidance and monitoring, percutaneous, mechanochemical; subsequent vein(s) treated in a single extremity, each through separate access sites (List separately in addition to code for primary procedure)",0,1,0,,
 316221,315634,CPT,,36475,"Endovenous ablation therapy of incompetent vein, extremity, inclusive of all imaging guidance and monitoring, percutaneous, radiofrequency; first vein treated",0,1,25,2108138,Procedure
 316222,315634,CPT,,36476,"Endovenous ablation therapy of incompetent vein, extremity, inclusive of all imaging guidance and monitoring, percutaneous, radiofrequency; subsequent vein(s) treated in a single extremity, each through separate access sites (List separately in addition to code for primary procedure)",0,1,1,2108139,Procedure
 316223,315635,CPT,,36478,"Endovenous ablation therapy of incompetent vein, extremity, inclusive of all imaging guidance and monitoring, percutaneous, laser; first vein treated",0,1,622,2108140,Procedure
