@@ -59,19 +59,19 @@ export class HomePageComponent implements OnInit {
     this.errorText = null;
     this.workspacesLoading = true;
     this.workspacesService.getWorkspaces()
-        .subscribe(
-            workspacesReceived => {
-              this.workspaceList = workspacesReceived.items;
-              this.workspacesLoading = false;
-            },
-            error => {
-              // if loading workspaces throws an error, display to the user
-              const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
-              if (response.message !== null) {
-                this.errorText = response.message;
-              }
-              this.workspacesLoading = false;
-            });
+      .subscribe(
+        workspacesReceived => {
+          this.workspaceList = workspacesReceived.items;
+          this.workspacesLoading = false;
+        },
+        error => {
+          // if loading workspaces throws an error, display to the user
+          const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
+          if (response.message !== null) {
+            this.errorText = response.message;
+          }
+          this.workspacesLoading = false;
+        });
   }
 
   addWorkspace(): void {

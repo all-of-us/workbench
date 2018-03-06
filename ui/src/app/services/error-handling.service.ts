@@ -95,10 +95,10 @@ export class ErrorHandlingService {
   public convertAPIError (e: any) {
     if (e._body != null && JSON.parse(e._body) != null) {
       const convertedError: ErrorResponse = {
-        'errorClassName': JSON.parse(e._body).errorClassName || '',
-        'errorCode': JSON.parse(e._body).errorCode || '',
-        'message': JSON.parse(e._body).message || '',
-        'statusCode': JSON.parse(e._body).statusCode || ''
+        'errorClassName': JSON.parse(e._body).errorClassName || null,
+        'errorCode': JSON.parse(e._body).errorCode || null,
+        'message': JSON.parse(e._body).message || null,
+        'statusCode': JSON.parse(e._body).statusCode || null
       };
       return convertedError;
     }
