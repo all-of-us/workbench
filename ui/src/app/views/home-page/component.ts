@@ -40,6 +40,11 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
   templateUrl: './component.html',
 })
 export class HomePageComponent implements OnInit {
+
+  private workspaceNameFilter = new WorkspaceNameFilter();
+  private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
+  private workspaceNameComparator = new WorkspaceNameComparator();
+
   errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
