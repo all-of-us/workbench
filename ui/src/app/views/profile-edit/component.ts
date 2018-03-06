@@ -11,7 +11,7 @@ import {ErrorResponse, Profile, ProfileService} from 'generated';
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
-  errorText : string;
+  errorText: string;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
@@ -37,7 +37,8 @@ export class ProfileEditComponent implements OnInit {
           error => {
           // if MailChimp throws an error, display to the user
           const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
-          if (response.message !== null && response.errorClassName === 'com.ecwid.maleorang.MailchimpException') {
+          if ((response.message !== null) &&
+              (response.errorClassName.indexOf('MailchimpException') !== null)) {
             this.errorText = response.message;
           }
         }
