@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {Comparator, StringFilter} from '@clr/angular';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
   ErrorResponse,
@@ -40,7 +40,7 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
   templateUrl: './component.html',
 })
 export class HomePageComponent implements OnInit {
-  errorText : string;
+  errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
