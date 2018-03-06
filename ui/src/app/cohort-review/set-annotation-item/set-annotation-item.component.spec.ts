@@ -32,14 +32,6 @@ class ApiSpy {
   getCohortAnnotationDefinitions = jasmine.createSpy('getCohortAnnotationDefinitions');
 }
 
-
-/*
- * The test as written actually passes. Uncommenting various combinations of
- * (A) (B) and (C), however, leads to various unhelpful and confusing error
- * messages.  Whether the custom provider in (B) is just a blank object, or a
- * more robustly written class, or any other value, doesn't seem to matter.
- */
-
 describe('SetAnnotationItemComponent', () => {
   let fixture: ComponentFixture<SetAnnotationItemComponent>;
   let component: SetAnnotationItemComponent;
