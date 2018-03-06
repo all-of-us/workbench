@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class PhecodesQueryBuilder extends AbstractQueryBuilder {
@@ -41,7 +40,7 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-        String namedParameter = getUniqueNamedParameter("PheCodes");
+        String namedParameter = "PheCodes" + getUniqueNamedParameterPostfix();
         queryParams.put(namedParameter,
                 QueryParameterValue.array(
                         parameters

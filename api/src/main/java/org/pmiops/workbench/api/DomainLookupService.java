@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
-import org.pmiops.workbench.cdr.model.CodeDomainLookup;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CodeDomainLookupService {
+public class DomainLookupService {
 
     @Autowired
     private CriteriaDao criteriaDao;
@@ -25,19 +24,24 @@ public class CodeDomainLookupService {
     public void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
         searchGroups.stream()
                 .flatMap(searchGroup -> searchGroup.getItems().stream())
-                .filter(item -> item.getType().matches("ICD9|ICD10|CPT"))
+                .filter(item -> item.getType().matches("ICD9|ICD10"))
                 .forEach(item -> {
                     List<SearchParameter> paramsWithDomains = new ArrayList<>();
-                    for (SearchParameter parameter : item.getSearchParameters()) {
+                        for (SearchParameter parameter : item.getSearchParameters()) {
                         if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
-                            List<CodeDomainLookup> codeDomainLookups =
-                                    criteriaDao.findCriteriaByTypeAndCode(parameter.getType(), parameter.getValue());
+                            List<String> domainLookups =
+                                    (parameter.getSubtype() == null)
+                                            ? criteriaDao.findCriteriaByTypeAndCode(parameter.getType(), parameter.getValue())
+                                            : criteriaDao.findCriteriaByTypeAndSubtypeAndCode(parameter.getType(),
+                                            parameter.getSubtype(), parameter.getValue());
 
-                            for (CodeDomainLookup row : codeDomainLookups) {
+                            for (String row : domainLookups) {
                                 paramsWithDomains.add(new SearchParameter()
-                                        .domain(row.getDomainId())
-                                        .value(row.getCode())
-                                        .type(parameter.getType()));
+                                        .domain(row)
+                                        .value(parameter.getValue())
+                                        .type(parameter.getType())
+                                        .subtype(parameter.getSubtype())
+                                        .group(parameter.getGroup()));
                             }
                         }
                         else {

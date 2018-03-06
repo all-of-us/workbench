@@ -2167,10 +2167,8 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 2166,45,ICD9,,043,[EXPIRED]-HIV infection causing other specified conditions.,0,1,1,700000001,Observation
 2167,45,ICD9,,043.0,[EXPIRED]-HIV infection causing lymphadenopathy,0,1,1,700000001,Observation
 2168,45,ICD9,,043.1,[EXPIRED]-HIV infection causing specified diseases of the central nervous system,0,1,12,700000001,Observation
-2169,45,ICD9,,043.2,[EXPIRED]-HIV infectino causing other disorders involving the immune mechanism,0,1,,,
 2170,45,ICD9,,043.3,[EXPIRED]-HIV infection causing other specified conditions,0,1,18,700000001,Observation
 2171,45,ICD9,,043.9,[EXPIRED]-Acquired immunodeficiency syndrome-related complex with or without other conditions,0,1,2,700000001,Observation
-2172,46,ICD9,,044,[EXPIRED]-Other human immunodeficiency virus (HIV) infection,0,1,,,
 2173,46,ICD9,,044.9,[EXPIRED]-HIV infection not otherwise specified,0,1,43,700000001,Observation
 2174,47,ICD9,,045,Acute poliomyelitis,0,1,4,44819360,Condition
 2175,47,ICD9,,045.0,Acute paralytic poliomyelitis specified as bulbar,0,1,0,44819361,Condition
@@ -5645,7 +5643,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 5644,334,ICD9,,348.9,Unspecified condition of brain,0,1,3587,44832282,Condition
 5645,335,ICD9,,349,Other and unspecified disorders of the nervous system,0,1,617,44833450,Condition
 5646,335,ICD9,,349.0,Reaction to spinal or lumbar puncture,0,1,1771,44823030,Condition
-5647,335,ICD9,,349.02,[EXPIRED]-(No description available),0,1,,,
 5648,335,ICD9,,349.1,Nervous system complications from surgically implanted device,0,1,89,44825343,Condition
 5649,335,ICD9,,349.2,"Disorders of meninges, not elsewhere classified",0,1,962,44819598,Condition
 5650,335,ICD9,,349.3,Dural tear,0,1,3,44819599,Condition
@@ -14184,7 +14181,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 14183,811,ICD9,,850.3,Concussion with prolonged loss of consciousness and return to pre-existing conscious level,0,1,21,44837513,Condition
 14184,811,ICD9,,850.4,"Concussion with prolonged loss of consciousness, without return to pre-existing conscious level",0,1,86,44820151,Condition
 14185,811,ICD9,,850.5,Concussion with loss of consciousness of unspecified duration,0,1,8370,44834015,Condition
-14186,811,ICD9,,850.56,[EXPIRED]-(No description available),0,1,,,
 14187,811,ICD9,,850.9,"Concussion, unspecified",0,1,5756,44825909,Condition
 14188,812,ICD9,,851,Cerebral laceration and contusion,0,1,44,44837514,Condition
 14189,812,ICD9,,851.0,Cortex (cerebral) contusion without mention of open intracranial wound,0,1,11,44835179,Condition
@@ -14747,7 +14743,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 14746,850,ICD9,,896.1,"Traumatic amputation of foot (complete) (partial), unilateral, complicated",0,1,86,44829407,Observation
 14747,850,ICD9,,896.2,"Traumatic amputation of foot (complete) (partial), bilateral, without mention of complication",0,1,13,44824749,Condition
 14748,850,ICD9,,896.3,"Traumatic amputation of foot (complete) (partial), bilateral, complicated",0,1,4,44836410,Condition
-14749,850,ICD9,,896.89,[EXPIRED]-(No description available),0,1,,,
 14750,851,ICD9,,897,Traumatic amputation of leg(s) (complete) (partial),0,1,10,44834052,Condition
 14751,851,ICD9,,897.0,"Traumatic amputation of leg(s) (complete) (partial), unilateral, below knee, without mention of complication",0,1,604,44830553,Observation
 14752,851,ICD9,,897.1,"Traumatic amputation of leg(s) (complete) (partial), unilateral, below knee, complicated",0,1,188,44821341,Observation
@@ -15442,8 +15437,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 15441,900,ICD9,,948,Burns classified according to extent of body surface involved,0,1,70,44820217,Condition
 15442,900,ICD9,,948.0,Burn [any degree] involving less than 10 percent of body surface,0,1,7,44837594,Condition
 15443,900,ICD9,,948.00,"Burn [any degree] involving less than 10 percent of body surface with third degree burn, less than 10 percent or unspecified",0,1,9748,44826003,Condition
-15444,900,ICD9,,948.01,[EXPIRED]-(No description available),0,1,,,
-15445,900,ICD9,,948.02,[EXPIRED]-(No description available),0,1,,,
 15446,900,ICD9,,948.1,Burn [any degree] involving 10-19 percent of body surface,0,1,5,44820218,Condition
 15447,900,ICD9,,948.10,"Burn [any degree] involving 10-19 percent of body surface with third degree burn, less than 10 percent or unspecified",0,1,1842,44823614,Condition
 15448,900,ICD9,,948.11,"Burn [any degree] involving 10-19 percent of body surface with third degree burn, 10-19%",0,1,1069,44831749,Condition
@@ -21566,26 +21559,13 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 21565,1124,ICD9,,V50.0,Elective hair transplant for purposes other than remedying health states,0,1,14,44835484,Procedure
 21566,1124,ICD9,,V50.1,Other plastic surgery for unacceptable cosmetic appearance,0,1,12096,44831963,Procedure
 21567,1124,ICD9,,V50.2,Routine or ritual circumcision,0,1,10891,44822707,Procedure
-21568,1124,ICD9,,V50.20,[EXPIRED]-(No description available),0,1,,,
-21569,1124,ICD9,,V50.21,[EXPIRED]-(No description available),0,1,,,
-21570,1124,ICD9,,V50.22,[EXPIRED]-(No description available),0,1,,,
-21571,1124,ICD9,,V50.23,[EXPIRED]-(No description available),0,1,,,
-21572,1124,ICD9,,V50.24,[EXPIRED]-(No description available),0,1,,,
-21573,1124,ICD9,,V50.25,[EXPIRED]-(No description available),0,1,,,
-21574,1124,ICD9,,V50.26,[EXPIRED]-(No description available),0,1,,,
-21575,1124,ICD9,,V50.27,[EXPIRED]-(No description available),0,1,,,
-21576,1124,ICD9,,V50.28,[EXPIRED]-(No description available),0,1,,,
-21577,1124,ICD9,,V50.29,[EXPIRED]-(No description available),0,1,,,
 21578,1124,ICD9,,V50.3,Ear piercing,0,1,32,44825018,Procedure
-21579,1124,ICD9,,V50.30,[EXPIRED]-(No description available),0,1,,,
-21580,1124,ICD9,,V50.31,[EXPIRED]-(No description available),0,1,,,
 21581,1124,ICD9,,V50.4,Prophylactic organ removal,0,1,2,44826209,Procedure
 21582,1124,ICD9,,V50.41,Prophylactic breast removal,0,1,457,44830809,Procedure
 21583,1124,ICD9,,V50.42,Prophylactic ovary removal,0,1,145,44825019,Procedure
 21584,1124,ICD9,,V50.49,Other prophylactic gland removal,0,1,138,44836665,Procedure
 21585,1124,ICD9,,V50.8,Other elective surgery for purposes other than remedying health states,0,1,341,44831964,Procedure
 21586,1124,ICD9,,V50.9,Unspecified elective surgery for purposes other than remedying health states,0,1,30,44835485,Procedure
-21587,1124,ICD9,,V50.99,[EXPIRED]-(No description available),0,1,,,
 21588,1126,ICD9,,V51,Aftercare involving the use of plastic surgery,0,1,90,44828555,Observation
 21589,1126,ICD9,,V51.0,Encounter for breast reconstruction following mastectomy,0,1,407,44822708,Observation
 21590,1126,ICD9,,V51.8,Other aftercare involving the use of plastic surgery,0,1,39,44833113,Observation
@@ -22750,7 +22730,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 22749,1245,ICD9,,E846,Accidents involving powered vehicles used solely within the buildings and premises of industrial or commercial establishment,0,1,3,44826082,Observation
 22750,1246,ICD9,,E847,Accidents involving cable cars not running on rails,0,1,1,44823704,Observation
 22751,1247,ICD9,,E848,"Accidents involving other vehicles, not elsewhere classifiable",0,1,420,44824888,Observation
-22752,1249,ICD9,,E849,Place of occurrence,0,1,,,
 22753,1249,ICD9,,E849.0,Home accidents,0,1,9977,44832973,Observation
 22754,1249,ICD9,,E849.1,Farm accidents,0,1,155,44837669,Observation
 22755,1249,ICD9,,E849.2,Mine and quarry accidents,0,1,17,44824889,Observation

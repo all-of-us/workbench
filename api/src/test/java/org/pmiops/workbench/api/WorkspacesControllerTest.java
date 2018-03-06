@@ -118,7 +118,7 @@ public class WorkspacesControllerTest {
     CohortMaterializationService.class,
     CloudStorageService.class,
     BigQueryService.class,
-    CodeDomainLookupService.class,
+    DomainLookupService.class,
     ParticipantCounter.class,
     NotebooksService.class
   })
