@@ -79,7 +79,7 @@ public class CohortReviewControllerTest {
     ParticipantCounter participantCounter;
 
     @Mock
-    CodeDomainLookupService codeDomainLookupService;
+    DomainLookupService domainLookupService;
 
     @Mock
     WorkspaceService workspaceService;
@@ -186,8 +186,8 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, definition));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
-        doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
-        doNothing().when(codeDomainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
+        doNothing().when(domainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
+        doNothing().when(domainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(searchRequest, 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -209,8 +209,8 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
         verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
-        verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
-        verify(codeDomainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
+        verify(domainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
+        verify(domainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
         verify(participantCounter, times(1)).buildParticipantIdQuery(searchRequest, 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -557,7 +557,7 @@ public class CohortReviewControllerTest {
     }
 
     private void verifyNoMoreMockInteractions() {
-        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, codeDomainLookupService, workspaceService);
+        verifyNoMoreInteractions(cohortReviewService, bigQueryService, participantCounter, domainLookupService, workspaceService);
     }
 
 }

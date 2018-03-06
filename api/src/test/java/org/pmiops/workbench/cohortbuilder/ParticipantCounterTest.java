@@ -82,19 +82,23 @@ public class ParticipantCounterTest {
         String genderNamedParameter = "";
         String conditionNamedParameter = "";
         String procedureNamedParameter = "";
-        String cmICD9NamedParameter = "";
-        String procICD9NamedParameter = "";
-        String cmCPTNamedParameter = "";
-        String procCPTNamedParameter = "";
+        String cmConditionParameter = "";
+        String procConditionParameter = "";
+        String cmProcedureParameter = "";
+        String procProcedureParameter = "";
 
         SearchParameter parameter1 = new SearchParameter()
                 .domain("Condition")
+                .group(false)
+                .type("ICD9")
                 .value("001.1");
         SearchParameter parameter2 = new SearchParameter()
                 .subtype("GEN")
                 .conceptId(8507L);
         SearchParameter parameter3 = new SearchParameter()
                 .domain("Procedure")
+                .group(false)
+                .type("CPT")
                 .value("001.2");
 
         SearchGroupItem searchGroupItem1 = new SearchGroupItem()
@@ -126,16 +130,12 @@ public class ParticipantCounterTest {
                 genderNamedParameter = key;
             } else if (key.startsWith("Condition")){
                 conditionNamedParameter = key;
+                cmConditionParameter = "cm" + key.replace("Condition", "");
+                procConditionParameter = "proc" + key.replace("Condition", "");
             } else if (key.startsWith("Procedure")) {
                 procedureNamedParameter = key;
-            } else if (key.startsWith("cmICD9")) {
-                cmICD9NamedParameter = key;
-            } else if (key.startsWith("procICD9")) {
-                procICD9NamedParameter = key;
-            } else if (key.startsWith("cmCPT")) {
-                cmCPTNamedParameter = key;
-            } else if (key.startsWith("procCPT")) {
-                procCPTNamedParameter = key;
+                cmProcedureParameter = "cm" + key.replace("Procedure", "");
+                procProcedureParameter = "proc" + key.replace("Procedure", "");
             }
         }
 
@@ -147,7 +147,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmICD9NamedParameter + ",@" + procICD9NamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -162,7 +162,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmCPTNamedParameter + ",@" + procCPTNamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
                 "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -189,19 +189,23 @@ public class ParticipantCounterTest {
         String genderNamedParameter = "";
         String conditionNamedParameter = "";
         String procedureNamedParameter = "";
-        String cmICD9NamedParameter = "";
-        String procICD9NamedParameter = "";
-        String cmCPTNamedParameter = "";
-        String procCPTNamedParameter = "";
+        String cmConditionParameter = "";
+        String procConditionParameter = "";
+        String cmProcedureParameter = "";
+        String procProcedureParameter = "";
 
         SearchParameter parameter1 = new SearchParameter()
                 .domain("Condition")
+                .group(false)
+                .type("ICD9")
                 .value("001.1");
         SearchParameter parameter2 = new SearchParameter()
                 .subtype("GEN")
                 .conceptId(8507L);
         SearchParameter parameter3 = new SearchParameter()
                 .domain("Procedure")
+                .group(false)
+                .type("CPT")
                 .value("001.2");
 
         SearchGroupItem searchGroupItem1 = new SearchGroupItem()
@@ -234,16 +238,12 @@ public class ParticipantCounterTest {
                 genderNamedParameter = key;
             } else if (key.startsWith("Condition")){
                 conditionNamedParameter = key;
+                cmConditionParameter = "cm" + key.replace("Condition", "");
+                procConditionParameter = "proc" + key.replace("Condition", "");
             } else if (key.startsWith("Procedure")) {
                 procedureNamedParameter = key;
-            } else if (key.startsWith("cmICD9")) {
-                cmICD9NamedParameter = key;
-            } else if (key.startsWith("procICD9")) {
-                procICD9NamedParameter = key;
-            } else if (key.startsWith("cmCPT")) {
-                cmCPTNamedParameter = key;
-            } else if (key.startsWith("procCPT")) {
-                procCPTNamedParameter = key;
+                cmProcedureParameter = "cm" + key.replace("Procedure", "");
+                procProcedureParameter = "proc" + key.replace("Procedure", "");
             }
         }
 
@@ -255,7 +255,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmICD9NamedParameter + ",@" + procICD9NamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -270,7 +270,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmCPTNamedParameter + ",@" + procCPTNamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
                 "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -299,19 +299,23 @@ public class ParticipantCounterTest {
         String genderNamedParameter = "";
         String conditionNamedParameter = "";
         String procedureNamedParameter = "";
-        String cmICD9NamedParameter = "";
-        String procICD9NamedParameter = "";
-        String cmCPTNamedParameter = "";
-        String procCPTNamedParameter = "";
+        String cmConditionParameter = "";
+        String procConditionParameter = "";
+        String cmProcedureParameter = "";
+        String procProcedureParameter = "";
 
         SearchParameter parameter1 = new SearchParameter()
                 .domain("Condition")
+                .group(false)
+                .type("ICD9")
                 .value("001.1");
         SearchParameter parameter2 = new SearchParameter()
                 .subtype("GEN")
                 .conceptId(8507L);
         SearchParameter parameter3 = new SearchParameter()
                 .domain("Procedure")
+                .group(false)
+                .type("CPT")
                 .value("001.2");
 
         SearchGroupItem searchGroupItem1 = new SearchGroupItem()
@@ -343,16 +347,12 @@ public class ParticipantCounterTest {
                 genderNamedParameter = key;
             } else if (key.startsWith("Condition")){
                 conditionNamedParameter = key;
+                cmConditionParameter = "cm" + key.replace("Condition", "");
+                procConditionParameter = "proc" + key.replace("Condition", "");
             } else if (key.startsWith("Procedure")) {
                 procedureNamedParameter = key;
-            } else if (key.startsWith("cmICD9")) {
-                cmICD9NamedParameter = key;
-            } else if (key.startsWith("procICD9")) {
-                procICD9NamedParameter = key;
-            } else if (key.startsWith("cmCPT")) {
-                cmCPTNamedParameter = key;
-            } else if (key.startsWith("procCPT")) {
-                procCPTNamedParameter = key;
+                cmProcedureParameter = "cm" + key.replace("Procedure", "");
+                procProcedureParameter = "proc" + key.replace("Procedure", "");
             }
         }
 
@@ -373,7 +373,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmICD9NamedParameter + ",@" + procICD9NamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
@@ -388,7 +388,7 @@ public class ParticipantCounterTest {
                 "where person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmCPTNamedParameter + ",@" + procCPTNamedParameter + ")\n" +
+                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
                 "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +

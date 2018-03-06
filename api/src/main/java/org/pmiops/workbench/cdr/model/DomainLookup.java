@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
-public interface CodeDomainLookup {
-    String getCode();
+public interface DomainLookup {
     String getDomainId();
+    String getSubtype();
 }
