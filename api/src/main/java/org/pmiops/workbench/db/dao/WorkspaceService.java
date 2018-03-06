@@ -8,6 +8,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public interface WorkspaceService {
+
+  public static final String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
+
   public WorkspaceDao getDao();
   public FireCloudService getFireCloudService();
   public Workspace get(String ns, String firecloudName);
