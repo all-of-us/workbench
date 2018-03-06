@@ -250,6 +250,8 @@ dependencies {
 swaggerSources {
   workbench {
     inputFile = file("$projectDir/$mergedApiSourceFile")
+  }
+  client {
     inputFile = file("$projectDir/$clientApiSourceFile")
   }
   firecloud {
