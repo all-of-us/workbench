@@ -32,6 +32,9 @@ export class AppComponent implements OnInit {
   currentUrl: string;
   email: string;
   backgroundImgSrc = '/assets/images/group.jpg';
+  headerImg = '/assets/images/logo-registration_nonSignedIn.png';
+  headerHeight = 102;
+  sidebarHeight = window.innerHeight - this.headerHeight;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -105,6 +108,9 @@ export class AppComponent implements OnInit {
         });
       }
     });
+    window.addEventListener('resize', () => {
+      this.sidebarHeight = window.innerHeight - this.headerHeight;
+    });
   }
 
   /**
@@ -138,11 +144,14 @@ export class AppComponent implements OnInit {
   }
 
   get reviewActive(): boolean {
-    return this.locationService.path().startsWith('/review');
+    return this.locationService.path().startsWith('/admin/review');
   }
 
   get workspacesActive(): boolean {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
+  }
+  test() {
+    return window.innerHeight - 103;
   }
 }
