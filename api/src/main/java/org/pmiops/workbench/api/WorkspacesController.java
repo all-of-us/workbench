@@ -554,9 +554,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw ExceptionUtils.convertFirecloudException(e);
     }
 
-    response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-    if (response.getAccessLevel() == null) {
-      throw new ServerErrorException("Firecloud access level not handled properly.");
+    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+      // We don't expose PROJECT_OWNER in our API; just use OWNER.
+      response.setAccessLevel(WorkspaceAccessLevel.OWNER);
+    } else {
+      response.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
+      if (response.getAccessLevel() == null) {
+        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
+      }
     }
     response.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
     return ResponseEntity.ok(response);

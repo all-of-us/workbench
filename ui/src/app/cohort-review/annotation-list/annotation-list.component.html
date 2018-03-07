@@ -16,7 +16,6 @@
 
 <app-annotation-item
   *ngFor="let anno of (annotations$ | async)"
-  [definition]="anno.definition"
-  [value]="anno.value"
+  [annotation]="anno"
   [showDataType]="showDataType">
 </app-annotation-item>
