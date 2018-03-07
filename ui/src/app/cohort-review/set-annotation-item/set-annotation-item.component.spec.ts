@@ -16,7 +16,9 @@ import {
   AnnotationType,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
+  ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
+
 
 class StubRoute {
   snapshot = {params: {
@@ -26,11 +28,22 @@ class StubRoute {
   }};
 }
 
+const stubRoute = new StubRoute();
+
+const stubDefinition = <CohortAnnotationDefinition>{
+  cohortAnnotationDefinitionId: 1,
+  cohortId: 1,
+  columnName: 'Test Defn',
+  annotationType: AnnotationType.STRING,
+};
+
+
 class ApiSpy {
   updateCohortAnnotationDefinition = jasmine.createSpy('updateCohortAnnotationDefinition');
   deleteCohortAnnotationDefinition = jasmine.createSpy('deleteCohortAnnotationDefinition');
   getCohortAnnotationDefinitions = jasmine.createSpy('getCohortAnnotationDefinitions');
 }
+
 
 describe('SetAnnotationItemComponent', () => {
   let fixture: ComponentFixture<SetAnnotationItemComponent>;
@@ -49,24 +62,17 @@ describe('SetAnnotationItemComponent', () => {
         providers: [
           ReviewStateService,
           {provide: CohortAnnotationDefinitionService, useValue: new ApiSpy()},
-          {provide: ActivatedRoute, useClass: StubRoute},
+          {provide: ActivatedRoute, useValue: stubRoute},
         ],
       }).compileComponents().then((resp) => {
         fixture = TestBed.createComponent(SetAnnotationItemComponent);
 
-        // tick();
         component = fixture.componentInstance;
 
         // Default Inputs for tests
-        component.definition = <CohortAnnotationDefinition>{
-          cohortAnnotationDefinitionId: 1,
-          cohortId: 1,
-          columnName: 'Test Defn',
-          annotationType: AnnotationType.STRING,
-        };
+        component.definition = stubDefinition;
         updateAndTick(fixture);
       });
-    // tick();
   }));
 
   it('Should render', () => {
@@ -77,7 +83,7 @@ describe('SetAnnotationItemComponent', () => {
     component.editing = true;
     updateAndTick(fixture);
     component.setFocus();
-    // component.edit() calls setTimeout so there's still a timer on the stack
+    // component.setFocus() calls setTimeout so there's still a timer on the stack
     // without this call to tick
     tick();
     const inpElem = component.nameInput.nativeElement;
@@ -142,5 +148,28 @@ describe('SetAnnotationItemComponent', () => {
     expect(component.editing).toBe(false);
     // The input no longer exists
     expect(component.nameInput).not.toBeDefined();
+  }));
+
+  it('Should call updateCohortAnnotationDefinition in the normal case', fakeAsync(() => {
+    // Set up an API spy
+    const spy = fixture.debugElement.injector.get(CohortAnnotationDefinitionService) as any;
+    // Make sure the form input exists
+    component.editing = true;
+    updateAndTick(fixture);
+
+    const testValue = 'Some test value';
+    component.name.setValue(testValue);
+    const input = component.nameInput.nativeElement;
+    const event = new KeyboardEvent('keyup', {'key': 'Enter'});
+    input.dispatchEvent(event);
+    updateAndTick(fixture);
+
+    expect(spy.updateCohortAnnotationDefinition).toHaveBeenCalledWith(
+      stubRoute.snapshot.params.ns,
+      stubRoute.snapshot.params.wsid,
+      stubRoute.snapshot.params.cid,
+      stubDefinition.cohortAnnotationDefinitionId,
+      <ModifyCohortAnnotationDefinitionRequest>{columnName: testValue}
+    );
   }));
 });
