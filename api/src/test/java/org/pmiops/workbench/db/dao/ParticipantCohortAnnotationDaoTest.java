@@ -130,7 +130,7 @@ public class ParticipantCohortAnnotationDaoTest {
             .annotationValueBoolean(Boolean.TRUE);
         List<ParticipantCohortAnnotation> annotations =
         participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
-        assertEquals(2, annotations.size());
+        assertEquals(1, annotations.size());
         assertEquals(expectedPCA, annotations.get(0));
     }
 
@@ -144,7 +144,7 @@ public class ParticipantCohortAnnotationDaoTest {
                 .annotationValueEnum("test");
         List<ParticipantCohortAnnotation> annotations =
                 participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
-        assertEquals(2, annotations.size());
+        assertEquals(1, annotations.size());
         assertEquals(expectedPCA, annotations.get(1));
         assertEquals(new CohortAnnotationEnumValue().name("z").order(0), annotations.get(1).getCohortAnnotationEnumValue());
     }
