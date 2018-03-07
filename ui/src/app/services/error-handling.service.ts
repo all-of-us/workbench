@@ -1,6 +1,6 @@
 import {Injectable, NgZone} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
 import {Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
 
 import {ErrorCode, ErrorResponse} from 'generated';
 
@@ -18,6 +18,19 @@ export class ErrorHandlingService {
   constructor(private zone: NgZone) {
     this.serverError = false;
     this.noServerResponse = false;
+  }
+
+  // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
+  public static convertAPIError (e: Response) {
+    try {
+      const { errorClassName = null,
+        errorCode = null,
+        message = null,
+        statusCode = null } = e.json();
+      return { errorClassName, errorCode, message, statusCode };
+    }  catch {
+      return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+    }
   }
 
   public setServerError(): void {
@@ -85,16 +98,5 @@ export class ErrorHandlingService {
         }
       });
     });
-  }
-
-  // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
-  public static convertAPIError (e: Response) {
-    try {
-      const { errorClassName = null, errorCode = null, message = null, statusCode = null } = e.json();
-      return { errorClassName, errorCode, message, statusCode };
-    }
-    catch {
-      return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR }
-    }
   }
 }
