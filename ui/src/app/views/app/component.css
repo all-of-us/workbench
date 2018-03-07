@@ -91,3 +91,8 @@
   margin-right: 0.6rem;
   margin-left: 1rem;
 }
+
+.sidenavHidden {
+  z-index: 0;
+  display: none;
+}

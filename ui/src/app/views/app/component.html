@@ -21,7 +21,7 @@
 <ng-template #signedIn>
   <div class="page-container">
     <div>
-      <div class="sidenav-toggle">
+      <div #sidenavToggleElement class="sidenav-toggle">
         <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"></clr-icon>
       </div>
       <img [src]="headerImg" class="header-image" routerLink="/">
@@ -40,7 +40,7 @@
   </div>
 
   <div class="content-container">
-    <nav *ngIf="sidenavToggle" class="sidenav"  (clickOutside)="onClickedOutsideSidebar($event)">
+    <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
       <section class="sidenav-content">
         <button class="btn btn-primary nav-link"
             [class.active]="workspacesActive"

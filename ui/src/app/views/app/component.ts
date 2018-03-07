@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -18,6 +18,7 @@ import {Authority, ProfileService} from 'generated';
 declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
+
 
 @Component({
   selector: 'app-aou',
@@ -40,6 +41,18 @@ export class AppComponent implements OnInit {
   private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 
+  @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
+
+  @ViewChild('sidenav') sidenav: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onClickOutsideSideNav(event: MouseEvent) {
+    const inSidenav = this.sidenav.nativeElement.contains(event.target);
+    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+      this.sidenavToggle = false;
+    }
+  }
   constructor(
     /* Ours */
     private signInService: SignInService,
@@ -151,13 +164,6 @@ export class AppComponent implements OnInit {
   get workspacesActive(): boolean {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
-  }
-  onClickedOutsideSidebar(e: MouseEvent) {
-    if (this.sidenavToggle) {
-      if (e.clientX > 240 && e.clientY > 80) {
-        this.sidenavToggle = false;
-      }
-    }
   }
 
 }
