@@ -26,9 +26,12 @@ public class DemoQueryBuilderTest {
     public void buildQueryJobConfig() throws Exception {
         String genderNamedParameter = "";
         String ageNamedParameter = "";
+        String raceNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
-        params.add(new SearchParameter().domain("DEMO").subtype("GEN").conceptId(8507L));
-        params.add(new SearchParameter().domain("DEMO").subtype("AGE").attribute(new Attribute().operator("=").operands(Arrays.asList("18"))));
+        params.add(new SearchParameter().type("DEMO").subtype("GEN").conceptId(8507L));
+        params.add(new SearchParameter().type("DEMO").subtype("AGE").attribute(new Attribute().operator("=").operands(Arrays.asList("18"))));
+        params.add(new SearchParameter().type("DEM0").subtype("RACE").conceptId(1234L));
+        params.add(new SearchParameter().type("DEM0").subtype("RACE").conceptId(1235L));
 
         QueryJobConfiguration queryJobConfiguration = queryBuilder
                 .buildQueryJobConfig(new QueryParameters().type("DEMO").parameters(params));
@@ -36,6 +39,8 @@ public class DemoQueryBuilderTest {
         for (String key : queryJobConfiguration.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {
                 genderNamedParameter = key;
+            } else if (key.startsWith("race")) {
+                raceNamedParameter = key;
             } else {
                 ageNamedParameter = key;
             }
@@ -43,11 +48,12 @@ public class DemoQueryBuilderTest {
 
         String expected = "select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
-                "union distinct\n" +
-                "select distinct person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) =\n" +
+                "where\n" +
+                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "and\n" +
+                "p.race_concept_id in (@" + raceNamedParameter + ")\n" +
+                "and\n" +
+                "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) =\n" +
                 "@" + ageNamedParameter + "\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());
@@ -55,11 +61,19 @@ public class DemoQueryBuilderTest {
         assertEquals("8507", queryJobConfiguration
                 .getNamedParameters()
                 .get(genderNamedParameter)
-                .getValue());
+                .getArrayValues().get(0).getValue());
         assertEquals("18", queryJobConfiguration
                 .getNamedParameters()
                 .get(ageNamedParameter)
                 .getValue());
+        assertEquals("1234", queryJobConfiguration
+                .getNamedParameters()
+                .get(raceNamedParameter)
+                .getArrayValues().get(0).getValue());
+        assertEquals("1235", queryJobConfiguration
+                .getNamedParameters()
+                .get(raceNamedParameter)
+                .getArrayValues().get(1).getValue());
     }
 
     @Test
