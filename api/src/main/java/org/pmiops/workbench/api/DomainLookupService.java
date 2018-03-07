@@ -12,8 +12,12 @@ import java.util.List;
 @Service
 public class DomainLookupService {
 
-    @Autowired
     private CriteriaDao criteriaDao;
+
+    @Autowired
+    public DomainLookupService(CriteriaDao criteriaDao) {
+        this.criteriaDao = criteriaDao;
+    }
 
     /**
      * Find all domain ids for {@link SearchGroup}s in the following groups:

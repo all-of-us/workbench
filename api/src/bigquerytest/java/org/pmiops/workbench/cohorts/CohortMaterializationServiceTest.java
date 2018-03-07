@@ -5,8 +5,11 @@ import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -28,11 +31,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({ParticipantCounter.class, BigQueryService.class, CohortMaterializationService.class,
-    DemoQueryBuilder.class, QueryBuilderFactory.class})
+@Import({BigQueryService.class, DemoQueryBuilder.class, QueryBuilderFactory.class})
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
-  @Autowired
   private CohortMaterializationService cohortMaterializationService;
 
   private CdrVersion cdrVersion = new CdrVersion();
@@ -40,12 +41,22 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   @Autowired
   private TestWorkbenchConfig testWorkbenchConfig;
 
+  @Autowired
+  private BigQueryService  bigQueryService;
+
+  @InjectMocks
+  private ParticipantCounter participantCounter;
+
+  @Mock
+  private DomainLookupService mockDomainLookupService;
+
   @Before
   public void setUp() {
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersion(cdrVersion);
+    cohortMaterializationService = new CohortMaterializationService(bigQueryService, participantCounter);
   }
 
   @Override

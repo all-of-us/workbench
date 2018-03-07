@@ -1,14 +1,17 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.pmiops.workbench.api.DomainLookupService;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -16,12 +19,19 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@Import({ParticipantCounter.class, QueryBuilderFactory.class})
+@Import({QueryBuilderFactory.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class ParticipantCounterTest {
 
-    @Autowired
-    ParticipantCounter participantCounter;
+    private ParticipantCounter participantCounter;
+
+    @Mock
+    private CriteriaDao criteriaDao;
+
+    @Before
+    public void setUp() {
+        this.participantCounter = new ParticipantCounter(new DomainLookupService(criteriaDao));
+    }
 
     @Test
     public void buildParticipantCounterQuery_BothIncludesAndExcludesEmpty() throws Exception {
@@ -65,7 +75,7 @@ public class ParticipantCounterTest {
                 "person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
-                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
                 ")\n";
 
         assertEquals(expectedSql, actualRequest.getQuery());
@@ -155,7 +165,7 @@ public class ParticipantCounterTest {
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
-                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
@@ -264,7 +274,7 @@ public class ParticipantCounterTest {
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
-                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
@@ -383,7 +393,7 @@ public class ParticipantCounterTest {
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
-                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
