@@ -86,6 +86,11 @@ jobs:
           working_directory: ~/workbench
           command: cp api/circle-sa-key.json public-api
       - run:
+          # MySQL sometimes refuses connections by the time we attempt to apply
+          # data migrations. Watch the port for 2m for startup.
+          name: Await MySQL startup
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+      - run:
           working_directory: ~/workbench/api
           command: ./project.rb run-local-migrations
       - run:
