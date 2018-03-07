@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -19,6 +19,7 @@ declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
+
 @Component({
   selector: 'app-aou',
   styleUrls: ['./component.css',
@@ -32,11 +33,26 @@ export class AppComponent implements OnInit {
   currentUrl: string;
   email: string;
   backgroundImgSrc = '/assets/images/group.jpg';
+  headerImg = '/assets/images/all-of-us-logo.svg';
+  headerHeight = 102;
+  sidenavToggle = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 
+  @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
+
+  @ViewChild('sidenav') sidenav: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onClickOutsideSideNav(event: MouseEvent) {
+    const inSidenav = this.sidenav.nativeElement.contains(event.target);
+    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+      this.sidenavToggle = false;
+    }
+  }
   constructor(
     /* Ours */
     private signInService: SignInService,
@@ -137,12 +153,17 @@ export class AppComponent implements OnInit {
     return this.showCreateAccount ? '10vh' : '30vh';
   }
 
-  get reviewActive(): boolean {
-    return this.locationService.path().startsWith('/review');
+  get reviewWorkspaceActive(): boolean {
+    return this.locationService.path().startsWith('/admin/review-workspace');
+  }
+
+  get reviewIdActive(): boolean {
+    return this.locationService.path().startsWith('/admin/review-id-verification');
   }
 
   get workspacesActive(): boolean {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
   }
+
 }
