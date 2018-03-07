@@ -5,7 +5,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
-import {ClickOutsideModule} from 'ng-click-outside';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
@@ -74,7 +73,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
 
     BrowserModule,
     BrowserAnimationsModule,
-    ClickOutsideModule,
     FormsModule,
     HttpModule,
     ReactiveFormsModule,

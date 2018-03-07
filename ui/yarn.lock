@@ -4336,10 +4336,6 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
-ng-click-outside@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ng-click-outside/-/ng-click-outside-3.2.0.tgz#e0fb3eab9caa2b6ccb4ff51c2c0811e0cef2cf87"
-
 ngx-popper@^1.9.9:
   version "1.9.9"
   resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-1.9.9.tgz#7c640c0e43cea817cdc46c2e26b79c9f064dfd05"
