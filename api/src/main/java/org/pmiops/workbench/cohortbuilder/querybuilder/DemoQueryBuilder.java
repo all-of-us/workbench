@@ -2,6 +2,8 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
@@ -21,37 +23,46 @@ import java.util.Optional;
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
+    private static final String SELECT = "select distinct person_id\n" +
+            "from `${projectId}.${dataSetId}.person` p\n" +
+            "where\n";
+
     private static final String DEMO_GEN =
-            "select distinct person_id\n" +
-                    "from `${projectId}.${dataSetId}.person` p\n" +
-                    "where p.gender_concept_id = ${gen}\n";
+            "p.gender_concept_id in (${gen})\n";
 
     private static final String DEMO_AGE =
-            "select distinct person_id\n" +
-                    "from `${projectId}.${dataSetId}.person` p\n" +
-                    "where CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) ${operator}\n";
+            "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) ${operator}\n";
 
-    private static final String UNION_TEMPLATE = "union distinct\n";
+    private static final String DEMO_RACE =
+            "p.race_concept_id in (${race})\n";
+
+    private static final String AND_TEMPLATE = "and\n";
 
     public enum DEMOTYPE { GEN, AGE, DEC, RACE };
 
     @Override
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-
+        ListMultimap<String, Object> paramMap = getMappedParameters(parameters.getParameters());
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
         List<String> queryParts = new ArrayList<>();
 
-        for (SearchParameter parameter : parameters.getParameters()) {
-            if (parameter.getSubtype().equals(DEMOTYPE.GEN.name())) {
-                final String namedParameter = parameter.getSubtype().toLowerCase() + getUniqueNamedParameterPostfix();
+        for (String key : paramMap.keySet()) {
+            paramMap.get(key);
+
+            if (key.equals(DEMOTYPE.GEN.name())) {
+                final String namedParameter = key.toLowerCase() + getUniqueNamedParameterPostfix();
                 queryParts.add(DEMO_GEN.replace("${gen}", "@" + namedParameter));
-                queryParams.put(namedParameter, QueryParameterValue.int64(parameter.getConceptId()));
-            } else if (parameter.getSubtype().equals(DEMOTYPE.AGE.name())) {
-                Optional<Attribute> attribute = Optional.ofNullable(parameter.getAttribute());
+                queryParams.put(namedParameter, QueryParameterValue.array(paramMap.get(key).stream().toArray(Long[]::new), Long.class));
+            } else if (key.equals(DEMOTYPE.RACE.name())) {
+                final String namedParameter = key.toLowerCase() + getUniqueNamedParameterPostfix();
+                queryParts.add(DEMO_RACE.replace("${race}", "@" + namedParameter));
+                queryParams.put(namedParameter, QueryParameterValue.array(paramMap.get(key).stream().toArray(Long[]::new), Long.class));
+            } else if (key.equals(DEMOTYPE.AGE.name())) {
+                Optional<Attribute> attribute = Optional.ofNullable((Attribute)paramMap.get(key).get(0));
                 if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
                     List<String> operandParts = new ArrayList<>();
                     for (String operand : attribute.get().getOperands()) {
-                        final String namedParameter = parameter.getSubtype().toLowerCase() + getUniqueNamedParameterPostfix();
+                        final String namedParameter = key.toLowerCase() + getUniqueNamedParameterPostfix();
                         operandParts.add("@" + namedParameter);
                         queryParams.put(namedParameter, QueryParameterValue.int64(new Long(operand)));
                     }
@@ -63,7 +74,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
             }
         }
 
-        String finalSql = String.join(UNION_TEMPLATE, queryParts);
+        String finalSql = SELECT + String.join(AND_TEMPLATE, queryParts);
 
         return QueryJobConfiguration
                 .newBuilder(finalSql)
@@ -75,5 +86,17 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     @Override
     public FactoryKey getType() {
         return FactoryKey.DEMO;
+    }
+
+    protected ListMultimap<String, Object> getMappedParameters(List<SearchParameter> searchParameters) {
+        ListMultimap<String, Object> mappedParameters = ArrayListMultimap.create();
+        for (SearchParameter parameter : searchParameters)
+            if (parameter.getSubtype().equals(DEMOTYPE.AGE.name())) {
+                mappedParameters.put(parameter.getSubtype(), parameter.getAttribute());
+            } else {
+                mappedParameters.put(parameter.getSubtype(), parameter.getConceptId());
+            }
+
+        return mappedParameters;
     }
 }
