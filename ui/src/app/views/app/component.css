@@ -34,7 +34,7 @@
   transition: box-shadow 0.05s ease-in;
 }
 
-.sidenav .sidenav-content>.nav-link {
+.sidenav .sidenav-content > .nav-link {
   margin: 0;
   padding: 0.5rem 1.5rem;
   text-align: left;
