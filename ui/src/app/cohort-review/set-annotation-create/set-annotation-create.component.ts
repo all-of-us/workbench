@@ -1,8 +1,6 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Component, EventEmitter, Output} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
 
@@ -19,42 +17,42 @@ import {
   styleUrls: ['./set-annotation-create.component.css']
 })
 export class SetAnnotationCreateComponent {
-  readonly kinds = AnnotationType;
-  private posting = false;
+  readonly datatypes = [{
+    value: AnnotationType.STRING,
+    displayName: 'Text'
+  }, {
+    value: AnnotationType.ENUM,
+    displayName: 'Enumeration'
+  }, {
+    value: AnnotationType.DATE,
+    displayName: 'Date'
+  }, {
+    value: AnnotationType.BOOLEAN,
+    displayName: 'Boolean'
+  }, {
+    value: AnnotationType.INTEGER,
+    displayName: 'Integer'
+  }];
+
   @Output() onFinish = new EventEmitter<boolean>();
-  private defn: CohortAnnotationDefinition | null;
-  private form: FormGroup;
-  private subscription: Subscription;
+  posting = false;
+  enumValues = <string[]>[];
+
+  form = new FormGroup({
+    name: new FormControl('', Validators.required),
+    kind: new FormControl('', Validators.required),
+    addValue: new FormControl(),
+  });
 
   get name() { return this.form.get('name'); }
   get kind() { return this.form.get('kind'); }
+  get addValue() { return this.form.get('addValue'); }
 
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private fb: FormBuilder,
-  ) {
-    this.form = this.fb.group({
-      name: ['', Validators.required],
-      kind: ['', Validators.required],
-      enumValues: this.fb.array([]),
-    });
-  }
-
-  get enumValues(): FormArray {
-    return this.form.get('enumValues') as FormArray;
-  }
-
-  addEnumValue(): void {
-    this.enumValues.push(this.fb.group({
-      value: ['', Validators.required]
-    }));
-  }
-
-  removeEnumValue(index: number): void {
-    this.enumValues.removeAt(index);
-  }
+  ) {}
 
   create(): void {
     this.posting = true;
@@ -66,6 +64,10 @@ export class SetAnnotationCreateComponent {
       annotationType: this.kind.value,
     };
 
+    if (this.isEnum) {
+      request.enumValues = [...this.enumValues];
+    }
+
     this.annotationAPI
       .createCohortAnnotationDefinition(ns, wsid, cid, request)
       .switchMap(_ => this.annotationAPI
@@ -75,13 +77,33 @@ export class SetAnnotationCreateComponent {
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
         this.posting = false;
-        this.form.reset();
         this.onFinish.emit(true);
       });
   }
 
   cancel() {
-    // this.form.reset();
     this.onFinish.emit(true);
+  }
+
+  addEnumValue() {
+    const val = this.addValue.value;
+    const hasVal = this.enumValues.includes(val);
+    if (val && val !== '' && !hasVal) {
+      this.enumValues = [...this.enumValues, val];
+      this.addValue.reset();
+    }
+  }
+
+  removeEnumValue(val: string) {
+    this.enumValues = this.enumValues.filter(v => v !== val);
+  }
+
+  get isEnum() {
+    return this.kind.value === AnnotationType.ENUM;
+  }
+
+  get formIsInvalid() {
+    const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
+    return (this.form.invalid || isEmptyEnum);
   }
 }

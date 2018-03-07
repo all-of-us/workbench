@@ -453,7 +453,7 @@ public class CohortReviewServiceImplTest {
                 .participantId(participantId);
 
         ModifyParticipantCohortAnnotationRequest modifyRequest = new ModifyParticipantCohortAnnotationRequest()
-                .valueBoolean(Boolean.FALSE);
+                .annotationValueBoolean(Boolean.FALSE);
 
         CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition(cohortAnnotationDefinitionId, AnnotationType.BOOLEAN);
 
@@ -483,7 +483,7 @@ public class CohortReviewServiceImplTest {
                 .participantId(participantId);
 
         ModifyParticipantCohortAnnotationRequest modifyRequest = new ModifyParticipantCohortAnnotationRequest()
-                .valueBoolean(Boolean.FALSE);
+                .annotationValueBoolean(Boolean.FALSE);
 
         when(participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(annotationId,
                 cohortReviewId, participantId)).thenReturn(participantCohortAnnotation);
@@ -510,7 +510,7 @@ public class CohortReviewServiceImplTest {
         long participantId = 1;
 
         ModifyParticipantCohortAnnotationRequest modifyRequest = new ModifyParticipantCohortAnnotationRequest()
-                .valueBoolean(Boolean.FALSE);
+                .annotationValueBoolean(Boolean.FALSE);
 
         when(participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(annotationId,
                 cohortReviewId, participantId)).thenReturn(null);

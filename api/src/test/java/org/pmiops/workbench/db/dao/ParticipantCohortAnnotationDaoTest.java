@@ -4,7 +4,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -25,25 +28,51 @@ import static org.junit.Assert.assertEquals;
 @Transactional
 public class ParticipantCohortAnnotationDaoTest {
 
+    private static long COHORT_ID = 1;
+
     @Autowired
     private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+
+    @Autowired
+    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     private long annotationId;
     private long cohortAnnotationDefinitionId = 2L;
+    private long cohortAnnotationDefinitionId1 = 3L;
     private long cohortReviewId = 3L;
     private long participantId = 4L;
 
     @Before
     public void setUp() throws Exception {
+        CohortAnnotationDefinition cohortAnnotationDefinition =
+                new CohortAnnotationDefinition()
+                .cohortId(COHORT_ID)
+                .columnName("enum")
+                .annotationType(AnnotationType.ENUM);
+        CohortAnnotationEnumValue enumValue1 = new CohortAnnotationEnumValue().name("z").order(0).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        CohortAnnotationEnumValue enumValue2 = new CohortAnnotationEnumValue().name("r").order(1).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        CohortAnnotationEnumValue enumValue3 = new CohortAnnotationEnumValue().name("a").order(2).cohortAnnotationDefinition(cohortAnnotationDefinition);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue1);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue2);
+        cohortAnnotationDefinition.getEnumValues().add(enumValue3);
+        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+
         ParticipantCohortAnnotation pca = new ParticipantCohortAnnotation()
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
                 .cohortReviewId(cohortReviewId)
                 .participantId(participantId)
                 .annotationValueBoolean(Boolean.TRUE);
+        ParticipantCohortAnnotation pca1 = new ParticipantCohortAnnotation()
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId1)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueEnum("test");
+        pca1.setCohortAnnotationEnumValue(enumValue1);
         annotationId = participantCohortAnnotationDao.save(pca).getAnnotationId();
+        participantCohortAnnotationDao.save(pca1);
     }
 
     @After
@@ -102,8 +131,23 @@ public class ParticipantCohortAnnotationDaoTest {
             .annotationValueBoolean(Boolean.TRUE);
         List<ParticipantCohortAnnotation> annotations =
         participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
-        assertEquals(1, annotations.size());
+        assertEquals(2, annotations.size());
         assertEquals(expectedPCA, annotations.get(0));
+    }
+
+    @Test
+    public void findByCohortReviewIdAndParticipantIdEnum() throws Exception {
+        ParticipantCohortAnnotation expectedPCA = new ParticipantCohortAnnotation()
+                .annotationId(annotationId)
+                .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId1)
+                .cohortReviewId(cohortReviewId)
+                .participantId(participantId)
+                .annotationValueEnum("test");
+        List<ParticipantCohortAnnotation> annotations =
+                participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
+        assertEquals(2, annotations.size());
+        assertEquals(expectedPCA, annotations.get(1));
+        assertEquals(new CohortAnnotationEnumValue().name("z").order(0), annotations.get(1).getCohortAnnotationEnumValue());
     }
 
 }
