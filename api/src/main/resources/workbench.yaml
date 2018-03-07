@@ -1,3 +1,10 @@
+# This file is for endpoints we do NOT intend to generate client libraries for
+# and advertise to notebook developers. Endpoints we DO want notebook developers to use should
+# go in client_api.yaml.
+
+# This file references parameters, paths, and definitions specified in
+# client_api.yaml; the two files get merged together into a merged.yaml file at build time.
+
 # If validation fails, gradle:generateApi fails claiming this file does not exist.
 # For separate validation (with some false positives), do:
 #     ./project.rb validate-swagger
@@ -44,18 +51,6 @@ security:
 
 ## Common Path Parameters
 parameters:
-  workspaceNamespace:
-    in: path
-    name: workspaceNamespace
-    type: string
-    description: The Workspace namespace
-    required: true
-  workspaceId:
-    in: path
-    name: workspaceId
-    type: string
-    description: The Workspace ID (a.k.a. the workspace's Firecloud name)
-    required: true
   cohortId:
     in: path
     name: cohortId
@@ -895,27 +890,6 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - cohorts
-      description: Materializes a cohort for a given CDR version to specified output
-      operationId: "materializeCohort"
-      parameters:
-       - in: body
-         name: request
-         description: cohort materialization request
-         schema:
-           $ref: "#/definitions/MaterializeCohortRequest"
-      responses:
-        200:
-          description: The results of materializing the cohort
-          schema:
-            $ref: "#/definitions/MaterializeCohortResponse"
-
   # Cohort Builder #######################################################################
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{parentId}:
     parameters:
@@ -1706,63 +1680,6 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
-  MaterializeCohortRequest:
-    type: object
-    properties:
-      cohortName:
-        description: >
-         The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified
-        type: string
-      cohortSpec:
-        description: >
-          JSON representation of a cohort to be evaluated (using the same format used for saved
-          cohorts). Either this or cohortName should be specified
-        type: string
-      statusFilter:
-        description: >
-          An array of status values; participants with these statuses will be included.
-          Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED.
-          Only valid for use with cohortName (cohorts saved in the database.)
-        type: array
-        items:
-          $ref: "#/definitions/CohortStatus"
-      cdrVersionName:
-        description: >
-          The name of a CDR version to use when evaluating the cohort; if none is specified,
-          the CDR version currently associated with the workspace will be used
-        type: string
-      pageToken:
-        description: >
-          Pagination token retrieved from a previous call to materializeCohort; used for
-          retrieving additional pages of results. If this is specified, all other fields on
-          MaterializeCohortRequest apart from pageSize must match the values specified
-          on the request that generated this token.
-        type: string
-      pageSize:
-        description: >
-          Maximum number of results to return in a response. Defaults to 1000.
-        type: integer
-        format: int32
-      # TODO: add fieldSpec, output information
-
-  MaterializeCohortResponse:
-    type: object
-    properties:
-      results:
-        description: >
-          An array of JSON dictionaries representing results to the cohort materialization.
-          (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
-          list[object] where each object is a dictionary. In Typescript clients, this is an
-          Array<any> where each object is a dictionary.)
-        type: array
-        items:
-          type: object
-      nextPageToken:
-        description: >
-          Pagination token that can be used in a subsequent call to MaterializeCohortRequest to
-          retrieve more results. If not set, there are no more results to retrieve.
-        type: string
-
   CreateAccountRequest:
     type: object
     required:
@@ -2373,11 +2290,6 @@ definitions:
         format: int64
       ethnicity:
         type: string
-
-  CohortStatus:
-    type: string
-    description: possible values indicating whether participants are in or out of the cohort
-    enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
 
   ModifyCohortStatusRequest:
     type: object
