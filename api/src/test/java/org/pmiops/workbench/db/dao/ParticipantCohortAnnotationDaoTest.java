@@ -40,6 +40,7 @@ public class ParticipantCohortAnnotationDaoTest {
     private JdbcTemplate jdbcTemplate;
 
     private long annotationId;
+    private long annotationId1;
     private long cohortAnnotationDefinitionId = 2L;
     private long cohortAnnotationDefinitionId1 = 3L;
     private long cohortReviewId = 3L;
@@ -72,6 +73,7 @@ public class ParticipantCohortAnnotationDaoTest {
                 .annotationValueEnum("test");
         pca1.setCohortAnnotationEnumValue(enumValue1);
         annotationId = participantCohortAnnotationDao.save(pca).getAnnotationId();
+        annotationId1 = participantCohortAnnotationDao.save(pca1).getAnnotationId();
     }
 
     @After
