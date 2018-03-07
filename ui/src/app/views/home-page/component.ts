@@ -66,7 +66,7 @@ export class HomePageComponent implements OnInit {
         },
         error => {
           // if loading workspaces throws an error, display to the user
-          const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
+          const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
           if (response.message !== null) {
             this.errorText = response.message;
           }

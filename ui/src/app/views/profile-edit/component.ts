@@ -36,9 +36,8 @@ export class ProfileEditComponent implements OnInit {
         },
           error => {
           // if MailChimp throws an error, display to the user
-          const response: ErrorResponse = this.errorHandlingService.convertAPIError(error);
-          if ((response.message !== null) &&
-              (response.errorClassName.indexOf('MailchimpException') !== null)) {
+          const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+          if (response.message && response.errorClassName.includes('MailchimpException')) {
             this.errorText = response.message;
           }
         }

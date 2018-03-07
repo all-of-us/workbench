@@ -1,5 +1,6 @@
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
+import {Response} from '@angular/http';
 
 import {ErrorCode, ErrorResponse} from 'generated';
 
@@ -51,23 +52,20 @@ export class ErrorHandlingService {
     this.serverBusy = false;
   }
 
-  // Don't retry API calls unless the status code is 503.
+  // don't retry API calls unless the status code is 503.
   public retryApi (observable: Observable<any>,
-      toRun?: number): Observable<any> {
-    if (toRun === undefined) {
-      toRun = 3;
-    }
+      toRun = 3): Observable<any> {
     let numberRuns = 0;
 
-    return observable.retryWhen((errors) => {
-      return errors.do((e) => {
+    return observable.retryWhen(errors => {
+      return errors.do(e => {
         numberRuns++;
         if (numberRuns === toRun) {
           this.setServerBusy();
           throw e;
         }
 
-        const errorResponse = this.convertAPIError(e);
+        const errorResponse = ErrorHandlingService.convertAPIError(e);
         switch (errorResponse.statusCode) {
           case 503:
             break;
@@ -89,22 +87,14 @@ export class ErrorHandlingService {
     });
   }
 
-  // convert error response from API to ErrorResponse object,
-  // otherwise, report parse error
-  public convertAPIError (e: any) {
-    if (e._body != null && JSON.parse(e._body) != null) {
-      const convertedError: ErrorResponse = {
-        'errorClassName': JSON.parse(e._body).errorClassName || null,
-        'errorCode': JSON.parse(e._body).errorCode || null,
-        'message': JSON.parse(e._body).message || null,
-        'statusCode': JSON.parse(e._body).statusCode || null
-      };
-      return convertedError;
-    } else {
-      const nonApiError: ErrorResponse = {
-        'statusCode': ErrorCode.PARSEERROR
-      };
-      return nonApiError;
+  // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
+  public static convertAPIError (e: Response) {
+    try {
+      const { errorClassName = null, errorCode = null, message = null, statusCode = null } = e.json();
+      return { errorClassName, errorCode, message, statusCode };
+    }
+    catch {
+      return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR }
     }
   }
 }
