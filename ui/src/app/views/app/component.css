@@ -27,7 +27,7 @@
   transform: rotate(0deg);
   display: inline-block;
   margin-left: 1rem;
-  transition: transform 1s;
+  transition: transform 0.5s;
 }
 .sidenav-toggle.rotate {
   transform: rotate(90deg);
@@ -73,7 +73,7 @@
   max-width: 10rem;
   box-shadow: 0px 3px 10px;
   opacity: 1;
-  transition: opacity 1s;
+  transition: opacity 0.5s;
 }
 
 .sidenav.sidenavHidden {
