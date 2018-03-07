@@ -64,7 +64,8 @@ public class ParticipantCounterTest {
                 "where\n" +
                 "person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
+                "where\n" +
+                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
                 ")\n";
 
         assertEquals(expectedSql, actualRequest.getQuery());
@@ -73,7 +74,7 @@ public class ParticipantCounterTest {
                 actualRequest
                         .getNamedParameters()
                         .get(genderNamedParameter)
-                        .getValue());
+                        .getArrayValues().get(0).getValue());
     }
 
     @Test
@@ -153,7 +154,8 @@ public class ParticipantCounterTest {
                 ")\n" +
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
+                "where\n" +
+                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
@@ -174,7 +176,7 @@ public class ParticipantCounterTest {
                 actualRequest
                         .getNamedParameters()
                         .get(genderNamedParameter)
-                        .getValue());
+                        .getArrayValues().get(0).getValue());
 
         assertEquals(parameter1.getValue(),
                 actualRequest
@@ -261,7 +263,8 @@ public class ParticipantCounterTest {
                 ")\n" +
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
+                "where\n" +
+                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
@@ -284,7 +287,7 @@ public class ParticipantCounterTest {
                 actualRequest
                         .getNamedParameters()
                         .get(genderNamedParameter)
-                        .getValue());
+                        .getArrayValues().get(0).getValue());
 
         assertEquals(parameter1.getValue(),
                 actualRequest
@@ -379,7 +382,8 @@ public class ParticipantCounterTest {
                 ")\n" +
                 "and person.person_id in (select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where p.gender_concept_id = @" + genderNamedParameter + "\n" +
+                "where\n" +
+                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
                 ")\n" +
                 "and not exists\n" +
                 "(select 'x' from\n" +
@@ -402,7 +406,7 @@ public class ParticipantCounterTest {
                 actualRequest
                         .getNamedParameters()
                         .get(genderNamedParameter)
-                        .getValue());
+                        .getArrayValues().get(0).getValue());
 
         assertEquals(parameter1.getValue(),
                 actualRequest
