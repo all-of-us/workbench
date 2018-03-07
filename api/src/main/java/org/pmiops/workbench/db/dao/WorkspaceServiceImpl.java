@@ -236,7 +236,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
-    if (userAccess == PROJECT_OWNER_ACCESS_LEVEL) {
+    if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
     WorkspaceAccessLevel result = WorkspaceAccessLevel.fromValue(userAccess);
