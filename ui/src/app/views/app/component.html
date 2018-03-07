@@ -21,7 +21,7 @@
 <ng-template #signedIn>
   <div class="page-container">
     <div>
-      <div #sidenavToggleElement class="sidenav-toggle">
+      <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
         <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"></clr-icon>
       </div>
       <img [src]="headerImg" class="header-image" routerLink="/">
