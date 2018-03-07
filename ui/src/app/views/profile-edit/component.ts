@@ -39,7 +39,7 @@ export class ProfileEditComponent implements OnInit {
         if (response.message && response.errorClassName.includes('MailchimpException')) {
           this.errorText = response.message;
         } else {
-          this.errorText = "";
+          this.errorText = '';
         }
     });
   }
