@@ -81,10 +81,20 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  get angleDir() {
+    return this.sidebarOpen ? 'right' : 'left';
+  }
+
+  get sidebarOpen() {
+    return this.state.sidebarOpen.getValue();
+  }
+
+  set sidebarOpen(value: boolean) {
+    this.state.sidebarOpen.next(value);
+  }
+
   toggleSidebar() {
-    this.state.sidebarOpen.asObservable()
-      .take(1)
-      .subscribe(val => this.state.sidebarOpen.next(!val));
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
   up() {

@@ -26,7 +26,6 @@ import {ParticipantDetailComponent} from './participant-detail/participant-detai
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
-import {FullPageDirective} from './directives/fullPage.directive';
 import {ReviewStateService} from './review-state.service';
 
 import {CohortReviewRoutingModule} from './routing/routing.module';
@@ -67,9 +66,6 @@ import {WorkspacesService} from 'generated';
     ParticipantDetailComponent,
     ParticipantStatusComponent,
     SidebarContentComponent,
-
-    /* Directives */
-    FullPageDirective,
   ],
   providers: [ReviewStateService]
 })
