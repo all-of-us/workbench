@@ -20,7 +20,12 @@
 </ng-template>
 <ng-template #signedIn>
   <div class="page-container">
-    <img [src]="headerImg" class="headerImage">
+    <div>
+      <div class="sidenav-toggle">
+        <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"></clr-icon>
+      </div>
+      <img [src]="headerImg" class="header-image" routerLink="/">
+    </div>
     <clr-dropdown>
       <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
         <clr-icon shape="user" size="24"></clr-icon>
@@ -35,7 +40,7 @@
   </div>
 
   <div class="content-container">
-    <nav class="sidenav" [style.min-height.px]="sidebarHeight">
+    <nav *ngIf="sidenavToggle" class="sidenav"  (clickOutside)="onClickedOutsideSidebar($event)">
       <section class="sidenav-content">
         <button class="btn btn-primary nav-link"
             [class.active]="workspacesActive"

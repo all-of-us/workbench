@@ -32,9 +32,9 @@ export class AppComponent implements OnInit {
   currentUrl: string;
   email: string;
   backgroundImgSrc = '/assets/images/group.jpg';
-  headerImg = '/assets/images/logo-registration_nonSignedIn.png';
+  headerImg = '/assets/images/all-of-us-logo.svg';
   headerHeight = 102;
-  sidebarHeight = window.innerHeight - this.headerHeight;
+  sidenavToggle = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -108,9 +108,6 @@ export class AppComponent implements OnInit {
         });
       }
     });
-    window.addEventListener('resize', () => {
-      this.sidebarHeight = window.innerHeight - this.headerHeight;
-    });
   }
 
   /**
@@ -155,4 +152,12 @@ export class AppComponent implements OnInit {
     return this.locationService.path() === ''
       || this.locationService.path().startsWith('/workspace');
   }
+  onClickedOutsideSidebar(e: MouseEvent) {
+    if (this.sidenavToggle) {
+      if (e.clientX > 240 && e.clientY > 80) {
+        this.sidenavToggle = false;
+      }
+    }
+  }
+
 }

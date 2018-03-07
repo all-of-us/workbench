@@ -45,6 +45,7 @@
     "immutable": "^4.0.0-rc.9",
     "moment": "^2.20.1",
     "mutationobserver-shim": "^0.3.2",
+    "ng-click-outside": "^3.2.0",
     "ngx-popper": "^1.9.9",
     "popper.js": "^1.13.0",
     "redux": "^3.7.2",
