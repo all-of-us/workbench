@@ -41,11 +41,11 @@
             [class.active]="workspacesActive"
             routerLink="/">My Workspaces</button>
         <button class="btn btn-primary nav-link"
-            [class.active]="reviewActive"
+            [class.active]="reviewWorkspaceActive"
             *ngIf="hasReviewResearchPurpose"
             routerLink="/admin/review-workspace">Review Workspaces</button>
         <button class="btn btn-primary nav-link"
-            [class.active]="reviewActive"
+            [class.active]="reviewIdActive"
             *ngIf="hasReviewIdVerification"
             routerLink="/admin/review-id-verification">Review ID Verifications</button>
       </section>

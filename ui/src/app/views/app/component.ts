@@ -143,8 +143,12 @@ export class AppComponent implements OnInit {
     return this.showCreateAccount ? '10vh' : '30vh';
   }
 
-  get reviewActive(): boolean {
-    return this.locationService.path().startsWith('/admin/review');
+  get reviewWorkspaceActive(): boolean {
+    return this.locationService.path().startsWith('/admin/review-workspace');
+  }
+
+  get reviewIdActive(): boolean {
+    return this.locationService.path().startsWith('/admin/review-id-verification');
   }
 
   get workspacesActive(): boolean {
