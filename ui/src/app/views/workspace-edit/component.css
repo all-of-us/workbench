@@ -8,6 +8,10 @@
   width: 20rem;
 }
 
+.input.description {
+  width: 100%;
+}
+
 .checkbox-group {
   padding: 0.6rem 0;
 }

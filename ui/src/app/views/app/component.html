@@ -20,8 +20,11 @@
 </ng-template>
 <ng-template #signedIn>
   <div class="page-container">
-    <div style="height: 2rem;">
-      <ng-template *ngIf="true; then logoImages"></ng-template>
+    <div>
+      <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
+        <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"></clr-icon>
+      </div>
+      <img [src]="headerImg" class="header-image" routerLink="/">
     </div>
     <clr-dropdown>
       <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
@@ -35,26 +38,32 @@
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
-  <div class="top-nav btn-primary">
-    <button class="btn tab-link"
-        [class.active]="workspacesActive"
-        routerLink="/">My Workspaces</button>
-    <button class="btn tab-link"
-        [class.active]="reviewActive"
-        *ngIf="hasReviewResearchPurpose"
-        routerLink="/admin/review-workspace">Review Workspaces</button>
-    <button class="btn tab-link"
-        [class.active]="reviewActive"
-        *ngIf="hasReviewIdVerification"
-        routerLink="/admin/review-id-verification">Review ID Verifications</button>
+
+  <div class="content-container">
+    <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
+      <section class="sidenav-content">
+        <button class="btn btn-primary nav-link"
+            [class.active]="workspacesActive"
+            routerLink="/">My Workspaces</button>
+        <button class="btn btn-primary nav-link"
+            [class.active]="reviewWorkspaceActive"
+            *ngIf="hasReviewResearchPurpose"
+            routerLink="/admin/review-workspace">Review Workspaces</button>
+        <button class="btn btn-primary nav-link"
+            [class.active]="reviewIdActive"
+            *ngIf="hasReviewIdVerification"
+            routerLink="/admin/review-id-verification">Review ID Verifications</button>
+      </section>
+    </nav>
+    <div class="app-container">
+      <!--
+        Angular's builtin Router module will attach specific views here
+        based on clicking routerLink elements (above) or router.navigate calls.
+      -->
+      <router-outlet></router-outlet>
+    </div>
   </div>
-  <div>
-    <!--
-      Angular's builtin Router module will attach specific views here
-      based on clicking routerLink elements (above) or router.navigate calls.
-    -->
-    <router-outlet></router-outlet>
-  </div>
+
 </ng-template>
 <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
   <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
