@@ -169,11 +169,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                     String.format("Not Found: Participant Cohort Annotation does not exist for annotationId: %s, cohortReviewId: %s, participantId: %s",
                             annotationId, cohortReviewId, participantId));
         }
-        participantCohortAnnotation.annotationValueString(modifyRequest.getValueString())
-                .annotationValueEnum(modifyRequest.getValueEnum())
-                .annotationValueDateString(modifyRequest.getValueDate())
-                .annotationValueBoolean(modifyRequest.getValueBoolean())
-                .annotationValueInteger(modifyRequest.getValueInteger());
+        participantCohortAnnotation.annotationValueString(modifyRequest.getAnnotationValueString())
+                .annotationValueEnum(modifyRequest.getAnnotationValueEnum())
+                .annotationValueDateString(modifyRequest.getAnnotationValueDate())
+                .annotationValueBoolean(modifyRequest.getAnnotationValueBoolean())
+                .annotationValueInteger(modifyRequest.getAnnotationValueInteger());
         CohortAnnotationDefinition cohortAnnotationDefinition =
                 findCohortAnnotationDefinition(participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
@@ -267,7 +267,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             if (enumValues.isEmpty()) {
                 throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
-            participantCohortAnnotation.setCohortAnnotationEnumValueId(enumValues.get(0).getCohortAnnotationEnumValueId());
+            participantCohortAnnotation.setCohortAnnotationEnumValue(enumValues.get(0));
         }
     }
 

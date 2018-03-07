@@ -1,62 +1,94 @@
 <div class="wrapper">
-  <ng-container [ngSwitch]="definition.annotationType">
+  <ng-container [ngSwitch]="annotation.definition.annotationType">
 
+    <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
-          {{ definition.columnName }}
+          {{ annotation.definition.columnName }}
           <em>{{ datatypeDisplay | titlecase }}</em>
         </span>
         <clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>
       </label>
-      <input type="text" *ngIf="!expandText" [name]="machineName" [id]="machineName" [formControl]="control">
-      <textarea *ngIf="expandText" [name]="machineName" [id]="machineName" [formControl]="control"></textarea>
+      <input *ngIf="!expandText"
+        type="text"
+        (blur)="handleInput()"
+        [name]="machineName"
+        [id]="machineName"
+        [formControl]="control">
+        <textarea *ngIf="expandText"
+          (blur)="handleInput()"
+          [name]="machineName"
+          [id]="machineName"
+          [formControl]="control">
+        </textarea>
     </div>
 
+    <div *ngSwitchCase="kinds.DATE">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ annotation.definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+      </label>
+      <input
+        (blur)="handleInput()"
+        type="date"
+        [name]="machineName"
+        [id]="machineName"
+        [formControl]="control">
+    </div>
+
+    <div *ngSwitchCase="kinds.INTEGER">
+      <label [for]="machineName" class="flex-container">
+        <span class="flex-content-main">
+          {{ annotation.definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
+        </span>
+      </label>
+      <input
+        (blur)="handleInput()"
+        type="number"
+        [name]="machineName"
+        [id]="machineName"
+        [formControl]="control">
+    </div>
+
+    <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
-          {{ definition.columnName }}
+          {{ annotation.definition.columnName }}
           <em>{{ datatypeDisplay | titlecase }}</em>
         </span>
       </label>
       <div class="select">
-        <select [name]="machineName" [id]="machineName" [formControl]="control">
-          <option *ngFor="let value of definition.enumValues">
+        <select
+          (change)="handleInput()"
+          [name]="machineName"
+          [id]="machineName"
+          [formControl]="control">
+          <option value=''><em>No Selection</em></option>
+          <option *ngFor="let value of annotation.definition.enumValues" [value]="value">
             {{ value | titlecase }}
           </option>
         </select>
       </div>
     </div>
 
-    <div *ngSwitchCase="kinds.DATE">
-      <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
-          {{ definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
-        </span>
-      </label>
-      <input type="date" [name]="machineName" [id]="machineName" [formControl]="control">
-    </div>
-
-    <!-- Provisional data types -->
     <div *ngSwitchCase="kinds.BOOLEAN">
       <div class="checkbox-inline flex-container">
-        <input type="checkbox" [name]="machineName" [id]="machineName" [formControl]="control">
+        <input
+          (change)="handleInput()"
+          type="checkbox"
+          [name]="machineName"
+          [id]="machineName"
+          [formControl]="control">
         <label [for]="machineName" class="flex-content-main">
-          {{ definition.columnName }}<em>{{ datatypeDisplay | titlecase }}</em>
+          {{ annotation.definition.columnName }}
+          <em>{{ datatypeDisplay | titlecase }}</em>
         </label>
       </div>
-    </div>
-
-    <div *ngSwitchCase="kinds.INTEGER">
-      <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
-          {{ definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
-        </span>
-      </label>
-      <input type="number" [name]="machineName" [id]="machineName" [formControl]="control">
     </div>
 
   </ng-container>

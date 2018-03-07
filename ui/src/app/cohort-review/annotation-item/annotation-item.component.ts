@@ -1,33 +1,37 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
 
 import {
   AnnotationType,
-  CohortAnnotationDefinition as Definition,
+  CohortAnnotationDefinition,
   CohortReviewService,
-  ModifyParticipantCohortAnnotationRequest as Request,
-  ParticipantCohortAnnotation as Annotation,
+  ModifyParticipantCohortAnnotationRequest,
+  ParticipantCohortAnnotation,
 } from 'generated';
+
+
+interface Annotation {
+  definition: CohortAnnotationDefinition;
+  value: ParticipantCohortAnnotation;
+}
+
 
 @Component({
   selector: 'app-annotation-item',
   templateUrl: './annotation-item.component.html',
   styleUrls: ['./annotation-item.component.css']
 })
-export class AnnotationItemComponent implements OnInit  {
-  @Input() definition: Definition;
-  @Input() value: Annotation;
+export class AnnotationItemComponent implements OnInit {
+  readonly kinds = AnnotationType;
+
+  @Input() annotation: Annotation;
   @Input() showDataType: boolean;
 
   private control = new FormControl();
-  private subscription: Subscription;
   private expandText = false;
-  readonly kinds = AnnotationType;
 
   constructor(
     private state: ReviewStateService,
@@ -36,77 +40,87 @@ export class AnnotationItemComponent implements OnInit  {
   ) {}
 
   ngOnInit() {
-    // TODO (jms) - once the backend is in place, here we'll establish
-    // delegating to create / update / destroy as is appropriate for changes to
-    // this.control
-    this.subscription = Observable.combineLatest(
-        this.control.valueChanges,
-        this.control.statusChanges)
-      .subscribe(console.log);
+    const oldValue = this.annotation.value[this.valuePropertyName];
+    if (oldValue !== undefined) {
+      this.control.setValue(oldValue);
+    }
   }
 
-  create(value): Observable<Annotation> {
-    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
-    const request = <Annotation>{
-      ...this.value,
-      [this.valuePropertyName]: value
-    };
-    return this.reviewAPI
-      .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
-  }
+  handleInput() {
+    /* Parameters from the path */
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const pid = this.annotation.value.participantId;
+    const cdrid = +(this.route.snapshot.data.workspace.cdrVersionId);
 
-  update(value): Observable<Annotation> {
-    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
-    const aid = this.definition.cohortAnnotationDefinitionId;
-    const request = <Request>{
-      [this.valuePropertyName]: value
-    };
-    return this.reviewAPI
-      .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, aid, request);
-  }
+    const newValue = this.control.value;
+    const oldValue = this.annotation.value[this.valuePropertyName];
+    const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
+    const annoId = this.annotation.value.annotationId;
 
-  delete(): Observable<{}> {
-    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
-    const aid = this.definition.cohortAnnotationDefinitionId;
-    return this.reviewAPI
-      .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, aid);
-  }
+    let apiCall;
 
-  refresh(): Observable<Annotation[]> {
-    const {ns, wsid, cid, cdrid, pid} = this.pathParams;
-    return (this.reviewAPI
+    // Nothing to see here - if there's no change, no need to hit the server
+    if (newValue === oldValue) {
+      return ;
+    }
+
+    // If there is an annotation ID then the annotation has already been
+    // created, so this must be either delete or update
+    if (annoId !== undefined) {
+      // If the new value isn't anything, this is a delete
+      if (newValue === '' || newValue === null) {
+        apiCall = this.reviewAPI
+          .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
+      } else {
+        const request = <ModifyParticipantCohortAnnotationRequest>{
+          [this.valuePropertyName]: newValue,
+        };
+        apiCall = this.reviewAPI
+          .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
+      }
+    } else {
+    // There's no annotation ID so this must be a create
+      const request = <ParticipantCohortAnnotation> {
+        cohortAnnotationDefinitionId: defnId,
+        ...this.annotation.value,
+        [this.valuePropertyName]: newValue,
+      };
+      apiCall = this.reviewAPI
+        .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
+    }
+
+    // Re-load the full list after updating the individual
+    const refresh = this.reviewAPI
       .getParticipantCohortAnnotations(ns, wsid, cid, cdrid, pid)
-      .pluck('items') as Observable<Annotation[]>);
+      .pluck('items');
+
+    // Actually run the API calls
+    apiCall.switchMap(_ => refresh).subscribe(newValues => {
+      this.state.annotationValues.next(newValues);
+    });
   }
 
   toggleExpandText() {
     this.expandText = !this.expandText;
   }
 
-  private get pathParams() {
-    const {ns, wsid, cid} = this.route.snapshot.params;
-    const pid = this.value.participantId;
-    const cdrid = +(this.route.snapshot.data.workspace.cdrVersionId);
-    return {ns, wsid, cid, pid, cdrid};
-  }
-
   get valuePropertyName() {
     return {
-      [this.kinds.STRING]:   'valueString',
-      [this.kinds.ENUM]:     'valueEnum',
-      [this.kinds.DATE]:     'valueDate',
-      [this.kinds.BOOLEAN]:  'valueBoolean',
-      [this.kinds.INTEGER]:  'valueInteger'
-    }[this.definition.annotationType];
+      [AnnotationType.STRING]:   'annotationValueString',
+      [AnnotationType.ENUM]:     'annotationValueEnum',
+      [AnnotationType.DATE]:     'annotationValueDate',
+      [AnnotationType.BOOLEAN]:  'annotationValueBoolean',
+      [AnnotationType.INTEGER]:  'annotationValueInteger'
+    }[this.annotation.definition.annotationType];
   }
 
   get machineName() {
-    return this.definition.columnName.split(' ').join('-');
+    return this.annotation.definition.columnName.split(' ').join('-');
   }
 
   get datatypeDisplay() {
     return this.showDataType
-      ? ` (${this.definition.annotationType})`
+      ? ` (${this.annotation.definition.annotationType})`
       : '';
   }
 }

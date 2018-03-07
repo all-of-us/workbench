@@ -2469,6 +2469,7 @@ definitions:
     required:
       - cohortReviewId
       - participantId
+      - cohortAnnotationDefinitionId
     properties:
       annotationId:
         type: integer
@@ -2486,6 +2487,7 @@ definitions:
         type: integer
         format: int64
         description: the participant id.
+      # These property names should match what is in ModifyParticipantCohortAnnotationRequest
       annotationValueString:
         type: string
         description: The Value of the annotation if the AnnotationType is STRING
@@ -2534,19 +2536,19 @@ definitions:
   ModifyParticipantCohortAnnotationRequest:
     type: object
     properties:
-      valueString:
+      annotationValueString:
         type: string
         description: The Value of the annotation if the AnnotationType is STRING
-      valueEnum:
+      annotationValueEnum:
         type: string
         description: The option chosen for the annotation if the AnnotationType is ENUM
-      valueDate:
+      annotationValueDate:
         type: string
         description: The Value of the annotation if the AnnotationType is DATE
-      valueBoolean:
+      annotationValueBoolean:
         type: boolean
         description: The Value of the annotation if the AnnotationType is BOOLEAN
-      valueInteger:
+      annotationValueInteger:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
 

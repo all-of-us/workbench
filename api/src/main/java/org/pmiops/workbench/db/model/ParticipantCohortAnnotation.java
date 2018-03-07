@@ -2,11 +2,14 @@ package org.pmiops.workbench.db.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.sql.Date;
@@ -20,7 +23,7 @@ public class ParticipantCohortAnnotation {
     private Long cohortReviewId;
     private Long participantId;
     private String annotationValueString;
-    private Long cohortAnnotationEnumValueId;
+    private CohortAnnotationEnumValue cohortAnnotationEnumValue;
     private String annotationValueEnum;
     private Date annotationValueDate;
     private String annotationValueDateString;
@@ -99,17 +102,18 @@ public class ParticipantCohortAnnotation {
         return this;
     }
 
-    @Column(name = "cohort_annotation_enum_value_id")
-    public Long getCohortAnnotationEnumValueId() {
-        return cohortAnnotationEnumValueId;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cohort_annotation_enum_value_id")
+    public CohortAnnotationEnumValue getCohortAnnotationEnumValue() {
+        return cohortAnnotationEnumValue;
     }
 
-    public void setCohortAnnotationEnumValueId(Long cohortAnnotationEnumValueId) {
-        this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
+    public void setCohortAnnotationEnumValue(CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+        this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
     }
 
-    public ParticipantCohortAnnotation cohortAnnotationEnumValueId(Long cohortAnnotationEnumValueId) {
-        this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
+    public ParticipantCohortAnnotation cohortAnnotationEnumValue(CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+        this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
         return this;
     }
 
@@ -192,7 +196,6 @@ public class ParticipantCohortAnnotation {
                 Objects.equals(cohortReviewId, that.cohortReviewId) &&
                 Objects.equals(participantId, that.participantId) &&
                 Objects.equals(annotationValueString, that.annotationValueString) &&
-                Objects.equals(cohortAnnotationEnumValueId, that.cohortAnnotationEnumValueId) &&
                 Objects.equals(annotationValueDate, that.annotationValueDate) &&
                 Objects.equals(annotationValueBoolean, that.annotationValueBoolean) &&
                 Objects.equals(annotationValueInteger, that.annotationValueInteger);
@@ -204,7 +207,6 @@ public class ParticipantCohortAnnotation {
                 cohortReviewId,
                 participantId,
                 annotationValueString,
-                cohortAnnotationEnumValueId,
                 annotationValueDate,
                 annotationValueBoolean,
                 annotationValueInteger);
@@ -218,7 +220,6 @@ public class ParticipantCohortAnnotation {
                 .append("cohortReviewId", cohortReviewId)
                 .append("participantId", participantId)
                 .append("annotationValueString", annotationValueString)
-                .append("cohortAnnotationEnumValueId", cohortAnnotationEnumValueId)
                 .append("annotationValueDate", annotationValueDate)
                 .append("annotationValueBoolean", annotationValueBoolean)
                 .append("annotationValueInteger", annotationValueInteger)
