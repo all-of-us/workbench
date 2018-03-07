@@ -43,9 +43,13 @@ export class SetAnnotationItemComponent {
   edit(): void {
     this.editing = true;
     this.name.setValue(this.definition.columnName);
+    this.setFocus();
+  }
+
+  setFocus() {
     // tslint:disable
     /* For all the reasons behind this TOTALLY OBVIOUS solution to the
-     * extremely complex problem of focusing an input (/s), please see the
+     * extremely complex problem of focusing an input, please see the
      * following:
      * https://stackoverflow.com/questions/41190075/how-do-i-programmatically-set-focus-to-dynamically-created-formcontrol-in-angula?rq=1
      * https://stackoverflow.com/questions/34502768/why-angular2-template-local-variables-are-not-usable-in-templates-when-using-ng?rq=1
