@@ -20,20 +20,20 @@ export class ProfileEditComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.errorText = null;
     this.profileService.getMe().subscribe(
-        (profile: Profile) => {
-      this.profile = profile;
-      this.profileLoaded = true;
-    });
+      (profile: Profile) => {
+        this.profile = profile;
+        this.profileLoaded = true;
+      });
   }
 
   submitChanges(): void {
-    this.profileService.updateProfile(this.profile)
-      .subscribe(
+    this.profileService.updateProfile(this.profile).subscribe(
       () => {
         this.router.navigate(['../'], {relativeTo : this.route});
       },
-        error => {
+      error => {
         // if MailChimp throws an error, display to the user
         const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
         if (response.message && response.errorClassName.includes('MailchimpException')) {
@@ -41,6 +41,6 @@ export class ProfileEditComponent implements OnInit {
         } else {
           this.errorText = '';
         }
-    });
+      });
   }
 }

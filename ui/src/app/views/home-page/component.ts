@@ -58,20 +58,21 @@ export class HomePageComponent implements OnInit {
   ngOnInit(): void {
     this.errorText = null;
     this.workspacesLoading = true;
-    this.workspacesService.getWorkspaces()
-      .subscribe(
-        workspacesReceived => {
-          this.workspaceList = workspacesReceived.items;
-          this.workspacesLoading = false;
-        },
-        error => {
-          // if loading workspaces throws an error, display to the user
-          const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-          if (response.message !== null) {
-            this.errorText = response.message;
-          }
-          this.workspacesLoading = false;
-        });
+    this.workspacesService.getWorkspaces().subscribe(
+      workspacesReceived => {
+        this.workspaceList = workspacesReceived.items;
+        this.workspacesLoading = false;
+      },
+      error => {
+        // if loading workspaces throws an error, display to the user
+        const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+        if (response.message !== null) {
+          this.errorText = response.message;
+        } else {
+          this.errorText = '';
+        }
+        this.workspacesLoading = false;
+      });
   }
 
   addWorkspace(): void {
