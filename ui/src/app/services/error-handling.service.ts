@@ -66,8 +66,7 @@ export class ErrorHandlingService {
   }
 
   // don't retry API calls unless the status code is 503.
-  public retryApi (observable: Observable<any>,
-      toRun = 3): Observable<any> {
+  public retryApi (observable: Observable<any>, toRun = 3): Observable<any> {
     let numberRuns = 0;
 
     return observable.retryWhen(errors => {
