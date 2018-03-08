@@ -393,6 +393,11 @@ def docker_clean(*args)
     common.run_inline("docker rm -f #{docker_images}")
   end
   common.run_inline %W{docker-compose down --volumes}
+  # This keyfile gets created and cached locally on dev-up. Though it's not
+  # specific to Docker, it is mounted locally for docker runs. For lack of a
+  # better "dev teardown" hook, purge that file here; e.g. in case we decide to
+  # invalidate a dev key or change the service account.
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 end
 
 Common.register_command({
