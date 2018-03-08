@@ -17,7 +17,7 @@ public class InterceptorUtils {
     Method apiControllerMethod = handlerMethod.getMethod();
     String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
     String controllerName = apiControllerPattern.matcher(apiControllerName).replaceAll("$1$2");
-    Class controllerClass;
+    Class<?> controllerClass;
     try {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
