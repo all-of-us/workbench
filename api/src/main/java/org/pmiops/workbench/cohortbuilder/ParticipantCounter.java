@@ -2,12 +2,14 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import java.util.StringJoiner;
  */
 @Service
 public class ParticipantCounter {
+
+    private DomainLookupService domainLookupService;
 
     private static final String COUNT_SQL_TEMPLATE =
             "select count(distinct person_id) as count\n" +
@@ -63,11 +67,18 @@ public class ParticipantCounter {
                     "(${excludeSql})\n" +
                     "x where x.person_id = person.person_id)\n";
 
+    @Autowired
+    public ParticipantCounter(DomainLookupService domainLookupService) {
+        this.domainLookupService = domainLookupService;
+    }
+
     /**
      * Provides counts with demographic info for charts
      * defined by the provided {@link SearchRequest}.
      */
     public QueryJobConfiguration buildParticipantCounterQuery(SearchRequest request) {
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
         return buildQuery(request, COUNT_SQL_TEMPLATE, "");
     }
 
@@ -76,11 +87,15 @@ public class ParticipantCounter {
      * defined by the provided {@link SearchRequest}.
      */
     public QueryJobConfiguration buildChartInfoCounterQuery(SearchRequest request) {
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
         return buildQuery(request, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
     }
 
     public QueryJobConfiguration buildParticipantIdQuery(SearchRequest request, long resultSize,
         long offset) {
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
         String endSql = ID_SQL_ORDER_BY + " " + resultSize;
         if (offset > 0) {
             endSql += OFFSET_SUFFIX + offset;

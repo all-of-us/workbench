@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
-    private DomainLookupService domainLookupService;
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private CdrVersionDao cdrVersionDao;
@@ -56,12 +55,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Autowired
     CohortBuilderController(BigQueryService bigQueryService,
-                            DomainLookupService domainLookupService,
                             ParticipantCounter participantCounter,
                             CriteriaDao criteriaDao,
                             CdrVersionDao cdrVersionDao) {
         this.bigQueryService = bigQueryService;
-        this.domainLookupService = domainLookupService;
         this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
         this.cdrVersionDao = cdrVersionDao;
@@ -89,9 +86,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -104,9 +98,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         ChartInfoListResponse response = new ChartInfoListResponse();
-
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
