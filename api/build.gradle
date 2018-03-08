@@ -162,10 +162,10 @@ validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
-ideaModule.dependsOn generateFireCloudClient
-compileGeneratedJava.dependsOn generateFireCloudClient
-ideaModule.dependsOn generateNotebooksClient
-compileGeneratedJava.dependsOn generateNotebooksClient
+// ideaModule.dependsOn generateFireCloudClient
+// compileGeneratedJava.dependsOn generateFireCloudClient
+// ideaModule.dependsOn generateNotebooksClient
+// compileGeneratedJava.dependsOn generateNotebooksClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
@@ -344,3 +344,37 @@ version = '0.1.0'          // Version in generated output
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+
+class IncrementalHotSwapTask extends DefaultTask {
+    @InputDirectory
+    def File inputDir
+
+    @TaskAction
+    void execute(IncrementalTaskInputs inputs) {
+      // Only handle incremental builds---don't hot-swap on initial compile.
+      if (inputs.incremental) {
+
+        inputs.outOfDate { change ->
+          String prefix = "/w/api/build/classes/java/main/"
+          String relativePath = change.file.path.substring(prefix.length())
+          String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
+          printf "Hot swapping $fqClassName..."
+          def proc = "echo redefine $fqClassName $change.file.path".execute() \
+            | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
+          proc.waitFor()
+          println "done."
+        }
+
+        inputs.removed { change ->
+          println "Class removed (may require restart): ${change.file.path}"
+        }
+      }
+    }
+}
+
+task incrementalHotSwap(type: IncrementalHotSwapTask) {
+    inputDir = file("$buildDir/classes/java/main")
+}
+
+incrementalHotSwap.dependsOn compileJava

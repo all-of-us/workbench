@@ -258,8 +258,7 @@ def run_api()
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-    at_exit { common.run_inline %W{docker-compose down} }
-    common.run_inline_swallowing_interrupt %W{docker-compose up api}
+    common.run_inline %W{docker-compose up -d api}
   end
 end
 
@@ -1316,4 +1315,15 @@ Common.register_command({
   :invocation => "setup-cloud-project",
   :description => "Initializes resources within a cloud project that has already been created",
   :fn => lambda { |*args| setup_cloud_project("setup-cloud-project", *args) }
+})
+
+def start_api_and_sleep()
+  c = Common.new
+  c.run_inline %W{gradle appengineStart}
+  c.run_inline %W{sleep 1000d}
+end
+
+Common.register_command({
+  :invocation => "start-api-and-sleep",
+  :fn => lambda { |*args| start_api_and_sleep() }
 })
