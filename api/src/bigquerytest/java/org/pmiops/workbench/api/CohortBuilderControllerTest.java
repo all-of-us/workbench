@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class})
+@Import({QueryBuilderFactory.class, BigQueryService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -51,14 +51,12 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Autowired
     private BigQuery bigquery;
 
-    @Autowired
-    private ParticipantCounter participantCounter;
-
-    @Mock
-    private DomainLookupService domainLookupService;
 
     @Autowired
     private BigQueryService bigQueryService;
+
+    @Mock
+    private DomainLookupService mockDomainLookupService;
 
     @Mock
     private CriteriaDao mockCriteriaDao;
@@ -89,8 +87,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
         cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
         CdrVersionContext.setCdrVersion(cdrVersion);
-        this.controller = new CohortBuilderController(bigQueryService, domainLookupService,
-            participantCounter, mockCriteriaDao, mockCdrVersionDao);
+        this.controller = new CohortBuilderController(bigQueryService,
+                new ParticipantCounter(mockDomainLookupService), mockCriteriaDao, mockCdrVersionDao);
     }
 
     @Test
@@ -350,13 +348,16 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
+        final SearchRequest searchRequests = createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
+                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))));
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
-                                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
-                        1);
+        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
+        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
+        assertParticipants(controller.countParticipants(1L, searchRequests),1);
+
+        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
+        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
     }
 
     @Test

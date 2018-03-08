@@ -49,9 +49,9 @@ public class DemoQueryBuilderTest {
         String expected = "select distinct person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
-                "p.gender_concept_id in (@" + genderNamedParameter + ")\n" +
+                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
                 "and\n" +
-                "p.race_concept_id in (@" + raceNamedParameter + ")\n" +
+                "p.race_concept_id in unnest(@" + raceNamedParameter + ")\n" +
                 "and\n" +
                 "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) =\n" +
                 "@" + ageNamedParameter + "\n";
