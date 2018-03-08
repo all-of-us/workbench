@@ -21,7 +21,9 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +34,8 @@ import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({BigQueryService.class, DemoQueryBuilder.class, QueryBuilderFactory.class})
+@SpringBootTest(classes = {TestCdrJpaConfig.class})
+@ActiveProfiles("test-cdr")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   private CohortMaterializationService cohortMaterializationService;
