@@ -65,7 +65,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean("apiHostName")
   public String getHostName() {
     ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
-    return (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
+    // TODO: see if there's a better way of doing this?
+    String version = System.getProperty("com.google.appengine.application.version");
+    // Strip off the timestamp suffix.
+    version = version.substring(0, version.lastIndexOf('.'));
+    return version + "-dot-" + (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
   }
 
   @Bean
