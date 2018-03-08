@@ -11,9 +11,7 @@ function isBlank(s: string) {
 @Component ({
   selector : 'app-invitation-key',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/inputs.css',
-              '../../styles/headers.css'],
+              '../../styles/template.css'],
   templateUrl: './component.html'
 })
 
