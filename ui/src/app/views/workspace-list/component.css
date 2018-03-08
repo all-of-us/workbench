@@ -15,16 +15,6 @@ h3 {
   display: inline-block;
 }
 
-.warning {
-  background-color: #bbae00;
-  color: white;
-}
-
-.rejected {
-  background-color: red;
-  color: white
-}
-
 .card-area {
   display: flex;
   justify-content: flex-start;
@@ -32,10 +22,9 @@ h3 {
 }
 
 .card {
-  width: 10rem;
-  height: 12rem;
+  width: 12rem;
+  height: 9rem;
   margin-right: 1rem;
-  border: 0.5px solid #6cace4;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -45,17 +34,20 @@ h3 {
 .description {
   text-overflow: ellipsis;
   overflow: hidden;
-  height: 4rem;
+  height: 2rem;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
 .card *.date-text {
   font-size: 12px;
   margin-top: auto;
+  line-height: 14px;
 }
 
 .workspace-name {
+  color: #6cace4;
+  font-weight: bold;
   margin-bottom: 0.5rem;
 }
