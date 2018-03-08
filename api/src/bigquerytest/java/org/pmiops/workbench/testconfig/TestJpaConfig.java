@@ -42,13 +42,13 @@ public class TestJpaConfig {
     }
 
     @Bean
-    JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
+    public JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;
     }
 
-    final Properties additionalProperties() {
+    public final Properties additionalProperties() {
         final Properties hibernateProperties = new Properties();
 
         hibernateProperties.setProperty("hibernate.hbm2ddl.auto", "create-drop");

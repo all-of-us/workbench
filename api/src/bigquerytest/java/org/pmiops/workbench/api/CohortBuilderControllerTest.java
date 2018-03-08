@@ -46,7 +46,6 @@ import static org.mockito.Mockito.*;
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
     private CohortBuilderController controller;
-    private ParticipantCounter participantCounter;
     private CdrVersion cdrVersion;
 
     @Autowired
@@ -88,9 +87,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
         cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
         CdrVersionContext.setCdrVersion(cdrVersion);
-        participantCounter = new ParticipantCounter(mockDomainLookupService);
         this.controller = new CohortBuilderController(bigQueryService,
-            participantCounter, mockCriteriaDao, mockCdrVersionDao);
+                new ParticipantCounter(mockDomainLookupService), mockCriteriaDao, mockCdrVersionDao);
     }
 
     @Test
