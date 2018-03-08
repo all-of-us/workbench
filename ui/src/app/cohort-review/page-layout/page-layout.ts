@@ -32,6 +32,8 @@ export class PageLayout implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.updateWrapperDimensions();
+
     const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
     this.state.annotationDefinitions.next(annotationDefinitions);
     this.state.cohort.next(cohort);
@@ -40,7 +42,6 @@ export class PageLayout implements OnInit {
     if (review.reviewStatus === ReviewStatus.NONE) {
       this.createReviewModal.modal.open();
     }
-    this.updateWrapperDimensions();
   }
 
   @HostListener('window:resize')
@@ -51,7 +52,11 @@ export class PageLayout implements OnInit {
   updateWrapperDimensions() {
     const nativeEl = this.fullPageDiv.nativeElement;
     const {top} = nativeEl.getBoundingClientRect();
-    const minHeight = pixel(window.innerHeight - top - ONE_REM);
+
+    // margin-top, margin-bottom each one rem, see the css file
+    const margins = ONE_REM * 2;
+
+    const minHeight = pixel(window.innerHeight - top - margins);
     this.renderer.setStyle(nativeEl, 'min-height', minHeight);
   }
 }
