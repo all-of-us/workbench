@@ -17,12 +17,12 @@ import {
   SortOrder
 } from 'generated';
 
+
 @Component({
-  selector: 'app-participant-detail',
-  templateUrl: './participant-detail.component.html',
-  styleUrls: ['./participant-detail.component.css']
+  templateUrl: './detail-page.html',
+  styleUrls: ['./detail-page.css']
 })
-export class ParticipantDetailComponent implements OnInit, OnDestroy {
+export class DetailPage implements OnInit, OnDestroy {
   participant: Participant;
   isFirstParticipant: boolean;
   isLastParticipant: boolean;

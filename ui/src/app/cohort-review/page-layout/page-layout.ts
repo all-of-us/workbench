@@ -18,11 +18,10 @@ const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
 
 @Component({
-  selector: 'app-cohort-review',
-  templateUrl: './cohort-review.component.html',
-  styleUrls: ['./cohort-review.component.css']
+  templateUrl: './page-layout.html',
+  styleUrls: ['./page-layout.css']
 })
-export class CohortReviewComponent implements OnInit {
+export class PageLayout implements OnInit {
   @ViewChild('createReviewModal') createReviewModal: CreateReviewComponent;
   @ViewChild('fullPageDiv') fullPageDiv: ElementRef;
 
