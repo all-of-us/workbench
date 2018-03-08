@@ -1,0 +1,18 @@
+<div class="area-block">
+  <div class="table-header">
+    <h3 class="table-header-descriptor">Your Workspaces</h3>
+    <button class="btn btn-secondary" (click)="addWorkspace()">
+      <clr-icon shape="plus"></clr-icon>
+      New Workspace
+    </button>
+  </div>
+  <div class="card-area">
+    <div class="card" *ngFor="let workspaceResponse of workspaceList" routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">
+      <h3 class="workspace-name">{{workspaceResponse.workspace.name}}</h3>
+      <div class="description">{{workspaceResponse.workspace.description}}</div>
+      <div class="date-text">
+        Last Modified: {{workspaceResponse.workspace.lastModifiedTime | date:'short'}}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+.table-header-descriptor {
+  margin-top: 0;
+  padding-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.table-header {
+  margin: 1rem 0 0.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h3 {
+  display: inline-block;
+}
+
+.warning {
+  background-color: #bbae00;
+  color: white;
+}
+
+.rejected {
+  background-color: red;
+  color: white
+}
+
+.card-area {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 10rem;
+  height: 12rem;
+  margin-right: 1rem;
+  border: 0.5px solid #6cace4;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.description {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.card *.date-text {
+  font-size: 12px;
+  margin-top: auto;
+}
+
+.workspace-name {
+  margin-bottom: 0.5rem;
+}
