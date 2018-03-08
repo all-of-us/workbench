@@ -23,6 +23,9 @@ import {
   styleUrls: ['./detail-page.css']
 })
 export class DetailPage implements OnInit, OnDestroy {
+
+  sidebarOpen = true;
+
   participant: Participant;
   isFirstParticipant: boolean;
   isLastParticipant: boolean;
@@ -40,7 +43,6 @@ export class DetailPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.state.sidebarOpen.next(true);
     this.subscription = this.state.participant$
       .merge(this.route.data.pluck('participant'))
       .do(participant => this.participant = <Participant>participant)
@@ -76,7 +78,6 @@ export class DetailPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.state.sidebarOpen.next(false);
     this.state.participant.next(null);
     this.subscription.unsubscribe();
   }
@@ -85,19 +86,11 @@ export class DetailPage implements OnInit, OnDestroy {
     return this.sidebarOpen ? 'right' : 'left';
   }
 
-  get sidebarOpen() {
-    return this.state.sidebarOpen.getValue();
-  }
-
-  set sidebarOpen(value: boolean) {
-    this.state.sidebarOpen.next(value);
-  }
-
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  up() {
+  backToTable() {
     this.router.navigate(['..'], {relativeTo: this.route});
   }
 

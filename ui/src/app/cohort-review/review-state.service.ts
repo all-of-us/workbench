@@ -28,6 +28,5 @@ export class ReviewStateService {
   annotationDefinitions$ = this.annotationDefinitions.asObservable();
 
   /* Flags */
-  sidebarOpen = new BehaviorSubject<boolean>(false);
   annotationManagerOpen = new BehaviorSubject<boolean>(false);
 }

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -15,66 +15,69 @@ import {
   ParticipantCohortStatus,
 } from 'generated';
 
+
 @Component({
   selector: 'app-participant-status',
   templateUrl: './participant-status.component.html',
   styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
+  private _participant: Participant;
 
-  readonly CohortStatus = CohortStatus;
+  @Input() set participant(p: Participant) {
+    this._participant = p;
+    const status = p.status === CohortStatus.NOTREVIEWED ? null : p.status;
+    this.statusControl.setValue(status, {emitEvent: false});
+  }
+
+  get participant() {
+    return this._participant;
+  }
+
   readonly cohortStatusList = [{
-    key: '',
-    value: 'Select a Status',
-  }, {
-    key: CohortStatus.EXCLUDED,
-    value: Participant.formatStatusForText(CohortStatus.EXCLUDED)
-  }, {
-    key: CohortStatus.INCLUDED,
-    value: Participant.formatStatusForText(CohortStatus.INCLUDED)
-  }, {
-    key: CohortStatus.NEEDSFURTHERREVIEW,
-    value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
+      value: CohortStatus.INCLUDED,
+      display: Participant.formatStatusForText(CohortStatus.INCLUDED)
+    }, {
+      value: CohortStatus.EXCLUDED,
+      display: Participant.formatStatusForText(CohortStatus.EXCLUDED)
+    }, {
+      value: CohortStatus.NEEDSFURTHERREVIEW,
+      display: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
   }];
 
   statusControl = new FormControl();
   subscription: Subscription;
-  participant: Participant | null;
 
-  constructor(private state: ReviewStateService,
-              private reviewAPI: CohortReviewService,
-              private route: ActivatedRoute) {
+  get noStatus() {
+    return this.participant.status === CohortStatus.NOTREVIEWED;
   }
 
+  get validStatuses() {
+    return this.cohortStatusList.map(obj => obj.value);
+  }
+
+  constructor(
+    private state: ReviewStateService,
+    private reviewAPI: CohortReviewService,
+    private route: ActivatedRoute,
+  ) {}
+
   ngOnInit() {
-    this.subscription = this.state.participant$
-      .subscribe(participant => {
-        this.participant = participant;
-        const status = this.participant ? this.participant.status : '';
-        this.statusControl.setValue(status, {emitEvent: false});
-      });
-
-    const participantId = this.state.participant$
-      .filter(participant => participant !== null)
-      .map(participant => participant.id);
-
-    const statusChanger = this.statusControl.valueChanges
-      .filter(status => status !== '')
-      .withLatestFrom(participantId)
+    this.subscription = this.statusControl.valueChanges
+      .filter(status => this.validStatuses.includes(status))
       .switchMap(this.callApi)
       .subscribe(this.emit);
-
-    this.subscription.add(statusChanger);
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  private callApi = ([status, pid]): Observable<ParticipantCohortStatus> => {
+  private callApi = (status): Observable<ParticipantCohortStatus> => {
+    const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
-    const {ns, wsid, cid} = this.route.snapshot.params;
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
 
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }

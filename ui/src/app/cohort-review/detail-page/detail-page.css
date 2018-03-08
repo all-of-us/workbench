@@ -2,15 +2,20 @@ app-participant-detail {
   position: relative;
 }
 
-.participant-browser-header {
-    margin: 0px;
+.nav-header {
+  display: flex;
+  align-items: center;
 }
 
-.participant-browser-navigation {
-    display: flex;
+.nav-header h4 {
+  margin: 0 0.5rem;;
 }
 
-.sidebar {
+.nav-header button:first-of-type {
+  margin: 0;
+}
+
+.detail-sidebar {
   position: absolute;
   top: 0;
   right: 0px;
@@ -27,12 +32,12 @@ app-participant-detail {
   background-color: rgb(230, 230, 230);
 }
 
-.main-content {
+.detail-page {
   transition: margin .5s;
   margin-right: 24px;
 }
 
-.main-content.sidebar-open {
+.detail-page.sidebar-open {
   margin-right: 324px;
   padding-right: 1rem;
 }
