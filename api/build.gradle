@@ -2,15 +2,20 @@ import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
 
 def swaggerTemplateDir = 'src/main/resources'
-def swaggerSourceFile = 'src/main/resources/workbench.yaml'
+def mergedApiSourceFile = 'src/main/resources/merged.yaml'
+def clientApiSourceFile = 'src/main/resources/client_api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
+task generateMergedSwagger(type: Exec) {
+  commandLine "./build.rb", "merge-yaml"
+}
+
 task generateApi {
-  inputs.file("$projectDir/$swaggerSourceFile")
+  inputs.file("$projectDir/$mergedApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
+    config.setInputSpec("file:///$projectDir/$mergedApiSourceFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
@@ -149,6 +154,7 @@ sourceSets {
   }
 }
 
+validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
@@ -243,7 +249,10 @@ dependencies {
 
 swaggerSources {
   workbench {
-    inputFile = file("$projectDir/$swaggerSourceFile")
+    inputFile = file("$projectDir/$mergedApiSourceFile")
+  }
+  client {
+    inputFile = file("$projectDir/$clientApiSourceFile")
   }
   firecloud {
     inputFile = file("$projectDir/$fireCloudApiFile")

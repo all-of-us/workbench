@@ -1,18 +1,23 @@
 .flex-container {
   display: flex;
-  width: 100%;
-  align-items: flex-start;
-  flex-flow: row nowrap;
-  justify-content: space-between;
+  width: 90%;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .item-info {
   min-width: 0;
-  flex: 10;
-  width: 100%;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+}
+
+.item-info > button {
+  align-self: center;
+  margin: 0;
+  color: rgb(98, 164, 32);
+  min-width: unset;
+  padding: 0 0.25rem;
 }
 
 .item-info > .name {
@@ -29,9 +34,7 @@
   text-align: justify;
 }
 
-.item-meta {
-  flex: 2;
-  width: 100%;
-  text-align: right;
+.item-count {
+  padding: 0 0.5rem;
   white-space: nowrap;
 }
