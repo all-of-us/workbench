@@ -1,0 +1,37 @@
+<div class="area-block">
+  <div class="table-header">
+    <h3 class="table-header-descriptor">Your Workspaces</h3>
+    <button class="btn btn-secondary" (click)="addWorkspace()">
+      <clr-icon shape="plus"></clr-icon>
+      New Workspace
+    </button>
+  </div>
+  <div class="card-area">
+    <div class="card" *ngFor="let workspaceResponse of workspaceList" routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">
+      <h5 class="workspace-name">{{workspaceResponse.workspace.name}}</h5>
+      <div class="description">{{workspaceResponse.workspace.description}}</div>
+      <div class="date-text">
+        Last Changed:<br>
+        {{workspaceResponse.workspace.lastModifiedTime | date:'short'}}
+      </div>
+      <div style="color: #f8c954" *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === null) else rejected">
+        <clr-icon shape="exclamation-triangle" class="is-solid" style="fill: #f8c954"></clr-icon>
+        Pending Approval
+      </div>
+      <ng-template #rejected>
+        <div style="color: #f58771" *ngIf="(workspaceResponse.workspace.researchPurpose.reviewRequested === true && workspaceResponse.workspace.researchPurpose.approved === false) else permissions">
+          <clr-icon shape="exclamation-triangle" class="is-solid" style="fill: #f58771"></clr-icon>
+          Rejected
+        </div>
+      </ng-template>
+      <ng-template #permissions>
+        <div style="color: #8bc990" *ngIf="workspaceResponse.accessLevel === workspaceAccessLevel.READER">
+          <clr-icon shape="search" style="fill: #8bc990"></clr-icon>
+          Read Only
+        </div>
+      </ng-template>
+      <!-- TODO: Add collaborator pictures. -->
+      <!-- TODO: Add view of locked workspace when that functionality exists. -->
+    </div>
+  </div>
+</div>

@@ -34,10 +34,12 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
 
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css',
+              '../../styles/cards.css'],
   templateUrl: './component.html',
 })
-export class HomePageComponent implements OnInit {
+export class WorkspaceListComponent implements OnInit {
 
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
@@ -56,6 +58,9 @@ export class HomePageComponent implements OnInit {
     this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
+              workspacesReceived.items.sort(function(a, b) {
+                return a.workspace.name.localeCompare(b.workspace.name);
+              });
               this.workspaceList = workspacesReceived.items;
               this.workspacesLoading = false;
             },
