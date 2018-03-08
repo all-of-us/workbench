@@ -7,11 +7,11 @@ import {SearchComponent} from './data-browser/search/search.component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
-import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
+import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -26,7 +26,7 @@ declare let ga_tracking_id: string;
 const routes: Routes = [
   {
     path: '',
-    component: HomePageComponent,
+    component: WorkspaceListComponent,
     data: {title: 'View Workspaces'}
   }, {
     /* TODO The children under ./views need refactoring to use the data
