@@ -43,8 +43,7 @@ export class DetailPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription = this.state.participant$
-      .merge(this.route.data.pluck('participant'))
+    this.subscription = this.route.data.pluck('participant')
       .do(participant => this.participant = <Participant>participant)
       .withLatestFrom(this.state.review$)
       .subscribe(([participant, review]: [Participant, CohortReview]) => {
@@ -78,7 +77,6 @@ export class DetailPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.state.participant.next(null);
     this.subscription.unsubscribe();
   }
 

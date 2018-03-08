@@ -5,7 +5,6 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
 
 import {
   CohortReview,
@@ -57,7 +56,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
   ) {}
@@ -66,7 +64,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription = this.statusControl.valueChanges
       .filter(status => this.validStatuses.includes(status))
       .switchMap(this.callApi)
-      .subscribe(this.emit);
+      .subscribe();
   }
 
   ngOnDestroy() {
@@ -80,24 +78,5 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
 
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
-  }
-
-  private emit = (newStatus: ParticipantCohortStatus) => {
-    const participant = Participant.fromStatus(newStatus);
-    this.state.participant.next(participant);
-
-    /* TODO (jms) replace this with an action to refresh the table? */
-    this.state.review$
-      .take(1)
-      .map((review: CohortReview) => {
-        const index = review.participantCohortStatuses.findIndex(
-          ({participantId}) => participantId === newStatus.participantId
-        );
-        if (index >= 0) {
-          review.participantCohortStatuses.splice(index, 1, newStatus);
-        }
-        return review;
-      })
-      .subscribe(r => this.state.review.next(r));
   }
 }

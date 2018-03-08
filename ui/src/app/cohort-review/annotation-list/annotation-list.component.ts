@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
@@ -44,6 +44,8 @@ const identity = obj => obj;
   styleUrls: ['./annotation-list.component.css'],
 })
 export class AnnotationListComponent implements OnInit {
+  @Input() participant;
+
   annotations$: Observable<Annotation[]>;
 
   /* Determines if the children should show the datatype of the annotation */
@@ -57,12 +59,8 @@ export class AnnotationListComponent implements OnInit {
      */
     const defs$ = this.state.annotationDefinitions$.filter(identity);
     const vals$ = this.state.annotationValues$.filter(identity);
-    const pid$ = this.state.participant$.filter(identity).pluck('participantId');
-    const rid$ = this.state.review$.filter(identity).pluck('cohortReviewId');
-
-    const factory$ = Observable
-      .combineLatest(pid$, rid$)
-      .map(vals => valueFactory(vals));
+    const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
+      .map(rid => valueFactory([this.participant.id, rid]));
 
     this.annotations$ = Observable
       .combineLatest(defs$, vals$, factory$)
