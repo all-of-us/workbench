@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
@@ -43,7 +43,7 @@ const identity = obj => obj;
   templateUrl: './annotation-list.component.html',
   styleUrls: ['./annotation-list.component.css'],
 })
-export class AnnotationListComponent implements OnInit {
+export class AnnotationListComponent implements OnChanges {
   @Input() participant;
 
   annotations$: Observable<Annotation[]>;
@@ -53,19 +53,19 @@ export class AnnotationListComponent implements OnInit {
 
   constructor(private state: ReviewStateService) {}
 
-  ngOnInit() {
+  ngOnChanges(changes) {
     /* All four of these get filtered for existence; they must all exist for
      * this component to make any sense
      */
     const defs$ = this.state.annotationDefinitions$.filter(identity);
-    const vals$ = this.state.annotationValues$.filter(identity);
     const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
       .map(rid => valueFactory([this.participant.id, rid]));
 
     this.annotations$ = Observable
-      .combineLatest(defs$, vals$, factory$)
-      .map(([defs, vals, factoryFunc]) =>
+      .combineLatest(defs$, factory$)
+      .map(([defs, factoryFunc]) =>
         defs.map(definition => {
+          const vals = this.participant.annotations;
           const value = vals.find(byDefinitionId(definition)) || factoryFunc();
           return <Annotation>{definition, value};
         }))

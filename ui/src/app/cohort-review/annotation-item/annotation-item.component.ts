@@ -2,8 +2,6 @@ import {Component, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
-import {ReviewStateService} from '../review-state.service';
-
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -11,7 +9,6 @@ import {
   ModifyParticipantCohortAnnotationRequest,
   ParticipantCohortAnnotation,
 } from 'generated';
-
 
 interface Annotation {
   definition: CohortAnnotationDefinition;
@@ -34,7 +31,6 @@ export class AnnotationItemComponent implements OnInit {
   private expandText = false;
 
   constructor(
-    private state: ReviewStateService,
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
   ) {}
@@ -48,9 +44,9 @@ export class AnnotationItemComponent implements OnInit {
 
   handleInput() {
     /* Parameters from the path */
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
-    const cdrid = +(this.route.snapshot.data.workspace.cdrVersionId);
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
 
     const newValue = this.control.value;
     const oldValue = this.annotation.value[this.valuePropertyName];
@@ -89,15 +85,7 @@ export class AnnotationItemComponent implements OnInit {
         .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
     }
 
-    // Re-load the full list after updating the individual
-    const refresh = this.reviewAPI
-      .getParticipantCohortAnnotations(ns, wsid, cid, cdrid, pid)
-      .pluck('items');
-
-    // Actually run the API calls
-    apiCall.switchMap(_ => refresh).subscribe(newValues => {
-      this.state.annotationValues.next(newValues);
-    });
+    apiCall.subscribe();
   }
 
   toggleExpandText() {

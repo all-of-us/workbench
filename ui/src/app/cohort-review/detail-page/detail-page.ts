@@ -43,7 +43,9 @@ export class DetailPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription = this.route.data.pluck('participant')
+    this.subscription = this.route.data
+      .do(({participant, annotations}) => participant.annotations = annotations)
+      .pluck('participant')
       .do(participant => this.participant = <Participant>participant)
       .withLatestFrom(this.state.review$)
       .subscribe(([participant, review]: [Participant, CohortReview]) => {

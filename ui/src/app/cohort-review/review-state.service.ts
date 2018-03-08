@@ -16,13 +16,11 @@ export class ReviewStateService {
   /* Data Subjects */
   review = new ReplaySubject<CohortReview>(1);
   cohort = new ReplaySubject<Cohort>(1);
-  annotationValues = new ReplaySubject<ParticipantCohortAnnotation[]>(1);
   annotationDefinitions = new ReplaySubject<CohortAnnotationDefinition[]>(1);
 
   /* Observable views on the data Subjects */
   review$ = this.review.asObservable();
   cohort$ = this.cohort.asObservable();
-  annotationValues$ = this.annotationValues.asObservable();
   annotationDefinitions$ = this.annotationDefinitions.asObservable();
 
   /* Flags */
