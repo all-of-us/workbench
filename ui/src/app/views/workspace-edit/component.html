@@ -5,7 +5,7 @@
     <h2 *ngSwitchCase="Mode.Clone">Clone workspace "{{oldWorkspaceName}}"</h2>
   </ng-container>
   <div>* is a required field</div>
-  <div style="width: 50rem;">
+  <div>
     <div class="name-area" [class.validation-error]="nameNotEntered">
       <input type="text" class="input name" name="workspace-name" autofocus
           [(ngModel)]="workspace.name" [disabled]="!hasPermission"
