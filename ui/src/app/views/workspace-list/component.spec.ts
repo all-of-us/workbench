@@ -4,7 +4,7 @@ import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {HomePageComponent} from 'app/views/home-page/component';
+import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   queryAllByCss,
@@ -14,15 +14,15 @@ import {
 
 import {WorkspacesService} from 'generated';
 
-class HomePage {
-  fixture: ComponentFixture<HomePageComponent>;
+class WorkspaceListPage {
+  fixture: ComponentFixture<WorkspaceListComponent>;
   workspacesService: WorkspacesService;
   route: UrlSegment[];
-  workspaceTableRows: DebugElement[];
+  workspaceCards: DebugElement[];
   loggedOutMessage: DebugElement;
 
   constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(HomePageComponent);
+    this.fixture = testBed.createComponent(WorkspaceListComponent);
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.readPageData();
   }
@@ -30,27 +30,27 @@ class HomePage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.workspaceTableRows = queryAllByCss(this.fixture, '.workspace-table-row');
+    this.workspaceCards = queryAllByCss(this.fixture, '.card');
     this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
   }
 }
 
 
-describe('HomePageComponent', () => {
-  let homePage: HomePage;
+describe('WorkspaceListComponent', () => {
+  let workspaceListPage: WorkspaceListPage;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        ClarityModule.forRoot()
+        ClarityModule
       ],
       declarations: [
-        HomePageComponent
+        WorkspaceListComponent
       ],
       providers: [
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
       ] }).compileComponents().then(() => {
-        homePage = new HomePage(TestBed);
+        workspaceListPage = new WorkspaceListPage(TestBed);
       });
       tick();
   }));
@@ -58,12 +58,12 @@ describe('HomePageComponent', () => {
 
   it('displays correct number of workspaces in home-page', fakeAsync(() => {
     let expectedWorkspaces: number;
-    homePage.workspacesService.getWorkspaces()
+    workspaceListPage.workspacesService.getWorkspaces()
       .subscribe(workspaces => {
         expectedWorkspaces = workspaces.items.length;
     });
     tick();
-    expect(homePage.workspaceTableRows.length).toEqual(expectedWorkspaces);
+    expect(workspaceListPage.workspaceCards.length).toEqual(expectedWorkspaces);
   }));
 
 });
