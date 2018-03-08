@@ -7,12 +7,17 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 
 import {
-  CohortReview,
   CohortReviewService,
   CohortStatus,
   ModifyCohortStatusRequest,
   ParticipantCohortStatus,
 } from 'generated';
+
+const validStatuses = [
+  CohortStatus.INCLUDED,
+  CohortStatus.EXCLUDED,
+  CohortStatus.NEEDSFURTHERREVIEW,
+];
 
 
 @Component({
@@ -21,6 +26,12 @@ import {
   styleUrls: ['./participant-status.component.css']
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
+
+  readonly cohortStatusList = validStatuses.map(status => ({
+    value: status,
+    display: Participant.formatStatusForText(status),
+  }));
+
   private _participant: Participant;
 
   @Input() set participant(p: Participant) {
@@ -33,27 +44,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     return this._participant;
   }
 
-  readonly cohortStatusList = [{
-      value: CohortStatus.INCLUDED,
-      display: Participant.formatStatusForText(CohortStatus.INCLUDED)
-    }, {
-      value: CohortStatus.EXCLUDED,
-      display: Participant.formatStatusForText(CohortStatus.EXCLUDED)
-    }, {
-      value: CohortStatus.NEEDSFURTHERREVIEW,
-      display: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
-  }];
-
   statusControl = new FormControl();
   subscription: Subscription;
-
-  get noStatus() {
-    return this.participant.status === CohortStatus.NOTREVIEWED;
-  }
-
-  get validStatuses() {
-    return this.cohortStatusList.map(obj => obj.value);
-  }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -62,8 +54,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.statusControl.valueChanges
-      .filter(status => this.validStatuses.includes(status))
-      .switchMap(this.callApi)
+      .filter(status => validStatuses.includes(status))
+      .switchMap(status => this.updateStatus(status))
       .subscribe();
   }
 
@@ -71,12 +63,11 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private callApi = (status): Observable<ParticipantCohortStatus> => {
+  updateStatus(status): Observable<ParticipantCohortStatus> {
     const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
-
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }
 }
