@@ -371,30 +371,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantDemographics> getParticipantDemographics(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-
-        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
-
-        Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
-        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-
-        ParticipantDemographics participantDemographics =
-                new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
-        return ResponseEntity.ok(participantDemographics);
-    }
-
-    @Override
     public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
                                                                                          String workspaceId,
                                                                                          Long cohortId,
