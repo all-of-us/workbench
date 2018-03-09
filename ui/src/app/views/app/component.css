@@ -43,6 +43,7 @@
   box-shadow: 3px 0px 10px;
   padding-top: 1rem;
   padding-bottom: 0.5rem;
+  background-color: white;
 }
 
 .nav-link:hover {
