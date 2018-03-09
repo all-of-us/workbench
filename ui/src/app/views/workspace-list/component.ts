@@ -71,7 +71,7 @@ export class WorkspaceListComponent implements OnInit {
             },
             error => {
               const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-              this.errorText = (response.message) ? response.message : "";
+              this.errorText = (response.message) ? response.message : '';
             });
   }
 
