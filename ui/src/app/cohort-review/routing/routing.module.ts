@@ -11,10 +11,17 @@ import {ParticipantAnnotationsResolver} from './participant-annotations.resolver
 import {ParticipantResolver} from './participant.resolver';
 
 
+/**
+ * All routes additionally have access to the `Cohort` and `Review` objects
+ * through the route data; these are resolved in the top level app routing
+ * config
+ */
 const routes: Routes = [{
   path: '',
   component: PageLayout,
-  data: {title: 'Review Cohort Participants'},
+  data: {
+    title: 'Review Cohort Participants'
+  },
   children: [
     {
       path: '',

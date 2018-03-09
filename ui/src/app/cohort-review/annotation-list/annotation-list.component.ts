@@ -54,9 +54,6 @@ export class AnnotationListComponent implements OnChanges {
   constructor(private state: ReviewStateService) {}
 
   ngOnChanges(changes) {
-    /* All four of these get filtered for existence; they must all exist for
-     * this component to make any sense
-     */
     const defs$ = this.state.annotationDefinitions$.filter(identity);
     const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
       .map(rid => valueFactory([this.participant.id, rid]));
