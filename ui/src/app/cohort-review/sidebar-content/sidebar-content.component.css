@@ -1,3 +1,11 @@
-.padding-right {
-  padding-right: 5px;
+.sidebar-content {
+  padding-right: 0.25rem;
+}
+
+.sidebar-content h4 {
+  margin-top: 0.25rem;
+}
+
+.demographics-info {
+  color: #111;
 }

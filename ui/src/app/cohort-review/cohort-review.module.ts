@@ -6,9 +6,13 @@ import {ClarityModule} from '@clr/angular';
 
 import {ChartsModule} from '../charts/charts.module';
 
-import {CohortReviewComponent} from './cohort-review/cohort-review.component';
+/* Pages */
+import {DetailPage} from './detail-page/detail-page';
+import {OverviewPage} from './overview-page/overview-page';
+import {PageLayout} from './page-layout/page-layout';
+import {TablePage} from './table-page/table-page';
+
 import {CreateReviewComponent} from './create-review/create-review.component';
-import {OverviewComponent} from './overview/overview.component';
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
@@ -19,14 +23,11 @@ import {SetAnnotationListComponent} from './set-annotation-list/set-annotation-l
 import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation-modal.component';
 
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
-import {ParticipantTableComponent} from './participant-table/participant-table.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 
-import {ParticipantDetailComponent} from './participant-detail/participant-detail.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
-import {FullPageDirective} from './directives/fullPage.directive';
 import {ReviewStateService} from './review-state.service';
 
 import {CohortReviewRoutingModule} from './routing/routing.module';
@@ -44,10 +45,13 @@ import {WorkspacesService} from 'generated';
     ChartsModule,
   ],
   declarations: [
-    /* Components - Layout & General Use */
-    CohortReviewComponent,
+    /* Scaffolding and Pages */
+    DetailPage,
+    OverviewPage,
+    PageLayout,
+    TablePage,
+
     CreateReviewComponent,
-    OverviewComponent,
     ReviewNavComponent,
 
     /* Annotations */
@@ -61,15 +65,10 @@ import {WorkspacesService} from 'generated';
     /* Participant Table */
     ChoiceFilterComponent,
     StatusFilterComponent,
-    ParticipantTableComponent,
 
     /* Participant Detail */
-    ParticipantDetailComponent,
     ParticipantStatusComponent,
     SidebarContentComponent,
-
-    /* Directives */
-    FullPageDirective,
   ],
   providers: [ReviewStateService]
 })

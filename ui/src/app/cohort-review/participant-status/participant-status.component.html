@@ -1,19 +1,12 @@
-<div>
-  <h4 class="sidebar-header">Participant {{ participant?.participantId }}</h4>
-  <hr/>
-  <div class="text-black">
-    <div>DOB: {{ participant.dob | date:'yyyy-MM-dd'}}</div>
-    <div>Gender: {{ participant.gender | titlecase }}</div>
-    <div>Race: {{ participant.race }}</div>
-    <div>Ethnicity: {{ participant.ethnicity }}</div>
-  </div>
-  <hr/>
-  <h4 class="participant-status-margin-top">Status</h4>
-  <div class="select form-group">
-    <select [formControl]="statusControl">
-      <option *ngFor="let status of cohortStatusList"
-              [value]="status.key">{{status.value}}
-      </option>
-    </select>
+<div class="form-group">
+  <label for="status-selector">
+    Choose a Review Status for Participant {{ participant.id }}
+  </label>
+  <div class="select">
+  <select [formControl]="statusControl">
+    <option *ngFor="let status of cohortStatusList" [value]="status.value">
+      {{status.display}}
+    </option>
+  </select>
   </div>
 </div>

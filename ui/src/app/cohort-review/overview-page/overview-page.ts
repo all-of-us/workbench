@@ -8,10 +8,9 @@ import {ChartInfoListResponse, CohortBuilderService, SearchRequest} from 'genera
 
 
 @Component({
-  selector: 'app-overview',
-  templateUrl: './overview.component.html',
+  templateUrl: './overview-page.html',
 })
-export class OverviewComponent implements OnInit, OnDestroy {
+export class OverviewPage implements OnInit, OnDestroy {
 
   data;
   private subscription: Subscription;

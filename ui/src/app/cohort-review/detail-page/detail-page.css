@@ -1,8 +1,21 @@
-[appFullPage] {
+app-participant-detail {
   position: relative;
 }
 
-.sidebar {
+.nav-header {
+  display: flex;
+  align-items: center;
+}
+
+.nav-header h4 {
+  margin: 0 0.5rem;;
+}
+
+.nav-header button:first-of-type {
+  margin: 0;
+}
+
+.detail-sidebar {
   position: absolute;
   top: 0;
   right: 0px;
@@ -19,12 +32,12 @@
   background-color: rgb(230, 230, 230);
 }
 
-.cohort-review-main {
+.detail-page {
   transition: margin .5s;
   margin-right: 24px;
 }
 
-.cohort-review-main.sidebar-open {
+.detail-page.sidebar-open {
   margin-right: 324px;
   padding-right: 1rem;
 }

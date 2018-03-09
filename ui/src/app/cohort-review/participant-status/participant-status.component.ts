@@ -1,19 +1,24 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
 
 import {
-  CohortReview,
   CohortReviewService,
   CohortStatus,
   ModifyCohortStatusRequest,
   ParticipantCohortStatus,
 } from 'generated';
+
+const validStatuses = [
+  CohortStatus.INCLUDED,
+  CohortStatus.EXCLUDED,
+  CohortStatus.NEEDSFURTHERREVIEW,
+];
+
 
 @Component({
   selector: 'app-participant-status',
@@ -22,79 +27,47 @@ import {
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
-  readonly CohortStatus = CohortStatus;
-  readonly cohortStatusList = [{
-    key: '',
-    value: 'Select a Status',
-  }, {
-    key: CohortStatus.EXCLUDED,
-    value: Participant.formatStatusForText(CohortStatus.EXCLUDED)
-  }, {
-    key: CohortStatus.INCLUDED,
-    value: Participant.formatStatusForText(CohortStatus.INCLUDED)
-  }, {
-    key: CohortStatus.NEEDSFURTHERREVIEW,
-    value: Participant.formatStatusForText(CohortStatus.NEEDSFURTHERREVIEW)
-  }];
+  readonly cohortStatusList = validStatuses.map(status => ({
+    value: status,
+    display: Participant.formatStatusForText(status),
+  }));
+
+  private _participant: Participant;
+
+  @Input() set participant(p: Participant) {
+    this._participant = p;
+    const status = p.status === CohortStatus.NOTREVIEWED ? null : p.status;
+    this.statusControl.setValue(status, {emitEvent: false});
+  }
+
+  get participant() {
+    return this._participant;
+  }
 
   statusControl = new FormControl();
   subscription: Subscription;
-  participant: Participant | null;
 
-  constructor(private state: ReviewStateService,
-              private reviewAPI: CohortReviewService,
-              private route: ActivatedRoute) {
-  }
+  constructor(
+    private reviewAPI: CohortReviewService,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
-    this.subscription = this.state.participant$
-      .subscribe(participant => {
-        this.participant = participant;
-        const status = this.participant ? this.participant.status : '';
-        this.statusControl.setValue(status, {emitEvent: false});
-      });
-
-    const participantId = this.state.participant$
-      .filter(participant => participant !== null)
-      .map(participant => participant.id);
-
-    const statusChanger = this.statusControl.valueChanges
-      .filter(status => status !== '')
-      .withLatestFrom(participantId)
-      .switchMap(this.callApi)
-      .subscribe(this.emit);
-
-    this.subscription.add(statusChanger);
+    this.subscription = this.statusControl.valueChanges
+      .filter(status => validStatuses.includes(status))
+      .switchMap(status => this.updateStatus(status))
+      .subscribe();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  private callApi = ([status, pid]): Observable<ParticipantCohortStatus> => {
+  updateStatus(status): Observable<ParticipantCohortStatus> {
+    const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
-    const {ns, wsid, cid} = this.route.snapshot.params;
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
-
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
-  }
-
-  private emit = (newStatus: ParticipantCohortStatus) => {
-    const participant = Participant.fromStatus(newStatus);
-    this.state.participant.next(participant);
-
-    /* TODO (jms) replace this with an action to refresh the table? */
-    this.state.review$
-      .take(1)
-      .map((review: CohortReview) => {
-        const index = review.participantCohortStatuses.findIndex(
-          ({participantId}) => participantId === newStatus.participantId
-        );
-        if (index >= 0) {
-          review.participantCohortStatuses.splice(index, 1, newStatus);
-        }
-        return review;
-      })
-      .subscribe(r => this.state.review.next(r));
   }
 }
