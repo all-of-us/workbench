@@ -17,12 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.CohortService;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -102,6 +97,8 @@ public class CohortsControllerTest {
   FireCloudService fireCloudService;
   @Autowired
   NotebooksService notebooksService;
+  @Autowired
+  AdminActionHistoryDao adminActionHistoryDao;
   @Mock
   CloudStorageService cloudStorageService;
 
@@ -134,7 +131,7 @@ public class CohortsControllerTest {
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com",notebooksService);
+        "https://api.blah.com",notebooksService, adminActionHistoryDao);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();

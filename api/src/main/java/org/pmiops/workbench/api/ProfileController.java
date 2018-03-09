@@ -29,8 +29,10 @@ import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -100,6 +102,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final MailChimpService mailChimpService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
+  private final AdminActionHistoryDao adminActionHistoryDao;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -110,7 +113,8 @@ public class ProfileController implements ProfileApiDelegate {
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
       MailChimpService mailChimpService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkbenchEnvironment workbenchEnvironment) {
+      WorkbenchEnvironment workbenchEnvironment,
+      AdminActionHistoryDao adminActionHistoryDao) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -124,6 +128,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.mailChimpService = mailChimpService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
+    this.adminActionHistoryDao = adminActionHistoryDao;
   }
 
   @Override
@@ -483,11 +488,21 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     BlockscoreIdVerificationStatus status = review.getNewStatus();
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
+      adminActionHistory.setAction("manual Id verification approve");
     } else {
       userService.setIdVerificationApproved(userId, false);
+      adminActionHistory.setAction("manual Id verification reject");
     }
+
+    // log admin action
+    adminActionHistory.setTargetId(userId);
+    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
+    adminActionHistory.setUserId(initializeUserIfNeeded().getUserId());
+    adminActionHistoryDao.save(adminActionHistory);
     return getIdVerificationsForReview();
   }
 }

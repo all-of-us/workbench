@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -276,6 +278,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final String apiHostName;
   private final NotebooksService notebooksService;
+  private final AdminActionHistoryDao adminActionHistoryDao;
 
   @Autowired
   WorkspacesController(
@@ -287,7 +290,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       @Qualifier("apiHostName") String apiHostName,
-      NotebooksService notebooksService) {
+      NotebooksService notebooksService,
+      AdminActionHistoryDao adminActionHistoryDao
+  ) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -297,6 +302,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.apiHostName = apiHostName;
     this.notebooksService = notebooksService;
+    this.adminActionHistoryDao = adminActionHistoryDao;
+
   }
 
   @VisibleForTesting
@@ -786,6 +793,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
+
+    // log admin action
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setAction("research purpose approved set to " + review.getApproved().toString());
+    adminActionHistory.setTargetId(this.workspaceService.get(ns, id).getWorkspaceId());
+    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
+    adminActionHistory.setUserId(this.userProvider.get().getUserId());
+    adminActionHistoryDao.save(adminActionHistory);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
