@@ -71,7 +71,7 @@
   bottom: 0;
   z-index: 1500;
   flex-grow: 1;
-  max-width: 10rem;
+  width: 10rem;
   box-shadow: 0px 3px 10px;
   opacity: 1;
   transition: opacity 0.5s;
