@@ -6,6 +6,16 @@
       New Workspace
     </button>
   </div>
+  <div class="alert alert-danger" *ngIf="errorText">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+        </div>
+        <span class="alert-text">{{errorText}}</span>
+      </div>
+    </div>
+  </div>
   <div class="card-area">
     <div class="card" *ngFor="let workspaceResponse of workspaceList" routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">
       <h5 class="workspace-name">{{workspaceResponse.workspace.name}}</h5>

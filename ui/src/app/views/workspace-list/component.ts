@@ -1,8 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
+  ErrorResponse,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
@@ -45,10 +47,12 @@ export class WorkspaceListComponent implements OnInit {
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
 
+  errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
+      private errorHandlingService: ErrorHandlingService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
@@ -65,8 +69,8 @@ export class WorkspaceListComponent implements OnInit {
               this.workspacesLoading = false;
             },
             error => {
-              // TODO: Add Error Message.
-              this.workspacesLoading = false;
+              const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+              this.errorText = (response.message) ? response.message : '';
             });
   }
 
