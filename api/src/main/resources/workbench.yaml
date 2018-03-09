@@ -985,16 +985,12 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  # Cohort Review  #######################################################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/demographics:
+  /v1/cohortbuilder/{cdrVersionId}/demographics:
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
-        - cohortReview
+        - cohortBuilder
       description: Will return a list all values for gender, race and ethnicity.
       operationId: "getParticipantDemographics"
       responses:
@@ -1003,6 +999,7 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDemographics"
 
+  # Cohort Review  #######################################################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
