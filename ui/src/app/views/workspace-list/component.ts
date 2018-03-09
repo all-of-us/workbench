@@ -58,7 +58,6 @@ export class WorkspaceListComponent implements OnInit {
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
-    this.errorText = null;
     this.workspacesLoading = true;
     this.workspacesService.getWorkspaces()
         .subscribe(
