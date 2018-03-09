@@ -2,19 +2,6 @@ app-participant-detail {
   position: relative;
 }
 
-.nav-header {
-  display: flex;
-  align-items: center;
-}
-
-.nav-header h4 {
-  margin: 0 0.5rem;;
-}
-
-.nav-header button:first-of-type {
-  margin: 0;
-}
-
 .detail-sidebar {
   position: absolute;
   top: 0;

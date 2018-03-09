@@ -1,0 +1,12 @@
+.detail-header {
+  display: flex;
+  align-items: center;
+}
+
+.detail-header h4 {
+  margin: 0 0.5rem;;
+}
+
+.detail-header button:first-of-type {
+  margin: 0;
+}

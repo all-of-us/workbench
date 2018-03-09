@@ -33,6 +33,8 @@ import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
+import { DetailHeaderComponent } from './detail-header/detail-header.component';
+import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
 /* tslint:enable:max-line-length */
 
 
@@ -69,6 +71,8 @@ import {WorkspacesService} from 'generated';
     /* Participant Detail */
     ParticipantStatusComponent,
     SidebarContentComponent,
+    DetailHeaderComponent,
+    DetailTabsComponent,
   ],
   providers: [ReviewStateService]
 })
