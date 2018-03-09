@@ -1,10 +1,11 @@
 {
   "firecloud": {
-    "debugEndpoints": false,
     "billingAccountId": "014D91-FCB792-33D2C0",
     "billingProjectPrefix": "aou-rw-stable-",
-    "registeredDomainName": "all-of-us-registered-stable",
-    "enforceRegistered": false
+    "debugEndpoints": false,
+    "enforceRegistered": false,
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-stable-scripts/setup_notebook_cluster.sh",
+    "registeredDomainName": "all-of-us-registered-stable"
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]

@@ -1233,6 +1233,10 @@ def create_project_resources(gcc)
   end
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
+  common.status "Creating GCS bucket to store scripts..."
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
+  common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  common.run_inline %W{gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
                        --activation-policy=ALWAYS --backup-start-time 00:00
