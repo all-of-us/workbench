@@ -17,12 +17,15 @@ import {
   SortOrder
 } from 'generated';
 
+
 @Component({
-  selector: 'app-participant-detail',
-  templateUrl: './participant-detail.component.html',
-  styleUrls: ['./participant-detail.component.css']
+  templateUrl: './detail-page.html',
+  styleUrls: ['./detail-page.css']
 })
-export class ParticipantDetailComponent implements OnInit, OnDestroy {
+export class DetailPage implements OnInit, OnDestroy {
+
+  sidebarOpen = true;
+
   participant: Participant;
   isFirstParticipant: boolean;
   isLastParticipant: boolean;
@@ -40,9 +43,9 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.state.sidebarOpen.next(true);
-    this.subscription = this.state.participant$
-      .merge(this.route.data.pluck('participant'))
+    this.subscription = this.route.data
+      .do(({participant, annotations}) => participant.annotations = annotations)
+      .pluck('participant')
       .do(participant => this.participant = <Participant>participant)
       .withLatestFrom(this.state.review$)
       .subscribe(([participant, review]: [Participant, CohortReview]) => {
@@ -76,18 +79,18 @@ export class ParticipantDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.state.sidebarOpen.next(false);
-    this.state.participant.next(null);
     this.subscription.unsubscribe();
   }
 
-  toggleSidebar() {
-    this.state.sidebarOpen.asObservable()
-      .take(1)
-      .subscribe(val => this.state.sidebarOpen.next(!val));
+  get angleDir() {
+    return this.sidebarOpen ? 'right' : 'left';
   }
 
-  up() {
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  backToTable() {
     this.router.navigate(['..'], {relativeTo: this.route});
   }
 

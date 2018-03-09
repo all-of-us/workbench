@@ -1,20 +1,27 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CohortReviewComponent} from '../cohort-review/cohort-review.component';
-import {OverviewComponent} from '../overview/overview.component';
-import {ParticipantDetailComponent} from '../participant-detail/participant-detail.component';
-import {ParticipantTableComponent} from '../participant-table/participant-table.component';
+import {DetailPage} from '../detail-page/detail-page';
+import {OverviewPage} from '../overview-page/overview-page';
+import {PageLayout} from '../page-layout/page-layout';
+import {TablePage} from '../table-page/table-page';
 
 import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
 import {ParticipantAnnotationsResolver} from './participant-annotations.resolver';
 import {ParticipantResolver} from './participant.resolver';
 
 
+/**
+ * All routes additionally have access to the `Cohort` and `Review` objects
+ * through the route data; these are resolved in the top level app routing
+ * config
+ */
 const routes: Routes = [{
   path: '',
-  component: CohortReviewComponent,
-  data: {title: 'Review Cohort Participants'},
+  component: PageLayout,
+  data: {
+    title: 'Review Cohort Participants'
+  },
   children: [
     {
       path: '',
@@ -22,16 +29,16 @@ const routes: Routes = [{
       pathMatch: 'full',
     }, {
       path: 'overview',
-      component: OverviewComponent,
+      component: OverviewPage,
     }, {
       path: 'participants',
-      component: ParticipantTableComponent,
+      component: TablePage,
       resolve: {
         concepts: DemographicConceptMapsResolver,
       }
     }, {
       path: 'participants/:pid',
-      component: ParticipantDetailComponent,
+      component: DetailPage,
       resolve: {
         participant: ParticipantResolver,
         annotations: ParticipantAnnotationsResolver,
