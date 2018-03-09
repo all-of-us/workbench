@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -17,8 +19,10 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -30,18 +34,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, ParticipantCounter.class, BigQueryService.class})
+@Import({QueryBuilderFactory.class, BigQueryService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
@@ -51,20 +59,21 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Autowired
     private BigQuery bigquery;
 
-    @Autowired
-    private ParticipantCounter participantCounter;
-
-    @Mock
-    private DomainLookupService domainLookupService;
 
     @Autowired
     private BigQueryService bigQueryService;
+
+    @Mock
+    private DomainLookupService mockDomainLookupService;
 
     @Mock
     private CriteriaDao mockCriteriaDao;
 
     @Mock
     private CdrVersionDao mockCdrVersionDao;
+
+    @Mock
+    private Provider<GenderRaceEthnicityConcept> mockGenderRaceEthnicityConceptProvider;
 
     @Autowired
     private TestWorkbenchConfig testWorkbenchConfig;
@@ -89,8 +98,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
         cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
         CdrVersionContext.setCdrVersion(cdrVersion);
-        this.controller = new CohortBuilderController(bigQueryService, domainLookupService,
-            participantCounter, mockCriteriaDao, mockCdrVersionDao);
+        this.controller = new CohortBuilderController(bigQueryService,
+                new ParticipantCounter(mockDomainLookupService), mockCriteriaDao, mockCdrVersionDao, mockGenderRaceEthnicityConceptProvider);
     }
 
     @Test
@@ -350,13 +359,16 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
+        final SearchRequest searchRequests = createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
+                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))));
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
-                                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))))),
-                        1);
+        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
+        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
+        assertParticipants(controller.countParticipants(1L, searchRequests),1);
+
+        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
+        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
     }
 
     @Test
@@ -515,6 +527,53 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         QueryJobConfiguration queryJobConfiguration = QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
         final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
         assertThat(expectedResult).isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
+    }
+
+    @Test
+    public void getParticipantDemographics() throws Exception {
+        Long cdrVersionId = 1L;
+        Map<String, Map<Long, String>> concepts = createGenderRaceEthnicityConcept();
+
+        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
+
+        when(mockCdrVersionDao.findOne(cdrVersionId)).thenReturn(cdrVersion);
+        when(mockGenderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(concepts));
+
+        ParticipantDemographics response = controller.getParticipantDemographics(cdrVersionId).getBody();
+        assertEquals(expected, response);
+
+        verify(mockCdrVersionDao).findOne(cdrVersionId);
+        verify(mockGenderRaceEthnicityConceptProvider).get();
+        verifyNoMoreInteractions(mockCdrVersionDao, mockCriteriaDao, mockDomainLookupService, mockGenderRaceEthnicityConceptProvider);
+    }
+
+    private Map<String, Map<Long, String>> createGenderRaceEthnicityConcept() {
+        Map<Long, String> raceMap = new HashMap<>();
+        raceMap.put(1L, "White");
+        raceMap.put(2L, "African American");
+
+        Map<Long, String> genderMap = new HashMap<>();
+        genderMap.put(3L, "MALE");
+        genderMap.put(4L, "FEMALE");
+
+        Map<Long, String> ethnicityMap = new HashMap<>();
+        ethnicityMap.put(5L, "Hispanic or Latino");
+        ethnicityMap.put(6L, "Not Hispanic or Latino");
+
+        Map<String, Map<Long, String>> concepts = new HashMap<>();
+        concepts.put(GenderRaceEthnicityType.RACE.name(), raceMap);
+        concepts.put(GenderRaceEthnicityType.GENDER.name(), genderMap);
+        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), ethnicityMap);
+        return concepts;
     }
 
     protected String getTablePrefix() {

@@ -26,14 +26,12 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
-import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
@@ -52,7 +50,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -186,8 +183,6 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, definition));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
-        doNothing().when(domainLookupService).findCodesForEmptyDomains(searchRequest.getIncludes());
-        doNothing().when(domainLookupService).findCodesForEmptyDomains(searchRequest.getExcludes());
         when(participantCounter.buildParticipantIdQuery(searchRequest, 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -209,8 +204,6 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
         verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
-        verify(domainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getIncludes());
-        verify(domainLookupService, times(1)).findCodesForEmptyDomains(searchRequest.getExcludes());
         verify(participantCounter, times(1)).buildParticipantIdQuery(searchRequest, 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -239,34 +232,6 @@ public class CohortReviewControllerTest {
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, pageSize,null,null);
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page,null,null,null);
         assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,null,null);
-    }
-
-    @Test
-    public void getParticipantDemographics() throws Exception {
-
-        Map<String, Map<Long, String>> concepts = createGenderRaceEthnicityConcept();
-
-        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
-
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
-        when(genderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(concepts));
-
-        ParticipantDemographics response = reviewController.getParticipantDemographics(namespace, name, cohortId, cdrVersionId).getBody();
-        assertEquals(expected, response);
-
-        verify(cohortReviewService).findCohort(cohortId);
-        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
-        verifyNoMoreMockInteractions();
     }
 
     @Test

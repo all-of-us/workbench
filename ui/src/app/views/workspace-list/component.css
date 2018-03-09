@@ -1,0 +1,50 @@
+.table-header-descriptor {
+  margin-top: 0;
+  padding-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.table-header {
+  margin: 1rem 0 0.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.card-area {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 12rem;
+  height: 9rem;
+  margin-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.description {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card *.date-text {
+  font-size: 12px;
+  margin-top: auto;
+  line-height: 14px;
+}
+
+.workspace-name {
+  color: #6cace4;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}

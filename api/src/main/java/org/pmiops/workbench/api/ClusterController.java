@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Cluster;
@@ -24,6 +25,7 @@ public class ClusterController implements ClusterApiDelegate {
   private final NotebooksService notebooksService;
   private final Provider<User> userProvider;
   private final WorkspaceService workspaceService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
     new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
@@ -49,6 +51,8 @@ public class ClusterController implements ClusterApiDelegate {
     firecloudClusterRequest.setLabels(labels);
     // TODO: Host our extension somewhere.
     // firecloudClusterRequest.setJupyterExtensionUri("");
+    firecloudClusterRequest.setJupyterUserScriptUri(
+        workbenchConfigProvider.get().firecloud.jupyterUserScriptUri);
 
     return firecloudClusterRequest;
   }
@@ -62,10 +66,12 @@ public class ClusterController implements ClusterApiDelegate {
   @Autowired
   ClusterController(NotebooksService notebooksService,
       Provider<User> userProvider,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override

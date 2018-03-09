@@ -1,0 +1,23 @@
+<!--
+  CohortReview main content outlet
+  Pages: Overview, Table (participant master), Detail
+-->
+<div #fullPageDiv class="full-page-div">
+  <router-outlet></router-outlet>
+</div>
+
+
+<!--
+  Modals and other stuff not in the normal page flow
+
+  app-create-review: First time in, you must set some parameters and have the
+  review created
+
+  set-annotation-modal: A manager for creating, updating, removing annotation
+  definitions (i.e. set wide annotations)
+-->
+<app-create-review #createReviewModal>
+</app-create-review>
+
+<app-set-annotation-modal>
+</app-set-annotation-modal>

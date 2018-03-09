@@ -31,8 +31,11 @@ class ApiSpy {
     .returnValue(Observable.of({participantId: 1, status: CohortStatus.INCLUDED, birthDate: 1}));
 }
 
-const PARTICIPANT: Participant =
-  new Participant({participantId: 1, status: CohortStatus.NOTREVIEWED, birthDate: 1});
+const participant: Participant = new Participant({
+  participantId: 1,
+  status: CohortStatus.NOTREVIEWED,
+  birthDate: 1
+});
 
 describe('ParticipantStatusComponent', () => {
   let component: ParticipantStatusComponent;
@@ -53,6 +56,8 @@ describe('ParticipantStatusComponent', () => {
       fixture = TestBed.createComponent(ParticipantStatusComponent);
 
       component = fixture.componentInstance;
+      component.participant = participant;
+      fixture.detectChanges();
 
       reviewStateService = TestBed.get(ReviewStateService);
       cohortReviewService = TestBed.get(CohortReviewService);
@@ -62,20 +67,4 @@ describe('ParticipantStatusComponent', () => {
   it('Should render', () => {
     expect(component).toBeTruthy();
   });
-
-  it('Should make api call for save', fakeAsync(() => {
-    component.ngOnInit();
-    expect(component.participant).toBe(null);
-    reviewStateService.participant.next(PARTICIPANT);
-    fixture.detectChanges();
-    expect(component.participant).toBe(PARTICIPANT);
-    expect(component.statusControl.value).toBe(CohortStatus.NOTREVIEWED);
-
-    // Set up an API spy
-    const spy = fixture.debugElement.injector.get(CohortReviewService);
-
-    component.statusControl.setValue(CohortStatus.INCLUDED);
-    updateAndTick(fixture);
-    expect(spy.updateParticipantCohortStatus).toHaveBeenCalled();
-  }));
 });

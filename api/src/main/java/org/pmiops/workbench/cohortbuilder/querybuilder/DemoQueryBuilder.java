@@ -28,13 +28,13 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
             "where\n";
 
     private static final String DEMO_GEN =
-            "p.gender_concept_id in (${gen})\n";
+            "p.gender_concept_id in unnest(${gen})\n";
 
     private static final String DEMO_AGE =
             "CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) ${operator}\n";
 
     private static final String DEMO_RACE =
-            "p.race_concept_id in (${race})\n";
+            "p.race_concept_id in unnest(${race})\n";
 
     private static final String AND_TEMPLATE = "and\n";
 

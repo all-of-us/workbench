@@ -36,10 +36,12 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
 
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+              '../../styles/buttons.css',
+              '../../styles/cards.css'],
   templateUrl: './component.html',
 })
-export class HomePageComponent implements OnInit {
+export class WorkspaceListComponent implements OnInit {
 
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
@@ -58,17 +60,19 @@ export class HomePageComponent implements OnInit {
   ngOnInit(): void {
     this.errorText = null;
     this.workspacesLoading = true;
-    this.workspacesService.getWorkspaces().subscribe(
-      workspacesReceived => {
-        this.workspaceList = workspacesReceived.items;
-        this.workspacesLoading = false;
-      },
-      error => {
-        // if loading workspaces throws an error, display to the user
-        const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-        this.errorText = (response.message !== null) ? response.message : '';
-        this.workspacesLoading = false;
-      });
+    this.workspacesService.getWorkspaces()
+        .subscribe(
+            workspacesReceived => {
+              workspacesReceived.items.sort(function(a, b) {
+                return a.workspace.name.localeCompare(b.workspace.name);
+              });
+              this.workspaceList = workspacesReceived.items;
+              this.workspacesLoading = false;
+            },
+            error => {
+              const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+              this.errorText = (response.message) ? response.message : "";
+            });
   }
 
   addWorkspace(): void {

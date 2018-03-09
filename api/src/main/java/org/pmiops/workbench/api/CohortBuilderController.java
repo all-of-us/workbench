@@ -4,19 +4,24 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
+import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,10 +31,10 @@ import java.util.stream.Collectors;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     private BigQueryService bigQueryService;
-    private DomainLookupService domainLookupService;
     private ParticipantCounter participantCounter;
     private CriteriaDao criteriaDao;
     private CdrVersionDao cdrVersionDao;
+    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -56,15 +61,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     @Autowired
     CohortBuilderController(BigQueryService bigQueryService,
-                            DomainLookupService domainLookupService,
                             ParticipantCounter participantCounter,
                             CriteriaDao criteriaDao,
-                            CdrVersionDao cdrVersionDao) {
+                            CdrVersionDao cdrVersionDao,
+                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.bigQueryService = bigQueryService;
-        this.domainLookupService = domainLookupService;
         this.participantCounter = participantCounter;
         this.criteriaDao = criteriaDao;
         this.cdrVersionDao = cdrVersionDao;
+        this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
     /**
@@ -89,9 +94,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -104,9 +106,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
         ChartInfoListResponse response = new ChartInfoListResponse();
-
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(request));
         QueryResult result = bigQueryService.executeQuery(qjc);
@@ -132,6 +131,26 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
         return ResponseEntity.ok(criteriaResponse);
+    }
+
+    @Override
+    public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
+        CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+
+        Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
+        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
+                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+                .collect(Collectors.toList());
+
+        ParticipantDemographics participantDemographics =
+                new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
+        return ResponseEntity.ok(participantDemographics);
     }
 
 }

@@ -28,10 +28,9 @@ function isChoiceFilter(filter): filter is ChoiceFilterComponent {
 
 
 @Component({
-  selector: 'app-participant-table',
-  templateUrl: './participant-table.component.html',
+  templateUrl: './table-page.html',
 })
-export class ParticipantTableComponent implements OnInit, OnDestroy {
+export class TablePage implements OnInit, OnDestroy {
 
   readonly ColumnEnum = Columns;
   readonly ReverseColumnEnum = {

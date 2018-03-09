@@ -15,6 +15,7 @@ import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 
+import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
@@ -22,7 +23,6 @@ import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
-import {HomePageComponent} from './views/home-page/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -30,6 +30,7 @@ import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
+import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -83,13 +84,14 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AccountCreationComponent,
+    AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
-    HomePageComponent,
+    WorkspaceListComponent,
     IdVerificationPageComponent,
     InvitationKeyComponent,
     PageTemplateSignedOutComponent,

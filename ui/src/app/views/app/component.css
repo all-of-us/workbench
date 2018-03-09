@@ -43,6 +43,7 @@
   box-shadow: 3px 0px 10px;
   padding-top: 1rem;
   padding-bottom: 0.5rem;
+  background-color: white;
 }
 
 .nav-link:hover {
@@ -102,4 +103,16 @@
   width: 100%;
   margin-right: 0.6rem;
   margin-left: 1rem;
+}
+
+.background-image {
+  background-image: url('/assets/images/hex-background@2x.png');
+  background-repeat: no-repeat;
+  z-index: -1;
+  background-size: cover;
+  right: 0rem;
+  top: 3.3rem;
+  width: 50%;
+  position: absolute;
+  height: 90%;
 }

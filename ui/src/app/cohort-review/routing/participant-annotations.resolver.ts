@@ -2,21 +2,17 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {ReviewStateService} from '../review-state.service';
-
 import {
   CohortReviewService,
   ParticipantCohortAnnotation,
   ParticipantCohortAnnotationListResponse,
 } from 'generated';
 
+
 @Injectable()
 export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohortAnnotation[]> {
 
-  constructor(
-    private state: ReviewStateService,
-    private reviewAPI: CohortReviewService,
-  ) {}
+  constructor(private reviewAPI: CohortReviewService) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<ParticipantCohortAnnotation[]> {
     const ns = route.parent.paramMap.get('ns');
@@ -39,8 +35,7 @@ export class ParticipantAnnotationsResolver implements Resolve<ParticipantCohort
     const call = this.reviewAPI
       .getParticipantCohortAnnotations(ns, wsid, cid, cdrid, pid)
       .catch(err => Observable.of(empty))
-      .pluck('items')
-      .do(vals => this.state.annotationValues.next(<ParticipantCohortAnnotation[]>vals));
+      .pluck('items');
 
     return (call as Observable<ParticipantCohortAnnotation[]>);
   }

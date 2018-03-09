@@ -1,8 +1,20 @@
-<div class="padding-right">
-  <app-participant-status>
+<div class="sidebar-content">
+
+  <h4>Participant {{ participant?.participantId }}</h4>
+  <hr/>
+  <div class="demographics-info">
+    <div>DOB: {{ participant.dob | date:'yyyy-MM-dd'}}</div>
+    <div>Gender: {{ participant.gender | titlecase }}</div>
+    <div>Race: {{ participant.race }}</div>
+    <div>Ethnicity: {{ participant.ethnicity }}</div>
+  </div>
+  <hr/>
+
+  <h4>Participant Status</h4>
+  <app-participant-status [participant]="participant">
   </app-participant-status>
 
-  <app-annotation-list>
+  <app-annotation-list [participant]="participant">
   </app-annotation-list>
 </div>
 

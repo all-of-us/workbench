@@ -46,7 +46,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
-    private DomainLookupService domainLookupService;
     private ParticipantCounter participantCounter;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
@@ -140,12 +139,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     @Autowired
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
-                           DomainLookupService domainLookupService,
                            ParticipantCounter participantCounter,
                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
-        this.domainLookupService = domainLookupService;
         this.participantCounter = participantCounter;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
@@ -195,9 +192,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
-
-        domainLookupService.findCodesForEmptyDomains(searchRequest.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(searchRequest.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
                 participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
@@ -377,30 +371,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantDemographics> getParticipantDemographics(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-
-        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
-
-        Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
-        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-
-        ParticipantDemographics participantDemographics =
-                new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
-        return ResponseEntity.ok(participantDemographics);
-    }
-
-    @Override
     public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
                                                                                          String workspaceId,
                                                                                          Long cohortId,
@@ -455,9 +425,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
-
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
         QueryResult result = bigQueryService.executeQuery(
                 bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));

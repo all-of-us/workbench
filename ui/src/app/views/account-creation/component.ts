@@ -3,8 +3,6 @@ import {Component} from '@angular/core';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 
-import {SignInService} from 'app/services/sign-in.service';
-
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
@@ -18,8 +16,7 @@ function isBlank(s: string) {
   selector: 'app-account-creation',
   templateUrl: './component.html',
   styleUrls: ['./component.css',
-              '../../styles/inputs.css',
-              '../../styles/buttons.css']
+              '../../styles/template.css']
 })
 export class AccountCreationComponent {
   containsLowerAndUpperError: boolean;
@@ -46,7 +43,6 @@ export class AccountCreationComponent {
 
   constructor(
     private profileService: ProfileService,
-    private signInService: SignInService,
     private invitationKeyService: InvitationKeyComponent,
     private appComponent: AppComponent
   ) {
@@ -86,10 +82,6 @@ export class AccountCreationComponent {
     }, () => {
       this.creatingAcccount = false;
     });
-  }
-
-  signIn(): void {
-    this.signInService.signIn();
   }
 
   usernameChanged(): void {

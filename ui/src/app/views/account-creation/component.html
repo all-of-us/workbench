@@ -1,7 +1,7 @@
-<form (ngSubmit)="createAccount()">
+<form (ngSubmit)="createAccount()" *ngIf="!accountCreated">
   <h2>Create your account</h2>
   <div>Lorem ipsum dolor sit amet, conser adipscing elit.</div>
-  <div *ngIf="!accountCreated" class="form-area">
+  <div class="form-area">
     <div class="form-section">
       <input type="text" class="long-input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName" placeholder="Given Name">
     </div>
@@ -50,9 +50,5 @@
   </div>
 </form>
 <div *ngIf="accountCreated">
-  <div style="text-align: center; color: darkgreen;">Account created successfully.</div>
-  <div style="text-align: center;">Sign-in to your new account below.</div>
-  <div style="display: flex; justify-content: space-around;">
-    <button (click)="signIn()" class="btn btn-primary">Sign In</button>
-  </div>
+  <app-account-creation-success></app-account-creation-success>
 </div>
