@@ -104,3 +104,15 @@
   margin-right: 0.6rem;
   margin-left: 1rem;
 }
+
+.background-image {
+  background-image: url('/assets/images/hex-background@2x.png');
+  background-repeat: no-repeat;
+  z-index: -1;
+  background-size: cover;
+  right: 0rem;
+  top: 3.3rem;
+  width: 50%;
+  position: absolute;
+  height: 90%;
+}
