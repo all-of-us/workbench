@@ -260,6 +260,10 @@ paths:
       responses:
         204:
           description: Request received.
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   # TODO: add signature / other state?
   /v1/account/accept-terms-of-service:
@@ -328,15 +332,15 @@ paths:
         403:
           description: You must be an admin of this group in order to remove members
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         404:
           description: User not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: FireCloud Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
       parameters:
         - in: path
           name: groupName
@@ -356,15 +360,15 @@ paths:
         403:
           description: You must be an admin of this group in order to remove members
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         404:
           description: User not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: FireCloud Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
       parameters:
         - in: path
           name: groupName
@@ -408,11 +412,11 @@ paths:
         400:
           description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster:
     parameters:
@@ -432,11 +436,11 @@ paths:
         404:
           description: Cluster not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
     put:
       summary: Creates a new dataproc cluster in the given project with the given name
       description: creates dataproc cluster with jupyters
@@ -451,11 +455,11 @@ paths:
         400:
           description: Bad Request
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
     delete:
       summary: Deletes an existing dataproc cluster in the given project
       description: deletes a dataproc cluster
@@ -470,11 +474,11 @@ paths:
         404:
           description: Cluster not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
     get:
@@ -504,11 +508,11 @@ paths:
         404:
           description: Workspace not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebooks:
     post:
@@ -542,11 +546,11 @@ paths:
         404:
          description: Cluster or Workspace not found
          schema:
-           $ref: '#/definitions/ErrorReport'
+           $ref: '#/definitions/ErrorResponse'
         500:
          description: Internal Error
          schema:
-          $ref: '#/definitions/ErrorReport'
+          $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-all-files:
     get:
@@ -572,11 +576,11 @@ paths:
         404:
           description: Workspace or Cluster not found
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
         500:
           description: Internal Error
           schema:
-            $ref: '#/definitions/ErrorReport'
+            $ref: '#/definitions/ErrorResponse'
 
   # Billing projects #####################################################################
 
@@ -1795,7 +1799,12 @@ definitions:
       message:
         description: General error message for the response.
         type: string
-      code:
+      statusCode:
+        type: integer
+        description: HTTP status code
+      errorClassName:
+        type: string
+      errorCode:
         description: Short description of the type of error
         $ref: "#/definitions/ErrorCode"
       # TODO: add list of field-level error messages with field names.
@@ -2465,39 +2474,6 @@ definitions:
     type: string
     description: possible values indicating whether the user's ID has been verified
     enum: [UNVERIFIED, VERIFIED, REJECTED]
-
-
-  # Mirrors notebooks definitions ###############################################
-  ErrorReport:
-    description: ''
-    required:
-      - source
-      - message
-      - causes
-      - stackTrace
-    properties:
-      source:
-        type: string
-        description: service causing error
-      message:
-        type: string
-        description: what went wrong
-      exceptionClass:
-        type: string
-        description: class of exception thrown
-      statusCode:
-        type: integer
-        description: HTTP status code
-      causes:
-        type: array
-        description: errors triggering this one
-        items:
-          $ref: '#/definitions/ErrorReport'
-      stackTrace:
-        type: array
-        description: stack trace
-        items:
-          $ref: '#/definitions/StackTraceElement'
 
   StackTraceElement:
     description: ''

@@ -11,6 +11,6 @@ public interface MailChimpService {
   static final String MAILCHIMP_KEY_STATUS = "status";
 
   String addUserContactEmail(String contactEmail);
-
+  void deleteUserContactEmail(String contactEmail);
   String getMember(String userEmailHash);
 }
