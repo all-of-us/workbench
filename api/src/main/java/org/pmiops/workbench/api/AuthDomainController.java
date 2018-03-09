@@ -75,8 +75,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     }
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
-    user.setDisabledTime(timestamp);
-    user.setDisablingAdminId(userProvider.get().getUserId());
+
+    // TODO: log admin action
+
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -99,6 +100,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
+
+    // TODO: log admin action
+
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

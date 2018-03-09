@@ -338,15 +338,6 @@ public class Workspace {
     this.timeRequested = timeRequested;
   }
 
-  @Column(name = "rp_time_reviewed")
-  public Timestamp getTimeReviewed() {
-    return this.timeReviewed;
-  }
-
-  public void setTimeReviewed(Timestamp timeReviewed) {
-    this.timeReviewed = timeReviewed;
-  }
-
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
   public Set<Cohort> getCohorts() {
     return cohorts;

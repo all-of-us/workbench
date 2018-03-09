@@ -90,13 +90,7 @@ public class UserService {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
         } catch (ApiException e) {
-          if (e.getCode() == 403) {
-            throw new ForbiddenException(e.getResponseBody());
-          } else if (e.getCode() == 404) {
-            throw new NotFoundException(e.getResponseBody());
-          } else {
-            throw new ServerErrorException(e.getResponseBody());
-          }
+          handleApiException(e);
         }
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
@@ -204,4 +198,15 @@ public class UserService {
       }
     }, user);
   }
+
+  public void handleApiException(ApiException e) {
+    if (e.getCode() == 403) {
+      throw new ForbiddenException(e.getResponseBody());
+    } else if (e.getCode() == 404) {
+      throw new NotFoundException(e.getResponseBody());
+    } else {
+      throw new ServerErrorException(e.getResponseBody());
+    }
+  }
+
 }

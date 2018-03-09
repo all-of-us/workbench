@@ -173,10 +173,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if(workspace.getTimeRequested() != null){
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
-
-    if(workspace.getTimeReviewed() != null){
-      researchPurpose.timeReviewed(workspace.getTimeReviewed().getTime());
-    }
     return researchPurpose;
   }
 
@@ -241,7 +237,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           if (workspace.getResearchPurpose() != null) {
             setResearchPurposeDetails(result, workspace.getResearchPurpose());
             if (workspace.getResearchPurpose().getTimeReviewed() != null) {
-              result.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
+              // TODO: log admin action
             }
             result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
             if (workspace.getResearchPurpose().getTimeRequested() != null) {

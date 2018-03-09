@@ -28,5 +28,10 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                              onDelete="NO ACTION"
                              referencedColumnNames="user_id"
                              referencedTableName="user"/>
+    <dropForeignKeyConstraint baseTableName="user"
+                              constraintName="disabling_admin"/>
+    <dropColumn tableName="user" columnName="disabled_time"/>
+    <dropColumn tableName="user" columnName="disabling_admin_id"/>
+    <dropColumn tableName="workspace" columnName="rp_time_reviewed"/>
   </changeSet>
 </databaseChangeLog>

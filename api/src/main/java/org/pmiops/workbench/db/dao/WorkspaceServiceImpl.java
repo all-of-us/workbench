@@ -123,7 +123,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
-    workspace.setTimeReviewed(now);
+
+    // TODO: log admin action
+
     saveWithLastModified(workspace, now);
   }
 
