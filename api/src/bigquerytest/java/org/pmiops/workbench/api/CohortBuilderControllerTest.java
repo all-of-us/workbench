@@ -73,7 +73,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     private CdrVersionDao mockCdrVersionDao;
 
     @Mock
-    Provider<GenderRaceEthnicityConcept> mockGenderRaceEthnicityConceptProvider;
+    private Provider<GenderRaceEthnicityConcept> mockGenderRaceEthnicityConceptProvider;
 
     @Autowired
     private TestWorkbenchConfig testWorkbenchConfig;
