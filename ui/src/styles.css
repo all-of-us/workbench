@@ -36,6 +36,10 @@ a {
   cursor: hand;
 }
 
+body {
+  background-color: #f1f2f2;
+}
+
 textarea {
   height: 10em;
   resize: none;
