@@ -97,7 +97,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary)
+create_tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary)
 for t in "${create_tables[@]}"
 do
     bq --project=$WORKBENCH_PROJECT rm -f $WORKBENCH_DATASET.$t

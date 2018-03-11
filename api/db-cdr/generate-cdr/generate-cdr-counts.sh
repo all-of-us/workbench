@@ -85,24 +85,6 @@ PUBLIC_DATASET=public$CDR_VERSION
 
 startDate=`date`
 echo `date` " Starting generate-cdr-counts $startDate"
-###### Peter Debugging this block. Take out after
-## Make BigQuery public
-echo "Making BigQuery public dataset"
-if ./generate-cdr/make-bq-public-data.sh --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET \
-  --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET --min-count $MIN_COUNT
-then
-    echo "BigQuery public cdr data generated"
-else
-    echo "FAILED To generate public BigQuery data for $CDR_VERSION"
-    exit 1
-fi
-
-echo "Done public data "
-exit 0;
-###############################
-
-
-
 
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"

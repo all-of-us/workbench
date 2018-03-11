@@ -52,27 +52,6 @@ then
   exit 1
 fi
 
-# Get person count to set prevalence
-q="select count_value from \`${PUBLIC_PROJECT}.${PUBLIC_DATASET}.achilles_results\` a where a.analysis_id = 1"
-person_count=`bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
-
-# Sent any count below min count to min count
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results\`
-set count_value = ${MIN_COUNT}
-WHERE count_value < ${MIN_COUNT} and count_value > 0;"
-
-# Round all to nearest multiple of min count
-#update `all-of-us-workbench-test.public20180305.achilles_results`
-#set count_value = case when Mod(count_value, 20) >= 10 then count_value + 20 - Mod(count_value, 20)
-#when Mod(count_value, 20) < 10 then count_value -  Mod(count_value, 20)
-#end
-#where count_value > 20 and Mod(count_value, 20) > 0
-exit 0;
-##### End debugging
-
-
-
 # Check that source dataset exists and exit if not
 datasets=`bq --project=$WORKBENCH_PROJECT ls`
 if [ -z "$datasets" ]
@@ -106,32 +85,80 @@ else
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
-copy_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
+copy_tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary )
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
   bq --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
 done
 
-# Todo, Run queries to make counts suitable for public
+# Round counts for public dataset
+# Set any count below min count to MIN_COUNT, round any above to multiple of MIN_COUNT
 
-# Business logic
-# Aggregate bin size will be set at 20 or MIN_COUNT. Counts lower than 20 will be displayed as 20; Counts higher than 20 will
-# be rounded up or down to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1240 .
-
-# Peter Debugging this . Move to bottom later
 # Get person count to set prevalence
 q="select count_value from \`${PUBLIC_PROJECT}.${PUBLIC_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=`bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
 
-# UPDATE COUNT > 20 TO NEAREST MULTIPLE OF 20
+# achilles_results
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results\`
+set count_value =
+    case when count_value < ${MIN_COUNT}
+        then ${MIN_COUNT}
+    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
+        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
+    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
+        then count_value -  Mod(count_value, ${MIN_COUNT})
+    end
+where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
+
+# achilles_results_concept
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_concept\`
+set count_value =
+    case when count_value < ${MIN_COUNT}
+        then ${MIN_COUNT}
+    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
+        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
+    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
+        then count_value -  Mod(count_value, ${MIN_COUNT})
+    end
+where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
+
+# concept
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-set count_value = ${MIN_COUNT},  prevalence = round(${MIN_COUNT}/${person_count}, 2)
-WHERE count_value < 20 and count_value > 0;"
+set count_value =
+    case when count_value < ${MIN_COUNT}
+        then ${MIN_COUNT}
+    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
+        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
+    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
+        then count_value -  Mod(count_value, ${MIN_COUNT})
+    end,
+    prevalence =
+    case when count_value < ${MIN_COUNT}
+        then round(${MIN_COUNT} / ${person_count},2)
+    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
+        then round((count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})) / ${person_count}, 2)
+    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
+        then round((count_value -  Mod(count_value, ${MIN_COUNT})) / ${person_count}, 2)
+    end
+where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
 
-exit 0;
-##### End debugging
+# criteria
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.criteria\`
+set est_count =
+    case when est_count < ${MIN_COUNT}
+        then ${MIN_COUNT}
+    when Mod(est_count, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
+        then est_count + ${MIN_COUNT} - Mod(est_count, ${MIN_COUNT})
+    when Mod(est_count, ${MIN_COUNT}) < ${MIN_COUNT} / 2
+        then est_count -  Mod(est_count, ${MIN_COUNT})
+    end
+where est_count > 0 and Mod(est_count, ${MIN_COUNT}) > 0"
+
 
 
 
