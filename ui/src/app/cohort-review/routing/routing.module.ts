@@ -16,13 +16,18 @@ import {CohortResolver} from '../../resolvers/cohort';
 import {ReviewResolver} from '../../resolvers/review';
 
 
-/**
- * All routes additionally have access to the `Cohort` and `Review` objects
- * through the route data; these are resolved in the top level app routing
- * config
- */
-const routes: Routes = [
-  {
+const routes: Routes = [{
+  path: '',
+  component: PageLayout,
+  data: {
+    title: 'Review Cohort Participants'
+  },
+  resolve: {
+    annotationDefinitions: AnnotationDefinitionsResolver,
+    cohort: CohortResolver,
+    review: ReviewResolver,
+  },
+  children: [{
     path: 'create',
     component: CreateReviewPage,
     data: {
@@ -30,41 +35,26 @@ const routes: Routes = [
     },
   }, {
     path: '',
-    component: PageLayout,
-    data: {
-      title: 'Review Cohort Participants'
-    },
+    redirectTo: 'overview',
+    pathMatch: 'full',
+  }, {
+    path: 'overview',
+    component: OverviewPage,
+  }, {
+    path: 'participants',
+    component: TablePage,
     resolve: {
-      annotationDefinitions: AnnotationDefinitionsResolver,
-      cohort: CohortResolver,
-      review: ReviewResolver,
-    },
-    // canActivate: [],
-    children: [
-      {
-        path: '',
-        redirectTo: 'overview',
-        pathMatch: 'full',
-      }, {
-        path: 'overview',
-        component: OverviewPage,
-      }, {
-        path: 'participants',
-        component: TablePage,
-        resolve: {
-          concepts: DemographicConceptMapsResolver,
-        }
-      }, {
-        path: 'participants/:pid',
-        component: DetailPage,
-        resolve: {
-          participant: ParticipantResolver,
-          annotations: ParticipantAnnotationsResolver,
-        }
-      }
-    ],
-  }
-];
+      concepts: DemographicConceptMapsResolver,
+    }
+  }, {
+    path: 'participants/:pid',
+    component: DetailPage,
+    resolve: {
+      participant: ParticipantResolver,
+      annotations: ParticipantAnnotationsResolver,
+    }
+  }],
+}];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

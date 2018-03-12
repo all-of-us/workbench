@@ -3,71 +3,68 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {ReviewStateService} from '../review-state.service';
-
 import {
+  Cohort,
+  CohortReview,
   CohortReviewService,
   CreateReviewRequest,
 } from 'generated';
+
 
 @Component({
   templateUrl: './create-review-page.html',
 })
 export class CreateReviewPage implements OnInit {
+  creating = false;
+  cohort: Cohort;
+  review: CohortReview;
+
   reviewParamForm = new FormGroup({
     numParticipants: new FormControl(),
   });
 
-  private creating = false;
-  private maxParticipants: number;
-  private matchedParticipantCount: number;
-  private cohortName: string;
-
   constructor(
     private reviewAPI: CohortReviewService,
-    private state: ReviewStateService,
     private router: Router,
     private route: ActivatedRoute,
-  ) { }
+  ) {}
 
   get numParticipants() {
     return this.reviewParamForm.get('numParticipants');
   }
 
-  ngOnInit() {
-    this.state.review$
-      .take(1)
-      .pluck('matchedParticipantCount')
-      .do((count: number) => this.matchedParticipantCount = count)
-      .map((count: number) => Math.min(10000, count))
-      .do((count: number) => this.maxParticipants = count)
-      .map(count => Validators.compose([
-        Validators.required,
-        Validators.min(1),
-        Validators.max(count)]))
-      .subscribe(validators => this.numParticipants.setValidators(validators));
+  get maxParticipants() {
+    return Math.min(this.review.matchedParticipantCount, 10000);
+  }
 
-    this.state.cohort$
-      .take(1)
-      .pluck('name')
-      .subscribe((name: string) => this.cohortName = name);
+  ngOnInit() {
+    const {review, cohort} = this.route.parent.snapshot.data;
+    this.review = review;
+    this.cohort = cohort;
+
+    this.numParticipants.setValidators([
+      Validators.required,
+      Validators.min(1),
+      Validators.max(this.maxParticipants),
+    ]);
   }
 
   cancelReview() {
-    const {ns, wsid} = this.route.snapshot.params;
+    const {ns, wsid} = this.route.parent.snapshot.params;
+    console.dir(this.route);
     this.router.navigate(['workspace', ns, wsid]);
   }
 
   createReview() {
     this.creating = true;
-    const {ns, wsid, cid} = this.route.snapshot.params;
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const request = <CreateReviewRequest>{size: this.numParticipants.value};
 
-    Observable.of(<CreateReviewRequest>{size: this.numParticipants.value})
-      .mergeMap(request => this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request))
-      .subscribe(review => {
+    this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
+      .subscribe(_ => {
         this.creating = false;
-        this.state.review.next(review);
+        this.router.navigate(['overview'], {relativeTo: this.route.parent});
       });
   }
 }

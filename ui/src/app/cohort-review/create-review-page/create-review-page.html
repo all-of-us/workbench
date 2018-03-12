@@ -1,9 +1,10 @@
 <h3>Generate Review Set</h3>
 
 <div>
-  <p> Cohort {{ cohortName }} has {{ matchedParticipantCount }}
-    participants for possible review.  How many would you like to review?
-    (max 10000)
+  <p>
+    Cohort {{ cohort.name }} has {{ review.matchedParticipantCount }}
+    participants for possible review.  How many would you like to review?  (max
+    10000)
   </p>
   <form [formGroup]="reviewParamForm" (ngSubmit)="createReview()">
     <label>Cohort Review Parameters</label>

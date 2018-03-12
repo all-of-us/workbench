@@ -6,10 +6,9 @@ import {
   Renderer2,
   ViewChild,
 } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CreateReviewComponent} from '../create-review/create-review.component';
 import {ReviewStateService} from '../review-state.service';
 
 import {ReviewStatus} from 'generated';
@@ -17,17 +16,18 @@ import {ReviewStatus} from 'generated';
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
 
+
 @Component({
   templateUrl: './page-layout.html',
   styleUrls: ['./page-layout.css']
 })
 export class PageLayout implements OnInit {
-  @ViewChild('createReviewModal') createReviewModal: CreateReviewComponent;
   @ViewChild('fullPageDiv') fullPageDiv: ElementRef;
 
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private router: Router,
     private renderer: Renderer2,
   ) {}
 
@@ -40,7 +40,7 @@ export class PageLayout implements OnInit {
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {
-      this.createReviewModal.modal.open();
+      this.router.navigate(['create'], {relativeTo: this.route});
     }
   }
 
