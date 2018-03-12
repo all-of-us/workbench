@@ -350,16 +350,28 @@ class IncrementalHotSwapTask extends DefaultTask {
     @InputDirectory
     def File inputDir
 
+    @Input
+    def FileCollection classpath
+
+    @OutputDirectory
+    def File outputDir
+
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
       // Only handle incremental builds---don't hot-swap on initial compile.
       if (inputs.incremental) {
 
         inputs.outOfDate { change ->
-          String prefix = "/w/api/build/classes/java/main/"
-          String relativePath = change.file.path.substring(prefix.length())
-          String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
-          printf "Hot swapping $fqClassName..."
+          println "Compiling ${change.file.path}..."
+          String cp = classpath.join(":")
+          def compileProc = ("/usr/lib/jvm/default-jvm/bin/javac -classpath ${cp}" \
+            + " -d ${outputDir.path} -g ${change.file.path}").execute()
+          compileProc.waitFor()
+          String relativePath = change.file.path.substring(1 + inputDir.path.length())
+          String fqClassName = relativePath[0..-(".java".length() + 1)].replaceAll("/", ".")
+          String outputPath = outputDir.path + "/" \
+            + relativePath[0..-(".java".length() + 1)] + ".class"
+          printf "Hot swapping $fqClassName from ${outputPath}..."
           def proc = "echo redefine $fqClassName $change.file.path".execute() \
             | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
           proc.waitFor()
@@ -369,12 +381,14 @@ class IncrementalHotSwapTask extends DefaultTask {
         inputs.removed { change ->
           println "Class removed (may require restart): ${change.file.path}"
         }
+      } else {
+        println "Watching ${inputDir}"
       }
     }
 }
 
 task incrementalHotSwap(type: IncrementalHotSwapTask) {
-    inputDir = file("$buildDir/classes/java/main")
+    inputDir = sourceSets.main.java.srcDirs.toArray()[0]
+    classpath = sourceSets.main.compileClasspath
+    outputDir = sourceSets.main.java.outputDir
 }
-
-incrementalHotSwap.dependsOn compileJava
