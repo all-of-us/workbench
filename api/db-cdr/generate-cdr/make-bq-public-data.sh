@@ -7,7 +7,7 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
-USAGE="./generate-clousql-cdr/make-bq-public-data.sh --workbench-project <PROJECT> --workbench-dataset <DATASET> --public-project <PROJECT> --public-dataset <DATASET> --min-count <INT>"
+USAGE="./generate-clousql-cdr/make-bq-public-data.sh --workbench-project <PROJECT> --workbench-dataset <DATASET> --public-project <PROJECT> --public-dataset <DATASET> --bin-size <INT>"
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -16,7 +16,7 @@ while [ $# -gt 0 ]; do
     --workbench-dataset) WORKBENCH_DATASET=$2; shift 2;;
     --public-project) PUBLIC_PROJECT=$2; shift 2;;
     --public-dataset) PUBLIC_DATASET=$2; shift 2;;
-    --min-count) MIN_COUNT=$2; shift 2;;
+    --bin-size) BIN_SIZE=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -46,7 +46,7 @@ then
   exit 1
 fi
 
-if [ -z "${MIN_COUNT}" ]
+if [ -z "${BIN_SIZE}" ]
 then
   echo "Usage: $USAGE"
   exit 1
@@ -93,7 +93,7 @@ do
 done
 
 # Round counts for public dataset
-# Set any count below min count to MIN_COUNT, round any above to multiple of MIN_COUNT
+# Set any count below min count to BIN_SIZE, round any above to multiple of BIN_SIZE
 
 # Get person count to set prevalence
 q="select count_value from \`${PUBLIC_PROJECT}.${PUBLIC_DATASET}.achilles_results\` a where a.analysis_id = 1"
@@ -103,61 +103,61 @@ person_count=`bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q"
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results\`
 set count_value =
-    case when count_value < ${MIN_COUNT}
-        then ${MIN_COUNT}
-    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
-        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
-    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
-        then count_value -  Mod(count_value, ${MIN_COUNT})
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
+        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
+    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
+        then count_value -  Mod(count_value, ${BIN_SIZE})
     end
-where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
+where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
 # achilles_results_concept
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_concept\`
 set count_value =
-    case when count_value < ${MIN_COUNT}
-        then ${MIN_COUNT}
-    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
-        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
-    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
-        then count_value -  Mod(count_value, ${MIN_COUNT})
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
+        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
+    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
+        then count_value -  Mod(count_value, ${BIN_SIZE})
     end
-where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
+where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
 # concept
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
 set count_value =
-    case when count_value < ${MIN_COUNT}
-        then ${MIN_COUNT}
-    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
-        then count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})
-    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
-        then count_value -  Mod(count_value, ${MIN_COUNT})
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
+        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
+    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
+        then count_value -  Mod(count_value, ${BIN_SIZE})
     end,
     prevalence =
-    case when count_value < ${MIN_COUNT}
-        then round(${MIN_COUNT} / ${person_count},2)
-    when Mod(count_value, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
-        then round((count_value + ${MIN_COUNT} - Mod(count_value, ${MIN_COUNT})) / ${person_count}, 2)
-    when Mod(count_value, ${MIN_COUNT}) < ${MIN_COUNT} / 2
-        then round((count_value -  Mod(count_value, ${MIN_COUNT})) / ${person_count}, 2)
+    case when count_value < ${BIN_SIZE}
+        then round(${BIN_SIZE} / ${person_count},2)
+    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
+        then round((count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})) / ${person_count}, 2)
+    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
+        then round((count_value -  Mod(count_value, ${BIN_SIZE})) / ${person_count}, 2)
     end
-where count_value > 0 and Mod(count_value, ${MIN_COUNT}) > 0"
+where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.criteria\`
 set est_count =
-    case when est_count < ${MIN_COUNT}
-        then ${MIN_COUNT}
-    when Mod(est_count, ${MIN_COUNT}) >= ${MIN_COUNT} / 2
-        then est_count + ${MIN_COUNT} - Mod(est_count, ${MIN_COUNT})
-    when Mod(est_count, ${MIN_COUNT}) < ${MIN_COUNT} / 2
-        then est_count -  Mod(est_count, ${MIN_COUNT})
+    case when est_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    when Mod(est_count, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
+        then est_count + ${BIN_SIZE} - Mod(est_count, ${BIN_SIZE})
+    when Mod(est_count, ${BIN_SIZE}) < ${BIN_SIZE} / 2
+        then est_count -  Mod(est_count, ${BIN_SIZE})
     end
-where est_count > 0 and Mod(est_count, ${MIN_COUNT}) > 0"
+where est_count > 0 and Mod(est_count, ${BIN_SIZE}) > 0"
 
 
 

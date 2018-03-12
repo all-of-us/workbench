@@ -29,7 +29,7 @@ while [ $# -gt 0 ]; do
     --public-project) PUBLIC_PROJECT=$2; shift 2;;
     --bucket) BUCKET=$2; shift;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
-    --min-count) MIN_COUNT=$2; shift 2;;
+    --bin-size) BIN_SIZE=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -75,9 +75,9 @@ if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]];
     exit 1
 fi
 
-if [ -z "${MIN_COUNT}" ]
+if [ -z "${BIN_SIZE}" ]
 then
-  $MIN_COUNT=20
+  $BIN_SIZE=20
 fi
 
 WORKBENCH_DATASET=cdr$CDR_VERSION
@@ -110,7 +110,7 @@ fi
 ## Make BigQuery public
 echo "Making BigQuery public dataset"
 if ./generate-cdr/make-bq-public-data.sh --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET \
-  --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET --min-count $MIN_COUNT
+  --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET --bin-size $BIN_SIZE
 then
     echo "BigQuery public cdr data generated"
 else
