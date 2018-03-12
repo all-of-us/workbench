@@ -93,11 +93,12 @@ do
 done
 
 # Round counts for public dataset
-# Set any count below min count to BIN_SIZE, round any above to multiple of BIN_SIZE
+# 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
+# 2. Round any above BIN_SIZE to multiple of BIN_SIZE
 
 # Get person count to set prevalence
 q="select count_value from \`${PUBLIC_PROJECT}.${PUBLIC_DATASET}.achilles_results\` a where a.analysis_id = 1"
-person_count=`bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
+person_count=$(bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
 
 # achilles_results
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -105,10 +106,8 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
-    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
-        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
-    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
-        then count_value -  Mod(count_value, ${BIN_SIZE})
+    else
+        ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}
     end
 where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
@@ -118,10 +117,8 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
-    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
-        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
-    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
-        then count_value -  Mod(count_value, ${BIN_SIZE})
+    else
+        ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}
     end
 where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
@@ -131,18 +128,14 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
-    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
-        then count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})
-    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
-        then count_value -  Mod(count_value, ${BIN_SIZE})
+    else
+        ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}
     end,
     prevalence =
     case when count_value < ${BIN_SIZE}
         then round(${BIN_SIZE} / ${person_count},2)
-    when Mod(count_value, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
-        then round((count_value + ${BIN_SIZE} - Mod(count_value, ${BIN_SIZE})) / ${person_count}, 2)
-    when Mod(count_value, ${BIN_SIZE}) < ${BIN_SIZE} / 2
-        then round((count_value -  Mod(count_value, ${BIN_SIZE})) / ${person_count}, 2)
+    else
+        round(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
     end
 where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
@@ -152,13 +145,7 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 set est_count =
     case when est_count < ${BIN_SIZE}
         then ${BIN_SIZE}
-    when Mod(est_count, ${BIN_SIZE}) >= ${BIN_SIZE} / 2
-        then est_count + ${BIN_SIZE} - Mod(est_count, ${BIN_SIZE})
-    when Mod(est_count, ${BIN_SIZE}) < ${BIN_SIZE} / 2
-        then est_count -  Mod(est_count, ${BIN_SIZE})
+    else
+        ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE}
     end
 where est_count > 0 and Mod(est_count, ${BIN_SIZE}) > 0"
-
-
-
-
