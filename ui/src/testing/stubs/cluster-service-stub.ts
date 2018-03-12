@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs/Observable';
 
-import {Cluster, FileDetail} from 'generated';
+import {Cluster, ClusterStatus, FileDetail} from 'generated';
 
 export class ClusterServiceStub {
 
@@ -10,7 +10,7 @@ export class ClusterServiceStub {
     const stubCluster: Cluster = <Cluster>{
       clusterName: 'Cluster Name',
       clusterNamespace: 'Namespace',
-      status: 'Running',
+      status: ClusterStatus.RUNNING,
       createdDate: '08/08/2018',
       labels: null
     };

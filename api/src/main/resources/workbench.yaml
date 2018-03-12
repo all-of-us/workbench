@@ -388,158 +388,51 @@ paths:
 
   /v1/clusters:
     get:
-      summary: List all clusters
-      description: List all clusters, optionally filtering on a set of labels
+      summary: List available notebook clusters
+      description: >
+        Returns the clusters available to the current user. Currently there is a
+        single default cluster supported per researcher and this cluster should
+        always either exist or be in the process of being initialized. In a
+        future where researchers have more control over cluster creation, this
+        endpoint would be extended to return all clusters.
       operationId: listClusters
       tags:
         - cluster
-      parameters:
-        - in: query
-          name: _labels
-          description: |
-            Optional label key-value pairs to filter results by. Example: key1=val1,key2=val2.
-
-            Note: this string format is a workaround because Swagger doesn't support free-form
-            query string parameters. The recommended way to use this endpoint is to specify the
-            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
-          required: false
-          type: string
       responses:
         200:
-          description: A list of cluster definitions.
+          description: Available clusters
           schema:
-            $ref: "#/definitions/ClusterListResponse"
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/ClusterListResponse'
         500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cluster:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    get:
-      summary: Get details of a dataproc cluster
-      description: Returns information about an existing dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
-      operationId: getCluster
-      tags:
-        - cluster
-      responses:
-        200:
-          description: Cluster found, here are the details
-          schema:
-            $ref: '#/definitions/Cluster'
-        404:
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-    put:
-      summary: Creates a new dataproc cluster in the given project with the given name
-      description: creates dataproc cluster with jupyters
-      operationId: createCluster
-      tags:
-        - cluster
-      responses:
-        200:
-          description: Cluster creation successful
-          schema:
-            $ref: '#/definitions/Cluster'
-        400:
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-    delete:
-      summary: Deletes an existing dataproc cluster in the given project
-      description: deletes a dataproc cluster
-      operationId: deleteCluster
-      tags:
-        - cluster
-      responses:
-        202:
-          description: Cluster deletion request accepted
-          schema:
-            $ref: '#/definitions/EmptyResponse'
-        404:
-          description: Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
-    get:
-      summary: Get details of Python files from google Bucket directory notebook
-      description: Returns list of name and path of python files from google bucket, directory notebook.
-      operationId: getNoteBookList
-      tags:
-        - workspaces
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          description: workspaceNamespace
-          required: true
-          type: string
-        - in: path
-          name: workspaceId
-          description: workspaceId
-          required: true
-          type: string
-      responses:
-        200:
-          description: List of files
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/FileDetail'
-        404:
-          description: Workspace not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-notebooks:
+  /v1/clusters/{clusterNamespace}/{clusterName}/localize:
     post:
-      summary: Localize files from workspace to notebook cluster
-      description: localize files
-      operationId: localizeNotebook
+      summary: >
+        Localize files from a workspace to notebook cluster. As a side-effect, a
+        JSON workspace environment file will also be localized to the cluster.
+      description: Localize notebook files to the corresponding notebook cluster.
+      operationId: localize
       tags:
         - cluster
       parameters:
       - in: path
-        name: workspaceNamespace
-        description: workspaceNamespace
+        name: clusterNamespace
+        description: clusterNamespace
         required: true
         type: string
       - in: path
-        name: workspaceId
-        description: workspaceId
+        name: clusterName
+        description: clusterName
         required: true
         type: string
       - in: body
-        name: fileList
-        description: List of file to be transfered
-        required: true
+        name: body
+        description: Localization request.
         schema:
-          type: array
-          items:
-            $ref: '#/definitions/FileDetail'
+          $ref: '#/definitions/ClusterLocalizeRequest'
       responses:
         200:
          description: List of files
@@ -551,36 +444,6 @@ paths:
          description: Internal Error
          schema:
           $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/localize-all-files:
-    get:
-      summary: Get file details from google bucket and then localize to notebook server
-      description: Get files details from bucket folders config and notebooks and then localize to notebook server
-      operationId: localizeAllFiles
-      tags:
-        - workspaces
-      parameters:
-        - in: path
-          name: workspaceNamespace
-          description: workspaceNamespace
-          required: true
-          type: string
-        - in: path
-          name: workspaceId
-          description: workspaceId
-          required: true
-          type: string
-      responses:
-        200:
-          description: Files have been localized
-        404:
-          description: Workspace or Cluster not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
 
   # Billing projects #####################################################################
 
@@ -689,6 +552,42 @@ paths:
           description: A list of workspaces
           schema:
             $ref: "#/definitions/WorkspaceListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
+    get:
+      summary: Get details of Python files from google Bucket directory notebook
+      description: >
+        Returns list of name and path of python files from google bucket,
+        directory notebook.
+      operationId: getNoteBookList
+      tags:
+        - workspaces
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+      responses:
+        200:
+          description: List of files
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FileDetail'
+        404:
+          description: Workspace not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/admin/users/id-verification/list:
     get:
@@ -2496,15 +2395,17 @@ definitions:
         type: integer
         description: line number
 
-  # TODO: Clean up the client representation of the cluster
+  ClusterStatus:
+    type: string
+    description: The status for a Firecloud notebook cluster.
+    enum: [CREATING, RUNNING, ERROR]
+
   Cluster:
-    description: ''
+    description: A Firecloud notebook cluster.
     required:
       - clusterName
       - clusterNamespace
       - status
-      - createdDate
-      - labels
     properties:
       clusterName:
         type: string
@@ -2513,17 +2414,10 @@ definitions:
         type: string
         description: The Google Project used to create the cluster
       status:
-        type: string
-        description: The current state of the cluster
+        $ref: "#/definitions/ClusterStatus"
       createdDate:
         type: string
         description: The date and time the cluster was created, in ISO-8601 format
-      destroyedDate:
-        type: string
-        description: The date and time the cluster was destroyed, in ISO-8601 format
-      labels:
-        type: object
-        description: The labels to be placed on the cluster. Of type Map[String,String]
 
   FileDetail:
     type: object
@@ -2541,12 +2435,32 @@ definitions:
   ClusterListResponse:
     type: object
     required:
-      - items
+      - defaultCluster
     properties:
-      items:
-        type: "array"
+      defaultCluster:
+        $ref: "#/definitions/Cluster"
+
+  ClusterLocalizeRequest:
+    type: object
+    required:
+      - workspaceNamespace
+      - workspaceId
+      - notebookNames
+    properties:
+      workspaceNamespace:
+        type: string
+        description: Workspace namespace from which to source notebooks
+      workspaceId:
+        type: string
+        description: Workspace from which to source notebooks
+      notebookNames:
+        type: array
+        description: >
+          Names of notebooks to localize. This is just the basename (no gs://
+          needed). This is interpreted as relative to the /notebooks directory
+          within the provided workspace's Google Cloud Storage bucket.
         items:
-          $ref: "#/definitions/Cluster"
+          type: string
 
   UsernameTakenResponse:
     type: object
