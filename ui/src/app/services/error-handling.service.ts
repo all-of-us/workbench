@@ -1,7 +1,8 @@
 import {Injectable, NgZone} from '@angular/core';
+import {Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorCode} from 'generated';
+import {ErrorCode, ErrorResponse} from 'generated';
 
 @Injectable()
 export class ErrorHandlingService {
@@ -12,12 +13,24 @@ export class ErrorHandlingService {
   public serverError: boolean;
   public noServerResponse: boolean;
   public serverBusy: boolean;
-
   public userDisabledError: boolean;
 
   constructor(private zone: NgZone) {
     this.serverError = false;
     this.noServerResponse = false;
+  }
+
+  // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
+  public static convertAPIError (e: Response) {
+    try {
+      const { errorClassName = null,
+        errorCode = null,
+        message = null,
+        statusCode = null } = e.json();
+      return { errorClassName, errorCode, message, statusCode };
+    }  catch {
+      return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+    }
   }
 
   public setServerError(): void {
@@ -52,35 +65,27 @@ export class ErrorHandlingService {
     this.serverBusy = false;
   }
 
-  // Don't retry API calls unless the status code is 503.
-  public retryApi (observable: Observable<any>,
-      toRun?: number): Observable<any> {
-    if (toRun === undefined) {
-      toRun = 3;
-    }
+  // don't retry API calls unless the status code is 503.
+  public retryApi (observable: Observable<any>, toRun = 3): Observable<any> {
     let numberRuns = 0;
 
-    return observable.retryWhen((errors) => {
-      return errors.do((e) => {
+    return observable.retryWhen(errors => {
+      return errors.do(e => {
         numberRuns++;
         if (numberRuns === toRun) {
           this.setServerBusy();
           throw e;
         }
-        switch (e.status) {
+
+        const errorResponse = ErrorHandlingService.convertAPIError(e);
+        switch (errorResponse.statusCode) {
           case 503:
             break;
           case 500:
             this.setServerError();
             throw e;
           case 403:
-            let code;
-            try {
-              code = JSON.parse(e._body).code;
-            } catch {
-              code = ErrorCode.PARSEERROR;
-            }
-            if (code === ErrorCode.USERDISABLED) {
+            if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
               this.setUserDisabledError();
             }
             throw e;

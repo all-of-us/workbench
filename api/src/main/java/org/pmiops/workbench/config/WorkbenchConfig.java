@@ -21,6 +21,7 @@ public class WorkbenchConfig {
     public String billingProjectPrefix;
     public String registeredDomainName;
     public boolean enforceRegistered;
+    public String jupyterUserScriptUri;
   }
 
   public static class AuthConfig {
