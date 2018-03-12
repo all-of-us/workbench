@@ -107,7 +107,7 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        integer(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE})
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
@@ -118,7 +118,7 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        integer(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE})
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
 
@@ -129,7 +129,7 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        integer(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE})
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     prevalence =
     case when count_value < ${BIN_SIZE}
@@ -146,6 +146,6 @@ set est_count =
     case when est_count < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        integer(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE})
+        cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where est_count > 0 and Mod(est_count, ${BIN_SIZE}) > 0"
