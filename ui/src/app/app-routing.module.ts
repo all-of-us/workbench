@@ -15,9 +15,7 @@ import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
-import {AnnotationDefinitionsResolver} from './resolvers/annotation-definitions';
 import {CohortResolver} from './resolvers/cohort';
-import {ReviewResolver} from './resolvers/review';
 import {WorkspaceResolver} from './resolvers/workspace';
 
 declare let gtag: Function;
@@ -58,11 +56,6 @@ const routes: Routes = [
       }, {
         path: 'cohorts/:cid/review',
         loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-        resolve: {
-          annotationDefinitions: AnnotationDefinitionsResolver,
-          cohort: CohortResolver,
-          review: ReviewResolver,
-        },
       }, {
         path: 'cohorts/:cid/edit',
         component: CohortEditComponent,
@@ -110,9 +103,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
   providers: [
-    AnnotationDefinitionsResolver,
     CohortResolver,
-    ReviewResolver,
     WorkspaceResolver,
   ]
 })

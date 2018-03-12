@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {ChartsModule} from '../charts/charts.module';
 
 /* Pages */
+import {CreateReviewPage} from './create-review-page/create-review-page';
 import {DetailPage} from './detail-page/detail-page';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
@@ -46,6 +47,7 @@ import {WorkspacesService} from 'generated';
   ],
   declarations: [
     /* Scaffolding and Pages */
+    CreateReviewPage,
     DetailPage,
     OverviewPage,
     PageLayout,
