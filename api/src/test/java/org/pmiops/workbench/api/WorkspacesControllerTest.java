@@ -1036,17 +1036,6 @@ public class WorkspacesControllerTest {
     }
   }
 
-  @Test
-  public void testLocalizeAllFiles() throws Exception {
-    mockObjectsForBuckFileList();
-    try {
-      workspacesController.localizeAllFiles("mockProjectName", "mockWorkspaceName");
-    }
-    catch(Exception ex){
-      fail();
-    }
-  }
-
   private void mockObjectsForBuckFileList() throws ApiException {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
