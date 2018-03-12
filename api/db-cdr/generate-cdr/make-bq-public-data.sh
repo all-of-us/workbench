@@ -109,7 +109,7 @@ set count_value =
     else
         cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
+where count_value > 0"
 
 # achilles_results_concept
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -120,7 +120,7 @@ set count_value =
     else
         cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
+where count_value > 0"
 
 # concept
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -137,7 +137,7 @@ set count_value =
     else
         ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
     end
-where count_value > 0 and Mod(count_value, ${BIN_SIZE}) > 0"
+where count_value > 0"
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -148,4 +148,4 @@ set est_count =
     else
         cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where est_count > 0 and Mod(est_count, ${BIN_SIZE}) > 0"
+where est_count > 0"
