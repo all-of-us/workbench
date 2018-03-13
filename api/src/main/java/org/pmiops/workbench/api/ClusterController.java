@@ -26,14 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
+  private static final String DEFAULT_CLUSTER_NAME = "all-of-us";
+  private static final String CLUSTER_LABEL_AOU = "all-of-us";
+  private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+
+  private static final Logger log = Logger.getLogger(ClusterController.class.getName());
+
   private static final Map<org.pmiops.workbench.notebooks.model.ClusterStatus, ClusterStatus> fcToWorkbenchStatusMap =
       new ImmutableMap.Builder<org.pmiops.workbench.notebooks.model.ClusterStatus, ClusterStatus>()
       .put(org.pmiops.workbench.notebooks.model.ClusterStatus.CREATING, ClusterStatus.CREATING)
       .put(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING, ClusterStatus.RUNNING)
       .put(org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR, ClusterStatus.ERROR)
       .build();
-
-  private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
     new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
@@ -66,31 +70,16 @@ public class ClusterController implements ClusterApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  /**
-   * Deterministically produces a cluster name for a given user/environment.
-   * Clusters are namespaced under a free tier project, which is unique to each
-   * user, therefore the only true requirements here are to:
-   * 1. have a reproducible mapping of user -> cluster name (as we currently
-   *    don't store this)
-   * 2. generate a unique name across AoU environments (decision still pending)
-   */
-  private String clusterNameForUser() {
-      String id =
-          workbenchConfigProvider.get().server.projectId + this.userProvider.get().getEmail();
-      // Take the last 4 digits of the hash of the above.
-      return "aou-" + String.format("%04x", id.hashCode()).substring(0, 4);
-  }
-
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
     String project = userProvider.get().getFreeTierBillingProjectName();
-    String clusterName = this.clusterNameForUser();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.notebooksService.getCluster(project, clusterName);
     } catch (NotFoundException e) {
-      fcCluster = this.notebooksService.createCluster(project, clusterName, createFirecloudClusterRequest());
+      fcCluster = this.notebooksService.createCluster(
+          project, DEFAULT_CLUSTER_NAME, createFirecloudClusterRequest());
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
@@ -101,9 +90,11 @@ public class ClusterController implements ClusterApiDelegate {
     org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
     // TODO(calbach): Configure Jupyter server extensions here.
     Map<String, String> labels = new HashMap<String, String>();
-    labels.put("all-of-us", "true");
-    labels.put("created-by", userProvider.get().getEmail());
+    labels.put(CLUSTER_LABEL_AOU, "true");
+    labels.put(CLUSTER_LABEL_CREATED_BY, userProvider.get().getEmail());
     firecloudClusterRequest.setLabels(labels);
+    firecloudClusterRequest.setJupyterUserScriptUri(
+        workbenchConfigProvider.get().firecloud.jupyterUserScriptUri);
     return firecloudClusterRequest;
   }
 

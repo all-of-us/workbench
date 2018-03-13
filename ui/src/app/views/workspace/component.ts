@@ -71,6 +71,8 @@ class NotebookNameComparator implements Comparator<Notebook> {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  // Keep in sync with api/src/main/resources/notebooks.yaml.
+  private readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
   private cohortNameFilter = new CohortNameFilter();
   private cohortDescriptionFilter = new CohortDescriptionFilter();
@@ -203,11 +205,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private initializeNotebookCookies(cluster: Cluster): Observable<Response> {
-    // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://notebooks.firecloud.org';
+    // TODO(calbach): Generate the FC notebook Typescript client and call here.
     const leoNotebookUrl = leoBaseUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
-        + cluster.clusterName;
+      + cluster.clusterName;
     const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
 
     const headers = new Headers();
@@ -246,8 +247,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   openCluster(notebookName?: string): void {
-    // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://notebooks.firecloud.org';
     let leoNotebookUrl = leoBaseUrl + '/notebooks/'
       + this.cluster.clusterNamespace + '/'
       + this.cluster.clusterName;
