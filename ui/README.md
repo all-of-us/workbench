@@ -17,3 +17,11 @@ other places.
 
 To debug Project Clarity, the widget framework, go here for examples:
 https://github.com/vmware/clarity/tree/master/src/app
+
+To run UI unit tests:
+
+`yarn install && yarn test`
+
+or to run tests headless:
+
+`yarn install && yarn test --browsers=ChromeHeadless`
