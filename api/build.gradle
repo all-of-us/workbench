@@ -262,6 +262,10 @@ swaggerSources {
   }
 }
 
+compileJava {
+  options.compilerArgs << '-Xlint:unchecked'
+}
+
 task integration(type: Test) {
   group = LifecycleBasePlugin.VERIFICATION_GROUP
   testClassesDirs = sourceSets.integration.output.classesDirs
