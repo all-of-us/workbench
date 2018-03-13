@@ -69,6 +69,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     try {
       new StatusApi().status();
     } catch (ApiException e) {
+      log.log(Level.WARNING, "Firecloud status check request failed", e);
       String response = e.getResponseBody();
       JSONObject errorBody = new JSONObject(response);
       JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
