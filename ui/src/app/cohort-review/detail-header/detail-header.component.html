@@ -1,0 +1,31 @@
+<div class="detail-header">
+  <button
+    type="button"
+    class="btn btn-sm"
+    title="Go Back to the Participant Table"
+    (click)="backToTable()">
+    <clr-icon shape="angle-double" dir="left"></clr-icon>
+    Table
+  </button>
+  <h4>Participant {{ participant.id }}</h4>
+  <div class="btn-group btn-sm">
+    <button
+      type="button"
+      class="btn"
+      title="Go To the Prior Participant"
+      [disabled]="isFirstParticipant"
+      (click)="previous()">
+      <clr-icon shape="caret" dir="left"></clr-icon>
+      Prev
+    </button>
+    <button
+      type="button"
+      class="btn"
+      title="Go To the Next Participant"
+      [disabled]="isLastParticipant"
+      (click)="next()">
+      Next
+      <clr-icon shape="caret" dir="right"></clr-icon>
+    </button>
+  </div>
+</div>
