@@ -7,12 +7,12 @@ import {ClarityModule} from '@clr/angular';
 import {ChartsModule} from '../charts/charts.module';
 
 /* Pages */
+import {CreateReviewPage} from './create-review-page/create-review-page';
 import {DetailPage} from './detail-page/detail-page';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {TablePage} from './table-page/table-page';
 
-import {CreateReviewComponent} from './create-review/create-review.component';
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
@@ -46,12 +46,12 @@ import {WorkspacesService} from 'generated';
   ],
   declarations: [
     /* Scaffolding and Pages */
+    CreateReviewPage,
     DetailPage,
     OverviewPage,
     PageLayout,
     TablePage,
 
-    CreateReviewComponent,
     ReviewNavComponent,
 
     /* Annotations */
