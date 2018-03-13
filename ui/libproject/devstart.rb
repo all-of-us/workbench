@@ -116,7 +116,7 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{yarn run build --environment=#{environment_name}}
+    common.run_inline %W{yarn run build --environment=#{environment_name} --no-watch --no-progress}
     ServiceAccountContext.new(@opts.project).run do
       common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
     end
