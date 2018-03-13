@@ -72,7 +72,7 @@ class NotebookNameComparator implements Comparator<Notebook> {
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
-  private readonly leoBaseUrl = 'https://notebooks.firecloud.org';
+  private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
   private cohortNameFilter = new CohortNameFilter();
   private cohortDescriptionFilter = new CohortDescriptionFilter();
@@ -206,7 +206,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private initializeNotebookCookies(cluster: Cluster): Observable<Response> {
     // TODO(calbach): Generate the FC notebook Typescript client and call here.
-    const leoNotebookUrl = leoBaseUrl + '/notebooks/'
+    const leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
       + cluster.clusterName;
     const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
@@ -247,7 +247,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   openCluster(notebookName?: string): void {
-    let leoNotebookUrl = leoBaseUrl + '/notebooks/'
+    let leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
       + this.cluster.clusterNamespace + '/'
       + this.cluster.clusterName;
     if (notebookName) {
@@ -271,7 +271,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (e.source !== notebook) {
           return;
         }
-        if (e.origin !== leoBaseUrl) {
+        if (e.origin !== WorkspaceComponent.leoBaseUrl) {
           return;
         }
         if (e.data.type !== 'bootstrap-auth.request') {
@@ -282,7 +282,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           'body': {
               'googleClientId': this.signInService.clientId
           }
-        }, leoBaseUrl);
+        }, WorkspaceComponent.leoBaseUrl);
       };
       window.addEventListener('message', this.notebookAuthListener);
       this.listenerAdded = true;

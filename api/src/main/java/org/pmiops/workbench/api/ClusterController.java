@@ -76,7 +76,7 @@ public class ClusterController implements ClusterApiDelegate {
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.notebooksService.getCluster(project, clusterName);
+      fcCluster = this.notebooksService.getCluster(project, DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
           project, DEFAULT_CLUSTER_NAME, createFirecloudClusterRequest());
