@@ -192,7 +192,7 @@ jobs:
           name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
-            yarn run codegen && yarn test --no-watch --no-progress
+            yarn run codegen && yarn test --no-watch --no-progress --browsers=ChromeHeadless
       - run:
           name: Test compilation of the Angular app
           working_directory: ~/workbench/ui

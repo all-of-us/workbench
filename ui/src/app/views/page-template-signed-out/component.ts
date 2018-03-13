@@ -7,8 +7,7 @@ import {Component, Input} from '@angular/core';
 })
 export class PageTemplateSignedOutComponent {
   @Input() imageSrc = '';
-  headerImg = '/assets/images/logo-registration_nonSignedIn.png';
+  headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
   constructor() {}
 }
-

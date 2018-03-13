@@ -2,6 +2,8 @@ package org.pmiops.workbench.notebooks;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
+  private static final Logger log = Logger.getLogger(NotebooksServiceImpl.class.getName());
 
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
@@ -81,6 +84,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       new StatusApi().getSystemStatus();
     } catch (ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
+      log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;
     }
     return true;
