@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr" })
+@EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" })
 @EnableTransactionManagement
 public class TestJpaConfig {
 
@@ -35,7 +35,7 @@ public class TestJpaConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[] { "org.pmiops.workbench.cdr" });
+        em.setPackagesToScan(new String[] { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" });
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaProperties(additionalProperties());
         return em;
