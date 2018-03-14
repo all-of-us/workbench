@@ -4,7 +4,10 @@ import {Comparator, StringFilter} from '@clr/angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {
+  BillingProjectStatus,
   ErrorResponse,
+  Profile,
+  ProfileService,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
@@ -46,19 +49,21 @@ export class WorkspaceListComponent implements OnInit {
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
-
+  billingProjectInitialized = false;
   errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   constructor(
       private errorHandlingService: ErrorHandlingService,
+      private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
+    this.queryBillingStatus();
     this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
@@ -72,6 +77,21 @@ export class WorkspaceListComponent implements OnInit {
               const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
               this.errorText = (response.message) ? response.message : '';
             });
+  }
+
+  queryBillingStatus(): void {
+    console.log("Sending?");
+    this.profileService.getMe().subscribe((profile: Profile) => {
+      console.log("Sent");
+      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+        this.billingProjectInitialized = true;
+      } else {
+        setTimeout(() => {
+          this.queryBillingStatus();
+        }, 10000)
+      }
+
+    })
   }
 
   addWorkspace(): void {
