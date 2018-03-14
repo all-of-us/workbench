@@ -32,8 +32,8 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-  backgroundImgSrc = '/assets/images/login-group@2x.png';
-  smallerBackgroundImgSrc = '/assets/images/login-standing@2x.png';
+  backgroundImgSrc = '/assets/images/login-group.png';
+  smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   headerImg = '/assets/images/all-of-us-logo.svg';
   headerHeight = 102;
   sidenavToggle = false;

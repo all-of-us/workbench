@@ -33,9 +33,9 @@ export class InvitationKeyComponent {
       this.requestSent = false;
       // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
       setTimeout(() => {
-        this.appComponent.backgroundImgSrc = '/assets/images/invitation-female@2x.png';
+        this.appComponent.backgroundImgSrc = '/assets/images/invitation-female.png';
         this.appComponent.smallerBackgroundImgSrc =
-            '/assets/images/invitation-female-standing@2x.png';
+            '/assets/images/invitation-female-standing.png';
       }, 0);
 
     }

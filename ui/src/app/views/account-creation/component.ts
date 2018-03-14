@@ -49,8 +49,8 @@ export class AccountCreationComponent {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
       this.appComponent.smallerBackgroundImgSrc =
-          '/assets/images/create-account-male-standing@2x.png';
-      this.appComponent.backgroundImgSrc = '/assets/images/create-account-male@2x.png';
+          '/assets/images/create-account-male-standing.png';
+      this.appComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
     }, 0);
   }
 

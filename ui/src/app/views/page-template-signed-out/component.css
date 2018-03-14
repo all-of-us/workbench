@@ -4,7 +4,7 @@
   width: 100%;
   min-height: 100vh;
   background-size: contain;
-  background-position: bottom right;
+  background-position: bottom right -1rem;
   background-image: var(--larger-image);
 }
 
