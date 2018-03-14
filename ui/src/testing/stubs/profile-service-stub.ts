@@ -1,5 +1,5 @@
 import {DataAccessLevel} from 'generated';
-import {Profile} from 'generated';
+import {BillingProjectStatus, Profile} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
@@ -9,6 +9,7 @@ export class ProfileStubVariables {
     contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
     enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
+    freeTierBillingProjectStatus: BillingProjectStatus.Ready,
     dataAccessLevel: DataAccessLevel.Registered,
     fullName:  'Tester MacTesterson><script>alert("hello");</script>',
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
