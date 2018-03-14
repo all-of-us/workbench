@@ -1,6 +1,6 @@
 <div>
   <div class="overview-header">
-    <h3 id="total-count">
+    <h2 id="total-count">
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
@@ -8,7 +8,7 @@
       <span *ngIf="!(isRequesting$ | async)">
         {{ total$ | async }}
       </span>
-    </h3>
+    </h2>
     <div>
       <button
         type="button"

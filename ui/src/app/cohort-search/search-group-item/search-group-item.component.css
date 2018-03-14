@@ -23,6 +23,10 @@
 }
 
 .close-button {
-  color: rgb(38, 34, 98);
+  color: rgb(245, 135, 113);
   margin: 0 !important;
+}
+
+.close-button:hover {
+  color: rgb(255, 186, 164);
 }

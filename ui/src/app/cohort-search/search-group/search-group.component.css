@@ -1,6 +1,7 @@
 .card {
   border-radius: 0.2rem;
   box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
+  margin: 0.6rem 0;
 }
 
 .card-header {
@@ -16,10 +17,25 @@
 }
 
 .close-button {
-  color: rgb(38, 34, 98);
+  color: rgb(245, 135, 113);
   margin: 0 !important;
 }
 
 .close-button:hover {
-  color: rgb(67, 86, 167);
+  color: rgb(255, 186, 164);
+}
+
+.selection-button {
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.selection-button:hover {
+  background-color: rgb(219, 228, 233);
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.dropdown-item:hover {
+  background-color: rgb(219, 228, 233);
 }
