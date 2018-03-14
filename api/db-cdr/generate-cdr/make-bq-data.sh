@@ -97,7 +97,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary)
+create_tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary)
 for t in "${create_tables[@]}"
 do
     bq --project=$WORKBENCH_PROJECT rm -f $WORKBENCH_DATASET.$t
@@ -105,7 +105,7 @@ do
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(db_domain achilles_analysis criteria ignore_ppi)
+load_tables=(db_domain achilles_analysis criteria)
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do

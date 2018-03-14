@@ -7,7 +7,7 @@ set -xeuo pipefail
 IFS=$'\n\t'
 
 # --cdr=cdr_version ... *optional
-USAGE="./generate-clousql-cdr/make-bq-public-data.sh --workbench-project <PROJECT> --workbench-dataset <DATASET> --public-project <PROJECT> --public-dataset <DATASET> "
+USAGE="./generate-clousql-cdr/make-bq-public-data.sh --workbench-project <PROJECT> --workbench-dataset <DATASET> --public-project <PROJECT> --public-dataset <DATASET> --bin-size <INT>"
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -16,6 +16,7 @@ while [ $# -gt 0 ]; do
     --workbench-dataset) WORKBENCH_DATASET=$2; shift 2;;
     --public-project) PUBLIC_PROJECT=$2; shift 2;;
     --public-dataset) PUBLIC_DATASET=$2; shift 2;;
+    --bin-size) BIN_SIZE=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -40,6 +41,12 @@ then
 fi
 
 if [ -z "${PUBLIC_DATASET}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
+if [ -z "${BIN_SIZE}" ]
 then
   echo "Usage: $USAGE"
   exit 1
@@ -78,15 +85,67 @@ else
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
-copy_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary )
+copy_tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary )
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
   bq --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
 done
 
-# Todo, Run queries to make counts suitable for public
+# Round counts for public dataset
+# 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
+# 2. Round any above BIN_SIZE to multiple of BIN_SIZE
 
-# Business logic
-# Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will
-# be rounded up or down to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1240 .
+# Get person count to set prevalence
+q="select count_value from \`${PUBLIC_PROJECT}.${PUBLIC_DATASET}.achilles_results\` a where a.analysis_id = 1"
+person_count=$(bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
+
+# achilles_results
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results\`
+set count_value =
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where count_value > 0"
+
+# achilles_results_concept
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_concept\`
+set count_value =
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where count_value > 0"
+
+# concept
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
+set count_value =
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end,
+    prevalence =
+    case when count_value < ${BIN_SIZE}
+        then ROUND(${BIN_SIZE} / ${person_count},2)
+    else
+        ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+    end
+where count_value > 0"
+
+# criteria
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.criteria\`
+set est_count =
+    case when est_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where est_count > 0"
