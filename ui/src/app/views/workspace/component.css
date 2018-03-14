@@ -28,3 +28,11 @@ h3 {
 .permissions-group {
   margin: 1rem 0rem 0rem 1rem;
 }
+
+.cluster-spinner {
+  display: inline-block;
+}
+
+.notebook-table-row {
+  cursor: pointer;
+}
