@@ -73,6 +73,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
         throw new ServerErrorException(e.getResponseBody());
       }
     }
+    // TODO(calbach): Teardown any active clusters here.
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
     user.setDisabledTime(timestamp);

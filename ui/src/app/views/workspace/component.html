@@ -97,10 +97,10 @@
   </clr-modal>
 
   <clr-modal [(clrModalOpen)]="clusterPulled">
-    <h3 class="modal-title">Cluster Created:</h3>
-    <div class="modal-body">Your notebook cluster is ready. Would you like to enter the cluster?</div>
+    <h3 class="modal-title">Notebook Server Ready:</h3>
+    <div class="modal-body">Your notebook server is ready, please confirm to open in a new tab</div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="openCluster()">Ok</button>
+      <button type="button" class="btn btn-primary" (click)="openCluster(launchedNotebookName)">Ok</button>
       <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
     </div>
   </clr-modal>
@@ -117,31 +117,25 @@
           </div>
         </div>
       </div>
-      <button class="btn" (click)="launchNotebook()">Launch Notebook Server</button>
-      <button class="btn" id="createAndLaunch" (click)="createAndLaunchNotebook()">
-        <div *ngIf="!clusterLoading; else clusterCreateLoading">Create Notebook Server</div>
-        <ng-template #clusterCreateLoading>
-          <div>
-            <span class="spinner spinner-sm"></span>
-            <span class="loading-text">Creating Notebook Server...</span>
-          </div>
-        </ng-template>
+      <button class="btn" (click)="launchCluster()">New Notebook
       </button>
-      <button class="btn" (click)="killNotebook()">Delete Notebook Server</button>
+      <div *ngIf="clusterLoading" class="cluster-spinner">
+        <span class="spinner spinner-sm" alt=Creating Notebook Server...></span>
+      </div>
     </div>
     <div class="indented">
-      <button class="btn" (click)="localizeNotebooks(notebookList)"
-              [ngClass]="{disabled: !enablePushNotebookBtn}">Push To Notebook Server</button>
       <clr-datagrid [clrDgLoading]="notebooksLoading">
-        <clr-dg-column><input type="checkbox" (change)="selectAllNoteBooks()" [(ngModel)]="checkColumnNotebook"/></clr-dg-column>
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
         </clr-dg-column>
         <clr-dg-column>Path</clr-dg-column>
         <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
-        <clr-dg-row *clrDgItems="let notebook of notebookList" [clrDgItem]="notebook" class="table-row notebook-table-row">
-          <clr-dg-cell><input type="checkbox" (change)="selectANotebook(notebook)" [(ngModel)]="notebook.selected"/></clr-dg-cell>
+        <clr-dg-row
+          class="table-row notebook-table-row"
+          *clrDgItems="let notebook of notebookList"
+          [clrDgItem]="notebook"
+          (click)="launchNotebook(notebook)">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
         </clr-dg-row>
