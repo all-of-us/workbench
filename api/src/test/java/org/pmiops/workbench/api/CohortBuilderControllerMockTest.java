@@ -28,10 +28,10 @@ public class CohortBuilderControllerMockTest {
     private CdrVersionDao mockCdrVersionDao;
 
     @InjectMocks
-    CohortBuilderController controller;
+    private CohortBuilderController controller;
 
     @Test
-    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
+    public void getCriteriaByTypeAndParentIdIcd9() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
@@ -66,7 +66,7 @@ public class CohortBuilderControllerMockTest {
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_demo() throws Exception {
+    public void getCriteriaByTypeAndParentIdDemo() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
@@ -101,7 +101,7 @@ public class CohortBuilderControllerMockTest {
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_icd10() throws Exception {
+    public void getCriteriaByTypeAndParentIdIcd10() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
@@ -134,7 +134,7 @@ public class CohortBuilderControllerMockTest {
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_CPT() throws Exception {
+    public void getCriteriaByTypeAndParentIdCPT() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
@@ -167,7 +167,7 @@ public class CohortBuilderControllerMockTest {
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_Phecodes() throws Exception {
+    public void getCriteriaByTypeAndParentIdPhecodes() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
