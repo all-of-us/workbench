@@ -179,7 +179,7 @@ export class CohortSearchActions {
       /* If this was the only item in the group, the group no longer has a
        * count, not really. */
       if (isOnlyChild) {
-        this.setCount('groups', groupId, null);
+        this.removeGroup(role, groupId);
       } else {
         this.requestGroupCount(role, groupId);
       }
