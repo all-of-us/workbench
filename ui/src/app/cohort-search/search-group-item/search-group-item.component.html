@@ -16,12 +16,11 @@
       <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
       <span class="text-muted">Contains</span>
       <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
-      <span class="hidden">{{ codes }}</span>
     </small>
+
     <small class="text-muted padding-right">|</small>
-    <span *ngIf="isRequesting"
-          class="spinner spinner-inline"
-          [style.vertical-align]="'middle'">
+
+    <span *ngIf="isRequesting" class="spinner spinner-inline">
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="font-weight-bold">
@@ -32,9 +31,9 @@
   <div>
     <button
       type="button"
-      class="btn btn-link btn-sm text-danger margin-right"
+      class="btn btn-link btn-sm close-button"
       (click)="remove()">
-      <clr-icon shape="close"></clr-icon>
+      <clr-icon shape="close" size="24"></clr-icon>
     </button>
   </div>
 

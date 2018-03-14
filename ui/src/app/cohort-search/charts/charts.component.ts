@@ -100,11 +100,6 @@ const combinationDataTable = (cleanData: Data): any[] => {
 
     </div>
   `,
-  styles: [`
-    .box {
-      border: 1px solid #d7d7d7;
-    }
-  `],
 })
 export class ChartsComponent {
   private rawData: Data;

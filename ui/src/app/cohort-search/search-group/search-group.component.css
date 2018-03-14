@@ -1,0 +1,25 @@
+.card {
+  border-radius: 0.2rem;
+  box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-footer {
+  color: rgb(38, 34, 98);
+  background-color: rgb(226, 226, 233);
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.close-button {
+  color: rgb(38, 34, 98);
+  margin: 0 !important;
+}
+
+.close-button:hover {
+  color: rgb(67, 86, 167);
+}
