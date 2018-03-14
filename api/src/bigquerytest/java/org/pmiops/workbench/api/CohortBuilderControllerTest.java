@@ -1,32 +1,24 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.ChartInfo;
-import org.pmiops.workbench.model.ChartInfoListResponse;
-import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaListResponse;
-import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -34,49 +26,67 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.inject.Provider;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class})
+@Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
+        ParticipantCounter.class, DomainLookupService.class, TestJpaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
-    private CohortBuilderController controller;
-    private CdrVersion cdrVersion;
+    private static final String TYPE_ICD9 = "ICD9";
+    private static final String SUBTYPE_NONE = null;
+    private static final String TYPE_ICD10 = "ICD10";
+    private static final String TYPE_CPT = "CPT";
+    private static final String SUBTYPE_CPT4 = "CPT4";
+    private static final String SUBTYPE_ICD10CM = "ICD10CM";
+    private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
+    private static final String DOMAIN_CONDITION = "Condition";
+    private static final String DOMAIN_PROCEDURE = "Procedure";
+    private static final String DOMAIN_MEASUREMENT = "Measurement";
+    private static final String DOMAIN_OBSERVATION = "Observation";
+    private static final String DOMAIN_DRUG = "Drug";
 
     @Autowired
-    private BigQuery bigquery;
+    private CohortBuilderController controller;
 
+    private CdrVersion cdrVersion;
 
     @Autowired
     private BigQueryService bigQueryService;
 
-    @Mock
-    private DomainLookupService mockDomainLookupService;
+    @Autowired
+    private CriteriaDao criteriaDao;
 
-    @Mock
-    private CriteriaDao mockCriteriaDao;
-
-    @Mock
-    private CdrVersionDao mockCdrVersionDao;
-
-    @Mock
-    private Provider<GenderRaceEthnicityConcept> mockGenderRaceEthnicityConceptProvider;
+    @Autowired
+    private CdrVersionDao cdrVersionDao;
 
     @Autowired
     private TestWorkbenchConfig testWorkbenchConfig;
+
+    private Criteria icd9ConditionChild;
+    private Criteria icd9ConditionParent;
+    private Criteria icd9ProcedureChild;
+    private Criteria icd9ProcedureParent;
+    private Criteria icd9MeasurementChild;
+    private Criteria icd9MeasurementParent;
+    private Criteria icd10ConditionChild;
+    private Criteria icd10ConditionParent;
+    private Criteria icd10ProcedureChild;
+    private Criteria icd10ProcedureParent;
+    private Criteria icd10MeasurementChild;
+    private Criteria icd10MeasurementParent;
+    private Criteria cptProcedure;
+    private Criteria cptObservation;
+    private Criteria cptMeasurement;
+    private Criteria cptDrug;
 
     @Override
     public List<String> getTableNames() {
@@ -95,421 +105,216 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Before
     public void setUp() {
         cdrVersion = new CdrVersion();
+        cdrVersion.setCdrVersionId(1L);
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
         cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
         CdrVersionContext.setCdrVersion(cdrVersion);
-        this.controller = new CohortBuilderController(bigQueryService,
-                new ParticipantCounter(mockDomainLookupService), mockCriteriaDao, mockCdrVersionDao, mockGenderRaceEthnicityConceptProvider);
+
+        cdrVersionDao.save(cdrVersion);
+
+        icd9ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"001"));
+        icd9ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ConditionParent.getId(), "001", DOMAIN_CONDITION));
+        icd9ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"002"));
+        icd9ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ProcedureParent.getId(), "002", DOMAIN_PROCEDURE));
+        icd9MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"003"));
+        icd9MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9MeasurementParent.getId(), "003", DOMAIN_MEASUREMENT));
+        icd10ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM,"A"));
+        icd10ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10ConditionParent.getId(), "A09", DOMAIN_CONDITION));
+        icd10ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10PCS,"16"));
+        icd10ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10PCS, icd10ProcedureParent.getId(), "16070", DOMAIN_PROCEDURE));
+        icd10MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM,"R92"));
+        icd10MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10MeasurementParent.getId(), "R92.2", DOMAIN_MEASUREMENT));
+        cptProcedure = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001T", DOMAIN_PROCEDURE));
+        cptObservation = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Z", DOMAIN_OBSERVATION));
+        cptMeasurement = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Q", DOMAIN_MEASUREMENT));
+        cptDrug = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "90703", DOMAIN_DRUG));
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_Icd9() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("ICD9")
-                        .code("001-139.99")
-                        .name("Infectious and parasitic diseases")
-                        .group(false)
-                        .selectable(false)
-                        .count("0")
-                        .conceptId("0");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId(1L,"ICD9", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("ICD9")
-                        .code("001-139.99")
-                        .name("Infectious and parasitic diseases")
-                        .group(false)
-                        .selectable(false)
-                        .count(0L)
-                        .conceptId(0L));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L);
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_demo() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("DEMO")
-                        .name("Age")
-                        .group(false)
-                        .selectable(true)
-                        .count("0")
-                        .conceptId("12")
-                        .subtype("AGE");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId(1L,"DEMO", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("DEMO")
-                        .name("Age")
-                        .group(false)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(12L)
-                        .subtype("AGE"));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L);
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_icd10() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("ICD10")
-                        .name("DIAGNOSIS CODES")
-                        .group(true)
-                        .selectable(true)
-                        .count("0")
-                        .conceptId("0");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId(1L,"ICD10", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("ICD10")
-                        .name("DIAGNOSIS CODES")
-                        .group(true)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(0L));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L);
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
+        SearchRequest searchRequest = createSearchRequests(icd9ProcedureChild.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_CPT() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("CPT")
-                        .name("DIAGNOSIS CODES")
-                        .group(true)
-                        .selectable(true)
-                        .count("0")
-                        .conceptId("0");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId(1L,"CPT", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("CPT")
-                        .name("DIAGNOSIS CODES")
-                        .group(true)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(0L));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L);
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
+        SearchRequest searchRequest = createSearchRequests(icd9ProcedureParent.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void getCriteriaByTypeAndParentId_Phecodes() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("PHECODE")
-                        .name("Intestinal infection")
-                        .group(true)
-                        .selectable(true)
-                        .count("0")
-                        .conceptId("0");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaByTypeAndParentId(1l,"PHECODE", 0L),
-                new Criteria()
-                        .id(1L)
-                        .type("PHECODE")
-                        .name("Intestinal infection")
-                        .group(true)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(0L));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L);
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9MeasurementChild() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
+        SearchRequest searchRequest = createSearchRequests(icd9MeasurementChild.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void getCriteriaTreeQuickSearch() throws Exception {
-        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
-                new org.pmiops.workbench.cdr.model.Criteria()
-                        .id(1L)
-                        .type("PHECODE")
-                        .name("Intestinal infection")
-                        .group(true)
-                        .selectable(true)
-                        .count("0")
-                        .conceptId("0");
-
-        when(mockCriteriaDao
-                .findCriteriaByTypeAndNameOrCode("PHECODE", "infect*"))
-                .thenReturn(Arrays.asList(expectedCriteria));
-
-        assertCriteria(
-                controller.getCriteriaTreeQuickSearch(1L,"PHECODE", "infect"),
-                new Criteria()
-                        .id(1L)
-                        .type("PHECODE")
-                        .name("Intestinal infection")
-                        .group(true)
-                        .selectable(true)
-                        .count(0L)
-                        .conceptId(0L));
-
-        verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "infect*");
-        verifyNoMoreInteractions(mockCriteriaDao);
+    public void countSubjectsICD9MeasurementParent() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
+        SearchRequest searchRequest = createSearchRequests(icd9MeasurementParent.getType(), Arrays.asList(icd9));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD9ConditionOccurrenceLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(false).value("001.1").domain("Condition")))),
-                1);
+    public void countSubjectsDemoGender() throws Exception {
+        Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+        SearchParameter demo = createSearchParameter(demoGender, null);
+        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD9ConditionOccurrenceParent() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(true).value("001.1").domain("Condition")))),
-                1);
-    }
-
-    @Test
-    public void countSubjects_ICD9ProcedureOccurrenceLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(false).value("002.1").domain("Procedure")))),
-                1);
-    }
-
-    @Test
-    public void countSubjects_ICD9ProcedureOccurrenceParent() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(controller.countParticipants(1L,
-                createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(true).value("002.1").domain("Procedure")))),
-                1);
-    }
-
-    @Test
-    public void countSubjects_ICD9MeasurementLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(false).value("003.1").domain("Measurement")))),
-                        1);
-    }
-
-    @Test
-    public void countSubjects_ICD9MeasurementParent() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD9", Arrays.asList(new SearchParameter().type("ICD9").group(true).value("003.1").domain("Measurement")))),
-                        1);
-    }
-
-    @Test
-    public void countSubjects_DemoGender() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("DEMO", Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")))),
-                        1);
-    }
-
-    @Test
-    public void countSubjects_DemoAge() throws Exception {
+    public void countSubjectsDemoAge() throws Exception {
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
-        final SearchRequest searchRequests = createSearchRequests("DEMO", Arrays.asList(new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
-                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())))));
-
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
-        doNothing().when(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
-        assertParticipants(controller.countParticipants(1L, searchRequests),1);
-
-        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getIncludes());
-        verify(mockDomainLookupService).findCodesForEmptyDomains(searchRequests.getExcludes());
+        Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+        SearchParameter demo = createSearchParameter(demoAge, null);
+        demo.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests),1);
     }
 
     @Test
-    public void countSubjects_DemoGenderAndAge() throws Exception {
+    public void countSubjectsDemoGenderAndAge() throws Exception {
+        Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+        SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
-                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
+        Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+        SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
+        demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
 
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter))),
-                        1);
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests),1);
     }
 
     @Test
-    public void countSubjects_ICD9_Demo_SameSearchGroup() throws Exception {
+    public void countSubjectsICD9AndDemo() throws Exception {
+        Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+        SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+
         LocalDate birthdate = LocalDate.of(1980, 8, 01);
         LocalDate now = LocalDate.now();
         Integer age = Period.between(birthdate, now).getYears();
+        Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+        SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
+        demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
 
-        SearchParameter ageParameter = new SearchParameter().value(String.valueOf(age)).domain("DEMO").subtype("AGE")
-                .attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam));
 
-        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
-                .searchParameters(Arrays.asList(new SearchParameter().type("ICD9").group(false).value("003.1").domain("Measurement")));
+        SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(icd9.getType()).searchParameters(Arrays.asList(icd9));
 
-        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(ageParameter, genderParameter));
-        testSearchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
+        searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-
-        assertParticipants( controller.countParticipants(1L, testSearchRequest), 1);
+        assertParticipants( controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
     }
 
     @Test
-    public void countSubjects_ICD9_Demo_DiffSearchGroup() throws Exception {
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
+    public void countSubjectsDemoExcluded() throws Exception {
+        Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+        SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
-        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("ICD9")
-                .searchParameters(Arrays.asList(new SearchParameter().type("ICD9").group(false).value("003.1").domain("Measurement")));
-        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
+        SearchParameter demoGenderSearchParamExclude = createSearchParameter(demoGender, null);
 
-        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
-        testSearchRequest.getIncludes().add(anotherSearchGroup);
+        SearchGroupItem excludeSearchGroupItem = new SearchGroupItem().type(demoGender.getType())
+                .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
+        SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
+        SearchRequest searchRequests = createSearchRequests(demoGender.getType(), Arrays.asList(demoGenderSearchParam));
+        searchRequests.getExcludes().add(excludeSearchGroup);
 
-        assertParticipants( controller.countParticipants(1L, testSearchRequest), 1);
+        assertParticipants( controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
     }
 
     @Test
-    public void countSubjects_DemoExcluded() throws Exception {
-        SearchParameter genderParameter = new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN");
-
-        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type("DEMO")
-                .searchParameters(Arrays.asList(new SearchParameter().domain("DEMO").conceptId(8507L).subtype("GEN")));
-        SearchGroup anotherSearchGroup = new SearchGroup().addItemsItem(anotherSearchGroupItem);
-
-        SearchRequest testSearchRequest = createSearchRequests("DEMO", Arrays.asList(genderParameter));
-        testSearchRequest.getExcludes().add(anotherSearchGroup);
-
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-
-        assertParticipants( controller.countParticipants(1L, testSearchRequest), 0);
+    public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
+        SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD10ConditionOccurrenceLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().type("ICD10").subtype("ICD10CM").group(false).value("A09").domain("Condition")))),
-                1);
+    public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
+        SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD10ConditionOccurrenceParent() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().type("ICD10").subtype("ICD10CM").group(true).value("C00.5").domain("Condition")))),
-                1);
+    public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10ProcedureChild, "16070");
+        SearchRequest searchRequest = createSearchRequests(icd10ProcedureChild.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD10ProcedureOccurrenceLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().type("ICD10").subtype("ICD10PCS").group(false).value("16070").domain("Procedure")))),
-                1);
+    public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
+        SearchRequest searchRequest = createSearchRequests(icd10ProcedureParent.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_ICD10MeasurementLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("ICD10", Arrays.asList(new SearchParameter().type("ICD10").subtype("ICD10CM").group(false).value("R92.2").domain("Measurement")))),
-                1);
+    public void countSubjectsICD10MeasurementChild() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
+        SearchRequest searchRequest = createSearchRequests(icd10MeasurementChild.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_CPTProcedureOccurrenceLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().type("CPT").group(false).value("0001T").domain("Procedure")))),
-                1);
+    public void countSubjectsICD10MeasurementParent() throws Exception {
+        SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
+        SearchRequest searchRequest = createSearchRequests(icd10MeasurementParent.getType(), Arrays.asList(icd10));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_CPTObservationLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().type("CPT").group(false).value("0001Z").domain("Observation")))),
-                1);
+    public void countSubjectsCPTProcedureOccurrence() throws Exception {
+        SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
+        SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_CPTMeasurementLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().type("CPT").group(false).value("0001Q").domain("Measurement")))),
-                1);
+    public void countSubjectsCPTObservation() throws Exception {
+        SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
+        SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
-    public void countSubjects_CPTDrugExposureLeaf() throws Exception {
-        when(mockCdrVersionDao.findOne(1L)).thenReturn(cdrVersion);
-        assertParticipants(
-                controller.countParticipants(1L,
-                        createSearchRequests("CPT", Arrays.asList(new SearchParameter().type("CPT").group(false).value("90703").domain("Drug")))),
-                1);
+    public void countSubjectsCPTMeasurement() throws Exception {
+        SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
+        SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
+    }
+
+    @Test
+    public void countSubjectsCPTDrugExposure() throws Exception {
+        SearchParameter cpt = createSearchParameter(cptDrug, "90703");
+        SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
@@ -529,63 +334,35 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         assertThat(expectedResult).isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
     }
 
-    @Test
-    public void getParticipantDemographics() throws Exception {
-        Long cdrVersionId = 1L;
-        Map<String, Map<Long, String>> concepts = createGenderRaceEthnicityConcept();
-
-        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
-                .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
-                .collect(Collectors.toList());
-        ParticipantDemographics expected = new ParticipantDemographics().raceList(raceList).genderList(genderList).ethnicityList(ethnicityList);
-
-        when(mockCdrVersionDao.findOne(cdrVersionId)).thenReturn(cdrVersion);
-        when(mockGenderRaceEthnicityConceptProvider.get()).thenReturn(new GenderRaceEthnicityConcept(concepts));
-
-        ParticipantDemographics response = controller.getParticipantDemographics(cdrVersionId).getBody();
-        assertEquals(expected, response);
-
-        verify(mockCdrVersionDao).findOne(cdrVersionId);
-        verify(mockGenderRaceEthnicityConceptProvider).get();
-        verifyNoMoreInteractions(mockCdrVersionDao, mockCriteriaDao, mockDomainLookupService, mockGenderRaceEthnicityConceptProvider);
-    }
-
-    private Map<String, Map<Long, String>> createGenderRaceEthnicityConcept() {
-        Map<Long, String> raceMap = new HashMap<>();
-        raceMap.put(1L, "White");
-        raceMap.put(2L, "African American");
-
-        Map<Long, String> genderMap = new HashMap<>();
-        genderMap.put(3L, "MALE");
-        genderMap.put(4L, "FEMALE");
-
-        Map<Long, String> ethnicityMap = new HashMap<>();
-        ethnicityMap.put(5L, "Hispanic or Latino");
-        ethnicityMap.put(6L, "Not Hispanic or Latino");
-
-        Map<String, Map<Long, String>> concepts = new HashMap<>();
-        concepts.put(GenderRaceEthnicityType.RACE.name(), raceMap);
-        concepts.put(GenderRaceEthnicityType.GENDER.name(), genderMap);
-        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), ethnicityMap);
-        return concepts;
-    }
-
     protected String getTablePrefix() {
         CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
         return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
     }
 
-    private void assertCriteria(ResponseEntity response, Criteria expectedCriteria) {
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    private Criteria createCriteriaParent(String type, String subtype, String code) {
+        return new Criteria().parentId(0).type(type).subtype(subtype)
+                .code(code).name("Cholera").group(true).selectable(true)
+                .count("28");
+    }
 
-        CriteriaListResponse listResponse = (CriteriaListResponse) response.getBody();
-        assertThat(listResponse.getItems().get(0)).isEqualTo(expectedCriteria);
+    private Criteria createCriteriaChild(String type, String subtype, long parentId, String code, String domain) {
+        return new Criteria().parentId(parentId).type(type).subtype(subtype)
+                .code(code).name("Cholera").group(false).selectable(true)
+                .count("16").domainId(domain).conceptId("44829696");
+    }
+
+    private Criteria createDemoCriteria(String type, String subtype, String conceptId) {
+        return new Criteria().type(type).subtype(subtype).conceptId(conceptId);
+    }
+
+    private SearchParameter createSearchParameter(Criteria criteria, String code) {
+        return new SearchParameter()
+                .type(criteria.getType())
+                .subtype(criteria.getSubtype())
+                .group(criteria.getGroup())
+                .value(code)
+                .domain(criteria.getDomainId())
+                .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
     }
 
     private SearchRequest createSearchRequests(String type, List<SearchParameter> parameters) {
@@ -603,16 +380,5 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
         Long participantCount = (Long) response.getBody();
         assertThat(participantCount).isEqualTo(expectedCount);
-    }
-
-    private void assertChartInfoCounts(ResponseEntity response, String gender, String race, String ageRange, int count) {
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        ChartInfoListResponse chartInfoResponse = (ChartInfoListResponse) response.getBody();
-        final ChartInfo chartInfo = chartInfoResponse.getItems().get(0);
-        assertThat(chartInfo.getGender()).isEqualTo(gender);
-        assertThat(chartInfo.getRace()).isEqualTo(race);
-        assertThat(chartInfo.getAgeRange()).isEqualTo(ageRange);
-        assertThat(chartInfo.getCount()).isEqualTo(count);
     }
 }
