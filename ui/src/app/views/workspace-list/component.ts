@@ -80,18 +80,15 @@ export class WorkspaceListComponent implements OnInit {
   }
 
   queryBillingStatus(): void {
-    console.log("Sending?");
     this.profileService.getMe().subscribe((profile: Profile) => {
-      console.log("Sent");
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
         setTimeout(() => {
           this.queryBillingStatus();
-        }, 10000)
+        }, 10000);
       }
-
-    })
+    });
   }
 
   addWorkspace(): void {
