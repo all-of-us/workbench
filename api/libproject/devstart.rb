@@ -258,7 +258,8 @@ def run_api()
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
-    common.run_inline %W{docker-compose up -d api}
+    at_exit { common.run_inline %W{docker-compose down} }
+    common.run_inline_swallowing_interrupt %W{docker-compose up api}
   end
 end
 
@@ -1317,13 +1318,17 @@ Common.register_command({
   :fn => lambda { |*args| setup_cloud_project("setup-cloud-project", *args) }
 })
 
-def start_api_and_sleep()
-  c = Common.new
-  c.run_inline %W{gradle appengineStart}
-  c.run_inline %W{sleep 1000d}
+def start_api_and_incremental_build(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  # common.run_inline %W{gradle appengineRun}
+  common.run_inline %W{gradle appengineStart}
+  common.run_inline %W{gradle --continuous incrementalHotSwap}
 end
 
+# TODO(dmohs): This is really isn't meant to be run directly, so it'd be better to hide it from the
+# menu of options.
 Common.register_command({
-  :invocation => "start-api-and-sleep",
-  :fn => lambda { |*args| start_api_and_sleep() }
+  :invocation => "start-api-and-incremental-build",
+  :fn => lambda { |*args| start_api_and_incremental_build("start-api-and-incremental-build", args) }
 })

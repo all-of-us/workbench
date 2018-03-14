@@ -162,10 +162,10 @@ validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
-// ideaModule.dependsOn generateFireCloudClient
-// compileGeneratedJava.dependsOn generateFireCloudClient
-// ideaModule.dependsOn generateNotebooksClient
-// compileGeneratedJava.dependsOn generateNotebooksClient
+ideaModule.dependsOn generateFireCloudClient
+compileGeneratedJava.dependsOn generateFireCloudClient
+ideaModule.dependsOn generateNotebooksClient
+compileGeneratedJava.dependsOn generateNotebooksClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
@@ -364,17 +364,20 @@ class IncrementalHotSwapTask extends DefaultTask {
         inputs.outOfDate { change ->
           println "Compiling ${change.file.path}..."
           String cp = classpath.join(":")
-          def compileProc = ("/usr/lib/jvm/default-jvm/bin/javac -classpath ${cp}" \
-            + " -d ${outputDir.path} -g ${change.file.path}").execute()
-          compileProc.waitFor()
+          def compileProc = new ProcessBuilder(
+            "/usr/lib/jvm/default-jvm/bin/javac", "-classpath", cp,
+            "-d", outputDir.path, "-g", change.file.path)
+            .inheritIO()
+            .start()
+          assert compileProc.waitFor() == 0
           String relativePath = change.file.path.substring(1 + inputDir.path.length())
           String fqClassName = relativePath[0..-(".java".length() + 1)].replaceAll("/", ".")
           String outputPath = outputDir.path + "/" \
             + relativePath[0..-(".java".length() + 1)] + ".class"
           printf "Hot swapping $fqClassName from ${outputPath}..."
-          def proc = "echo redefine $fqClassName $change.file.path".execute() \
+          def swapProc = "echo redefine $fqClassName ${outputPath}".execute() \
             | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
-          proc.waitFor()
+          assert swapProc.waitFor() == 0
           println "done."
         }
 
