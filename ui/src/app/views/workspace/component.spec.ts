@@ -145,14 +145,4 @@ describe('WorkspaceComponent', () => {
     expect(app.notebookList[0].name).toEqual('FileDetails');
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
   }));
-
-  it('Calls localize All files after creating cluster', fakeAsync(() => {
-    const fixture = workspacePage.fixture;
-    const app = fixture.debugElement.componentInstance;
-    fixture.componentRef.instance.createAndLaunchNotebook();
-    tick(5000);
-    expect(app.clusterPulled).toEqual(true);
-  }));
-
-
 });

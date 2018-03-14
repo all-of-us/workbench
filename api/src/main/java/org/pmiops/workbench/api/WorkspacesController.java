@@ -10,7 +10,6 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -59,7 +58,6 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,7 +84,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
-  private static final String CONFIG_FILENAME = "config/all_of_us_config.json";
+  public static final String CONFIG_FILENAME = "config/all_of_us_config.json";
 
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
@@ -510,33 +508,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> localizeAllFiles(String workspaceNamespace, String workspaceId) {
-    List<FileDetail> fileList = new ArrayList<>();
-    try {
-      org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
-          fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
-              .getWorkspace();
-      String bucketName = fireCloudWorkspace.getBucketName();
-      fileList = getFilesFromNotebooks(bucketName);
-      fileList.addAll(getFilesFromConfig(bucketName));
-      Map<String, String> fileMap = fileList.stream()
-          .collect(Collectors.toMap(fileDetail -> "~/" + fileDetail.getName(),
-              fileDetail -> fileDetail.getPath()));
-      this.notebooksService.localize(workspaceNamespace, convertClusterName(workspaceId), fileMap);
-    } catch (org.pmiops.workbench.firecloud.ApiException ex) {
-      if (ex.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      }
-      throw new ServerErrorException(ex);
-    } catch (NotFoundException ex) {
-      throw new NotFoundException(String.format("Cluster %s/%s not found",
-          workspaceNamespace, workspaceId));
-    }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
@@ -805,14 +776,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  private String convertClusterName(String workspaceId) {
-    // TODO(calbach): This conversion method is flawed as cluster creation
-    // retries by appending digits to the cluster name. Clean this up.
-    String clusterName = workspaceId + this.userProvider.get().getUserId();
-    clusterName = clusterName.toLowerCase();
-    return clusterName;
-  }
-
   /**
    * Returns List of python fileDetails from notebooks folder
    * @param bucketName
@@ -831,18 +794,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /**
-   * Returns List of FileDetail from config folder
-   * @param bucketName
-   * @return list of FileDetail
-   * @throws org.pmiops.workbench.firecloud.ApiException
-   */
-  private List<FileDetail> getFilesFromConfig(String bucketName) throws org.pmiops.workbench.firecloud.ApiException {
-    List<Blob> blobList = new ArrayList<>();
-    blobList = cloudStorageService.getBlobList(bucketName, CONFIG_WORKSPACE_DIRECTORY);
-    return convertBlobToFileDetail(blobList, bucketName);
-  }
-
-  /**
    * Convers Blob to FileDetail
    * @param blobList
    * @param bucketName
@@ -851,8 +802,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private List<FileDetail> convertBlobToFileDetail(List<Blob> blobList, String bucketName) {
     List<FileDetail> fileList = new ArrayList<>();
     blobList.forEach(blob -> {
+      String[] parts = blob.getName().split("/");
       FileDetail fileDetail = new FileDetail();
-      fileDetail.setName(blob.getName());
+      fileDetail.setName(parts[parts.length-1]);
       fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
       fileList.add(fileDetail);
     });
