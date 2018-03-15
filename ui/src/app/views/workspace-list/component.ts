@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -44,12 +44,13 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
               '../../styles/cards.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceListComponent implements OnInit {
+export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   private workspaceNameFilter = new WorkspaceNameFilter();
   private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
   private workspaceNameComparator = new WorkspaceNameComparator();
   billingProjectInitialized = false;
+  billingProjectQuery: NodeJS.Timer;
   errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
@@ -79,12 +80,18 @@ export class WorkspaceListComponent implements OnInit {
             });
   }
 
+  ngOnDestroy(): void {
+    clearTimeout(this.billingProjectQuery);
+  }
+
   queryBillingStatus(): void {
+    // TODO (blrubenstein): When we have a home page, move this to the
+    //      home page and change from tooltip to more descriptive message.
     this.profileService.getMe().subscribe((profile: Profile) => {
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
-        setTimeout(() => {
+        this.billingProjectQuery = setTimeout(() => {
           this.queryBillingStatus();
         }, 10000);
       }
