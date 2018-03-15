@@ -30,8 +30,9 @@ export class ErrorReporterService extends ErrorHandler {
   }
 
   handleError(error: any) {
+    // Always log to console regardless of whether Stackdriver is enabled.
+    super.handleError(error);
     if (!this.stackdriverReporter) {
-      super.handleError(error);
       return;
     }
     this.stackdriverReporter.report(error, (e) => {
