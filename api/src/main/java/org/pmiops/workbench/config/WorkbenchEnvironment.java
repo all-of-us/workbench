@@ -10,7 +10,7 @@ public class WorkbenchEnvironment {
 
 
   public WorkbenchEnvironment() {
-    this(SystemProperty.environment.value().equals(Value.Development),
+    this(Value.Development.equals(SystemProperty.environment.value()),
          SystemProperty.applicationId.get());
   }
 
