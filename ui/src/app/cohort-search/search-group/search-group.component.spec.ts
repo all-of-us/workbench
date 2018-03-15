@@ -120,7 +120,7 @@ describe('SearchGroupComponent', () => {
 
   it('Should dispatch REMOVE_GROUP on remove button click', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    const button = fixture.debugElement.query(By.css('button.close'));
+    const button = fixture.debugElement.query(By.css('button.close-button'));
     button.triggerEventHandler('click', null);
     expect(spy).toHaveBeenCalledWith({
       type: REMOVE_GROUP,

@@ -8,7 +8,11 @@ import {SearchRequest} from 'generated';
 
 @Component({
   selector: 'app-search-group',
-  templateUrl: 'search-group.component.html',
+  templateUrl: './search-group.component.html',
+  styleUrls: [
+    './search-group.component.css',
+    '../../styles/buttons.css',
+  ]
 })
 export class SearchGroupComponent {
   @Input() group;

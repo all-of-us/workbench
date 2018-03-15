@@ -10,10 +10,14 @@ import {Cohort, CohortsService, Workspace} from 'generated';
 
 const COHORT_TYPE = 'AoU_Discover';
 
+
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
-  styleUrls: ['./overview.component.css']
+  styleUrls: [
+    './overview.component.css',
+    '../../styles/buttons.css',
+  ]
 })
 export class OverviewComponent {
   @Input() chartData$: Observable<List<any>>;

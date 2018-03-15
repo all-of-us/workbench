@@ -1,9 +1,12 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Your Workspaces</h3>
-    <button class="btn btn-secondary" (click)="addWorkspace()">
+    <button class="btn btn-secondary tooltip tooltip-lg tooltip-top-left" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
       <clr-icon shape="plus"></clr-icon>
       New Workspace
+      <span *ngIf="!billingProjectInitialized" class="tooltip-content">
+        Your billing project is currently being created, please wait.
+      </span>
     </button>
   </div>
   <div class="alert alert-danger" *ngIf="errorText">
