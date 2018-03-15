@@ -16,6 +16,7 @@ export class WizardComponent {
   constructor(private actions: CohortSearchActions) {}
 
   get critPageTitle() {
+    console.log(this.criteriaType);
     return `Choose ${typeToTitle(this.criteriaType)} Codes`;
   }
 

@@ -1,0 +1,35 @@
+<form [formGroup]="demoForm" (ngSubmit)="submit()">
+  <section class="form-block">
+
+    <!-- Choose the Operator -->
+    <div class="form-group">
+      <label for="age">Choose an Age Filter</label>
+      <div>
+        Age slider / filters go here.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="genders">Choose Gender Filters</label>
+      <div>
+        Genders Go Here
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <label for="races">Choose Race Filters</label>
+      <div>
+        Races Go Here
+      </div>
+    </div>
+  </section>
+
+  <button class="btn btn-link" type="button" (click)="cancel()">
+    Cancel
+  </button>
+  <button class="btn btn-success" type="button" (click)="opened = false" [disabled]="demoForm.invalid">
+    Finish
+  </button>
+
+</form>
