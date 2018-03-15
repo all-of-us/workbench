@@ -1,13 +1,15 @@
-<div class="search-groups-header">
-  <h3>{{ title | titlecase }}</h3>
-</div>
+<div>
+  <div class="col-header">
+    <h2>{{ title | titlecase }}</h2>
+  </div>
 
-<!-- .size, not .length => this is an immutable.js list -->
-<div class="search-groups">
+  <!-- .size, not .length => this is an immutable.js list -->
   <div *ngFor="let group of (groups$ | async)">
     <app-search-group [group]="group" [role]="role">
     </app-search-group>
-    <div *ngIf="(groups$ | async)?.size > 0" class="text-center font-weight-bold">AND</div>
+    <div class="circle-wrapper">
+      <div class="and-circle">AND</div>
+    </div>
   </div>
   <app-search-group-select [role]="role"></app-search-group-select>
 </div>

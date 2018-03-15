@@ -14,14 +14,19 @@
   color: rgb(0, 124, 187)!important;
 }
 
-.margin-right {
-  margin-right: 0px !important;
-}
-
 .padding-right {
   padding-right: 10px;
 }
 
 .hidden {
   display: none;
+}
+
+.close-button {
+  color: rgb(245, 135, 113);
+  margin: 0 !important;
+}
+
+.close-button:hover {
+  color: rgb(255, 186, 164);
 }

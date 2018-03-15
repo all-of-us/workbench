@@ -93,17 +93,17 @@ describe('SearchGroupItemComponent', () => {
     fixture.detectChanges();
   });
 
-  it('Should display code type and names', () => {
+  it('Should display code type', () => {
     expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
     fixture.detectChanges();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
-    expect(display.childElementCount).toBe(3);
+    expect(display.childElementCount).toBe(2);
 
     const trimmedText = display.textContent.replace(/\s+/g, ' ').trim();
-    expect(trimmedText).toEqual('Contains ICD9 Codes CodeA, CodeB');
+    expect(trimmedText).toEqual('Contains ICD9 Codes');
   });
 
   it('Should properly pluralize \'Code\'', () => {
@@ -151,10 +151,10 @@ describe('SearchGroupItemComponent', () => {
     fixture.detectChanges();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
-    expect(display.childElementCount).toBe(4);
+    expect(display.childElementCount).toBe(3);
 
     const trimmedText = display.textContent.replace(/\s+/g, ' ').trim();
-    expect(trimmedText).toEqual('OR Contains ICD9 Codes CodeA, CodeB');
+    expect(trimmedText).toEqual('OR Contains ICD9 Codes');
   });
 
 });

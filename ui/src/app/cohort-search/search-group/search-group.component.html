@@ -1,16 +1,12 @@
-<div
-  class="card bg-faded"
-  [style.margin-top]="'0.6rem'"
-  [style.margin-bottom]="'0.6rem'">
+<div class="card bg-faded">
 
   <div class="card-header">
     <clr-dropdown>
-      <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+      <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-        <button
-          *ngFor="let criteria of criteriaTypes"
+        <button *ngFor="let criteria of criteriaTypes"
           id="criteria.type"
           class="dropdown-item"
           type="button"
@@ -20,9 +16,9 @@
     </clr-dropdown>
     <button
       type="button"
-      class="btn btn-icon btn-link close"
+      class="btn btn-icon btn-link close-button"
       (click)="remove($event)">
-      <clr-icon shape="close" size="24" [style.fill]="'rgb(217, 83, 79)'">
+      <clr-icon shape="close" size="30">
       </clr-icon>
     </button>
   </div>
@@ -35,15 +31,9 @@
       [itemId]="itemId"
       [itemIndex]="itemIndex">
     </app-search-group-item>
-    <div *ngIf="items.size === 0">
-      <em>Start by selecting "Add Criteria"</em>
-    </div>
   </div>
 
-  <div
-    class="card-footer font-weight-bold bg-count text-right"
-    [style.padding]="'0.125rem 0.75rem 0 0.75rem'"
-    [style.background-color]="'#d7d7d7'">
+  <div class="card-footer text-right">
     Group Count:
     <span *ngIf="isRequesting"
       class="spinner spinner-inline"
@@ -51,7 +41,7 @@
       Loading...
     </span>
     <span *ngIf="!isRequesting">
-     {{ group.get('count') || 0 }}
+    {{ group.get('count') || 0 }}
     </span>
   </div>
 
