@@ -3,14 +3,11 @@ package org.pmiops.workbench.config;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.apphosting.api.ApiProxy;
-import java.io.IOException;
-import java.io.InputStream;
-import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
-import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +23,10 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.io.InputStream;
 
 @EnableWebMvc
 @Configuration
@@ -66,6 +67,9 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public String getHostName() {
     ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
     // TODO: see if there's a better way of doing this?
+    if(env == null) {
+      return null;
+    }
     return "api-dot-" + (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
   }
 
