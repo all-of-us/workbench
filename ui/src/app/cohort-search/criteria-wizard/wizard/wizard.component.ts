@@ -6,7 +6,10 @@ import {typeToTitle} from '../../utils';
 @Component({
   selector: 'app-criteria-wizard',
   templateUrl: './wizard.component.html',
-  styleUrls: ['./wizard.component.css'],
+  styleUrls: [
+    './wizard.component.css',
+    '../../../styles/buttons.css',
+  ],
   encapsulation: ViewEncapsulation.None,
 })
 export class WizardComponent {
