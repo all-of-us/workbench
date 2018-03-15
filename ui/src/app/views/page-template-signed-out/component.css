@@ -28,6 +28,8 @@
 @media all and (max-width: 1300px) and (min-width: 900px) {
   .template {
     background-image: var(--smaller-image);
+    background-position: bottom right;
+
   }
 }
 
