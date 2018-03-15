@@ -1,22 +1,24 @@
-.search-groups-header {
+.col-header {
+  height: 2rem;
   display: flex;
-  flex-flow: row wrap;
   align-items: center;
-  justify-content: space-between;
-  margin: 0.125rem 0;
-  height: 48px;
 }
 
-h3 {
+h2 {
   margin: 0;
-  flex: 1;
-  white-space: nowrap;
 }
 
-.search-groups {
-  border-radius: 0.2rem;
-  border: 1px solid #d7d7d7;
-  padding-right: 0.6rem;
-  padding-left: 0.6rem;
-  background-color: #e9f0f1;
+.circle-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.and-circle {
+  background-color: rgb(226, 226, 233);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
 }

@@ -1,3 +1,8 @@
+button {
+  font-family: GothamMedium;
+  font-size: 12px;
+}
+
 button.btn.btn-primary {
   background-color: #262262;
   border: none;
@@ -10,10 +15,12 @@ button.btn.btn-primary {
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
 }
+
 button.btn.btn-primary:hover {
   background-color: #4356A7;
   color: #fff;
 }
+
 button.btn.btn-primary:disabled {
   background-color: #c3c3c3;
   color: #fff;
@@ -23,7 +30,6 @@ button.btn.btn-primary:disabled {
 button.btn.btn-secondary {
   background-color: #fff;
   border: 2px solid #262262;
-  font-family: GothamMedium;
   padding: 0rem 0.77rem;
   border-radius: 0.3rem;
   cursor: pointer;
@@ -33,10 +39,12 @@ button.btn.btn-secondary {
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
 }
+
 button.btn.btn-secondary:hover {
   background-color: #262262;
   color: #fff;
 }
+
 button.btn.btn-secondary:disabled {
   border: 2px solid #c3c3c3;
   background-color: #f1f2f2;

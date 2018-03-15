@@ -1,6 +1,6 @@
 <div>
   <div class="overview-header">
-    <h3 id="total-count">
+    <h2 id="total-count">
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
@@ -8,20 +8,23 @@
       <span *ngIf="!(isRequesting$ | async)">
         {{ total$ | async }}
       </span>
-    </h3>
+    </h2>
     <div>
       <button
         type="button"
-        class="btn btn-success"
+        class="btn btn-primary"
         [style.margin-left]="'0'"
         (click)="saveModal.open()">
-        <clr-icon shape="floppy"></clr-icon>
         Save Cohort
       </button>
     </div>
   </div>
 
-  <app-charts [data]="(chartData$ | async)"></app-charts>
+  <div class="card bg-faded">
+    <div class="card-block">
+      <app-charts [data]="(chartData$ | async)"></app-charts>
+    </div>
+  </div>
 </div>
 
 <clr-modal
