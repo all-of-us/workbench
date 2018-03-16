@@ -1,6 +1,12 @@
-import {Component, Input, ViewEncapsulation} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {Component, Input, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../../redux';
+import {
+  activeParameterList,
+  CohortSearchActions,
+  CohortSearchState,
+} from '../../redux';
 import {typeToTitle} from '../../utils';
 
 @Component({
@@ -12,22 +18,42 @@ import {typeToTitle} from '../../utils';
   ],
   encapsulation: ViewEncapsulation.None,
 })
-export class WizardComponent {
+export class WizardComponent implements OnInit, OnDestroy {
   @Input() open: boolean;
   @Input() criteriaType: string;
+  disableFinish = true;
+  subscription: Subscription;
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor(
+    private ngRedux: NgRedux<CohortSearchState>,
+    private actions: CohortSearchActions,
+  ) {}
+
+  ngOnInit() {
+    this.subscription = this.ngRedux
+      .select(activeParameterList)
+      .map(list => !(list.size > 0))
+      .subscribe(val => this.disableFinish = val);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   get critPageTitle() {
-    console.log(this.criteriaType);
     return `Choose ${typeToTitle(this.criteriaType)} Codes`;
   }
 
-  cancel() {
+  onCancel() {
     this.actions.cancelWizard();
   }
 
-  finish() {
+  onSubmit() {
+    if (this.disableFinish) {
+      // Not sure how we got here, since the controls should be disabled, but
+      // do the safe thing and cancel instead
+      return this.onCancel();
+    }
     this.actions.finishWizard();
   }
 }

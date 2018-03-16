@@ -2,7 +2,6 @@
 
   <clr-modal *ngSwitchCase="'demo'"
     [clrModalOpen]="open"
-    (clrModalOpenChange)="cancel()"
     [clrModalStaticBackdrop]="true"
     [clrModalSize]="'xl'">
     <h3 class="modal-title">{{ critPageTitle }}</h3>
@@ -14,11 +13,9 @@
 
   <clr-wizard *ngSwitchDefault
     [clrWizardOpen]="open"
-    (clrWizardOnCancel)="cancel()"
-    (clrWizardOnFinish)="finish()">
-
+    (clrWizardOnCancel)="onCancel()"
+    (clrWizardOnFinish)="onSubmit()">
     <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
-
     <clr-wizard-page><!-- Criteria Selection Page -->
       <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
       <div id="criteria-page">
@@ -30,7 +27,6 @@
         </div>
       </div>
     </clr-wizard-page>
-
     <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
     <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
