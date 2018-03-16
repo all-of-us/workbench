@@ -2,6 +2,7 @@ import {ErrorHandler, Injectable} from '@angular/core';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {ServerConfigService} from 'app/services/server-config.service';
+import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 
 @Injectable()
@@ -10,9 +11,8 @@ export class ErrorReporterService extends ErrorHandler {
 
   constructor(serverConfigService: ServerConfigService) {
     super();
-    if (window.location.protocol !== 'https:') {
-      // The scheme is an indirect proxy for whether this is a local dev
-      // deployment. If it is local, we want to disable Stackdriver reporting as
+    if (environment.debug) {
+      // This is a local dev server, we want to disable Stackdriver reporting as
       // it's not useful and likely won't work due to the origin.
       return;
     }
