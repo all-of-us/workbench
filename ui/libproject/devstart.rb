@@ -52,7 +52,7 @@ class DevUpOptions
   attr_accessor :env
 
   def initialize
-    self.env = "test"
+    self.env = nil
   end
 
   def parse args
@@ -63,7 +63,7 @@ class DevUpOptions
         # The default environment file (called "dev" in Angular language)
         # compiles a local server to run against the deployed remote test API.
         # Leave this unset to get that default.
-        self.env = v == "local-test" ? "" : v
+        self.env = v == "local-test" ? nil : v
       end
     end
     parser.parse args
