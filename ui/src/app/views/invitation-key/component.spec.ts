@@ -71,6 +71,7 @@ describe('InvitationKeyComponent', () => {
   it('should create the app', fakeAsync(() => {
     const fixture = TestBed.createComponent(InvitationKeyComponent);
     const app = fixture.debugElement.componentInstance;
+    updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.invitationKeyVerifed).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
@@ -81,6 +82,7 @@ describe('InvitationKeyComponent', () => {
   it('should not accept blank invitation code', fakeAsync(() => {
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
+    updateAndTick(invitationKeyPage.fixture);
     expect(app.invitationKeyVerifed).toBeFalsy();
     expect(app.invitationKeyReq).toBeTruthy();
     expect(app.invitationKeyInvalid).toBeFalsy();
@@ -89,6 +91,7 @@ describe('InvitationKeyComponent', () => {
   it('should throw an error with invalid invitation code', fakeAsync(() => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     app.invitationKey = 'invalid';
+    updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     expect(app.invitationKeyVerifed).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
@@ -98,6 +101,7 @@ describe('InvitationKeyComponent', () => {
   it('should continue to next page on entering correct invitation code', fakeAsync(() => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     app.invitationKey = 'dummy';
+    updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     expect(app.invitationKeyVerifed).toBeTruthy();
     expect(app.invitationKeyReq).toBeFalsy();
