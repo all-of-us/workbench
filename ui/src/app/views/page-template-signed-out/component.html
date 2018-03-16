@@ -1,9 +1,9 @@
-<div class="template" [ngStyle]="{ 'background-image': 'url(' + imageSrc + ')'}">
+<div class="template" #template>
   <div class="row">
     <img [src]="headerImg" class="headerImage">
   </div>
   <div class="row">
-    <div class="col-sm-5">
+    <div class="signed-out-content">
       <ng-content></ng-content>
     </div>
   </div>

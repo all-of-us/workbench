@@ -16,7 +16,11 @@ export class AccountCreationSuccessComponent {
       private app: AppComponent,
       private account: AccountCreationComponent,
       private signInService: SignInService) {
-    app.backgroundImgSrc = '/assets/images/congrats-female@2x.jpg';
+    // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
+    setTimeout(() => {
+      app.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
+      app.backgroundImgSrc = '/assets/images/congrats-female.png';
+    }, 0);
     this.email = account.profile.username;
   }
 

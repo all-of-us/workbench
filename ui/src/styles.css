@@ -16,10 +16,6 @@
     src: url('/assets/fonts/Gotham Medium.otf');
 }
 
-body {
-  background-color: #f1f2f2;
-}
-
 h1, h1 > *,
 h2, h2 > *,
 h3, h3 > * {
@@ -50,6 +46,10 @@ a {
   color: #6fb4ff;
   cursor: pointer;
   cursor: hand;
+}
+
+body {
+  background-color: #e2e3e5;
 }
 
 textarea {
