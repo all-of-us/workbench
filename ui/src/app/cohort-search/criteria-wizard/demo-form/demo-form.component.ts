@@ -6,7 +6,7 @@ import {forkJoin} from 'rxjs/observable/forkJoin';
 
 import {CohortSearchActions} from '../../redux';
 
-import {CohortBuilderService, Criteria} from 'generated';
+import {Attribute, CohortBuilderService, Criteria} from 'generated';
 
 
 function sortByCountThenName(critA, critB) {
@@ -19,7 +19,6 @@ function sortByCountThenName(critA, critB) {
     : diff;
 }
 
-
 @Component({
   selector: 'crit-demo-form',
   templateUrl: './demo-form.component.html',
@@ -31,11 +30,14 @@ export class DemoFormComponent implements OnInit {
   readonly MIN_AGE = 0;
 
   demoForm = new FormGroup({
+    ageHigh: new FormControl(),
+    ageLow: new FormControl(),
     genders: new FormControl(),
     races: new FormControl(),
     deceased: new FormControl(),
   });
 
+  age: Criteria;
   deceased: Criteria[] = [];
   genders: Criteria[] = [];
   races: Criteria[] = [];
@@ -50,7 +52,7 @@ export class DemoFormComponent implements OnInit {
     this.demoForm.valueChanges.subscribe(console.log);
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
-    const calls = ['DEC', 'GEN', 'RACE'].map(code => this.api
+    const calls = ['DEC', 'GEN', 'RACE', 'AGE'].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
       .map(response => {
         const items = response.items;
@@ -59,10 +61,11 @@ export class DemoFormComponent implements OnInit {
       })
     );
 
-    forkJoin(...calls).subscribe(([dec, gen, race]) => {
+    forkJoin(...calls).subscribe(([dec, gen, race, age]) => {
       this.deceased = dec;
       this.genders = gen;
       this.races = race;
+      this.age = age[0];
     });
   }
 
@@ -72,10 +75,10 @@ export class DemoFormComponent implements OnInit {
 
   onSubmit() {
     let hasSelection = false;
-    // transform the form into a set of criteria selections
+
     if (this.demoForm.get('deceased').value === 'isDeceased') {
       console.log('Filtering by deadness');
-      const node = this.deceased.find(node => node.code === 'Deceased');
+      const node = this.deceased.find(_node => _node.code === 'Deceased');
       if (node) {
         const id = `param${node.id || node.code}`;
         const param = fromJS(node).set('parameterId', id);
@@ -85,23 +88,45 @@ export class DemoFormComponent implements OnInit {
     }
 
     const gender = this.demoForm.get('genders');
+    if (gender.value) {
+      gender.value.map(node => {
+        console.log(`Processing gender ${node}`);
+        const id = `param${node.id || node.code}`;
+        const param = fromJS(node).set('parameterId', id);
+        this.actions.addParameter(param);
+        hasSelection = true;
+      });
+    }
+
     const race = this.demoForm.get('races');
+    if (race.value) {
+      race.value.map(node => {
+        console.log(`Processing race ${node}`);
+        const id = `param${node.id || node.code}`;
+        const param = fromJS(node).set('parameterId', id);
+        this.actions.addParameter(param);
+        hasSelection = true;
+      });
+    }
 
-    gender.value && gender.value.map(node => {
-      console.log(`Processing gender ${node}`);
-      const id = `param${node.id || node.code}`;
-      const param = fromJS(node).set('parameterId', id);
+    const ageHigh = this.demoForm.get('ageHigh').value;
+    const ageLow = this.demoForm.get('ageLow').value;
+
+    if (ageHigh || ageLow) {
+      const attr = fromJS(<Attribute>{
+        operator: 'between',
+        operands: [
+          ageLow  || 0,
+          ageHigh || 120,
+        ]
+      });
+      const id = `param${this.age.id || this.age.code}`;
+      const param = fromJS(this.age)
+        .set('parameterId', attr.hashCode())
+        .set('attribute', attr);
       this.actions.addParameter(param);
       hasSelection = true;
-    });
-
-    race.value && race.value.map(node => {
-      console.log(`Processing race ${node}`);
-      const id = `param${node.id || node.code}`;
-      const param = fromJS(node).set('parameterId', id);
-      this.actions.addParameter(param);
-      hasSelection = true;
-    });
+    }
 
     if (hasSelection) {
       this.actions.finishWizard();

@@ -3,11 +3,20 @@
 
     <!-- Age -->
     <div class="form-group">
-      <label for="age">Choose an Age Filter</label>
-      <div>
-      </div>
+      <label for="age">Age Range</label>
+      <input
+        id="age"
+        formControlName="ageLow"
+        type="number"
+        min="{{ minAge }}" max="{{ maxAge }}">
+      <input
+        id="age"
+        formControlName="ageHigh"
+        type="number"
+        min="{{ minAge }}" max="{{ maxAge }}">
     </div>
 
+    <!-- Genders -->
     <div class="form-group">
       <label for="genders">Choose Gender Filters</label>
       <div class="select multiple">
@@ -22,7 +31,7 @@
       </div>
     </div>
 
-
+    <!-- Races -->
     <div class="form-group">
       <label for="races">Choose Race Filters</label>
       <div class="select multiple">
@@ -73,5 +82,4 @@
   <button class="btn btn-primary" type="submit" [disabled]="demoForm.invalid">
     Finish
   </button>
-
 </form>
