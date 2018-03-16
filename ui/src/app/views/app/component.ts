@@ -32,10 +32,12 @@ export class AppComponent implements OnInit {
   hasReviewIdVerification = false;
   currentUrl: string;
   email: string;
-  backgroundImgSrc = '/assets/images/group.jpg';
+  backgroundImgSrc = '/assets/images/login-group.png';
+  smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   headerImg = '/assets/images/all-of-us-logo.svg';
   headerHeight = 102;
   sidenavToggle = false;
+  isSignedIn = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -47,10 +49,12 @@ export class AppComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onClickOutsideSideNav(event: MouseEvent) {
-    const inSidenav = this.sidenav.nativeElement.contains(event.target);
-    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
-    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
-      this.sidenavToggle = false;
+    if (this.isSignedIn) {
+      const inSidenav = this.sidenav.nativeElement.contains(event.target);
+      const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+      if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+        this.sidenavToggle = false;
+      }
     }
   }
   constructor(
@@ -112,6 +116,7 @@ export class AppComponent implements OnInit {
     this.user = this.signInService.user;
     this.user.subscribe(user => {
       if (user.isSignedIn) {
+        this.isSignedIn = true;
         this.profileService.getMe().subscribe(profile => {
           this.hasReviewResearchPurpose =
             profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);

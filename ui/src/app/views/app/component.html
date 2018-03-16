@@ -3,12 +3,12 @@
 <ng-template #notSignedIn>
 
   <div *ngIf="currentUrl && currentUrl.indexOf('/data-browser/') === -1" class="sign-in-container">
-    <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc>
-      <div *ngIf="!showCreateAccount;" style="margin-top: 6.5rem; margin-left: -13rem;">
-        <div style="display: flex; justify-content: space-around;">
+    <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc [smallerImageSrc]=smallerBackgroundImgSrc>
+      <div *ngIf="!showCreateAccount;" style="margin-top: 6.5rem;  padding-left: 3rem;">
+        <div style="display: flex; padding-bottom: 1rem;">
           <button (click)="showCreateAccount = true" class="btn btn-primary">Create Account</button>
         </div>
-        <div style="display: flex; justify-content: space-around;">
+        <div style="display: flex;">
           <button (click)="signIn()" class="btn btn-primary">Sign In</button>
         </div>
       </div>

@@ -31,7 +31,13 @@ export class InvitationKeyComponent {
       this.invitationKeyReq = false;
       this.invitationKeyInvalid = false;
       this.requestSent = false;
-      this.appComponent.backgroundImgSrc = '/assets/images/invitation-female@2x.jpg';
+      // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
+      setTimeout(() => {
+        this.appComponent.backgroundImgSrc = '/assets/images/invitation-female.png';
+        this.appComponent.smallerBackgroundImgSrc =
+            '/assets/images/invitation-female-standing.png';
+      }, 0);
+
     }
 
   next(): void {
