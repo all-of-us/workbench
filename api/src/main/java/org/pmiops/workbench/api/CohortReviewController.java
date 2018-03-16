@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -47,6 +48,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
     private ParticipantCounter participantCounter;
+    private ConditionQueryBuilder conditionQueryBuilder;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     /**
@@ -140,10 +142,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            ParticipantCounter participantCounter,
+                           ConditionQueryBuilder conditionQueryBuilder,
                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.participantCounter = participantCounter;
+        this.conditionQueryBuilder = conditionQueryBuilder;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
@@ -368,6 +372,35 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<ParticipantConditionListResponse> getParticipantConditions(String workspaceNamespace,
+                                                                                     String workspaceId,
+                                                                                     Long cohortId,
+                                                                                     Long cdrVersionId,
+                                                                                     Long participantId) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+        //this validates that the participant is in the requested review.
+        cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+                conditionQueryBuilder.buildQuery(participantId)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+        ParticipantConditionListResponse response = new ParticipantConditionListResponse();
+        for (List<FieldValue> row : result.iterateAll()) {
+            ParticipantCondition condition = new ParticipantCondition()
+                    .itemDate(bigQueryService.getDate(row, rm.get("item_date")).toString());
+            response.addItemsItem(condition);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

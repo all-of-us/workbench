@@ -1072,6 +1072,24 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/conditions:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a collection of ParticipantConditions.
+      operationId: "getParticipantConditions"
+      responses:
+        200:
+          description: A collection of ParticipantConditions.
+          schema:
+            $ref: "#/definitions/ParticipantConditionListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -2305,7 +2323,6 @@ definitions:
         items:
           type: string
 
-
   ParticipantCohortAnnotation:
     type: object
     required:
@@ -2346,6 +2363,35 @@ definitions:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
 
+  ParticipantCondition:
+    type: object
+    required:
+      - itemDate
+      - standardVocabulary
+      - standardName
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+    properties:
+      itemDate:
+        type: string
+        description: The date of the condition occurrence
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this condition
+      standardName:
+        type: string
+        description: The standard name of this condition
+      sourceValue:
+        type: string
+        description: The source value of this condition
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this condition
+      sourceName:
+        type: string
+        description: The source name of this condition.
+
   CohortAnnotationDefinitionListResponse:
     type: object
     required:
@@ -2374,6 +2420,16 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantCohortAnnotation"
+
+  ParticipantConditionListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+         $ref: "#/definitions/ParticipantCondition"
 
   ModifyParticipantCohortAnnotationRequest:
     type: object
