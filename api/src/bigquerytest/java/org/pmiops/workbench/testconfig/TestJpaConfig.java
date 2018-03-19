@@ -1,7 +1,7 @@
 package org.pmiops.workbench.testconfig;
 
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -14,7 +14,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-@Configuration
+@TestConfiguration
 @EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" })
 @EnableTransactionManagement
 public class TestJpaConfig {
