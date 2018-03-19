@@ -5,6 +5,8 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,10 @@ public class CohortMaterializationService {
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
+
+  private static final List<CohortStatus> NOT_EXCLUDED =
+      Arrays.asList(CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW,
+          CohortStatus.NOT_REVIEWED);
 
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
@@ -52,7 +58,15 @@ public class CohortMaterializationService {
       }
     }
     int limit = pageSize + 1;
-    // TODO: use CDR version, statusFilter here
+    if (statusFilter == null) {
+      statusFilter = NOT_EXCLUDED;
+    }
+
+    if (statusFilter.contains(CohortStatus.NOT_REVIEWED)) {
+
+    }
+
+
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
         participantCounter.buildParticipantIdQuery(searchRequest, limit, offset)));
     MaterializeCohortResponse response = new MaterializeCohortResponse();
