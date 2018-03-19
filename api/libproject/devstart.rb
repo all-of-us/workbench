@@ -946,6 +946,24 @@ Common.register_command({
 })
 
 
+def deploy_gcs_artifacts()
+  gcc = GcloudContextV2.new(WbOptionsParser.new(cmd_name, args))
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  # This file must be readable by all AoU researchers and the Leonardo service
+  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
+  # public since the script's source is public anyways.
+  common.run_inline %W{gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+end
+
+Common.register_command({
+  :invocation => "deploy-gcs-artifacts",
+  :description => "Deploys any GCS artifacts associated with this environment.",
+  :fn => lambda { |*args| deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
+})
+
+
 def deploy(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -1131,6 +1149,9 @@ def circle_deploy(cmd_name, args)
       migrate_database
       load_config(ctx.project)
     end
+
+    common.status "Pushing GCS artifacts..."
+    deploy_gcs_artifacts(cmd_name, args)
   end
 
   promote = ""
