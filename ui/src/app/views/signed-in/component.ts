@@ -18,12 +18,12 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 
 @Component({
-  selector: 'signed-in-app',
+  selector: 'app-signed-in',
   styleUrls: ['./component.css',
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedInAppComponent implements OnInit {
+export class SignedInComponent implements OnInit {
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;

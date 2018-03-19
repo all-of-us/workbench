@@ -21,12 +21,12 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 
 @Component({
-  selector: 'signed-out-app',
+  selector: 'app-signed-out',
   styleUrls: ['./component.css',
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedOutAppComponent implements OnInit {
+export class SignedOutComponent implements OnInit {
   currentUrl: string;
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
