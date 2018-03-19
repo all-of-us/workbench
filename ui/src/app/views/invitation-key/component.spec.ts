@@ -21,7 +21,7 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
-import {SignedOutAppComponent} from '../signed-out-app/component';
+import {SignedOutComponent} from '../signed-out/component';
 
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
@@ -51,7 +51,7 @@ describe('InvitationKeyComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        SignedOutAppComponent,
+        SignedOutComponent,
         AccountCreationComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
@@ -59,7 +59,7 @@ describe('InvitationKeyComponent', () => {
         RoutingSpinnerComponent
       ],
       providers: [
-        { provide: SignedOutAppComponent, useValue: {}},
+        { provide: SignedOutComponent, useValue: {}},
         { provide: SignInService, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {

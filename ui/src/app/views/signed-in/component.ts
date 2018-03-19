@@ -1,11 +1,8 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
   Event as RouterEvent,
-  NavigationEnd,
-  Router,
 } from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
@@ -21,49 +18,54 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 
 @Component({
-  selector: 'app-signed-out',
+  selector: 'app-signed-in',
   styleUrls: ['./component.css',
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedOutAppComponent implements OnInit {
+export class SignedInComponent implements OnInit {
   user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
-  currentUrl: string;
-  email: string;
-  backgroundImgSrc = '/assets/images/login-group.png';
-  smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   headerImg = '/assets/images/all-of-us-logo.svg';
-  headerHeight = 102;
   sidenavToggle = false;
-  isSignedIn = false;
-  private baseTitle: string;
-  private overriddenUrl: string = null;
-  private showCreateAccount = false;
-  private overriddenPublicUrl: string = null;
 
+  @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
+
+  @ViewChild('sidenav') sidenav: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onClickOutsideSideNav(event: MouseEvent) {
+    const inSidenav = this.sidenav.nativeElement.contains(event.target);
+    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+      this.sidenavToggle = false;
+    }
+  }
   constructor(
     /* Ours */
     private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
-    private activatedRoute: ActivatedRoute,
     private locationService: Location,
-    private router: Router,
-    private titleService: Title
   ) {}
 
   ngOnInit(): void {
-    this.currentUrl = this.router.url;
+    document.body.style.backgroundColor = '#f1f2f2';
+    this.user = this.signInService.user;
+    this.user.subscribe(user => {
+      this.profileService.getMe().subscribe(profile => {
+        this.hasReviewResearchPurpose =
+          profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+        this.hasReviewIdVerification =
+          profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+          // this.email = profile.username;
+      });
+    });
   }
 
-  signIn(e: Event): void {
-    this.signInService.signIn();
-  }
-
-  getTopMargin(): string {
-    return this.showCreateAccount ? '10vh' : '30vh';
+  signOut(e: Event): void {
+    this.signInService.signOut();
   }
 
   get reviewWorkspaceActive(): boolean {
