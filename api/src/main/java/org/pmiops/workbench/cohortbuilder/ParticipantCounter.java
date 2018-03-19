@@ -57,7 +57,7 @@ public class ParticipantCounter {
 
     private static final String OFFSET_SUFFIX = " offset ";
 
-    private static final String UNION_TEMPLATE = "union distinct\n";
+    private static final String UNION_TEMPLATE = "union all\n";
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
 

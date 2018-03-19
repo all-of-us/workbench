@@ -23,15 +23,15 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
             "select person_id\n" +
                     "from `${projectId}.${dataSetId}.condition_occurrence` co\n" +
                     "where co.condition_source_concept_id in (${innerSql})\n" +
-                    "union distinct\n" +
+                    "union all\n" +
             "select person_id\n" +
                     "from `${projectId}.${dataSetId}.procedure_occurrence` po\n" +
                     "where po.procedure_source_concept_id in (${innerSql})\n" +
-                    "union distinct\n" +
+                    "union all\n" +
             "select person_id\n" +
                     "from `${projectId}.${dataSetId}.measurement` m\n" +
                     "where m.measurement_source_concept_id in (${innerSql})\n" +
-                    "union distinct\n" +
+                    "union all\n" +
             "select person_id\n" +
                     "from `${projectId}.${dataSetId}.observation` o\n" +
                     "where o.observation_source_concept_id in (${innerSql})\n";
