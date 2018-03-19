@@ -946,8 +946,12 @@ Common.register_command({
 })
 
 
-def deploy_gcs_artifacts()
-  gcc = GcloudContextV2.new(WbOptionsParser.new(cmd_name, args))
+def deploy_gcs_artifacts(cmd_name, args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
   common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
