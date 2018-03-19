@@ -28,35 +28,13 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 })
 export class AppComponent implements OnInit {
   user: Observable<SignInDetails>;
-  hasReviewResearchPurpose = false;
-  hasReviewIdVerification = false;
-  currentUrl: string;
-  email: string;
-  backgroundImgSrc = '/assets/images/login-group.png';
-  smallerBackgroundImgSrc = '/assets/images/login-standing.png';
-  headerImg = '/assets/images/all-of-us-logo.svg';
-  headerHeight = 102;
-  sidenavToggle = false;
   isSignedIn = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 
-  @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
-  @ViewChild('sidenav') sidenav: ElementRef;
-
-  @HostListener('document:click', ['$event'])
-  onClickOutsideSideNav(event: MouseEvent) {
-    if (this.isSignedIn) {
-      const inSidenav = this.sidenav.nativeElement.contains(event.target);
-      const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
-      if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
-        this.sidenavToggle = false;
-      }
-    }
-  }
   constructor(
     /* Ours */
     private signInService: SignInService,
@@ -115,16 +93,7 @@ export class AppComponent implements OnInit {
 
     this.user = this.signInService.user;
     this.user.subscribe(user => {
-      if (user.isSignedIn) {
-        this.isSignedIn = true;
-        this.profileService.getMe().subscribe(profile => {
-          this.hasReviewResearchPurpose =
-            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-          this.hasReviewIdVerification =
-            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-            // this.email = profile.username;
-        });
-      }
+      this.isSignedIn = true;
     });
   }
 
@@ -132,7 +101,6 @@ export class AppComponent implements OnInit {
    * Uses the title service to set the page title after nagivation events
    */
   private setTitleFromRoute(event: RouterEvent): void {
-    this.currentUrl = this.router.url;
     if (event instanceof NavigationEnd) {
 
       let currentRoute = this.activatedRoute;
@@ -144,31 +112,6 @@ export class AppComponent implements OnInit {
             this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
       }
     }
-  }
-
-  signIn(e: Event): void {
-    this.signInService.signIn();
-  }
-
-  signOut(e: Event): void {
-    this.signInService.signOut();
-  }
-
-  getTopMargin(): string {
-    return this.showCreateAccount ? '10vh' : '30vh';
-  }
-
-  get reviewWorkspaceActive(): boolean {
-    return this.locationService.path().startsWith('/admin/review-workspace');
-  }
-
-  get reviewIdActive(): boolean {
-    return this.locationService.path().startsWith('/admin/review-id-verification');
-  }
-
-  get workspacesActive(): boolean {
-    return this.locationService.path() === ''
-      || this.locationService.path().startsWith('/workspace');
   }
 
 }

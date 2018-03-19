@@ -1,11 +1,8 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
   Event as RouterEvent,
-  NavigationEnd,
-  Router,
 } from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
@@ -21,36 +18,54 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 
 @Component({
-  selector: 'signed-out-app',
+  selector: 'signed-in-app',
   styleUrls: ['./component.css',
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedOutAppComponent implements OnInit {
-  currentUrl: string;
-  backgroundImgSrc = '/assets/images/login-group.png';
-  smallerBackgroundImgSrc = '/assets/images/login-standing.png';
+export class SignedInAppComponent implements OnInit {
+  user: Observable<SignInDetails>;
+  hasReviewResearchPurpose = false;
+  hasReviewIdVerification = false;
   headerImg = '/assets/images/all-of-us-logo.svg';
-  private showCreateAccount = false;
+  sidenavToggle = false;
 
+  @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
+
+  @ViewChild('sidenav') sidenav: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onClickOutsideSideNav(event: MouseEvent) {
+    const inSidenav = this.sidenav.nativeElement.contains(event.target);
+    const inSidenavToggle = this.sidenavToggleElement.nativeElement.contains(event.target);
+    if (this.sidenavToggle && !(inSidenav || inSidenavToggle)) {
+      this.sidenavToggle = false;
+    }
+  }
   constructor(
     /* Ours */
     private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
-    private activatedRoute: ActivatedRoute,
     private locationService: Location,
-    private router: Router,
-    private titleService: Title
   ) {}
 
   ngOnInit(): void {
-    this.currentUrl = this.router.url;
-    document.body.style.backgroundColor = '#e2e3e5';
+    document.body.style.backgroundColor = '#f1f2f2';
+    this.user = this.signInService.user;
+    this.user.subscribe(user => {
+      this.profileService.getMe().subscribe(profile => {
+        this.hasReviewResearchPurpose =
+          profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+        this.hasReviewIdVerification =
+          profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+          // this.email = profile.username;
+      });
+    });
   }
 
-  signIn(e: Event): void {
-    this.signInService.signIn();
+  signOut(e: Event): void {
+    this.signInService.signOut();
   }
 
   get reviewWorkspaceActive(): boolean {
