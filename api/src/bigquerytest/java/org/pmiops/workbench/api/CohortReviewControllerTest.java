@@ -16,10 +16,15 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.PaginationFilteringRequest;
 import org.pmiops.workbench.model.ParticipantCondition;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -31,16 +36,19 @@ import javax.inject.Provider;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({ConditionQueryBuilder.class, BigQueryService.class, TestJpaConfig.class})
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     private static final Long WORKSPACE_ID = 1L;
     private static final String NAMESPACE = "aou-test";
     private static final String NAME = "test";
     private static final Long CDR_VERSION_ID = 1L;
+    private static final Long PARTICIPANT_ID = 102246L;
+    private static final Long COHORT_REVIEW_ID = 1L;
 
     private CohortReviewController controller;
 
@@ -57,6 +65,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Autowired
     private CohortReviewDao cohortReviewDao;
+
+    @Autowired
+    private WorkspaceDao workspaceDao;
 
     @Autowired
     private ParticipantCohortStatusDao participantCohortStatusDao;
@@ -83,7 +94,10 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Override
     public List<String> getTableNames() {
-        return Arrays.asList("condition_occurrence");
+        return Arrays.asList(
+                "condition_occurrence",
+                "concept"
+        );
     }
 
     @Before
@@ -108,26 +122,25 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 conditionQueryBuilder,
                 genderRaceEthnicityConceptProvider);
 
+        Workspace workspace = new Workspace();
+        workspace.setWorkspaceId(WORKSPACE_ID);
+        workspaceDao.save(workspace);
+
         cohort = new Cohort();
         cohort.setWorkspaceId(WORKSPACE_ID);
         cohortDao.save(cohort);
 
-//        icd9ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"001"));
-//        icd9ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ConditionParent.getId(), "001", DOMAIN_CONDITION));
-//        icd9ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"002"));
-//        icd9ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ProcedureParent.getId(), "002", DOMAIN_PROCEDURE));
-//        icd9MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE,"003"));
-//        icd9MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9MeasurementParent.getId(), "003", DOMAIN_MEASUREMENT));
-//        icd10ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM,"A"));
-//        icd10ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10ConditionParent.getId(), "A09", DOMAIN_CONDITION));
-//        icd10ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10PCS,"16"));
-//        icd10ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10PCS, icd10ProcedureParent.getId(), "16070", DOMAIN_PROCEDURE));
-//        icd10MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM,"R92"));
-//        icd10MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10MeasurementParent.getId(), "R92.2", DOMAIN_MEASUREMENT));
-//        cptProcedure = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001T", DOMAIN_PROCEDURE));
-//        cptObservation = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Z", DOMAIN_OBSERVATION));
-//        cptMeasurement = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Q", DOMAIN_MEASUREMENT));
-//        cptDrug = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "90703", DOMAIN_DRUG));
+        CohortReview review = new CohortReview()
+                .cdrVersionId(CDR_VERSION_ID)
+                .cohortId(cohort.getCohortId());
+        cohortReviewDao.save(review);
+
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
+                .participantId(PARTICIPANT_ID)
+                .cohortReviewId(COHORT_REVIEW_ID);
+        ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus()
+                .participantKey(key);
+        participantCohortStatusDao.save(participantCohortStatus);
     }
 
     @Test
@@ -138,9 +151,25 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .thenReturn(WorkspaceAccessLevel.fromValue(WorkspaceAccessLevel.READER.name()));
         when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(workspace);
 
+        ParticipantCondition expected = new ParticipantCondition()
+                .itemDate("2008-07-22")
+                .standardVocabulary("SNOMED")
+                .standardName("SNOMED")
+                .sourceValue("0020")
+                .sourceVocabulary("ICD9CM")
+                .sourceName("Typhoid and paratyphoid fevers");
+
         List<ParticipantCondition> conditions = controller
-                .getParticipantConditions(NAMESPACE, NAME, cohort.getCohortId(), CDR_VERSION_ID,102246L)
+                .getParticipantConditions(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        CDR_VERSION_ID,
+                        PARTICIPANT_ID,
+                        new PaginationFilteringRequest())
                 .getBody()
                 .getItems();
+        assertThat(conditions.size()).isEqualTo(1);
+        assertThat(conditions.get(0)).isEqualTo(expected);
     }
 }

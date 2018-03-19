@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -347,7 +348,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 String workspaceId,
                                                                                                 Long cohortId,
                                                                                                 Long cdrVersionId,
-                                                                                                ParticipantCohortStatusesRequest request) {
+                                                                                                PaginationFilteringRequest request) {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
@@ -381,7 +382,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                      String workspaceId,
                                                                                      Long cohortId,
                                                                                      Long cdrVersionId,
-                                                                                     Long participantId) {
+                                                                                     Long participantId,
+                                                                                     PaginationFilteringRequest request) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
         cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
@@ -391,14 +393,22 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         //this validates that the participant is in the requested review.
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
+        int pageParam = Optional.ofNullable(request.getPage()).orElse(PAGE);
+        int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(PAGE_SIZE);
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                conditionQueryBuilder.buildQuery(participantId)));
+                conditionQueryBuilder.buildQuery(participantId, pageParam, pageSizeParam)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         ParticipantConditionListResponse response = new ParticipantConditionListResponse();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         for (List<FieldValue> row : result.iterateAll()) {
             ParticipantCondition condition = new ParticipantCondition()
-                    .itemDate(bigQueryService.getDate(row, rm.get("item_date")).toString());
+                    .itemDate(sdf.format(bigQueryService.getDate(row, rm.get("item_date"))))
+                    .standardVocabulary(bigQueryService.getString(row, rm.get("standard_vocabulary")))
+                    .standardName(bigQueryService.getString(row, rm.get("standard_name")))
+                    .sourceValue(bigQueryService.getString(row, rm.get("source_value")))
+                    .sourceVocabulary(bigQueryService.getString(row, rm.get("source_vocabulary")))
+                    .sourceName(bigQueryService.getString(row, rm.get("source_name")));
             response.addItemsItem(condition);
         }
 

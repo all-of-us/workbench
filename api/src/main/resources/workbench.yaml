@@ -975,7 +975,7 @@ paths:
           required: true
           description: request body for getting list of ParticipantCohortStatuses.
           schema:
-            $ref: "#/definitions/ParticipantCohortStatusesRequest"
+            $ref: "#/definitions/PaginationFilteringRequest"
       responses:
         200:
           description: A collection of participants
@@ -1081,11 +1081,20 @@ paths:
       - $ref: '#/parameters/cohortId'
       - $ref: '#/parameters/cdrVersionId'
       - $ref: '#/parameters/participantId'
-    get:
+    post:
       tags:
         - cohortReview
-      description: This endpoint will get a collection of ParticipantConditions.
+      description:  >
+            Returns a collection of ParticipantConditions for the specified params. This endpoint
+            does pagination based on page, limit, order and column.
       operationId: "getParticipantConditions"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            $ref: "#/definitions/PaginationFilteringRequest"
       responses:
         200:
           description: A collection of ParticipantConditions.
@@ -2118,7 +2127,7 @@ definitions:
       sortColumn:
         type: string
 
-  ParticipantCohortStatusesRequest:
+  PaginationFilteringRequest:
     type: object
     required:
       - page
