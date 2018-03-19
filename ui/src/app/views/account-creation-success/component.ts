@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
-import {AppComponent} from '../app/component';
+import {SignedOutAppComponent} from '../signed-out-app/component';
 
 @Component({
   selector : 'app-account-creation-success',
@@ -13,13 +13,13 @@ export class AccountCreationSuccessComponent {
   email: string;
 
   constructor(
-      private app: AppComponent,
+      private signedOutAppComponent: SignedOutAppComponent,
       private account: AccountCreationComponent,
       private signInService: SignInService) {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
-      app.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
-      app.backgroundImgSrc = '/assets/images/congrats-female.png';
+      signedOutAppComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
+      signedOutAppComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
     this.email = account.profile.username;
   }
