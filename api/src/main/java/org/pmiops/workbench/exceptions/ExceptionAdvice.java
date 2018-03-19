@@ -1,42 +1,56 @@
 package org.pmiops.workbench.exceptions;
 
+
+import com.ecwid.maleorang.MailchimpException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.model.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+
 @ControllerAdvice
 public class ExceptionAdvice {
 
-  private static final Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
-
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
-    int statusCode = 500;
-    if (e.getClass().getPackage().getName().equals(
-        ExceptionAdvice.class.getPackage().getName())) {
-      ResponseStatus responseStatus = e.getClass().getAnnotation(ResponseStatus.class);
-      if (responseStatus != null) {
-        statusCode = responseStatus.value().value();
-        log.log(Level.WARNING, "[{0}] {1}: {2}",
-            new Object[]{statusCode, e.getClass().getSimpleName(), e.getMessage()});
-        if (statusCode < 500) {
-          if (e instanceof WorkbenchException) {
-            ErrorResponse errorResponse = ((WorkbenchException) e).getErrorResponse();
-            return ResponseEntity.status(statusCode).body(
-                ((WorkbenchException) e).getErrorResponse());
-          }
-          return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(
-              e.getMessage()));
-        }
+    ErrorResponse errorResponse = new ErrorResponse();
+    Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+    // if this error was thrown by another error, get the info from that exception
+    Throwable relevantError = e;
+    if (e.getCause() != null) {
+      relevantError = e.getCause();
+    }
+
+    errorResponse.setMessage(relevantError.getMessage());
+    errorResponse.setErrorClassName(relevantError.getClass().getName());
+
+    // if exception class has an HTTP status associated with it, grab it
+    if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
+      statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
+    }
+    if (relevantError instanceof MailchimpException) {
+      MailchimpException mailchimpException = (MailchimpException) relevantError;
+      statusCode = mailchimpException.code;
+      errorResponse.setMessage(mailchimpException.description);
+    } else if (relevantError instanceof WorkbenchException) {
+      WorkbenchException workbenchException = (WorkbenchException) relevantError;
+      if (workbenchException.getErrorResponse() != null && workbenchException.getErrorResponse().getErrorCode() != null) {
+        errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());
       }
     }
-    log.log(Level.SEVERE, "Server error", e);
-    String message = statusCode == 503 ? "The server is unavailable."
-        : "An unexpected error occurred.";
-    return ResponseEntity.status(statusCode).body(ExceptionUtils.errorResponse(message));
+
+    // only log error if it's a server error
+    if (statusCode >= 500) {
+      Logger log = Logger.getLogger(ExceptionAdvice.class.getName());
+      log.log(Level.SEVERE, relevantError.getClass().getName(), e);
+    }
+
+    errorResponse.setStatusCode(statusCode);
+    return ResponseEntity.status(statusCode).body(errorResponse);
   }
 }

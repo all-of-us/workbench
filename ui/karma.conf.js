@@ -4,13 +4,14 @@
 module.exports = function (config) {
   config.set({
     customLaunchers: {
-      'webdriver': {
-        base: 'WebDriver',
-        browserName: 'chrome',
-        config: {
-          hostname: 'localhost',
-          port: 4444
-        },
+      ChromeHeadless: {
+        base: 'Chrome',
+        flags: [
+          '--headless',
+          '--disable-gpu',
+          // Without a remote debugging port, Google Chrome exits immediately.
+          '--remote-debugging-port=9222',
+        ],
       }
     },
     basePath: '',

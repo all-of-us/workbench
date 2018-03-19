@@ -48,19 +48,22 @@ Common.register_command({
 })
 
 class DevUpOptions
-  ENV_CHOICES = %W{local test prod}
+  ENV_CHOICES = %W{local-test local test prod}
   attr_accessor :env
 
   def initialize
-    self.env = "test"
+    self.env = nil
   end
 
   def parse args
     parser = OptionParser.new do |parser|
       parser.banner = "Usage: ./project.rb dev-up [options]"
       parser.on(
-          "--environment ENV", ENV_CHOICES, "Environment [local (default), test, prod]") do |v|
-        self.env = v
+          "--environment ENV", ENV_CHOICES, "Environment [local-test (default), local, test, prod]") do |v|
+        # The default environment file (called "dev" in Angular language)
+        # compiles a local server to run against the deployed remote test API.
+        # Leave this unset to get that default.
+        self.env = v == "local-test" ? nil : v
       end
     end
     parser.parse args
@@ -116,7 +119,7 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{yarn run build --environment=#{environment_name}}
+    common.run_inline %W{yarn run build --environment=#{environment_name} --no-watch --no-progress}
     ServiceAccountContext.new(@opts.project).run do
       common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
     end
@@ -141,7 +144,7 @@ def dev_up(*args)
 
   install_dependencies
 
-  ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
+  ENV["ENV_FLAG"] = options.env ? "--environment=#{options.env}" : ""
   at_exit { common.run_inline %W{docker-compose down} }
   swagger_regen()
   common.run_inline %W{docker-compose run -d --service-ports tests}

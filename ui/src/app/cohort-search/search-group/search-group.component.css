@@ -1,0 +1,41 @@
+.card {
+  border-radius: 0.2rem;
+  box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
+  margin: 0.6rem 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-footer {
+  color: rgb(38, 34, 98);
+  background-color: rgb(226, 226, 233);
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.close-button {
+  color: rgb(245, 135, 113);
+  margin: 0 !important;
+}
+
+.close-button:hover {
+  color: rgb(255, 186, 164);
+}
+
+.selection-button {
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.selection-button:hover {
+  background-color: rgb(219, 228, 233);
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.dropdown-item:hover {
+  background-color: rgb(219, 228, 233);
+}

@@ -10,6 +10,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {
   Cluster,
   ClusterService,
+  ClusterStatus,
   Cohort,
   CohortsService,
   FileDetail,
@@ -20,7 +21,7 @@ import {
 
 
 class Notebook {
-  constructor(public name: string, public path: string, public selected: boolean) {}
+  constructor(public name: string, public path: string) {}
 }
 /*
 * Search filters used by the cohort and notebook data tables to
@@ -70,6 +71,8 @@ class NotebookNameComparator implements Comparator<Notebook> {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  // Keep in sync with api/src/main/resources/notebooks.yaml.
+  private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
   private cohortNameFilter = new CohortNameFilter();
   private cohortDescriptionFilter = new CohortDescriptionFilter();
@@ -86,16 +89,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cohortsError = false;
   notebookError = false;
   notebooksLoading = false;
-  checkColumnNotebook = false;
   cohortList: Cohort[] = [];
   cluster: Cluster;
+  clusterLoading = true;
   clusterPulled = false;
-  clusterLoading = false;
+  launchedNotebookName: string;
   notFound = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;
-  enablePushNotebookBtn = false;
   // TODO: Replace with real data/notebooks read in from GCS
   notebookList: Notebook[] = [];
   editHover = false;
@@ -146,14 +148,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
                   fileList => {
                     for (const filedetail of fileList) {
                       this.notebookList
-                          .push(new Notebook(filedetail.name, filedetail.path, false));
+                          .push(new Notebook(filedetail.name, filedetail.path));
                     }
                   },
                   error => {
                     this.notebooksLoading = false;
                     this.notebookError = false;
                   });
-            },
+            this.initCluster();
+          },
           error => {
             if (error.status === 404) {
               this.notFound = true;
@@ -167,21 +170,45 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     window.removeEventListener('message', this.notebookAuthListener);
   }
 
-  launchNotebook(): void {
-    this.pollCluster().subscribe(cluster => {
-      this.cluster = cluster;
-      this.initializeNotebookCookies().subscribe(() => {
-        this.localizeAllFiles();
+  launchNotebook(notebook): void {
+    if (this.clusterLoading) {
+      return;
+    }
+    this.localizeNotebooks([notebook]).subscribe(() => {
+      this.launchedNotebookName = notebook.name;
+      this.clusterPulled = true;
+    });
+  }
+
+  launchCluster(): void {
+    if (this.clusterLoading) {
+      return;
+    }
+    this.localizeNotebooks(this.notebookList).subscribe(() => {
+      // TODO(calbach): Going through this modal is a temporary hack to avoid
+      // triggering pop-up blockers. Likely we'll want to switch notebook
+      // cluster opening to go through a redirect URL to make the localize and
+      // redirect look more atomic to the browser. Once this is in place, rm the
+      // modal and this hacky passing of the launched notebook name.
+      this.launchedNotebookName = '';
+      this.clusterPulled = true;
+    });
+  }
+
+  private initCluster(): void {
+    this.pollCluster().subscribe((c) => {
+      this.initializeNotebookCookies(c).subscribe(() => {
+        this.clusterLoading = false;
+        this.cluster = c;
       });
     });
   }
 
-  initializeNotebookCookies(): Observable<Response> {
-    // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://notebooks.firecloud.org';
-    const leoNotebookUrl = leoBaseUrl + '/notebooks/'
-        + this.cluster.clusterNamespace + '/'
-        + this.cluster.clusterName;
+  private initializeNotebookCookies(cluster: Cluster): Observable<Response> {
+    // TODO(calbach): Generate the FC notebook Typescript client and call here.
+    const leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
+        + cluster.clusterNamespace + '/'
+      + cluster.clusterName;
     const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
 
     const headers = new Headers();
@@ -192,41 +219,50 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  pollCluster(): Observable<Cluster> {
-    // Polls for cluster startup every minute.
+  private pollCluster(): Observable<Cluster> {
+    // Polls for cluster startup every 10s.
     return new Observable<Cluster>(observer => {
-      this.clusterService.getCluster(this.workspace.namespace, this.workspace.id)
-          .subscribe((cluster) => {
-        if (cluster.status !== 'Running' && cluster.status !== 'Deleting') {
-          setTimeout(() => {
+      this.clusterService.listClusters()
+        .subscribe((resp) => {
+          const cluster = resp.defaultCluster;
+          if (cluster.status !== ClusterStatus.RUNNING) {
+            setTimeout(() => {
               this.pollCluster().subscribe(newCluster => {
                 this.cluster = newCluster;
                 observer.next(newCluster);
                 observer.complete();
               });
-            }, 60000
-          );
-        } else {
-          this.cluster = cluster;
-          observer.next(cluster);
-          observer.complete();
-        }
+            }, 10000);
+          } else {
+            observer.next(cluster);
+            observer.complete();
+          }
       });
     });
   }
 
   cancelCluster(): void {
+    this.launchedNotebookName = '';
     this.clusterPulled = false;
   }
 
-  openCluster(): void {
-    // TODO (blrubenstein): Make this configurable by environment
-    const leoBaseUrl = 'https://notebooks.firecloud.org';
-    const leoNotebookUrl = leoBaseUrl + '/notebooks/'
-        + this.cluster.clusterNamespace + '/'
-        + this.cluster.clusterName;
+  openCluster(notebookName?: string): void {
+    let leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
+      + this.cluster.clusterNamespace + '/'
+      + this.cluster.clusterName;
+    if (notebookName) {
+      leoNotebookUrl = [
+        leoNotebookUrl, 'edit', 'workspaces', this.workspace.id, notebookName
+      ].join('/');
+    } else {
+      // TODO(calbach): If lacking a notebook name, should create a new notebook instead.
+      leoNotebookUrl = [
+        leoNotebookUrl, 'tree', 'workspaces', this.workspace.id
+      ].join('/');
+    }
 
     const notebook = window.open(leoNotebookUrl, '_blank');
+    this.launchedNotebookName = '';
     this.clusterPulled = false;
     // TODO (blrubenstein): Make the notebook page a list of pages, and
     //    move this to component scope.
@@ -235,7 +271,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         if (e.source !== notebook) {
           return;
         }
-        if (e.origin !== leoBaseUrl) {
+        if (e.origin !== WorkspaceComponent.leoBaseUrl) {
           return;
         }
         if (e.data.type !== 'bootstrap-auth.request') {
@@ -246,30 +282,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           'body': {
               'googleClientId': this.signInService.clientId
           }
-        }, leoBaseUrl);
+        }, WorkspaceComponent.leoBaseUrl);
       };
       window.addEventListener('message', this.notebookAuthListener);
       this.listenerAdded = true;
     }
-  }
-
-  createAndLaunchNotebook(): void {
-    this.clusterLoading = true;
-    this.clusterService.createCluster(this.workspace.namespace, this.workspace.id)
-        .subscribe(() => {
-      this.pollCluster().subscribe(polledCluster => {
-        this.clusterLoading = false;
-        this.cluster = polledCluster;
-        this.initializeNotebookCookies().subscribe(() => {
-          this.localizeAllFiles();
-        });
-      });
-    });
-  }
-
-  killNotebook(): void {
-    this.clusterService.deleteCluster(
-        this.workspace.namespace, this.workspace.id).subscribe(() => {});
   }
 
   edit(): void {
@@ -283,19 +300,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   share(): void {
     this.router.navigate(['share'], {relativeTo : this.route});
   }
-
-  selectANotebook(): void {
-    this.checkColumnNotebook = this.notebookList.every(notebook => notebook.selected);
-    this.enablePushNotebookBtn = this.notebookList.some(notebook => notebook.selected);
-  }
-
-  selectAllNoteBooks(): void {
-    for (const file of this.notebookList) {
-      file.selected = this.checkColumnNotebook;
-    }
-    this.enablePushNotebookBtn = this.checkColumnNotebook;
-  }
-
 
   delete(): void {
     this.deleting = true;
@@ -314,46 +318,26 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  localizeNotebooks(notebooks): void {
-    const fileList: Array<FileDetail> = notebooks.filter((item) => item.selected);
-    this.clusterService
-        .localizeNotebook(this.workspace.namespace, this.workspace.id, fileList)
+  private localizeNotebooks(notebooks): Observable<void> {
+    const names: Array<string> = notebooks.map(n => n.name);
+    return new Observable<void>(obs => {
+      this.clusterService
+        .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
+          workspaceNamespace: this.workspace.namespace,
+          workspaceId: this.workspace.id,
+          notebookNames: names
+        })
         .subscribe(() => {
-          this.handleLocalizeSuccess();
-          setTimeout(() => {
-            this.resetAlerts();
-          }, 5000);
-        }, () => {
+          obs.next();
+          obs.complete();
+        }, (err) => {
           this.handleLocalizeError();
           setTimeout(() => {
             this.resetAlerts();
           }, 5000);
+          obs.error(err);
         });
-  }
-
-  localizeAllFiles(): void {
-    this.workspacesService.localizeAllFiles(this.wsNamespace, this.wsId)
-        .subscribe(() => {
-              this.handleLocalizeSuccess();
-              this.clusterPulled = true;
-              setTimeout(() => {
-                this.resetAlerts();
-              }, 3000);
-            },
-            error => {
-              this.handleLocalizeError();
-              this.clusterPulled = true;
-              setTimeout(() => {
-                this.resetAlerts();
-              }, 3000);
-            });
-
-  }
-
-  handleLocalizeSuccess(): void {
-    this.alertCategory = 'alert-success';
-    this.alertMsg = 'File(s) have been saved';
-    this.showAlerts = true;
+    });
   }
 
   handleLocalizeError(): void {

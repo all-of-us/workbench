@@ -3,13 +3,13 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
-  margin: 0.125rem 0;
+  margin: 0 0 0.125rem 0;
+  height: 2rem;
 }
 
 #total-count {
-  margin: 0;
   flex: 1;
-  white-space: nowrap;
+  margin: 0;
 }
 
 input[type=text],
@@ -19,4 +19,10 @@ input[type=text]:not([readonly]):focus {
   border-top: none;
   border-right: none;
   border-left: none;
+}
+
+.card {
+  background-color: white;
+  margin-top: 0.6rem;
+  margin-bottom: 0.6rem;
 }

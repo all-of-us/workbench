@@ -1,5 +1,15 @@
 <h2>Profile</h2>
 <span *ngIf="!profileLoaded;else publicInfo" class="spinner spinner-sm"></span>
+<div class="alert alert-danger" *ngIf="errorText">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+      </div>
+      <span class="alert-text">{{errorText}}</span>
+    </div>
+  </div>
+</div>
 <ng-template #publicInfo>
   <div class="static info">
     <clr-icon shape="user" size="18" class="is-solid"></clr-icon> Shows on your public profile.
@@ -14,7 +24,7 @@
   <div class="field">
     <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
     <input *ngIf="profileLoaded else loading" type="text"
-      [(ngModel)]="profile.familyName" id="givenName">
+      [(ngModel)]="profile.familyName" id="familyName">
   </div>
 </div>
 <div class="field-wrapper">

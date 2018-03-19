@@ -71,7 +71,7 @@
   bottom: 0;
   z-index: 1500;
   flex-grow: 1;
-  max-width: 10rem;
+  width: 10rem;
   box-shadow: 0px 3px 10px;
   opacity: 1;
   transition: opacity 0.5s;
@@ -103,4 +103,16 @@
   width: 100%;
   margin-right: 0.6rem;
   margin-left: 1rem;
+}
+
+.background-image {
+  background-image: url('/assets/images/hex-background@2x.png');
+  background-repeat: no-repeat;
+  z-index: -1;
+  background-size: cover;
+  right: 0rem;
+  top: 3.3rem;
+  width: 50%;
+  position: absolute;
+  height: 90%;
 }

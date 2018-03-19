@@ -1,7 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
 import org.pmiops.workbench.model.ErrorResponse;
-import org.springframework.http.HttpStatus;
 
 public class WorkbenchException extends RuntimeException {
 

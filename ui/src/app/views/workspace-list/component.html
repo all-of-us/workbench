@@ -1,10 +1,23 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Your Workspaces</h3>
-    <button class="btn btn-secondary" (click)="addWorkspace()">
+    <button class="btn btn-secondary tooltip tooltip-lg tooltip-top-left" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
       <clr-icon shape="plus"></clr-icon>
       New Workspace
+      <span *ngIf="!billingProjectInitialized" class="tooltip-content">
+        Your billing project is currently being created, please wait.
+      </span>
     </button>
+  </div>
+  <div class="alert alert-danger" *ngIf="errorText">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-icon-wrapper">
+          <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+        </div>
+        <span class="alert-text">{{errorText}}</span>
+      </div>
+    </div>
   </div>
   <div class="card-area">
     <div class="card" *ngFor="let workspaceResponse of workspaceList" routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">

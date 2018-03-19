@@ -1,0 +1,14 @@
+.selection-button {
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.selection-button:hover {
+  background-color: rgb(219, 228, 233);
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
+
+.dropdown-item:hover {
+  background-color: rgb(219, 228, 233);
+}

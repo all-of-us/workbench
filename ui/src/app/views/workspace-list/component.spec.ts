@@ -4,7 +4,10 @@ import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   queryAllByCss,
@@ -12,7 +15,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {WorkspacesService} from 'generated';
+import {ProfileService, WorkspacesService} from 'generated';
 
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
@@ -48,7 +51,9 @@ describe('WorkspaceListComponent', () => {
         WorkspaceListComponent
       ],
       providers: [
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
+        { provide: ProfileService, useValue: new ProfileServiceStub() }
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
       });
