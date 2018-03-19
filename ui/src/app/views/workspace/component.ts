@@ -20,9 +20,6 @@ import {
 } from 'generated';
 
 
-class Notebook {
-  constructor(public name: string, public path: string) {}
-}
 /*
 * Search filters used by the cohort and notebook data tables to
 * determine which of the cohorts loaded into client side memory
@@ -38,8 +35,8 @@ class CohortDescriptionFilter implements StringFilter<Cohort> {
     return cohort.description.toLowerCase().indexOf(search) >= 0;
   }
 }
-class NotebookNameFilter implements StringFilter<Notebook> {
-  accepts(notebook: Notebook, search: string): boolean {
+class NotebookNameFilter implements StringFilter<FileDetail> {
+  accepts(notebook: FileDetail, search: string): boolean {
     return notebook.name.toLowerCase().indexOf(search) >= 0;
   }
 }
@@ -59,8 +56,8 @@ class CohortDescriptionComparator implements Comparator<Cohort> {
     return a.description.localeCompare(b.description);
   }
 }
-class NotebookNameComparator implements Comparator<Notebook> {
-  compare(a: Notebook, b: Notebook) {
+class NotebookNameComparator implements Comparator<FileDetail> {
+  compare(a: FileDetail, b: FileDetail) {
     return a.name.localeCompare(b.name);
   }
 }
@@ -93,13 +90,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cluster: Cluster;
   clusterLoading = true;
   clusterPulled = false;
-  launchedNotebookName: string;
+  private clusterLocalDirectory: string;
+  private launchedNotebookName: string;
   notFound = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;
-  // TODO: Replace with real data/notebooks read in from GCS
-  notebookList: Notebook[] = [];
+  notebookList: FileDetail[] = [];
   editHover = false;
   shareHover = false;
   trashHover = false;
@@ -146,10 +143,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
                 .subscribe(
                   fileList => {
-                    for (const filedetail of fileList) {
-                      this.notebookList
-                          .push(new Notebook(filedetail.name, filedetail.path));
-                    }
+                    this.notebookList = fileList;
                   },
                   error => {
                     this.notebooksLoading = false;
@@ -252,12 +246,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       + this.cluster.clusterName;
     if (notebookName) {
       leoNotebookUrl = [
-        leoNotebookUrl, 'edit', 'workspaces', this.workspace.id, notebookName
+        leoNotebookUrl, 'edit', this.clusterLocalDirectory, notebookName
       ].join('/');
     } else {
       // TODO(calbach): If lacking a notebook name, should create a new notebook instead.
       leoNotebookUrl = [
-        leoNotebookUrl, 'tree', 'workspaces', this.workspace.id
+        leoNotebookUrl, 'tree', this.clusterLocalDirectory
       ].join('/');
     }
 
@@ -327,7 +321,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           workspaceId: this.workspace.id,
           notebookNames: names
         })
-        .subscribe(() => {
+        .subscribe((resp) => {
+          this.clusterLocalDirectory = resp.clusterLocalDirectory;
           obs.next();
           obs.complete();
         }, (err) => {
