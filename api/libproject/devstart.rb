@@ -946,6 +946,24 @@ Common.register_command({
 })
 
 
+def deploy_gcs_artifacts()
+  gcc = GcloudContextV2.new(WbOptionsParser.new(cmd_name, args))
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  # This file must be readable by all AoU researchers and the Leonardo service
+  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
+  # public since the script's source is public anyways.
+  common.run_inline %W{gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+end
+
+Common.register_command({
+  :invocation => "deploy-gcs-artifacts",
+  :description => "Deploys any GCS artifacts associated with this environment.",
+  :fn => lambda { |*args| deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
+})
+
+
 def deploy(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -1131,6 +1149,9 @@ def circle_deploy(cmd_name, args)
       migrate_database
       load_config(ctx.project)
     end
+
+    common.status "Pushing GCS artifacts..."
+    deploy_gcs_artifacts(cmd_name, args)
   end
 
   promote = ""
@@ -1235,8 +1256,6 @@ def create_project_resources(gcc)
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating GCS bucket to store scripts..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
-  common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
-  common.run_inline %W{gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
                        --activation-policy=ALWAYS --backup-start-time 00:00
@@ -1317,6 +1336,7 @@ def setup_cloud_project(cmd_name, *args)
   create_project_resources(gcc)
   setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
                      random_password(), random_password(), random_password(), args)
+  deploy_gcs_artifacts(cmd_name, args)
 end
 
 Common.register_command({
