@@ -1,0 +1,9 @@
+.sign-in-container {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: auto;
+}
