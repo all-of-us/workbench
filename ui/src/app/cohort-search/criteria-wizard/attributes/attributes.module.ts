@@ -3,10 +3,17 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 
-import {AgeFormComponent} from './age-form.component';
 import {AttributesComponent} from './attributes.component';
 import {AttributesDirective} from './attributes.directive';
 
+import {DummyComponent} from './dummy.component';
+
+/*
+ * Main docs for dynamically generating components:
+ * https://angular.io/guide/dynamic-component-loader
+ *
+ *
+ */
 @NgModule({
   imports: [
     CommonModule,
@@ -17,12 +24,13 @@ import {AttributesDirective} from './attributes.directive';
     AttributesComponent,
   ],
   declarations: [
-    AgeFormComponent,
     AttributesComponent,
     AttributesDirective,
+    DummyComponent,
   ],
   entryComponents: [
-    AgeFormComponent,
+    // Dynamically generated forms need to be declared here as well
+    DummyComponent,
   ],
 })
 export class AttributesModule {}
