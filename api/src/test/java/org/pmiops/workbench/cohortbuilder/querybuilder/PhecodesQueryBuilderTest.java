@@ -51,7 +51,7 @@ public class PhecodesQueryBuilderTest {
                         "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
                         "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
-                        "union distinct\n" +
+                        "union all\n" +
                         "select person_id\n" +
                         "from `${projectId}.${dataSetId}.procedure_occurrence` po\n" +
                         "where po.procedure_source_concept_id in (select concept_id\n" +
@@ -61,7 +61,7 @@ public class PhecodesQueryBuilderTest {
                         "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
                         "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
-                        "union distinct\n" +
+                        "union all\n" +
                         "select person_id\n" +
                         "from `${projectId}.${dataSetId}.measurement` m\n" +
                         "where m.measurement_source_concept_id in (select concept_id\n" +
@@ -71,7 +71,7 @@ public class PhecodesQueryBuilderTest {
                         "where phecode in unnest(@" + pheCodesNamedParameter + "))\n" +
                         "and vocabulary_id in ('ICD9Proc', 'ICD9CM')\n" +
                         ")\n" +
-                        "union distinct\n" +
+                        "union all\n" +
                         "select person_id\n" +
                         "from `${projectId}.${dataSetId}.observation` o\n" +
                         "where o.observation_source_concept_id in (select concept_id\n" +
