@@ -14,6 +14,7 @@ import {
 
 import {AlertsComponent} from '../alerts/alerts.component';
 import {AttributesModule} from '../attributes/attributes.module';
+import {DemoFormComponent} from '../demo-form/demo-form.component';
 import {ExplorerComponent} from '../explorer/explorer.component';
 import {LeafComponent} from '../leaf/leaf.component';
 import {
@@ -44,6 +45,7 @@ describe('WizardComponent', () => {
       .configureTestingModule({
         declarations: [
           AlertsComponent,
+          DemoFormComponent,
           ExplorerComponent,
           LeafComponent,
           QuickSearchComponent,
@@ -84,13 +86,15 @@ describe('WizardComponent', () => {
 
   it('Should dispatch WIZARD_CANCEL on cancel', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.cancel();
+    comp.onCancel();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_CANCEL});
   });
 
-  it('Should dispatch WIZARD_FINISH on finish', () => {
+  it('Should dispatch WIZARD_FINISH on submission', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.finish();
+    comp.disableFinish = false;
+    fixture.detectChanges();
+    comp.onSubmit();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
   });
 });

@@ -10,8 +10,12 @@ import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions} from '../../redux';
-import {AgeFormComponent} from './age-form.component';
 import {AttributesDirective} from './attributes.directive';
+import {AttributeFormComponent} from './attributes.interface';
+
+import {Attribute} from 'generated';
+
+import {DummyComponent} from './dummy.component';
 
 
 @Component({
@@ -39,19 +43,24 @@ export class AttributesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   createForm() {
-    // TODO(jms) selection logic for instantiating the form
-    const component = AgeFormComponent;
+    /*
+     * TODO attribute selection logic here to determine which component to
+     * instantiate based on type of selected criteria instead of just passing
+     * in DummyComponent
+     */
+    const component = DummyComponent;
     const factory = this.resolver.resolveComponentFactory(component);
 
     this.attrFormHost.container.clear();
     const form = this.attrFormHost.container.createComponent(factory);
 
-    const [cancel$, submit$] = form.instance.attribute
-      .partition(value => value === null);
+    const [cancel$, submit$] = form.instance.attribute.partition(value => value === null);
 
     this.subscription = cancel$.subscribe(v => {
       this.cleanup();

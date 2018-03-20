@@ -1,0 +1,24 @@
+#demo-form-container {
+  position: relative;
+}
+
+#demo-form-spinner {
+  z-index: -99;
+  position: absolute;
+}
+
+#demo-form-spinner.show {
+  z-index: 99;
+  height: 100%;
+  width: 100%;
+}
+
+#demo-form-spinner .spinner {
+  top: 50%;
+  left: 50%;
+}
+
+.blur {
+	color: transparent;
+	text-shadow: 0 0 3px #aaa;
+}
