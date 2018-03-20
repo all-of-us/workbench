@@ -411,8 +411,8 @@ paths:
   /v1/clusters/{clusterNamespace}/{clusterName}/localize:
     post:
       summary: >
-        Localize files from a workspace to notebook cluster. As a side-effect, a
-        JSON workspace environment file will also be localized to the cluster.
+        Localize files from a workspace to notebook cluster. As a side-effect,
+        JSON workspace environment files will also be localized to the cluster.
       description: Localize notebook files to the corresponding notebook cluster.
       operationId: localize
       tags:
@@ -435,15 +435,17 @@ paths:
           $ref: '#/definitions/ClusterLocalizeRequest'
       responses:
         200:
-         description: List of files
+          description: Success
+          schema:
+            $ref: '#/definitions/ClusterLocalizeResponse'
         404:
-         description: Cluster or Workspace not found
-         schema:
-           $ref: '#/definitions/ErrorResponse'
+          description: Cluster or Workspace not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         500:
-         description: Internal Error
-         schema:
-          $ref: '#/definitions/ErrorResponse'
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 
   # Billing projects #####################################################################
 
@@ -2486,6 +2488,19 @@ definitions:
           within the provided workspace's Google Cloud Storage bucket.
         items:
           type: string
+
+  ClusterLocalizeResponse:
+    type: object
+    required:
+      - clusterLocalDirectory
+    properties:
+      clusterLocalDirectory:
+        type: string
+        description: >
+          The directory on the notebook cluster file system where the requested
+          files were localized. This is the "API" directory in Jupyter terms,
+          which means it is a relative path in the Jupyter user-facing file
+          system, e.g. "foo/bar.ipynb".
 
   UsernameTakenResponse:
     type: object
