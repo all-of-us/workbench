@@ -6,8 +6,8 @@ import {
   Cohort,
   CohortReview,
   CohortReviewService,
+  PaginationFilteringRequest,
   ParticipantCohortStatusColumns,
-  ParticipantCohortStatusesRequest,
   SortOrder,
   Workspace,
 } from 'generated';
@@ -27,7 +27,7 @@ export class ReviewResolver implements Resolve<CohortReview> {
     // console.dir(route);
 
     /* Default values */
-    const request = <ParticipantCohortStatusesRequest>{
+    const request = <PaginationFilteringRequest>{
       page: 0,
       pageSize: 25,
       sortColumn: ParticipantCohortStatusColumns.ParticipantId,

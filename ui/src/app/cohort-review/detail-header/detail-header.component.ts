@@ -11,7 +11,6 @@ import {
   CohortReviewService,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns,
-  ParticipantCohortStatusesRequest,
   SortOrder
 } from 'generated';
 
