@@ -5,6 +5,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {AlertsComponent} from './alerts/alerts.component';
 import {AttributesModule} from './attributes/attributes.module';
+import {DemoFormComponent} from './demo-form/demo-form.component';
 import {ExplorerComponent} from './explorer/explorer.component';
 import {LeafComponent} from './leaf/leaf.component';
 import {
@@ -27,6 +28,7 @@ import {WizardComponent} from './wizard/wizard.component';
   exports: [WizardComponent],
   declarations: [
     AlertsComponent,
+    DemoFormComponent,
     ExplorerComponent,
     LeafComponent,
     QuickSearchComponent,

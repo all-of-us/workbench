@@ -1,0 +1,96 @@
+<div id="demo-form-container">
+  <div id="demo-form-spinner" [class.show]="loading">
+    <div class="spinner spinner-lg">Loading...</div>
+  </div>
+  <div [class.blur]="loading">
+    <form [formGroup]="demoForm" (ngSubmit)="onSubmit()">
+      <section class="form-block">
+
+        <!-- Age -->
+        <div class="form-group">
+          <label for="age-low">Age Range</label>
+          <input
+            id="age-low"
+            formControlName="ageLow"
+            type="number"
+            [min]="minAge" [max]="maxAge">
+          <input
+            id="age-high"
+            formControlName="ageHigh"
+            type="number"
+            [min]="minAge" [max]="maxAge">
+        </div>
+
+        <!-- Genders -->
+        <div class="form-group">
+          <label for="genders">Choose Gender Filters</label>
+          <div class="select multiple">
+            <select multiple formControlName="genders" id="genders">
+              <option *ngFor="let gender of genders" [value]="gender">
+                {{ gender.name }}
+                <span *ngIf="gender.count > 0">
+                  {{ gender.count }}
+                </span>
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Races -->
+        <div class="form-group">
+          <label for="races">Choose Race Filters</label>
+          <div class="select multiple">
+            <select multiple formControlName="races" id="races">
+              <option *ngFor="let race of races" [value]="race">
+                {{ race.name }}
+                <span *ngIf="race.count > 0">
+                  {{ race.count }}
+                </span>
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Deceased status -->
+        <div class="form-group">
+          <label>Filter By Deceased Status</label>
+          <div class="radio">
+            <input type="radio"
+              formControlName="deceased"
+              value="isDeceased"
+              name="deceased"
+              id="is-deceased">
+            <label for="is-deceased">Deceased</label>
+          </div>
+          <div class="radio">
+            <input type="radio"
+              formControlName="deceased"
+              value="isNotDeceased"
+              name="deceased"
+              id="is-not-deceased">
+            <label for="is-not-deceased">Not Deceased</label>
+          </div>
+          <div class="radio">
+            <input type="radio"
+              formControlName="deceased"
+              value="noDeceasedFilter"
+              name="deceased"
+              id="no-deceased">
+            <label for="no-deceased">Do Not Filter By Deceased</label>
+          </div>
+        </div>
+      </section>
+
+      <button type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()">
+        Cancel
+      </button>
+      <button type="submit"
+        class="btn btn-primary"
+        [disabled]="demoForm.invalid">
+        Finish
+      </button>
+    </form>
+  </div>
+</div>
