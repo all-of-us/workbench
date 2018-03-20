@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
-  CanActivateChild,
   Router, RouterStateSnapshot
 } from '@angular/router';
 
@@ -14,14 +13,11 @@ import {SignInService} from 'app/services/sign-in.service';
 declare const gapi: any;
 
 @Injectable()
-export class SignInGuard implements CanActivate, CanActivateChild {
+export class SignInGuard implements CanActivate {
   constructor(private signInService: SignInService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.signInService.user.pluck('isSignedIn');
-  }
 
-  canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    return this.canActivate(route, state);
   }
 }

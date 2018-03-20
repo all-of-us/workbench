@@ -94,6 +94,8 @@ export class AppComponent implements OnInit {
     this.user = this.signInService.user;
     this.user.subscribe(user => {
       this.isSignedIn = true;
+      this.router.navigated = false;
+      this.router.navigateByUrl(this.router.url);
     });
   }
 
