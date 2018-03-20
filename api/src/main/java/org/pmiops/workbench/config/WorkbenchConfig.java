@@ -43,7 +43,7 @@ public class WorkbenchConfig {
   }
 
   public static class ServerConfig {
-    public String stackdriverApiKey;
+    public String publicApiKeyForErrorReports;
     public String projectId;
   }
 }

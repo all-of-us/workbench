@@ -8,7 +8,7 @@ import {ConfigResponse, ConfigService} from 'generated';
 
 const testConfig: ConfigResponse = {
   gsuiteDomain: 'fake-domain',
-  stackdriverApiKey: '123',
+  publicApiKeyForErrorReports: '123',
   projectId: 'foo'
 };
 
