@@ -191,7 +191,7 @@ jobs:
       - run:
           name: Lint Angular app
           working_directory: ~/workbench/ui
-          command: yarn lint
+          command: yarn run lint
       - run:
           name: Run Angular tests
           working_directory: ~/workbench/ui
