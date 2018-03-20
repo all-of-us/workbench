@@ -69,10 +69,10 @@ public class ParticipantCounterTest {
             }
         }
 
-        final String expectedSql = "select count(distinct person_id) as count\n" +
+        final String expectedSql = "select count(*) as count\n" +
                 "from `${projectId}.${dataSetId}.person` person\n" +
                 "where\n" +
-                "person.person_id in (select distinct person_id\n" +
+                "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
                 "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
@@ -150,19 +150,19 @@ public class ParticipantCounterTest {
             }
         }
 
-        final String expectedSql = "select count(distinct person_id) as count\n" +
+        final String expectedSql = "select count(*) as count\n" +
                 "from `${projectId}.${dataSetId}.person` person\n" +
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
-                "and person.person_id in (select distinct person_id\n" +
+                "and person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
                 "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
@@ -171,7 +171,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
@@ -259,19 +259,19 @@ public class ParticipantCounterTest {
             }
         }
 
-        final String expectedSql = "select distinct person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+        final String expectedSql = "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
                 "from `${projectId}.${dataSetId}.person` person\n" +
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
-                "and person.person_id in (select distinct person_id\n" +
+                "and person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
                 "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
@@ -280,7 +280,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
@@ -383,14 +383,14 @@ public class ParticipantCounterTest {
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                 "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                 ")\n" +
                 ")\n" +
-                "and person.person_id in (select distinct person_id\n" +
+                "and person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
                 "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
@@ -399,7 +399,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select distinct person_id\n" +
+                "where person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
