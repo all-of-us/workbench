@@ -29,7 +29,6 @@ import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -85,8 +84,6 @@ public class ProfileControllerTest {
   private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired
   private UserDao userDao;
-  @Autowired
-  private AdminActionHistoryDao adminActionHistoryDao;
   @Mock
   private FireCloudService fireCloudService;
   @Mock
@@ -141,10 +138,10 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment, adminActionHistoryDao);
+        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), cloudEnvironment, adminActionHistoryDao);
+        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), cloudEnvironment);
   }
 
   @Test(expected = BadRequestException.class)

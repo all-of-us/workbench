@@ -1,10 +1,8 @@
 package org.pmiops.workbench.api;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
@@ -29,21 +27,18 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   private final FireCloudService fireCloudService;
   private final UserDao userDao;
   private final Provider<User> userProvider;
-  private final AdminActionHistoryDao adminActionHistoryDao;
+  private static final AdminActionHistory adminActionHistory = new AdminActionHistory();
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
       Clock clock,
       UserDao userDao,
-      Provider<User> userProvider,
-      AdminActionHistoryDao adminActionHistoryDao
-  ) {
+      Provider<User> userProvider) {
     this.fireCloudService = fireCloudService;
     this.clock = clock;
     this.userDao = userDao;
     this.userProvider = userProvider;
-    this.adminActionHistoryDao = adminActionHistoryDao;
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
@@ -75,13 +70,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     user.setDisabled(true);
     userDao.save(user);
 
-    // log admin action
-    AdminActionHistory adminActionHistory = new AdminActionHistory();
-    adminActionHistory.setAction("user removed from auth domain and disabled");
-    adminActionHistory.setTargetId(user.getUserId());
-    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
-    adminActionHistory.setUserId(userProvider.get().getUserId());
-    adminActionHistoryDao.save(adminActionHistory);
+    adminActionHistory.logAdminAction(
+      "user removed from auth domain and disabled",
+      userProvider.get().getUserId(),
+      user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -99,14 +91,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     user.setDisabled(false);
     userDao.save(user);
 
-    // log admin action
-    AdminActionHistory adminActionHistory = new AdminActionHistory();
-    adminActionHistory.setAction("user added to auth domain and enabled");
-    adminActionHistory.setTargetId(user.getUserId());
-    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
-    adminActionHistory.setUserId(userProvider.get().getUserId());
-    adminActionHistoryDao.save(adminActionHistory);
-
+    adminActionHistory.logAdminAction(
+        "user added to auth domain and enabled",
+        userProvider.get().getUserId(),
+        user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

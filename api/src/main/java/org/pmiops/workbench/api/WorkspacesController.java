@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -68,6 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
+  private static final AdminActionHistory adminActionHistory = new AdminActionHistory();
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
@@ -269,7 +269,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final String apiHostName;
   private final NotebooksService notebooksService;
-  private final AdminActionHistoryDao adminActionHistoryDao;
 
   @Autowired
   WorkspacesController(
@@ -281,9 +280,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       @Qualifier("apiHostName") String apiHostName,
-      NotebooksService notebooksService,
-      AdminActionHistoryDao adminActionHistoryDao
-  ) {
+      NotebooksService notebooksService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -293,8 +290,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.apiHostName = apiHostName;
     this.notebooksService = notebooksService;
-    this.adminActionHistoryDao = adminActionHistoryDao;
-
   }
 
   @VisibleForTesting
@@ -758,14 +753,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
 
-    // log admin action
-    AdminActionHistory adminActionHistory = new AdminActionHistory();
-    adminActionHistory.setAction("research purpose approved set to " + review.getApproved().toString());
-    adminActionHistory.setTargetId(this.workspaceService.get(ns, id).getWorkspaceId());
-    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
-    adminActionHistory.setUserId(this.userProvider.get().getUserId());
-    adminActionHistoryDao.save(adminActionHistory);
-
+    adminActionHistory.logAdminAction(
+        "research purpose approved set to " + review.getApproved().toString(),
+        this.workspaceService.get(ns, id).getWorkspaceId(),
+        this.userProvider.get().getUserId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
