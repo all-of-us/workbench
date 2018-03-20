@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import java.util.Set;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
@@ -76,34 +77,37 @@ public class ParticipantCounter {
      * Provides counts with demographic info for charts
      * defined by the provided {@link SearchRequest}.
      */
-    public QueryJobConfiguration buildParticipantCounterQuery(SearchRequest request) {
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-        return buildQuery(request, COUNT_SQL_TEMPLATE, "");
+    public QueryJobConfiguration buildParticipantCounterQuery(ParticipantCriteria participantCriteria) {
+        return buildQuery(participantCriteria, COUNT_SQL_TEMPLATE, "");
     }
 
     /**
      * Provides counts of unique subjects
      * defined by the provided {@link SearchRequest}.
      */
-    public QueryJobConfiguration buildChartInfoCounterQuery(SearchRequest request) {
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-        return buildQuery(request, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
+    public QueryJobConfiguration buildChartInfoCounterQuery(ParticipantCriteria participantCriteria) {
+        return buildQuery(participantCriteria, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
     }
 
-    public QueryJobConfiguration buildParticipantIdQuery(SearchRequest request, long resultSize,
-        long offset) {
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
+    public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
+        long resultSize, long offset) {
         String endSql = ID_SQL_ORDER_BY + " " + resultSize;
         if (offset > 0) {
             endSql += OFFSET_SUFFIX + offset;
         }
-        return buildQuery(request, ID_SQL_TEMPLATE, endSql);
+        return buildQuery(participantCriteria, ID_SQL_TEMPLATE, endSql);
     }
 
-    public QueryJobConfiguration buildQuery(SearchRequest request, String sqlTemplate, String endSql) {
+    public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
+        String sqlTemplate, String endSql) {
+        SearchRequest request = participantCriteria.getSearchRequest();
+        if (request == null) {
+            Set<Long> participantIdsToInclude = participantCriteria.getParticipantIdsToInclude();
+
+        }
+        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
+
         if(request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
             throw new BadRequestException("Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
         }
