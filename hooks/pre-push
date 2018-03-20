@@ -21,8 +21,6 @@ do
       has_ts=1
     else
       files=$(git diff --name-only "$remote_sha..$local_sha")
-      echo git diff --name-only "$remote_sha..$local_sha"
-      echo "got: " $files
 
       [ -n "`echo $files | grep \.ts$`" ] && has_ts=1
     fi
