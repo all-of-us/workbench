@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {AppComponent} from '../app/component';
+import {SignedOutComponent} from '../signed-out/component';
 
 import {InvitationVerificationRequest, ProfileService} from 'generated';
 
@@ -25,13 +25,19 @@ export class InvitationKeyComponent {
 
   constructor(
       private profileService: ProfileService,
-      private appComponent: AppComponent
+      private signedOutComponent: SignedOutComponent
   ) {
       this.invitationKeyVerifed = false;
       this.invitationKeyReq = false;
       this.invitationKeyInvalid = false;
       this.requestSent = false;
-      this.appComponent.backgroundImgSrc = '/assets/images/invitation-female@2x.jpg';
+      // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
+      setTimeout(() => {
+        this.signedOutComponent.backgroundImgSrc = '/assets/images/invitation-female.png';
+        this.signedOutComponent.smallerBackgroundImgSrc =
+            '/assets/images/invitation-female-standing.png';
+      }, 0);
+
     }
 
   next(): void {

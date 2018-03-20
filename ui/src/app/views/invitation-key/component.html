@@ -1,4 +1,5 @@
-<div style="padding: 3rem;">
+
+<div style="padding: 3rem 3rem 0 3rem;">
   <div *ngIf="!invitationKeyVerifed" class="form-area">
     <div class="form-section">
       <h2>Enter your Invitation Key:</h2>
@@ -20,7 +21,7 @@
     <div class="invitation-help-text">Lorem ipsum dolor sit amet, conser adipiscing elit. Aenean euisimod bibendum
       laoreet.
     </div>
-    <input type="text" class="input" [(ngModel)]="invitationKeyRequestEmail" placeholder="Email Address">
+    <input type="text" class="input" [(ngModel)]="invitationKeyRequestEmail" placeholder="Email Address" style="display: block;">
     <button id="requestKey" (click)="requestKey()" class="btn btn-secondary" style="width: 9rem; height: 1.8rem">
       Request Invite Key
     </button>

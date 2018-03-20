@@ -13,15 +13,15 @@
 }
 
 .long-input {
-  width: 20rem;
+  width: 16rem;
 }
 
 .short-input {
-  width: 12rem;
+  width: 10rem;
 }
 
 .short-button {
-  width: 12rem;
+  width: 10rem;
   height: 2rem;
   margin: 0rem;
 }

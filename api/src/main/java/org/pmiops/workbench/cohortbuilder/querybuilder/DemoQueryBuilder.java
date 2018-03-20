@@ -23,7 +23,7 @@ import java.util.Optional;
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
-    private static final String SELECT = "select distinct person_id\n" +
+    private static final String SELECT = "select person_id\n" +
             "from `${projectId}.${dataSetId}.person` p\n" +
             "where\n";
 

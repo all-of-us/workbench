@@ -1,10 +1,11 @@
 .template {
   background-color: #dedfe1;
-  height:50rem;
   background-repeat: no-repeat;
-  background-position: center;
   width: 100%;
-  background-size: 100% 100%;
+  min-height: 100vh;
+  background-size: contain;
+  background-position: bottom right -1rem;
+  background-image: var(--larger-image);
 }
 
 .headerImage {
@@ -18,8 +19,27 @@
   height:auto;
 }
 
-@media all and (max-width: 1100px) {
+@media all and (max-width: 900px) {
   .template {
     background-size: 0% 0%;
   }
+}
+
+@media all and (max-width: 1300px) and (min-width: 900px) {
+  .template {
+    background-image: var(--smaller-image);
+    background-position: bottom right;
+
+  }
+}
+
+
+.signed-out-content {
+  flex: 0 0 41.66667%;
+  max-width: 41.66667%;
+  min-width: 25rem;
+}
+
+.row {
+  margin: 0;
 }
