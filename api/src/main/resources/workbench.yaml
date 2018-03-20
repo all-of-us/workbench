@@ -975,7 +975,7 @@ paths:
           required: true
           description: request body for getting list of ParticipantCohortStatuses.
           schema:
-            $ref: "#/definitions/PaginationFilteringRequest"
+            $ref: "#/definitions/PageFilterRequest"
       responses:
         200:
           description: A collection of participants
@@ -1094,7 +1094,7 @@ paths:
           required: true
           description: request body for getting list of ParticipantCohortStatuses.
           schema:
-            $ref: "#/definitions/PaginationFilteringRequest"
+            $ref: "#/definitions/PageFilterRequest"
       responses:
         200:
           description: A collection of ParticipantConditions.
@@ -2127,13 +2127,13 @@ definitions:
       sortColumn:
         type: string
 
-  PaginationFilteringRequest:
-    type: object
+  PageFilterRequest:
+    discriminator: pageFilterType
     required:
       - page
       - pageSize
-      - sortColumn
       - sortOrder
+      - pageFilterType # required for inheritance to work
     properties:
       page:
         type: integer
@@ -2141,18 +2141,40 @@ definitions:
       pageSize:
         type: integer
         description: page size of results (default is 25)
-      sortColumn:
-        $ref: "#/definitions/ParticipantCohortStatusColumns"
-        description: Column upon which to sort (default is 'participantId')
       sortOrder:
         $ref: "#/definitions/SortOrder"
-        description: Sort direction (default is ascending)
+      pageFilterType:
+        $ref: "#/definitions/PageFilterType"
       filters:
         $ref: "#/definitions/FilterList"
+
+  ParticipantCohortStatusesPageFilter:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantCohortStatusColumns"
+            description: Column upon which to sort (default is 'participantId')
+
+  ParticipantCoditionsPageFilter:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantCoditionsColumns"
+            description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
+
+  ParticipantCoditionsColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
+
+  PageFilterType:
+    type: string
+    enum: [ParticipantCohortStatus, ParticipantCoditions]
 
   SortOrder:
     type: string

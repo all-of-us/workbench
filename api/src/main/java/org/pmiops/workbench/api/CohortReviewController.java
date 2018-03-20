@@ -348,7 +348,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 String workspaceId,
                                                                                                 Long cohortId,
                                                                                                 Long cdrVersionId,
-                                                                                                PaginationFilteringRequest request) {
+                                                                                                PageFilterRequest request) {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
@@ -361,10 +361,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             cohortReview = initializeCohortReview(cdrVersionId, cohort);
         }
 
+        ParticipantCohortStatusesPageFilter filter = null;
+        if (request.getPageFilterType().equals("type1")) {
+            filter = (ParticipantCohortStatusesPageFilter) request;
+        }
         PageRequest pageRequest = createPageRequest(request.getPage(),
                 request.getPageSize(),
                 request.getSortOrder(),
-                request.getSortColumn());
+                filter.getSortColumn());
 
         List<Filter> filters = request.getFilters() == null ? Collections.<Filter>emptyList() : request.getFilters().getItems();
         List<ParticipantCohortStatus> participantCohortStatuses =
@@ -383,18 +387,22 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                      Long cohortId,
                                                                                      Long cdrVersionId,
                                                                                      Long participantId,
-                                                                                     PaginationFilteringRequest request) {
+                                                                                     PageFilterRequest request) {
         Cohort cohort = cohortReviewService.findCohort(cohortId);
         //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
                 cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
 
         //this validates that the participant is in the requested review.
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
-        int pageParam = Optional.ofNullable(request.getPage()).orElse(PAGE);
-        int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(PAGE_SIZE);
+        PageRequest pageRequest = createPageRequest(request.getPage(),
+                request.getPageSize(),
+                request.getSortOrder(),
+                request.getSortColumn());
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
                 conditionQueryBuilder.buildQuery(participantId, pageParam, pageSizeParam)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
