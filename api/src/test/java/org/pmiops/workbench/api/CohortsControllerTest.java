@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -93,6 +94,8 @@ public class CohortsControllerTest {
   @Autowired
   CohortDao cohortDao;
   @Autowired
+  CohortReviewDao cohortReviewDao;
+  @Autowired
   UserDao userDao;
   @Mock
   CohortMaterializationService cohortMaterializationService;
@@ -139,7 +142,7 @@ public class CohortsControllerTest {
         WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
-        workspaceService, cohortDao, cdrVersionDao, cohortMaterializationService,
+        workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
         userProvider, CLOCK);
   }
 
@@ -309,7 +312,7 @@ public class CohortsControllerTest {
     request.setCohortName(cohort.getName());
     request.setPageSize(0);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+    when(cohortMaterializationService.materializeCohort(null, searchRequest, null,
         CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -323,7 +326,7 @@ public class CohortsControllerTest {
     request.setCohortName(cohort.getName());
     request.setPageSize(CohortsController.MAX_PAGE_SIZE + 1);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+    when(cohortMaterializationService.materializeCohort(null, searchRequest, null,
         CohortsController.MAX_PAGE_SIZE, null)).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -337,7 +340,7 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+    when(cohortMaterializationService.materializeCohort(null, searchRequest, null,
         CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -351,7 +354,7 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortSpec(cohort.getCriteria());
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, null,
+    when(cohortMaterializationService.materializeCohort(null, searchRequest, null,
         CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -370,7 +373,7 @@ public class CohortsControllerTest {
     List<CohortStatus> statuses = ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.NOT_REVIEWED);
     request.setStatusFilter(statuses);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cdrVersion, searchRequest, statuses,
+    when(cohortMaterializationService.materializeCohort(null, searchRequest, statuses,
         123, "token")).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);

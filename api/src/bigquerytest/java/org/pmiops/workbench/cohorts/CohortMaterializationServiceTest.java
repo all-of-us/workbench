@@ -86,7 +86,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortOneMale() {
-    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cdrVersion,
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.males(),null, 1000, null);
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
@@ -94,7 +94,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortICD9Group() {
-    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cdrVersion,
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
             SearchRequests.icd9Codes(),null, 1000, null);
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
@@ -102,18 +102,18 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortPaging() {
-    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cdrVersion,
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.allGenders(),null, 2, null);
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNotNull();
-    MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(cdrVersion,
+    MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(null,
         SearchRequests.allGenders(),null, 2, response.getNextPageToken());
     assertPersonIds(response2, 102246L);
     assertThat(response2.getNextPageToken()).isNull();
 
     try {
       // Pagination token doesn't match, this should fail.
-      cohortMaterializationService.materializeCohort(cdrVersion, SearchRequests.males(),
+      cohortMaterializationService.materializeCohort(null, SearchRequests.males(),
           null, 2, response.getNextPageToken());
       fail("Exception expected");
     } catch (BadRequestException e) {
@@ -124,7 +124,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     PaginationToken invalidToken = new PaginationToken(-1L, token.getParameterHash());
     try {
       // Pagination token doesn't match, this should fail.
-      cohortMaterializationService.materializeCohort(cdrVersion, SearchRequests.males(),
+      cohortMaterializationService.materializeCohort(null, SearchRequests.males(),
           null, 2, invalidToken.toBase64());
       fail("Exception expected");
     } catch (BadRequestException e) {

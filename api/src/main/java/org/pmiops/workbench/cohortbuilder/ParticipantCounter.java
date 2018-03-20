@@ -2,7 +2,12 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
@@ -12,12 +17,6 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * Provides counts of unique subjects
@@ -62,6 +61,14 @@ public class ParticipantCounter {
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
 
+    private static final String PERSON_ID_WHITELIST_PARAM = "@person_id_whitelist";
+    private static final String PERSON_ID_BLACKLIST_PARAM = "@person_id_blacklist";
+
+    private static final String PERSON_ID_WHITELIST_TEMPLATE = "person.person_id in unnest(" +
+        PERSON_ID_WHITELIST_PARAM + ")\n";
+    private static final String PERSON_ID_BLACKLIST_TEMPLATE = "person.person_id not in unnest(" +
+        PERSON_ID_BLACKLIST_PARAM + ")\n";
+
     private static final String EXCLUDE_SQL_TEMPLATE =
             "not exists\n" +
                     "(select 'x' from\n" +
@@ -101,32 +108,42 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
         String sqlTemplate, String endSql) {
         SearchRequest request = participantCriteria.getSearchRequest();
-        if (request == null) {
-            Set<Long> participantIdsToInclude = participantCriteria.getParticipantIdsToInclude();
-
-        }
-        domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-        domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
-        if(request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
-            throw new BadRequestException("Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
-        }
+        StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
         Map<String, QueryParameterValue> params = new HashMap<>();
-
-        // build query for included search groups
-        StringJoiner joiner = buildQuery(request.getIncludes(), params, false);
-
-        // if includes is empty then don't add the excludes clause
-        if (joiner.toString().isEmpty()) {
-            joiner.merge(buildQuery(request.getExcludes(), params, false));
+        if (request == null) {
+            queryBuilder.append(PERSON_ID_WHITELIST_TEMPLATE);
+            params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
+                participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
         } else {
-            joiner.merge(buildQuery(request.getExcludes(), params, true));
-        }
+          domainLookupService.findCodesForEmptyDomains(request.getIncludes());
+          domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
-        String finalSql = sqlTemplate + joiner.toString() + endSql;
+          if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
+            throw new BadRequestException(
+                "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
+          }
+
+          // build query for included search groups
+          StringJoiner joiner = buildQuery(request.getIncludes(), params, false);
+
+          // if includes is empty then don't add the excludes clause
+          if (joiner.toString().isEmpty()) {
+            joiner.merge(buildQuery(request.getExcludes(), params, false));
+          } else {
+            joiner.merge(buildQuery(request.getExcludes(), params, true));
+          }
+          Set<Long> participantIdsToExclude = participantCriteria.getParticipantIdsToExclude();
+          if (!participantIdsToExclude.isEmpty()) {
+              joiner.add(PERSON_ID_BLACKLIST_TEMPLATE);
+              params.put(PERSON_ID_BLACKLIST_PARAM, QueryParameterValue.array(
+                  participantIdsToExclude.toArray(new Long[0]), Long.class));
+          }
+          queryBuilder.append(joiner.toString());
+        }
+        queryBuilder.append(endSql);
 
         return QueryJobConfiguration
-                .newBuilder(finalSql)
+                .newBuilder(queryBuilder.toString())
                 .setNamedParameters(params)
                 .setUseLegacySql(false)
                 .build();

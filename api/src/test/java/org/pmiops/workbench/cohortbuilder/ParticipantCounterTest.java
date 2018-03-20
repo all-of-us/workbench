@@ -37,7 +37,7 @@ public class ParticipantCounterTest {
     public void buildParticipantCounterQuery_BothIncludesAndExcludesEmpty() throws Exception {
 
         try {
-            participantCounter.buildParticipantCounterQuery(new SearchRequest());
+            participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(new SearchRequest()));
         } catch (BadRequestException e) {
             assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
         }
@@ -61,7 +61,8 @@ public class ParticipantCounterTest {
         SearchRequest request = new SearchRequest()
                 .addExcludesItem(searchGroup1);
 
-        QueryJobConfiguration actualRequest = participantCounter.buildParticipantCounterQuery(request);
+        QueryJobConfiguration actualRequest = participantCounter.buildParticipantCounterQuery(
+            new ParticipantCriteria(request));
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {
@@ -134,7 +135,8 @@ public class ParticipantCounterTest {
                 .addIncludesItem(searchGroup2)
                 .addExcludesItem(searchGroup3);
 
-        QueryJobConfiguration actualRequest = participantCounter.buildParticipantCounterQuery(request);
+        QueryJobConfiguration actualRequest = participantCounter.buildParticipantCounterQuery(
+            new ParticipantCriteria(request));
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {
@@ -242,8 +244,8 @@ public class ParticipantCounterTest {
                 .addIncludesItem(searchGroup2)
                 .addExcludesItem(searchGroup3);
 
-        QueryJobConfiguration actualRequest = participantCounter.buildParticipantIdQuery(request,
-            200, 0);
+        QueryJobConfiguration actualRequest = participantCounter.buildParticipantIdQuery(
+            new ParticipantCriteria(request),200, 0);
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {
@@ -353,7 +355,8 @@ public class ParticipantCounterTest {
                 .addIncludesItem(searchGroup2)
                 .addExcludesItem(searchGroup3);
 
-        QueryJobConfiguration actualRequest = participantCounter.buildChartInfoCounterQuery(request);
+        QueryJobConfiguration actualRequest = participantCounter.buildChartInfoCounterQuery(
+            new ParticipantCriteria(request));
 
         for (String key : actualRequest.getNamedParameters().keySet()) {
             if (key.startsWith("gen")) {
