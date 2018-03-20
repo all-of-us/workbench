@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.pmiops.workbench.auth.ProfileService;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -47,6 +50,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private Clock clock;
+  @Autowired private AdminActionHistoryDao adminActionHistoryDao;
+  @Autowired private ProfileService profileService;
 
   /**
    * Clients wishing to use the auto-generated methods from the DAO interface may directly access
@@ -112,6 +117,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
     Workspace workspace = getRequired(ns, firecloudName);
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException(String.format(
           "No review requested for workspace %s/%s.", ns, firecloudName));
@@ -123,9 +129,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
-
-    // TODO: log admin action
-
     saveWithLastModified(workspace, now);
   }
 

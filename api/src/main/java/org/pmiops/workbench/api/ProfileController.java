@@ -492,10 +492,10 @@ public class ProfileController implements ProfileApiDelegate {
 
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
-      adminActionHistory.setAction("manual Id verification approve");
+      adminActionHistory.setAction("manual ID verification approve");
     } else {
       userService.setIdVerificationApproved(userId, false);
-      adminActionHistory.setAction("manual Id verification reject");
+      adminActionHistory.setAction("manual ID verification reject");
     }
 
     // log admin action

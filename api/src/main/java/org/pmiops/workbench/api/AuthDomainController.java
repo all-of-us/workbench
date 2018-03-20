@@ -4,11 +4,11 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -29,17 +29,21 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   private final FireCloudService fireCloudService;
   private final UserDao userDao;
   private final Provider<User> userProvider;
+  private final AdminActionHistoryDao adminActionHistoryDao;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
       Clock clock,
       UserDao userDao,
-      Provider<User> userProvider) {
+      Provider<User> userProvider,
+      AdminActionHistoryDao adminActionHistoryDao
+  ) {
     this.fireCloudService = fireCloudService;
     this.clock = clock;
     this.userDao = userDao;
     this.userProvider = userProvider;
+    this.adminActionHistoryDao = adminActionHistoryDao;
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
@@ -60,26 +64,24 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     User user = userDao.findUserByEmail(request.getEmail());
     try {
       fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      this.fireCloudService.handleApiException(e);
     }
     // TODO(calbach): Teardown any active clusters here.
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
-
-    // TODO: log admin action
-
     userDao.save(user);
+
+    // log admin action
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setAction("user removed from auth domain and disabled");
+    adminActionHistory.setTargetId(user.getUserId());
+    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
+    adminActionHistory.setUserId(userProvider.get().getUserId());
+    adminActionHistoryDao.save(adminActionHistory);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -90,21 +92,21 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     try {
       fireCloudService.addUserToGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      this.fireCloudService.handleApiException(e);
     }
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
-
-    // TODO: log admin action
-
     userDao.save(user);
+
+    // log admin action
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setAction("user added to auth domain and enabled");
+    adminActionHistory.setTargetId(user.getUserId());
+    adminActionHistory.setTimestamp(new Timestamp(clock.instant().toEpochMilli()));
+    adminActionHistory.setUserId(userProvider.get().getUserId());
+    adminActionHistoryDao.save(adminActionHistory);
+
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

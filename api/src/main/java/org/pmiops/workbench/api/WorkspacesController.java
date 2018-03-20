@@ -234,9 +234,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           result.setName(workspace.getName());
           if (workspace.getResearchPurpose() != null) {
             setResearchPurposeDetails(result, workspace.getResearchPurpose());
-            if (workspace.getResearchPurpose().getTimeReviewed() != null) {
-              // TODO: log admin action
-            }
             result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
             if (workspace.getResearchPurpose().getTimeRequested() != null) {
               result.setTimeRequested(
