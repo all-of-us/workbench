@@ -17,10 +17,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
+import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,7 +88,6 @@ public class ClusterController implements ClusterApiDelegate {
 
   private org.pmiops.workbench.notebooks.model.ClusterRequest createFirecloudClusterRequest() {
     org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
-    // TODO(calbach): Configure Jupyter server extensions here.
     Map<String, String> labels = new HashMap<String, String>();
     labels.put(CLUSTER_LABEL_AOU, "true");
     labels.put(CLUSTER_LABEL_CREATED_BY, userProvider.get().getEmail());
@@ -99,7 +98,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> localize(
+  public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
     String workspaceBucket;
     try {
@@ -124,7 +123,8 @@ public class ClusterController implements ClusterApiDelegate {
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
     }
-    String localDir = String.join("/", "~", "workspaces", workspacePath);
+    String apiDir = String.join("/", "workspaces", workspacePath);
+    String localDir = String.join("/", "~", apiDir);
     Map<String, String> toLocalize = body.getNotebookNames()
         .stream()
         .collect(Collectors.<String, String, String>toMap(
@@ -134,8 +134,9 @@ public class ClusterController implements ClusterApiDelegate {
     toLocalize.put(
         localDir + "/.all_of_us_config.json",
         workspaceBucket + "/" + WorkspacesController.CONFIG_FILENAME);
-
     notebooksService.localize(projectName, clusterName, toLocalize);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    ClusterLocalizeResponse resp = new ClusterLocalizeResponse();
+    resp.setClusterLocalDirectory(apiDir);
+    return ResponseEntity.ok(resp);
   }
 }
