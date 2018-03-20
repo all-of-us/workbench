@@ -29,6 +29,8 @@ import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/c
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
+import {SignedInComponent} from './views/signed-in/component';
+import {SignedOutComponent} from './views/signed-out/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
@@ -98,6 +100,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
+    SignedInComponent,
+    SignedOutComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,
