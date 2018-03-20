@@ -29,6 +29,7 @@ import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -84,6 +85,8 @@ public class ProfileControllerTest {
   private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired
   private UserDao userDao;
+  @Autowired
+  private AdminActionHistoryDao adminActionHistoryDao;
   @Mock
   private FireCloudService fireCloudService;
   @Mock
@@ -134,7 +137,7 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,

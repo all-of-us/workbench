@@ -496,7 +496,7 @@ public class ProfileController implements ProfileApiDelegate {
       action = "manual ID verification reject";
     }
 
-    adminActionHistory.logAdminAction(action, initializeUserIfNeeded().getUserId(), userId);
+    userService.logAdminAction(action, userId);
     return getIdVerificationsForReview();
   }
 }

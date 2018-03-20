@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -73,7 +74,7 @@ public class CohortsControllerTest {
 
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortService.class})
+  @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
   @MockBean({FireCloudService.class, NotebooksService.class})
   static class Configuration {
     @Bean
@@ -101,7 +102,7 @@ public class CohortsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
-  NotebooksService notebooksService;
+  UserService userService;
   @Mock
   CloudStorageService cloudStorageService;
 
@@ -134,7 +135,7 @@ public class CohortsControllerTest {
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        "https://api.blah.com",notebooksService);
+        "https://api.blah.com", userService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     workspace = workspacesController.createWorkspace(workspace).getBody();

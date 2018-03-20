@@ -23,8 +23,8 @@ import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -56,7 +56,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +66,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
-  private static final AdminActionHistory adminActionHistory = new AdminActionHistory();
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
@@ -268,7 +266,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final String apiHostName;
-  private final NotebooksService notebooksService;
+  private final UserService userService;
 
   @Autowired
   WorkspacesController(
@@ -280,7 +278,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       @Qualifier("apiHostName") String apiHostName,
-      NotebooksService notebooksService) {
+      UserService userService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
@@ -289,7 +287,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.apiHostName = apiHostName;
-    this.notebooksService = notebooksService;
+    this.userService = userService;
   }
 
   @VisibleForTesting
@@ -753,10 +751,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String ns, String id, ResearchPurposeReviewRequest review) {
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
 
-    adminActionHistory.logAdminAction(
-        "research purpose approved set to " + review.getApproved().toString(),
-        this.workspaceService.get(ns, id).getWorkspaceId(),
-        this.userProvider.get().getUserId());
+    userService.logAdminAction(
+      "research purpose approved set to " + review.getApproved().toString(),
+      this.workspaceService.get(ns, id).getWorkspaceId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 

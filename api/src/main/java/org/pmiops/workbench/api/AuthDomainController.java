@@ -4,7 +4,7 @@ import java.time.Clock;
 import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.AdminActionHistory;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -25,17 +25,19 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final UserService userService;
   private final UserDao userDao;
   private final Provider<User> userProvider;
-  private static final AdminActionHistory adminActionHistory = new AdminActionHistory();
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
+      UserService userService,
       Clock clock,
       UserDao userDao,
       Provider<User> userProvider) {
     this.fireCloudService = fireCloudService;
+    this.userService = userService;
     this.clock = clock;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -70,9 +72,8 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     user.setDisabled(true);
     userDao.save(user);
 
-    adminActionHistory.logAdminAction(
+    userService.logAdminAction(
       "user removed from auth domain and disabled",
-      userProvider.get().getUserId(),
       user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -91,9 +92,8 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     user.setDisabled(false);
     userDao.save(user);
 
-    adminActionHistory.logAdminAction(
+    userService.logAdminAction(
         "user added to auth domain and enabled",
-        userProvider.get().getUserId(),
         user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

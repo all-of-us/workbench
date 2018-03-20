@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -31,6 +32,7 @@ public class UserService {
 
   private final Provider<User> userProvider;
   private final UserDao userDao;
+  private final AdminActionHistoryDao adminActionHistoryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
@@ -38,11 +40,13 @@ public class UserService {
   @Autowired
   public UserService(Provider<User> userProvider,
       UserDao userDao,
+      AdminActionHistoryDao adminActionHistoryDao,
       Clock clock,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
+    this.adminActionHistoryDao = adminActionHistoryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
@@ -197,5 +201,14 @@ public class UserService {
         return user;
       }
     }, user);
+  }
+
+  public void logAdminAction(String action, long targetId) {
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setAction(action);
+    adminActionHistory.setTargetId(targetId);
+    adminActionHistory.setUserId(userProvider.get().getUserId());
+    adminActionHistory.setTimestamp();
+    adminActionHistoryDao.save(adminActionHistory);
   }
 }
