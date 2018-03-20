@@ -28,12 +28,12 @@ public class ParticipantCounter {
     private DomainLookupService domainLookupService;
 
     private static final String COUNT_SQL_TEMPLATE =
-            "select count(distinct person_id) as count\n" +
+            "select count(*) as count\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
     private static final String ID_SQL_TEMPLATE =
-            "select distinct person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+            "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
@@ -57,7 +57,7 @@ public class ParticipantCounter {
 
     private static final String OFFSET_SUFFIX = " offset ";
 
-    private static final String UNION_TEMPLATE = "union distinct\n";
+    private static final String UNION_TEMPLATE = "union all\n";
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
 

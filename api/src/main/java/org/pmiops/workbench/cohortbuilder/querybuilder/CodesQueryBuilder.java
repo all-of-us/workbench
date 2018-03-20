@@ -38,7 +38,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     private static final String INNER_SQL_TEMPLATE =
-            "select distinct person_id\n" +
+            "select person_id\n" +
                     "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n"+
                     "where a.${tableId} = b.concept_id\n";
 
@@ -50,7 +50,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
     private static final String GROUP_CODE_LIKE_TEMPLATE = "and b.concept_code like ${conceptCodes}\n";
 
-    private static final String UNION_TEMPLATE = " union distinct\n";
+    private static final String UNION_TEMPLATE = " union all\n";
 
     private static final String OUTER_SQL_TEMPLATE =
             "select person_id\n"+
