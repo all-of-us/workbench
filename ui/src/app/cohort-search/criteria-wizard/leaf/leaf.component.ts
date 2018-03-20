@@ -8,7 +8,7 @@ import {
   isParameterActive,
 } from '../../redux';
 
-/**
+/*
  * Stub function - some criteria types will have "attributes" that help define
  * them.  Demographics AGE was in this category until we removed demographics
  * to its own modal form.  This function and the overall attribute flow has
@@ -71,6 +71,16 @@ export class LeafComponent implements OnInit, OnDestroy {
     return this.node.get('code', '');
   }
 
+  /*
+   * On selection, we examine the selected criterion and see if it needs some
+   * attributes. If it does, we set the criterion in "focus".  The explorer
+   * listens for their being a node in focus; if there is, it sets its own mode
+   * to `SetAttr` (setting attributes) and passes the node down to
+   * `crit-attributes`, the entry point defined by the attributes module.
+   *
+   * If the node does NOT need an attribute we give it a deterministic ID and
+   * add it to the selected params in the state.
+   */
   select() {
     if (needsAttributes(this.node)) {
       this.actions.setWizardFocus(this.node);
