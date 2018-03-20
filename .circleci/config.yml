@@ -189,6 +189,10 @@ jobs:
             - ~/workbench/ui/node_modules
           key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
       - run:
+          name: Lint Angular app
+          working_directory: ~/workbench/ui
+          command: yarn run lint
+      - run:
           name: Run Angular tests
           working_directory: ~/workbench/ui
           command: |
