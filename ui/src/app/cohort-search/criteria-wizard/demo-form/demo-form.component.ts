@@ -26,8 +26,9 @@ function sortByCountThenName(critA, critB) {
   styleUrls: ['./demo-form.component.css'],
 })
 export class DemoFormComponent implements OnInit {
-  readonly MAX_AGE = 120;
-  readonly MIN_AGE = 0;
+
+  readonly minAge = 0;
+  readonly maxAge = 120;
 
   demoForm = new FormGroup({
     ageHigh: new FormControl(),
@@ -42,6 +43,8 @@ export class DemoFormComponent implements OnInit {
   genders: Criteria[] = [];
   races: Criteria[] = [];
 
+  loading = false;
+
   constructor(
     private route: ActivatedRoute,
     private api: CohortBuilderService,
@@ -49,6 +52,7 @@ export class DemoFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.loading = true;
     this.demoForm.valueChanges.subscribe(console.log);
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
@@ -66,6 +70,7 @@ export class DemoFormComponent implements OnInit {
       this.genders = gen;
       this.races = race;
       this.age = age[0];
+      this.loading = false;
     });
   }
 

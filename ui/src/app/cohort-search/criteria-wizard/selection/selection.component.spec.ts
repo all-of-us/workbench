@@ -18,7 +18,7 @@ import {SelectionComponent} from './selection.component';
 import {CohortBuilderService} from 'generated';
 
 const TYPE_ICD9 = 'icd9';
-const TYPE_DEMO = 'demo';
+const TYPE_ICD10 = 'icd10';
 
 const SELECTION_ICD9 = fromJS([
   {
@@ -94,9 +94,9 @@ describe('SelectionComponent', () => {
     fixture.detectChanges();
     expect(title.nativeElement.textContent).toBe('Selected ICD9 Codes');
 
-    typeStub.next(TYPE_DEMO);
+    typeStub.next(TYPE_ICD10);
     fixture.detectChanges();
-    expect(title.nativeElement.textContent).toBe('Selected Demographics Codes');
+    expect(title.nativeElement.textContent).toBe('Selected ICD10 Codes');
   });
 
   it('should dispatch REMOVE_PARAMETER on removal click', () => {

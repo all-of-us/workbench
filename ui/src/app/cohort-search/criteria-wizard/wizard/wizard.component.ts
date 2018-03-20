@@ -50,8 +50,10 @@ export class WizardComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.disableFinish) {
-      // Not sure how we got here, since the controls should be disabled, but
-      // do the safe thing and cancel instead
+      /*
+       * If there are no selected criteria, then we cancel to revert to the
+       * pre-wizard state, not finish.
+       */
       return this.onCancel();
     }
     this.actions.finishWizard();
