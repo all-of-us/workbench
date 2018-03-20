@@ -1,15 +1,11 @@
 package org.pmiops.workbench.db.model;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.Clock;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @Table(name = "admin_action_history")
@@ -19,7 +15,6 @@ public class AdminActionHistory {
   private long targetId;
   private String action;
   private Timestamp timestamp;
-  private static AdminActionHistoryDao adminActionHistoryDao;
 
   @Id
   @Column(name = "history_id")

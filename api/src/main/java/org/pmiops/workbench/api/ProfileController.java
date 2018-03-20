@@ -31,7 +31,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -86,7 +85,6 @@ public class ProfileController implements ProfileApiDelegate {
       };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
-  private static final AdminActionHistory adminActionHistory = new AdminActionHistory();
 
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
 

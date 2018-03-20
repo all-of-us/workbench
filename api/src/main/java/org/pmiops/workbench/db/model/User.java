@@ -45,8 +45,6 @@ public class User {
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
-  private Timestamp disabledTime;
-  private Long disablingAdminId;
   private EmailVerificationStatus emailVerificationStatus;
 
   @Id
