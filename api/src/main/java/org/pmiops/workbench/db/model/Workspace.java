@@ -91,7 +91,6 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Timestamp timeReviewed;
 
   private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
 

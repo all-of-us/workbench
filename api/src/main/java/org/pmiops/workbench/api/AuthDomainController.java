@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import java.time.Clock;
-import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -24,24 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthDomainController implements AuthDomainApiDelegate {
 
-  private final Clock clock;
   private final FireCloudService fireCloudService;
   private final UserService userService;
   private final UserDao userDao;
-  private final Provider<User> userProvider;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
       UserService userService,
-      Clock clock,
-      UserDao userDao,
-      Provider<User> userProvider) {
+      UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.userService = userService;
-    this.clock = clock;
     this.userDao = userDao;
-    this.userProvider = userProvider;
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
