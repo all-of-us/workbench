@@ -7,7 +7,17 @@ import {
   CohortSearchState,
   isParameterActive,
 } from '../../redux';
-import {needsAttributes} from '../utils';
+
+/*
+ * Stub function - some criteria types will have "attributes" that help define
+ * them.  Demographics AGE was in this category until we removed demographics
+ * to its own modal form.  This function and the overall attribute flow has
+ * been left intact in order to provide a "hook-in" location for implementing
+ * other types of attribute.
+ */
+function needsAttributes(node) {
+  return false;
+}
 
 @Component({
   selector: 'crit-leaf',
@@ -50,20 +60,27 @@ export class LeafComponent implements OnInit, OnDestroy {
   }
 
   get displayName() {
-    const isDemo = this.node.get('type', '').match(/^DEMO.*/i);
     const isPM = this.node.get('type', '').match(/^PM.*/i);
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (nameIsCode || isDemo) || isPM
+    return (nameIsCode || isPM)
       ? ''
       : this.node.get('name', '');
 }
 
   get displayCode() {
-    return this.node.get('type', '').match(/^(DEMO|PM).*/i)
-      ? this.node.get('name', '')
-      : this.node.get('code', '');
+    return this.node.get('code', '');
   }
 
+  /*
+   * On selection, we examine the selected criterion and see if it needs some
+   * attributes. If it does, we set the criterion in "focus".  The explorer
+   * listens for their being a node in focus; if there is, it sets its own mode
+   * to `SetAttr` (setting attributes) and passes the node down to
+   * `crit-attributes`, the entry point defined by the attributes module.
+   *
+   * If the node does NOT need an attribute we give it a deterministic ID and
+   * add it to the selected params in the state.
+   */
   select() {
     if (needsAttributes(this.node)) {
       this.actions.setWizardFocus(this.node);

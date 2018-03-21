@@ -1,25 +1,36 @@
-<clr-wizard
-  [clrWizardOpen]="open"
-  (clrWizardOnCancel)="cancel()"
-  (clrWizardOnFinish)="finish()">
+<ng-container [ngSwitch]="criteriaType">
 
-  <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
-
-  <clr-wizard-page><!-- Criteria Selection Page -->
-    <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
-    <div id="criteria-page">
-      <div id="criteria-explorer">
-        <crit-explorer [criteriaType]="criteriaType"></crit-explorer>
-      </div>
-      <div id="criteria-selection">
-        <crit-selection></crit-selection>
-      </div>
+  <clr-modal *ngSwitchCase="'demo'"
+    [clrModalOpen]="open"
+    [clrModalStaticBackdrop]="true"
+    [clrModalSize]="'xl'">
+    <h3 class="modal-title">{{ critPageTitle }}</h3>
+    <div class="modal-body">
+      <crit-demo-form>
+      </crit-demo-form>
     </div>
-  </clr-wizard-page>
+  </clr-modal>
 
-  <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
-  <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
-  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-  <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
+  <clr-wizard *ngSwitchDefault
+    [clrWizardOpen]="open"
+    (clrWizardOnCancel)="onCancel()"
+    (clrWizardOnFinish)="onSubmit()">
+    <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
+    <clr-wizard-page><!-- Criteria Selection Page -->
+      <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
+      <div id="criteria-page">
+        <div id="criteria-explorer">
+          <crit-explorer [criteriaType]="criteriaType"></crit-explorer>
+        </div>
+        <div id="criteria-selection">
+          <crit-selection></crit-selection>
+        </div>
+      </div>
+    </clr-wizard-page>
+    <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
+    <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+    <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+    <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
+  </clr-wizard>
 
-</clr-wizard>
+</ng-container>
