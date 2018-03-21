@@ -484,17 +484,16 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     BlockscoreIdVerificationStatus status = review.getNewStatus();
-    String action;
+    String oldValue = userDao.findUserByUserId(userId).getBlockscoreVerificationIsValid().toString();
 
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
-      action = "manual ID verification approve";
+      userService.logAdminUserAction(userId, oldValue, "true");
     } else {
       userService.setIdVerificationApproved(userId, false);
-      action = "manual ID verification reject";
+      userService.logAdminUserAction(userId, oldValue, "false");
     }
 
-    userService.logAdminAction(action, userId);
     return getIdVerificationsForReview();
   }
 }

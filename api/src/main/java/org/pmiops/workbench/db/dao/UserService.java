@@ -201,10 +201,21 @@ public class UserService {
     }, user);
   }
 
-  public void logAdminAction(String action, long targetId) {
+  public void logAdminUserAction(long targetUserId, String oldValue, String newValue) {
     AdminActionHistory adminActionHistory = new AdminActionHistory();
-    adminActionHistory.setAction(action);
-    adminActionHistory.setTargetId(targetId);
+    adminActionHistory.setTargetUserId(targetUserId);
+    adminActionHistory.setOldValue(oldValue);
+    adminActionHistory.setNewValue(newValue);
+    adminActionHistory.setAdminUserId(userProvider.get().getUserId());
+    adminActionHistory.setTimestamp();
+    adminActionHistoryDao.save(adminActionHistory);
+  }
+
+  public void logAdminWorkspaceAction(long targetWorkspaceId, String oldValue, String newValue) {
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
+    adminActionHistory.setOldValue(oldValue);
+    adminActionHistory.setNewValue(newValue);
     adminActionHistory.setAdminUserId(userProvider.get().getUserId());
     adminActionHistory.setTimestamp();
     adminActionHistoryDao.save(adminActionHistory);

@@ -12,10 +12,16 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
       <column name="admin_user_id" type="bigint">
         <constraints nullable="false"/>
       </column>
-      <column name="target_id" type="bigint">
+      <column name="target_user_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="target_workspace_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="old_value_as_string" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
-      <column name="action" type="varchar(255)">
+      <column name="new_value_as_string" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
       <column name="timestamp" type="datetime">
@@ -24,10 +30,22 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
     </createTable>
     <addForeignKeyConstraint baseColumnNames="admin_user_id"
                              baseTableName="admin_action_history"
-                             constraintName="fk_history_user_id"
+                             constraintName="fk_history_admin_id"
                              onDelete="NO ACTION"
                              referencedColumnNames="user_id"
                              referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="target_user_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_target_user_id"
+                             onDelete="NO ACTION"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="target_workspace_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_target_workspace_id"
+                             onDelete="NO ACTION"
+                             referencedColumnNames="workspace_id"
+                             referencedTableName="workspace"/>
     <dropForeignKeyConstraint baseTableName="user"
                               constraintName="disabling_admin"/>
     <dropColumn tableName="user" columnName="disabled_time"/>

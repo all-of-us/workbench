@@ -12,8 +12,10 @@ import javax.persistence.Table;
 public class AdminActionHistory {
   private long historyId;
   private long adminUserId;
-  private long targetId;
-  private String action;
+  private long targetUserId;
+  private long targetWorkspaceId;
+  private String oldValue;
+  private String newValue;
   private Timestamp timestamp;
 
   @Id
@@ -35,22 +37,40 @@ public class AdminActionHistory {
     this.adminUserId = adminUserId;
   }
 
-  @Column(name = "target_id")
-  public long getTargetId() {
-    return targetId;
+  @Column(name = "target_user_id")
+  public long getTargetUserId() {
+    return targetUserId;
   }
 
-  public void setTargetId(long targetId) {
-    this.targetId = targetId;
+  public void setTargetUserId(long targetUserId) {
+    this.targetUserId = targetUserId;
   }
 
-  @Column(name = "action")
-  public String getAction() {
-    return action;
+  @Column(name = "target_workspace_id")
+  public long getTargetWorkspaceId() {
+    return targetWorkspaceId;
   }
 
-  public void setAction(String action) {
-    this.action = action;
+  public void setTargetWorkspaceId(long targetWorkspaceId) {
+    this.targetWorkspaceId = targetWorkspaceId;
+  }
+
+  @Column(name = "old_value_as_string")
+  public String getOldValue() {
+    return oldValue;
+  }
+
+  public void setOldValue(String oldValue) {
+    this.oldValue = oldValue;
+  }
+
+  @Column(name = "new_value_as_string")
+  public String newOldValue() {
+    return newValue;
+  }
+
+  public void setNewValue(String newValue) {
+    this.newValue = newValue;
   }
 
   @Column(name = "timestamp")

@@ -749,11 +749,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
+    org.pmiops.workbench.db.model.Workspace workspace = workspaceService.get(ns, id);
+    userService.logAdminWorkspaceAction(
+        workspace.getWorkspaceId(),
+        workspace.getApproved().toString(),
+        review.getApproved().toString());
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
-
-    userService.logAdminAction(
-      "research purpose approved set to " + review.getApproved().toString(),
-      this.workspaceService.get(ns, id).getWorkspaceId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
