@@ -28,7 +28,13 @@ export class WorkspacesServiceStub {
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
 
   constructor() {
-    const stubWorkspace: Workspace = {
+
+    this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
+    this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
+  }
+
+  static stubWorkspace(): Workspace {
+    return {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
       id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -62,9 +68,6 @@ export class WorkspacesServiceStub {
         },
       ]
     };
-
-    this.workspaces = [stubWorkspace];
-    this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
   }
 
   private clone(w: Workspace): Workspace {
