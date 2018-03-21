@@ -205,7 +205,7 @@ public class UserService {
     AdminActionHistory adminActionHistory = new AdminActionHistory();
     adminActionHistory.setAction(action);
     adminActionHistory.setTargetId(targetId);
-    adminActionHistory.setUserId(userProvider.get().getUserId());
+    adminActionHistory.setAdminUserId(userProvider.get().getUserId());
     adminActionHistory.setTimestamp();
     adminActionHistoryDao.save(adminActionHistory);
   }

@@ -9,7 +9,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
       <column name="history_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="user_id" type="bigint">
+      <column name="admin_user_id" type="bigint">
         <constraints nullable="false"/>
       </column>
       <column name="target_id" type="bigint">
@@ -22,7 +22,7 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
         <constraints nullable="false"/>
       </column>
     </createTable>
-    <addForeignKeyConstraint baseColumnNames="user_id"
+    <addForeignKeyConstraint baseColumnNames="admin_user_id"
                              baseTableName="admin_action_history"
                              constraintName="fk_history_user_id"
                              onDelete="NO ACTION"
