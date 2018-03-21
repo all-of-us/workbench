@@ -31,7 +31,7 @@ public class AdminActionHistory {
     return adminUserId;
   }
 
-  public void setAdminUserId(long userId) {
+  public void setAdminUserId(long adminUserId) {
     this.adminUserId = adminUserId;
   }
 
