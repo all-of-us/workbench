@@ -30,6 +30,8 @@ export class OverviewComponent {
   });
 
   stackChart = false;
+  showGenderChart = true;
+  showComboChart = true;
 
   constructor(
     private actions: CohortSearchActions,
@@ -56,5 +58,13 @@ export class OverviewComponent {
 
   toggleChartMode() {
     this.stackChart = !this.stackChart;
+  }
+
+  toggleShowGender() {
+    this.showGenderChart = !this.showGenderChart;
+  }
+
+  toggleShowCombo() {
+    this.showComboChart = !this.showComboChart;
   }
 }
