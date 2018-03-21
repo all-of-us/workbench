@@ -7,7 +7,7 @@ import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 /**
  * Flatten a layer of nesting
  */
-interface WorkspaceData extends Workspace {
+export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
 }
 

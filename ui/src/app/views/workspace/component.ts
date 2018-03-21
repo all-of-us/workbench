@@ -5,6 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
+import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 
 import {
@@ -81,7 +82,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  workspaceLoading = true;
   cohortsLoading = true;
   cohortsError = false;
   notebookError = false;
@@ -92,7 +92,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   clusterPulled = false;
   private clusterLocalDirectory: string;
   private launchedNotebookName: string;
-  notFound = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;
@@ -114,50 +113,37 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       private signInService: SignInService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
-  ) {}
+  ) {
+    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.workspace = wsData;
+    this.accessLevel = wsData.accessLevel;
+  }
 
   ngOnInit(): void {
-    this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-
-    this.workspacesService.getWorkspace(this.wsNamespace, this.wsId)
-        .subscribe(
-          workspaceResponse => {
-            this.workspace = workspaceResponse.workspace;
-            this.accessLevel = workspaceResponse.accessLevel;
-            this.workspaceLoading = false;
-            this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
-                .subscribe(
-                    cohortsReceived => {
-                      for (const coho of cohortsReceived.items) {
-                        this.cohortList.push(coho);
-                      }
-                      this.cohortsLoading = false;
-                    },
-                    error => {
-                      this.cohortsLoading = false;
-                      this.cohortsError = true;
-                    });
-
-            this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-                .subscribe(
-                  fileList => {
-                    this.notebookList = fileList;
-                  },
-                  error => {
-                    this.notebooksLoading = false;
-                    this.notebookError = false;
-                  });
-            this.initCluster();
-          },
-          error => {
-            if (error.status === 404) {
-              this.notFound = true;
-            } else {
-              this.workspaceLoading = false;
-            }
-          });
+    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
+      .subscribe(
+        cohortsReceived => {
+          for (const coho of cohortsReceived.items) {
+            this.cohortList.push(coho);
+          }
+          this.cohortsLoading = false;
+        },
+        error => {
+          this.cohortsLoading = false;
+          this.cohortsError = true;
+        });
+    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
+      .subscribe(
+        fileList => {
+          this.notebookList = fileList;
+        },
+        error => {
+          this.notebooksLoading = false;
+          this.notebookError = false;
+        });
+    this.initCluster();
   }
 
   ngOnDestroy(): void {
