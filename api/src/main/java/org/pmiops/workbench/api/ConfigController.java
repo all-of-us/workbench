@@ -23,6 +23,6 @@ public class ConfigController implements ConfigApiDelegate {
       new ConfigResponse()
         .gsuiteDomain(configProvider.get().googleDirectoryService.gSuiteDomain)
         .projectId(configProvider.get().server.projectId)
-        .stackdriverApiKey(configProvider.get().server.stackdriverApiKey));
+        .publicApiKeyForErrorReports(configProvider.get().server.publicApiKeyForErrorReports));
   }
 }
