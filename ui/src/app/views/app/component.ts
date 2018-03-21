@@ -95,7 +95,7 @@ export class AppComponent implements OnInit {
     this.user.subscribe(user => {
       this.isSignedIn = true;
       this.router.navigated = false;
-      // Uses window.location.pathname because 
+      // Uses window.location.pathname because
       // the URL for the router will always be /
       this.router.navigateByUrl(window.location.pathname);
     });
