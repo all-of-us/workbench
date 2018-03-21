@@ -29,6 +29,8 @@ export class OverviewComponent {
     description: new FormControl()
   });
 
+  stackChart = false;
+
   constructor(
     private actions: CohortSearchActions,
     private cohortApi: CohortsService,
@@ -50,5 +52,9 @@ export class OverviewComponent {
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
     const goBack = (_) => this.router.navigate(['workspace', ns, wsid]);
     this.cohortApi.createCohort(ns, wsid, cohort).subscribe(goBack);
+  }
+
+  toggleChartMode() {
+    this.stackChart = !this.stackChart;
   }
 }
