@@ -4,6 +4,7 @@
 import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
@@ -41,7 +42,9 @@ export class SignInService {
   public user: Observable<SignInDetails>;
   public currentAccessToken: string = null;
   public clientId = environment.clientId;
-  constructor(private zone: NgZone, serverConfigService: ServerConfigService) {
+  constructor(private zone: NgZone,
+      private router: Router,
+      serverConfigService: ServerConfigService) {
     this.zone = zone;
     this.user = this.makeUserSubject();
     this.subscribeToUser();
