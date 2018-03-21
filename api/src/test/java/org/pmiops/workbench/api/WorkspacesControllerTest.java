@@ -48,7 +48,6 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
