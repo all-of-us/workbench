@@ -10,11 +10,11 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.Properties;
 import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -250,7 +250,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // Free tier billing project setup is complete; nothing to do.
-    if (!BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
+    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
       return user;
     }
 
