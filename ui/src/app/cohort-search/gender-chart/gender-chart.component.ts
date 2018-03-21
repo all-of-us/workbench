@@ -61,6 +61,13 @@ export class GenderChartComponent {
       .map((value, name) => ({name, value}))
       .valueSeq()
       .toArray();
+
+    /*
+     * This is a kind of workaround - the way ngx-charts detects how large it
+     * should be (to be responsive) only appears to detect changes in the
+     * parent container on a window resize event
+     */
+    window.dispatchEvent(new Event('resize'));
   }
 
   get data() {
@@ -78,6 +85,6 @@ export class GenderChartComponent {
       return count;
     }, 0);
 
-    return Math.max(numberBars * 100, 100);
+    return Math.max(numberBars * 100, 200);
   }
 }

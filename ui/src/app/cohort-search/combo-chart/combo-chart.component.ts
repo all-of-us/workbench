@@ -19,15 +19,6 @@ export class ComboChartComponent {
     'F': 'Female',
   };
 
-  /*
-   * TODO - see the above note on this.codeMap
-   */
-  readonly defaults = {
-    Male: 0,
-    Female: 0,
-    Unknown: 0
-  };
-
   readonly axis = {
     x: {
       show: true,
@@ -69,6 +60,8 @@ export class ComboChartComponent {
       .valueSeq()
       .sort((a, b) => a.name > b.name ? 1 : -1)
       .toArray();
+
+    window.dispatchEvent(new Event('resize'));
   }
 
   get data() {
@@ -81,6 +74,6 @@ export class ComboChartComponent {
    * positive value or else just 100.
    */
   get minHeight() {
-    return Math.max(this.data.length * 30, 100);
+    return Math.max(this.data.length * 40, 200);
   }
 }

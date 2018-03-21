@@ -24,7 +24,9 @@
     <div class="card bg-faded">
       <div class="card-header">Results by Gender</div>
       <div class="card-block">
-        <app-gender-chart [data]="chartData"></app-gender-chart>
+        <app-gender-chart *ngIf="chartData.size"
+          [data]="chartData">
+        </app-gender-chart>
       </div>
     </div>
 
@@ -39,7 +41,7 @@
         </span>
       </div>
       <div class="card-block">
-        <app-combo-chart
+        <app-combo-chart *ngIf="chartData.size"
           [data]="chartData"
           [mode]="stackChart ? 'stacked' : 'normalized'">
         </app-combo-chart>
