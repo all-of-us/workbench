@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -65,7 +66,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     try {
       fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      this.fireCloudService.handleApiException(e);
+      ExceptionUtils.convertFirecloudException(e);
     }
     // TODO(calbach): Teardown any active clusters here.
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
@@ -73,7 +74,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     userDao.save(user);
 
     userService.logAdminAction(
-      "user removed from auth domain and disabled",
+      "user removed from " + groupName + " auth domain and disabled",
       user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -85,7 +86,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     try {
       fireCloudService.addUserToGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      this.fireCloudService.handleApiException(e);
+      ExceptionUtils.convertFirecloudException(e);
     }
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
@@ -93,8 +94,8 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     userDao.save(user);
 
     userService.logAdminAction(
-        "user added to auth domain and enabled",
-        user.getUserId());
+      "user added from " + groupName + " auth domain and disabled",
+      user.getUserId());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

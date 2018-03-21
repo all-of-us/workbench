@@ -74,6 +74,4 @@ public interface FireCloudService {
   void addUserToGroup(String email, String groupName) throws ApiException;
 
   void removeUserFromGroup(String email, String groupName) throws ApiException;
-
-  void handleApiException(org.pmiops.workbench.firecloud.ApiException e);
 }

@@ -9,6 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -91,7 +92,7 @@ public class UserService {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
         } catch (ApiException e) {
-          this.fireCloudService.handleApiException(e);
+          ExceptionUtils.convertFirecloudException(e);
         }
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -185,7 +186,7 @@ public class FireCloudServiceImpl implements FireCloudService {
               fromName,
               e.getResponseBody()),
           e);
-      handleApiException(e);
+      ExceptionUtils.convertFirecloudException(e);
     }
   }
 
@@ -234,15 +235,5 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void removeUserFromGroup(String email, String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
     groupsApi.removeUserFromGroup(groupName, "member", email);
-  }
-
-  public void handleApiException(org.pmiops.workbench.firecloud.ApiException e) {
-    if (e.getCode() == 403) {
-      throw new ForbiddenException(e.getResponseBody());
-    } else if (e.getCode() == 404) {
-      throw new NotFoundException(e.getResponseBody());
-    } else {
-      throw new ServerErrorException(e.getResponseBody());
-    }
   }
 }

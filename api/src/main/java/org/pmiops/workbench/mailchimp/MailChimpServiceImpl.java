@@ -57,21 +57,17 @@ public class MailChimpServiceImpl implements MailChimpService {
   }
 
   // general function that handles MailChimp client creation and error handling
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings (value="unchecked")
   private MailchimpObject executeMailChimpRequest(MailchimpMethod method) {
     if (apiKey == null) {
       apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
     }
-    MailchimpClient client = new MailchimpClient(apiKey);
-    MailchimpObject result;
 
-    try {
-      result = client.execute(method);
+    try(MailchimpClient client = new MailchimpClient(apiKey)) {
+      return client.execute(method);
     } catch (IOException | MailchimpException e) {
       throw new RuntimeException(e);
     }
-
-    return result;
   }
 
   private String getListId() {
