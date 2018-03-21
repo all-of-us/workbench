@@ -17,12 +17,12 @@ export class ErrorReporterService extends ErrorHandler {
       return;
     }
     serverConfigService.getConfig().subscribe((config: ConfigResponse) => {
-      if (!config.stackdriverApiKey) {
+      if (!config.publicApiKeyForErrorReports) {
         return;
       }
       const r = new StackdriverErrorReporter();
       r.start({
-        key: config.stackdriverApiKey,
+        key: config.publicApiKeyForErrorReports,
         projectId: config.projectId,
       });
       this.stackdriverReporter = r;
