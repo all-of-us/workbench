@@ -1,3 +1,7 @@
+.workspace-header {
+  display: flex;
+}
+
 .area-block {
   margin-top: 0.2rem;
   margin-left: 4%;

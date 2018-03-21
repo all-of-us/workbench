@@ -5,6 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
+import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 
 import {
@@ -113,8 +114,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
   ) {
-    this.workspace = this.route.snapshot.data['workspace'];
-    this.accessLevel = this.route.snapshot.data['workspace'].accessLevel;
+    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.workspace = wsData;
+    this.accessLevel = wsData.accessLevel;
   }
 
   ngOnInit(): void {

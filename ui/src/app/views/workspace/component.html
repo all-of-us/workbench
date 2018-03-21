@@ -1,29 +1,31 @@
-<h2>{{workspace.name}}</h2>
-<div class="btn-group btn-primary-outline permissions-group">
-  <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
-      [disabled]="!writePermission" (click)="edit()"
-      class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-    <app-edit-icon [editHover]="editHover"></app-edit-icon>
-    <span class="tooltip-content">Edit Workspace</span>
-  </button>
-  <button (mouseover)="shareHover=true" (mouseleave)="shareHover=false"
-      (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-    <app-share-icon [shareHover]="shareHover"></app-share-icon>
-    <span class="tooltip-content">Share Workspace</span>
-  </button>
-  <button (mouseover)="cloneHover=true" (mouseleave)="cloneHover=false"
-          (click)="clone()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-    <!-- TODO(calbach): Check whether we have the real asset available. -->
-    <clr-icon shape="copy"></clr-icon>
-    <span class="tooltip-content">Clone Workspace</span>
-  </button>
-  <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
-      [disabled]="!ownerPermission"
-      class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
-      (click)="delete()" [clrLoading]="deleting">
-    <app-trash-icon [trashHover]="trashHover"></app-trash-icon>
-    <span class="tooltip-content">Delete Workspace</span>
-  </button>
+<div class="workspace-header">
+  <h2>{{workspace.name}}</h2>
+  <div class="btn-group btn-primary-outline permissions-group">
+    <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
+        [disabled]="!writePermission" (click)="edit()"
+        class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+      <app-edit-icon [editHover]="editHover"></app-edit-icon>
+      <span class="tooltip-content">Edit Workspace</span>
+    </button>
+    <button (mouseover)="shareHover=true" (mouseleave)="shareHover=false"
+        (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+      <app-share-icon [shareHover]="shareHover"></app-share-icon>
+      <span class="tooltip-content">Share Workspace</span>
+    </button>
+    <button (mouseover)="cloneHover=true" (mouseleave)="cloneHover=false"
+            (click)="clone()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
+      <!-- TODO(calbach): Check whether we have the real asset available. -->
+      <clr-icon shape="copy"></clr-icon>
+      <span class="tooltip-content">Clone Workspace</span>
+    </button>
+    <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
+        [disabled]="!ownerPermission"
+        class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
+        (click)="delete()" [clrLoading]="deleting">
+      <app-trash-icon [trashHover]="trashHover"></app-trash-icon>
+      <span class="tooltip-content">Delete Workspace</span>
+    </button>
+  </div>
 </div>
 <div class="description-text">
   {{workspace.description}}
