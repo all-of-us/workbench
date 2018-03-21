@@ -17,7 +17,6 @@ export class SignInGuard implements CanActivate {
   constructor(private signInService: SignInService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    return this.signInService.user.pluck('isSignedIn');
-
+    return this.signInService.$isSignedIn;
   }
 }
