@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortreview.util;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.SortOrder;
 
 import java.util.Objects;
@@ -10,7 +9,7 @@ public class PageRequest {
     private int page;
     private int size;
     private SortOrder sortOrder;
-    private ParticipantCohortStatusColumns sortColumn;
+    private String sortColumn;
 
     /**
      * Creates a new {@link PageRequest}. Pages are zero indexed.
@@ -18,7 +17,7 @@ public class PageRequest {
      * @param page zero-based page index.
      * @param size the size of the page to be returned.
      */
-    public PageRequest(int page, int size) {
+    public PageRequest(int page, int size, String sortColumn) {
         if (page < 0) {
             throw new IllegalArgumentException("Page index must not be less than zero!");
         }
@@ -30,7 +29,7 @@ public class PageRequest {
         this.page = page;
         this.size = size;
         this.sortOrder = SortOrder.ASC;
-        this.sortColumn = ParticipantCohortStatusColumns.PARTICIPANTID;
+        this.sortColumn = sortColumn;
     }
 
     /**
@@ -41,10 +40,9 @@ public class PageRequest {
      * @param sortOrder order of the sort.
      * @param sortColumn column to sort.
      */
-    public PageRequest(int page, int size, SortOrder sortOrder, ParticipantCohortStatusColumns sortColumn) {
-        this(page, size);
+    public PageRequest(int page, int size, SortOrder sortOrder, String sortColumn) {
+        this(page, size, sortColumn);
         this.sortOrder = sortOrder;
-        this.sortColumn = sortColumn;
     }
 
     public int getPageSize() {
@@ -57,7 +55,7 @@ public class PageRequest {
 
     public SortOrder getSortOrder() { return this.sortOrder; }
 
-    public ParticipantCohortStatusColumns getSortColumn() { return this.sortColumn; }
+    public String getSortColumn() { return this.sortColumn; }
 
     @Override
     public boolean equals(Object o) {

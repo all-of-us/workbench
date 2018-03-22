@@ -1,8 +1,11 @@
 package org.pmiops.workbench.testconfig;
 
+import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -12,15 +15,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Properties;
 
 @TestConfiguration
+@MockBean({FireCloudService.class, CohortService.class})
 @EnableJpaRepositories(basePackages = { "org.pmiops.workbench.cdr", "org.pmiops.workbench.db" })
 @EnableTransactionManagement
 public class TestJpaConfig {
 
+    private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+
     @Bean
-    @Profile("test-jpa")
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -56,5 +64,10 @@ public class TestJpaConfig {
         hibernateProperties.setProperty("hibernate.show_sql", "true");
 
         return hibernateProperties;
+    }
+
+    @Bean
+    Clock clock() {
+        return CLOCK;
     }
 }

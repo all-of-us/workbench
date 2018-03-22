@@ -104,7 +104,7 @@ public class ParticipantCohortStatusDaoTest {
      * @throws Exception
      */
     @Test
-    public void zzzsaveParticipantCohortStatuses() throws Exception {
+    public void findAllRsaveParticipantCohortStatuses() throws Exception {
         ParticipantCohortStatusKey key1 = new ParticipantCohortStatusKey().cohortReviewId(2).participantId(3);
         ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortReviewId(2).participantId(4);
         ParticipantCohortStatus pcs1 = new ParticipantCohortStatus()
@@ -135,7 +135,7 @@ public class ParticipantCohortStatusDaoTest {
     public void findAllNoMatchingConcept() throws Exception {
         jdbcTemplate.execute("delete from concept");
 
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -143,7 +143,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllNoSearchCriteria() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -159,7 +159,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllSearchCriteriaEqual() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<Filter> filters = new ArrayList<>();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("1")));
         filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).values(Arrays.asList(CohortStatus.INCLUDED.toString())));
@@ -179,7 +179,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllSearchCriteriaIn() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<Filter> filters = new ArrayList<>();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.IN).values(Arrays.asList("1", "2")));
         filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.IN).values(Arrays.asList(CohortStatus.INCLUDED.toString(),CohortStatus.EXCLUDED.toString())));
@@ -202,7 +202,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllPaging() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, 1, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, 1, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(1, results.size());
@@ -212,7 +212,7 @@ public class ParticipantCohortStatusDaoTest {
 
         assertEquals(expectedPCS, results.get(0));
 
-        pageRequest = new PageRequest(1, 1, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        pageRequest = new PageRequest(1, 1, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(1, results.size());
@@ -225,7 +225,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllParticipantIdSorting() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -238,7 +238,7 @@ public class ParticipantCohortStatusDaoTest {
         assertEquals(expectedPCS1, results.get(0));
         assertEquals(expectedPCS2, results.get(1));
 
-        pageRequest = new PageRequest(page, 2, SortOrder.DESC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        pageRequest = new PageRequest(page, 2, SortOrder.DESC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -254,7 +254,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllStatusSorting() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.ASC, ParticipantCohortStatusColumns.STATUS);
+        PageRequest pageRequest = new PageRequest(page, 2, SortOrder.ASC, ParticipantCohortStatusColumns.STATUS.toString());
         List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -267,7 +267,7 @@ public class ParticipantCohortStatusDaoTest {
         assertEquals(expectedPCS1, results.get(0));
         assertEquals(expectedPCS2, results.get(1));
 
-        pageRequest = new PageRequest(page, 2, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS);
+        pageRequest = new PageRequest(page, 2, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS.toString());
         results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
         assertEquals(2, results.size());
@@ -283,7 +283,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllBadFilterTypes() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<Filter> filters = new ArrayList<>();
 
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("z")));
@@ -300,7 +300,7 @@ public class ParticipantCohortStatusDaoTest {
 
     @Test
     public void findAllBadFilterValuesSize() throws Exception {
-        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID);
+        PageRequest pageRequest = new PageRequest(page, pageSize, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
         List<Filter> filters = new ArrayList<>();
 
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("1", "2")));

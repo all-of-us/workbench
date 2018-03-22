@@ -2,6 +2,9 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.cohortreview.util.ParticipantConditionDbInfo;
+import org.pmiops.workbench.model.ParticipantConditionsColumns;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -11,8 +14,6 @@ import java.util.Map;
 public class ConditionQueryBuilder {
 
     private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
-    private static final String NAMED_LIMIT_PARAM = "limit";
-    private static final String NAMED_OFFSET_PARAM = "offset";
 
     private static final String CONDITIONS_SQL_TEMPLATE =
             "select co.condition_start_datetime as item_date,\n" +
@@ -25,13 +26,21 @@ public class ConditionQueryBuilder {
                     "left join `${projectId}.${dataSetId}.concept` c1 on co.condition_concept_id = c1.concept_id\n" +
                     "left join `${projectId}.${dataSetId}.concept` c2 on co.condition_source_concept_id = c2.concept_id\n" +
                     "where co.person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-                    "order by item_date, condition_occurrence_id\n";
+                    "order by %s, condition_occurrence_id %s\n" +
+                    "limit %d offset %d\n";
 
-    public QueryJobConfiguration buildQuery(Long participantId, Integer page, Integer pageSize) {
+    public QueryJobConfiguration buildQuery(Long participantId, PageRequest pageRequest) {
+        ParticipantConditionsColumns sortColumn = ParticipantConditionsColumns.fromValue(pageRequest.getSortColumn());
+        String finalSql = String.format(CONDITIONS_SQL_TEMPLATE,
+                ParticipantConditionDbInfo.fromName(sortColumn).getDbName(),
+                pageRequest.getSortOrder().toString(),
+                pageRequest.getPageSize(),
+                pageRequest.getPageNumber() * pageRequest.getPageSize());
+
         Map<String, QueryParameterValue> params = new HashMap<>();
         params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
         return QueryJobConfiguration
-                .newBuilder(CONDITIONS_SQL_TEMPLATE + "limit " + pageSize + " offset " + (page * pageSize))
+                .newBuilder(finalSql)
                 .setNamedParameters(params)
                 .setUseLegacySql(false)
                 .build();
