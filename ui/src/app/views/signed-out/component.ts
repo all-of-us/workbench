@@ -53,7 +53,7 @@ export class SignedOutComponent implements OnInit {
     this.currentUrl = this.router.url;
     document.body.style.backgroundColor = '#e2e3e5';
 
-    this.signInService.$isSignedIn.subscribe((signedIn) => {
+    this.signInService.isSignedIn$.subscribe((signedIn) => {
       if (signedIn === true) {
         if (this.activatedRoute.snapshot.params.from === undefined) {
           this.router.navigateByUrl('/');

@@ -56,7 +56,7 @@ export class SignedInComponent implements OnInit {
 
   ngOnInit(): void {
     document.body.style.backgroundColor = '#f1f2f2';
-    this.signInService.$isSignedIn.subscribe(signedIn => {
+    this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileService.getMe().subscribe(profile => {
           this.hasReviewResearchPurpose =

@@ -10,7 +10,6 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
-import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
 import {Authority, ProfileService} from 'generated';
@@ -36,7 +35,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     /* Ours */
-    private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
     private activatedRoute: ActivatedRoute,
@@ -88,9 +86,6 @@ export class AppComponent implements OnInit {
 
     this.router.events.subscribe((event: RouterEvent) => {
       this.setTitleFromRoute(event);
-    });
-    this.signInService.$isSignedIn.subscribe((isSignedIn) => {
-      this.isSignedIn = isSignedIn;
     });
   }
 

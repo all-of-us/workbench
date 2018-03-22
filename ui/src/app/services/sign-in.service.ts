@@ -20,15 +20,13 @@ const SIGNED_IN_USER = 'signedInUser';
 export class SignInService {
   // Expose "current user details" as an Observable
   private isSignedIn = new BehaviorSubject<boolean>(false);
-  public $isSignedIn: Observable<boolean>;
+  public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
   constructor(private zone: NgZone,
       private router: Router,
       serverConfigService: ServerConfigService) {
     this.zone = zone;
-    this.$isSignedIn = this.isSignedIn.asObservable();
-    this.isSignedIn.next(false);
 
     serverConfigService.getConfig().subscribe((config) => {
       this.makeAuth2(config);
@@ -59,6 +57,8 @@ export class SignInService {
   }
 
   private subscribeToAuth2User(): void {
+    // The listen below only fires on changes, so we need an initial
+    // check to handle the case where the user is already signed in.
     if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
       this.zone.run(() => {
         this.isSignedIn.next(true);
