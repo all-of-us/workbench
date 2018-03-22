@@ -10,8 +10,11 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
-import {SignInDetails, SignInService} from 'app/services/sign-in.service';
+import {SignInGuard} from 'app/guards/sign-in-guard.service';
+import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
+
+import {AppComponent} from '../app/component';
 
 import {Authority, ProfileService} from 'generated';
 
@@ -26,7 +29,7 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedOutComponent implements OnInit {
+export class LoginComponent implements OnInit {
   currentUrl: string;
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
@@ -35,7 +38,9 @@ export class SignedOutComponent implements OnInit {
 
   constructor(
     /* Ours */
+    private appComponent: AppComponent,
     private signInService: SignInService,
+    private signInGuard: SignInGuard,
     private profileService: ProfileService,
     /* Angular's */
     private activatedRoute: ActivatedRoute,
@@ -47,6 +52,16 @@ export class SignedOutComponent implements OnInit {
   ngOnInit(): void {
     this.currentUrl = this.router.url;
     document.body.style.backgroundColor = '#e2e3e5';
+
+    this.signInService.isSignedIn$.subscribe((signedIn) => {
+      if (signedIn === true) {
+        if (this.activatedRoute.snapshot.params.from === undefined) {
+          this.router.navigateByUrl('/');
+        } else {
+          this.router.navigateByUrl(this.activatedRoute.snapshot.params.from);
+        }
+      }
+    });
   }
 
   signIn(e: Event): void {
