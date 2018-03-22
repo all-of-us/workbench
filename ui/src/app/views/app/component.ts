@@ -28,7 +28,6 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 })
 export class AppComponent implements OnInit {
   isSignedIn = false;
-  gapiInitialized = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
   private showCreateAccount = false;
@@ -90,10 +89,9 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe((event: RouterEvent) => {
       this.setTitleFromRoute(event);
     });
-    this.signInService.$gapiInitialized.subscribe(() => {
-      this.gapiInitialized = true;
+    this.signInService.$isSignedIn.subscribe((isSignedIn) => {
+      this.isSignedIn = isSignedIn;
     });
-
   }
 
   /**

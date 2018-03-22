@@ -4,11 +4,11 @@
 import 'rxjs/Rx';
 
 import {Injectable, NgZone} from '@angular/core';
-import {NavigationEnd, Router} from '@angular/router';
+import {ActivatedRouteSnapshot, NavigationEnd, Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
-import {Subject} from 'rxjs/Subject';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 
 declare const gapi: any;
@@ -19,22 +19,19 @@ const SIGNED_IN_USER = 'signedInUser';
 @Injectable()
 export class SignInService {
   // Expose "current user details" as an Observable
-  private isSignedIn = new Subject<boolean>();
+  private isSignedIn = new BehaviorSubject<boolean>(false);
   public $isSignedIn: Observable<boolean>;
   // Expose "current user details" as an Observable
-  private gapiInitialized = new Subject<boolean>();
-  public $gapiInitialized: Observable<boolean>;
   public clientId = environment.clientId;
   constructor(private zone: NgZone,
       private router: Router,
       serverConfigService: ServerConfigService) {
     this.zone = zone;
     this.$isSignedIn = this.isSignedIn.asObservable();
-    this.$gapiInitialized = this.gapiInitialized.asObservable();
+    this.isSignedIn.next(false);
+
     serverConfigService.getConfig().subscribe((config) => {
-      this.makeAuth2(config).then(() => {
-        this.subscribeToAuth2User();
-      });
+      this.makeAuth2(config);
     });
   }
 
@@ -53,19 +50,24 @@ export class SignInService {
             client_id: this.clientId,
             hosted_domain: config.gsuiteDomain,
             scope: 'https://www.googleapis.com/auth/plus.login openid profile'
+        }).then(() => {
+          this.subscribeToAuth2User();
         });
         resolve(gapi.auth2);
-        this.gapiInitialized.next(true);
       });
     });
   }
 
   private subscribeToAuth2User(): void {
-    if (gapi.auth2.getAuthInstance().currentUser.get().isSignedIn()) {
-      this.isSignedIn.next(true);
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      this.zone.run(() => {
+        this.isSignedIn.next(true);
+      });
     }
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
-      this.isSignedIn.next(isSignedIn);
+      this.zone.run(() => {
+        this.isSignedIn.next(isSignedIn);
+      });
     });
   }
 

@@ -13,6 +13,7 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {SignedOutComponent} from './views/signed-out/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
@@ -34,9 +35,14 @@ const routes: Routes = [
     component: SearchComponent,
     data: {title: 'Browse'}
   }, {
+    path: 'login',
+    component: SignedOutComponent,
+    data: {title: 'Sign In'}
+  }, {
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
+    canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {

@@ -10,6 +10,7 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
+import {SignInGuard} from 'app/guards/sign-in-guard.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
@@ -39,6 +40,7 @@ export class SignedOutComponent implements OnInit {
     /* Ours */
     private appComponent: AppComponent,
     private signInService: SignInService,
+    private signInGuard: SignInGuard,
     private profileService: ProfileService,
     /* Angular's */
     private activatedRoute: ActivatedRoute,
@@ -50,10 +52,15 @@ export class SignedOutComponent implements OnInit {
   ngOnInit(): void {
     this.currentUrl = this.router.url;
     document.body.style.backgroundColor = '#e2e3e5';
-    this.signInService.$isSignedIn.subscribe(signedInStatus => {
-      this.appComponent.isSignedIn = signedInStatus;
-      this.router.navigated = false;
-      this.router.navigateByUrl(this.router.url);
+
+    this.signInService.$isSignedIn.subscribe((signedIn) => {
+      if (signedIn === true) {
+        if (this.activatedRoute.snapshot.params.from === undefined) {
+          this.router.navigateByUrl('/');
+        } else {
+          this.router.navigateByUrl(this.activatedRoute.snapshot.params.from);
+        }
+      }
     });
   }
 

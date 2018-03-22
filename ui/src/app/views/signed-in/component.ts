@@ -3,7 +3,7 @@ import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/c
 import {
   ActivatedRoute,
   Event as RouterEvent,
-  Router
+  Router,
 } from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
@@ -65,10 +65,11 @@ export class SignedInComponent implements OnInit {
             profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
             // this.email = profile.username;
         });
+      } else {
+        this.router.navigate(['/login', {
+          from: this.router.routerState.snapshot.url
+        }]);
       }
-      this.appComponent.isSignedIn = signedIn;
-      this.router.navigated = false;
-      this.router.navigateByUrl(this.router.url);
     });
   }
 
