@@ -164,6 +164,12 @@ definitions:
         type: array
         items:
           type: string
+      orderBy:
+        description: >
+          An array of columns to sort the resulting data by. (Default varies by table.)
+        type: array
+        items:
+          type: string
 
   CohortStatus:
     type: string
