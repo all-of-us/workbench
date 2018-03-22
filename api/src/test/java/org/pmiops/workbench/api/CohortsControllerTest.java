@@ -74,16 +74,7 @@ public class CohortsControllerTest {
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String COHORT_NAME = "cohort";
 
-
-  @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
-  @MockBean({FireCloudService.class, NotebooksService.class})
-  static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-  }
+  private CohortsController cohortsController;
 
   Workspace workspace;
   CdrVersion cdrVersion;
@@ -110,7 +101,15 @@ public class CohortsControllerTest {
   @Mock
   CloudStorageService cloudStorageService;
 
-  private CohortsController cohortsController;
+  @TestConfiguration
+  @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
+  @MockBean({FireCloudService.class, NotebooksService.class})
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+  }
 
   @Before
   public void setUp() throws Exception {
