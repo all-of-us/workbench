@@ -77,7 +77,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    String previousAccess = user.getDataAccessLevel().toString();
+    DataAccessLevel previousAccess = user.getDataAccessLevel();
     try {
       fireCloudService.addUserToGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
