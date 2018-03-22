@@ -20,11 +20,42 @@
     </div>
   </div>
 
-  <div class="card bg-faded">
-    <div class="card-block">
-      <app-charts [data]="(chartData$ | async)"></app-charts>
+  <ng-container *ngIf="chartData$ | async as chartData">
+    <div class="card bg-faded">
+      <div class="card-header">
+        Results by Gender
+        <clr-icon shape="angle"
+          [dir]="showGenderChart ? 'up' : 'down'"
+          (click)="toggleShowGender()">
+        </clr-icon>
+      </div>
+      <div *ngIf="showGenderChart" class="card-block">
+        <app-gender-chart *ngIf="chartData.size"
+          [data]="chartData">
+        </app-gender-chart>
+      </div>
     </div>
-  </div>
+
+    <div class="card bg-faded">
+      <div class="card-header">
+        Results By Gender, Age Range, and Race
+        <clr-icon shape="sort-by"
+          [class.is-info]="stackChart"
+          (click)="toggleChartMode()">
+        </clr-icon>
+        <clr-icon shape="angle"
+          [dir]="showComboChart ? 'up' : 'down'"
+          (click)="toggleShowCombo()">
+        </clr-icon>
+      </div>
+      <div *ngIf="showComboChart" class="card-block">
+        <app-combo-chart *ngIf="chartData.size"
+          [data]="chartData"
+          [mode]="stackChart ? 'stacked' : 'normalized'">
+        </app-combo-chart>
+      </div>
+    </div>
+  </ng-container>
 </div>
 
 <clr-modal

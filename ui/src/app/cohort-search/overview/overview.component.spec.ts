@@ -1,17 +1,20 @@
 import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
-import {ChartsModule} from '../charts/charts.module';
 import {CohortSearchActions} from '../redux';
 import {OverviewComponent} from './overview.component';
 
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, CohortsService} from 'generated';
+
 
 class MockActions {}
+
 
 describe('OverviewComponent', () => {
   let fixture: ComponentFixture<OverviewComponent>;
@@ -32,13 +35,16 @@ describe('OverviewComponent', () => {
         ],
         imports: [
           ClarityModule,
-          ChartsModule,
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
+          {provide: CohortsService, useValue: {}},
           {provide: CohortBuilderService, useValue: {}},
+          {provide: Router, useValue: {}},
+          {provide: ActivatedRoute, useValue: {}},
           {provide: CohortSearchActions, useValue: new MockActions()},
         ],
+        schemas: [NO_ERRORS_SCHEMA],
       })
       .compileComponents();
   }));
@@ -56,9 +62,7 @@ describe('OverviewComponent', () => {
     fixture.detectChanges();
   });
 
-  xit('Should render', () => {
-    // TODO(jms) - need to figure out how to mock `google` for GoogleChartComponent
-    // Rewrite this & add other tests when the charts are rewritten
+  it('Should render', () => {
     expect(component).toBeTruthy();
   });
 });
