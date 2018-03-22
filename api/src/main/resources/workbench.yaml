@@ -1236,7 +1236,7 @@ definitions:
       projectId:
         type: string
         description: The cloud project in which this app is running.
-      stackdriverApiKey:
+      publicApiKeyForErrorReports:
         type: string
         description: |
           Stackdriver API key for error reporting, scoped to a particular

@@ -21,7 +21,7 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
-    "stackdriverApiKey": "",
+    "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test"
   }
 }
