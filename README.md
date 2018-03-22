@@ -380,3 +380,5 @@ create and delete BigQuery datasets), run:
 ```
 ./project.rb bigquerytest
 ```
+
+By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
