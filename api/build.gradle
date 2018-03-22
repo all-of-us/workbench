@@ -162,10 +162,10 @@ validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
-ideaModule.dependsOn generateFireCloudClient
-compileGeneratedJava.dependsOn generateFireCloudClient
-ideaModule.dependsOn generateNotebooksClient
-compileGeneratedJava.dependsOn generateNotebooksClient
+// ideaModule.dependsOn generateFireCloudClient
+// compileGeneratedJava.dependsOn generateFireCloudClient
+// ideaModule.dependsOn generateNotebooksClient
+// compileGeneratedJava.dependsOn generateNotebooksClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
@@ -350,34 +350,20 @@ class IncrementalHotSwapTask extends DefaultTask {
     @InputDirectory
     def File inputDir
 
-    @Input
-    def FileCollection classpath
-
-    @OutputDirectory
-    def File outputDir
-
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
       // Only handle incremental builds---don't hot-swap on initial compile.
       if (inputs.incremental) {
 
         inputs.outOfDate { change ->
-          println "Compiling ${change.file.path}..."
-          String cp = classpath.join(":")
-          def compileProc = new ProcessBuilder(
-            "/usr/lib/jvm/default-jvm/bin/javac", "-classpath", cp,
-            "-d", outputDir.path, "-g", change.file.path)
-            .inheritIO()
-            .start()
-          assert compileProc.waitFor() == 0
-          String relativePath = change.file.path.substring(1 + inputDir.path.length())
-          String fqClassName = relativePath[0..-(".java".length() + 1)].replaceAll("/", ".")
-          String outputPath = outputDir.path + "/" \
-            + relativePath[0..-(".java".length() + 1)] + ".class"
-          printf "Hot swapping $fqClassName from ${outputPath}..."
-          def swapProc = "echo redefine $fqClassName ${outputPath}".execute() \
+          println("inputDir: " + inputDir.path)
+          String prefix = inputDir.path + "/"
+          String relativePath = change.file.path.substring(prefix.length())
+          String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
+          printf "Hot swapping $fqClassName..."
+          def proc = "echo redefine $fqClassName $change.file.path".execute() \
             | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
-          assert swapProc.waitFor() == 0
+          proc.waitFor()
           println "done."
         }
 
@@ -391,7 +377,7 @@ class IncrementalHotSwapTask extends DefaultTask {
 }
 
 task incrementalHotSwap(type: IncrementalHotSwapTask) {
-    inputDir = sourceSets.main.java.srcDirs.toArray()[0]
-    classpath = sourceSets.main.compileClasspath
-    outputDir = sourceSets.main.java.outputDir
+    inputDir = sourceSets.main.java.outputDir
 }
+
+incrementalHotSwap.dependsOn compileJava
