@@ -13,6 +13,7 @@ import {
   ParticipantCohortStatusColumns,
   SortOrder
 } from 'generated';
+import {PageFilterType} from '../../../generated/model/pageFilterType';
 
 
 @Component({
@@ -115,7 +116,8 @@ export class DetailHeaderComponent implements OnChanges {
         page: page,
         pageSize: size,
         sortColumn: ParticipantCohortStatusColumns.ParticipantId,
-        sortOrder: SortOrder.Asc
+        sortOrder: SortOrder.Asc,
+        pageFilterType: PageFilterType.ParticipantCohortStatusesPageFilter
     };
     return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }

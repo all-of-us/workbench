@@ -14,8 +14,9 @@ import {
   ConceptIdName,
   Filter,
   Operator,
-  PaginationFilteringRequest as Request,
+  PageFilterType,
   ParticipantCohortStatusColumns as Columns,
+  ParticipantCohortStatusesPageFilter as Request,
   ParticipantDemographics,
   SortOrder,
   Workspace,
@@ -88,6 +89,7 @@ export class TablePage implements OnInit, OnDestroy {
       sortColumn: Columns.ParticipantId,
       sortOrder: SortOrder.Asc,
       filters: {items: []},
+      pageFilterType: PageFilterType.ParticipantCohortStatusesPageFilter,
     };
 
     if (state.sort) {

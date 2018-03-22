@@ -644,14 +644,16 @@ public class WorkspacesControllerTest {
 
     CohortReview gotCr1 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
-        cdrVersion.getCdrVersionId(), new PaginationFilteringRequest()).getBody();
+        cdrVersion.getCdrVersionId(),
+            new ParticipantCohortStatusesPageFilter().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)).getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
 
     CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
-        cdrVersion.getCdrVersionId(), new PaginationFilteringRequest()).getBody();
+        cdrVersion.getCdrVersionId(),
+            new ParticipantCohortStatusesPageFilter().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)).getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses())
         .isEqualTo(cr2.getParticipantCohortStatuses());

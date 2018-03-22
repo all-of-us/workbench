@@ -1097,7 +1097,7 @@ paths:
         200:
           description: A collection of ParticipantConditions.
           schema:
-            $ref: "#/definitions/ParticipantConditionListResponse"
+            $ref: "#/definitions/ParticipantConditionsListResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
@@ -2154,25 +2154,25 @@ definitions:
             $ref: "#/definitions/ParticipantCohortStatusColumns"
             description: Column upon which to sort (default is 'participantId')
 
-  ParticipantCoditionsPageFilter:
+  ParticipantConditionsPageFilter:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
           sortColumn:
-            $ref: "#/definitions/ParticipantCoditionsColumns"
+            $ref: "#/definitions/ParticipantConditionsColumns"
             description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
 
-  ParticipantCoditionsColumns:
+  ParticipantConditionsColumns:
     type: string
     enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
 
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatus, ParticipantCoditions]
+    enum: [ParticipantCohortStatusesPageFilter, ParticipantConditionsPageFilter]
 
   SortOrder:
     type: string
@@ -2452,7 +2452,7 @@ definitions:
         items:
           $ref: "#/definitions/ParticipantCohortAnnotation"
 
-  ParticipantConditionListResponse:
+  ParticipantConditionsListResponse:
     type: object
     required:
       - items

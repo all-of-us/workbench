@@ -5,12 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -18,14 +18,18 @@ import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.model.PaginationFilteringRequest;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCondition;
+import org.pmiops.workbench.model.ParticipantConditionsPageFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -40,7 +44,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({ConditionQueryBuilder.class, BigQueryService.class, TestJpaConfig.class})
+@Import({ConditionQueryBuilder.class, BigQueryService.class, WorkspaceServiceImpl.class,
+        TestJpaConfig.class})
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     private static final Long WORKSPACE_ID = 1L;
@@ -52,7 +57,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     private CohortReviewController controller;
 
-    private CdrVersion cdrVersion;
+    private Workspace workspace;
 
     @Autowired
     private BigQueryService bigQueryService;
@@ -70,6 +75,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     private WorkspaceDao workspaceDao;
 
     @Autowired
+    private CdrVersionDao cdrVersionDao;
+
+    @Autowired
     private ParticipantCohortStatusDao participantCohortStatusDao;
 
     @Autowired
@@ -81,8 +89,11 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     @Autowired
     private ConditionQueryBuilder conditionQueryBuilder;
 
-    @Mock
+    @Autowired
     private WorkspaceService workspaceService;
+
+    @Autowired
+    private FireCloudService mockFireCloudService;
 
     @Mock
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
@@ -102,11 +113,11 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
-        cdrVersion = new CdrVersion();
+        CdrVersion cdrVersion = new CdrVersion();
         cdrVersion.setCdrVersionId(CDR_VERSION_ID);
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
         cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-        CdrVersionContext.setCdrVersion(cdrVersion);
+        cdrVersionDao.save(cdrVersion);
 
         CohortReviewService cohortReviewService = new CohortReviewServiceImpl(cohortReviewDao,
                 cohortDao,
@@ -122,8 +133,11 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 conditionQueryBuilder,
                 genderRaceEthnicityConceptProvider);
 
-        Workspace workspace = new Workspace();
+        workspace = new Workspace();
         workspace.setWorkspaceId(WORKSPACE_ID);
+        workspace.setCdrVersion(cdrVersion);
+        workspace.setWorkspaceNamespace(NAMESPACE);
+        workspace.setFirecloudName(NAME);
         workspaceDao.save(workspace);
 
         cohort = new Cohort();
@@ -145,11 +159,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Test
     public void getParticipantConditions() throws Exception {
-        Workspace workspace = new Workspace();
-        workspace.setWorkspaceId(WORKSPACE_ID);
-        when(workspaceService.enforceWorkspaceAccessLevel(NAMESPACE, NAME, WorkspaceAccessLevel.READER))
-                .thenReturn(WorkspaceAccessLevel.fromValue(WorkspaceAccessLevel.READER.name()));
-        when(workspaceService.getRequired(NAMESPACE, NAME)).thenReturn(workspace);
+        WorkspaceResponse workspaceResponse = new WorkspaceResponse();
+        workspaceResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+        when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
 
         ParticipantCondition expected = new ParticipantCondition()
                 .itemDate("2008-07-22")
@@ -166,7 +178,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         cohort.getCohortId(),
                         CDR_VERSION_ID,
                         PARTICIPANT_ID,
-                        new PaginationFilteringRequest())
+                        new ParticipantConditionsPageFilter()
+                                .pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER))
                 .getBody()
                 .getItems();
         assertThat(conditions.size()).isEqualTo(1);
