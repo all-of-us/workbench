@@ -78,7 +78,7 @@ public class CdrDbConfig {
         // workbench database user or data browser user.
         String dbName = isWorkbenchDbUser ? cdrVersion.getCdrDbName() : cdrVersion.getPublicDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
-        String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName;
+        String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
 
         DataSource dataSource =
             DataSourceBuilder.create()
