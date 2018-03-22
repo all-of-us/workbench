@@ -7,6 +7,7 @@ import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -18,8 +19,10 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -27,6 +30,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -86,6 +90,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final WorkspaceService workspaceService;
   private final CohortDao cohortDao;
   private final CdrVersionDao cdrVersionDao;
+  private final CohortReviewDao cohortReviewDao;
   private final CohortMaterializationService cohortMaterializationService;
   private final Provider<User> userProvider;
   private final Clock clock;
@@ -95,12 +100,14 @@ public class CohortsController implements CohortsApiDelegate {
       WorkspaceService workspaceService,
       CohortDao cohortDao,
       CdrVersionDao cdrVersionDao,
+      CohortReviewDao cohortReviewDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortReviewDao = cohortReviewDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -223,6 +230,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
     CdrVersionContext.setCdrVersion(cdrVersion);
+
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
       if (cdrVersion == null) {
@@ -231,6 +239,8 @@ public class CohortsController implements CohortsApiDelegate {
       }
     }
     String cohortSpec;
+    CohortReview cohortReview = null;
+    List<CohortStatus> statusFilter = null;
     if (request.getCohortName() != null) {
       org.pmiops.workbench.db.model.Cohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
@@ -239,9 +249,15 @@ public class CohortsController implements CohortsApiDelegate {
             String.format("Couldn't find cohort with name %s in workspace %s/%s",
                 request.getCohortName(), workspaceNamespace, workspaceId));
       }
+      cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
+          cdrVersion.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
+      statusFilter = request.getStatusFilter();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
+      if (request.getStatusFilter() != null) {
+        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+      }
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
@@ -264,7 +280,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cdrVersion, searchRequest, request.getStatusFilter(), pageSize,
+        cohortReview, searchRequest, statusFilter, pageSize,
         request.getPageToken());
     return ResponseEntity.ok(response);
   }
