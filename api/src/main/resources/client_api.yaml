@@ -141,8 +141,8 @@ definitions:
   FieldSet:
     type: object
     description: >
-      A specification for fields to retrieve for a cohort. Exactly one of the properties below
-      should be specified.
+      A specification for fields to retrieve about participants in a cohort.
+      Exactly one of the properties below should be specified.
     properties:
       tableQuery:
         description: >
@@ -156,18 +156,23 @@ definitions:
     properties:
       tableName:
         description: >
-          The name of the table to retrieve data from.
+          The name of a table containing a person_id column to retrieve data from (e.g. person, observation);
+          should be in the OMOP CDM 5.2 schema.
+        externalDocs:
+          description: OMOP CDM 5.2 schema definition
+          url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql                          
         type: string
       columns:
         description: >
-          An array of columns to retrieve from the table. Defaults to all columns.
+          An array of columns to retrieve from the table, taken from the table specified above.
+          Defaults to all columns.
         type: array
         items:
           type: string
       orderBy:
         description: >
-          An array of columns to sort the resulting data by, each one optionally followed by "DESC"
-          for descending sort order. (Default varies by table.)
+          An array of columns to sort the resulting data by, taken from the table specified above,
+          each one optionally followed by " DESC" for descending sort order. (Default varies by table.)
         type: array
         items:
           type: string
