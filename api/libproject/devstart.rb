@@ -1321,9 +1321,16 @@ Common.register_command({
 def start_api_and_incremental_build(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
-  # common.run_inline %W{gradle appengineRun}
-  common.run_inline %W{gradle appengineStart}
-  common.run_inline %W{gradle --continuous incrementalHotSwap}
+  begin
+    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+    # the application has finished starting.
+    common.run_inline %W{gradle --daemon appengineStart}
+    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
+    # in the output.
+    common.run_inline %W{gradle --no-daemon --continuous incrementalHotSwap}
+  ensure
+    common.run_inline %W{gradle --stop}
+  end
 end
 
 # TODO(dmohs): This is really isn't meant to be run directly, so it'd be better to hide it from the
