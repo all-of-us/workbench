@@ -9,6 +9,7 @@ import {
 } from '../../redux';
 import {typeToTitle} from '../../utils';
 
+
 @Component({
   selector: 'app-criteria-wizard',
   templateUrl: './wizard.component.html',
