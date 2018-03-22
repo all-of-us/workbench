@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortreview.util;
+package org.pmiops.workbench.cdm;
 
 import org.pmiops.workbench.model.ParticipantConditionsColumns;
 

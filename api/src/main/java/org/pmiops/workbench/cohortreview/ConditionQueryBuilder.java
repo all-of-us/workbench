@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortreview;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cohortreview.util.ParticipantConditionDbInfo;
+import org.pmiops.workbench.cdm.ParticipantConditionDbInfo;
 import org.pmiops.workbench.model.ParticipantConditionsColumns;
 import org.springframework.stereotype.Service;
 
