@@ -201,23 +201,21 @@ public class UserService {
     }, user);
   }
 
-  public void logAdminUserAction(long targetUserId, String targetAction, String oldValue, String newValue) {
-    AdminActionHistory adminActionHistory = new AdminActionHistory();
-    adminActionHistory.setTargetUserId(targetUserId);
-    adminActionHistory.setTargetAction(targetAction);
-    adminActionHistory.setOldValue(oldValue);
-    adminActionHistory.setNewValue(newValue);
-    adminActionHistory.setAdminUserId(userProvider.get().getUserId());
-    adminActionHistory.setTimestamp();
-    adminActionHistoryDao.save(adminActionHistory);
+  public void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue) {
+    logAdminAction(targetUserId,null, targetAction, oldValue,  newValue);
   }
 
-  public void logAdminWorkspaceAction(long targetWorkspaceId, String targetAction, String oldValue, String newValue) {
+  public void logAdminWorkspaceAction(long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
+    logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);
+  }
+
+  private void logAdminAction(Long targetUserId, Long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
     AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setTargetUserId(targetUserId);
     adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
     adminActionHistory.setTargetAction(targetAction);
-    adminActionHistory.setOldValue(oldValue);
-    adminActionHistory.setNewValue(newValue);
+    adminActionHistory.setOldValue(oldValue == null ? "null" : oldValue.toString());
+    adminActionHistory.setNewValue(newValue == null ? "null" : newValue.toString());
     adminActionHistory.setAdminUserId(userProvider.get().getUserId());
     adminActionHistory.setTimestamp();
     adminActionHistoryDao.save(adminActionHistory);

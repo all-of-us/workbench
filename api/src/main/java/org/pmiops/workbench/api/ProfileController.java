@@ -498,7 +498,7 @@ public class ProfileController implements ProfileApiDelegate {
     userService.logAdminUserAction(
         userId,
         "manual ID verification",
-        (oldVerification != null) ? oldVerification.toString() : "null",
+        oldVerification,
         newValue
     );
     return getIdVerificationsForReview();

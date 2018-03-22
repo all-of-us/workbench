@@ -752,7 +752,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",
-        (workspace.getApproved() != null) ? workspace.getApproved().toString() : "null",
+        workspace.getApproved(),
         review.getApproved().toString());
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
