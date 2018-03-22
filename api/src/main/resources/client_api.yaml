@@ -113,7 +113,12 @@ definitions:
           Maximum number of results to return in a response. Defaults to 1000.
         type: integer
         format: int32
-      # TODO: add fieldSpec, output information
+      fieldSet:
+        description: >
+          Specification defining what data to return for participants in the cohort. Defaults to
+          just participant IDs.
+        $ref: "#/definitions/FieldSet"
+      # TODO: add output information
 
   MaterializeCohortResponse:
     type: object
@@ -132,6 +137,45 @@ definitions:
           Pagination token that can be used in a subsequent call to MaterializeCohortRequest to
           retrieve more results. If not set, there are no more results to retrieve.
         type: string
+
+  FieldSet:
+    type: object
+    description: >
+      A specification for fields to retrieve about participants in a cohort.
+      Exactly one of the properties below should be specified.
+    properties:
+      tableQuery:
+        description: >
+          A query specifying how to pull data out of a single table.
+        $ref: "#/definitions/TableQuery"
+
+  TableQuery:
+    type: object
+    description: >
+      A specification for pulling data from a single table.
+    properties:
+      tableName:
+        description: >
+          The name of a table containing a person_id column to retrieve data from (e.g. person, observation);
+          should be in the OMOP CDM 5.2 schema.
+        externalDocs:
+          description: OMOP CDM 5.2 schema definition
+          url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql                          
+        type: string
+      columns:
+        description: >
+          An array of columns to retrieve from the table, taken from the table specified above.
+          Defaults to all columns.
+        type: array
+        items:
+          type: string
+      orderBy:
+        description: >
+          An array of columns to sort the resulting data by, taken from the table specified above,
+          each one optionally followed by " DESC" for descending sort order. (Default varies by table.)
+        type: array
+        items:
+          type: string
 
   CohortStatus:
     type: string
