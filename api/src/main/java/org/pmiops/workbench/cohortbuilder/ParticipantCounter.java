@@ -61,12 +61,12 @@ public class ParticipantCounter {
 
     private static final String INCLUDE_SQL_TEMPLATE = "person.person_id in (${includeSql})\n";
 
-    private static final String PERSON_ID_WHITELIST_PARAM = "@person_id_whitelist";
-    private static final String PERSON_ID_BLACKLIST_PARAM = "@person_id_blacklist";
+    private static final String PERSON_ID_WHITELIST_PARAM = "person_id_whitelist";
+    private static final String PERSON_ID_BLACKLIST_PARAM = "person_id_blacklist";
 
-    private static final String PERSON_ID_WHITELIST_TEMPLATE = "person.person_id in unnest(" +
+    private static final String PERSON_ID_WHITELIST_TEMPLATE = "person.person_id in unnest(@" +
         PERSON_ID_WHITELIST_PARAM + ")\n";
-    private static final String PERSON_ID_BLACKLIST_TEMPLATE = "person.person_id not in unnest(" +
+    private static final String PERSON_ID_BLACKLIST_TEMPLATE = "person.person_id not in unnest(@" +
         PERSON_ID_BLACKLIST_PARAM + ")\n";
 
     private static final String EXCLUDE_SQL_TEMPLATE =

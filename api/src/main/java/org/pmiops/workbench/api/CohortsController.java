@@ -6,7 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -29,6 +31,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -47,6 +50,9 @@ public class CohortsController implements CohortsApiDelegate {
   @VisibleForTesting
   static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
+
+  private static final List<CohortStatus> NOT_EXCLUDED =
+      Arrays.asList(CohortStatus.NOT_REVIEWED, CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -238,6 +244,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     String cohortSpec;
     CohortReview cohortReview = null;
+    List<CohortStatus> statusFilter = null;
     if (request.getCohortName() != null) {
       org.pmiops.workbench.db.model.Cohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
@@ -249,8 +256,12 @@ public class CohortsController implements CohortsApiDelegate {
       cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
           cdrVersion.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
+      statusFilter = request.getStatusFilter();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
+      if (request.getStatusFilter() != null) {
+        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+      }
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
@@ -273,7 +284,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cohortReview, searchRequest, request.getStatusFilter(), pageSize,
+        cohortReview, searchRequest, statusFilter, pageSize,
         request.getPageToken());
     return ResponseEntity.ok(response);
   }

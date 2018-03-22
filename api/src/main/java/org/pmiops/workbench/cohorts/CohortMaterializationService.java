@@ -6,9 +6,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +17,6 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
@@ -38,9 +34,7 @@ public class CohortMaterializationService {
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
 
-  private static final List<CohortStatus> NOT_EXCLUDED =
-      Arrays.asList(CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW,
-          CohortStatus.NOT_REVIEWED);
+  private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());
 
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
@@ -59,12 +53,13 @@ public class CohortMaterializationService {
     if (cohortReview == null) {
       return ImmutableSet.of();
     }
-    return participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndStatusIn(
+    Set<Long> participantIds = participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndStatusIn(
         cohortReview.getCohortReviewId(), statusFilter)
         .stream()
         .map(ParticipantIdAndCohortStatus::getParticipantKey)
         .map(Key::getParticipantId)
         .collect(Collectors.toSet());
+    return participantIds;
   }
 
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
@@ -84,7 +79,7 @@ public class CohortMaterializationService {
     }
     int limit = pageSize + 1;
     if (statusFilter == null) {
-      statusFilter = NOT_EXCLUDED;
+      statusFilter = ALL_STATUSES;
     }
 
     ParticipantCriteria criteria;
@@ -115,15 +110,15 @@ public class CohortMaterializationService {
     int numResults = 0;
     boolean hasMoreResults = false;
     for (List<FieldValue> row : result.iterateAll()) {
+      if (numResults == pageSize) {
+        hasMoreResults = true;
+        break;
+      }
       long personId = bigQueryService.getLong(row, rm.get(PERSON_ID));
       Map<String, Object> resultMap = new HashMap<>(1);
       resultMap.put(PERSON_ID, personId);
       response.addResultsItem(resultMap);
       numResults++;
-      if (numResults == pageSize) {
-        hasMoreResults = true;
-        break;
-      }
     }
     if (hasMoreResults) {
       // TODO: consider pagination based on cursor / values rather than offset

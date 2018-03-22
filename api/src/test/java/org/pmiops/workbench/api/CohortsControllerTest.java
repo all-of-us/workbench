@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -336,11 +337,30 @@ public class CohortsControllerTest {
   public void testMaterializeCohortNamedCohort() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
-
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     MaterializeCohortResponse response = new MaterializeCohortResponse();
     when(cohortMaterializationService.materializeCohort(null, searchRequest, null,
+        CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
+    assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        request).getBody()).isEqualTo(response);
+  }
+
+  @Test
+  public void testMaterializeCohortNamedCohortWithReview() throws Exception {
+    Cohort cohort = createDefaultCohort();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    CohortReview cohortReview = new CohortReview();
+    cohortReview.setCohortId(cohort.getId());
+    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
+    cohortReview.setReviewSize(2);
+    cohortReview.setReviewedCount(2);
+    cohortReviewDao.save(cohortReview);
+
+    MaterializeCohortRequest request = new MaterializeCohortRequest();
+    request.setCohortName(cohort.getName());
+    MaterializeCohortResponse response = new MaterializeCohortResponse();
+    when(cohortMaterializationService.materializeCohort(cohortReview, searchRequest, null,
         CohortsController.DEFAULT_PAGE_SIZE, null)).thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
