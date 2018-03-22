@@ -1,13 +1,5 @@
-<ng-template *ngIf="(user | async).isSignedIn; then signedIn else notSignedIn"></ng-template>
-
-<ng-template #notSignedIn>
-  <app-signed-out></app-signed-out>
-</ng-template>
-<ng-template #signedIn>
-  <router-outlet></router-outlet>
-</ng-template>
+<router-outlet></router-outlet>
 <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
   <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
 </div>
-
 <app-routing-spinner></app-routing-spinner>

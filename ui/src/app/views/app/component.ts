@@ -10,7 +10,6 @@ import {
 
 import {Observable} from 'rxjs/Observable';
 
-import {SignInDetails, SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
 import {Authority, ProfileService} from 'generated';
@@ -27,7 +26,6 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
-  user: Observable<SignInDetails>;
   isSignedIn = false;
   private baseTitle: string;
   private overriddenUrl: string = null;
@@ -37,7 +35,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     /* Ours */
-    private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
     private activatedRoute: ActivatedRoute,
@@ -89,15 +86,6 @@ export class AppComponent implements OnInit {
 
     this.router.events.subscribe((event: RouterEvent) => {
       this.setTitleFromRoute(event);
-    });
-
-    this.user = this.signInService.user;
-    this.user.subscribe(user => {
-      this.isSignedIn = true;
-      this.router.navigated = false;
-      // Uses window.location.pathname because
-      // the URL for the router will always be /
-      this.router.navigateByUrl(window.location.pathname);
     });
   }
 

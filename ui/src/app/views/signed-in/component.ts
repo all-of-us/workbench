@@ -3,12 +3,15 @@ import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/c
 import {
   ActivatedRoute,
   Event as RouterEvent,
+  Router,
 } from '@angular/router';
 
 import {Observable} from 'rxjs/Observable';
 
-import {SignInDetails, SignInService} from 'app/services/sign-in.service';
+import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
+
+import {AppComponent} from '../app/component';
 
 import {Authority, ProfileService} from 'generated';
 
@@ -24,7 +27,6 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit {
-  user: Observable<SignInDetails>;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
   headerImg = '/assets/images/all-of-us-logo.svg';
@@ -44,23 +46,30 @@ export class SignedInComponent implements OnInit {
   }
   constructor(
     /* Ours */
+    private appComponent: AppComponent,
     private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
     private locationService: Location,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     document.body.style.backgroundColor = '#f1f2f2';
-    this.user = this.signInService.user;
-    this.user.subscribe(user => {
-      this.profileService.getMe().subscribe(profile => {
-        this.hasReviewResearchPurpose =
-          profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-        this.hasReviewIdVerification =
-          profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-          // this.email = profile.username;
-      });
+    this.signInService.isSignedIn$.subscribe(signedIn => {
+      if (signedIn) {
+        this.profileService.getMe().subscribe(profile => {
+          this.hasReviewResearchPurpose =
+            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+          this.hasReviewIdVerification =
+            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+            // this.email = profile.username;
+        });
+      } else {
+        this.router.navigate(['/login', {
+          from: this.router.routerState.snapshot.url
+        }]);
+      }
     });
   }
 
