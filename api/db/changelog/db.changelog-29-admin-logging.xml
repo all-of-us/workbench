@@ -12,16 +12,16 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
       <column name="admin_user_id" type="bigint">
         <constraints nullable="false"/>
       </column>
-      <column name="target_user_id" type="bigint">
+      <column name="target_user_id" type="bigint" defaultValue="null">
         <constraints nullable="true"/>
       </column>
-      <column name="target_workspace_id" type="bigint">
+      <column name="target_workspace_id" type="bigint" defaultValue="null">
         <constraints nullable="true"/>
       </column>
-      <column name="old_value_as_string" type="varchar(255)">
+      <column name="old_value_as_string" type="varchar(255)" defaultValue="">
         <constraints nullable="false"/>
       </column>
-      <column name="new_value_as_string" type="varchar(255)">
+      <column name="new_value_as_string" type="varchar(255)" defaultValue="">
         <constraints nullable="false"/>
       </column>
       <column name="timestamp" type="datetime">

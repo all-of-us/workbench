@@ -55,7 +55,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    String previousAccess = user.getDataAccessLevel().toString();
+    DataAccessLevel previousAccess = user.getDataAccessLevel();
     try {
       fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
@@ -67,7 +67,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     userDao.save(user);
 
     userService.logAdminUserAction(
-        user.getUserId(), previousAccess, DataAccessLevel.REVOKED.toString());
+        user.getUserId(),
+        (previousAccess != null) ? previousAccess.toString() : "null",
+        DataAccessLevel.REVOKED.toString());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -87,7 +89,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     userDao.save(user);
 
     userService.logAdminUserAction(
-        user.getUserId(), previousAccess, DataAccessLevel.REGISTERED.toString());
+        user.getUserId(),
+        (previousAccess != null) ? previousAccess.toString() : "null",
+        DataAccessLevel.REGISTERED.toString());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
