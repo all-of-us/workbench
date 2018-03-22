@@ -1,6 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.List;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
+import org.pmiops.workbench.model.CohortStatus;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -30,4 +33,6 @@ public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCo
             @Param("cohortReviewId") long cohortReviewId,
             @Param("participantId") long participantId);
 
+  List<ParticipantIdAndCohortStatus> findByParticipantKey_CohortReviewIdAndStatusIn(
+      Long cohortReviewId, List<CohortStatus> cohortStatuses);
 }

@@ -8,6 +8,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
@@ -194,7 +195,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                participantCounter.buildParticipantIdQuery(searchRequest, request.getSize(), 0L)));
+                participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest),
+                    request.getSize(), 0L)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         List<ParticipantCohortStatus> participantCohortStatuses =
@@ -427,7 +429,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
         QueryResult result = bigQueryService.executeQuery(
-                bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(request)));
+                bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
+                    new ParticipantCriteria(request))));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
         List<FieldValue> row = result.iterateAll().iterator().next();
         long cohortCount = bigQueryService.getLong(row, rm.get("count"));
