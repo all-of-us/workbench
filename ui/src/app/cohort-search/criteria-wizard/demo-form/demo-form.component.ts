@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS} from 'immutable';
@@ -26,6 +26,7 @@ function sortByCountThenName(critA, critB) {
   styleUrls: ['./demo-form.component.css'],
 })
 export class DemoFormComponent implements OnInit {
+  @Input() open: boolean;
 
   readonly minAge = 0;
   readonly maxAge = 120;
@@ -135,6 +136,18 @@ export class DemoFormComponent implements OnInit {
 
     if (hasSelection) {
       this.actions.finishWizard();
+    }
+  }
+
+  /*
+   * ClrModal doesn't emit an event specific to cancellation like the wizard
+   * does, so here we'll intercept closures to make sure we're running
+   * this.onCancel when the user hits <ESC> or the X in the corner as well as
+   * the `Cancel` button
+   */
+  openChange(value: boolean) {
+    if (!value) {
+      this.onCancel();
     }
   }
 }
