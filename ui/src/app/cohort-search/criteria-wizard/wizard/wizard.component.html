@@ -1,15 +1,7 @@
 <ng-container [ngSwitch]="criteriaType">
 
-  <clr-modal *ngSwitchCase="'demo'"
-    [clrModalOpen]="open"
-    [clrModalStaticBackdrop]="true"
-    [clrModalSize]="'xl'">
-    <h3 class="modal-title">{{ critPageTitle }}</h3>
-    <div class="modal-body">
-      <crit-demo-form>
-      </crit-demo-form>
-    </div>
-  </clr-modal>
+  <crit-demo-form *ngSwitchCase="'demo'" [open]="open">
+  </crit-demo-form>
 
   <clr-wizard *ngSwitchDefault
     [clrWizardOpen]="open"
