@@ -1,23 +1,21 @@
 package org.pmiops.workbench.api;
 
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
-import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
+import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
@@ -25,42 +23,81 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCondition;
 import org.pmiops.workbench.model.ParticipantConditionsPageFilter;
+import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import javax.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({ConditionQueryBuilder.class, BigQueryService.class, WorkspaceServiceImpl.class,
-        TestJpaConfig.class})
+@Import({TestJpaConfig.class})
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
-    private static final Long WORKSPACE_ID = 1L;
     private static final String NAMESPACE = "aou-test";
     private static final String NAME = "test";
-    private static final Long CDR_VERSION_ID = 1L;
     private static final Long PARTICIPANT_ID = 102246L;
-    private static final Long COHORT_REVIEW_ID = 1L;
-
-    private CohortReviewController controller;
-
+    private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+    private ParticipantCondition expected1;
+    private ParticipantCondition expected2;
+    private CdrVersion cdrVersion;
     private Workspace workspace;
+    private CohortReview review;
+    private ParticipantCohortStatus participantCohortStatus;
+
+    @TestConfiguration
+    @Import({
+            WorkspaceServiceImpl.class,
+            CohortReviewServiceImpl.class,
+            CohortReviewController.class,
+            BigQueryService.class,
+            ConditionQueryBuilder.class,
+            CohortService.class,
+            ParticipantCounter.class,
+            DomainLookupService.class
+    })
+    @MockBean({
+            FireCloudService.class
+    })
+    static class Configuration {
+        @Bean
+        GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+            Map<String, Map<Long, String>> concepts = new HashMap<>();
+            concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+            concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+            concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+            return new GenderRaceEthnicityConcept(concepts);
+        }
+
+        @Bean
+        Clock clock() {
+            return CLOCK;
+        }
+    }
 
     @Autowired
-    private BigQueryService bigQueryService;
+    private CohortReviewController controller;
 
     @Autowired
     private TestWorkbenchConfig testWorkbenchConfig;
@@ -81,25 +118,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     private ParticipantCohortStatusDao participantCohortStatusDao;
 
     @Autowired
-    private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
-
-    @Autowired
-    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-
-    @Autowired
-    private ConditionQueryBuilder conditionQueryBuilder;
-
-    @Autowired
-    private WorkspaceService workspaceService;
-
-    @Autowired
     private FireCloudService mockFireCloudService;
-
-    @Mock
-    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
-
-    @Mock
-    private ParticipantCounter participantCounter;
 
     private Cohort cohort;
 
@@ -113,76 +132,136 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Before
     public void setUp() {
-        CdrVersion cdrVersion = new CdrVersion();
-        cdrVersion.setCdrVersionId(CDR_VERSION_ID);
-        cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-        cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-        cdrVersionDao.save(cdrVersion);
-
-        CohortReviewService cohortReviewService = new CohortReviewServiceImpl(cohortReviewDao,
-                cohortDao,
-                participantCohortStatusDao,
-                participantCohortAnnotationDao,
-                cohortAnnotationDefinitionDao,
-                workspaceService,
-                genderRaceEthnicityConceptProvider);
-
-        controller = new CohortReviewController(cohortReviewService,
-                bigQueryService,
-                participantCounter,
-                conditionQueryBuilder,
-                genderRaceEthnicityConceptProvider);
-
-        workspace = new Workspace();
-        workspace.setWorkspaceId(WORKSPACE_ID);
-        workspace.setCdrVersion(cdrVersion);
-        workspace.setWorkspaceNamespace(NAMESPACE);
-        workspace.setFirecloudName(NAME);
-        workspaceDao.save(workspace);
-
-        cohort = new Cohort();
-        cohort.setWorkspaceId(WORKSPACE_ID);
-        cohortDao.save(cohort);
-
-        CohortReview review = new CohortReview()
-                .cdrVersionId(CDR_VERSION_ID)
-                .cohortId(cohort.getCohortId());
-        cohortReviewDao.save(review);
-
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
-                .participantId(PARTICIPANT_ID)
-                .cohortReviewId(COHORT_REVIEW_ID);
-        ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus()
-                .participantKey(key);
-        participantCohortStatusDao.save(participantCohortStatus);
-    }
-
-    @Test
-    public void getParticipantConditions() throws Exception {
-        WorkspaceResponse workspaceResponse = new WorkspaceResponse();
-        workspaceResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-        when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
-
-        ParticipantCondition expected = new ParticipantCondition()
+        expected1 = new ParticipantCondition()
                 .itemDate("2008-07-22")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0020")
                 .sourceVocabulary("ICD9CM")
                 .sourceName("Typhoid and paratyphoid fevers");
+        expected2 = new ParticipantCondition()
+                .itemDate("2008-08-01")
+                .standardVocabulary("SNOMED")
+                .standardName("SNOMED")
+                .sourceValue("0021")
+                .sourceVocabulary("ICD9CM")
+                .sourceName("Typhoid and paratyphoid fevers");
 
+        cdrVersion = new CdrVersion();
+        cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+        cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+        cdrVersionDao.save(cdrVersion);
+
+        workspace = new Workspace();
+        workspace.setCdrVersion(cdrVersion);
+        workspace.setWorkspaceNamespace(NAMESPACE);
+        workspace.setFirecloudName(NAME);
+        workspaceDao.save(workspace);
+
+        cohort = new Cohort();
+        cohort.setWorkspaceId(workspace.getWorkspaceId());
+        cohortDao.save(cohort);
+
+        review = new CohortReview()
+                .cdrVersionId(cdrVersion.getCdrVersionId())
+                .cohortId(cohort.getCohortId());
+        cohortReviewDao.save(review);
+
+        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
+                .participantId(PARTICIPANT_ID)
+                .cohortReviewId(review.getCohortReviewId());
+        participantCohortStatus = new ParticipantCohortStatus()
+                .participantKey(key);
+        participantCohortStatusDao.save(participantCohortStatus);
+    }
+
+    @After
+    public void tearDown() {
+        workspaceDao.delete(workspace.getWorkspaceId());
+        cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+    }
+
+    @Test
+    public void getParticipantConditionsSorting() throws Exception {
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER);
+
+        //no sort order or column
         List<ParticipantCondition> conditions = controller
                 .getParticipantConditions(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
-                        CDR_VERSION_ID,
+                        cdrVersion.getCdrVersionId(),
                         PARTICIPANT_ID,
-                        new ParticipantConditionsPageFilter()
-                                .pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER))
+                        testFilter)
+                .getBody()
+                .getItems();
+        assertThat(conditions.size()).isEqualTo(2);
+        assertThat(conditions.get(0)).isEqualTo(expected1);
+        assertThat(conditions.get(1)).isEqualTo(expected2);
+
+        //added sort order
+        testFilter.sortOrder(SortOrder.DESC);
+        conditions = controller
+                .getParticipantConditions(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody()
+                .getItems();
+        assertThat(conditions.size()).isEqualTo(2);
+        assertThat(conditions.get(0)).isEqualTo(expected2);
+        assertThat(conditions.get(1)).isEqualTo(expected1);
+    }
+
+    @Test
+    public void getParticipantConditionsPagination() throws Exception {
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER);
+        testFilter.page(0);
+        testFilter.pageSize(1);
+
+        //page 1 should have 1 item
+        List<ParticipantCondition> conditions = controller
+                .getParticipantConditions(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
                 .getBody()
                 .getItems();
         assertThat(conditions.size()).isEqualTo(1);
-        assertThat(conditions.get(0)).isEqualTo(expected);
+        assertThat(conditions.get(0)).isEqualTo(expected1);
+
+        //page 2 should have 1 item
+        testFilter.page(1);
+        conditions = controller
+                .getParticipantConditions(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody()
+                .getItems();
+        assertThat(conditions.size()).isEqualTo(1);
+        assertThat(conditions.get(0)).isEqualTo(expected2);
+    }
+
+    private void stubMockFirecloudGetWorkspace() throws ApiException {
+        WorkspaceResponse workspaceResponse = new WorkspaceResponse();
+        workspaceResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+        when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
     }
 }

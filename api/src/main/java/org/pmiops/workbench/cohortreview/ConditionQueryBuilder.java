@@ -26,7 +26,7 @@ public class ConditionQueryBuilder {
                     "left join `${projectId}.${dataSetId}.concept` c1 on co.condition_concept_id = c1.concept_id\n" +
                     "left join `${projectId}.${dataSetId}.concept` c2 on co.condition_source_concept_id = c2.concept_id\n" +
                     "where co.person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-                    "order by %s, condition_occurrence_id %s\n" +
+                    "order by %s %s, condition_occurrence_id\n" +
                     "limit %d offset %d\n";
 
     public QueryJobConfiguration buildQuery(Long participantId, PageRequest pageRequest) {
