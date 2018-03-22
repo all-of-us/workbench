@@ -162,10 +162,10 @@ validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
-// ideaModule.dependsOn generateFireCloudClient
-// compileGeneratedJava.dependsOn generateFireCloudClient
-// ideaModule.dependsOn generateNotebooksClient
-// compileGeneratedJava.dependsOn generateNotebooksClient
+ideaModule.dependsOn generateFireCloudClient
+compileGeneratedJava.dependsOn generateFireCloudClient
+ideaModule.dependsOn generateNotebooksClient
+compileGeneratedJava.dependsOn generateNotebooksClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
