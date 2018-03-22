@@ -14,6 +14,7 @@ public class AdminActionHistory {
   private long adminUserId;
   private Long targetUserId;
   private Long targetWorkspaceId;
+  private String targetAction;
   private String oldValue;
   private String newValue;
   private Timestamp timestamp;
@@ -53,6 +54,15 @@ public class AdminActionHistory {
 
   public void setTargetWorkspaceId(Long targetWorkspaceId) {
     this.targetWorkspaceId = targetWorkspaceId;
+  }
+
+  @Column(name = "target_action")
+  public String getTargetAction() {
+    return targetAction;
+  }
+
+  public void setTargetAction(String targetAction) {
+    this.targetAction = targetAction;
   }
 
   @Column(name = "old_value_as_string")

@@ -751,6 +751,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace workspace = workspaceService.get(ns, id);
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
+        "research purpose approval",
         (workspace.getApproved() != null) ? workspace.getApproved().toString() : "null",
         review.getApproved().toString());
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());

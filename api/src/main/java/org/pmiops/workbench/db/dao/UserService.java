@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.lang.reflect.AccessibleObject;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -201,9 +202,10 @@ public class UserService {
     }, user);
   }
 
-  public void logAdminUserAction(long targetUserId, String oldValue, String newValue) {
+  public void logAdminUserAction(long targetUserId, String targetAction, String oldValue, String newValue) {
     AdminActionHistory adminActionHistory = new AdminActionHistory();
     adminActionHistory.setTargetUserId(targetUserId);
+    adminActionHistory.setTargetAction(targetAction);
     adminActionHistory.setOldValue(oldValue);
     adminActionHistory.setNewValue(newValue);
     adminActionHistory.setAdminUserId(userProvider.get().getUserId());
@@ -211,9 +213,10 @@ public class UserService {
     adminActionHistoryDao.save(adminActionHistory);
   }
 
-  public void logAdminWorkspaceAction(long targetWorkspaceId, String oldValue, String newValue) {
+  public void logAdminWorkspaceAction(long targetWorkspaceId, String targetAction, String oldValue, String newValue) {
     AdminActionHistory adminActionHistory = new AdminActionHistory();
     adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
+    adminActionHistory.setTargetAction(targetAction);
     adminActionHistory.setOldValue(oldValue);
     adminActionHistory.setNewValue(newValue);
     adminActionHistory.setAdminUserId(userProvider.get().getUserId());

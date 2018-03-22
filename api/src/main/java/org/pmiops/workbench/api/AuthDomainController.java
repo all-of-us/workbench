@@ -68,6 +68,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
     userService.logAdminUserAction(
         user.getUserId(),
+        "user access to  " + groupName + " domain",
         (previousAccess != null) ? previousAccess.toString() : "null",
         DataAccessLevel.REVOKED.toString());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -90,6 +91,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
     userService.logAdminUserAction(
         user.getUserId(),
+        "user access to  " + groupName + " domain",
         (previousAccess != null) ? previousAccess.toString() : "null",
         DataAccessLevel.REGISTERED.toString());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
