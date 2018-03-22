@@ -27,8 +27,7 @@ To initialize the project, run the following:
 ```shell
 git clone https://github.com/all-of-us/workbench
 cd workbench
-git submodule init
-git submodule update --recursive
+git submodule update --init --recursive
 ```
 
 Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
@@ -66,7 +65,7 @@ From the `api/` directory:
 ```
 
 When the console displays "Dev App Server is now running", you can hit your
-local API server under http://localhost:8081/api/. 
+local API server under http://localhost:8081/api/.
 
 **Note:** If you haven't loaded any data locally for the app, please run the goal below. Also, this will not run while dev-up is running, so please kill dev-up first.
 ```Shell
@@ -133,7 +132,7 @@ Other available operations may be discovered by running:
 
 ## Deploying
 
-To deploy your local workbench API code to a given AppEngine project, in the api 
+To deploy your local workbench API code to a given AppEngine project, in the api
 directory run:
 
 ```
@@ -156,7 +155,7 @@ To deploy your local public API code, in the api directory run:
 
 ```
 
-To deploy your local UI code to a given AppEngine project, in the ui 
+To deploy your local UI code to a given AppEngine project, in the ui
 directory run:
 
 ```
@@ -169,7 +168,7 @@ Example:
 ./project.rb deploy-ui --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
 ```
 
-When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API 
+When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API
 service (https://api-dot-PROJECT.appspot.com). (If there's a need, we may
 want to make this configurable in future.)
 
@@ -261,29 +260,29 @@ CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities a
 
 ## Generate cdr and public count databases for a CDR version
 
-This happens anytime a new cdr is released or if you want all the count data for databrowser and cohort builder generated locally. 
+This happens anytime a new cdr is released or if you want all the count data for databrowser and cohort builder generated locally.
 
 Description of arguments for these scripts are as follows. See examples below.
 * bq-project : Project where BigQuery cdr lives that you want to generate data from. This must exist
 * bq-dataset : BigQuery Dataset for the cdr release that you want to generate data from. This must exist
 * workbench-project:  Project where private count dataset (cdr) is generated. This must exist.
 * public-project: Project where public count dataset (public) is generated. This must exist.
-* cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets, csv folders, and databases. 
+* cdr-version: Version of form YYYYMMDD or empty string '' . It is used to name resulting datasets, csv folders, and databases.
 * bucket: A GCS Bucket where csv data dumps are of the generated data. This must exist.
 * db-name: Name of local mysql database
-* instance: Cloud Sql Instance 
+* instance: Cloud Sql Instance
 
 ###Examples:
-#### Generate count data in BigQuery from a cdr release 
+#### Generate count data in BigQuery from a cdr release
 `./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
-##### Result is 
+##### Result is
 1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
 2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv and public20180206/*.csv with public counts in multiples of bin-size
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 3. Note cdr-version can be ''  to make datasets named cdr and public
 #### Generate local mysql databases -- cdr and public for data generated above
 `./project.rb generate-local-count-dbs --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
-##### Result is 
+##### Result is
 1. Local mysql database cdr20180206 fully populated with count data from cdr version 20180206
 2. Local mysql database public20180206 fully populated with count data from cdr version 20180206
 3. Note cdr-version can be '' to make databases named cdr public
@@ -291,21 +290,21 @@ Description of arguments for these scripts are as follows. See examples below.
 #### Put mysqldump of local mysql database in bucket for importing into cloudsql. Call once for each db you want to dump
 `./project.rb mysqldump-local-db --db-name cdr20180206 --bucket all-of-us-workbench-private-cloudsql`
 `./project.rb mysqldump-local-db --db-name public20180206 --bucket all-of-us-workbench-public-cloudsql`
-##### Result is 
+##### Result is
 1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
 1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
 
 #### Import a dump to cloudsql instance.
 `./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
-##### Note a 3GB dump like cdr and public can take an hour or so to finish. You must wait before running another import on same instance (Cloudsql limitation) You can check status of import at the website: https://console.cloud.google.com/sql/instances/workbenchmaindb/operations?project=all-of-us-workbench-test 
-##### Or with this command: 
+##### Note a 3GB dump like cdr and public can take an hour or so to finish. You must wait before running another import on same instance (Cloudsql limitation) You can check status of import at the website: https://console.cloud.google.com/sql/instances/workbenchmaindb/operations?project=all-of-us-workbench-test
+##### Or with this command:
 `gcloud sql operations list --instance [INSTANCE_NAME] --limit 10`
 
 ##### Run again for the public db
 `./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file public20180206.sql --bucket all-of-us-workbench-public-cloudsql`
- 
+
 ##### Result
-1) databases are live in cloudsql 
+1) databases are live in cloudsql
 
 #### Import a dump to local mysql db.
 `./project.rb local-mysql-import --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
@@ -317,7 +316,7 @@ Description of arguments for these scripts are as follows. See examples below.
 ###
 ## Cohort Builder
 
-During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema. 
+During ```./project dev-up``` the schema activity is the only activity run, which only creates tables for the cdr schema.
 
 Loading of cloud data for the criteria trees and cdr version happens in a manual goal(deletes and inserts tree data into the criteria table):
 
