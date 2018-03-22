@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.model.SearchRequest;
 
 /**

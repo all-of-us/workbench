@@ -27,19 +27,16 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -68,9 +65,6 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Autowired
   private CdrVersionDao cdrVersionDao;
-
-  @Autowired
-  private UserDao userDao;
 
   @Autowired
   private WorkspaceDao workspaceDao;

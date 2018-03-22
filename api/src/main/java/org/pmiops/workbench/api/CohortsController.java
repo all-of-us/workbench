@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -50,9 +49,6 @@ public class CohortsController implements CohortsApiDelegate {
   @VisibleForTesting
   static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
-
-  private static final List<CohortStatus> NOT_EXCLUDED =
-      Arrays.asList(CohortStatus.NOT_REVIEWED, CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
   /**
    * Converter function from backend representation (used with Hibernate) to
