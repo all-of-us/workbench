@@ -63,38 +63,6 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     private ParticipantCondition expected2;
     private CdrVersion cdrVersion;
     private Workspace workspace;
-    private CohortReview review;
-    private ParticipantCohortStatus participantCohortStatus;
-
-    @TestConfiguration
-    @Import({
-            WorkspaceServiceImpl.class,
-            CohortReviewServiceImpl.class,
-            CohortReviewController.class,
-            BigQueryService.class,
-            ConditionQueryBuilder.class,
-            CohortService.class,
-            ParticipantCounter.class,
-            DomainLookupService.class
-    })
-    @MockBean({
-            FireCloudService.class
-    })
-    static class Configuration {
-        @Bean
-        GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
-            Map<String, Map<Long, String>> concepts = new HashMap<>();
-            concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
-            concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
-            concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
-            return new GenderRaceEthnicityConcept(concepts);
-        }
-
-        @Bean
-        Clock clock() {
-            return CLOCK;
-        }
-    }
 
     @Autowired
     private CohortReviewController controller;
@@ -121,6 +89,36 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     private FireCloudService mockFireCloudService;
 
     private Cohort cohort;
+
+    @TestConfiguration
+    @Import({
+            WorkspaceServiceImpl.class,
+            CohortReviewServiceImpl.class,
+            CohortReviewController.class,
+            BigQueryService.class,
+            ConditionQueryBuilder.class,
+            CohortService.class,
+            ParticipantCounter.class,
+            DomainLookupService.class
+    })
+    @MockBean({
+            FireCloudService.class
+    })
+    static class Configuration {
+        @Bean
+        public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+            Map<String, Map<Long, String>> concepts = new HashMap<>();
+            concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
+            concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
+            concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+            return new GenderRaceEthnicityConcept(concepts);
+        }
+
+        @Bean
+        public Clock clock() {
+            return CLOCK;
+        }
+    }
 
     @Override
     public List<String> getTableNames() {
@@ -162,7 +160,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         cohort.setWorkspaceId(workspace.getWorkspaceId());
         cohortDao.save(cohort);
 
-        review = new CohortReview()
+        CohortReview review = new CohortReview()
                 .cdrVersionId(cdrVersion.getCdrVersionId())
                 .cohortId(cohort.getCohortId());
         cohortReviewDao.save(review);
@@ -170,7 +168,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
                 .participantId(PARTICIPANT_ID)
                 .cohortReviewId(review.getCohortReviewId());
-        participantCohortStatus = new ParticipantCohortStatus()
+        ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus()
                 .participantKey(key);
         participantCohortStatusDao.save(participantCohortStatus);
     }
