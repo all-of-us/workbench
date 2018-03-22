@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 
 import {InvitationKeyComponent} from '../invitation-key/component';
-import {SignedOutComponent} from '../signed-out/component';
+import {LoginComponent} from '../login/component';
 
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
@@ -44,13 +44,13 @@ export class AccountCreationComponent {
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
-    private signedOutComponent: SignedOutComponent
+    private loginComponent: LoginComponent
   ) {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
-      this.signedOutComponent.smallerBackgroundImgSrc =
+      this.loginComponent.smallerBackgroundImgSrc =
           '/assets/images/create-account-male-standing.png';
-      this.signedOutComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
+      this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
     }, 0);
   }
 

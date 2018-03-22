@@ -1,0 +1,18 @@
+<div class="chart-container" [style.min-height.px]="minHeight">
+  <ngx-charts-bar-horizontal-normalized *ngIf="mode === 'normalized'"
+    [results]="data"
+    [xAxis]="axis.x.show"
+    [showXAxisLabel]="axis.x.showLabel"
+    [xAxisLabel]="axis.x.label"
+    [xAxisTickFormatting]="axis.x.percentFormatter"
+    [yAxis]="axis.y.show">
+  </ngx-charts-bar-horizontal-normalized>
+
+  <ngx-charts-bar-horizontal-stacked *ngIf="mode === 'stacked'"
+    [results]="data"
+    [xAxis]="axis.x.show"
+    [showXAxisLabel]="axis.x.showLabel"
+    [xAxisLabel]="axis.x.label"
+    [yAxis]="axis.y.show">
+  </ngx-charts-bar-horizontal-stacked>
+</div>
