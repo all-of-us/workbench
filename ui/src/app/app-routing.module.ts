@@ -10,10 +10,10 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {LoginComponent} from './views/login/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
-import {SignedOutComponent} from './views/signed-out/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
@@ -36,7 +36,7 @@ const routes: Routes = [
     data: {title: 'Browse'}
   }, {
     path: 'login',
-    component: SignedOutComponent,
+    component: LoginComponent,
     data: {title: 'Sign In'}
   }, {
     path: '',

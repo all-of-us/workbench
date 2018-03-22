@@ -29,7 +29,7 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
               '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
-export class SignedOutComponent implements OnInit {
+export class LoginComponent implements OnInit {
   currentUrl: string;
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
