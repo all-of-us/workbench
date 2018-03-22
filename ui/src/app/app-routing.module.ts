@@ -10,6 +10,7 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {LoginComponent} from './views/login/component';
 import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -34,9 +35,14 @@ const routes: Routes = [
     component: SearchComponent,
     data: {title: 'Browse'}
   }, {
+    path: 'login',
+    component: LoginComponent,
+    data: {title: 'Sign In'}
+  }, {
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
+    canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
