@@ -166,7 +166,8 @@ definitions:
           type: string
       orderBy:
         description: >
-          An array of columns to sort the resulting data by. (Default varies by table.)
+          An array of columns to sort the resulting data by, each one optionally followed by "DESC"
+          for descending sort order. (Default varies by table.)
         type: array
         items:
           type: string
