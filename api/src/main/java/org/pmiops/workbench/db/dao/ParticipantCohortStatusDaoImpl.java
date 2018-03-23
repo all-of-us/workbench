@@ -6,6 +6,7 @@ import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -114,7 +115,8 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
-        String sortColumn = ParticipantCohortStatusDbInfo.fromName(pageRequest.getSortColumn()).getDbName();
+        ParticipantCohortStatusColumns sortColumnEnum = ParticipantCohortStatusColumns.fromValue(pageRequest.getSortColumn());
+        String sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumnEnum).getDbName();
         String schemaPrefix = CdrVersionContext.getCdrVersion().getCdrDbName();
         schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
 

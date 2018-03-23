@@ -96,7 +96,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .page(pageRequest.getPageNumber())
                             .pageSize(pageRequest.getPageSize())
                             .sortOrder(pageRequest.getSortOrder().toString())
-                            .sortColumn(pageRequest.getSortColumn().toString());
+                            .sortColumn(pageRequest.getSortColumn());
                 }
             };
 

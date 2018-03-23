@@ -30,9 +30,10 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
+import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
+import org.pmiops.workbench.model.ParticipantCohortStatusesPageFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
@@ -501,16 +502,18 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findAll(key.getCohortReviewId(),
                 Collections.<Filter>emptyList(),
-                new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn))).thenReturn(participants);
+                new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()))).thenReturn(participants);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
 
-        ParticipantCohortStatusesRequest request = new ParticipantCohortStatusesRequest()
-                .page(page)
-                .pageSize(pageSize)
-                .sortColumn(sortColumn)
-                .sortOrder(sortOrder);
+        ParticipantCohortStatusesPageFilter request = new ParticipantCohortStatusesPageFilter();
+        request.page(page);
+        request.pageSize(pageSize);
+        request.sortOrder(sortOrder);
+        request.sortColumn(sortColumn);
+        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
                         namespace, name, cohortId, cdrVersionId, request);
@@ -523,7 +526,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findAll(key.getCohortReviewId(),
                         Collections.<Filter>emptyList(),
-                        new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn));
+                        new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
         verifyNoMoreMockInteractions();
     }

@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -31,6 +30,7 @@ public class UserService {
 
   private final Provider<User> userProvider;
   private final UserDao userDao;
+  private final AdminActionHistoryDao adminActionHistoryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
@@ -38,11 +38,13 @@ public class UserService {
   @Autowired
   public UserService(Provider<User> userProvider,
       UserDao userDao,
+      AdminActionHistoryDao adminActionHistoryDao,
       Clock clock,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
+    this.adminActionHistoryDao = adminActionHistoryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
@@ -90,13 +92,7 @@ public class UserService {
           this.fireCloudService.addUserToGroup(user.getEmail(),
               configProvider.get().firecloud.registeredDomainName);
         } catch (ApiException e) {
-          if (e.getCode() == 403) {
-            throw new ForbiddenException(e.getResponseBody());
-          } else if (e.getCode() == 404) {
-            throw new NotFoundException(e.getResponseBody());
-          } else {
-            throw new ServerErrorException(e.getResponseBody());
-          }
+          ExceptionUtils.convertFirecloudException(e);
         }
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
@@ -203,5 +199,25 @@ public class UserService {
         return user;
       }
     }, user);
+  }
+
+  public void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue) {
+    logAdminAction(targetUserId,null, targetAction, oldValue,  newValue);
+  }
+
+  public void logAdminWorkspaceAction(long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
+    logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);
+  }
+
+  private void logAdminAction(Long targetUserId, Long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
+    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    adminActionHistory.setTargetUserId(targetUserId);
+    adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
+    adminActionHistory.setTargetAction(targetAction);
+    adminActionHistory.setOldValue(oldValue == null ? "null" : oldValue.toString());
+    adminActionHistory.setNewValue(newValue == null ? "null" : newValue.toString());
+    adminActionHistory.setAdminUserId(userProvider.get().getUserId());
+    adminActionHistory.setTimestamp();
+    adminActionHistoryDao.save(adminActionHistory);
   }
 }

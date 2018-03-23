@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -123,7 +124,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
-    workspace.setTimeReviewed(now);
     saveWithLastModified(workspace, now);
   }
 

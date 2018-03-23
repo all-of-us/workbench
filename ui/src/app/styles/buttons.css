@@ -28,10 +28,9 @@ button.btn.btn-primary:disabled {
 }
 
 button.btn.btn-secondary {
-  background-color: #fff;
   border: 2px solid #262262;
   padding: 0rem 0.77rem;
-  border-radius: 0.3rem;
+  border-radius: 0.2rem;
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
@@ -50,4 +49,8 @@ button.btn.btn-secondary:disabled {
   background-color: #f1f2f2;
   color: #c3c3c3;
   cursor: auto;
+}
+
+button.btn.btn-lg {
+  height: 2.5rem;
 }

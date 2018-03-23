@@ -162,5 +162,16 @@
     "concept_code": "F",
     "valid_start_date": "1970-01-01",
     "valid_end_date": "2099-12-31"
+  },
+  {
+    "concept_id": "192819",
+    "concept_name": "SNOMED",
+    "domain_id": "SNOMED",
+    "vocabulary_id": "SNOMED",
+    "concept_class_id": "SNOMED",
+    "standard_concept": "S",
+    "concept_code": "F",
+    "valid_start_date": "1970-01-01",
+    "valid_end_date": "2099-12-31"
   }
 ]
