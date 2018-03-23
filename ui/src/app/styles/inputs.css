@@ -11,3 +11,11 @@ input[type=url]:not([readonly]) {
   border-radius: 5px;
   background-color: white;
 }
+
+label {
+  color: #262262;
+  font-family: "Gotham HTF";
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 14px;
+}

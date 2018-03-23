@@ -5,13 +5,16 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ErrorResponse, Profile, ProfileService} from 'generated';
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['../../styles/buttons.css',
+              '../../styles/inputs.css',
+              './component.css'],
   templateUrl: './component.html',
 })
 export class ProfileEditComponent implements OnInit {
   profile: Profile;
   profileLoaded = false;
   errorText: string;
+  editing = false;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
@@ -31,7 +34,7 @@ export class ProfileEditComponent implements OnInit {
   submitChanges(): void {
     this.profileService.updateProfile(this.profile).subscribe(
       () => {
-        this.router.navigate(['../'], {relativeTo : this.route});
+        this.editing = false;
       },
       error => {
         // if MailChimp throws an error, display to the user

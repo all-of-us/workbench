@@ -1,4 +1,8 @@
 <h2>Profile</h2>
+<button (mouseover)="editHover=true" (mouseleave)="editHover=false"
+    (click)="editing = true" class="btn btn-icon">
+  <app-edit-icon [editHover]="editHover"></app-edit-icon>
+</button>
 <span *ngIf="!profileLoaded;else publicInfo" class="spinner spinner-sm"></span>
 <div class="alert alert-danger" *ngIf="errorText">
   <div class="alert-items">
@@ -19,19 +23,19 @@
   <div class="field">
     <label for="givenName" class="long-text-field">Given Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
     <input *ngIf="profileLoaded else loading" type="text" autofocus
-      [(ngModel)]="profile.givenName" id="givenName">
+      [(ngModel)]="profile.givenName" id="givenName" [disabled]="!editing">
   </div>
   <div class="field">
     <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
     <input *ngIf="profileLoaded else loading" type="text"
-      [(ngModel)]="profile.familyName" id="familyName">
+      [(ngModel)]="profile.familyName" id="familyName" [disabled]="!editing">
   </div>
 </div>
 <div class="field-wrapper">
   <div class="field">
     <label for="contactEmail" class="long-text-field">Contact Email:</label>
     <input *ngIf="profileLoaded else loading" type="text"
-      [(ngModel)]="profile.contactEmail" id="contactEmail">
+      [(ngModel)]="profile.contactEmail" id="contactEmail" [disabled]="!editing">
   </div>
 </div>
 <h5>Username:</h5>
@@ -82,5 +86,5 @@
     </div>
   </ng-template>
   <button (click)="submitChanges()" class="btn">Update Profile</button>
-  <button routerLink="/profile" class="btn">Cancel</button>
+  <button (click)="editing=false" class="btn">Cancel</button>
 </div>

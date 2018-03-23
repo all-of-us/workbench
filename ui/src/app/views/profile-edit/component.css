@@ -23,3 +23,11 @@ div.field {
   display: inline-block;
   margin-right: 2rem;
 }
+input[type=text]:not([readonly]) {
+  padding: 0.75rem;
+  width: 14rem;
+}
+
+label {
+  padding-bottom: 0.5rem;
+}
