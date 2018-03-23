@@ -153,6 +153,8 @@ definitions:
     type: object
     description: >
       A specification for pulling data from a single table.
+    required:
+      - tableName
     properties:
       tableName:
         description: >
@@ -169,6 +171,17 @@ definitions:
         type: array
         items:
           type: string
+      filters:
+        description: >
+          An array of arrays of ColumnFilter objects to apply to results.
+          Each child array represents a series of criteria to logically AND together; these
+          expressions are then logically OR'd together at the top level.
+        type: array
+        items:
+          type: array
+          items:
+            $ref: "#/definitions/ColumnFilter"
+
       orderBy:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
@@ -177,7 +190,38 @@ definitions:
         items:
           type: string
 
+  ColumnFilter:
+    type: object
+    required:
+      - columnName
+    description: >
+      A filter applied to the results of a query, based on a column value in a table. Only results
+      matching the filter will be returned. If neither value nor valueNumber are set, the
+      column is compared to null.
+    properties:
+      columnName:
+        description: >
+          The name of the column to filter on.
+        type: string
+      operator:
+        description: >
+          The operator to use when comparing values. Defaults to EQUAL.
+        $ref: "#/definitions/Operator"
+      value:
+        description: >
+          A string or ISO-formatted date / datetime value to use in comparisons (case-sensitive).
+        type: string
+      valueNumber:
+        description: >
+          A number to use in comparisons (either integer or floating point.)
+        type: number
+
+
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
     enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
+
+  Operator:
+    type: string
+    enum: ['=', '<', '>', '<=', '>=', 'like', 'in']
