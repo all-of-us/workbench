@@ -7,3 +7,18 @@
   align-items: flex-start;
   width: auto;
 }
+
+.google-icon {
+  height: 54px;
+  width: 54px;
+  margin-right: 24px;
+}
+
+.btn.btn-lg.btn-primary {
+  font-family: Roboto;
+  font-size: 18px;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: none;
+  border-radius: 2px;
+}
