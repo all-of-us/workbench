@@ -1,4 +1,12 @@
-input {
+input[type=date]:not([readonly]),
+input[type=datetime-local]:not([readonly]),
+input[type=email]:not([readonly]),
+input[type=number]:not([readonly]),
+input[type=password]:not([readonly]),
+input[type=tel]:not([readonly]),
+input[type=text]:not([readonly]),
+input[type=time]:not([readonly]),
+input[type=url]:not([readonly]) {
   padding: 1rem;
   border-radius: 5px;
   background-color: white;
