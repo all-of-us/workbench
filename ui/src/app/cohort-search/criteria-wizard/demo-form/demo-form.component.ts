@@ -40,7 +40,7 @@ export class DemoFormComponent implements OnInit {
   });
 
   age: Criteria;
-  deceased: Criteria[] = [];
+  deceased: Criteria;
   genders: Criteria[] = [];
   races: Criteria[] = [];
 
@@ -67,9 +67,9 @@ export class DemoFormComponent implements OnInit {
     );
 
     forkJoin(...calls).subscribe(([dec, gen, race, age]) => {
-      this.deceased = dec;
       this.genders = gen;
       this.races = race;
+      this.deceased = dec[0];
       this.age = age[0];
       this.loading = false;
     });
@@ -82,15 +82,13 @@ export class DemoFormComponent implements OnInit {
   onSubmit() {
     let hasSelection = false;
 
-    if (this.demoForm.get('deceased').value === 'isDeceased') {
-      console.log('Filtering by deadness');
-      const node = this.deceased.find(_node => _node.code === 'Deceased');
-      if (node) {
-        const id = `param${node.id || node.code}`;
-        const param = fromJS(node).set('parameterId', id);
-        this.actions.addParameter(param);
-        hasSelection = true;
-      }
+    const deceased = this.demoForm.get('deceased');
+    if (deceased.value) {
+      console.log('Processing deceased status');
+      const param = fromJS(this.deceased)
+        .set('parameterId', `param${this.deceased.id}`);
+      this.actions.addParameter(param);
+      hasSelection = true;
     }
 
     const gender = this.demoForm.get('genders');
@@ -117,7 +115,6 @@ export class DemoFormComponent implements OnInit {
 
     const ageHigh = this.demoForm.get('ageHigh').value;
     const ageLow = this.demoForm.get('ageLow').value;
-
     if (ageHigh || ageLow) {
       const attr = fromJS(<Attribute>{
         operator: 'between',
