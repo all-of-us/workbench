@@ -26,11 +26,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.PageFilterType;
-import org.pmiops.workbench.model.ParticipantCondition;
-import org.pmiops.workbench.model.ParticipantConditionsPageFilter;
-import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -187,7 +183,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER);
 
         //no sort order or column
-        List<ParticipantCondition> conditions = controller
+        ParticipantConditionsListResponse response = controller
                 .getParticipantConditions(
                         NAMESPACE,
                         NAME,
@@ -195,15 +191,16 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         cdrVersion.getCdrVersionId(),
                         PARTICIPANT_ID,
                         testFilter)
-                .getBody()
-                .getItems();
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
         assertThat(conditions.get(0)).isEqualTo(expected1);
         assertThat(conditions.get(1)).isEqualTo(expected2);
 
         //added sort order
         testFilter.sortOrder(SortOrder.DESC);
-        conditions = controller
+        response = controller
                 .getParticipantConditions(
                         NAMESPACE,
                         NAME,
@@ -211,8 +208,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         cdrVersion.getCdrVersionId(),
                         PARTICIPANT_ID,
                         testFilter)
-                .getBody()
-                .getItems();
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
         assertThat(conditions.get(0)).isEqualTo(expected2);
         assertThat(conditions.get(1)).isEqualTo(expected1);
@@ -228,7 +226,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageSize(1);
 
         //page 1 should have 1 item
-        List<ParticipantCondition> conditions = controller
+        ParticipantConditionsListResponse response =  controller
                 .getParticipantConditions(
                         NAMESPACE,
                         NAME,
@@ -236,14 +234,15 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         cdrVersion.getCdrVersionId(),
                         PARTICIPANT_ID,
                         testFilter)
-                .getBody()
-                .getItems();
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
         assertThat(conditions.get(0)).isEqualTo(expected1);
 
         //page 2 should have 1 item
         testFilter.page(1);
-        conditions = controller
+        response = controller
                 .getParticipantConditions(
                         NAMESPACE,
                         NAME,
@@ -251,8 +250,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         cdrVersion.getCdrVersionId(),
                         PARTICIPANT_ID,
                         testFilter)
-                .getBody()
-                .getItems();
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
         assertThat(conditions.get(0)).isEqualTo(expected2);
     }

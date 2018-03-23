@@ -2458,11 +2458,16 @@ definitions:
     type: object
     required:
       - items
+      - count
     properties:
       items:
         type: "array"
         items:
          $ref: "#/definitions/ParticipantCondition"
+      count:
+        type: integer
+        format: int64
+        description: the cohort reivew id.
 
   ModifyParticipantCohortAnnotationRequest:
     type: object
