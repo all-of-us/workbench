@@ -15,6 +15,10 @@ import {TablePage} from './table-page/table-page';
 
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
+import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
+import {DetailHeaderComponent} from './detail-header/detail-header.component';
+import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
+
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -33,8 +37,6 @@ import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
-import { DetailHeaderComponent } from './detail-header/detail-header.component';
-import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
 /* tslint:enable:max-line-length */
 
 
@@ -73,6 +75,7 @@ import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
     SidebarContentComponent,
     DetailHeaderComponent,
     DetailTabsComponent,
+    DetailConditionsComponent,
   ],
   providers: [ReviewStateService]
 })

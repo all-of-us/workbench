@@ -1,0 +1,56 @@
+<clr-datagrid [clrDgLoading]="loading">
+  <clr-dg-placeholder>No Conditions Data</clr-dg-placeholder>
+  <clr-dg-column [clrDgField]="'itemDate'">
+    Date
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'standardVocabulary'">
+    Standard Vocabulary (SNOMED)
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'standardName'">
+    Standard Name
+  </clr-dg-column>
+
+  <clr-dg-column [clrDgField]="'sourceValue'">
+    Source Value
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'sourceVocabulary'">
+    Source Vocabulary (ICD9CM, ICD10CM, HCPCS, SNOMED)
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'sourceName'">
+    Source Name
+  </clr-dg-column>
+
+  <clr-dg-row *ngFor="let condition of conditions">
+    <clr-dg-cell>
+      {{ condition.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ condition.standardVocabulary }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ condition.standardName }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ condition.sourceVocabulary }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ condition.sourceValue }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ condition.sourceName }}
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <!--
+  <clr-dg-footer>
+    {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+    {{ totalCount }} Records
+    <clr-dg-pagination #pagination
+      [clrDgTotalItems]="totalCount"
+      [clrDgPageSize]="request.pageSize"
+      [clrDgPage]="request.page + 1">
+    </clr-dg-pagination>
+  </clr-dg-footer>
+  -->
+
+</clr-datagrid>
