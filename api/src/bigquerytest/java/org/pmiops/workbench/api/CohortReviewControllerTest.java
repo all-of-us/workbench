@@ -177,6 +177,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Test
     public void getParticipantConditionsSorting() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(25)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
         stubMockFirecloudGetWorkspace();
 
         ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
@@ -193,6 +199,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         testFilter)
                 .getBody();
         assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
         assertThat(conditions.get(0)).isEqualTo(expected1);
@@ -200,6 +207,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
         //added sort order
         testFilter.sortOrder(SortOrder.DESC);
+        expectedPageRequest.sortOrder(SortOrder.DESC);
         response = controller
                 .getParticipantConditions(
                         NAMESPACE,
@@ -210,6 +218,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         testFilter)
                 .getBody();
         assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
         assertThat(conditions.get(0)).isEqualTo(expected2);
@@ -218,6 +227,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     @Test
     public void getParticipantConditionsPagination() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(1)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
         stubMockFirecloudGetWorkspace();
 
         ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
@@ -236,12 +251,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         testFilter)
                 .getBody();
         assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
         assertThat(conditions.get(0)).isEqualTo(expected1);
 
         //page 2 should have 1 item
         testFilter.page(1);
+        expectedPageRequest.page(1);
         response = controller
                 .getParticipantConditions(
                         NAMESPACE,
@@ -252,6 +269,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         testFilter)
                 .getBody();
         assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
         assertThat(conditions.get(0)).isEqualTo(expected2);
