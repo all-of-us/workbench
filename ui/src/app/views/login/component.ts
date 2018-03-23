@@ -26,7 +26,8 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 @Component({
   selector: 'app-signed-out',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css'],
+              '../../styles/buttons.css',
+              '../../styles/headers.css'],
   templateUrl: './component.html'
 })
 export class LoginComponent implements OnInit {
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   headerImg = '/assets/images/all-of-us-logo.svg';
+  googleIcon = '/assets/icons/google-icon.png';
   private showCreateAccount = false;
 
   constructor(
