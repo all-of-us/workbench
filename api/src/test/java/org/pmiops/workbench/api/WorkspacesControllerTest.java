@@ -20,12 +20,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortService;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -38,8 +33,23 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.*;
-import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.ParticipantCohortStatusesPageFilter;
+import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +117,7 @@ public class WorkspacesControllerTest {
     BigQueryService.class,
     DomainLookupService.class,
     ParticipantCounter.class,
-    NotebooksService.class
+    UserService.class
   })
   static class Configuration {
     @Bean
@@ -390,7 +400,6 @@ public class WorkspacesControllerTest {
     researchPurpose = ws.getResearchPurpose();
 
     assertThat(researchPurpose.getApproved()).isTrue();
-    assertThat(researchPurpose.getTimeReviewed()).isEqualTo(NOW_TIME);
   }
 
   @Test

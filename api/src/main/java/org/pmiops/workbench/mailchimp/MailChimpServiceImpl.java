@@ -62,16 +62,12 @@ public class MailChimpServiceImpl implements MailChimpService {
     if (apiKey == null) {
       apiKey = cloudStorageServiceProvider.get().readMailChimpApiKey();
     }
-    MailchimpClient client = new MailchimpClient(apiKey);
-    MailchimpObject result;
 
-    try {
-      result = client.execute(method);
+    try(MailchimpClient client = new MailchimpClient(apiKey)) {
+      return client.execute(method);
     } catch (IOException | MailchimpException e) {
       throw new RuntimeException(e);
     }
-
-    return result;
   }
 
   private String getListId() {
