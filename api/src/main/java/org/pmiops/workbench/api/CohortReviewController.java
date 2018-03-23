@@ -10,6 +10,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
+import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +50,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
     private ParticipantCounter participantCounter;
+    private ConditionQueryBuilder conditionQueryBuilder;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     /**
@@ -93,7 +96,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                             .page(pageRequest.getPageNumber())
                             .pageSize(pageRequest.getPageSize())
                             .sortOrder(pageRequest.getSortOrder().toString())
-                            .sortColumn(pageRequest.getSortColumn().toString());
+                            .sortColumn(pageRequest.getSortColumn());
                 }
             };
 
@@ -141,10 +144,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            ParticipantCounter participantCounter,
+                           ConditionQueryBuilder conditionQueryBuilder,
                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.participantCounter = participantCounter;
+        this.conditionQueryBuilder = conditionQueryBuilder;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
@@ -209,14 +214,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
+        ParticipantCohortStatusesPageFilter filterRequest = new ParticipantCohortStatusesPageFilter();
+        filterRequest.setPage(PAGE);
+        filterRequest.setPageSize(PAGE_SIZE);
+        filterRequest.setSortOrder(SortOrder.ASC);
+        filterRequest.setPageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+        filterRequest.setSortColumn(ParticipantCohortStatusColumns.PARTICIPANTID);
+
         List<ParticipantCohortStatus> paginatedPCS =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(),
                         Collections.<Filter>emptyList(),
-                        createPageRequest(PAGE, PAGE_SIZE, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID));
+                        createPageRequest(filterRequest));
         lookupGenderRaceEthnicityValues(paginatedPCS);
 
         org.pmiops.workbench.model.CohortReview responseReview =
-                TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(PAGE, PAGE_SIZE, SortOrder.ASC, ParticipantCohortStatusColumns.PARTICIPANTID));
+                TO_CLIENT_COHORTREVIEW.apply(cohortReview, createPageRequest(filterRequest));
         responseReview.setParticipantCohortStatuses(paginatedPCS.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
@@ -343,7 +355,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                 String workspaceId,
                                                                                                 Long cohortId,
                                                                                                 Long cdrVersionId,
-                                                                                                ParticipantCohortStatusesRequest request) {
+                                                                                                PageFilterRequest request) {
         CohortReview cohortReview = null;
         Cohort cohort = cohortReviewService.findCohort(cohortId);
 
@@ -356,11 +368,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             cohortReview = initializeCohortReview(cdrVersionId, cohort);
         }
 
-        PageRequest pageRequest = createPageRequest(request.getPage(),
-                request.getPageSize(),
-                request.getSortOrder(),
-                request.getSortColumn());
-
+        PageRequest pageRequest = createPageRequest(request);
         List<Filter> filters = request.getFilters() == null ? Collections.<Filter>emptyList() : request.getFilters().getItems();
         List<ParticipantCohortStatus> participantCohortStatuses =
                 cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
@@ -370,6 +378,70 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
 
         return ResponseEntity.ok(responseReview);
+    }
+
+    @Override
+    public ResponseEntity<ParticipantConditionsListResponse> getParticipantConditions(String workspaceNamespace,
+                                                                                     String workspaceId,
+                                                                                     Long cohortId,
+                                                                                     Long cdrVersionId,
+                                                                                     Long participantId,
+                                                                                     PageFilterRequest request) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
+        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+
+
+        //this validates that the participant is in the requested review.
+        cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+
+        PageRequest pageRequest = createPageRequest(request);
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+                conditionQueryBuilder.buildQuery(participantId, pageRequest)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+        ParticipantConditionsListResponse response = new ParticipantConditionsListResponse();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (List<FieldValue> row : result.iterateAll()) {
+            ParticipantCondition condition = new ParticipantCondition()
+                    .itemDate(sdf.format(bigQueryService.getDate(row, rm.get("item_date"))))
+                    .standardVocabulary(bigQueryService.getString(row, rm.get("standard_vocabulary")))
+                    .standardName(bigQueryService.getString(row, rm.get("standard_name")))
+                    .sourceValue(bigQueryService.getString(row, rm.get("source_value")))
+                    .sourceVocabulary(bigQueryService.getString(row, rm.get("source_vocabulary")))
+                    .sourceName(bigQueryService.getString(row, rm.get("source_name")));
+            response.addItemsItem(condition);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Helper method to create a {@link PageRequest} based on the specified
+     * type {@link PageFilterRequest}.
+     *
+     * @param request
+     * @return
+     */
+    private PageRequest createPageRequest(PageFilterRequest request) {
+        String sortColumn = "";
+        if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER)) {
+            sortColumn =  Optional.ofNullable(((ParticipantConditionsPageFilter) request).getSortColumn())
+                    .orElse(ParticipantConditionsColumns.ITEMDATE).toString();
+        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)) {
+            sortColumn =  Optional.ofNullable(((ParticipantCohortStatusesPageFilter) request).getSortColumn())
+                    .orElse(ParticipantCohortStatusColumns.PARTICIPANTID).toString();
+        } else {
+            throw new BadRequestException("Invalid Request: Please provide a valid PageFilterType of " +
+                    request.getPageFilterType() + ".");
+        }
+        int pageParam = Optional.ofNullable(request.getPage()).orElse(PAGE);
+        int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(PAGE_SIZE);
+        SortOrder sortOrderParam = Optional.ofNullable(request.getSortOrder()).orElse(SortOrder.ASC);
+        return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumn);
     }
 
     @Override
@@ -485,23 +557,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     String.format("Not Found: No Cohort definition matching cohortId: %s", cohort.getCohortId()));
         }
         return definition;
-    }
-
-    /**
-     * Helper method that builds a {@link PageRequest} from the specified parameters.
-     *
-     * @param page
-     * @param pageSize
-     * @param sortOrder
-     * @param sortColumn
-     * @return
-     */
-    private PageRequest createPageRequest(Integer page, Integer pageSize, SortOrder sortOrder, ParticipantCohortStatusColumns sortColumn) {
-        int pageParam = Optional.ofNullable(page).orElse(PAGE);
-        int pageSizeParam = Optional.ofNullable(pageSize).orElse(PAGE_SIZE);
-        SortOrder sortOrderParam = Optional.ofNullable(sortOrder).orElse(SortOrder.ASC);
-        ParticipantCohortStatusColumns sortColumnParam = Optional.ofNullable(sortColumn).orElse(sortColumn.PARTICIPANTID);
-        return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumnParam);
     }
 
     /**
