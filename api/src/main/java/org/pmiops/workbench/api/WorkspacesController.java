@@ -753,7 +753,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspace.getWorkspaceId(),
         "research purpose approval",
         workspace.getApproved(),
-        review.getApproved().toString());
+        review.getApproved());
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
   }

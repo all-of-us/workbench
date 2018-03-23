@@ -70,7 +70,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
         user.getUserId(),
         "user access to  " + groupName + " domain",
         previousAccess,
-        DataAccessLevel.REVOKED.toString());
+        DataAccessLevel.REVOKED);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -93,7 +93,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
         user.getUserId(),
         "user access to  " + groupName + " domain",
         previousAccess,
-        DataAccessLevel.REGISTERED.toString());
+        DataAccessLevel.REGISTERED);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

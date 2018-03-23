@@ -40,6 +40,8 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.ParticipantCohortStatusesPageFilter;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
