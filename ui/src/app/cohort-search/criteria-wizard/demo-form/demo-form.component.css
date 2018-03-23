@@ -1,10 +1,6 @@
-#demo-form-container {
-  position: relative;
-}
-
 #demo-form-spinner {
   z-index: -99;
-  position: absolute;
+  position: relative;
 }
 
 #demo-form-spinner.show {
@@ -14,6 +10,7 @@
 }
 
 #demo-form-spinner .spinner {
+  position: absolute;
   top: 50%;
   left: 50%;
 }
@@ -21,4 +18,12 @@
 .blur {
 	color: transparent;
 	text-shadow: 0 0 3px #aaa;
+}
+
+/*
+ * This is set to hidden on .modal-body by the wizard for wizard reasons; we
+ * reset it here so that our form will scroll if need be on small screens
+ */
+#demographics-modal-body {
+  overflow: auto;
 }

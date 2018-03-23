@@ -85,4 +85,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     const {top} = wrapper.getBoundingClientRect();
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
+
+  get longString() {
+    return ' lorem ipsum '.repeat(10000);
+  }
 }
