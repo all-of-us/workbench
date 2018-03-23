@@ -975,7 +975,7 @@ paths:
           required: true
           description: request body for getting list of ParticipantCohortStatuses.
           schema:
-            $ref: "#/definitions/ParticipantCohortStatusesRequest"
+            $ref: "#/definitions/PageFilterRequest"
       responses:
         200:
           description: A collection of participants
@@ -1073,6 +1073,33 @@ paths:
           description: A collection of ParticipantCohortAnnotation.
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/conditions:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      description:  >
+            Returns a collection of ParticipantConditions for the specified params. This endpoint
+            does pagination based on page, limit, order and column.
+      operationId: "getParticipantConditions"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantConditions.
+          schema:
+            $ref: "#/definitions/ParticipantConditionsListResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
@@ -2100,13 +2127,13 @@ definitions:
       sortColumn:
         type: string
 
-  ParticipantCohortStatusesRequest:
-    type: object
+  PageFilterRequest:
+    discriminator: pageFilterType
     required:
       - page
       - pageSize
-      - sortColumn
       - sortOrder
+      - pageFilterType # required for inheritance to work
     properties:
       page:
         type: integer
@@ -2114,18 +2141,40 @@ definitions:
       pageSize:
         type: integer
         description: page size of results (default is 25)
-      sortColumn:
-        $ref: "#/definitions/ParticipantCohortStatusColumns"
-        description: Column upon which to sort (default is 'participantId')
       sortOrder:
         $ref: "#/definitions/SortOrder"
-        description: Sort direction (default is ascending)
+      pageFilterType:
+        $ref: "#/definitions/PageFilterType"
       filters:
         $ref: "#/definitions/FilterList"
+
+  ParticipantCohortStatusesPageFilter:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantCohortStatusColumns"
+            description: Column upon which to sort (default is 'participantId')
+
+  ParticipantConditionsPageFilter:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantConditionsColumns"
+            description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
+
+  ParticipantConditionsColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
+
+  PageFilterType:
+    type: string
+    enum: [ParticipantCohortStatusesPageFilter, ParticipantConditionsPageFilter]
 
   SortOrder:
     type: string
@@ -2307,7 +2356,6 @@ definitions:
         items:
           type: string
 
-
   ParticipantCohortAnnotation:
     type: object
     required:
@@ -2348,6 +2396,35 @@ definitions:
         type: integer
         description: The Value of the annotation if the AnnotationType is INTEGER
 
+  ParticipantCondition:
+    type: object
+    required:
+      - itemDate
+      - standardVocabulary
+      - standardName
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+    properties:
+      itemDate:
+        type: string
+        description: The date of the condition occurrence
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this condition
+      standardName:
+        type: string
+        description: The standard name of this condition
+      sourceValue:
+        type: string
+        description: The source value of this condition
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this condition
+      sourceName:
+        type: string
+        description: The source name of this condition.
+
   CohortAnnotationDefinitionListResponse:
     type: object
     required:
@@ -2376,6 +2453,16 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantCohortAnnotation"
+
+  ParticipantConditionsListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+         $ref: "#/definitions/ParticipantCondition"
 
   ModifyParticipantCohortAnnotationRequest:
     type: object

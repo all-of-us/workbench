@@ -25,6 +25,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 import javax.inject.Provider;
@@ -249,7 +250,7 @@ public class CohortReviewServiceImplTest {
     @Test
     public void findParticipantCohortStatuses() throws Exception {
         long cohortReviewId = 1;
-        PageRequest pageRequest = new PageRequest(0, 1);
+        PageRequest pageRequest = new PageRequest(0, 1, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
 
         when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
 

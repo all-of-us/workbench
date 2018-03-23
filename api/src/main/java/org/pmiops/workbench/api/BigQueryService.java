@@ -7,15 +7,18 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 public class BigQueryService {
@@ -76,5 +79,12 @@ public class BigQueryService {
 
     public Boolean getBoolean(List<FieldValue> row, int index) {
         return row.get(index).getBooleanValue();
+    }
+
+    public Date getDate(List<FieldValue> row, int index) {
+        if (row.get(index).isNull()) {
+            throw new BigQueryException(500, "FieldValue is null at position: " + index);
+        }
+        return java.sql.Date.from(Instant.ofEpochMilli(Double.valueOf(row.get(index).getStringValue()).longValue() * 1000));
     }
 }
