@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="rsasch" id="changelog-29">
+    <createTable tableName="admin_action_history">
+      <column name="history_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="admin_user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="target_user_id" type="bigint" defaultValue="null">
+        <constraints nullable="true"/>
+      </column>
+      <column name="target_workspace_id" type="bigint" defaultValue="null">
+        <constraints nullable="true"/>
+      </column>
+      <column name="target_action" type="varchar(255)" defaultValue="">
+        <constraints nullable="false"/>
+      </column>
+      <column name="old_value_as_string" type="varchar(255)" defaultValue="">
+        <constraints nullable="false"/>
+      </column>
+      <column name="new_value_as_string" type="varchar(255)" defaultValue="">
+        <constraints nullable="false"/>
+      </column>
+      <column name="timestamp" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="admin_user_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_admin_id"
+                             onDelete="NO ACTION"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="target_user_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_target_user_id"
+                             onDelete="NO ACTION"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="target_workspace_id"
+                             baseTableName="admin_action_history"
+                             constraintName="fk_history_target_workspace_id"
+                             onDelete="NO ACTION"
+                             referencedColumnNames="workspace_id"
+                             referencedTableName="workspace"/>
+    <dropForeignKeyConstraint baseTableName="user"
+                              constraintName="disabling_admin"/>
+    <dropColumn tableName="user" columnName="disabled_time"/>
+    <dropColumn tableName="user" columnName="disabling_admin_id"/>
+    <dropColumn tableName="workspace" columnName="rp_time_reviewed"/>
+  </changeSet>
+</databaseChangeLog>

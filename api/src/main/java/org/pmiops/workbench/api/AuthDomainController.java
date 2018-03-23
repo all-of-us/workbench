@@ -1,14 +1,11 @@
 package org.pmiops.workbench.api;
 
-import java.sql.Timestamp;
-import java.time.Clock;
-import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -25,21 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthDomainController implements AuthDomainApiDelegate {
 
-  private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final UserService userService;
   private final UserDao userDao;
-  private final Provider<User> userProvider;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
-      Clock clock,
-      UserDao userDao,
-      Provider<User> userProvider) {
+      UserService userService,
+      UserDao userDao) {
     this.fireCloudService = fireCloudService;
-    this.clock = clock;
+    this.userService = userService;
     this.userDao = userDao;
-    this.userProvider = userProvider;
   }
 
   @AuthorityRequired({Authority.MANAGE_GROUP})
@@ -60,25 +54,23 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     User user = userDao.findUserByEmail(request.getEmail());
+    DataAccessLevel previousAccess = user.getDataAccessLevel();
     try {
       fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      ExceptionUtils.convertFirecloudException(e);
     }
     // TODO(calbach): Teardown any active clusters here.
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
-    user.setDisabledTime(timestamp);
-    user.setDisablingAdminId(userProvider.get().getUserId());
     userDao.save(user);
+
+    userService.logAdminUserAction(
+        user.getUserId(),
+        "user access to  " + groupName + " domain",
+        previousAccess,
+        DataAccessLevel.REVOKED);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -86,21 +78,22 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
+    DataAccessLevel previousAccess = user.getDataAccessLevel();
     try {
       fireCloudService.addUserToGroup(request.getEmail(), groupName);
     } catch (ApiException e) {
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      ExceptionUtils.convertFirecloudException(e);
     }
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
     userDao.save(user);
+
+    userService.logAdminUserAction(
+        user.getUserId(),
+        "user access to  " + groupName + " domain",
+        previousAccess,
+        DataAccessLevel.REGISTERED);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
