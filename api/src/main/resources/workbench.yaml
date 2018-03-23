@@ -2458,11 +2458,39 @@ definitions:
     type: object
     required:
       - items
+      - count
+      - pageRequest
     properties:
       items:
         type: "array"
         items:
          $ref: "#/definitions/ParticipantCondition"
+      count:
+        type: integer
+        format: int64
+        description: the cohort reivew id.
+      pageRequest:
+        $ref: "#/definitions/PageRequest"
+
+  PageRequest:
+    type: object
+    required:
+      - page
+      - pageSize
+      - sortOrder
+      - sortColumn
+    properties:
+      page:
+        type: integer
+        description: the page
+      pageSize:
+        type: integer
+        description: the page size.
+      sortOrder:
+        $ref: "#/definitions/SortOrder"
+      sortColumn:
+        type: string
+        description: sort column
 
   ModifyParticipantCohortAnnotationRequest:
     type: object

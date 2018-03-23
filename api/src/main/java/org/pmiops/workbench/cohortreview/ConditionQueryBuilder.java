@@ -29,6 +29,11 @@ public class ConditionQueryBuilder {
                     "order by %s %s, condition_occurrence_id\n" +
                     "limit %d offset %d\n";
 
+    private static final String CONDITIONS_SQL_COUNT_TEMPLATE =
+            "select count(*) as count\n" +
+                    "from `${projectId}.${dataSetId}.condition_occurrence`\n" +
+                    "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
+
     public QueryJobConfiguration buildQuery(Long participantId, PageRequest pageRequest) {
         ParticipantConditionsColumns sortColumn = ParticipantConditionsColumns.fromValue(pageRequest.getSortColumn());
         String finalSql = String.format(CONDITIONS_SQL_TEMPLATE,
@@ -41,6 +46,16 @@ public class ConditionQueryBuilder {
         params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
         return QueryJobConfiguration
                 .newBuilder(finalSql)
+                .setNamedParameters(params)
+                .setUseLegacySql(false)
+                .build();
+    }
+
+    public QueryJobConfiguration buildCountQuery(Long participantId) {
+        Map<String, QueryParameterValue> params = new HashMap<>();
+        params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+        return QueryJobConfiguration
+                .newBuilder(CONDITIONS_SQL_COUNT_TEMPLATE)
                 .setNamedParameters(params)
                 .setUseLegacySql(false)
                 .build();
