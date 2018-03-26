@@ -13,6 +13,7 @@ public class CohortService {
   @Autowired private CohortDao cohortDao;
   @Autowired private CohortReviewDao cohortReviewDao;
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
 
   @Transactional
   public Cohort saveAndCloneReviews(Cohort from, Cohort to) {
@@ -30,6 +31,8 @@ public class CohortService {
       cr = cohortReviewDao.save(cr);
       participantCohortStatusDao.bulkCopyByCohortReview(
           fromReview.getCohortReviewId(), cr.getCohortReviewId());
+      cohortAnnotationDefinitionDao.bulkCopyByCohort(
+              from.getCohortId(), to.getCohortId());
     }
     return saved;
   }
