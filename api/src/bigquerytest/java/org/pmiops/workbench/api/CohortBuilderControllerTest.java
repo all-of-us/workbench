@@ -99,7 +99,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "observation",
                 "drug_exposure",
                 "phecode_criteria_icd",
-                "concept_relationship");
+                "concept_relationship",
+                "death");
     }
 
     @Before
@@ -176,6 +177,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjectsDemoGender() throws Exception {
         Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
         SearchParameter demo = createSearchParameter(demoGender, null);
+        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
+    }
+
+    @Test
+    public void countSubjectsDemoDec() throws Exception {
+        Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+        SearchParameter demo = createSearchParameter(demoGender, "Deceased");
         SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo));
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
