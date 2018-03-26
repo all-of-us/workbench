@@ -1,4 +1,4 @@
-<ng-container [ngSwitch]="criteriaType">
+<ng-container [ngSwitch]="criteriaType.toLowerCase()">
 
   <crit-demo-form *ngSwitchCase="'demo'" [open]="open">
   </crit-demo-form>
