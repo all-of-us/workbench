@@ -11,7 +11,6 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {LoginComponent} from './views/login/component';
-import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
@@ -102,10 +101,6 @@ const routes: Routes = [
       }, {
         path: 'profile',
         component: ProfilePageComponent,
-        data: {title: 'Profile'}
-      }, {
-        path: 'profile/edit',
-        component: ProfileEditComponent,
         data: {title: 'Profile'}
       }, {
         path: 'workspace/build',

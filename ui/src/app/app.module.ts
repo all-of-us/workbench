@@ -27,7 +27,6 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
-import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -98,7 +97,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent,
     LoginComponent,
     PageTemplateSignedOutComponent,
-    ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,

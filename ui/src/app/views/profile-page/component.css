@@ -6,12 +6,6 @@ h2 {
   margin: 0 0 0.75rem 0.5rem;
 }
 
-div.field {
-  display: inline-block;
-  margin-right: 2rem;
-  width: 15rem;
-}
-
 .field-label {
   font-size: 0.55rem;
 }
@@ -23,4 +17,33 @@ div.field {
 .field-label-button {
   height: 1rem;
   line-height: 0rem;
+}
+
+.field-wrapper {
+  margin: 0.5rem 0 1.5rem 0;
+}
+
+label.long-text-field {
+  display: block;
+}
+
+label clr-icon {
+  margin-left: 0.25rem;
+}
+
+div.field {
+  display: inline-block;
+  margin-right: 2rem;
+}
+input[type=text]:not([readonly]) {
+  padding: 0.75rem;
+  width: 14rem;
+}
+
+label {
+  padding-bottom: 0.5rem;
+}
+
+.alert {
+  width: 14rem;
 }
