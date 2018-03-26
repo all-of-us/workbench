@@ -24,6 +24,32 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               cloudbilling.googleapis.com sqladmin.googleapis.com sql-component.googleapis.com
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 
+ENVIRONMENTS = {
+  TEST_PROJECT => {
+    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :config_json => "config_test.json"
+  },
+  # TODO: Point this to test.
+  "all-of-us-rw-stable" => {
+    :cdr_sql_instance => "all-of-us-rw-stable:us-central1:workbenchmaindb",
+    :config_json => "config_stable.json"
+  }
+}
+
+def get_config(project)
+  unless ENVIRONMENTS.fetch(project, {}).has_key?(:config_json)
+    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+  end
+  return ENVIRONMENTS[project][:config_json]
+end
+
+def get_cdr_sql_project(project)
+  unless ENVIRONMENTS.fetch(project, {}).has_key?(:cdr_sql_instance)
+    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+  end
+  return ENVIRONMENTS[project][:cdr_sql_instance].split(":")[0]
+end
+
 def ensure_docker(cmd_name, args)
   unless Workbench::in_docker?
     exec *(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args)
@@ -44,16 +70,26 @@ end
 
 def read_db_vars_v2(gcc)
   Workbench::assert_in_docker
-  vars = Common.new.capture_stdout(%W{
+  vars = Workbench::read_vars(Common.new.capture_stdout(%W{
     gsutil cat gs://#{gcc.project}-credentials/vars.env
-  })
+  }))
   if vars.empty?
     Common.new.error "Failed to read gs://#{gcc.project}-credentials/vars.env"
     exit 1
   end
-  Workbench::read_vars(Common.new.capture_stdout(%W{
-    gsutil cat gs://#{gcc.project}-credentials/vars.env
+  # Note: CDR project and target project may be the same.
+  cdr_project = get_cdr_sql_project(gcc.project)
+  cdr_vars = Workbench::read_vars(Common.new.capture_stdout(%W{
+    gsutil cat gs://#{cdr_project}-credentials/vars.env
   }))
+  return vars.merge({
+    'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
+    'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
+    'CDR_DB_PASSWORD' => cdr_vars['WORKBENCH_DB_PASSWORD'],
+    'PUBLIC_DB_CONNECTION_STRING' => cdr_vars['PUBLIC_DB_CONNECTION_STRING'],
+    'PUBLIC_DB_USER' => cdr_vars['PUBLIC_DB_USER'],
+    'PUBLIC_DB_PASSWORD' => cdr_vars['PUBLIC_DB_PASSWORD']
+  })
 end
 
 def dev_up(*args)
@@ -421,70 +457,9 @@ Common.register_command({
   :fn => lambda { |*args| rebuild_image(*args) }
 })
 
-
-def get_service_account_creds_file(project, account, creds_file_path)
-  common = Common.new
-  service_account = "#{project}@appspot.gserviceaccount.com"
-  common.run_inline %W{gcloud iam service-accounts keys create #{creds_file_path}
-    --iam-account=#{service_account} --project=#{project} --account=#{account}}
-end
-
-def delete_service_accounts_creds(project, account, creds_file_path)
-  tmp_private_key = `grep private_key_id #{creds_file_path} | cut -d\\\" -f4`.strip()
-  service_account ="#{project}@appspot.gserviceaccount.com"
-  common = Common.new
-  common.run_inline %W{gcloud iam service-accounts keys delete #{tmp_private_key} -q
-     --iam-account=#{service_account} --project=#{project} --account=#{account}}
-  common.run_inline %W{rm #{creds_file_path}}
-end
-
-def activate_service_account(creds_file)
-  common = Common.new
-  common.run_inline %W{gcloud auth activate-service-account --key-file #{creds_file}}
-end
-
 def copy_file_to_gcs(source_path, bucket, filename)
   common = Common.new
   common.run_inline %W{gsutil cp #{source_path} gs://#{bucket}/#{filename}}
-end
-
-def get_file_from_gcs(bucket, filename, target_path)
-  common = Common.new
-  common.run_inline %W{gsutil cp gs://#{bucket}/#{filename} #{target_path}}
-end
-
-# Downloads database credentials from GCS and parses them into ENV.
-def read_db_vars(creds_file, project)
-  db_creds_file = Tempfile.new("#{project}-vars.env")
-  begin
-    activate_service_account(creds_file)
-    get_file_from_gcs("#{project}-credentials", "vars.env", db_creds_file.path)
-    ENV.update(Workbench::read_vars_file(db_creds_file.path))
-  ensure
-    db_creds_file.unlink
-  end
-  ENV["DB_PORT"] = "3307"
-end
-
-def run_cloud_sql_proxy(project, creds_file)
-  common = Common.new
-  if !File.file?("cloud_sql_proxy")
-    op_sys = "linux"
-    if RUBY_PLATFORM.downcase.include? "darwin"
-      op_sys = "darwin"
-    end
-    common.run_inline %W{wget https://dl.google.com/cloudsql/cloud_sql_proxy.#{op_sys}.amd64 -O
-      cloud_sql_proxy}
-    common.run_inline %W{chmod +x cloud_sql_proxy}
-  end
-  cloud_sql_proxy_cmd = %W{./cloud_sql_proxy
-      -instances #{project}:us-central1:workbenchmaindb=tcp:3307
-      -credential_file=#{creds_file} &}
-  puts "Running Cloud SQL Proxy with #{cloud_sql_proxy_cmd}. Note stdout/err not shown."
-  pid = spawn(*cloud_sql_proxy_cmd)
-  sleep 3.0  # Wait for the proxy to become active.
-  puts "Cloud SQL Proxy running (PID #{pid})."
-  return pid
 end
 
 # Common.run_inline uses spawn() which doesn't handle pipes/redirects.
@@ -749,7 +724,9 @@ Common.register_command({
   :fn => lambda { |*args| run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, public_db_name, root_password, workbench_password, public_password)
+def write_db_creds_file(project, cdr_db_name, public_db_name,
+                        root_password, workbench_password, cdr_password,
+                        public_password=nil)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -768,9 +745,11 @@ def write_db_creds_file(project, cdr_db_name, public_db_name, root_password, wor
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
       db_creds_file.puts "WORKBENCH_DB_USER=workbench"
       db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{public_db_name}?rewriteBatchedStatements=true"
-      db_creds_file.puts "PUBLIC_DB_USER=public"
-      db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
+      if public_password
+        db_creds_file.puts "PUBLIC_DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/#{public_db_name}?rewriteBatchedStatements=true"
+        db_creds_file.puts "PUBLIC_DB_USER=public"
+        db_creds_file.puts "PUBLIC_DB_PASSWORD=#{public_password}"
+      end
       db_creds_file.close
 
       copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
@@ -1073,14 +1052,6 @@ def migrate_workbench_data()
   end
 end
 
-def get_config(project)
-  configs = {
-    TEST_PROJECT => "config_test.json",
-    "all-of-us-rw-stable" => "config_stable.json",
-  }
-  return configs[project]
-end
-
 def get_auth_domain(project)
   config_json = get_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
@@ -1152,10 +1123,10 @@ def circle_deploy(cmd_name, args)
     with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
       migrate_database
       load_config(ctx.project)
-    end
 
-    common.status "Pushing GCS artifacts..."
-    deploy_gcs_artifacts(cmd_name, args)
+      common.status "Pushing GCS artifacts..."
+      deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
+    end
   end
 
   promote = ""
@@ -1276,35 +1247,40 @@ def create_project_resources(gcc)
   common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
-def setup_project_data(gcc, cdr_db_name, public_db_name,
-                       root_password, workbench_password, public_password, args)
+def setup_project_data(gcc, cdr_db_name, public_db_name, args)
+  root_password, workbench_password = random_password(), random_password()
+
+  public_password = nil
+  if gcc.project == get_cdr_sql_project(gcc.project)
+    # Only initialize a public user/pass if this environment will have CDR dbs.
+    public_password = random_password()
+  end
+
   common = Common.new
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password, workbench_password,
-                      public_password)
+  write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password,
+                      workbench_password, public_password=public_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
                      to_redact=root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
-  CloudSqlProxyContext.new(gcc.project).run do
-    with_cloud_proxy_and_db_env("setup-db-users", args) do |ctx|
-      common.status "Copying service account key to GCS..."
-      gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json")
-      common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
-          --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
-      common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    common.status "Copying service account key to GCS..."
+    gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
+    common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
+        --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+    common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
 
-      common.status "Setting up databases and users..."
-      create_workbench_db
+    common.status "Setting up databases and users..."
+    create_workbench_db
 
-      common.status "Running schema migrations..."
-      migrate_database
-      # This will insert a CDR version row pointing at the CDR and public DB.
-      migrate_workbench_data
-    end
+    common.status "Running schema migrations..."
+    migrate_database
+    # This will insert a CDR version row pointing at the CDR and public DB.
+    migrate_workbench_data
   end
 end
 
@@ -1338,9 +1314,8 @@ def setup_cloud_project(cmd_name, *args)
   gcc.validate
 
   create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name,
-                     random_password(), random_password(), random_password(), args)
-  deploy_gcs_artifacts(cmd_name, args)
+  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name, args)
+  deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 
 Common.register_command({
