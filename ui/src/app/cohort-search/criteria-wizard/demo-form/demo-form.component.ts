@@ -1,11 +1,12 @@
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {fromJS} from 'immutable';
+import {fromJS, is} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../../redux';
+import {activeParameterList, CohortSearchActions} from '../../redux';
 
 import {Attribute, CohortBuilderService, Criteria} from 'generated';
 
@@ -19,6 +20,7 @@ function sortByCountThenName(critA, critB) {
     : diff;
 }
 
+
 @Component({
   selector: 'crit-demo-form',
   templateUrl: './demo-form.component.html',
@@ -27,11 +29,12 @@ function sortByCountThenName(critA, critB) {
 })
 export class DemoFormComponent implements OnInit {
   @Input() open: boolean;
+  @select(activeParameterList) selected$;
 
   readonly minAge = 0;
   readonly maxAge = 120;
   loading = false;
-  subscription: Subscription;
+  subscription = new Subscription();
 
   demoForm = new FormGroup({
     ageMin: new FormControl(0),
@@ -42,10 +45,15 @@ export class DemoFormComponent implements OnInit {
     deceased: new FormControl(),
   });
 
-  age: Criteria;
-  deceased: Criteria;
-  genders: Criteria[] = [];
-  races: Criteria[] = [];
+  get genders() { return this.demoForm.get('genders'); }
+  get races() { return this.demoForm.get('races'); }
+  get ageRange() { return this.demoForm.get('ageRange'); }
+  get deceased() { return this.demoForm.get('deceased'); }
+
+  ageNode;
+  deceasedNode;
+  genderNodes = [];
+  raceNodes = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -55,7 +63,17 @@ export class DemoFormComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
-    this.demoForm.valueChanges.subscribe(console.log);
+
+    this.selected$.first().subscribe(selections => {
+      console.log('DemoForm.ngOnInit selections');
+      console.dir(selections);
+      const genders = selections.filter(s => s.get('subtype') === 'GEN');
+      this.genders.setValue(genders.toArray());
+      console.log(this.genders.value);
+    });
+
+    this.demoForm.valueChanges.withLatestFrom(this.selected$).subscribe(console.log);
+
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
 
     const calls = ['DEC', 'GEN', 'RACE', 'AGE'].map(code => this.api
@@ -68,10 +86,10 @@ export class DemoFormComponent implements OnInit {
     );
 
     forkJoin(...calls).subscribe(([dec, gen, race, age]) => {
-      this.genders = gen;
-      this.races = race;
-      this.deceased = dec[0];
-      this.age = age[0];
+      this.genderNodes = fromJS(gen);
+      this.raceNodes = fromJS(race);
+      this.deceasedNode = fromJS(dec[0]);
+      this.ageNode = fromJS(age[0]);
       this.loading = false;
     });
 
@@ -86,19 +104,19 @@ export class DemoFormComponent implements OnInit {
     const max = this.demoForm.get('ageMax');
     const range = this.demoForm.get('ageRange');
 
-    this.subscription = range.valueChanges.subscribe(([lo, hi]) => {
+    this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
-    });
+    }));
 
     this.subscription.add(min.valueChanges.subscribe(value => {
-      const [_, hi] = [...range.value];
-      range.setValue([value, hi], {emitEvent: false});
+      const [_, hi] = [...this.ageRange.value];
+      this.ageRange.setValue([value, hi], {emitEvent: false});
     }));
 
     this.subscription.add(max.valueChanges.subscribe(value => {
-      const [lo, _] = [...range.value];
-      range.setValue([lo, value], {emitEvent: false});
+      const [lo, _] = [...this.ageRange.value];
+      this.ageRange.setValue([lo, value], {emitEvent: false});
     }));
   }
 
@@ -113,40 +131,37 @@ export class DemoFormComponent implements OnInit {
   onSubmit() {
     let hasSelection = false;
 
-    const deceased = this.demoForm.get('deceased');
-    if (deceased.value) {
+
+    if (this.deceased.value) {
       console.log('Processing deceased status');
-      const param = fromJS(this.deceased)
-        .set('parameterId', `param${this.deceased.id}`);
+      const paramId = `param${this.deceasedNode.get('id')}`;
+      const param = this.deceasedNode.set('parameterId', paramId);
       this.actions.addParameter(param);
       hasSelection = true;
     }
 
-    const gender = this.demoForm.get('genders');
-    if (gender.value) {
-      gender.value.map(node => {
+    if (this.genders.value) {
+      this.genders.value.map(node => {
         console.log(`Processing gender ${node}`);
-        const id = `param${node.id || node.code}`;
-        const param = fromJS(node).set('parameterId', id);
+        const paramId = `param${node.get('id', node.get('code'))}`;
+        const param = node.set('parameterId', paramId);
         this.actions.addParameter(param);
         hasSelection = true;
       });
     }
 
-    const race = this.demoForm.get('races');
-    if (race.value) {
-      race.value.map(node => {
+    if (this.races.value) {
+      this.races.value.map(node => {
         console.log(`Processing race ${node}`);
-        const id = `param${node.id || node.code}`;
-        const param = fromJS(node).set('parameterId', id);
+        const paramId = `param${node.get('id', node.get('code'))}`;
+        const param = node.set('parameterId', paramId);
         this.actions.addParameter(param);
         hasSelection = true;
       });
     }
 
-    const ageRange = this.demoForm.get('ageRange');
-    if (ageRange.value) {
-      const [ageLow, ageHigh] = this.demoForm.get('ageRange').value;
+    if (this.ageRange.value) {
+      const [ageLow, ageHigh] = this.ageRange.value;
       if (ageHigh < 120 || ageLow > 0) {
         const attr = fromJS(<Attribute>{
           operator: 'between',
@@ -155,8 +170,7 @@ export class DemoFormComponent implements OnInit {
             ageHigh || 120,
           ]
         });
-        const id = `param${this.age.id || this.age.code}`;
-        const param = fromJS(this.age)
+        const param = this.ageNode
           .set('parameterId', attr.hashCode())
           .set('attribute', attr);
         this.actions.addParameter(param);
@@ -178,6 +192,18 @@ export class DemoFormComponent implements OnInit {
   openChange(value: boolean) {
     if (!value) {
       this.onCancel();
+    }
+  }
+
+  /*
+   * When editing an existing set of demographics options, this function is
+   * critical for telling the select which option boxes to highlight.  See the
+   * [compareWith] function on each `option` element.
+   */
+  optionComparator(A, B): boolean {
+    // Sometimes (for some reason) A or B is undefined... not sure how or why :/
+    if (A && B) {
+      return A.get('id') === B.get('id');
     }
   }
 }

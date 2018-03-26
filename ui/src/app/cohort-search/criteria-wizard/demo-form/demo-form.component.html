@@ -42,11 +42,14 @@
           <div class="form-group">
             <label for="genders">Choose Gender Filters</label>
             <div class="select multiple">
-              <select multiple formControlName="genders" id="genders">
-                <option *ngFor="let gender of genders" [value]="gender">
-                  {{ gender.name }}
-                  <span *ngIf="gender.count > 0">
-                    {{ gender.count }}
+              <select multiple
+                [compareWith]="optionComparator"
+                formControlName="genders"
+                id="genders">
+                <option *ngFor="let gender of genderNodes" [value]="gender">
+                  {{ gender.get('name', '') }}
+                  <span *ngIf="gender.get('count')">
+                    {{ gender.get('count') }}
                   </span>
                 </option>
               </select>
@@ -57,11 +60,14 @@
           <div class="form-group">
             <label for="races">Choose Race Filters</label>
             <div class="select multiple">
-              <select multiple formControlName="races" id="races">
-                <option *ngFor="let race of races" [value]="race">
-                  {{ race.name }}
-                  <span *ngIf="race.count > 0">
-                    {{ race.count }}
+              <select multiple
+                [compareWith]="optionComparator"
+                formControlName="races"
+                id="races">
+                <option *ngFor="let race of raceNodes" [value]="race">
+                  {{ race.get('name', '') }}
+                  <span *ngIf="race.get('count')">
+                    {{ race.get('count') }}
                   </span>
                 </option>
               </select>
