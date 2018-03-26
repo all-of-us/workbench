@@ -24,7 +24,9 @@
                 class="number-display">
               <div class="slider">
                 <nouislider
-                  [config]="ageRangeConfig"
+                  [min]="minAge" [max]="maxAge" [step]="1"
+                  [behaviour]="'step'"
+                  [connect]="true"
                   [formControl]="demoForm.controls.ageRange">
                 </nouislider>
               </div>

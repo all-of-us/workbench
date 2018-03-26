@@ -30,6 +30,7 @@ export class DemoFormComponent implements OnInit {
 
   readonly minAge = 0;
   readonly maxAge = 120;
+  loading = false;
   subscription: Subscription;
 
   demoForm = new FormGroup({
@@ -41,25 +42,10 @@ export class DemoFormComponent implements OnInit {
     deceased: new FormControl(),
   });
 
-  // Additional configuration
-  ageRangeConfig = {
-    behaviour: 'drag',
-    connect: true,
-    range: {min: this.minAge, max: this.maxAge},
-    step: 1,
-    // pips: {
-    //   mode: 'steps',
-    //   density: 5
-    //   filter: n => n % 5 ? 0 : 1;
-    // },
-  };
-
   age: Criteria;
   deceased: Criteria;
   genders: Criteria[] = [];
   races: Criteria[] = [];
-
-  loading = false;
 
   constructor(
     private route: ActivatedRoute,
