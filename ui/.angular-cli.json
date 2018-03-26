@@ -33,6 +33,7 @@
         "dev": "environments/environment.ts",
         "local": "environments/environment.local.ts",
         "test": "environments/environment.test.ts",
+        "staging": "environments/environment.staging.ts",
         "stable": "environments/environment.stable.ts",
         "prod": "environments/environment.prod.ts"
       }
