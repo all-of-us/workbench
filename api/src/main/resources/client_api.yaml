@@ -153,6 +153,8 @@ definitions:
     type: object
     description: >
       A specification for pulling data from a single table.
+    required:
+      - tableName
     properties:
       tableName:
         description: >
@@ -169,6 +171,17 @@ definitions:
         type: array
         items:
           type: string
+      filters:
+        description: >
+          An array of arrays of ColumnFilter objects to apply to results.
+          Each child array represents a series of criteria to logically AND together; these
+          expressions are then logically OR'd together at the top level.
+        type: array
+        items:
+          type: array
+          items:
+            $ref: "#/definitions/ColumnFilter"
+
       orderBy:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
@@ -177,7 +190,61 @@ definitions:
         items:
           type: string
 
+  ColumnFilter:
+    type: object
+    required:
+      - columnName
+    description: >
+      A filter applied to the results of a query, based on a column value in a table. Only results
+      matching the filter will be returned. One (and only one) of the value columns should be populated.
+      values and valueNumbers should only be used in conjunction with the "in" operator.
+    properties:
+      columnName:
+        description: >
+          The name of the column to filter on.
+        type: string
+      operator:
+        description: >
+          The operator to use when comparing values. Defaults to EQUAL. If the "in" operator is used,
+          either values or valueNumbers should be populated.
+        $ref: "#/definitions/Operator"
+        externalDocs:
+          description: "Documentation of BigQuery SQL operators"
+          url: https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#comparison-operators
+      value:
+        description: >
+          A string to use in comparisons (case-sensitive).
+        type: string
+      values:
+        description: >
+          An array of strings to use in comparisons (case-sensitive); used with the "in" operator.
+        type: array
+        items:
+          type: string
+      valueDate:
+        description: >
+          An ISO-formatted date / datetime value to use in comparisons.
+        type: string
+      valueNumber:
+        description: >
+          A number to use in comparisons (either integer or floating point.)
+        type: number
+      valueNumbers:
+        description: >
+          An array of numbers to use in comparisons (used with the "in" operator)
+        type: array
+        items:
+          type: number
+      valueNull:
+        description: >
+          Set to true if the column value should be compared to null.
+        type: boolean
+
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
     enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
+
+  Operator:
+    type: string
+    enum: ['=', '<', '>', '<=', '>=', 'like', 'in']
