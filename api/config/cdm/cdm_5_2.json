@@ -1,0 +1,654 @@
+{
+  "metadata_tables": {
+    "care_site": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "care_site_id",
+          "mode": "required",
+          "description": "A unique identifier for each Care Site.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "care_site_name",
+          "mode": "nullable",
+          "description": "The verbatim description or name of the Care Site as in data source"
+        },
+        {
+          "type": "integer",
+          "name": "place_of_service_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key that refers to a Place of Service Concept ID in the Standardized Vocabularies.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "location_id",
+          "mode": "nullable",
+          "description": "A foreign key to the geographic Location in the LOCATION table, where the detailed address information is stored.",
+          "foreignKey": "location"
+        },
+        {
+          "type": "string",
+          "name": "care_site_source_value",
+          "mode": "nullable",
+          "description": "The identifier for the Care Site in the source data, stored here for reference."
+        },
+        {
+          "type": "string",
+          "name": "place_of_service_source_value",
+          "mode": "nullable",
+          "description": "The source code for the Place of Service as it appears in the source data, stored here for reference."
+        }
+      ]
+    },
+    "concept": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "concept_id",
+          "mode": "required",
+          "description": "A unique identifier for each Concept across all domains.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "concept_name",
+          "mode": "required",
+          "description": "An unambiguous, meaningful and descriptive name for the Concept."
+        },
+        {
+          "type": "string",
+          "name": "domain_id",
+          "mode": "required",
+          "description": "A foreign key to the [DOMAIN](https://github.com/OHDSI/CommonDataModel/wiki/DOMAIN) table the Concept belongs to.",
+          "foreignKey": "domain"
+        },
+        {
+          "type": "string",
+          "name": "vocabulary_id",
+          "mode": "required",
+          "description": "A foreign key to the [VOCABULARY](https://github.com/OHDSI/CommonDataModel/wiki/VOCABULARY) table indicating from which source the Concept has been adapted.",
+          "foreignKey": "vocabulary"
+        },
+        {
+          "type": "string",
+          "name": "concept_class_id",
+          "mode": "required",
+          "description": "The attribute or concept class of the Concept. Examples are 'Clinical Drug', 'Ingredient', 'Clinical Finding' etc."
+        },
+        {
+          "type": "string",
+          "name": "standard_concept",
+          "mode": "nullable",
+          "description": "This flag determines where a Concept is a Standard Concept, i.e. is used in the data, a Classification Concept, or a non-standard Source Concept. The allowables values are 'S' (Standard Concept) and 'C' (Classification Concept), otherwise the content is NULL."
+        },
+        {
+          "type": "string",
+          "name": "concept_code",
+          "mode": "required",
+          "description": "The concept code represents the identifier of the Concept in the source vocabulary, such as SNOMED-CT concept IDs, RxNorm RXCUIs etc. Note that concept codes are not unique across vocabularies."
+        },
+        {
+          "type": "date",
+          "name": "valid_start_date",
+          "mode": "required",
+          "description": "The date when the Concept was first recorded. The default value is 1-Jan-1970, meaning, the Concept has no (known) date of inception."
+        },
+        {
+          "type": "date",
+          "name": "valid_end_date",
+          "mode": "required",
+          "description": "The date when the Concept became invalid because it was deleted or superseded (updated) by a new concept. The default value is 31-Dec-2099, meaning, the Concept is valid until it becomes deprecated."
+        },
+        {
+          "type": "string",
+          "name": "invalid_reason",
+          "mode": "nullable",
+          "description": "Reason the Concept was invalidated. Possible values are D (deleted), U (replaced with an update) or NULL when valid_end_date has the default value."
+        }
+      ]
+    },
+    "domain": {
+      "columns": [
+        {
+          "type": "string",
+          "name": "domain_id",
+          "mode": "required",
+          "description": "A unique key for each domain.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "domain_name",
+          "mode": "required",
+          "description": "The name describing the Domain, e.g. \"Condition\", \"Procedure\", \"Measurement\" etc."
+        },
+        {
+          "type": "integer",
+          "name": "domain_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to an identifier in the [CONCEPT](https://github.com/OHDSI/CommonDataModel/wiki/CONCEPT) table for the unique Domain Concept the Domain record belongs to.",
+          "foreignKey": "concept"
+        }
+      ]
+    },
+    "location": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "location_id",
+          "mode": "required",
+          "description": "A unique identifier for each geographic location.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "address_1",
+          "mode": "nullable",
+          "description": "The address field 1, typically used for the street address, as it appears in the source data."
+        },
+        {
+          "type": "string",
+          "name": "address_2",
+          "mode": "nullable",
+          "description": "The address field 2, typically used for additional detail such as buildings, suites, floors, as it appears in the source data."
+        },
+        {
+          "type": "string",
+          "name": "city",
+          "mode": "nullable",
+          "description": "The city field as it appears in the source data."
+        },
+        {
+          "type": "string",
+          "name": "state",
+          "mode": "nullable",
+          "description": "The state field as it appears in the source data."
+        },
+        {
+          "type": "string",
+          "name": "zip",
+          "mode": "nullable",
+          "description": "The zip or postal code."
+        },
+        {
+          "type": "string",
+          "name": "county",
+          "mode": "nullable",
+          "description": "The county."
+        },
+        {
+          "type": "string",
+          "name": "location_source_value",
+          "mode": "nullable",
+          "description": "The verbatim information that is used to uniquely identify the location as it appears in the source data."
+        }
+      ]
+    },
+    "provider": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "provider_id",
+          "mode": "required",
+          "description": "A unique identifier for each Provider.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "provider_name",
+          "mode": "nullable",
+          "description": "A description of the Provider."
+        },
+        {
+          "type": "string",
+          "name": "NPI",
+          "mode": "nullable"
+        },
+        {
+          "type": "string",
+          "name": "DEA",
+          "mode": "nullable"
+        },
+        {
+          "type": "integer",
+          "name": "specialty_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Standard Specialty Concept ID in the Standardized Vocabularies.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "care_site_id",
+          "mode": "nullable",
+          "description": "A foreign key to the main Care Site where the provider is practicing.",
+          "foreignKey": "care_site"
+        },
+        {
+          "type": "integer",
+          "name": "year_of_birth",
+          "mode": "nullable",
+          "description": "The year of birth of the Provider."
+        },
+        {
+          "type": "integer",
+          "name": "gender_concept_id",
+          "mode": "nullable",
+          "description": "The gender of the Provider."
+        },
+        {
+          "type": "string",
+          "name": "provider_source_value",
+          "mode": "nullable",
+          "description": "The identifier used for the Provider in the source data, stored here for reference."
+        },
+        {
+          "type": "string",
+          "name": "specialty_source_value",
+          "mode": "nullable",
+          "description": "The source code for the Provider specialty as it appears in the source data, stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "specialty_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "gender_source_value",
+          "mode": "nullable",
+          "description": "The gender code for the Provider as it appears in the source data, stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "gender_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        }
+      ]
+    },
+    "vocabulary": {
+      "columns": [
+        {
+          "type": "string",
+          "name": "vocabulary_id",
+          "mode": "required",
+          "description": "A unique identifier for each Vocabulary, such as ICD9CM, SNOMED, Visit.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "string",
+          "name": "vocabulary_name",
+          "mode": "required",
+          "description": "The name describing the vocabulary, for example \"International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 1 and 2 (NCHS)\" etc."
+        },
+        {
+          "type": "string",
+          "name": "vocabulary_reference",
+          "mode": "nullable",
+          "description": "External reference to documentation or available download of the about the vocabulary."
+        },
+        {
+          "type": "string",
+          "name": "vocabulary_version",
+          "mode": "nullable",
+          "description": "Version of the Vocabulary as indicated in the source."
+        },
+        {
+          "type": "integer",
+          "name": "vocabulary_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to a standard concept identifier in the CONCEPT table for the Vocabulary the VOCABULARY record belongs to.",
+          "foreignKey": "concept"
+        }
+      ]
+    }
+  },
+  "cohort_tables": {
+    "condition_occurrence": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "condition_occurrence_id",
+          "mode": "required",
+          "description": "A unique identifier for each Condition Occurrence event.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "integer",
+          "name": "person_id",
+          "mode": "required",
+          "description": "A foreign key identifier to the Person who is experiencing the condition. The demographic details of that Person are stored in the PERSON table.",
+          "foreignKey": "person"
+        },
+        {
+          "type": "integer",
+          "name": "condition_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to a Standard Condition Concept identifier in the Standardized Vocabularies.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "date",
+          "name": "condition_start_date",
+          "mode": "required",
+          "description": "The date when the instance of the Condition is recorded."
+        },
+        {
+          "type": "timestamp",
+          "name": "condition_start_datetime",
+          "mode": "required",
+          "description": "The date and time when the instance of the Condition is recorded."
+        },
+        {
+          "type": "date",
+          "name": "condition_end_date",
+          "mode": "nullable",
+          "description": "The date when the instance of the Condition is considered to have ended."
+        },
+        {
+          "type": "timestamp",
+          "name": "condition_end_datetime",
+          "mode": "nullable",
+          "description": "The date when the instance of the Condition is considered to have ended."
+        },
+        {
+          "type": "integer",
+          "name": "condition_type_concept_id",
+          "mode": "required",
+          "description": "A foreign key to the predefined Concept identifier in the Standardized Vocabularies reflecting the source data from which the condition was recorded, the level of standardization, and the type of occurrence.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "stop_reason",
+          "mode": "nullable",
+          "description": "The reason that the condition was no longer present, as indicated in the source data."
+        },
+        {
+          "type": "integer",
+          "name": "provider_id",
+          "mode": "nullable",
+          "description": "A foreign key to the Provider in the PROVIDER table who was responsible for capturing (diagnosing) the Condition.",
+          "foreignKey": "provider"
+        },
+        {
+          "type": "integer",
+          "name": "visit_occurrence_id",
+          "mode": "nullable",
+          "description": "A foreign key to the visit in the VISIT_OCCURRENCE table during which the Condition was determined (diagnosed).",
+          "foreignKey": "visit_occurrence"
+        },
+        {
+          "type": "string",
+          "name": "condition_source_value",
+          "mode": "nullable",
+          "description": "The source code for the condition as it appears in the source data. This code is mapped to a standard condition concept in the Standardized Vocabularies and the original code is stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "condition_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Condition Concept that refers to the code used in the source."
+        },
+        {
+          "type": "string",
+          "name": "condition_status_source_value",
+          "mode": "nullable",
+          "description": "The source code for the condition status as it appears in the source data."
+        },
+        {
+          "type": "integer",
+          "name": "condition_status_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the predefined Concept in the Standard Vocabulary reflecting the condition status",
+          "foreignKey": "concept"
+        }
+      ]
+    },
+    "person": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "person_id",
+          "mode": "required",
+          "description": "A unique identifier for each person.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "integer",
+          "name": "gender_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to an identifier in the CONCEPT table for the unique gender of the person.",
+          "foreignKey": "concept_id"
+        },
+        {
+          "type": "integer",
+          "name": "year_of_birth",
+          "mode": "required",
+          "description": "The year of birth of the person. For data sources with date of birth, the year is extracted. For data sources where the year of birth is not available, the approximate year of birth is derived based on any age group categorization available."
+        },
+        {
+          "type": "integer",
+          "name": "month_of_birth",
+          "mode": "nullable",
+          "description": "The month of birth of the person. For data sources that provide the precise date of birth, the month is extracted and stored in this field."
+        },
+        {
+          "type": "integer",
+          "name": "day_of_birth",
+          "mode": "nullable",
+          "description": "The day of the month of birth of the person. For data sources that provide the precise date of birth, the day is extracted and stored in this field."
+        },
+        {
+          "type": "timestamp",
+          "name": "birth_datetime",
+          "mode": "nullable",
+          "description": "The date and time of birth of the person."
+        },
+        {
+          "type": "integer",
+          "name": "race_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to an identifier in the CONCEPT table for the unique race of the person.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "ethnicity_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to the standard concept identifier in the Standardized Vocabularies for the ethnicity of the person.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "location_id",
+          "mode": "nullable",
+          "description": "A foreign key to the place of residency for the person in the location table, where the detailed address information is stored.",
+          "foreignKey": "location"
+        },
+        {
+          "type": "integer",
+          "name": "provider_id",
+          "mode": "nullable",
+          "description": "A foreign key to the primary care provider the person is seeing in the provider table.",
+          "foreignKey": "provider"
+        },
+        {
+          "type": "integer",
+          "name": "care_site_id",
+          "mode": "nullable",
+          "description": "A foreign key to the site of primary care in the care_site table, where the details of the care site are stored.",
+          "foreignKey": "care_site"
+        },
+        {
+          "type": "string",
+          "name": "person_source_value",
+          "mode": "nullable",
+          "description": "An (encrypted) key derived from the person identifier in the source data. This is necessary when a use case requires a link back to the person data at the source dataset."
+        },
+        {
+          "type": "string",
+          "name": "gender_source_value",
+          "mode": "nullable",
+          "description": "The source code for the gender of the person as it appears in the source data. The person’s gender is mapped to a standard gender concept in the Standardized Vocabularies; the original value is stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "gender_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the gender concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "race_source_value",
+          "mode": "nullable",
+          "description": "The source code for the race of the person as it appears in the source data. The person race is mapped to a standard race concept in the Standardized Vocabularies and the original value is stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "race_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the race concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "ethnicity_source_value",
+          "mode": "nullable",
+          "description": "The source code for the ethnicity of the person as it appears in the source data. The person ethnicity is mapped to a standard ethnicity concept in the Standardized Vocabularies and the original code is, stored here for reference."
+        },
+        {
+          "type": "integer",
+          "name": "ethnicity_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the ethnicity concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        }
+      ]
+    },
+    "visit_occurrence": {
+      "columns": [
+        {
+          "type": "integer",
+          "name": "visit_occurrence_id",
+          "mode": "required",
+          "description": "A unique identifier for each Person's visit or encounter at a healthcare provider.",
+          "primaryKey": "true"
+        },
+        {
+          "type": "integer",
+          "name": "person_id",
+          "mode": "required",
+          "description": "A foreign key identifier to the Person for whom the visit is recorded. The demographic details of that Person are stored in the PERSON table.",
+          "foreignKey": "person"
+        },
+        {
+          "type": "integer",
+          "name": "visit_concept_id",
+          "mode": "required",
+          "description": "A foreign key that refers to a visit Concept identifier in the Standardized Vocabularies.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "date",
+          "name": "visit_start_date",
+          "mode": "required",
+          "description": "The start date of the visit."
+        },
+        {
+          "type": "timestamp",
+          "name": "visit_start_datetime",
+          "mode": "nullable",
+          "description": "The date and time of the visit started."
+        },
+        {
+          "type": "date",
+          "name": "visit_end_date",
+          "mode": "required",
+          "description": "The end date of the visit. If this is a one-day visit the end date should match the start date."
+        },
+        {
+          "type": "timestamp",
+          "name": "visit_end_datetime",
+          "mode": "nullable",
+          "description": "The date and time of the visit end."
+        },
+        {
+          "type": "integer",
+          "name": "visit_type_concept_id",
+          "mode": "required",
+          "description": "A foreign key to the predefined Concept identifier in the Standardized Vocabularies reflecting the type of source data from which the visit record is derived.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "provider_id",
+          "mode": "nullable",
+          "description": "A foreign key to the provider in the provider table who was associated with the visit.",
+          "foreignKey": "provider"
+        },
+        {
+          "type": "integer",
+          "name": "care_site_id",
+          "mode": "nullable",
+          "description": "A foreign key to the care site in the care site table that was visited.",
+          "foreignKey": "care_site"
+        },
+        {
+          "type": "string",
+          "name": "visit_source_value",
+          "mode": "nullable",
+          "description": "The source code for the visit as it appears in the source data."
+        },
+        {
+          "type": "integer",
+          "name": "visit_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Concept that refers to the code used in the source.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "integer",
+          "name": "admitting_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the predefined concept in the Place of Service Vocabulary reflecting the admitting source for a visit.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "admitting_source_value",
+          "mode": "nullable",
+          "description": "The source code for the admitting source as it appears in the source data."
+        },
+        {
+          "type": "integer",
+          "name": "discharge_to_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to the predefined concept in the Place of Service Vocabulary reflecting the discharge disposition for a visit.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "discharge_to_source_value",
+          "mode": "nullable",
+          "description": "The source code for the discharge disposition as it appears in the source data."
+        },
+        {
+          "type": "integer",
+          "name": "preceding_visit_occurrence_id",
+          "mode": "nullable",
+          "description": "A foreign key to the VISIT_OCCURRENCE table of the visit immediately preceding this visit",
+          "foreignKey": "visit_occurrence"
+        }
+      ]
+    }
+  }
+
+}
