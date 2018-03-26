@@ -1,33 +1,57 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {SignInService} from 'app/services/sign-in.service';
 
-import {ErrorResponse, Profile, ProfileService} from 'generated';
+import {BlockscoreIdVerificationStatus,
+    ErrorResponse,
+    Profile,
+    ProfileService} from 'generated';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
+              '../../styles/cards.css',
+              '../../styles/headers.css',
               '../../styles/inputs.css',
               './component.css'],
   templateUrl: './component.html',
 })
 export class ProfilePageComponent implements OnInit {
   profile: Profile;
+  profileImage: string;
   profileLoaded = false;
   errorText: string;
   editing = false;
+  view: any[] = [120, 120];
+  colorScheme = {
+    domain: ['#8BC990', '#C7C8C8']
+  };
+  spinnerValues = [
+    {
+      'name': 'finished',
+      'value': this.completedTasks
+    },
+    {
+      'name': 'not finished',
+      'value': 4 - this.completedTasks
+    }
+  ];
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
       private route: ActivatedRoute,
       private router: Router,
+      private signInService: SignInService
   ) {}
 
   ngOnInit(): void {
+    this.profileImage = this.signInService.profileImage;
     this.errorText = null;
     this.profileService.getMe().subscribe(
       (profile: Profile) => {
         this.profile = profile;
         this.profileLoaded = true;
+        this.reloadSpinner();
       });
   }
 
@@ -47,16 +71,62 @@ export class ProfilePageComponent implements OnInit {
       });
   }
 
+  public get completedTasks() {
+    if (this.profile === undefined) {
+      return 0;
+    }
+    let completedTasks = 0;
+    if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
+      completedTasks += 1;
+    }
+    if (this.profile.demographicSurveyCompletionTime !== null) {
+      completedTasks += 1;
+    }
+    if (this.profile.ethicsTrainingCompletionTime !== null) {
+      completedTasks += 1;
+    }
+    if (this.profile.termsOfServiceCompletionTime !== null) {
+      completedTasks += 1;
+    }
+    return completedTasks;
+  }
+
+  public get completedTasksAsPercentage() {
+    return this.completedTasks * 25;
+  }
+
+  reloadSpinner(): void {
+    this.spinnerValues = [
+      {
+        'name': 'finished',
+        'value': this.completedTasks
+      },
+      {
+        'name': 'not finished',
+        'value': 4 - this.completedTasks
+      }
+    ];
+  }
+
   submitTermsOfService(): void {
-    this.profileService.submitTermsOfService().subscribe();
+    this.profileService.submitTermsOfService().subscribe((profile) => {
+      this.profile = profile;
+      this.reloadSpinner();
+    });
   }
 
 
   completeEthicsTraining(): void {
-    this.profileService.completeEthicsTraining().subscribe();
+    this.profileService.completeEthicsTraining().subscribe((profile) => {
+      this.profile = profile;
+      this.reloadSpinner();
+    });
   }
 
   submitDemographicSurvey(): void {
-    this.profileService.submitDemographicsSurvey().subscribe();
+    this.profileService.submitDemographicsSurvey().subscribe((profile) => {
+      this.profile = profile;
+      this.reloadSpinner();
+    });
   }
 }

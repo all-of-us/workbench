@@ -34,6 +34,7 @@ button.btn.btn-secondary {
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
+  font-size: 10px;
   color: #262262;
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
