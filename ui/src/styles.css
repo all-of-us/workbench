@@ -101,3 +101,10 @@ input[type=text]:focus, input[type=password]:focus {
   position: relative;
   z-index: 999;
 }
+
+/**
+ * Style overrides for noUiSlider
+ */
+.noUi-connect {
+  background: rgb(92, 183, 225);
+}

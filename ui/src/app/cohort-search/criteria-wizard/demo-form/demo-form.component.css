@@ -27,3 +27,21 @@
 #demographics-modal-body {
   overflow: auto;
 }
+
+.slider-container {
+  width: 80%;
+  margin: 0 1rem 0 0;
+  display: flex;
+  align-items: center;
+}
+
+.slider {
+  flex: 1;
+}
+
+.number-display {
+  padding: 0 1rem;
+  margin: 0 1rem;
+  border: 1px solid black;
+  border-radius: 3px;
+}

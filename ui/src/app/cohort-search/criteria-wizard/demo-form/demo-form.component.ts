@@ -8,7 +8,6 @@ import {CohortSearchActions} from '../../redux';
 
 import {Attribute, CohortBuilderService, Criteria} from 'generated';
 
-
 function sortByCountThenName(critA, critB) {
   // Sorts by Count, then secondarily by Name
   const A = critA.count || 0;
@@ -32,12 +31,24 @@ export class DemoFormComponent implements OnInit {
   readonly maxAge = 120;
 
   demoForm = new FormGroup({
-    ageHigh: new FormControl(),
-    ageLow: new FormControl(),
+    ageRange: new FormControl([this.minAge, this.maxAge]),
     genders: new FormControl(),
     races: new FormControl(),
     deceased: new FormControl(),
   });
+
+  // Additional configuration
+  ageRangeConfig = {
+    behaviour: 'drag',
+    connect: true,
+    range: {min: this.minAge, max: this.maxAge},
+    step: 1,
+    // pips: {
+    //   mode: 'steps',
+    //   density: 5
+    //   filter: n => n % 5 ? 0 : 1;
+    // },
+  };
 
   age: Criteria;
   deceased: Criteria;
@@ -73,6 +84,23 @@ export class DemoFormComponent implements OnInit {
       this.age = age[0];
       this.loading = false;
     });
+  }
+
+  setAgeMin(event) {
+    const num = +event.target.value;
+    this.setRangeVal(0, num);
+  }
+
+  setAgeMax(event) {
+    const num = +event.target.value;
+    this.setRangeVal(1, num);
+  }
+
+  setRangeVal(index: number, value: number) {
+    const control = this.demoForm.get('ageRange');
+    const range = [...control.value];
+    range[index] = value;
+    control.setValue(range);
   }
 
   onCancel() {
@@ -113,22 +141,24 @@ export class DemoFormComponent implements OnInit {
       });
     }
 
-    const ageHigh = this.demoForm.get('ageHigh').value;
-    const ageLow = this.demoForm.get('ageLow').value;
-    if (ageHigh || ageLow) {
-      const attr = fromJS(<Attribute>{
-        operator: 'between',
-        operands: [
-          ageLow  || 0,
-          ageHigh || 120,
-        ]
-      });
-      const id = `param${this.age.id || this.age.code}`;
-      const param = fromJS(this.age)
-        .set('parameterId', attr.hashCode())
-        .set('attribute', attr);
-      this.actions.addParameter(param);
-      hasSelection = true;
+    const ageRange = this.demoForm.get('ageRange');
+    if (ageRange.value) {
+      const [ageLow, ageHigh] = this.demoForm.get('ageRange').value;
+      if (ageHigh < 120 || ageLow > 0) {
+        const attr = fromJS(<Attribute>{
+          operator: 'between',
+          operands: [
+            ageLow  || 0,
+            ageHigh || 120,
+          ]
+        });
+        const id = `param${this.age.id || this.age.code}`;
+        const param = fromJS(this.age)
+          .set('parameterId', attr.hashCode())
+          .set('attribute', attr);
+        this.actions.addParameter(param);
+        hasSelection = true;
+      }
     }
 
     if (hasSelection) {

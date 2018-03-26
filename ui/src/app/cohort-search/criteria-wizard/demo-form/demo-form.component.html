@@ -15,17 +15,22 @@
 
           <!-- Age -->
           <div class="form-group">
-            <label for="age-low">Age Range</label>
-            <input
-              id="age-low"
-              formControlName="ageLow"
-              type="number"
-              [min]="minAge" [max]="maxAge">
-            <input
-              id="age-high"
-              formControlName="ageHigh"
-              type="number"
-              [min]="minAge" [max]="maxAge">
+            <label>Age Range</label>
+            <div class="slider-container">
+              <span class="number-display"
+                [style.margin-left]="0">
+                {{ demoForm.get('ageRange').value[0] }}
+              </span>
+              <div class="slider">
+                <nouislider
+                  [config]="ageRangeConfig"
+                  [formControl]="demoForm.controls.ageRange">
+                </nouislider>
+              </div>
+              <span class="number-display">
+                {{ demoForm.get('ageRange').value[1] }}
+              </span>
+            </div>
           </div>
 
           <!-- Genders -->
