@@ -5,6 +5,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
+import {NouisliderModule} from 'ng2-nouislider';
 
 import {
   CohortSearchActions,
@@ -59,6 +60,7 @@ describe('WizardComponent', () => {
           AttributesModule,
           ClarityModule,
           NoopAnimationsModule,
+          NouisliderModule,
           ReactiveFormsModule,
         ],
         providers: [
