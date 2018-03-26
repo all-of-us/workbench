@@ -197,7 +197,7 @@ definitions:
     description: >
       A filter applied to the results of a query, based on a column value in a table. Only results
       matching the filter will be returned. One (and only one) of the value columns should be populated.
-      values and valueNumbers should only be used in conjunction with the "IN" operator.
+      values and valueNumbers should only be used in conjunction with the "in" operator.
     properties:
       columnName:
         description: >
@@ -205,7 +205,7 @@ definitions:
         type: string
       operator:
         description: >
-          The operator to use when comparing values. Defaults to EQUAL. If the "IN" operator is used,
+          The operator to use when comparing values. Defaults to EQUAL. If the "in" operator is used,
           either values or valueNumbers should be populated.
         $ref: "#/definitions/Operator"
         externalDocs:
@@ -217,7 +217,7 @@ definitions:
         type: string
       values:
         description: >
-          An array of strings to use in comparisons (case-sensitive); used with the "IN" operator.
+          An array of strings to use in comparisons (case-sensitive); used with the "in" operator.
         type: array
         items:
           type: string
@@ -231,14 +231,14 @@ definitions:
         type: number
       valueNumbers:
         description: >
-          An array of numbers to use in comparisons (used with the "IN" operator)
+          An array of numbers to use in comparisons (used with the "in" operator)
         type: array
         items:
           type: number
       valueNull:
         description: >
-          Set to "true" if the column value should be compared to null.
-        type: string
+          Set to true if the column value should be compared to null.
+        type: boolean
 
   CohortStatus:
     type: string
