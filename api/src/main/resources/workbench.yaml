@@ -2206,10 +2206,6 @@ definitions:
         items:
           type: string
 
-  Operator:
-    type: string
-    enum: ['=', '<', '>', '<=', '>=', 'like', 'in']
-
   ParticipantDemographics:
     type: object
     required:

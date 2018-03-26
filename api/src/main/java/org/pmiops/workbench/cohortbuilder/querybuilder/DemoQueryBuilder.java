@@ -23,6 +23,8 @@ import java.util.Optional;
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
+    private static final String DECEASED = "Deceased";
+
     private static final String SELECT = "select person_id\n" +
             "from `${projectId}.${dataSetId}.person` p\n" +
             "where\n";
@@ -35,6 +37,11 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
     private static final String DEMO_RACE =
             "p.race_concept_id in unnest(${race})\n";
+
+    private static final String DEMO_DEC =
+            "exists (\n" +
+                    "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n" +
+                    "where d.person_id = p.person_id)\n";
 
     private static final String AND_TEMPLATE = "and\n";
 
@@ -71,6 +78,13 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                 } else {
                     throw new IllegalArgumentException("Age must provide an operator and operands.");
                 }
+            } else if (key.equals(DEMOTYPE.DEC.name())) {
+                if (DECEASED.equals(paramMap.get(key).get(0))) {
+                    queryParts.add(DEMO_DEC);
+                } else {
+                    throw new IllegalArgumentException("Dec must provide a value of: " + DECEASED);
+                }
+
             }
         }
 
@@ -93,6 +107,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         for (SearchParameter parameter : searchParameters)
             if (parameter.getSubtype().equals(DEMOTYPE.AGE.name())) {
                 mappedParameters.put(parameter.getSubtype(), parameter.getAttribute());
+            } else if (parameter.getSubtype().equals(DEMOTYPE.DEC.name())) {
+                mappedParameters.put(parameter.getSubtype(), parameter.getValue());
             } else {
                 mappedParameters.put(parameter.getSubtype(), parameter.getConceptId());
             }
