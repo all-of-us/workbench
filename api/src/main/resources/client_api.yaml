@@ -196,8 +196,8 @@ definitions:
       - columnName
     description: >
       A filter applied to the results of a query, based on a column value in a table. Only results
-      matching the filter will be returned. If neither value nor valueNumber are set, the
-      column is compared to null.
+      matching the filter will be returned. One (and only one) of the value columns should be populated.
+      values and valueNumbers should only be used in conjunction with the "IN" operator.
     properties:
       columnName:
         description: >
@@ -205,17 +205,40 @@ definitions:
         type: string
       operator:
         description: >
-          The operator to use when comparing values. Defaults to EQUAL.
+          The operator to use when comparing values. Defaults to EQUAL. If the "IN" operator is used,
+          either values or valueNumbers should be populated.
         $ref: "#/definitions/Operator"
+        externalDocs:
+          description: "Documentation of BigQuery SQL operators"
+          url: https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#comparison-operators
       value:
         description: >
-          A string or ISO-formatted date / datetime value to use in comparisons (case-sensitive).
+          A string to use in comparisons (case-sensitive).
+        type: string
+      values:
+        description: >
+          An array of strings to use in comparisons (case-sensitive); used with the "IN" operator.
+        type: array
+        items:
+          type: string
+      valueDate:
+        description: >
+          An ISO-formatted date / datetime value to use in comparisons.
         type: string
       valueNumber:
         description: >
           A number to use in comparisons (either integer or floating point.)
         type: number
-
+      valueNumbers:
+        description: >
+          An array of numbers to use in comparisons (used with the "IN" operator)
+        type: array
+        items:
+          type: number
+      valueNull:
+        description: >
+          Set to "true" if the column value should be compared to null.
+        type: string
 
   CohortStatus:
     type: string
