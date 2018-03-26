@@ -3,6 +3,7 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
+import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions} from '../../redux';
 
@@ -29,8 +30,11 @@ export class DemoFormComponent implements OnInit {
 
   readonly minAge = 0;
   readonly maxAge = 120;
+  subscription: Subscription;
 
   demoForm = new FormGroup({
+    ageMin: new FormControl(0),
+    ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
     genders: new FormControl(),
     races: new FormControl(),
@@ -84,23 +88,36 @@ export class DemoFormComponent implements OnInit {
       this.age = age[0];
       this.loading = false;
     });
+
+    /*
+     * We want the two inputs to mirror the slider, so here we're wiring all
+     * three inputs together using the valueChanges Observable and the
+     * emitEvent option.  Setting emitEvent to false will prevent the other
+     * Observables from firing when a control is updated this way, hence
+     * preventing any infinite update cycles.
+     */
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    const range = this.demoForm.get('ageRange');
+
+    this.subscription = range.valueChanges.subscribe(([lo, hi]) => {
+      min.setValue(lo, {emitEvent: false});
+      max.setValue(hi, {emitEvent: false});
+    });
+
+    this.subscription.add(min.valueChanges.subscribe(value => {
+      const [_, hi] = [...range.value];
+      range.setValue([value, hi], {emitEvent: false});
+    }));
+
+    this.subscription.add(max.valueChanges.subscribe(value => {
+      const [lo, _] = [...range.value];
+      range.setValue([lo, value], {emitEvent: false});
+    }));
   }
 
-  setAgeMin(event) {
-    const num = +event.target.value;
-    this.setRangeVal(0, num);
-  }
-
-  setAgeMax(event) {
-    const num = +event.target.value;
-    this.setRangeVal(1, num);
-  }
-
-  setRangeVal(index: number, value: number) {
-    const control = this.demoForm.get('ageRange');
-    const range = [...control.value];
-    range[index] = value;
-    control.setValue(range);
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   onCancel() {
