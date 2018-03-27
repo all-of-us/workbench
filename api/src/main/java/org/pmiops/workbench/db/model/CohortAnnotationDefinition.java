@@ -27,6 +27,19 @@ public class CohortAnnotationDefinition {
     private AnnotationType annotationType;
     private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
 
+    public CohortAnnotationDefinition() {}
+
+    public CohortAnnotationDefinition(CohortAnnotationDefinition cad) {
+        cad.getEnumValues()
+                .stream()
+                .forEach(value -> {
+                    this.getEnumValues().add(new CohortAnnotationEnumValue(value)
+                            .cohortAnnotationDefinition(this));
+                });
+        this.annotationType = cad.getAnnotationType();
+        this.columnName = cad.getColumnName();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cohort_annotation_definition_id")
