@@ -280,7 +280,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cohortReview, searchRequest, statusFilter, pageSize,
+        cohortReview, searchRequest, request.getFieldSet(), statusFilter, pageSize,
         request.getPageToken());
     return ResponseEntity.ok(response);
   }

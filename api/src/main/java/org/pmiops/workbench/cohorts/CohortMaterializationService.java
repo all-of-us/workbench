@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohorts;
 
 import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
@@ -22,6 +24,7 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -38,14 +41,17 @@ public class CohortMaterializationService {
 
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
+  private final FieldSetQueryBuilder fieldSetQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
 
   @Autowired
   public CohortMaterializationService(BigQueryService bigQueryService,
       ParticipantCounter participantCounter,
+      FieldSetQueryBuilder fieldSetQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
+    this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
   }
 
@@ -63,7 +69,7 @@ public class CohortMaterializationService {
   }
 
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
-      SearchRequest searchRequest,
+      SearchRequest searchRequest, @Nullable FieldSet fieldSet,
       List<CohortStatus> statusFilter, int pageSize, String paginationToken) {
     long offset = 0L;
     // TODO: add CDR version ID here
@@ -104,8 +110,14 @@ public class CohortMaterializationService {
       }
       criteria = new ParticipantCriteria(participantIds);
     }
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-        participantCounter.buildParticipantIdQuery(criteria, limit, offset)));
+    QueryJobConfiguration jobConfiguration;
+    if (fieldSet == null) {
+      jobConfiguration = participantCounter.buildParticipantIdQuery(criteria, limit, offset);
+    } else {
+      jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria, fieldSet, limit, offset);
+    }
+    QueryResult result = bigQueryService.executeQuery(
+        bigQueryService.filterBigQueryConfig(jobConfiguration));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     int numResults = 0;
     boolean hasMoreResults = false;

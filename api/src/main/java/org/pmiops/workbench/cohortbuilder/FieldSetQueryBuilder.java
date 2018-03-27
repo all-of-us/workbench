@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -233,7 +234,7 @@ public class FieldSetQueryBuilder {
     CdrSchemaConfig schemaConfig = cdrSchemaConfigProvider.get();
     TableQuery tableQuery = fieldSet.getTableQuery();
     if (tableQuery == null) {
-      // TODO: support other kinds of field sets
+      // TODO: support other kinds of field sets besides tableQuery
       throw new BadRequestException("tableQuery must be specified in field sets");
     }
     String tableName = tableQuery.getTableName();
@@ -287,10 +288,31 @@ public class FieldSetQueryBuilder {
       startSql.append("\nand\n");
     }
 
-
-    StringBuilder endSql = new StringBuilder();
-
-
-    return participantCounter.buildQuery(participantCriteria, startSql.toString(), endSql.toString());
+    StringBuilder endSql = new StringBuilder("order by ");
+    List<String> orderBy = tableQuery.getOrderBy();
+    if (orderBy == null || orderBy.isEmpty()) {
+      ColumnConfig primaryKey = findPrimaryKey(tableConfig);
+      if (primaryKey.name.equals("person_id")) {
+        orderBy = ImmutableList.of("person_id");
+      } else {
+        // TODO: consider having per-table default sort order based on e.g. timestamp
+        orderBy = ImmutableList.of("person_id", primaryKey.name);
+      }
+    } else {
+      for (String columnName : orderBy) {
+        if (findColumn(tableConfig, columnName) == null) {
+          throw new BadRequestException("Invalid column in orderBy: " + columnName);
+        }
+      }
+    }
+    endSql.append(Joiner.on(", ").join(orderBy));
+    endSql.append(" limit ");
+    endSql.append(resultSize);
+    if (offset > 0) {
+      endSql.append(" offset ");
+      endSql.append(offset);
+    }
+    return participantCounter.buildQuery(participantCriteria, startSql.toString(), endSql.toString(),
+        paramMap);
   }
 }
