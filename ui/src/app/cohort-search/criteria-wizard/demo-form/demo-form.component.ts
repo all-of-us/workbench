@@ -75,12 +75,20 @@ export class DemoFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Set back to false at the end of loadNodesFromApi (i.e. the end of the
+    // initialization routine)
     this.loading = true;
-    // this.demoForm.valueChanges.withLatestFrom(this.selection$).subscribe(console.log);
+
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
     this.initAgeControls();
 
     this.selection$.first().subscribe(selections => {
+      /*
+       * Each subtype of DEMO requires subtly different initialization, which
+       * is handled by special-case methods which each receive any selected
+       * criteria already in the state (i.e. if we're editing a search group
+       * item).  Finally we load the relevant criteria from the API.
+       */
       this.initGenders(selections);
       this.initRaces(selections);
       this.initDeceased(selections);
@@ -96,23 +104,20 @@ export class DemoFormComponent implements OnInit, OnDestroy {
   loadNodesFromApi() {
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     /*
-     * When we fetch the crit nodes we immediately sort by count (secondary
-     * sort on name), then map each collection to immutable objects and attach
-     * a parameterId.  Parameter ID's should be unique for criteria, so we can
-     * use those to determine if we need to add / remove params (e.g. in the
-     * edit scenario)
-     *
-     * We do NOT calculate a param ID for AGE criteria since those are
-     * determined by a hash that relies on user input.
+     * Each subtype's possible criteri is loaded via the API.  Race and Gender
+     * criteria nodes become options in their respective dropdowns; deceased
+     * and age are used as templates for constructing relevant seach
+     * parameters.  Upon load we immediately map the criteria to immutable
+     * objects complete with deterministically generated `parameterId`s and
+     * sort them by count, then by name.
      */
-    const calls = [DEC, GEN, RACE, AGE].map(code => this.api
+    const calls = [AGE, DEC, GEN, RACE].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
       .map(response => {
         const items = response.items;
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
-          if (node.get('subtype') === AGE) {
-          } else {
+          if (node.get('subtype') !== AGE) {
             const paramId = `param${node.get('id', node.get('code'))}`;
             node = node.set('parameterId', paramId);
           }
@@ -121,7 +126,7 @@ export class DemoFormComponent implements OnInit, OnDestroy {
         return nodes.size > 1 ? nodes : nodes.get(0);
       })
     );
-    forkJoin(...calls).subscribe(([dec, gen, race, age]) => {
+    forkJoin(...calls).subscribe(([age, dec, gen, race]) => {
       this.deceasedNode = dec;
       this.genderNodes = gen;
       this.raceNodes = race;
@@ -151,6 +156,76 @@ export class DemoFormComponent implements OnInit, OnDestroy {
     this.subscription.add(max.valueChanges.subscribe(value => {
       const [lo, _] = [...this.ageRange.value];
       this.ageRange.setValue([lo, value], {emitEvent: false});
+    }));
+  }
+
+  /*
+   * The next four initialization methods do the following: if a value exists
+   * for that subtype already (i.e. we're editing), set that value on the
+   * relevant form control.  Also set up a subscriber to the observable stream
+   * coming from that control's `valueChanges` that will fire ADD_PARAMETER or
+   * REMOVE_PARAMETER events as appropriate.
+   *
+   * The exact ordering of these operations is slightly different per type.
+   * For race and gender, we watch the valueChanges stream in pairs so that we
+   * can generate added and removed lists, so they get their initialization
+   * _after_ the change listener is attached (otherwise we would never detect
+   * the _first_ selection, which would be dropped by `pairwise`).
+   *
+   * For Age, since the slider emits an event with every value, and there can
+   * be many values very quickly, we debounce the event emissions by 1/4 of a
+   * second.  Furthermore, we generate the correct parameter ID as a hash from
+   * the given user input so that we can determine if the age range has changed
+   * or not.
+   *
+   * (TODO: can we reduce all age criterion to 'between'?  Or should we be
+   * determining different attributes (operators, really) be examining the
+   * bounds and the diff between low and high?  And should we be generating the
+   * parameterId by stringifying the attribute (which may be more stable than
+   * using a hash?)
+   */
+  initAgeRange(selections) {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+
+    const existent = selections.find(s => s.get('subtype') === AGE);
+    if (existent) {
+      const range = existent.getIn(['attribute', 'operands']).toArray();
+      this.ageRange.setValue(range);
+      min.setValue(range[0]);
+      max.setValue(range[1]);
+    }
+
+    const selectedAge = this.selection$
+      .map(selectedNodes => selectedNodes
+        .find(node => node.get('subtype') === AGE)
+      );
+
+    const ageDiff = this.ageRange.valueChanges
+      .debounceTime(250)
+      .distinctUntilChanged()
+      .map(([lo, hi]) => {
+        const attr = fromJS(<Attribute>{
+          operator: 'between',
+          operands: [lo, hi],
+        });
+        const paramId = attr.hashCode();
+        return this.ageNode
+          .set('parameterId', paramId)
+          .set('attribute', attr);
+      })
+      .withLatestFrom(selectedAge)
+      .filter(([newNode, oldNode]) => {
+        if (oldNode) {
+          return oldNode.get('parameterId') !== newNode.get('parameterId');
+        }
+        return true;
+      });
+    this.subscription.add(ageDiff.subscribe(([newNode, oldNode]) => {
+      if (oldNode) {
+        this.actions.removeParameter(oldNode.get('parameterId'));
+      }
+      this.actions.addParameter(newNode);
     }));
   }
 
@@ -196,51 +271,6 @@ export class DemoFormComponent implements OnInit, OnDestroy {
     }));
     const initialRaces = selections.filter(s => s.get('subtype') === RACE).toArray();
     this.races.setValue(initialRaces);
-  }
-
-  initAgeRange(selections) {
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-
-    const existent = selections.find(s => s.get('subtype') === AGE);
-    if (existent) {
-      const range = existent.getIn(['attribute', 'operands']).toArray();
-      this.ageRange.setValue(range);
-      min.setValue(range[0]);
-      max.setValue(range[1]);
-    }
-
-    const selectedAge = this.selection$
-      .map(selectedNodes => selectedNodes
-        .find(node => node.get('subtype') === AGE)
-      );
-
-    const ageDiff = this.ageRange.valueChanges
-      .debounceTime(250)
-      .distinctUntilChanged()
-      .map(([lo, hi]) => {
-        const attr = fromJS(<Attribute>{
-          operator: 'between',
-          operands: [lo, hi],
-        });
-        const paramId = attr.hashCode();
-        return this.ageNode
-          .set('parameterId', paramId)
-          .set('attribute', attr);
-      })
-      .withLatestFrom(selectedAge)
-      .filter(([newNode, oldNode]) => {
-        if (oldNode) {
-          return oldNode.get('parameterId') !== newNode.get('parameterId');
-        }
-        return true;
-      });
-    this.subscription.add(ageDiff.subscribe(([newNode, oldNode]) => {
-      if (oldNode) {
-        this.actions.removeParameter(oldNode.get('parameterId'));
-      }
-      this.actions.addParameter(newNode);
-    }));
   }
 
   onCancel() {
