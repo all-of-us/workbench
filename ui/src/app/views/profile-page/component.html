@@ -19,110 +19,109 @@
     <clr-icon shape="user" size="18" class="is-solid"></clr-icon> Shows on your public profile.
   </div>
 </ng-template>
-<div class="field-wrapper">
-  <div class="field">
-    <label for="givenName" class="long-text-field">Given Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
-    <input *ngIf="profileLoaded else loading" type="text" autofocus
-      [(ngModel)]="profile.givenName" id="givenName" [disabled]="!editing">
-  </div>
-  <div class="field">
-    <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
-    <input *ngIf="profileLoaded else loading" type="text"
-      [(ngModel)]="profile.familyName" id="familyName" [disabled]="!editing">
-  </div>
-</div>
-<div class="field-wrapper">
-  <div class="field">
-    <label for="contactEmail" class="long-text-field">Contact Email:</label>
-    <div style="display: flex; justify-content: left" *ngIf="profileLoaded else loading">
-      <input type="text"
-        [(ngModel)]="profile.contactEmail" id="contactEmail" [disabled]="!editing"
-        style="margin-right: 1rem;">
-      <div class="alert alert-warning"*ngIf="profile.emailVerificationStatus !== 'subscribed'">
-        <div class="alert-items">
-          <div class="alert-item static">
-            <span class="alert-text">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
-          </div>
-        </div>
+<div style="display: flex; justify-content: space-between;">
+  <div style="display: block">
+    <div class="field-wrapper">
+      <div class="field">
+        <label for="givenName" class="long-text-field">Given Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
+        <input *ngIf="profileLoaded else loading" type="text" autofocus
+          [(ngModel)]="profile.givenName" id="givenName" [disabled]="!editing">
       </div>
-      <div class="alert alert-success" *ngIf="profile.emailVerificationStatus === 'subscribed'">
-        <div class="alert-items">
-          <div class="alert-item static">
-            <span class="alert-text">Your email address has been verified.</span>
-          </div>
-        </div>
+      <div class="field">
+        <label for="familyName" class="long-text-field">Family Name:<clr-icon shape="user" size="18" class="is-solid"></clr-icon></label>
+        <input *ngIf="profileLoaded else loading" type="text"
+          [(ngModel)]="profile.familyName" id="familyName" [disabled]="!editing">
       </div>
     </div>
-  </div>
-</div>
-<h5>Username:</h5>
-<div *ngIf="profileLoaded else loading">{{profile.username}}</div>
-<ng-template #loading>
-  <div class="loading-area">
-    <span class="loading-text">Loading...</span>
-  </div>
-</ng-template>
-<div>
-  <h3>Identity Verification</h3>
-  <div *ngIf="!profileLoaded; else verifiedStatusMessage">
-    <!-- TODO(dmohs): Spinner. -->
-    Checking verification status...
-  </div>
-  <ng-template #verifiedStatusMessage>
-    <div *ngIf="profile.blockscoreIdVerificationStatus === 'UNVERIFIED'">
-      <div class="alert alert-warning">
-        <div class="alert-items">
-          <div class="alert-item static">
-            <div class="alert-icon-wrapper">
-              <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+    <div class="field-wrapper">
+      <div class="field">
+        <label for="contactEmail" class="long-text-field">Contact Email:</label>
+        <div style="display: flex; justify-content: left" *ngIf="profileLoaded else loading">
+          <input type="text"
+            [(ngModel)]="profile.contactEmail" id="contactEmail" [disabled]="!editing"
+            style="margin-right: 1rem;">
+          <div class="alert alert-warning"*ngIf="profile.emailVerificationStatus !== 'subscribed'">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <span class="alert-text">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
+              </div>
             </div>
-            <span class="alert-text">Your identity has not been verified.</span>
+          </div>
+          <div class="alert alert-success" *ngIf="profile.emailVerificationStatus === 'subscribed'">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <span class="alert-text">Your email address has been verified.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div style="margin-top: 1rem;">
-        <a routerLink="id-verification">Verify your identity</a>
+    </div>
+    <h5>Username:</h5>
+    <div *ngIf="profileLoaded else loading">{{profile.username}}</div>
+    <ng-template #loading>
+      <div class="loading-area">
+        <span class="loading-text">Loading...</span>
+      </div>
+    </ng-template>
+    <button *ngIf="editing" (click)="submitChanges()" class="btn">Update Profile</button>
+    <button *ngIf="editing" (click)="editing=false" class="btn">Cancel</button>
+  </div>
+  <div *ngIf="profileLoaded" style="width: 13rem">
+    <div class="card">
+      <div style="display: flex; justify-content: space-around">
+        <img [src]="profileImage" style="border-radius: 100px">
+        <h6 style="padding: 0.8rem">
+          {{profile.givenName}} {{profile.familyName}} Profile Image
+        </h6>
       </div>
     </div>
-    <div class="alert alert-success" *ngIf="profile.blockscoreIdVerificationStatus === 'VERIFIED'">
-      <div class="alert-items">
-        <div class="alert-item static">
-          <div class="alert-icon-wrapper">
-            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
-          </div>
-          <span class="alert-text">Your identity has been verified.</span>
+    <div class="card">
+      <div style="height: 5rem;">
+        <ngx-charts-pie-chart
+            [view]="view"
+            [scheme]="colorScheme"
+            [results]="spinnerValues"
+            [doughnut]="true"
+            [tooltipDisabled]="true">
+        </ngx-charts-pie-chart>
+        <div class="percentText">
+          {{completedTasksAsPercentage}}%
         </div>
+        <h6 class="profileCompletionText">
+          Profile Completion Progress
+        </h6>
+      </div>
+      <div>
+        <button class="btn btn-secondary" routerLink="id-verification"
+            [disabled]="profile.blockscoreIdVerificationStatus === 'VERIFIED'">
+          Submit Identity Verification
+          <clr-tooltip *ngIf="profile.blockscoreIdVerificationStatus === 'REJECTED'">
+            <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>
+            <clr-tooltip-content clrPosition="top-left" clrSize="md" *clrIfOpen>
+              <span>Your identity could not be verified. Please try again or contact an administrator</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-secondary" (click)="submitTermsOfService()"
+            [disabled]="email === null || this.profile.termsOfServiceCompletionTime !== null">
+          Submit Terms of Service
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-secondary" (click)="completeEthicsTraining()"
+            [disabled]="email === null || this.profile.ethicsTrainingCompletionTime !== null">
+          Complete Ethics Training
+        </button>
+      </div>
+      <div>
+        <button class="btn btn-secondary" (click)="submitDemographicSurvey()"
+            [disabled]="email === null || this.profile.demographicSurveyCompletionTime !== null">
+          Submit Demographics Survey
+        </button>
       </div>
     </div>
-    <div class="alert alert-danger" *ngIf="profile.blockscoreIdVerificationStatus === 'REJECTED'">
-      <div class="alert-items">
-        <div class="alert-item static">
-          <div class="alert-icon-wrapper">
-            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
-          </div>
-          <span class="alert-text">Your identity cannot be validated.</span>
-        </div>
-      </div>
-    </div>
-  </ng-template>
-  <div *ngIf="profileLoaded">
-    <button class="btn" (click)="submitTermsOfService()"
-        [disabled]="email===null || this.profile.termsOfServiceCompletionTime !== null">
-      Submit Terms of Service
-    </button>
   </div>
-  <div *ngIf="profileLoaded">
-    <button class="btn" (click)="completeEthicsTraining()"
-        [disabled]="email===null || this.profile.ethicsTrainingCompletionTime !== null">
-      Complete Ethics Training
-    </button>
-  </div>
-  <div *ngIf="profileLoaded">
-    <button class="btn" (click)="submitDemographicSurvey()"
-        [disabled]="email===null || this.profile.demographicSurveyCompletionTime !== null">
-      Submit Demographics Survey
-    </button>
-  </div>
-  <button *ngIf="editing" (click)="submitChanges()" class="btn">Update Profile</button>
-  <button *ngIf="editing" (click)="editing=false" class="btn">Cancel</button>
 </div>

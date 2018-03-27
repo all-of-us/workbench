@@ -78,4 +78,12 @@ export class SignInService {
       return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token;
     }
   }
+
+  public get profileImage() {
+    if (!gapi.auth2) {
+      return null;
+    } else {
+      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().Paa;
+    }
+  }
 }
