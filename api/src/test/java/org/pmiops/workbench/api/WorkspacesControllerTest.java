@@ -22,6 +22,7 @@ import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -33,23 +34,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.CohortReview;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.PageFilterType;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.ShareWorkspaceResponse;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,11 +56,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -104,6 +84,7 @@ public class WorkspacesControllerTest {
   @Import({
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
+    CohortAnnotationDefinitionController.class,
     CohortsController.class,
     CohortService.class,
     CohortReviewController.class,
@@ -168,6 +149,8 @@ public class WorkspacesControllerTest {
   CohortsController cohortsController;
   @Autowired
   CohortReviewController cohortReviewController;
+  @Autowired
+  CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   WorkspacesController workspacesController;
 
@@ -623,6 +606,29 @@ public class WorkspacesControllerTest {
     CohortReview cr1 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c1.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
+    CohortAnnotationDefinition cad1Request = createCohortAnnotationDefinition(c1.getId(),
+            AnnotationType.ENUM,
+            "cad1",
+            Arrays.asList("value1"));
+    CohortAnnotationDefinition cad1Response =
+            cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    c1.getId(),
+                    cad1Request).getBody();
+    ParticipantCohortAnnotation pca1Request =
+            createParticipantCohortAnnotation(cad1Response.getCohortAnnotationDefinitionId(),
+            1L,
+            "value1");
+    ParticipantCohortAnnotation pca1Response =
+            cohortReviewController.createParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    c1.getId(),
+                    cdrVersion.getCdrVersionId(),
+                    1L,
+                    pca1Request).getBody();
+
     reviewReq.setSize(2);
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
@@ -659,6 +665,19 @@ public class WorkspacesControllerTest {
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
 
+    String sql = "select * from cohort_annotation_enum_value";
+    List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+
+    CohortAnnotationDefinitionListResponse clonedCad1List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
+            cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId()).getBody();
+    assertThat(clonedCad1List.getItems().size()).isEqualTo(1);
+    CohortAnnotationDefinition clonedCad1 = clonedCad1List.getItems().get(0);
+    assertThat(clonedCad1.getCohortAnnotationDefinitionId()).isNotEqualTo(cad1Response.getCohortAnnotationDefinitionId());
+    assertThat(clonedCad1.getCohortId()).isEqualTo(cohortsByName.get("c1").getId());
+    assertThat(clonedCad1.getColumnName()).isEqualTo(cad1Response.getColumnName());
+    assertThat(clonedCad1.getAnnotationType()).isEqualTo(cad1Response.getAnnotationType());
+    assertThat(clonedCad1.getEnumValues()).isEqualTo(cad1Response.getEnumValues());
+
     CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
         cdrVersion.getCdrVersionId(),
@@ -669,6 +688,27 @@ public class WorkspacesControllerTest {
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
+  }
+
+  private ParticipantCohortAnnotation createParticipantCohortAnnotation(Long cohortAnnotationDefinitionId,
+                                                                        Long participantId,
+                                                                        String value) {
+    return new ParticipantCohortAnnotation()
+            .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
+            .annotationValueEnum(value)
+            .annotationValueString(value)
+            .participantId(participantId);
+  }
+
+  private CohortAnnotationDefinition createCohortAnnotationDefinition(Long cohortId,
+                                                                      AnnotationType annotationType,
+                                                                      String columnName,
+                                                                      List<String> enumValues) {
+    return new CohortAnnotationDefinition()
+            .cohortId(cohortId)
+            .annotationType(annotationType)
+            .columnName(columnName)
+            .enumValues(enumValues);
   }
 
   @Test

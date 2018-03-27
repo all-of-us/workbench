@@ -102,19 +102,6 @@ public class CohortAnnotationDefinitionDaoTest {
         assertEquals(expectedDBList.get(0), cohortAnnotationDefinition);
     }
 
-    @Test
-    public void bulkCopyByCohort() throws Exception {
-        CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-
-        cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-
-        int id = cohortAnnotationDefinitionDao.bulkCopyByCohort(cohortAnnotationDefinition.getCohortId(), 2L);
-        assertEquals(1, id);
-
-        id = cohortAnnotationDefinitionDao.bulkCopyByCohort(cohortAnnotationDefinition.getCohortId(), 3L);
-        assertEquals(2, id);
-    }
-
     private CohortAnnotationDefinition createCohortAnnotationDefinition() {
         return new CohortAnnotationDefinition()
                 .cohortId(COHORT_ID)
