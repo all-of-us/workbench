@@ -2,12 +2,14 @@ package org.pmiops.workbench.config;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.Map;
 
 public class CdrSchemaConfig {
 
   public String description;
   public String version;
-  public Map<String, TableConfig> metadata
+  public Map<String, TableConfig> metadataTables;
+  public Map<String, TableConfig> cohortTables;
 
   public static class TableConfig {
     public List<ColumnConfig> columns;
