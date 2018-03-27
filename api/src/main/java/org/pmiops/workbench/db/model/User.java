@@ -46,6 +46,10 @@ public class User {
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
+  private Set<InstitutionalAffiliation> institutionalAffiliationSet =
+      new HashSet<InstitutionalAffiliation>();
+  private String aboutYou;
+  private String areaOfResearch;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -230,5 +234,37 @@ public class User {
 
   public void setEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "institutional_affiliation", joinColumns = @JoinColumn(name = "user_id"))
+  public Set<InstitutionalAffiliation> getInstitutionalAffiliationSet() {
+    return institutionalAffiliationSet;
+  }
+
+  public void setInstitutionalAffiliationSet(Set<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
+    this.institutionalAffiliationSet = newInstitutionalAffiliationSet;
+  }
+
+  public void addInstitutionalAffiliation(InstitutionalAffiliation newInstitutionalAffiliation) {
+    this.institutionalAffiliationSet.add(newInstitutionalAffiliation);
+  }
+
+  @Column(name = "about_you")
+  public String getAboutYou() {
+    return aboutYou;
+  }
+
+  public void setAboutYou(String aboutYou) {
+    this.aboutYou = aboutYou;
+  }
+
+  @Column(name = "area_of_research")
+  public String getAreaOfResearch() {
+    return areaOfResearch;
+  }
+
+  public void setAreaOfResearch(String areaOfResearch) {
+    this.areaOfResearch = areaOfResearch;
   }
 }
