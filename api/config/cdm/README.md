@@ -2,9 +2,9 @@
 
 * Set "version" attribute at the top level to the current CDM version.
 
-* Find all the tables in https://github.com/all-of-us/curation/tree/master/data_steward/resources/fields that have person_id -- these belong in `cohortTables`.
+* Find all the tables in https://github.com/all-of-us/curation/tree/master/data_steward/resources/fields that have person_id -- these tables belong in `cohortTables`. Copy their column metadata into the `columns` array for each table configuration. (See `cdm_5_2.json` for an example.)
 
-* Find all the tables that don't but they reference -- these belong in `metadataTables`.
+* Find all the tables in the same directory that don't have person_id but are referenced transitively by the cohort tables -- these belong in `metadataTables`.
 
 * Add `"primaryKey": true` for the primary key of each table.
 
