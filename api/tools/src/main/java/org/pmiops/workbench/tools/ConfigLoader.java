@@ -33,11 +33,14 @@ public class ConfigLoader {
   @Bean
   public CommandLineRunner run(ConfigDao configDao) {
     return (args) -> {
-      if (args.length != 1) {
-        throw new IllegalArgumentException("Must pass filename of config file");
+      if (args.length != 2) {
+        throw new IllegalArgumentException("Expected arguments: <config key> <config file>");
       }
+      String configKey = args[0];
+      String configFile = args[1];
+
       ObjectMapper jackson = new ObjectMapper();
-      String rawJson = new String(Files.readAllBytes(Paths.get(args[0])), Charset.defaultCharset());
+      String rawJson = new String(Files.readAllBytes(Paths.get(configFile)), Charset.defaultCharset());
       // Strip all lines starting with '//'.
       String strippedJson = rawJson.replaceAll("\\s*//.*", "");
       JsonNode newJson = jackson.readTree(strippedJson);
