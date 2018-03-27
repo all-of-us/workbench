@@ -1,12 +1,9 @@
 package org.pmiops.workbench.db.model;
 
-import com.google.common.collect.ImmutableMap;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.pmiops.workbench.config.CdrSchemaConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
 
 @Entity
 @Table(name = "config")
