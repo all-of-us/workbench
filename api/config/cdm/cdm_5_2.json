@@ -1,5 +1,5 @@
 {
-  "description": "Configuration specifying the schema for tables in the CDR, including foreign key relationships. Adapted from BigQuery schema files, found in https://github.com/all-of-us/curation/data_steward/resources/fields.",
+  "description": "Configuration specifying the schema for tables in the CDR, including foreign key relationships. Adapted from BigQuery schema files, found in https:\/\/github.com\/all-of-us\/curation\/data_steward\/resources\/fields.",
   "version": "5.2",
   "metadataTables": {
     "care_site": {
@@ -64,14 +64,14 @@
           "type": "string",
           "name": "domain_id",
           "mode": "required",
-          "description": "A foreign key to the [DOMAIN](https://github.com/OHDSI/CommonDataModel/wiki/DOMAIN) table the Concept belongs to.",
+          "description": "A foreign key to the [DOMAIN](https:\/\/github.com\/OHDSI\/CommonDataModel\/wiki\/DOMAIN) table the Concept belongs to.",
           "foreignKey": "domain"
         },
         {
           "type": "string",
           "name": "vocabulary_id",
           "mode": "required",
-          "description": "A foreign key to the [VOCABULARY](https://github.com/OHDSI/CommonDataModel/wiki/VOCABULARY) table indicating from which source the Concept has been adapted.",
+          "description": "A foreign key to the [VOCABULARY](https:\/\/github.com\/OHDSI\/CommonDataModel\/wiki\/VOCABULARY) table indicating from which source the Concept has been adapted.",
           "foreignKey": "vocabulary"
         },
         {
@@ -131,7 +131,7 @@
           "type": "integer",
           "name": "domain_concept_id",
           "mode": "required",
-          "description": "A foreign key that refers to an identifier in the [CONCEPT](https://github.com/OHDSI/CommonDataModel/wiki/CONCEPT) table for the unique Domain Concept the Domain record belongs to.",
+          "description": "A foreign key that refers to an identifier in the [CONCEPT](https:\/\/github.com\/OHDSI\/CommonDataModel\/wiki\/CONCEPT) table for the unique Domain Concept the Domain record belongs to.",
           "foreignKey": "concept"
         }
       ]
@@ -732,7 +732,7 @@
           "type": "timestamp",
           "name": "measurement_datetime",
           "mode": "nullable",
-          "description": "The date and time of the Measurement. Some database systems don't have a datatype of time. To accomodate all temporal analyses, datatype datetime can be used (combining measurement_date and measurement_time [forum discussion](http://forums.ohdsi.org/t/date-time-and-datetime-problem-and-the-world-of-hours-and-1day/314))"
+          "description": "The date and time of the Measurement. Some database systems don't have a datatype of time. To accomodate all temporal analyses, datatype datetime can be used (combining measurement_date and measurement_time [forum discussion](http:\/\/forums.ohdsi.org\/t\/date-time-and-datetime-problem-and-the-world-of-hours-and-1day\/314))"
         },
         {
           "type": "integer",
@@ -758,7 +758,7 @@
           "type": "integer",
           "name": "value_as_concept_id",
           "mode": "nullable",
-          "description": "A foreign key to a Measurement result represented as a Concept from the Standardized Vocabularies (e.g., positive/negative, present/absent, low/high, etc.).",
+          "description": "A foreign key to a Measurement result represented as a Concept from the Standardized Vocabularies (e.g., positive\/negative, present\/absent, low\/high, etc.).",
           "foreignKey": "concept"
         },
         {
@@ -879,7 +879,7 @@
           "type": "integer",
           "name": "value_as_concept_id",
           "mode": "nullable",
-          "description": "A foreign key to an observation result stored as a Concept ID. This is applicable to observations where the result can be expressed as a Standard Concept from the Standardized Vocabularies (e.g., positive/negative, present/absent, low/high, etc.).",
+          "description": "A foreign key to an observation result stored as a Concept ID. This is applicable to observations where the result can be expressed as a Standard Concept from the Standardized Vocabularies (e.g., positive\/negative, present\/absent, low\/high, etc.).",
           "foreignKey": "concept"
         },
         {
