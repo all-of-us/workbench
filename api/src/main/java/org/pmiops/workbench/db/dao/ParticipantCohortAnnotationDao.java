@@ -11,9 +11,14 @@ import java.util.List;
 public interface ParticipantCohortAnnotationDao extends JpaRepository<ParticipantCohortAnnotation, Long> {
 
     // Important: Keep in sync with all DB rows that should be copied.
+    static final String ALIAS_ALL_COLUMNS_EXCEPT_REVIEW_ID =
+            "pca.cohort_annotation_definition_id, pca.participant_id, pca.annotation_value_string, " +
+                    "pca.annotation_value_integer, pca.annotation_value_date, " +
+                    "pca.cohort_annotation_enum_value_id, pca.annotation_value_boolean";
+
     static final String ALL_COLUMNS_EXCEPT_REVIEW_ID =
             "cohort_annotation_definition_id, participant_id, annotation_value_string, " +
-                    "annotation_value_integer, last_modified_time, annotation_value_date, " +
+                    "annotation_value_integer, annotation_value_date, " +
                     "cohort_annotation_enum_value_id, annotation_value_boolean";
 
     ParticipantCohortAnnotation findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
@@ -36,10 +41,10 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
     @Query(
         value = "INSERT INTO participant_cohort_annotations" +
         " (cohort_review_id, " + ALL_COLUMNS_EXCEPT_REVIEW_ID + ")" +
-        " SELECT (:toCohortReviewId), " + ALL_COLUMNS_EXCEPT_REVIEW_ID +
+        " SELECT :toCohortReviewId, " + ALIAS_ALL_COLUMNS_EXCEPT_REVIEW_ID +
         " FROM participant_cohort_annotations pca" +
-        " JOIN cohort_annotation_definition cad on (:toCohortId) = cad.cohort_id" +
-        " WHERE pca.cohort_review_id = (:fromCohortReviewId)",
+        " JOIN cohort_annotation_definition cad on :toCohortId = cad.cohort_id" +
+        " WHERE pca.cohort_review_id = :fromCohortReviewId",
         nativeQuery = true)
     void bulkCopyByCohortReviewAndCohort(
             @Param("fromCohortReviewId") long fromCohortReviewId,

@@ -23,6 +23,13 @@ public class CohortAnnotationEnumValue implements Comparable {
     private CohortAnnotationDefinition cohortAnnotationDefinition;
     private ParticipantCohortAnnotation participantCohortAnnotation;
 
+    public CohortAnnotationEnumValue() {}
+
+    public CohortAnnotationEnumValue(CohortAnnotationEnumValue caev) {
+        this.name = caev.getName();
+        this.order = caev.getOrder();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cohort_annotation_enum_value_id")
