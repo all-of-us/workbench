@@ -28,6 +28,7 @@
   overflow: auto;
 }
 
+/* Slider elements */
 .slider-container {
   width: 80%;
   margin: 0 1rem 0 0;
@@ -54,4 +55,13 @@
 
 #max-age {
   margin-left: 0.5rem;
+}
+
+/* Multiple select elements */
+select[multiple] {
+  min-width: 12rem;
+}
+
+option:hover {
+  background-color: rgb(219, 228, 233);
 }
