@@ -26,11 +26,13 @@ import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.TableQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Builds queries based of a {@link FieldSet} and {@link ParticipantCriteria}.
  */
 // TODO: figure out how to return nicer error messages to users for bad queries
+@Service
 public class FieldSetQueryBuilder {
 
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
