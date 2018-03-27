@@ -47,3 +47,26 @@ label {
 .alert {
   width: 14rem;
 }
+
+button.btn.btn-secondary {
+  width: 10rem;
+}
+
+.percentText {
+  position: absolute;
+  top: 2.8rem;
+  color: #8BC990;
+  font-family: "Gotham HTF";
+  font-size: 22px;
+  line-height: 34px;
+  width: 5rem;
+  text-align: center;
+}
+
+.profileCompletionText {
+  width: 1rem;
+  vertical-align: middle;
+  width: 10rem;
+  padding: 1rem;
+  height: 100%;
+}
