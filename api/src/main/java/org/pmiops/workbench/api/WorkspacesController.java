@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -55,7 +56,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -85,6 +85,38 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   public static final String CONFIG_FILENAME = "config/all_of_us_config.json";
+
+  private final WorkspaceService workspaceService;
+  private final CdrVersionDao cdrVersionDao;
+  private final UserDao userDao;
+  private Provider<User> userProvider;
+  private final FireCloudService fireCloudService;
+  private final CloudStorageService cloudStorageService;
+  private final Clock clock;
+  private final String apiHostName;
+  private final UserService userService;
+
+  @Autowired
+  WorkspacesController(
+      WorkspaceService workspaceService,
+      CdrVersionDao cdrVersionDao,
+      UserDao userDao,
+      Provider<User> userProvider,
+      FireCloudService fireCloudService,
+      CloudStorageService cloudStorageService,
+      Clock clock,
+      @Qualifier("apiHostName") String apiHostName,
+      UserService userService) {
+    this.workspaceService = workspaceService;
+    this.cdrVersionDao = cdrVersionDao;
+    this.userDao = userDao;
+    this.userProvider = userProvider;
+    this.fireCloudService = fireCloudService;
+    this.cloudStorageService = cloudStorageService;
+    this.clock = clock;
+    this.apiHostName = apiHostName;
+    this.userService = userService;
+  }
 
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
@@ -169,10 +201,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if(workspace.getTimeRequested() != null){
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
-
-    if(workspace.getTimeReviewed() != null){
-      researchPurpose.timeReviewed(workspace.getTimeReviewed().getTime());
-    }
     return researchPurpose;
   }
 
@@ -236,9 +264,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           result.setName(workspace.getName());
           if (workspace.getResearchPurpose() != null) {
             setResearchPurposeDetails(result, workspace.getResearchPurpose());
-            if (workspace.getResearchPurpose().getTimeReviewed() != null) {
-              result.setTimeReviewed(new Timestamp(workspace.getResearchPurpose().getTimeReviewed()));
-            }
             result.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
             if (workspace.getResearchPurpose().getTimeRequested() != null) {
               result.setTimeRequested(
@@ -263,39 +288,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               return result;
             }
           };
-
-
-  private final WorkspaceService workspaceService;
-  private final CdrVersionDao cdrVersionDao;
-  private final UserDao userDao;
-  private Provider<User> userProvider;
-  private final FireCloudService fireCloudService;
-  private final CloudStorageService cloudStorageService;
-  private final Clock clock;
-  private final String apiHostName;
-  private final NotebooksService notebooksService;
-
-  @Autowired
-  WorkspacesController(
-      WorkspaceService workspaceService,
-      CdrVersionDao cdrVersionDao,
-      UserDao userDao,
-      Provider<User> userProvider,
-      FireCloudService fireCloudService,
-      CloudStorageService cloudStorageService,
-      Clock clock,
-      @Qualifier("apiHostName") String apiHostName,
-      NotebooksService notebooksService) {
-    this.workspaceService = workspaceService;
-    this.cdrVersionDao = cdrVersionDao;
-    this.userDao = userDao;
-    this.userProvider = userProvider;
-    this.fireCloudService = fireCloudService;
-    this.cloudStorageService = cloudStorageService;
-    this.clock = clock;
-    this.apiHostName = apiHostName;
-    this.notebooksService = notebooksService;
-  }
 
   @VisibleForTesting
   void setUserProvider(Provider<User> userProvider) {
@@ -756,6 +748,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
+    org.pmiops.workbench.db.model.Workspace workspace = workspaceService.get(ns, id);
+    userService.logAdminWorkspaceAction(
+        workspace.getWorkspaceId(),
+        "research purpose approval",
+        workspace.getApproved(),
+        review.getApproved());
     workspaceService.setResearchPurposeApproved(ns, id, review.getApproved());
     return ResponseEntity.ok(new EmptyResponse());
   }

@@ -20,6 +20,9 @@
     </div>
   </div>
   <div class="card-area">
+    <div *ngIf="workspacesLoading" style="margin-top: 1.5rem;">
+      <span class="spinner spinner-lg" style="padding-top: 1rem"></span>
+    </div>
     <div class="card" *ngFor="let workspaceResponse of workspaceList" routerLink="/workspace/{{workspaceResponse.workspace.namespace}}/{{workspaceResponse.workspace.id}}">
       <h5 class="workspace-name">{{workspaceResponse.workspace.name}}</h5>
       <div class="description">{{workspaceResponse.workspace.description}}</div>

@@ -1,0 +1,11 @@
+[
+  {
+    "person_id":102246,
+    "death_date":"2009-12-03",
+    "death_datetime":"2009-12-03 05:00:00 UTC",
+    "death_type_concept_id":1,
+    "cause_concept_id":1,
+    "cause_source_value":"",
+    "cause_source_concept_id":2
+  }
+]
