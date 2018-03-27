@@ -619,6 +619,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotation pca1Request =
             createParticipantCohortAnnotation(cad1Response.getCohortAnnotationDefinitionId(),
             1L,
+                    c1.getId(),
             "value1");
     ParticipantCohortAnnotation pca1Response =
             cohortReviewController.createParticipantCohortAnnotation(
@@ -665,7 +666,7 @@ public class WorkspacesControllerTest {
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
 
-    String sql = "select * from cohort_annotation_enum_value";
+    String sql = "select * from participant_cohort_annotations";
     List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
 
     CohortAnnotationDefinitionListResponse clonedCad1List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
@@ -677,6 +678,18 @@ public class WorkspacesControllerTest {
     assertThat(clonedCad1.getColumnName()).isEqualTo(cad1Response.getColumnName());
     assertThat(clonedCad1.getAnnotationType()).isEqualTo(cad1Response.getAnnotationType());
     assertThat(clonedCad1.getEnumValues()).isEqualTo(cad1Response.getEnumValues());
+
+    ParticipantCohortAnnotationListResponse clonedPca1List = cohortReviewController.getParticipantCohortAnnotations(
+                    cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
+                    cdrVersion.getCdrVersionId(), 1L).getBody();
+    assertThat(clonedPca1List.getItems().size()).isEqualTo(1);
+    ParticipantCohortAnnotation clonedPca1 = clonedPca1List.getItems().get(0);
+    assertThat(clonedPca1.getAnnotationId()).isNotEqualTo(pca1Response.getAnnotationId());
+    assertThat(clonedPca1.getAnnotationValueEnum()).isEqualTo(pca1Response.getAnnotationValueEnum());
+    assertThat(clonedPca1.getCohortAnnotationDefinitionId()).isEqualTo(clonedCad1.getCohortAnnotationDefinitionId());
+    assertThat(clonedPca1.getCohortReviewId()).isEqualTo(gotCr1.getCohortReviewId());
+    assertThat(clonedPca1.getParticipantId()).isEqualTo(1L);
+    assertThat(clonedPca1.getAnnotationValueString()).isEqualTo(pca1Response.getAnnotationValueEnum());
 
     CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
@@ -691,13 +704,15 @@ public class WorkspacesControllerTest {
   }
 
   private ParticipantCohortAnnotation createParticipantCohortAnnotation(Long cohortAnnotationDefinitionId,
+                                                                        Long cohortReviewId,
                                                                         Long participantId,
                                                                         String value) {
     return new ParticipantCohortAnnotation()
             .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
             .annotationValueEnum(value)
             .annotationValueString(value)
-            .participantId(participantId);
+            .participantId(participantId)
+            .cohortReviewId(cohortReviewId);
   }
 
   private CohortAnnotationDefinition createCohortAnnotationDefinition(Long cohortId,
