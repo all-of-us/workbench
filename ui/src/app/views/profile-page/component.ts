@@ -26,16 +26,18 @@ export class ProfilePageComponent implements OnInit {
   editing = false;
   view: any[] = [120, 120];
   numberOfTotalTasks = 4;
+  completedTasksName = 'Completed';
+  unfinishedTasksName = 'Unfinished';
   colorScheme = {
     domain: ['#8BC990', '#C7C8C8']
   };
   spinnerValues = [
     {
-      'name': 'finished',
+      'name': this.completedTasksName,
       'value': this.completedTasks
     },
     {
-      'name': 'not finished',
+      'name': this.unfinishedTasksName,
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
@@ -101,11 +103,11 @@ export class ProfilePageComponent implements OnInit {
   reloadSpinner(): void {
     this.spinnerValues = [
       {
-        'name': 'finished',
+        'name': this.completedTasksName,
         'value': this.completedTasks
       },
       {
-        'name': 'not finished',
+        'name': this.unfinishedTasksName,
         'value': this.numberOfTotalTasks - this.completedTasks
       }
     ];
