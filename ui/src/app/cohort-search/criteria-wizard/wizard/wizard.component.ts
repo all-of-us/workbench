@@ -20,7 +20,7 @@ export class WizardComponent implements OnInit, OnDestroy {
   @Input() criteriaType: string;
   @select(activeParameterList) selection$;
 
-  hasSelection = true;
+  hasSelection = false;
   subscription: Subscription;
 
   constructor(private actions: CohortSearchActions) {}

@@ -98,7 +98,7 @@
     <button type="submit"
       class="btn btn-primary"
       (click)="onSubmit()"
-      [disabled]="demoForm.invalid">
+      [disabled]="demoForm.invalid || !hasSelection">
       Finish
     </button>
   </div>

@@ -2,7 +2,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {fromJS, is} from 'immutable';
+import {fromJS, List} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -10,8 +10,19 @@ import {activeParameterList, CohortSearchActions} from '../../redux';
 
 import {Attribute, CohortBuilderService, Criteria} from 'generated';
 
+/* Demographic Criteria Subtypes and Constants */
+const AGE = 'AGE';
+const DEC = 'DEC';
+const GEN = 'GEN';
+const RACE = 'RACE';
+const minAge = 0;
+const maxAge = 120;
+
+/*
+ * Sorts a plain JS array of plain JS objects first by a 'count' key and then
+ * by a 'name' key
+ */
 function sortByCountThenName(critA, critB) {
-  // Sorts by Count, then secondarily by Name
   const A = critA.count || 0;
   const B = critB.count || 0;
   const diff = B - A;
@@ -19,7 +30,6 @@ function sortByCountThenName(critA, critB) {
     ? (critA.name > critB.name ? 1 : -1)
     : diff;
 }
-
 
 @Component({
   selector: 'crit-demo-form',
@@ -29,13 +39,14 @@ function sortByCountThenName(critA, critB) {
 })
 export class DemoFormComponent implements OnInit {
   @Input() open: boolean;
-  @select(activeParameterList) selected$;
-
-  readonly minAge = 0;
-  readonly maxAge = 120;
+  @select(activeParameterList) selection$;
+  readonly minAge = minAge;
+  readonly maxAge = maxAge;
   loading = false;
   subscription = new Subscription();
+  hasSelection = false;
 
+  /* The Demographics form controls and associated convenience lenses */
   demoForm = new FormGroup({
     ageMin: new FormControl(0),
     ageMax: new FormControl(120),
@@ -44,12 +55,12 @@ export class DemoFormComponent implements OnInit {
     races: new FormControl(),
     deceased: new FormControl(),
   });
-
-  get genders() { return this.demoForm.get('genders'); }
-  get races() { return this.demoForm.get('races'); }
+  get genders()  { return this.demoForm.get('genders');  }
+  get races()    { return this.demoForm.get('races');    }
   get ageRange() { return this.demoForm.get('ageRange'); }
   get deceased() { return this.demoForm.get('deceased'); }
 
+  /* Storage for the demographics options (fetched via the API) */
   ageNode;
   deceasedNode;
   genderNodes = [];
@@ -63,103 +74,135 @@ export class DemoFormComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
+    this.demoForm.valueChanges.withLatestFrom(this.selection$).subscribe(console.log);
+    this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
+    this.initAgeControls();
 
-    this.selected$.first().subscribe(selections => {
-      console.log('DemoForm.ngOnInit selections');
-      console.dir(selections);
-      const genders = selections.filter(s => s.get('subtype') === 'GEN');
-      this.genders.setValue(genders.toArray());
-      console.log(this.genders.value);
+    this.selection$.first().subscribe(selections => {
+      this.initGenders(selections);
+      this.initRaces(selections);
+      this.initDeceased(selections);
+      this.initAgeRange(selections);
+      this.loadNodesFromApi();
     });
+  }
 
-    this.demoForm.valueChanges.withLatestFrom(this.selected$).subscribe(console.log);
-
+  loadNodesFromApi() {
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
-
-    const calls = ['DEC', 'GEN', 'RACE', 'AGE'].map(code => this.api
+    /*
+     * When we fetch the crit nodes we immediately sort by count (secondary
+     * sort on name), then map each collection to immutable objects and attach
+     * a parameterId.  Parameter ID's should be unique for criteria, so we can
+     * use those to determine if we need to add / remove params (e.g. in the
+     * edit scenario)
+     *
+     * We do NOT calculate a param ID for AGE criteria since those are
+     * determined by a hash that relies on user input.
+     */
+    const calls = [DEC, GEN, RACE, AGE].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
       .map(response => {
-        const items = response.items;
+        let items = response.items;
         items.sort(sortByCountThenName);
-        return items;
+        const nodes = fromJS(items).map(node => {
+          if (node.get('subtype') === AGE) {
+          } else {
+            const paramId = `param${node.get('id', node.get('code'))}`;
+            node = node.set('parameterId', paramId);
+          }
+          return node;
+        });
+        return nodes.size > 1 ? nodes : nodes.get(0);
       })
     );
-
     forkJoin(...calls).subscribe(([dec, gen, race, age]) => {
-      this.genderNodes = fromJS(gen);
-      this.raceNodes = fromJS(race);
-      this.deceasedNode = fromJS(dec[0]);
-      this.ageNode = fromJS(age[0]);
+      this.deceasedNode = dec;
+      this.genderNodes = gen;
+      this.raceNodes = race;
+      this.ageNode = age;
       this.loading = false;
     });
+  }
 
-    /*
-     * We want the two inputs to mirror the slider, so here we're wiring all
-     * three inputs together using the valueChanges Observable and the
-     * emitEvent option.  Setting emitEvent to false will prevent the other
-     * Observables from firing when a control is updated this way, hence
-     * preventing any infinite update cycles.
-     */
+  /*
+    * We want the two inputs to mirror the slider, so here we're wiring all
+    * three inputs together using the valueChanges Observable and the
+    * emitEvent option.  Setting emitEvent to false will prevent the other
+    * Observables from firing when a control is updated this way, hence
+    * preventing any infinite update cycles.
+    */
+  initAgeControls() {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
-    const range = this.demoForm.get('ageRange');
-
     this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
     }));
-
     this.subscription.add(min.valueChanges.subscribe(value => {
       const [_, hi] = [...this.ageRange.value];
       this.ageRange.setValue([value, hi], {emitEvent: false});
     }));
-
     this.subscription.add(max.valueChanges.subscribe(value => {
       const [lo, _] = [...this.ageRange.value];
       this.ageRange.setValue([lo, value], {emitEvent: false});
     }));
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+  initDeceased(selections) {
+    const existent = selections.find(s => s.get('subtype') === DEC);
+    if (existent !== undefined) {
+      this.deceased.setValue(true);
+    }
+    this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
+      console.log(`Deceased status change: ${includeDeceased}`);
+      if (!this.deceasedNode) {
+        console.log('No node from which to make parameter for deceased status');
+        return ;
+      }
+      includeDeceased
+        ? this.actions.addParameter(this.deceasedNode)
+        : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+    }));
   }
 
-  onCancel() {
-    this.actions.cancelWizard();
+  initGenders(selections) {
+    const genDiff = this.genders.valueChanges.pairwise().map(([prior, latter]) => {
+      const add = latter.filter(item => !prior.includes(item));
+      const del = prior.filter(item => !latter.includes(item));
+      return [add, del];
+    });
+    this.subscription.add(genDiff.subscribe(([add, del]) => {
+      add.forEach(item => this.actions.addParameter(item));
+      del.forEach(item => this.actions.removeParameter(item.get('parameterId')));
+    }));
+    const initialGenders = selections.filter(s => s.get('subtype') === GEN).toArray();
+    this.genders.setValue(initialGenders);
   }
 
-  onSubmit() {
-    let hasSelection = false;
+  initRaces(selections) {
+    const raceDiff = this.races.valueChanges.pairwise().map(([prior, latter]) => {
+      const add = latter.filter(item => !prior.includes(item));
+      const del = prior.filter(item => !latter.includes(item));
+      return [add, del];
+    });
+    this.subscription.add(raceDiff.subscribe(([add, del]) => {
+      add.forEach(item => this.actions.addParameter(item));
+      del.forEach(item => this.actions.removeParameter(item.get('parameterId')));
+    }));
+    const initialRaces = selections.filter(s => s.get('subtype') === RACE).toArray();
+    this.races.setValue(initialRaces);
+  }
 
-
-    if (this.deceased.value) {
-      console.log('Processing deceased status');
-      const paramId = `param${this.deceasedNode.get('id')}`;
-      const param = this.deceasedNode.set('parameterId', paramId);
-      this.actions.addParameter(param);
-      hasSelection = true;
+  initAgeRange(selections) {
+    const existent = selections.find(s => s.get('subtype') === AGE);
+    if (existent) {
+      const range = existent.getIn(['attribute', 'operands']).toArray();
+      this.ageRange.setValue(range);
+      this.demoForm.get('ageMin').setValue(range[0]);
+      this.demoForm.get('ageMax').setValue(range[1]);
     }
-
-    if (this.genders.value) {
-      this.genders.value.map(node => {
-        console.log(`Processing gender ${node}`);
-        const paramId = `param${node.get('id', node.get('code'))}`;
-        const param = node.set('parameterId', paramId);
-        this.actions.addParameter(param);
-        hasSelection = true;
-      });
-    }
-
-    if (this.races.value) {
-      this.races.value.map(node => {
-        console.log(`Processing race ${node}`);
-        const paramId = `param${node.get('id', node.get('code'))}`;
-        const param = node.set('parameterId', paramId);
-        this.actions.addParameter(param);
-        hasSelection = true;
-      });
-    }
-
+    const ageDiff = this.ageRange.valueChanges;
+    /*
     if (this.ageRange.value) {
       const [ageLow, ageHigh] = this.ageRange.value;
       if (ageHigh < 120 || ageLow > 0) {
@@ -174,13 +217,37 @@ export class DemoFormComponent implements OnInit {
           .set('parameterId', attr.hashCode())
           .set('attribute', attr);
         this.actions.addParameter(param);
-        hasSelection = true;
       }
     }
+     */
+  }
 
-    if (hasSelection) {
-      this.actions.finishWizard();
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  onCancel() {
+    this.actions.cancelWizard();
+  }
+
+  onSubmit() {
+    if (this.ageRange.value) {
+      const [ageLow, ageHigh] = this.ageRange.value;
+      if (ageHigh < 120 || ageLow > 0) {
+        const attr = fromJS(<Attribute>{
+          operator: 'between',
+          operands: [
+            ageLow  || 0,
+            ageHigh || 120,
+          ]
+        });
+        const param = this.ageNode
+          .set('parameterId', attr.hashCode())
+          .set('attribute', attr);
+        this.actions.addParameter(param);
+      }
     }
+    this.actions.finishWizard();
   }
 
   /*
@@ -203,7 +270,11 @@ export class DemoFormComponent implements OnInit {
   optionComparator(A, B): boolean {
     // Sometimes (for some reason) A or B is undefined... not sure how or why :/
     if (A && B) {
-      return A.get('id') === B.get('id');
+      const idMatch = A.get('id') === B.get('id');
+      const subtypeAndCodeMatch =
+        A.get('subtype') === B.get('subtype')
+        && A.get('code') == B.get('code');
+      return idMatch || subtypeAndCodeMatch;
     }
   }
 }
