@@ -88,7 +88,7 @@
         <div class="percentText">
           {{completedTasksAsPercentage}}%
         </div>
-        <h6 style="width: 1rem; vertical-align: middle; width: 10rem; padding: 1rem; height: 100%">
+        <h6 class="profileCompletionText">
           Profile Completion Progress
         </h6>
       </div>
@@ -106,19 +106,19 @@
       </div>
       <div>
         <button class="btn btn-secondary" (click)="submitTermsOfService()"
-            [disabled]="email===null || this.profile.termsOfServiceCompletionTime !== null">
+            [disabled]="email === null || this.profile.termsOfServiceCompletionTime !== null">
           Submit Terms of Service
         </button>
       </div>
       <div>
         <button class="btn btn-secondary" (click)="completeEthicsTraining()"
-            [disabled]="email===null || this.profile.ethicsTrainingCompletionTime !== null">
+            [disabled]="email === null || this.profile.ethicsTrainingCompletionTime !== null">
           Complete Ethics Training
         </button>
       </div>
       <div>
         <button class="btn btn-secondary" (click)="submitDemographicSurvey()"
-            [disabled]="email===null || this.profile.demographicSurveyCompletionTime !== null">
+            [disabled]="email === null || this.profile.demographicSurveyCompletionTime !== null">
           Submit Demographics Survey
         </button>
       </div>

@@ -3,10 +3,12 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 
-import {BlockscoreIdVerificationStatus,
-    ErrorResponse,
-    Profile,
-    ProfileService} from 'generated';
+import {
+  BlockscoreIdVerificationStatus,
+  ErrorResponse,
+  Profile,
+  ProfileService,
+} from 'generated';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -23,6 +25,7 @@ export class ProfilePageComponent implements OnInit {
   errorText: string;
   editing = false;
   view: any[] = [120, 120];
+  numberOfTotalTasks = 4;
   colorScheme = {
     domain: ['#8BC990', '#C7C8C8']
   };
@@ -33,7 +36,7 @@ export class ProfilePageComponent implements OnInit {
     },
     {
       'name': 'not finished',
-      'value': 4 - this.completedTasks
+      'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
   constructor(
@@ -72,10 +75,10 @@ export class ProfilePageComponent implements OnInit {
   }
 
   public get completedTasks() {
-    if (this.profile === undefined) {
-      return 0;
-    }
     let completedTasks = 0;
+    if (this.profile === undefined) {
+      return completedTasks;
+    }
     if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
       completedTasks += 1;
     }
@@ -92,7 +95,7 @@ export class ProfilePageComponent implements OnInit {
   }
 
   public get completedTasksAsPercentage() {
-    return this.completedTasks * 25;
+    return this.completedTasks / this.numberOfTotalTasks * 100;
   }
 
   reloadSpinner(): void {
@@ -103,7 +106,7 @@ export class ProfilePageComponent implements OnInit {
       },
       {
         'name': 'not finished',
-        'value': 4 - this.completedTasks
+        'value': this.numberOfTotalTasks - this.completedTasks
       }
     ];
   }
