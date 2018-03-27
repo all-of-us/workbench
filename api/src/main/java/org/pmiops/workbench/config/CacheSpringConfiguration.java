@@ -53,9 +53,22 @@ public class CacheSpringConfiguration {
     return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
   }
 
+  public static CdrSchemaConfig lookupCdrSchemaConfig(
+      LoadingCache<String, Object> configCache) throws ExecutionException {
+    return (CdrSchemaConfig) configCache.get(Config.CDR_SCHEMA_CONFIG_ID);
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
+  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
     return lookupWorkbenchConfig(configCache);
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  CdrSchemaConfig getCdrSchemaConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
+    return lookupCdrSchemaConfig(configCache);
   }
 }

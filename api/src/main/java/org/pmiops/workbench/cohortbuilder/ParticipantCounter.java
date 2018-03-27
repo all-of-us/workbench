@@ -107,9 +107,14 @@ public class ParticipantCounter {
 
     public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
         String sqlTemplate, String endSql) {
+        return buildQuery(participantCriteria, sqlTemplate, endSql, new HashMap<>());
+    }
+
+    public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
+        String sqlTemplate, String endSql, Map<String, QueryParameterValue> params) {
         SearchRequest request = participantCriteria.getSearchRequest();
         StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
-        Map<String, QueryParameterValue> params = new HashMap<>();
+
         if (request == null) {
             queryBuilder.append(PERSON_ID_WHITELIST_TEMPLATE);
             params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
