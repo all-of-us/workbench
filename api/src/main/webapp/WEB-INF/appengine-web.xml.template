@@ -10,10 +10,14 @@
   </system-properties>
 
   <env-variables>
-    <env-var name="workbench.datasource.driver-class-name" value="${DB_DRIVER}"/>
-    <env-var name="workbench.datasource.url" value="${DB_CONNECTION_STRING}"/>
-    <env-var name="workbench.datasource.username" value="${WORKBENCH_DB_USER}"/>
-    <env-var name="workbench.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
+    <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
+    <env-var name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
+    <env-var name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
+    <env-var name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
+
+    <env-var name="cdr.datasource.url" value="${CDR_DB_CONNECTION_STRING}"/>
+    <env-var name="cdr.datasource.username" value="${CDR_DB_USER}"/>
+    <env-var name="cdr.datasource.password" value="${CDR_DB_PASSWORD}"/>
   </env-variables>
 
   <resource-files>
