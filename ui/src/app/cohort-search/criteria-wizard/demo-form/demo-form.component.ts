@@ -1,9 +1,11 @@
-import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnInit} from '@angular/core';
+import {select} from '@angular-redux/store';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {fromJS, List} from 'immutable';
+import {fromJS} from 'immutable';
+import {combineLatest} from 'rxjs/observable/combineLatest';
 import {forkJoin} from 'rxjs/observable/forkJoin';
+import {fromEvent} from 'rxjs/observable/fromEvent';
 import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions} from '../../redux';
@@ -37,7 +39,7 @@ function sortByCountThenName(critA, critB) {
   // Buttons styles picked up from parent (wizard.ts)
   styleUrls: ['./demo-form.component.css'],
 })
-export class DemoFormComponent implements OnInit {
+export class DemoFormComponent implements OnInit, OnDestroy {
   @Input() open: boolean;
   @select(activeParameterList) selection$;
   readonly minAge = minAge;
@@ -74,7 +76,7 @@ export class DemoFormComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
-    this.demoForm.valueChanges.withLatestFrom(this.selection$).subscribe(console.log);
+    // this.demoForm.valueChanges.withLatestFrom(this.selection$).subscribe(console.log);
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
     this.initAgeControls();
 
@@ -85,6 +87,10 @@ export class DemoFormComponent implements OnInit {
       this.initAgeRange(selections);
       this.loadNodesFromApi();
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   loadNodesFromApi() {
@@ -102,7 +108,7 @@ export class DemoFormComponent implements OnInit {
     const calls = [DEC, GEN, RACE, AGE].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
       .map(response => {
-        let items = response.items;
+        const items = response.items;
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
           if (node.get('subtype') === AGE) {
@@ -154,9 +160,8 @@ export class DemoFormComponent implements OnInit {
       this.deceased.setValue(true);
     }
     this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
-      console.log(`Deceased status change: ${includeDeceased}`);
       if (!this.deceasedNode) {
-        console.log('No node from which to make parameter for deceased status');
+        console.warn('No node from which to make parameter for deceased status');
         return ;
       }
       includeDeceased
@@ -194,36 +199,48 @@ export class DemoFormComponent implements OnInit {
   }
 
   initAgeRange(selections) {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+
     const existent = selections.find(s => s.get('subtype') === AGE);
     if (existent) {
       const range = existent.getIn(['attribute', 'operands']).toArray();
       this.ageRange.setValue(range);
-      this.demoForm.get('ageMin').setValue(range[0]);
-      this.demoForm.get('ageMax').setValue(range[1]);
+      min.setValue(range[0]);
+      max.setValue(range[1]);
     }
-    const ageDiff = this.ageRange.valueChanges;
-    /*
-    if (this.ageRange.value) {
-      const [ageLow, ageHigh] = this.ageRange.value;
-      if (ageHigh < 120 || ageLow > 0) {
+
+    const selectedAge = this.selection$
+      .map(selectedNodes => selectedNodes
+        .find(node => node.get('subtype') === AGE)
+      );
+
+    const ageDiff = this.ageRange.valueChanges
+      .debounceTime(250)
+      .distinctUntilChanged()
+      .map(([lo, hi]) => {
         const attr = fromJS(<Attribute>{
           operator: 'between',
-          operands: [
-            ageLow  || 0,
-            ageHigh || 120,
-          ]
+          operands: [lo, hi],
         });
-        const param = this.ageNode
-          .set('parameterId', attr.hashCode())
+        const paramId = attr.hashCode();
+        return this.ageNode
+          .set('parameterId', paramId)
           .set('attribute', attr);
-        this.actions.addParameter(param);
+      })
+      .withLatestFrom(selectedAge)
+      .filter(([newNode, oldNode]) => {
+        if (oldNode) {
+          return oldNode.get('parameterId') !== newNode.get('parameterId');
+        }
+        return true;
+      });
+    this.subscription.add(ageDiff.subscribe(([newNode, oldNode]) => {
+      if (oldNode) {
+        this.actions.removeParameter(oldNode.get('parameterId'));
       }
-    }
-     */
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+      this.actions.addParameter(newNode);
+    }));
   }
 
   onCancel() {
@@ -231,22 +248,6 @@ export class DemoFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.ageRange.value) {
-      const [ageLow, ageHigh] = this.ageRange.value;
-      if (ageHigh < 120 || ageLow > 0) {
-        const attr = fromJS(<Attribute>{
-          operator: 'between',
-          operands: [
-            ageLow  || 0,
-            ageHigh || 120,
-          ]
-        });
-        const param = this.ageNode
-          .set('parameterId', attr.hashCode())
-          .set('attribute', attr);
-        this.actions.addParameter(param);
-      }
-    }
     this.actions.finishWizard();
   }
 
@@ -273,7 +274,7 @@ export class DemoFormComponent implements OnInit {
       const idMatch = A.get('id') === B.get('id');
       const subtypeAndCodeMatch =
         A.get('subtype') === B.get('subtype')
-        && A.get('code') == B.get('code');
+        && A.get('code') === B.get('code');
       return idMatch || subtypeAndCodeMatch;
     }
   }

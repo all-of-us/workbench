@@ -94,7 +94,6 @@ describe('WizardComponent', () => {
 
   it('Should dispatch WIZARD_FINISH on submission', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.disableFinish = false;
     fixture.detectChanges();
     comp.onSubmit();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
