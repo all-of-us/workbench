@@ -1,7 +1,7 @@
 {
   "description": "Configuration specifying the schema for tables in the CDR, including foreign key relationships. Adapted from BigQuery schema files, found in https://github.com/all-of-us/curation/data_steward/resources/fields.",
   "version": "5.2",
-  "metadata_tables": {
+  "metadataTables": {
     "care_site": {
       "columns": [
         {
@@ -311,7 +311,7 @@
       ]
     }
   },
-  "cohort_tables": {
+  "cohortTables": {
     "condition_occurrence": {
       "columns": [
         {
