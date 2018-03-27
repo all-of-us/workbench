@@ -102,7 +102,7 @@ public class ParticipantCohortAnnotation {
         return this;
     }
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "cohort_annotation_enum_value_id")
     public CohortAnnotationEnumValue getCohortAnnotationEnumValue() {
         return cohortAnnotationEnumValue;
