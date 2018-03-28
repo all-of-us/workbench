@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 
+import {ServerConfigService} from '../../services/server-config.service';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 
@@ -39,13 +40,18 @@ export class AccountCreationComponent {
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
+  gsuiteDomain: string;
   usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
-    private loginComponent: LoginComponent
+    private loginComponent: LoginComponent,
+    serverConfigService: ServerConfigService
   ) {
+    serverConfigService.getConfig().subscribe((config) => {
+      this.gsuiteDomain = config.gsuiteDomain;
+    });
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
       this.loginComponent.smallerBackgroundImgSrc =
