@@ -189,7 +189,7 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
   compile 'com.google.appengine:appengine-api-1.0-sdk:+'
-  compile('org.springframework.boot:spring-boot-starter-web:+') {
+  compile('org.springframework.boot:spring-boot-starter-web:1.5.10.RELEASE') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
