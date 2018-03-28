@@ -1,0 +1,26 @@
+{
+  "firecloud": {
+    "billingAccountId": "014D91-FCB792-33D2C0",
+    "billingProjectPrefix": "aou-rw-staging-",
+    "debugEndpoints": false,
+    "enforceRegistered": false,
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-scripts/setup_notebook_cluster.sh",
+    "registeredDomainName": "all-of-us-registered-staging"
+  },
+  "auth": {
+    "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
+  },
+  "cdr": {
+    "defaultCdrVersion": "Test Registered CDR"
+  },
+  "googleCloudStorageService": {
+    "credentialsBucketName": "all-of-us-rw-staging-credentials"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "staging.fake-research-aou.org"
+  },
+  "server": {
+    "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
+    "projectId": "all-of-us-rw-staging"
+  }
+}
