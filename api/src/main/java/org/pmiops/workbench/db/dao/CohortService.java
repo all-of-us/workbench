@@ -41,10 +41,10 @@ public class CohortService {
         .stream()
         .map(definition -> new CohortAnnotationDefinition(definition).cohortId(saved.getCohortId()))
         .forEach(cohortAnnotationDefinitionDao::save);
-      participantCohortAnnotationDao.bulkCopyByCohortReviewAndCohort(
-        fromReview.getCohortReviewId(),
-        cr.getCohortReviewId(),
-        to.getCohortId());
+//      participantCohortAnnotationDao.bulkCopyByCohortReviewAndCohort(
+//        fromReview.getCohortReviewId(),
+//        cr.getCohortReviewId(),
+//        to.getCohortId());
 
     }
     return saved;
