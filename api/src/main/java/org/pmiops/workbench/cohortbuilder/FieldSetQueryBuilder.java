@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,7 +123,7 @@ public class FieldSetQueryBuilder {
     }
     sqlBuilder.append(columnFilter.getColumnName());
     sqlBuilder.append(' ');
-    sqlBuilder.append(columnFilter.getOperator());
+    sqlBuilder.append(OperatorUtils.getSqlOperator(columnFilter.getOperator()));
     sqlBuilder.append(" ${");
     sqlBuilder.append(paramName);
     sqlBuilder.append("}\n");
