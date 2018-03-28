@@ -3,14 +3,12 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS} from 'immutable';
-import {combineLatest} from 'rxjs/observable/combineLatest';
 import {forkJoin} from 'rxjs/observable/forkJoin';
-import {fromEvent} from 'rxjs/observable/fromEvent';
 import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions} from '../../redux';
 
-import {Attribute, CohortBuilderService, Criteria} from 'generated';
+import {Attribute, CohortBuilderService} from 'generated';
 
 /* Demographic Criteria Subtypes and Constants */
 const AGE = 'AGE';
@@ -104,7 +102,7 @@ export class DemoFormComponent implements OnInit, OnDestroy {
   loadNodesFromApi() {
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     /*
-     * Each subtype's possible criteri is loaded via the API.  Race and Gender
+     * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
      * and age are used as templates for constructing relevant seach
      * parameters.  Upon load we immediately map the criteria to immutable
