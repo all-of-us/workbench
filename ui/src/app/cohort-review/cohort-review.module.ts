@@ -3,6 +3,8 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {ChartsModule} from '../charts/charts.module';
 
@@ -14,6 +16,10 @@ import {PageLayout} from './page-layout/page-layout';
 import {TablePage} from './table-page/table-page';
 
 import {ReviewNavComponent} from './review-nav/review-nav.component';
+
+import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
+import {DetailHeaderComponent} from './detail-header/detail-header.component';
+import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
@@ -33,17 +39,21 @@ import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
-import { DetailHeaderComponent } from './detail-header/detail-header.component';
-import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
 /* tslint:enable:max-line-length */
 
 
 @NgModule({
   imports: [
-    CohortReviewRoutingModule,
-    ClarityModule,
+    // Angular
     CommonModule,
     ReactiveFormsModule,
+    // Routes
+    CohortReviewRoutingModule,
+    // 3rd Party
+    ClarityModule,
+    NgxChartsModule,
+    NgxPopperModule,
+    // Ours
     ChartsModule,
   ],
   declarations: [
@@ -73,6 +83,7 @@ import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
     SidebarContentComponent,
     DetailHeaderComponent,
     DetailTabsComponent,
+    DetailConditionsComponent,
   ],
   providers: [ReviewStateService]
 })

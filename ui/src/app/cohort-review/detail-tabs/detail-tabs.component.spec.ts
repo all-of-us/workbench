@@ -1,5 +1,5 @@
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {ClarityModule} from '@clr/angular';
 
 import {DetailTabsComponent} from './detail-tabs.component';
 
@@ -10,8 +10,8 @@ describe('DetailTabsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ClarityModule],
-      declarations: [ DetailTabsComponent ],
+      declarations: [DetailTabsComponent],
+      schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents();
   }));
