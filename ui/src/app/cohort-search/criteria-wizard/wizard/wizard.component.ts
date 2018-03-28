@@ -1,14 +1,10 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
+import {List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  activeParameterList,
-  CohortSearchActions,
-  CohortSearchState,
-} from '../../redux';
+import {activeParameterList, CohortSearchActions, CohortSearchState} from '../../redux';
 import {typeToTitle} from '../../utils';
-
 
 @Component({
   selector: 'app-criteria-wizard',
@@ -22,19 +18,15 @@ import {typeToTitle} from '../../utils';
 export class WizardComponent implements OnInit, OnDestroy {
   @Input() open: boolean;
   @Input() criteriaType: string;
-  disableFinish = true;
+  @select(activeParameterList) selection$;
+
+  hasSelection = false;
   subscription: Subscription;
 
-  constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private actions: CohortSearchActions,
-  ) {}
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    this.subscription = this.ngRedux
-      .select(activeParameterList)
-      .map(list => !(list.size > 0))
-      .subscribe(val => this.disableFinish = val);
+    this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
   }
 
   ngOnDestroy() {
@@ -49,14 +41,11 @@ export class WizardComponent implements OnInit, OnDestroy {
     this.actions.cancelWizard();
   }
 
+  /*
+   * Navigation is prevented if there is no selection; otherwise we'd have to
+   * do some checking here to make sure we don't create an empty search group
+   */
   onSubmit() {
-    if (this.disableFinish) {
-      /*
-       * If there are no selected criteria, then we cancel to revert to the
-       * pre-wizard state, not finish.
-       */
-      return this.onCancel();
-    }
     this.actions.finishWizard();
   }
 }

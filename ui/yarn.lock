@@ -4352,6 +4352,10 @@ negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
 
+ng2-nouislider@^1.7.7:
+  version "1.7.7"
+  resolved "https://registry.yarnpkg.com/ng2-nouislider/-/ng2-nouislider-1.7.7.tgz#b841f4b313c8c9c8a763c80f3a59d5aa4c3a70c8"
+
 ngx-popper@^1.9.9:
   version "1.9.9"
   resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-1.9.9.tgz#7c640c0e43cea817cdc46c2e26b79c9f064dfd05"
@@ -4498,6 +4502,10 @@ normalize-url@^1.4.0:
     prepend-http "^1.0.0"
     query-string "^4.1.0"
     sort-keys "^1.0.0"
+
+nouislider@^11.0.3:
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/nouislider/-/nouislider-11.0.3.tgz#a45a31bb7846bbced498afa514a513da197d22b2"
 
 npm-run-path@^2.0.0:
   version "2.0.2"

@@ -1,4 +1,4 @@
-<ng-container [ngSwitch]="criteriaType">
+<ng-container [ngSwitch]="criteriaType.toLowerCase()">
 
   <crit-demo-form *ngSwitchCase="'demo'" [open]="open">
   </crit-demo-form>
@@ -8,7 +8,8 @@
     (clrWizardOnCancel)="onCancel()"
     (clrWizardOnFinish)="onSubmit()">
     <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
-    <clr-wizard-page><!-- Criteria Selection Page -->
+    <!-- Criteria Selection Page -->
+    <clr-wizard-page [clrWizardPageNextDisabled]="!hasSelection">
       <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
       <div id="criteria-page">
         <div id="criteria-explorer">
@@ -24,5 +25,4 @@
     <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
     <clr-wizard-button [type]="'finish'">Finish</clr-wizard-button>
   </clr-wizard>
-
 </ng-container>

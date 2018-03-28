@@ -2,6 +2,8 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
+import {NouisliderModule} from 'ng2-nouislider';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {AlertsComponent} from './alerts/alerts.component';
 import {AttributesModule} from './attributes/attributes.module';
@@ -24,6 +26,8 @@ import {WizardComponent} from './wizard/wizard.component';
     CommonModule,
     ClarityModule,
     ReactiveFormsModule,
+    NgxPopperModule,
+    NouisliderModule,
   ],
   exports: [WizardComponent],
   declarations: [
