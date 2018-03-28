@@ -306,7 +306,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     try {
       // Pagination token doesn't match, this should fail.
       cohortMaterializationService.materializeCohort(null, SearchRequests.males(),
-          null,null, 2, response.getNextPageToken());
+          null, null, 2, response.getNextPageToken());
       fail("Exception expected");
     } catch (BadRequestException e) {
       // expected

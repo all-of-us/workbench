@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
+import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
@@ -143,9 +144,12 @@ public class CohortMaterializationService {
   }
 
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
-      SearchRequest searchRequest, @Nullable FieldSet fieldSet,
-      List<CohortStatus> statusFilter, int pageSize, String paginationToken) {
+      SearchRequest searchRequest, MaterializeCohortRequest request) {
     long offset = 0L;
+    FieldSet fieldSet = request.getFieldSet();
+    List<CohortStatus> statusFilter = request.getStatusFilter();
+    String paginationToken = request.getPageToken();
+    int pageSize = request.getPageSize();
     // TODO: add CDR version ID here
     Object[] paginationParameters = new Object[] { searchRequest, statusFilter };
     if (paginationToken != null) {
