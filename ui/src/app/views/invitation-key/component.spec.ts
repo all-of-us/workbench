@@ -67,7 +67,7 @@ describe('InvitationKeyComponent', () => {
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
-            gsuiteDomain: "fake-research-aou.org"
+            gsuiteDomain: 'fake-research-aou.org'
           })
         }
       ] }).compileComponents().then(() => {
