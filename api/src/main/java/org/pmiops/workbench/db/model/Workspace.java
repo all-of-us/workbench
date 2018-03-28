@@ -91,7 +91,6 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Timestamp timeReviewed;
 
   private Set<WorkspaceUserRole> usersWithAccess = new HashSet<WorkspaceUserRole>();
 
@@ -336,15 +335,6 @@ public class Workspace {
 
   public void setTimeRequested(Timestamp timeRequested) {
     this.timeRequested = timeRequested;
-  }
-
-  @Column(name = "rp_time_reviewed")
-  public Timestamp getTimeReviewed() {
-    return this.timeReviewed;
-  }
-
-  public void setTimeReviewed(Timestamp timeReviewed) {
-    this.timeReviewed = timeReviewed;
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)

@@ -4,6 +4,7 @@ import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
@@ -27,7 +28,6 @@ import {IdVerificationPageComponent} from './views/id-verification-page/componen
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
-import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -81,6 +81,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ReactiveFormsModule,
 
     IconsModule,
+    NgxChartsModule,
     ClarityModule,
     DataBrowserModule,
   ],
@@ -98,7 +99,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     InvitationKeyComponent,
     LoginComponent,
     PageTemplateSignedOutComponent,
-    ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,

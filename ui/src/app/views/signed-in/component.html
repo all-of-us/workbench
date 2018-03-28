@@ -25,15 +25,18 @@
     <section class="sidenav-content">
       <button class="btn btn-primary nav-link"
           [class.active]="workspacesActive"
-          routerLink="/">My Workspaces</button>
+          routerLink="/"
+          (click)="sidenavToggle = false">My Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="reviewWorkspaceActive"
           *ngIf="hasReviewResearchPurpose"
-          routerLink="/admin/review-workspace">Review Workspaces</button>
+          routerLink="/admin/review-workspace"
+          (click)="sidenavToggle = false">Review Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="reviewIdActive"
           *ngIf="hasReviewIdVerification"
-          routerLink="/admin/review-id-verification">Review ID Verifications</button>
+          routerLink="/admin/review-id-verification"
+          (click)="sidenavToggle = false">Review ID Verifications</button>
     </section>
   </nav>
   <div class="app-container">

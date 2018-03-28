@@ -85,6 +85,7 @@ public class ProfileController implements ProfileApiDelegate {
       };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
+
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
 
   private final ProfileService profileService;
@@ -483,11 +484,23 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     BlockscoreIdVerificationStatus status = review.getNewStatus();
+    Boolean oldVerification = userDao.findUserByUserId(userId).getBlockscoreVerificationIsValid();
+    String newValue;
+
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
+      newValue = "true";
     } else {
       userService.setIdVerificationApproved(userId, false);
+      newValue = "false";
     }
+
+    userService.logAdminUserAction(
+        userId,
+        "manual ID verification",
+        oldVerification,
+        newValue
+    );
     return getIdVerificationsForReview();
   }
 }
