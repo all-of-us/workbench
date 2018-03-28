@@ -752,3 +752,22 @@ CohortReview:
         type: array
         items:
           type: string
+
+  CohortAnnotationDefinitionListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortAnnotationDefinition"
+
+  ModifyCohortAnnotationDefinitionRequest:
+    type: object
+    required:
+      - columnName
+    properties:
+      columnName:
+        type: string
+        description: the name of this annotation.
