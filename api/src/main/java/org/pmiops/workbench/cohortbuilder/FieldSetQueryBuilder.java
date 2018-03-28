@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.joda.time.format.DateTimeFormat;
@@ -37,6 +36,7 @@ public class FieldSetQueryBuilder {
 
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
   private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSSSS";
+  private static final String PERSON_ID_COLUMN = "person_id";
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
@@ -225,7 +225,7 @@ public class FieldSetQueryBuilder {
         } else {
           sqlBuilder.append("\nand\n");
         }
-        handleColumnFilter(columnFilters.get(0), tableConfig, sqlBuilder, paramMap);
+        handleColumnFilter(columnFilter, tableConfig, sqlBuilder, paramMap);
       }
       sqlBuilder.append(")");
     }
@@ -294,11 +294,11 @@ public class FieldSetQueryBuilder {
     List<String> orderBy = tableQuery.getOrderBy();
     if (orderBy == null || orderBy.isEmpty()) {
       ColumnConfig primaryKey = findPrimaryKey(tableConfig);
-      if (primaryKey.name.equals("person_id")) {
-        orderBy = ImmutableList.of("person_id");
+      if (PERSON_ID_COLUMN.equals(primaryKey)) {
+        orderBy = ImmutableList.of(PERSON_ID_COLUMN);
       } else {
         // TODO: consider having per-table default sort order based on e.g. timestamp
-        orderBy = ImmutableList.of("person_id", primaryKey.name);
+        orderBy = ImmutableList.of(PERSON_ID_COLUMN, primaryKey.name);
       }
     } else {
       for (String columnName : orderBy) {
