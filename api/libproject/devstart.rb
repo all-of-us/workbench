@@ -29,6 +29,10 @@ ENVIRONMENTS = {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json"
   },
+  "all-of-us-rw-staging" => {
+    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
+    :config_json => "config_staging.json"
+  },
   # TODO: Point this to test.
   "all-of-us-rw-stable" => {
     :cdr_sql_instance => "all-of-us-rw-stable:us-central1:workbenchmaindb",
