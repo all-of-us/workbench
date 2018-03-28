@@ -4,20 +4,27 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
+import org.pmiops.workbench.config.CdrSchemaConfig;
+import org.pmiops.workbench.config.CdrSchemaConfig.ColumnConfig;
+import org.pmiops.workbench.config.CdrSchemaConfig.TableConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
@@ -27,6 +34,7 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +44,7 @@ public class CohortMaterializationService {
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
+  static final String PERSON_TABLE = "person";
 
   private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());
 
@@ -43,16 +52,19 @@ public class CohortMaterializationService {
   private final ParticipantCounter participantCounter;
   private final FieldSetQueryBuilder fieldSetQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
+  private final Provider<CdrSchemaConfig> cdrSchemaConfigProvider;
 
   @Autowired
   public CohortMaterializationService(BigQueryService bigQueryService,
       ParticipantCounter participantCounter,
       FieldSetQueryBuilder fieldSetQueryBuilder,
-      ParticipantCohortStatusDao participantCohortStatusDao) {
+      ParticipantCohortStatusDao participantCohortStatusDao,
+      Provider<CdrSchemaConfig> cdrSchemaConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
+    this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
   }
 
   private Set<Long> getParticipantIdsWithStatus(@Nullable CohortReview cohortReview, List<CohortStatus> statusFilter) {
@@ -66,6 +78,68 @@ public class CohortMaterializationService {
         .map(Key::getParticipantId)
         .collect(Collectors.toSet());
     return participantIds;
+  }
+
+  private ColumnConfig findPrimaryKey(TableConfig tableConfig) {
+    for (ColumnConfig columnConfig : tableConfig.columns) {
+      if (columnConfig.primaryKey) {
+        return columnConfig;
+      }
+    }
+    throw new IllegalStateException("Table lacks primary key!");
+  }
+
+  private TableQueryAndConfig getTableQueryAndConfig(FieldSet fieldSet) {
+    TableQuery tableQuery;
+    if (fieldSet == null) {
+      tableQuery = new TableQuery();
+      tableQuery.setTableName(PERSON_TABLE);
+      tableQuery.setColumns(ImmutableList.of(PERSON_ID));
+    } else {
+      tableQuery = fieldSet.getTableQuery();
+      if (tableQuery == null) {
+        // TODO: support other kinds of field sets besides tableQuery
+        throw new BadRequestException("tableQuery must be specified in field sets");
+      }
+      String tableName = tableQuery.getTableName();
+      if (Strings.isNullOrEmpty(tableName)) {
+        throw new BadRequestException("Table name must be specified in field sets");
+      }
+    }
+    CdrSchemaConfig cdrSchemaConfig = cdrSchemaConfigProvider.get();
+    TableConfig tableConfig = cdrSchemaConfig.cohortTables.get(tableQuery.getTableName());
+    Map<String, ColumnConfig> columnMap = Maps.uniqueIndex(tableConfig.columns,
+        columnConfig -> columnConfig.name);
+
+    List<String> columnNames = tableQuery.getColumns();
+    if (columnNames == null || columnNames.isEmpty()) {
+      // By default, return all columns on the table in question in our configuration.
+      tableQuery.setColumns(columnMap.keySet().stream().collect(Collectors.toList()));
+    } else {
+      for (String columnName : columnNames) {
+        // TODO: handle columns on foreign key tables
+        if (!columnMap.containsKey(columnName)) {
+          throw new BadRequestException("Unrecognized column name: " + columnName);
+        }
+      }
+    }
+    List<String> orderBy = tableQuery.getOrderBy();
+    if (orderBy == null || orderBy.isEmpty()) {
+      ColumnConfig primaryKey = findPrimaryKey(tableConfig);
+      if (PERSON_ID.equals(primaryKey)) {
+        tableQuery.setOrderBy(ImmutableList.of(PERSON_ID));
+      } else {
+        // TODO: consider having per-table default sort order based on e.g. timestamp
+        tableQuery.setOrderBy(ImmutableList.of(PERSON_ID, primaryKey.name));
+      }
+    } else {
+      for (String columnName : orderBy) {
+        if (!columnMap.containsKey(columnName)) {
+          throw new BadRequestException("Invalid column in orderBy: " + columnName);
+        }
+      }
+    }
+    return new TableQueryAndConfig(tableQuery, tableConfig, columnMap);
   }
 
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
@@ -111,11 +185,9 @@ public class CohortMaterializationService {
       criteria = new ParticipantCriteria(participantIds);
     }
     QueryJobConfiguration jobConfiguration;
-    if (fieldSet == null) {
-      jobConfiguration = participantCounter.buildParticipantIdQuery(criteria, limit, offset);
-    } else {
-      jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria, fieldSet, limit, offset);
-    }
+    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(fieldSet);
+
+    jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria, tableQueryAndConfig, limit, offset);
     QueryResult result = bigQueryService.executeQuery(
         bigQueryService.filterBigQueryConfig(jobConfiguration));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -126,9 +198,7 @@ public class CohortMaterializationService {
         hasMoreResults = true;
         break;
       }
-      long personId = bigQueryService.getLong(row, rm.get(PERSON_ID));
-      Map<String, Object> resultMap = new HashMap<>(1);
-      resultMap.put(PERSON_ID, personId);
+      Map<String, Object> resultMap = fieldSetQueryBuilder.extractResults(tableQueryAndConfig, row);
       response.addResultsItem(resultMap);
       numResults++;
     }

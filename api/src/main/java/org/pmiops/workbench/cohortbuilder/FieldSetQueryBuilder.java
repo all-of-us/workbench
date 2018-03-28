@@ -1,10 +1,10 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,7 +36,6 @@ public class FieldSetQueryBuilder {
 
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
   private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSSSS";
-  private static final String PERSON_ID_COLUMN = "person_id";
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
@@ -51,23 +50,6 @@ public class FieldSetQueryBuilder {
     this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
   }
 
-  private ColumnConfig findPrimaryKey(TableConfig tableConfig) {
-    for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (columnConfig.primaryKey) {
-        return columnConfig;
-      }
-    }
-    throw new IllegalStateException("Table lacks primary key!");
-  }
-
-  private ColumnConfig findColumn(TableConfig tableConfig, String columnName) {
-    for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (columnConfig.name.equals(columnName)) {
-        return columnConfig;
-      }
-    }
-    return null;
-  }
 
   private void handleComparison(ColumnFilter columnFilter, ColumnConfig columnConfig,
       StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
@@ -188,12 +170,12 @@ public class FieldSetQueryBuilder {
 
   }
 
-  private void handleColumnFilter(ColumnFilter columnFilter, TableConfig tableConfig,
+  private void handleColumnFilter(ColumnFilter columnFilter, TableQueryAndConfig tableQueryAndConfig,
       StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
     if (Strings.isNullOrEmpty(columnFilter.getColumnName())) {
       throw new BadRequestException("Missing column name for column filter");
     }
-    ColumnConfig columnConfig = findColumn(tableConfig, columnFilter.getColumnName());
+    ColumnConfig columnConfig = tableQueryAndConfig.getColumn(columnFilter.getColumnName());
     if (columnConfig == null) {
       throw new BadRequestException("Column " + columnFilter.getColumnName() + " does not exist");
     }
@@ -209,14 +191,15 @@ public class FieldSetQueryBuilder {
     }
   }
 
-  private void handleColumnFilters(List<ColumnFilter> columnFilters, TableConfig tableConfig,
+  private void handleColumnFilters(List<ColumnFilter> columnFilters,
+      TableQueryAndConfig tableQueryAndConfig,
       StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
     boolean first = false;
     if (columnFilters.isEmpty()) {
       throw new BadRequestException("Empty column filter list is invalid");
     }
     if (columnFilters.size() == 1) {
-      handleColumnFilter(columnFilters.get(0), tableConfig, sqlBuilder, paramMap);
+      handleColumnFilter(columnFilters.get(0), tableQueryAndConfig, sqlBuilder, paramMap);
     } else {
       sqlBuilder.append("(");
       for (ColumnFilter columnFilter : columnFilters) {
@@ -225,42 +208,19 @@ public class FieldSetQueryBuilder {
         } else {
           sqlBuilder.append("\nand\n");
         }
-        handleColumnFilter(columnFilter, tableConfig, sqlBuilder, paramMap);
+        handleColumnFilter(columnFilter, tableQueryAndConfig, sqlBuilder, paramMap);
       }
       sqlBuilder.append(")");
     }
   }
 
-  public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria, FieldSet fieldSet,
-      long resultSize, long offset) {
-    CdrSchemaConfig schemaConfig = cdrSchemaConfigProvider.get();
-    TableQuery tableQuery = fieldSet.getTableQuery();
-    if (tableQuery == null) {
-      // TODO: support other kinds of field sets besides tableQuery
-      throw new BadRequestException("tableQuery must be specified in field sets");
-    }
-    String tableName = tableQuery.getTableName();
-    if (Strings.isNullOrEmpty(tableName)) {
-      throw new BadRequestException("Table name must be specified in field sets");
-    }
-    TableConfig tableConfig = schemaConfig.cohortTables.get(tableName);
-    if (tableConfig == null) {
-      throw new BadRequestException("Table " + tableName + " not found in cohort tables");
-    }
-    List<String> tableColumnNames = tableConfig.columns.stream()
-        .map(columnConfig -> columnConfig.name).collect(Collectors.toList());
+  public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
+    TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
+    TableConfig tableConfig = tableQueryAndConfig.getTableConfig();
     List<String> columnNames = tableQuery.getColumns();
-    if (columnNames == null || columnNames.isEmpty()) {
-      // By default, return all columns on the table in question in our configuration.
-      columnNames = tableColumnNames;
-    } else {
-      for (String columnName : columnNames) {
-        // TODO: handle columns on foreign key tables
-        if (!tableColumnNames.contains(columnName)) {
-          throw new BadRequestException("Unrecognized column name: " + columnName);
-        }
-      }
-    }
+    String tableName = tableQuery.getTableName();
+
     StringBuilder startSql = new StringBuilder("select ");
     startSql.append(Joiner.on(", ").join(columnNames));
     startSql.append("\nfrom `${projectId}.${dataSetId}.");
@@ -273,7 +233,7 @@ public class FieldSetQueryBuilder {
     List<List<ColumnFilter>> columnFilters = tableQuery.getFilters();
     if (columnFilters != null && !columnFilters.isEmpty()) {
       if (columnFilters.size() == 1) {
-        handleColumnFilters(columnFilters.get(0), tableConfig, startSql, paramMap);
+        handleColumnFilters(columnFilters.get(0), tableQueryAndConfig, startSql, paramMap);
       } else {
         startSql.append("(");
         boolean first = true;
@@ -283,7 +243,7 @@ public class FieldSetQueryBuilder {
           } else {
             startSql.append("\nor\n");
           }
-          handleColumnFilters(filterList, tableConfig, startSql, paramMap);
+          handleColumnFilters(filterList, tableQueryAndConfig, startSql, paramMap);
         }
         startSql.append(")");
       }
@@ -292,21 +252,6 @@ public class FieldSetQueryBuilder {
 
     StringBuilder endSql = new StringBuilder("order by ");
     List<String> orderBy = tableQuery.getOrderBy();
-    if (orderBy == null || orderBy.isEmpty()) {
-      ColumnConfig primaryKey = findPrimaryKey(tableConfig);
-      if (PERSON_ID_COLUMN.equals(primaryKey)) {
-        orderBy = ImmutableList.of(PERSON_ID_COLUMN);
-      } else {
-        // TODO: consider having per-table default sort order based on e.g. timestamp
-        orderBy = ImmutableList.of(PERSON_ID_COLUMN, primaryKey.name);
-      }
-    } else {
-      for (String columnName : orderBy) {
-        if (findColumn(tableConfig, columnName) == null) {
-          throw new BadRequestException("Invalid column in orderBy: " + columnName);
-        }
-      }
-    }
     endSql.append(Joiner.on(", ").join(orderBy));
     endSql.append(" limit ");
     endSql.append(resultSize);
@@ -316,5 +261,42 @@ public class FieldSetQueryBuilder {
     }
     return participantCounter.buildQuery(participantCriteria, startSql.toString(), endSql.toString(),
         paramMap);
+  }
+
+  public Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
+      List<FieldValue> row) {
+    TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
+    TableConfig tableConfig = tableQueryAndConfig.getTableConfig();
+     List<ColumnConfig> columnConfigs = tableQuery.getColumns().stream()
+        .map(columnName -> tableQueryAndConfig.getColumn(columnName)).collect(Collectors.toList());
+    Map<String, Object> results = new HashMap<>(tableQuery.getColumns().size());
+    for (int i = 0; i < columnConfigs.size(); i++) {
+      FieldValue fieldValue = row.get(i);
+      ColumnConfig columnConfig = columnConfigs.get(i);
+      if (!fieldValue.isNull()) {
+        Object value;
+        switch (columnConfig.type) {
+          case DATE:
+            value = fieldValue.getStringValue();
+            break;
+          case FLOAT:
+            value = fieldValue.getDoubleValue();
+            break;
+          case INTEGER:
+            value = fieldValue.getLongValue();
+            break;
+          case STRING:
+            value = fieldValue.getStringValue();
+            break;
+          case TIMESTAMP:
+            value = DATE_TIME_FORMAT.print(fieldValue.getLongValue());
+            break;
+          default:
+            throw new IllegalStateException("Unrecognized column type: " + columnConfig.type);
+        }
+        results.put(columnConfig.name, value);
+      }
+    }
+    return results;
   }
 }

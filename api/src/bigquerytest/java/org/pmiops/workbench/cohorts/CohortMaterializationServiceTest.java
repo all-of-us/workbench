@@ -5,11 +5,15 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.jetbrains.annotations.TestOnly;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +42,11 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.test.TestCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -51,7 +58,7 @@ import org.springframework.context.annotation.Import;
 @Import({DemoQueryBuilder.class, QueryBuilderFactory.class, CohortMaterializationService.class,
         BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
         FieldSetQueryBuilder.class, QueryBuilderFactory.class, TestJpaConfig.class,
-        ConceptCacheConfiguration.class})
+        ConceptCacheConfiguration.class, TestCdrSchemaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
@@ -314,6 +321,64 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
       fail("Exception expected");
     } catch (BadRequestException e) {
       // expected
+    }
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdOnly() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.males(), fieldSet, null, 1000, null);
+    assertPersonIds(response, 1L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetAllColumns() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.males(), fieldSet, null, 1000, null);
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+       .put("person_id", 1L)
+       .put("gender_source_value", "1")
+       .put("race_source_value", "1")
+       .put("gender_concept_id", 8507L)
+       .put("year_of_birth", 1980L)
+       .put("month_of_birth", 8L)
+       .put("day_of_birth", 1L)
+       .put("race_concept_id", 1L)
+       .put("ethnicity_concept_id", 1L)
+       .put("location_id", 1L)
+       .put("provider_id", 1L)
+       .put("care_site_id", 1L)
+       .put("person_source_value", "psv")
+       .put("gender_source_concept_id", 1L)
+       .put("race_source_concept_id", 1L)
+       .put("ethnicity_source_value", "esv")
+       .put("ethnicity_source_concept_id", 1L)
+       .build();
+    assertResults(response, p1Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  private void assertResults(MaterializeCohortResponse response, ImmutableMap<String, Object>... results) {
+    if (response.getResults().size() != results.length) {
+      fail("Expected " + results.length + ", got " + response.getResults().size() + "; actual results: " +
+          response.getResults());
+    }
+    for (int i = 0; i < response.getResults().size(); i++) {
+      MapDifference<String, Object> difference =
+          Maps.difference((Map<String, Object>) response.getResults().get(i), results[i]);
+      if (!difference.areEqual()) {
+        fail("Result " + i + " had difference: " + difference.entriesDiffering());
+      }
     }
   }
 
