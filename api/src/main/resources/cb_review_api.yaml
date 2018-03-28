@@ -388,50 +388,50 @@ definitions:
         description: A sample size to review
         type: integer
 
-CohortReview:
-  type: object
-  required:
-    - cohortReviewId
-    - cohortId
-    - cdrVersionId
-    - creationTime
-    - matchedParticipantCount
-    - reviewStatus
-  properties:
-    cohortReviewId:
-      type: integer
-      format: int64
-    cohortId:
-      type: integer
-      format: int64
-    cdrVersionId:
-      type: integer
-      format: int64
-    creationTime:
-      type: string
-    matchedParticipantCount:
-      type: integer
-      format: int64
-    reviewSize:
-      type: integer
-      format: int64
-    reviewedCount:
-      type: integer
-      format: int64
-    reviewStatus:
-      $ref: "#/definitions/ReviewStatus"
-    participantCohortStatuses:
-      type: "array"
-      items:
-        $ref: "#/definitions/ParticipantCohortStatus"
-    page:
-      type: integer
-    pageSize:
-      type: integer
-    sortOrder:
-      type: string
-    sortColumn:
-      type: string
+  CohortReview:
+    type: object
+    required:
+      - cohortReviewId
+      - cohortId
+      - cdrVersionId
+      - creationTime
+      - matchedParticipantCount
+      - reviewStatus
+    properties:
+      cohortReviewId:
+        type: integer
+        format: int64
+      cohortId:
+        type: integer
+        format: int64
+      cdrVersionId:
+        type: integer
+        format: int64
+      creationTime:
+        type: string
+      matchedParticipantCount:
+        type: integer
+        format: int64
+      reviewSize:
+        type: integer
+        format: int64
+      reviewedCount:
+        type: integer
+        format: int64
+      reviewStatus:
+        $ref: "#/definitions/ReviewStatus"
+      participantCohortStatuses:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantCohortStatus"
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sortOrder:
+        type: string
+      sortColumn:
+        type: string
 
   PageFilterRequest:
     discriminator: pageFilterType
@@ -458,17 +458,17 @@ CohortReview:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
-        sortColumn:
-          $ref: "#/definitions/ParticipantCohortStatusColumns"
-          description: Column upon which to sort (default is 'participantId')
+          sortColumn:
+            $ref: "#/definitions/ParticipantCohortStatusColumns"
+            description: Column upon which to sort (default is 'participantId')
 
   ParticipantConditionsPageFilter:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
-        sortColumn:
-          $ref: "#/definitions/ParticipantConditionsColumns"
-          description: Column upon which to sort (default is 'itemDate')
+          sortColumn:
+            $ref: "#/definitions/ParticipantConditionsColumns"
+            description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
     type: string
