@@ -60,7 +60,7 @@ sourceSets {
                    // In general, command-line tools won't need access to
                    // org.pmiops.workbench.model (Swagger-generated classes),
                    // so we selectively whitelist as needed.
-                   'org/pmiops/workbench/config/CdrSchemaConfig.java',
+                   'org/pmiops/workbench/config/CdrBigQuerySchemaConfig.java',
                    'org/pmiops/workbench/config/WorkbenchConfig.java',
                    'org/pmiops/workbench/model/Authority.java',
                    'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',

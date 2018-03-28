@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
-import org.pmiops.workbench.config.CdrSchemaConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
@@ -33,7 +33,7 @@ public class ConfigLoader {
 
   private static final ImmutableMap<String, Class<?>> CONFIG_CLASS_MAP =
       ImmutableMap.of(Config.MAIN_CONFIG_ID, WorkbenchConfig.class,
-          Config.CDR_SCHEMA_CONFIG_ID, CdrSchemaConfig.class);
+          Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
 
   @Bean
   public CommandLineRunner run(ConfigDao configDao) {
