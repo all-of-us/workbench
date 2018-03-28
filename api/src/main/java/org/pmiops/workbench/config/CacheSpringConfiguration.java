@@ -23,6 +23,7 @@ public class CacheSpringConfiguration {
 
   static {
     CONFIG_CLASS_MAP.put(Config.MAIN_CONFIG_ID, WorkbenchConfig.class);
+    CONFIG_CLASS_MAP.put(Config.CDR_SCHEMA_CONFIG_ID, CdrSchemaConfig.class);
   }
 
   @Bean
