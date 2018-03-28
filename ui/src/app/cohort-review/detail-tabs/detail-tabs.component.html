@@ -9,48 +9,7 @@
   <clr-tab>
     <button clrTabLink id="detail-conditions-tab">Conditions</button>
     <clr-tab-content id="detail-conditions-content" *clrIfActive>
-
-      <clr-datagrid>
-        <clr-dg-column [clrDgField]="'description'">
-          Description
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'standard'">
-          Standard Vocabulary (SNOMED)
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'source'">
-          Source Vocabulary (ICD9CM, ICD10CM, HCPCS, SNOMED)
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'value'">
-          Source Value
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'date'">
-          Date
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'ageAtEvent'">
-          Age at Event
-        </clr-dg-column>
-        <clr-dg-row *clrDgItems="let condition of DUMMY_CONDITIONS">
-          <clr-dg-cell>
-            {{ condition.description }}
-          </clr-dg-cell>
-          <clr-dg-cell>
-            {{ condition.standard }}
-          </clr-dg-cell>
-          <clr-dg-cell>
-            {{ condition.source }}
-          </clr-dg-cell>
-          <clr-dg-cell>
-            {{ condition.value }}
-          </clr-dg-cell>
-          <clr-dg-cell>
-            {{ condition.date | date:'yyyy-MM-dd HH:mm:ss' }}
-          </clr-dg-cell>
-          <clr-dg-cell>
-            {{ condition.ageAtEvent }}
-          </clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
-
+      <app-detail-conditions></app-detail-conditions>
     </clr-tab-content>
   </clr-tab>
 
