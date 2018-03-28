@@ -208,7 +208,6 @@ definitions:
           The operator to use when comparing values. Defaults to EQUAL. If the "in" operator is used,
           either values or valueNumbers should be populated.
         $ref: "#/definitions/Operator"
-        default: '='
         externalDocs:
           description: "Documentation of BigQuery SQL operators"
           url: https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#comparison-operators
