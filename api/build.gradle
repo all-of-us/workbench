@@ -346,6 +346,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 
+// Custom task based on https://docs.gradle.org/2.5/userguide/custom_tasks.html#incremental_tasks
 class IncrementalHotSwapTask extends DefaultTask {
     @InputDirectory
     def File inputDir
