@@ -9,11 +9,13 @@ import {ClarityModule} from '@clr/angular';
 import {ProfileService} from 'generated';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
     queryByCss, simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
+import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
@@ -61,7 +63,13 @@ describe('InvitationKeyComponent', () => {
       providers: [
         { provide: LoginComponent, useValue: {}},
         { provide: SignInService, useValue: {}},
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        {
+          provide: ServerConfigService,
+          useValue: new ServerConfigServiceStub({
+            gsuiteDomain: 'fake-research-aou.org'
+          })
+        }
       ] }).compileComponents().then(() => {
         invitationKeyPage = new InvitationKeyPage(TestBed);
         });
