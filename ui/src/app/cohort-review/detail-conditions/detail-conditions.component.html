@@ -1,23 +1,25 @@
-<clr-datagrid [clrDgLoading]="loading">
+<clr-datagrid
+  [clrDgLoading]="loading"
+  (clrDgRefresh)="update($event)"
+  class="datagrid-compact"
+>
   <clr-dg-placeholder>No Conditions Data</clr-dg-placeholder>
-  <clr-dg-column [clrDgField]="'itemDate'">
+  <clr-dg-column [clrDgField]="'itemDate'" class="date-col">
     Date
   </clr-dg-column>
-  <clr-dg-column [clrDgField]="'standardVocabulary'">
-    Standard Vocabulary (SNOMED)
+
+  <clr-dg-column [clrDgField]="'standardVocabulary'" class="vocab-col">
+    Standard Vocabulary
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'standardName'">
     Standard Name
   </clr-dg-column>
 
+  <clr-dg-column [clrDgField]="'sourceVocabulary'" class="vocab-col">
+    Source Vocabulary
+  </clr-dg-column>
   <clr-dg-column [clrDgField]="'sourceValue'">
     Source Value
-  </clr-dg-column>
-  <clr-dg-column [clrDgField]="'sourceVocabulary'">
-    Source Vocabulary (ICD9CM, ICD10CM, HCPCS, SNOMED)
-  </clr-dg-column>
-  <clr-dg-column [clrDgField]="'sourceName'">
-    Source Name
   </clr-dg-column>
 
   <clr-dg-row *ngFor="let condition of conditions">
@@ -33,15 +35,15 @@
     <clr-dg-cell>
       {{ condition.sourceVocabulary }}
     </clr-dg-cell>
-    <clr-dg-cell>
-      {{ condition.sourceValue }}
-    </clr-dg-cell>
-    <clr-dg-cell>
-      {{ condition.sourceName }}
+    <clr-dg-cell
+        [popper]="condition.sourceName"
+        [popperTrigger]="'hover'"
+        [popperPlacement]="'left'"
+        [popperTarget]="sourceValue">
+      <span #sourceValue>{{ condition.sourceValue }}</span>
     </clr-dg-cell>
   </clr-dg-row>
 
-  <!--
   <clr-dg-footer>
     {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
     {{ totalCount }} Records
@@ -51,6 +53,5 @@
       [clrDgPage]="request.page + 1">
     </clr-dg-pagination>
   </clr-dg-footer>
-  -->
 
 </clr-datagrid>

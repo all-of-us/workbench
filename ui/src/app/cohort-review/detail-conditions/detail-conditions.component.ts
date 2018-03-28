@@ -1,26 +1,41 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {ClrDatagridStateInterface} from '@clr/angular';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 import {
   CohortReviewService,
   PageFilterRequest,
   PageFilterType,
-  ParticipantConditionsColumns,
+  ParticipantCondition,
+  ParticipantConditionsColumns as Columns,
   SortOrder,
 } from 'generated';
-
 
 @Component({
   selector: 'app-detail-conditions',
   templateUrl: './detail-conditions.component.html',
   styleUrls: ['./detail-conditions.component.css']
 })
-export class DetailConditionsComponent implements OnInit {
-  conditions;
-  apiCaller;
-  loading;
+export class DetailConditionsComponent implements OnInit, OnDestroy {
+  /* Maps string values to Enum values */
+  readonly reverseColumnEnum = {
+    itemDate: Columns.ItemDate,
+    standardVocabulary: Columns.StandardVocabulary,
+    standardName: Columns.StandardName,
+    sourceValue: Columns.SourceValue,
+    sourceVocabulary: Columns.SourceVocabulary,
+    sourceName: Columns.SourceName,
+  };
+
+  loading = false;
+
+  conditions: ParticipantCondition[];
   request;
-  totalCount = 1000;
+  totalCount: number;
+  apiCaller: (any) => Observable<any>;
+  subscription: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,47 +43,65 @@ export class DetailConditionsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // console.dir(this.route);
-    const {participant} = this.route.snapshot.data;
-    const {cohort, workspace} = this.route.snapshot.parent.data;
+    console.dir(this.route);
+    this.subscription = this.route.data
+      .map(({participant}) => participant)
+      .withLatestFrom(
+        this.route.parent.data.map(({cohort}) => cohort),
+        this.route.parent.data.map(({workspace}) => workspace),
+      )
+      .subscribe(([participant, cohort, workspace]) => {
+        this.loading = true;
 
-    this.apiCaller = (request) => this.reviewApi.getParticipantConditions(
-      workspace.namespace,
-      workspace.id,
-      cohort.id,
-      workspace.cdrVersionId,
-      participant.participantId,
-      request
-    );
+        this.apiCaller = (request) => this.reviewApi.getParticipantConditions(
+          workspace.namespace,
+          workspace.id,
+          cohort.id,
+          workspace.cdrVersionId,
+          participant.participantId,
+          request
+        );
 
-    this.request = <PageFilterRequest>{
-      page: 0,
-      pageSize: 25,
-      includeTotal: true,
-      sortOrder: SortOrder.Asc,
-      pageFilterType: PageFilterType.ParticipantConditionsPageFilter,
-      sortColumn: ParticipantConditionsColumns.ItemDate,
-    };
+        this.request = <PageFilterRequest>{
+          page: 0,
+          pageSize: 50,
+          includeTotal: true,
+          sortOrder: SortOrder.Asc,
+          sortColumn: Columns.ItemDate,
+          pageFilterType: PageFilterType.ParticipantConditionsPageFilter,
+        };
 
-    this.callApi();
+        this.callApi();
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   callApi() {
     this.loading = true;
     this.apiCaller(this.request).subscribe(resp => {
       this.conditions = resp.items;
-      // this.totalCount = resp.count;
-      // this.request = resp.request;
+      this.totalCount = resp.count;
+      this.request = resp.pageRequest;
+      this.request.pageFilterType = PageFilterType.ParticipantConditionsPageFilter;
       this.loading = false;
     });
   }
 
-    /*
-  toPage(page: number) {
-    if (!this.loading) {
-      this.request = {...this.request, page};
-      this.callApi();
+  update(state: ClrDatagridStateInterface) {
+    console.log('Datagrid state: ');
+    console.dir(state);
+    const page = Math.floor(state.page.from / state.page.size);
+    const pageSize = state.page.size;
+    this.request = {...this.request, page, pageSize};
+
+    if (state.sort) {
+      const sortby = <string>(state.sort.by);
+      this.request.sortColumn = this.reverseColumnEnum[sortby];
+      this.request.sortOrder = state.sort.reverse ? SortOrder.Desc : SortOrder.Asc;
     }
+    this.callApi();
   }
-     */
 }

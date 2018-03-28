@@ -3,6 +3,8 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {ChartsModule} from '../charts/charts.module';
 
@@ -42,10 +44,16 @@ import {WorkspacesService} from 'generated';
 
 @NgModule({
   imports: [
-    CohortReviewRoutingModule,
-    ClarityModule,
+    // Angular
     CommonModule,
     ReactiveFormsModule,
+    // Routes
+    CohortReviewRoutingModule,
+    // 3rd Party
+    ClarityModule,
+    NgxChartsModule,
+    NgxPopperModule,
+    // Ours
     ChartsModule,
   ],
   declarations: [
