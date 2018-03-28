@@ -1,6 +1,8 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
 
+def SPRING_VERSION = '1.5.10.RELEASE'
+
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
 def clientApiSourceFile = 'src/main/resources/client_api.yaml'
@@ -189,7 +191,7 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
   compile 'com.google.appengine:appengine-api-1.0-sdk:+'
-  compile('org.springframework.boot:spring-boot-starter-web:1.5.10.RELEASE') {
+  compile("org.springframework.boot:spring-boot-starter-web:${SPRING_VERSION}") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -197,7 +199,7 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+  compile("org.springframework.boot:spring-boot-starter-actuator:${SPRING_VERSION}") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -230,7 +232,7 @@ dependencies {
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
   testCompile 'com.google.truth:truth:+'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
+  testCompile "org.springframework.boot:spring-boot-starter-test:${SPRING_VERSION}"
   testCompile 'com.h2database:h2:+'
   testCompile 'org.liquibase:liquibase-core:+'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
