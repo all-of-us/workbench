@@ -11,7 +11,7 @@ end
 
 Common.register_command({
   :invocation => "merge-yaml",
-  :description => "Merges client_api.yaml and workbench.yaml together to produce a single YAML spec.",
+  :description => "Merges client_api.yaml, cb_review_api.yaml, cb_search_api.yaml and workbench.yaml together to produce a single YAML spec.",
   :fn => lambda { |*args| merge_yaml() }
 })
 
