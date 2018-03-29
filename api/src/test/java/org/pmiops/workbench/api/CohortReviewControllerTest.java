@@ -512,7 +512,7 @@ public class CohortReviewControllerTest {
         request.pageSize(pageSize);
         request.sortOrder(sortOrder);
         request.sortColumn(sortColumn);
-        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(

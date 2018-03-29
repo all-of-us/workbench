@@ -10,8 +10,9 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
+import org.pmiops.workbench.cohortreview.util.ReviewTabQueries;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -50,7 +51,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private CohortReviewService cohortReviewService;
     private BigQueryService bigQueryService;
     private ParticipantCounter participantCounter;
-    private ConditionQueryBuilder conditionQueryBuilder;
+    private ReviewTabQueryBuilder reviewTabQueryBuilder;
     private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     /**
@@ -144,12 +145,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReviewController(CohortReviewService cohortReviewService,
                            BigQueryService bigQueryService,
                            ParticipantCounter participantCounter,
-                           ConditionQueryBuilder conditionQueryBuilder,
+                           ReviewTabQueryBuilder reviewTabQueryBuilder,
                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
         this.cohortReviewService = cohortReviewService;
         this.bigQueryService = bigQueryService;
         this.participantCounter = participantCounter;
-        this.conditionQueryBuilder = conditionQueryBuilder;
+        this.reviewTabQueryBuilder = reviewTabQueryBuilder;
         this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
@@ -218,7 +219,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         filterRequest.setPage(PAGE);
         filterRequest.setPageSize(PAGE_SIZE);
         filterRequest.setSortOrder(SortOrder.ASC);
-        filterRequest.setPageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+        filterRequest.setPageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
         filterRequest.setSortColumn(ParticipantCohortStatusColumns.PARTICIPANTID);
 
         List<ParticipantCohortStatus> paginatedPCS =
@@ -246,11 +247,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
         }
 
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
                 FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
@@ -272,11 +270,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
         }
 
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
         //will throw a NotFoundException if participant does not exist
         cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
@@ -297,26 +292,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ParticipantCohortAnnotation> getParticipantCohortAnnotation(String workspaceNamespace,
-                                                                                      String workspaceId,
-                                                                                      Long cohortId,
-                                                                                      Long cdrVersionId,
-                                                                                      Long participantId,
-                                                                                      Long annotationId) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantCohortAnnotation());
-    }
-
-    @Override
     public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                    String workspaceId,
                                                                                                    Long cohortId,
                                                                                                    Long cdrVersionId,
                                                                                                    Long participantId) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-                        cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
         List<org.pmiops.workbench.db.model.ParticipantCohortAnnotation> annotations =
                 cohortReviewService.findParticipantCohortAnnotations(review.getCohortReviewId(), participantId);
@@ -332,14 +314,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                          Long cohortId,
                                                                                                          Long cdrVersionId,
                                                                                                          Long participantId) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        Workspace workspace =
-            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         ParticipantCohortStatus status =
                 cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
         lookupGenderRaceEthnicityValues(Arrays.asList(status));
@@ -387,19 +364,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                      Long cdrVersionId,
                                                                                      Long participantId,
                                                                                      PageFilterRequest request) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-                cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
-        CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
         //this validates that the participant is in the requested review.
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
         PageRequest pageRequest = createPageRequest(request);
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                conditionQueryBuilder.buildQuery(participantId, pageRequest)));
+                reviewTabQueryBuilder.buildQuery(ReviewTabQueries.CONDITION, participantId, pageRequest)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         ParticipantConditionsListResponse response = new ParticipantConditionsListResponse();
@@ -416,7 +389,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         }
 
         result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                conditionQueryBuilder.buildCountQuery(participantId)));
+                reviewTabQueryBuilder.buildCountQuery(ReviewTabQueries.CONDITION, participantId)));
         rm = bigQueryService.getResultMapper(result);
         List<FieldValue> row = result.iterateAll().iterator().next();
         response.count(bigQueryService.getLong(row, rm.get("count")));
@@ -436,7 +409,43 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                       Long cdrVersionId,
                                                                                       Long participantId,
                                                                                       PageFilterRequest request) {
-        return null;
+        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+
+        //this validates that the participant is in the requested review.
+        cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+
+        PageRequest pageRequest = createPageRequest(request);
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+                reviewTabQueryBuilder.buildQuery(ReviewTabQueries.PROCEDURE, participantId, pageRequest)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+        ParticipantProceduresListResponse response = new ParticipantProceduresListResponse();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (List<FieldValue> row : result.iterateAll()) {
+            ParticipantProcedure procedure = new ParticipantProcedure()
+                    .itemDate(sdf.format(bigQueryService.getDate(row, rm.get("item_date"))))
+                    .standardVocabulary(bigQueryService.getString(row, rm.get("standard_vocabulary")))
+                    .standardName(bigQueryService.getString(row, rm.get("standard_name")))
+                    .sourceValue(bigQueryService.getString(row, rm.get("source_value")))
+                    .sourceVocabulary(bigQueryService.getString(row, rm.get("source_vocabulary")))
+                    .sourceName(bigQueryService.getString(row, rm.get("source_name")))
+                    .age(bigQueryService.getLong(row, rm.get("age")).intValue());
+            response.addItemsItem(procedure);
+        }
+
+        result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+                reviewTabQueryBuilder.buildCountQuery(ReviewTabQueries.PROCEDURE, participantId)));
+        rm = bigQueryService.getResultMapper(result);
+        List<FieldValue> row = result.iterateAll().iterator().next();
+        response.count(bigQueryService.getLong(row, rm.get("count")));
+        response.setPageRequest(new org.pmiops.workbench.model.PageRequest()
+                .page(pageRequest.getPageNumber())
+                .pageSize(pageRequest.getPageSize())
+                .sortOrder(pageRequest.getSortOrder())
+                .sortColumn(pageRequest.getSortColumn()));
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -447,11 +456,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                          Long participantId,
                                                                                          Long annotationId,
                                                                                          ModifyParticipantCohortAnnotationRequest request) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
         org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
                 cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReview.getCohortReviewId(), participantId, request);
@@ -466,11 +472,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                                             Long cdrVersionId,
                                                                                                             Long participantId,
                                                                                                             ModifyCohortStatusRequest cohortStatusRequest) {
-        Cohort cohort = cohortReviewService.findCohort(cohortId);
-        //this validates that the user is in the proper workspace
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
-
-        CohortReview cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+        CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+                cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
         ParticipantCohortStatus participantCohortStatus
                 = cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
@@ -486,6 +489,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
     }
 
+    private CohortReview validateRequestAndSetCdrVersion(String workspaceNamespace,
+                                                         String workspaceId,
+                                                         Long cohortId,
+                                                         Long cdrVersionId,
+                                                         WorkspaceAccessLevel level) {
+        Cohort cohort = cohortReviewService.findCohort(cohortId);
+        //this validates that the user is in the proper workspace
+        Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
+                workspaceId, cohort.getWorkspaceId(), level);
+
+        CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
+
+        return cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
+    }
+
     /**
      * Helper method to create a {@link PageRequest} based on the specified
      * type {@link PageFilterRequest}.
@@ -495,10 +513,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
      */
     private PageRequest createPageRequest(PageFilterRequest request) {
         String sortColumn = "";
-        if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER)) {
+        if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONS)) {
             sortColumn =  Optional.ofNullable(((ParticipantConditionsPageFilter) request).getSortColumn())
                     .orElse(ParticipantConditionsColumns.ITEMDATE).toString();
-        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)) {
+        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTPROCEDURES)) {
+            sortColumn =  Optional.ofNullable(((ParticipantProceduresPageFilter) request).getSortColumn())
+                    .orElse(ParticipantProceduresColumns.ITEMDATE).toString();
+        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSES)) {
             sortColumn =  Optional.ofNullable(((ParticipantCohortStatusesPageFilter) request).getSortColumn())
                     .orElse(ParticipantCohortStatusColumns.PARTICIPANTID).toString();
         } else {
