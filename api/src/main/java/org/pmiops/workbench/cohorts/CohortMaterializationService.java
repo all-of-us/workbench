@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
@@ -44,7 +43,6 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 @Service

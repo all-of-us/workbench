@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
-import org.jetbrains.annotations.TestOnly;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
