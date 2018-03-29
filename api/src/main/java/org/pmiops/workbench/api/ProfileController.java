@@ -52,6 +52,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -63,6 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
+
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
       .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
@@ -80,6 +82,21 @@ public class ProfileController implements ProfileApiDelegate {
           result.setRole(billingProjectMembership.getRole());
           result.setStatus(
               fcToWorkbenchBillingMap.get(billingProjectMembership.getCreationStatus()));
+          return result;
+        }
+      };
+  private static final Function<InstitutionalAffiliation,
+      org.pmiops.workbench.db.model.InstitutionalAffiliation> FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
+      new Function<InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>() {
+        @Override
+        public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(InstitutionalAffiliation institutionalAffiliation) {
+          org.pmiops.workbench.db.model.InstitutionalAffiliation result =
+              new org.pmiops.workbench.db.model.InstitutionalAffiliation();
+          result.setUserId(institutionalAffiliation.getUserId());
+          result.setRole(institutionalAffiliation.getRole());
+          result.setInstitution(institutionalAffiliation.getInstitution());
+          result.setOrderIndex(institutionalAffiliation.getOrderIndex());
+
           return result;
         }
       };
@@ -363,9 +380,10 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
+    // The two null values are aboutYou and areaOfResearch, to be filled in by the user.
     userService.createUser(request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
+        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail(), null, null);
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.
@@ -449,6 +467,9 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setAboutYou(updatedProfile.getAboutYou());
+    user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
+
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
         mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
@@ -456,6 +477,12 @@ public class ProfileController implements ProfileApiDelegate {
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }
+
+    user.setInstitutionalAffiliationSet(
+        updatedProfile.getInstitutionalAffiliations()
+        .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+        .collect(Collectors.toList()));
+
 
     // This does not update the name in Google.
     userDao.save(user);

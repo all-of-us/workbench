@@ -1,8 +1,11 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -13,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
@@ -46,8 +50,10 @@ public class User {
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
-  private Set<InstitutionalAffiliation> institutionalAffiliationSet =
-      new HashSet<InstitutionalAffiliation>();
+
+  @OrderColumn(name="PRINT_ORDER")
+  private List<InstitutionalAffiliation> institutionalAffiliationSet =
+      new ArrayList<InstitutionalAffiliation>();
   private String aboutYou;
   private String areaOfResearch;
 
@@ -236,13 +242,12 @@ public class User {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "institutional_affiliation", joinColumns = @JoinColumn(name = "user_id"))
-  public Set<InstitutionalAffiliation> getInstitutionalAffiliationSet() {
+  @OneToMany(mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public List<InstitutionalAffiliation> getInstitutionalAffiliationSet() {
     return institutionalAffiliationSet;
   }
 
-  public void setInstitutionalAffiliationSet(Set<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
+  public void setInstitutionalAffiliationSet(List<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
     this.institutionalAffiliationSet = newInstitutionalAffiliationSet;
   }
 

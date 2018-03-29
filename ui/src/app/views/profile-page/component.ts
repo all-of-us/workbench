@@ -2,10 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {deepCopy} from 'app/utils/index';
 
 import {
   BlockscoreIdVerificationStatus,
   ErrorResponse,
+  InstitutionalAffiliation,
   Profile,
   ProfileService,
 } from 'generated';
@@ -20,6 +22,7 @@ import {
 })
 export class ProfilePageComponent implements OnInit {
   profile: Profile;
+  workingProfile: Profile;
   profileImage: string;
   profileLoaded = false;
   errorText: string;
@@ -55,14 +58,23 @@ export class ProfilePageComponent implements OnInit {
     this.profileService.getMe().subscribe(
       (profile: Profile) => {
         this.profile = profile;
+        this.workingProfile = <Profile> deepCopy(profile);
         this.profileLoaded = true;
         this.reloadSpinner();
       });
   }
 
   submitChanges(): void {
-    this.profileService.updateProfile(this.profile).subscribe(
+    if (this.workingProfile.institutionalAffiliations !== undefined){
+      let currentSpot = 0;
+      this.workingProfile.institutionalAffiliations.forEach((affiliation: InstitutionalAffiliation) => {
+        affiliation.orderIndex = currentSpot;
+        currentSpot++;
+      });
+    }
+    this.profileService.updateProfile(this.workingProfile).subscribe(
       () => {
+        this.profile = <Profile> deepCopy(this.workingProfile);
         this.editing = false;
       },
       error => {
@@ -115,7 +127,8 @@ export class ProfilePageComponent implements OnInit {
 
   submitTermsOfService(): void {
     this.profileService.submitTermsOfService().subscribe((profile) => {
-      this.profile = profile;
+      this.profile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
+      this.workingProfile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
       this.reloadSpinner();
     });
   }
@@ -123,15 +136,54 @@ export class ProfilePageComponent implements OnInit {
 
   completeEthicsTraining(): void {
     this.profileService.completeEthicsTraining().subscribe((profile) => {
-      this.profile = profile;
+      this.profile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
+      this.workingProfile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
       this.reloadSpinner();
     });
   }
 
   submitDemographicSurvey(): void {
     this.profileService.submitDemographicsSurvey().subscribe((profile) => {
-      this.profile = profile;
+      this.profile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
+      this.workingProfile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
       this.reloadSpinner();
     });
+  }
+
+  reloadProfile(): void {
+    this.workingProfile = <Profile> deepCopy(this.profile);
+    this.editing = false;
+  }
+
+  pushAffiliation(): void {
+    if (!this.editing) {
+      return;
+    }
+    if (this.workingProfile) {
+      if (this.workingProfile.institutionalAffiliations === undefined) {
+        this.workingProfile.institutionalAffiliations = [];
+      }
+      this.workingProfile.institutionalAffiliations.push(
+        {
+          institutionalAffiliationId: null,
+          role: '',
+          orderIndex: null,
+          institution: '',
+          userId: this.workingProfile.userId
+        }
+      );
+    }
+  }
+
+  removeAffiliation(affiliation: InstitutionalAffiliation): void {
+    if (!this.editing) {
+      return;
+    }
+    if (this.workingProfile) {
+      const positionOfValue = this.workingProfile.institutionalAffiliations.findIndex(item => item === affiliation);
+      if (positionOfValue !== -1) {
+        this.workingProfile.institutionalAffiliations.splice(positionOfValue, 1);
+      }
+    }
   }
 }

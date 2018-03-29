@@ -6,3 +6,7 @@ export function isBlank(toTest: String): boolean {
     return toTest === '';
   }
 }
+
+export function deepCopy(obj: Object): Object {
+  return JSON.parse(JSON.stringify(obj));
+}
