@@ -18,7 +18,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -41,7 +41,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.PageFilterType;
-import org.pmiops.workbench.model.ParticipantCohortStatusesPageFilter;
+import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -108,7 +108,7 @@ public class WorkspacesControllerTest {
     CohortService.class,
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
-    ConditionQueryBuilder.class
+    ReviewTabQueryBuilder.class
   })
   @MockBean({
     FireCloudService.class,
@@ -654,7 +654,7 @@ public class WorkspacesControllerTest {
     CohortReview gotCr1 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
         cdrVersion.getCdrVersionId(),
-            new ParticipantCohortStatusesPageFilter().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)).getBody();
+            new ParticipantCohortStatuses().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES)).getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
@@ -662,7 +662,7 @@ public class WorkspacesControllerTest {
     CohortReview gotCr2 = cohortReviewController.getParticipantCohortStatuses(
         cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
         cdrVersion.getCdrVersionId(),
-            new ParticipantCohortStatusesPageFilter().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)).getBody();
+            new ParticipantCohortStatuses().pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES)).getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses())
         .isEqualTo(cr2.getParticipantCohortStatuses());

@@ -232,7 +232,7 @@ paths:
         - in: body
           name: request
           required: true
-          description: request body for getting list of ParticipantCohortStatuses.
+          description: request body for getting list of ParticipantConditions.
           schema:
             $ref: "#/definitions/PageFilterRequest"
       responses:
@@ -240,6 +240,33 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             $ref: "#/definitions/ParticipantConditionsListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/procedures:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      description:  >
+            Returns a collection of ParticipantProcedures for the specified params. This endpoint
+            does pagination based on page, limit, order and column.
+      operationId: "getParticipantProcedures"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantProcedures.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantProcedures.
+          schema:
+            $ref: "#/definitions/ParticipantProceduresListResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
@@ -444,7 +471,7 @@ definitions:
       filters:
         $ref: "#/definitions/FilterList"
 
-  ParticipantCohortStatusesPageFilter:
+  ParticipantCohortStatuses:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
@@ -452,12 +479,20 @@ definitions:
             $ref: "#/definitions/ParticipantCohortStatusColumns"
             description: Column upon which to sort (default is 'participantId')
 
-  ParticipantConditionsPageFilter:
+  ParticipantConditions:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
           sortColumn:
             $ref: "#/definitions/ParticipantConditionsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
+  ParticipantProcedures:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantProceduresColumns"
             description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
@@ -468,9 +503,13 @@ definitions:
     type: string
     enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
 
+  ParticipantProceduresColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatusesPageFilter, ParticipantConditionsPageFilter]
+    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures]
 
   SortOrder:
     type: string
@@ -614,7 +653,25 @@ definitions:
       count:
         type: integer
         format: int64
-        description: the cohort reivew id.
+        description: the total count of conditions.
+      pageRequest:
+        $ref: "#/definitions/PageRequest"
+
+  ParticipantProceduresListResponse:
+    type: object
+    required:
+      - items
+      - count
+      - pageRequest
+    properties:
+      items:
+        type: "array"
+        items:
+         $ref: "#/definitions/ParticipantProcedure"
+      count:
+        type: integer
+        format: int64
+        description: the total count of procedures.
       pageRequest:
         $ref: "#/definitions/PageRequest"
 
@@ -712,6 +769,39 @@ definitions:
       sourceName:
         type: string
         description: The source name of this condition.
+
+  ParticipantProcedure:
+    type: object
+    required:
+      - itemDate
+      - standardVocabulary
+      - standardName
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+      - age
+    properties:
+      itemDate:
+        type: string
+        description: The date of the condition occurrence
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this condition
+      standardName:
+        type: string
+        description: The standard name of this condition
+      sourceValue:
+        type: string
+        description: The source value of this condition
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this condition
+      sourceName:
+        type: string
+        description: The source name of this condition.
+      age:
+        type: integer
+        description: The age of event for the participant.
 
   AnnotationType:
     type: string
