@@ -108,6 +108,9 @@ public class FieldSetQueryBuilder {
       if (foundIt) {
         throw new BadRequestException("Can't specify multiple value columns");
       }
+      if (operator != Operator.EQUAL) {
+        throw new BadRequestException("Unsupported operator for valueNull: " + operator);
+      }
       sqlBuilder.append(columnFilter.getColumnName());
       sqlBuilder.append(" is null\n");
       return;
@@ -135,19 +138,11 @@ public class FieldSetQueryBuilder {
     List<BigDecimal> valueNumbers = columnFilter.getValueNumbers();
     List<String> valueStrings = columnFilter.getValues();
 
-    if (valueNumbers == null || valueNumbers.isEmpty()) {
-      if (valueStrings == null || valueStrings.isEmpty()) {
-        throw new BadRequestException("Can't use in operator without values or valueNumbers");
+    if (valueNumbers != null && !valueNumbers.isEmpty()) {
+      if (valueStrings != null && !valueStrings.isEmpty()) {
+        throw new BadRequestException("Can't use both values and valueNumbers");
+
       } else {
-        if (!columnConfig.type.equals(ColumnType.STRING)) {
-          throw new BadRequestException("Can't use values with column " + columnConfig.name
-              + " of type " + columnConfig.type);
-        }
-        paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
-            String.class));
-      }
-    } else {
-      if (valueStrings == null || valueStrings.isEmpty()) {
         if (!columnConfig.type.equals(ColumnType.INTEGER)) {
           throw new BadRequestException("Can't use valueNumbers with column " + columnConfig.name
               + " of type " + columnConfig.type);
@@ -156,8 +151,18 @@ public class FieldSetQueryBuilder {
             valueNumbers.stream().map(BigDecimal::longValue).collect(
                 Collectors.toList()).toArray(new Long[0]),
             Long.class));
+      }
+    } else {
+      if (valueStrings != null && !valueStrings.isEmpty()) {
+        if (!columnConfig.type.equals(ColumnType.STRING)) {
+          throw new BadRequestException("Can't use values with column " + columnConfig.name
+              + " of type " + columnConfig.type);
+        }
+        paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
+            String.class));
+
       } else {
-        throw new BadRequestException("Can't use both values and valueNumbers");
+        throw new BadRequestException("Can't use in operator without values or valueNumbers");
       }
     }
     sqlBuilder.append(columnFilter.getColumnName());
@@ -174,6 +179,7 @@ public class FieldSetQueryBuilder {
     }
     ColumnConfig columnConfig = tableQueryAndConfig.getColumn(columnFilter.getColumnName());
     if (columnConfig == null) {
+      // TODO: consider having link to documentation or valid column expressions here
       throw new BadRequestException("Column " + columnFilter.getColumnName() + " does not exist");
     }
     Operator operator = columnFilter.getOperator();
@@ -191,24 +197,20 @@ public class FieldSetQueryBuilder {
   private void handleColumnFilters(List<ColumnFilter> columnFilters,
       TableQueryAndConfig tableQueryAndConfig,
       StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
-    boolean first = false;
     if (columnFilters.isEmpty()) {
       throw new BadRequestException("Empty column filter list is invalid");
     }
-    if (columnFilters.size() == 1) {
-      handleColumnFilter(columnFilters.get(0), tableQueryAndConfig, sqlBuilder, paramMap);
-    } else {
-      sqlBuilder.append("(");
-      for (ColumnFilter columnFilter : columnFilters) {
-        if (first) {
-          first = false;
-        } else {
-          sqlBuilder.append("\nand\n");
-        }
-        handleColumnFilter(columnFilter, tableQueryAndConfig, sqlBuilder, paramMap);
+    sqlBuilder.append("(");
+    boolean first = false;
+    for (ColumnFilter columnFilter : columnFilters) {
+      if (first) {
+        first = false;
+      } else {
+        sqlBuilder.append("\nand\n");
       }
-      sqlBuilder.append(")");
+      handleColumnFilter(columnFilter, tableQueryAndConfig, sqlBuilder, paramMap);
     }
+    sqlBuilder.append(")");
   }
 
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -228,26 +230,24 @@ public class FieldSetQueryBuilder {
     Map<String, QueryParameterValue> paramMap = new HashMap<>();
     List<List<ColumnFilter>> columnFilters = tableQuery.getFilters();
     if (columnFilters != null && !columnFilters.isEmpty()) {
-      if (columnFilters.size() == 1) {
-        handleColumnFilters(columnFilters.get(0), tableQueryAndConfig, startSql, paramMap);
-      } else {
-        startSql.append("(");
-        boolean first = true;
-        for (List<ColumnFilter> filterList : columnFilters) {
-          if (first) {
-            first = false;
-          } else {
-            startSql.append("\nor\n");
-          }
-          handleColumnFilters(filterList, tableQueryAndConfig, startSql, paramMap);
+     startSql.append("(");
+      boolean first = true;
+      for (List<ColumnFilter> filterList : columnFilters) {
+        if (first) {
+          first = false;
+        } else {
+          startSql.append("\nor\n");
         }
-        startSql.append(")");
+        handleColumnFilters(filterList, tableQueryAndConfig, startSql, paramMap);
       }
-      startSql.append("\nand\n");
+      startSql.append(")\nand\n");
     }
 
     StringBuilder endSql = new StringBuilder("order by ");
     List<String> orderBy = tableQuery.getOrderBy();
+    if (orderBy.isEmpty()) {
+      throw new BadRequestException("Order by list must not be empty");
+    }
     endSql.append(Joiner.on(", ").join(orderBy));
     endSql.append(" limit ");
     endSql.append(resultSize);

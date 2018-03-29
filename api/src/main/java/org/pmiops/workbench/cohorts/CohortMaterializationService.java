@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohorts;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
@@ -13,9 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -29,6 +33,9 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
@@ -37,10 +44,13 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CohortMaterializationService {
+
+  private static final Logger logger = Logger.getLogger(CohortMaterializationService.class.getName());
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
@@ -188,12 +198,26 @@ public class CohortMaterializationService {
       }
       criteria = new ParticipantCriteria(participantIds);
     }
-    QueryJobConfiguration jobConfiguration;
     TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(fieldSet);
 
-    jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria, tableQueryAndConfig, limit, offset);
-    QueryResult result = bigQueryService.executeQuery(
-        bigQueryService.filterBigQueryConfig(jobConfiguration));
+    QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria,
+        tableQueryAndConfig, limit, offset);
+    QueryResult result;
+    try {
+      result = bigQueryService.executeQuery(
+          bigQueryService.filterBigQueryConfig(jobConfiguration));
+    } catch (BigQueryException e) {
+      if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+        throw new ServerUnavailableException("BigQuery was temporarily unavailable, try again later", e);
+      } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
+        throw new ForbiddenException("Access to the CDR is denied", e);
+      } else {
+        logger.severe(String.format("Server error when trying to materialize cohort with query = ({0}), params = ({1})",
+              jobConfiguration.getQuery(), jobConfiguration.getNamedParameters()));
+        throw new ServerErrorException("An unexpected error occurred materializing the cohort", e);
+      }
+
+    }
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     int numResults = 0;
     boolean hasMoreResults = false;
