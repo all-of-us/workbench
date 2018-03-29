@@ -12,10 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnType;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
@@ -55,20 +53,20 @@ public class FieldSetQueryBuilder {
     if (columnFilter.getValueNumbers() != null || columnFilter.getValues() != null) {
       throw new BadRequestException("Can't use valueNumbers or values with operator " + operator);
     }
-    boolean foundIt = false;
+    if (!((columnFilter.getValue() != null)
+        ^ (columnFilter.getValueDate() != null)
+        ^ (columnFilter.getValueNumber() != null)
+        ^ (columnFilter.getValueNull() != null && columnFilter.getValueNull()))) {
+      throw new BadRequestException("Exactly one of value, valueDate, valueNumber, and valueNull "
+          + "must be specified for filter on column " + columnConfig.name);
+    }
     if (columnFilter.getValue() != null) {
-      foundIt = true;
       if (!columnConfig.type.equals(ColumnType.STRING)) {
         throw new BadRequestException("Can't use value with column " + columnConfig.name
             + " of type " + columnConfig.type);
       }
       paramMap.put(paramName, QueryParameterValue.string(columnFilter.getValue()));
-    }
-    if (columnFilter.getValueDate() != null) {
-      if (foundIt) {
-        throw new BadRequestException("Can't specify multiple value columns");
-      }
-      foundIt = true;
+    } else if (columnFilter.getValueDate() != null) {
       if (columnConfig.type.equals(ColumnType.DATE)) {
         try {
           DATE_FORMAT.parse(columnFilter.getValueDate());
@@ -89,12 +87,7 @@ public class FieldSetQueryBuilder {
         throw new BadRequestException("Can't use valueDate with column " + columnConfig.name
             + " of type " + columnConfig.type);
       }
-    }
-    if (columnFilter.getValueNumber() != null) {
-      if (foundIt) {
-        throw new BadRequestException("Can't specify multiple value columns");
-      }
-      foundIt = true;
+    } else if (columnFilter.getValueNumber() != null) {
       if (columnConfig.type.equals(ColumnType.FLOAT)) {
         paramMap.put(paramName, QueryParameterValue.float64(columnFilter.getValueNumber().doubleValue()));
       } else if (columnConfig.type.equals(ColumnType.INTEGER)) {
@@ -103,22 +96,13 @@ public class FieldSetQueryBuilder {
         throw new BadRequestException("Can't use valueNumber with column " + columnConfig.name
             + " of type " + columnConfig.type);
       }
-    }
-    if (columnFilter.getValueNull() != null && columnFilter.getValueNull()) {
-      if (foundIt) {
-        throw new BadRequestException("Can't specify multiple value columns");
-      }
+    } else if (columnFilter.getValueNull() != null && columnFilter.getValueNull()) {
       if (operator != Operator.EQUAL) {
         throw new BadRequestException("Unsupported operator for valueNull: " + operator);
       }
       sqlBuilder.append(columnFilter.getColumnName());
       sqlBuilder.append(" is null\n");
       return;
-    }
-    if (!foundIt) {
-      throw new BadRequestException(
-          "One of value, valueNumber, valueDate, or valueNull must be specified for filter on column " +
-              columnFilter.getColumnName());
     }
     sqlBuilder.append(columnFilter.getColumnName());
     sqlBuilder.append(' ');
@@ -137,33 +121,28 @@ public class FieldSetQueryBuilder {
     }
     List<BigDecimal> valueNumbers = columnFilter.getValueNumbers();
     List<String> valueStrings = columnFilter.getValues();
+    if (!((valueNumbers != null && !valueNumbers.isEmpty())
+        ^ (valueStrings != null && !valueStrings.isEmpty()))) {
+      throw new BadRequestException("Either valueNumbers or valueStrings must be specified with "
+          + "in clause on column " + columnFilter.getColumnName());
+    }
 
     if (valueNumbers != null && !valueNumbers.isEmpty()) {
-      if (valueStrings != null && !valueStrings.isEmpty()) {
-        throw new BadRequestException("Can't use both values and valueNumbers");
-
-      } else {
-        if (!columnConfig.type.equals(ColumnType.INTEGER)) {
-          throw new BadRequestException("Can't use valueNumbers with column " + columnConfig.name
-              + " of type " + columnConfig.type);
-        }
-        paramMap.put(paramName, QueryParameterValue.array(
-            valueNumbers.stream().map(BigDecimal::longValue).collect(
-                Collectors.toList()).toArray(new Long[0]),
-            Long.class));
+      if (!columnConfig.type.equals(ColumnType.INTEGER)) {
+        throw new BadRequestException("Can't use valueNumbers with column " + columnConfig.name
+            + " of type " + columnConfig.type);
       }
+      paramMap.put(paramName, QueryParameterValue.array(
+          valueNumbers.stream().map(BigDecimal::longValue).collect(
+              Collectors.toList()).toArray(new Long[0]),
+          Long.class));
     } else {
-      if (valueStrings != null && !valueStrings.isEmpty()) {
-        if (!columnConfig.type.equals(ColumnType.STRING)) {
-          throw new BadRequestException("Can't use values with column " + columnConfig.name
-              + " of type " + columnConfig.type);
-        }
-        paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
-            String.class));
-
-      } else {
-        throw new BadRequestException("Can't use in operator without values or valueNumbers");
+      if (!columnConfig.type.equals(ColumnType.STRING)) {
+        throw new BadRequestException("Can't use values with column " + columnConfig.name
+            + " of type " + columnConfig.type);
       }
+      paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
+          String.class));
     }
     sqlBuilder.append(columnFilter.getColumnName());
     sqlBuilder.append(" in unnest(${");
