@@ -10,6 +10,7 @@ input[type=url]:not([readonly]) {
   padding: 1rem;
   border-radius: 5px;
   background-color: white;
+  font-family: "Gotham HTF"
 }
 
 label {

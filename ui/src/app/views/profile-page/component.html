@@ -29,20 +29,19 @@
       </div>
     </div>
     <div class="field-wrapper">
-      <div class="field">
+      <div >
         <label for="contactEmail" class="long-text-field">Contact Email:</label>
         <div style="display: flex; justify-content: left" *ngIf="profileLoaded else loading">
-          <div style="display: block">
+          <div class="field">
             <input type="text"
-              [(ngModel)]="workingProfile.contactEmail" id="contactEmail" [disabled]="!editing"
-              style="margin-right: 1rem;">
+              [(ngModel)]="workingProfile.contactEmail" id="contactEmail" [disabled]="!editing">
             <label class="long-text-field" style="padding-top: 1.5rem">Username:</label>
             <div *ngIf="profileLoaded else loading">{{workingProfile.username}}</div>
           </div>
           <div class="alert alert-warning"*ngIf="workingProfile.emailVerificationStatus !== 'subscribed'">
             <div class="alert-items">
               <div class="alert-item static">
-                <span class="alert-text">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
+                <span class="alert-text-waiting">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
               </div>
             </div>
           </div>
@@ -71,6 +70,7 @@
         </textarea>
       </div>
     </div>
+    <h2 style="margin-top: 0">Institution Affiliations:</h2>
     <div *ngIf="profileLoaded">
       <div *ngFor="let affiliation of workingProfile.institutionalAffiliations">
         <div class="field-wrapper">
@@ -90,7 +90,7 @@
         </div>
       </div>
     </div>
-    <div style="display: flex; justify-content: left; align-items: center;">
+    <div *ngIf="editing" style="display: flex; justify-content: left; align-items: center;">
       <div class="line"></div>
       <clr-icon shape="plus-circle" class="add-icon" (click)="pushAffiliation()"></clr-icon>
       <div class="line"></div>
@@ -100,14 +100,16 @@
         <span class="loading-text">Loading...</span>
       </div>
     </ng-template>
-    <button *ngIf="editing" (click)="submitChanges()" class="btn">Update Profile</button>
-    <button *ngIf="editing" (click)="reloadProfile()" class="btn">Cancel</button>
+    <div style="margin-top: 2rem;">
+      <button *ngIf="editing" (click)="submitChanges()" class="btn btn-primary">Save Profile</button>
+      <button *ngIf="editing" (click)="reloadProfile()" class="btn btn-link">Cancel</button>
+    </div>
   </div>
   <div *ngIf="profileLoaded" style="width: 13rem">
     <div class="card">
       <div style="display: flex; justify-content: space-around">
         <img [src]="profileImage" style="border-radius: 100px">
-        <h6 style="padding: 0.8rem">
+        <h6 style="padding: 1.2rem 0.8rem 0.8rem 0.8rem; line-height: 17px">
           {{workingProfile.givenName}} {{workingProfile.familyName}} Profile Image
         </h6>
       </div>

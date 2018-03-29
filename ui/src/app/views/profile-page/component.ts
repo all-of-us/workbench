@@ -27,7 +27,7 @@ export class ProfilePageComponent implements OnInit {
   profileLoaded = false;
   errorText: string;
   editing = false;
-  view: any[] = [120, 120];
+  view: any[] = [135, 135];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
@@ -65,9 +65,10 @@ export class ProfilePageComponent implements OnInit {
   }
 
   submitChanges(): void {
-    if (this.workingProfile.institutionalAffiliations !== undefined){
+    if (this.workingProfile.institutionalAffiliations !== undefined) {
       let currentSpot = 0;
-      this.workingProfile.institutionalAffiliations.forEach((affiliation: InstitutionalAffiliation) => {
+      this.workingProfile.institutionalAffiliations.forEach(
+          (affiliation: InstitutionalAffiliation) => {
         affiliation.orderIndex = currentSpot;
         currentSpot++;
       });
@@ -180,7 +181,8 @@ export class ProfilePageComponent implements OnInit {
       return;
     }
     if (this.workingProfile) {
-      const positionOfValue = this.workingProfile.institutionalAffiliations.findIndex(item => item === affiliation);
+      const positionOfValue = this.workingProfile.institutionalAffiliations
+        .findIndex(item => item === affiliation);
       if (positionOfValue !== -1) {
         this.workingProfile.institutionalAffiliations.splice(positionOfValue, 1);
       }
