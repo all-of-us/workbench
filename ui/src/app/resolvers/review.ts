@@ -28,7 +28,7 @@ export class ReviewResolver implements Resolve<CohortReview> {
     // console.dir(route);
 
     /* Default values */
-    const request = <ParticipantCohortStatusesPageFilter>{
+    const request = <ParticipantCohortStatuses>{
       page: 0,
       pageSize: 25,
       sortColumn: ParticipantCohortStatusColumns.ParticipantId,
