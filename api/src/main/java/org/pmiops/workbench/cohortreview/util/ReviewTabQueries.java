@@ -1,7 +1,5 @@
 package org.pmiops.workbench.cohortreview.util;
 
-import org.pmiops.workbench.model.PageFilterType;
-
 public enum ReviewTabQueries {
 
     CONDITION(Constants.CONDITIONS_SQL_TEMPLATE, Constants.CONDITIONS_SQL_COUNT_TEMPLATE),

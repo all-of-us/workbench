@@ -2,11 +2,9 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.ImmutableMap;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cdm.ParticipantConditionDbInfo;
 import org.pmiops.workbench.cohortreview.util.ReviewTabQueries;
-import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantConditionsColumns;
 import org.springframework.stereotype.Service;
 

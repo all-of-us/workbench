@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cdm;
 
-import org.pmiops.workbench.model.ParticipantConditionsColumns;
 import org.pmiops.workbench.model.ParticipantProceduresColumns;
 
 public enum ParticipantProcedureDbInfo {
