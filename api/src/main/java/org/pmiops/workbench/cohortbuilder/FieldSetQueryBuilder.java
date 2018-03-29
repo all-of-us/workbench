@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 public class FieldSetQueryBuilder {
 
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-  private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSSSS";
+  private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
   private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
@@ -59,6 +59,9 @@ public class FieldSetQueryBuilder {
         ^ (columnFilter.getValueNull() != null && columnFilter.getValueNull()))) {
       throw new BadRequestException("Exactly one of value, valueDate, valueNumber, and valueNull "
           + "must be specified for filter on column " + columnConfig.name);
+    }
+    if (operator.equals(Operator.LIKE) && columnFilter.getValue() == null) {
+      throw new BadRequestException("LIKE operator only support with value");
     }
     if (columnFilter.getValue() != null) {
       if (!columnConfig.type.equals(ColumnType.STRING)) {
@@ -107,9 +110,9 @@ public class FieldSetQueryBuilder {
     sqlBuilder.append(columnFilter.getColumnName());
     sqlBuilder.append(' ');
     sqlBuilder.append(OperatorUtils.getSqlOperator(columnFilter.getOperator()));
-    sqlBuilder.append(" ${");
+    sqlBuilder.append(" @");
     sqlBuilder.append(paramName);
-    sqlBuilder.append("}\n");
+    sqlBuilder.append("\n");
   }
 
   private void handleInClause(ColumnFilter columnFilter, ColumnConfig columnConfig,
@@ -117,7 +120,7 @@ public class FieldSetQueryBuilder {
     String paramName = "p" + paramMap.size();
     if (columnFilter.getValue() != null || columnFilter.getValueNumber() != null
         || columnFilter.getValueDate() != null || columnFilter.getValueNull() != null) {
-      throw new BadRequestException("Can't use in operator with single value filter");
+      throw new BadRequestException("Can't use IN operator with single value filter");
     }
     List<BigDecimal> valueNumbers = columnFilter.getValueNumbers();
     List<String> valueStrings = columnFilter.getValues();
@@ -145,9 +148,9 @@ public class FieldSetQueryBuilder {
           String.class));
     }
     sqlBuilder.append(columnFilter.getColumnName());
-    sqlBuilder.append(" in unnest(${");
+    sqlBuilder.append(" in unnest(@");
     sqlBuilder.append(paramName);
-    sqlBuilder.append("})\n");
+    sqlBuilder.append(")\n");
 
   }
 
@@ -161,12 +164,11 @@ public class FieldSetQueryBuilder {
       // TODO: consider having link to documentation or valid column expressions here
       throw new BadRequestException("Column " + columnFilter.getColumnName() + " does not exist");
     }
-    Operator operator = columnFilter.getOperator();
-    if (operator == null) {
-      operator = Operator.EQUAL;
+    if (columnFilter.getOperator() == null) {
+      columnFilter.setOperator(Operator.EQUAL);
     }
 
-    if (operator.equals(Operator.IN)) {
+    if (columnFilter.getOperator().equals(Operator.IN)) {
       handleInClause(columnFilter, columnConfig, sqlBuilder, paramMap);
     } else {
       handleComparison(columnFilter, columnConfig, sqlBuilder, paramMap);
@@ -180,7 +182,7 @@ public class FieldSetQueryBuilder {
       throw new BadRequestException("Empty column filter list is invalid");
     }
     sqlBuilder.append("(");
-    boolean first = false;
+    boolean first = true;
     for (ColumnFilter columnFilter : columnFilters) {
       if (first) {
         first = false;
@@ -199,6 +201,7 @@ public class FieldSetQueryBuilder {
     String tableName = tableQuery.getTableName();
 
     StringBuilder startSql = new StringBuilder("select ");
+    // TODO: add column aliases, use below
     startSql.append(Joiner.on(", ").join(columnNames));
     startSql.append("\nfrom `${projectId}.${dataSetId}.");
     startSql.append(tableName);
@@ -235,7 +238,7 @@ public class FieldSetQueryBuilder {
       endSql.append(offset);
     }
     return participantCounter.buildQuery(participantCriteria, startSql.toString(), endSql.toString(),
-        paramMap);
+        tableName, paramMap);
   }
 
   public Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
@@ -264,7 +267,7 @@ public class FieldSetQueryBuilder {
             value = fieldValue.getStringValue();
             break;
           case TIMESTAMP:
-            value = DATE_TIME_FORMAT.print(fieldValue.getLongValue());
+            value = DATE_TIME_FORMAT.print(fieldValue.getTimestampValue() / 1000L);
             break;
           default:
             throw new IllegalStateException("Unrecognized column type: " + columnConfig.type);

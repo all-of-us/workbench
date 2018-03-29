@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ public class CohortMaterializationService {
   static final String PERSON_ID = "person_id";
   @VisibleForTesting
   static final String PERSON_TABLE = "person";
+
+  private static final String DESCENDING_SUFFIX = " DESC";
 
   private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());
 
@@ -148,6 +151,9 @@ public class CohortMaterializationService {
       }
     } else {
       for (String columnName : orderBy) {
+        if (columnName.toUpperCase().endsWith(DESCENDING_SUFFIX)) {
+          columnName = columnName.substring(0, columnName.length() - DESCENDING_SUFFIX.length());
+        }
         if (!columnMap.containsKey(columnName)) {
           throw new BadRequestException("Invalid column in orderBy: " + columnName);
         }
@@ -215,24 +221,27 @@ public class CohortMaterializationService {
       } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
         throw new ForbiddenException("Access to the CDR is denied", e);
       } else {
-        logger.severe(String.format("Server error when trying to materialize cohort with query = ({0}), params = ({1})",
-              jobConfiguration.getQuery(), jobConfiguration.getNamedParameters()));
-        throw new ServerErrorException("An unexpected error occurred materializing the cohort", e);
+        throw new ServerErrorException(
+            String.format("An unexpected error occurred materializing the cohort with "
+                + "query = (%s), params = (%s)", jobConfiguration.getQuery(),
+                jobConfiguration.getNamedParameters()), e);
       }
 
     }
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     int numResults = 0;
     boolean hasMoreResults = false;
+    ArrayList<Object> results = new ArrayList<>();
     for (List<FieldValue> row : result.iterateAll()) {
       if (numResults == pageSize) {
         hasMoreResults = true;
         break;
       }
       Map<String, Object> resultMap = fieldSetQueryBuilder.extractResults(tableQueryAndConfig, row);
-      response.addResultsItem(resultMap);
+      results.add(resultMap);
       numResults++;
     }
+    response.setResults(results);
     if (hasMoreResults) {
       // TODO: consider pagination based on cursor / values rather than offset
       PaginationToken token = PaginationToken.of(offset + pageSize, paginationParameters);
