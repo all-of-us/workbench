@@ -6,7 +6,6 @@ import com.google.cloud.bigquery.QueryResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -45,6 +44,7 @@ public class CohortMaterializationService {
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
+  @VisibleForTesting
   static final String PERSON_TABLE = "person";
 
   private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());

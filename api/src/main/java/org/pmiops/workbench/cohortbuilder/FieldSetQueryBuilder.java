@@ -42,15 +42,11 @@ public class FieldSetQueryBuilder {
   private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
 
   private final ParticipantCounter participantCounter;
-  private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
 
   @Autowired
-  public FieldSetQueryBuilder(ParticipantCounter participantCounter,
-      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
+  public FieldSetQueryBuilder(ParticipantCounter participantCounter) {
     this.participantCounter = participantCounter;
-    this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
   }
-
 
   private void handleComparison(ColumnFilter columnFilter, ColumnConfig columnConfig,
       StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
@@ -218,7 +214,6 @@ public class FieldSetQueryBuilder {
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
       TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
-    TableConfig tableConfig = tableQueryAndConfig.getTableConfig();
     List<String> columnNames = tableQuery.getColumns();
     String tableName = tableQuery.getTableName();
 
