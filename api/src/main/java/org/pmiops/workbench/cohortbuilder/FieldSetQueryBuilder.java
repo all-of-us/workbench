@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.pmiops.workbench.config.CdrSchemaConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig.ColumnConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig.ColumnType;
-import org.pmiops.workbench.config.CdrSchemaConfig.TableConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnType;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
@@ -42,11 +42,11 @@ public class FieldSetQueryBuilder {
   private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
 
   private final ParticipantCounter participantCounter;
-  private final Provider<CdrSchemaConfig> cdrSchemaConfigProvider;
+  private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
 
   @Autowired
   public FieldSetQueryBuilder(ParticipantCounter participantCounter,
-      Provider<CdrSchemaConfig> cdrSchemaConfigProvider) {
+      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
     this.participantCounter = participantCounter;
     this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
   }

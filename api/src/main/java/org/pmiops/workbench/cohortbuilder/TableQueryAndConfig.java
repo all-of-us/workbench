@@ -2,8 +2,8 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import org.pmiops.workbench.config.CdrSchemaConfig.ColumnConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig.TableConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.model.TableQuery;
 
 public class TableQueryAndConfig {

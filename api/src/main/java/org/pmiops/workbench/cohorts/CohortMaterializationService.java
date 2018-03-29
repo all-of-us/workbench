@@ -22,9 +22,9 @@ import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig.ColumnConfig;
-import org.pmiops.workbench.config.CdrSchemaConfig.TableConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
@@ -53,14 +53,14 @@ public class CohortMaterializationService {
   private final ParticipantCounter participantCounter;
   private final FieldSetQueryBuilder fieldSetQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
-  private final Provider<CdrSchemaConfig> cdrSchemaConfigProvider;
+  private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
 
   @Autowired
   public CohortMaterializationService(BigQueryService bigQueryService,
       ParticipantCounter participantCounter,
       FieldSetQueryBuilder fieldSetQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
-      Provider<CdrSchemaConfig> cdrSchemaConfigProvider) {
+      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
@@ -107,7 +107,7 @@ public class CohortMaterializationService {
         throw new BadRequestException("Table name must be specified in field sets");
       }
     }
-    CdrSchemaConfig cdrSchemaConfig = cdrSchemaConfigProvider.get();
+    CdrBigQuerySchemaConfig cdrSchemaConfig = cdrSchemaConfigProvider.get();
     TableConfig tableConfig = cdrSchemaConfig.cohortTables.get(tableQuery.getTableName());
     Map<String, ColumnConfig> columnMap = Maps.uniqueIndex(tableConfig.columns,
         columnConfig -> columnConfig.name);
