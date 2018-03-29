@@ -119,6 +119,11 @@ public class CohortMaterializationService {
     }
     CdrBigQuerySchemaConfig cdrSchemaConfig = cdrSchemaConfigProvider.get();
     TableConfig tableConfig = cdrSchemaConfig.cohortTables.get(tableQuery.getTableName());
+    if (tableConfig == null) {
+      throw new BadRequestException("Table " + tableQuery.getTableName() + " is not a valid "
+          + "cohort table; valid tables are: " +
+          cdrSchemaConfig.cohortTables.keySet().stream().sorted().collect(Collectors.joining(",")));
+    }
     Map<String, ColumnConfig> columnMap = Maps.uniqueIndex(tableConfig.columns,
         columnConfig -> columnConfig.name);
 
