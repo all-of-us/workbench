@@ -117,7 +117,7 @@ export class DetailHeaderComponent implements OnChanges {
         pageSize: size,
         sortColumn: ParticipantCohortStatusColumns.ParticipantId,
         sortOrder: SortOrder.Asc,
-        pageFilterType: PageFilterType.ParticipantCohortStatusesPageFilter
+        pageFilterType: PageFilterType.ParticipantCohortStatuses
     };
     return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }
