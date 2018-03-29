@@ -219,7 +219,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         filterRequest.setPage(PAGE);
         filterRequest.setPageSize(PAGE_SIZE);
         filterRequest.setSortOrder(SortOrder.ASC);
-        filterRequest.setPageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+        filterRequest.setPageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
         filterRequest.setSortColumn(ParticipantCohortStatusColumns.PARTICIPANTID);
 
         List<ParticipantCohortStatus> paginatedPCS =

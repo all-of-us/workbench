@@ -471,7 +471,7 @@ definitions:
       filters:
         $ref: "#/definitions/FilterList"
 
-  ParticipantCohortStatusesPageFilter:
+  ParticipantCohortStatuses:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
@@ -479,12 +479,20 @@ definitions:
             $ref: "#/definitions/ParticipantCohortStatusColumns"
             description: Column upon which to sort (default is 'participantId')
 
-  ParticipantConditionsPageFilter:
+  ParticipantConditions:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
           sortColumn:
             $ref: "#/definitions/ParticipantConditionsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
+  ParticipantProcedures:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantProceduresColumns"
             description: Column upon which to sort (default is 'itemDate')
 
   ParticipantCohortStatusColumns:
@@ -495,9 +503,13 @@ definitions:
     type: string
     enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
 
+  ParticipantProceduresColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatusesPageFilter, ParticipantConditionsPageFilter]
+    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures]
 
   SortOrder:
     type: string
@@ -767,6 +779,7 @@ definitions:
       - sourceValue
       - sourceVocabulary
       - sourceName
+      - age
     properties:
       itemDate:
         type: string
@@ -786,6 +799,9 @@ definitions:
       sourceName:
         type: string
         description: The source name of this condition.
+      age:
+        type: integer
+        description: The age of event for the participant.
 
   AnnotationType:
     type: string
