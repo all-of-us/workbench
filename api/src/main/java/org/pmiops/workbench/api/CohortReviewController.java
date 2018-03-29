@@ -394,7 +394,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
         CohortReview review = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
 
-
         //this validates that the participant is in the requested review.
         cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
@@ -430,29 +429,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Helper method to create a {@link PageRequest} based on the specified
-     * type {@link PageFilterRequest}.
-     *
-     * @param request
-     * @return
-     */
-    private PageRequest createPageRequest(PageFilterRequest request) {
-        String sortColumn = "";
-        if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER)) {
-            sortColumn =  Optional.ofNullable(((ParticipantConditionsPageFilter) request).getSortColumn())
-                    .orElse(ParticipantConditionsColumns.ITEMDATE).toString();
-        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)) {
-            sortColumn =  Optional.ofNullable(((ParticipantCohortStatusesPageFilter) request).getSortColumn())
-                    .orElse(ParticipantCohortStatusColumns.PARTICIPANTID).toString();
-        } else {
-            throw new BadRequestException("Invalid Request: Please provide a valid PageFilterType of " +
-                    request.getPageFilterType() + ".");
-        }
-        int pageParam = Optional.ofNullable(request.getPage()).orElse(PAGE);
-        int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(PAGE_SIZE);
-        SortOrder sortOrderParam = Optional.ofNullable(request.getSortOrder()).orElse(SortOrder.ASC);
-        return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumn);
+    @Override
+    public ResponseEntity<ParticipantProceduresListResponse> getParticipantProcedures(String workspaceNamespace,
+                                                                                      String workspaceId,
+                                                                                      Long cohortId,
+                                                                                      Long cdrVersionId,
+                                                                                      Long participantId,
+                                                                                      PageFilterRequest request) {
+        return null;
     }
 
     @Override
@@ -500,6 +484,31 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewService.saveCohortReview(cohortReview);
 
         return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
+    }
+
+    /**
+     * Helper method to create a {@link PageRequest} based on the specified
+     * type {@link PageFilterRequest}.
+     *
+     * @param request
+     * @return
+     */
+    private PageRequest createPageRequest(PageFilterRequest request) {
+        String sortColumn = "";
+        if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER)) {
+            sortColumn =  Optional.ofNullable(((ParticipantConditionsPageFilter) request).getSortColumn())
+                    .orElse(ParticipantConditionsColumns.ITEMDATE).toString();
+        } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER)) {
+            sortColumn =  Optional.ofNullable(((ParticipantCohortStatusesPageFilter) request).getSortColumn())
+                    .orElse(ParticipantCohortStatusColumns.PARTICIPANTID).toString();
+        } else {
+            throw new BadRequestException("Invalid Request: Please provide a valid PageFilterType of " +
+                    request.getPageFilterType() + ".");
+        }
+        int pageParam = Optional.ofNullable(request.getPage()).orElse(PAGE);
+        int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(PAGE_SIZE);
+        SortOrder sortOrderParam = Optional.ofNullable(request.getSortOrder()).orElse(SortOrder.ASC);
+        return new PageRequest(pageParam, pageSizeParam, sortOrderParam, sortColumn);
     }
 
     /**
