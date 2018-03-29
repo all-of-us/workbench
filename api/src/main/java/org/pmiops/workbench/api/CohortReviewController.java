@@ -215,7 +215,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
         cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
-        ParticipantCohortStatusesPageFilter filterRequest = new ParticipantCohortStatusesPageFilter();
+        ParticipantCohortStatuses filterRequest = new ParticipantCohortStatuses();
         filterRequest.setPage(PAGE);
         filterRequest.setPageSize(PAGE_SIZE);
         filterRequest.setSortOrder(SortOrder.ASC);
@@ -514,13 +514,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private PageRequest createPageRequest(PageFilterRequest request) {
         String sortColumn = "";
         if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCONDITIONS)) {
-            sortColumn =  Optional.ofNullable(((ParticipantConditionsPageFilter) request).getSortColumn())
+            sortColumn =  Optional.ofNullable(((ParticipantConditions) request).getSortColumn())
                     .orElse(ParticipantConditionsColumns.ITEMDATE).toString();
         } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTPROCEDURES)) {
-            sortColumn =  Optional.ofNullable(((ParticipantProceduresPageFilter) request).getSortColumn())
+            sortColumn =  Optional.ofNullable(((ParticipantProcedures) request).getSortColumn())
                     .orElse(ParticipantProceduresColumns.ITEMDATE).toString();
         } else if (request.getPageFilterType().equals(PageFilterType.PARTICIPANTCOHORTSTATUSES)) {
-            sortColumn =  Optional.ofNullable(((ParticipantCohortStatusesPageFilter) request).getSortColumn())
+            sortColumn =  Optional.ofNullable(((ParticipantCohortStatuses) request).getSortColumn())
                     .orElse(ParticipantCohortStatusColumns.PARTICIPANTID).toString();
         } else {
             throw new BadRequestException("Invalid Request: Please provide a valid PageFilterType of " +
