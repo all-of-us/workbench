@@ -12,7 +12,6 @@ class CloudSqlProxyContext < ServiceAccountContext
         exec *%W{
           cloud_sql_proxy
             -instances #{@project}:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
-            -credential_file=#{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}
         }
       end
       begin
