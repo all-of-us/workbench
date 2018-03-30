@@ -224,6 +224,7 @@ jobs:
           command: yarn run build --no-watch --no-progress
       - deploy:
           name: Deploy to gcloud test project
+          working_directory: ~/workbench/ui
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./project.rb deploy-ui \
