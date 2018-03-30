@@ -65,12 +65,10 @@ export class ProfilePageComponent implements OnInit {
   }
 
   submitChanges(): void {
-    if (this.workingProfile.institutionalAffiliations !== undefined) {
-      let currentSpot = 0;
+    if (this.workingProfile.institutionalAffiliations) {
       this.workingProfile.institutionalAffiliations.forEach(
-          (affiliation: InstitutionalAffiliation) => {
-        affiliation.orderIndex = currentSpot;
-        currentSpot++;
+          (affiliation, index) => {
+        affiliation.orderIndex = index;
       });
     }
     this.profileService.updateProfile(this.workingProfile).subscribe(
