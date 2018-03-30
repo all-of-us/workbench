@@ -16,7 +16,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnType;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
@@ -245,7 +244,6 @@ public class FieldSetQueryBuilder {
   public Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
       List<FieldValue> row) {
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
-    TableConfig tableConfig = tableQueryAndConfig.getTableConfig();
      List<ColumnConfig> columnConfigs = tableQuery.getColumns().stream()
         .map(columnName -> tableQueryAndConfig.getColumn(columnName)).collect(Collectors.toList());
     Map<String, Object> results = new HashMap<>(tableQuery.getColumns().size());
