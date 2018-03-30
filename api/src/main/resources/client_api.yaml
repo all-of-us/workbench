@@ -223,7 +223,7 @@ definitions:
           type: string
       valueDate:
         description: >
-          An ISO-formatted date / datetime value to use in comparisons.
+          A date (yyyy-MM-dd) or datetime (yyyy-MM-dd HH:mm:ss) value to use in comparisons.
         type: string
       valueNumber:
         description: >

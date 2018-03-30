@@ -80,7 +80,7 @@ public class FieldSetQueryBuilder {
         }
       } else if (columnConfig.type.equals(ColumnType.TIMESTAMP)) {
         try {
-          long timestamp = DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis();
+          long timestamp = DATE_TIME_FORMAT.parseDateTime(columnFilter.getValueDate()).getMillis() * 1000;
           paramMap.put(paramName, QueryParameterValue.timestamp(timestamp));
         } catch (IllegalArgumentException e) {
           throw new BadRequestException("Couldn't parse timestamp value " +

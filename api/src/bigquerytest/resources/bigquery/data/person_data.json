@@ -53,7 +53,6 @@
     "person_source_value":"psv",
     "gender_source_concept_id":2,
     "race_source_concept_id":2,
-    "ethnicity_source_value":"esv",
     "ethnicity_source_concept_id":2
   }
 ]
