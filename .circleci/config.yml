@@ -50,10 +50,16 @@ jobs:
                 --project all-of-us-workbench-test \
                 --version circle-ci-test \
                 --promote
-            elif [ -n "${CIRCLE_TAG}" ]; then
+            # XXX: REVERT.
+            # elif [ -n "${CIRCLE_TAG}" ]; then
+            #  ./project.rb deploy \
+            #    --project all-of-us-rw-staging \
+            #    --version "${CIRCLE_TAG}" \
+            #    --promote
+            elif [ "${CIRCLE_BRANCH}" == "ch/staging-deploy" ]; then
               ./project.rb deploy \
                 --project all-of-us-rw-staging \
-                --version "${CIRCLE_TAG}" \
+                --version "calbach" \
                 --promote
             else
               echo "Not master branch or tagged release, skipping deploy"
@@ -224,10 +230,16 @@ jobs:
                 --project all-of-us-workbench-test \
                 --version circle-ci-test \
                 --promote
-            elif [ -n "${CIRCLE_TAG}" ]; then
+            # XXX: REVERT.
+            # elif [ -n "${CIRCLE_TAG}" ]; then
+            #   ./project.rb deploy-ui \
+            #     --project all-of-us-rw-staging \
+            #     --version "${CIRCLE_TAG}" \
+            #     --promote
+            elif [ "${CIRCLE_BRANCH}" == "ch/staging-deploy" ]; then
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
-                --version "${CIRCLE_TAG}" \
+                --version "calbach" \
                 --promote
             else
               echo "Not master branch or tagged release, skipping deploy"
