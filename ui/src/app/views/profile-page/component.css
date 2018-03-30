@@ -86,13 +86,13 @@ textarea {
   width: 0.8rem;
   margin-left: 0.5rem;
   margin-right: 0.5rem;
-	color: #262262;
+  color: #262262;
 }
 
 .remove-icon {
   height: 1rem;
   width: 1rem;
-	color: #D0021B;
+  color: #D0021B;
 }
 
 button.btn.btn-primary {
