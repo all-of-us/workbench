@@ -30,6 +30,9 @@ export class SignedInComponent implements OnInit {
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
   headerImg = '/assets/images/all-of-us-logo.svg';
+  givenName = '';
+  familyName = '';
+  profileImage = '';
   sidenavToggle = false;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
@@ -55,7 +58,13 @@ export class SignedInComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    this.profileImage = this.signInService.profileImage;
     document.body.style.backgroundColor = '#f1f2f2';
+    this.profileService.getMe().subscribe(profile => {
+      this.givenName = profile.givenName;
+      this.familyName = profile.familyName;
+    });
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileService.getMe().subscribe(profile => {
