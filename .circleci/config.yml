@@ -227,6 +227,7 @@ jobs:
           working_directory: ~/workbench/ui
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
                 --version circle-ci-test \
@@ -238,6 +239,7 @@ jobs:
             #     --version "${CIRCLE_TAG}" \
             #     --promote
             elif [ "${CIRCLE_BRANCH}" == "ch/staging-deploy" ]; then
+              ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
                 --version "calbach" \

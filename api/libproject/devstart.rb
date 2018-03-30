@@ -667,11 +667,9 @@ def cloudsql_import(cmd_name, *args)
     "Name of the GCS bucket containing the SQL dump"
   )
   op.parse.validate
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    common.run_inline %W{docker-compose run db-cloudsql-import --instance #{op.opts.instance}
-        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
-  end
+  common = Common.new
+  common.run_inline %W{docker-compose run db-cloudsql-import --instance #{op.opts.instance}
+      --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
 end
 Common.register_command({
                             :invocation => "cloudsql-import",
