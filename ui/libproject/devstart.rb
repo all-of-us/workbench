@@ -1,7 +1,6 @@
 # UI project management commands and command-line flag definitions.
 
 require "optparse"
-require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
 require_relative "../../aou-utils/swagger"
@@ -87,10 +86,6 @@ class DeployUI
         "Project to create credentials for (e.g. all-of-us-workbench-test). Required.") do |project|
       @opts.project = project
     end
-    @parser.on("--account [ACCOUNT]",
-         "Account to use when creating credentials (your.name@pmi-ops.org). Required.") do |account|
-      @opts.account = account
-    end
     @parser.on("--version [VERSION]",
           "The name of the version to deploy. Required.") do |version|
        @opts.version = version
@@ -104,7 +99,7 @@ class DeployUI
   end
 
   def validate_options
-    if @opts.project == nil || @opts.account == nil || @opts.version == nil
+    if @opts.project == nil || @opts.version == nil
       puts @parser.help
       exit 1
     end
@@ -120,10 +115,9 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
+    common.run_inline %W{yarn install}
     common.run_inline %W{yarn run build --environment=#{environment_name} --no-watch --no-progress}
-    ServiceAccountContext.new(@opts.project).run do
-      common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
-    end
+    common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
   end
 end
 

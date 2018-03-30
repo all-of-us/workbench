@@ -50,7 +50,7 @@ jobs:
                 --project all-of-us-workbench-test \
                 --version circle-ci-test \
                 --promote
-            elif [ "${CIRCLE_TAG}" == "api_v*" ]; then
+            elif [ -n "${CIRCLE_TAG}" ]; then
               ./project.rb deploy \
                 --project all-of-us-rw-staging \
                 --version "${CIRCLE_TAG}" \
@@ -61,7 +61,11 @@ jobs:
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
-          command: ./project.rb gradle dependencyCheckAnalyze --info
+          command: |
+            if [ -n "${CIRCLE_TAG}" ]; then
+              ./project.rb gradle dependencyCheckAnalyze --info
+            else
+              echo "Not a tagged release, skipping dependency checks"
 
   api-local-tests:
     docker:
@@ -218,13 +222,11 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
-                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            elif [ "${CIRCLE_TAG}" == "api_v*" ]; then
+            elif [ -n "${CIRCLE_TAG}" ]; then
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
-                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version "${CIRCLE_TAG}" \
                 --promote
             else
