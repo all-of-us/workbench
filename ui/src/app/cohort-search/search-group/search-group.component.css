@@ -16,12 +16,12 @@
   font-weight: 600;
 }
 
-.close-button {
+#close-button {
   color: rgb(245, 135, 113);
   margin: 0 !important;
 }
 
-.close-button:hover {
+#close-button:hover {
   color: rgb(255, 186, 164);
 }
 
