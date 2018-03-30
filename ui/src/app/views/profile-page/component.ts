@@ -67,8 +67,8 @@ export class ProfilePageComponent implements OnInit {
   submitChanges(): void {
     if (this.workingProfile.institutionalAffiliations) {
       this.workingProfile.institutionalAffiliations.forEach(
-          (affiliation, index) => {
-        affiliation.orderIndex = index;
+        (affiliation, index) => {
+          affiliation.orderIndex = index;
       });
     }
     this.profileService.updateProfile(this.workingProfile).subscribe(
