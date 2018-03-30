@@ -60,11 +60,8 @@ export class LeafComponent implements OnInit, OnDestroy {
   }
 
   get displayName() {
-    const isPM = this.node.get('type', '').match(/^PM.*/i);
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (nameIsCode || isPM)
-      ? ''
-      : this.node.get('name', '');
+    return (nameIsCode) ? '' : this.node.get('name', '');
 }
 
   get displayCode() {
