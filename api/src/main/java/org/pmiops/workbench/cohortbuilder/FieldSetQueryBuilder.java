@@ -100,11 +100,15 @@ public class FieldSetQueryBuilder {
             + " of type " + columnConfig.type);
       }
     } else if (columnFilter.getValueNull() != null && columnFilter.getValueNull()) {
-      if (operator != Operator.EQUAL) {
+      if (operator != Operator.EQUAL && operator != Operator.NOT_EQUAL) {
         throw new BadRequestException("Unsupported operator for valueNull: " + operator);
       }
       sqlBuilder.append(columnFilter.getColumnName());
-      sqlBuilder.append(" is null\n");
+      if (operator.equals(Operator.EQUAL)) {
+        sqlBuilder.append(" is null\n");
+      } else {
+        sqlBuilder.append(" is not null\n");
+      }
       return;
     }
     sqlBuilder.append(columnFilter.getColumnName());
