@@ -45,13 +45,24 @@ jobs:
           name: Deploy to gcloud test project
           working_directory: ~/workbench/api
           command: |
-            ./project.rb circle-deploy \
-              --project all-of-us-workbench-test --creds-file circle-sa-key.json
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./project.rb deploy \
+                --project all-of-us-workbench-test \
+                --version circle-ci-test \
+                --promote
+            elif [ "${CIRCLE_TAG}" == "api_v*" ]; then
+              ./project.rb deploy \
+                --project all-of-us-rw-staging \
+                --version "${CIRCLE_TAG}" \
+                --promote
+            else
+              echo "Not master branch or tagged release, skipping deploy"
+            fi
       - run:
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
           command: ./project.rb gradle dependencyCheckAnalyze --info
-  
+
   api-local-tests:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
@@ -205,9 +216,19 @@ jobs:
           name: Deploy to gcloud test project
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./ci/deploy_ui.sh
+              ./project.rb deploy-ui \
+                --project all-of-us-workbench-test \
+                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version circle-ci-test \
+                --promote
+            elif [ "${CIRCLE_TAG}" == "api_v*" ]; then
+              ./project.rb deploy-ui \
+                --project all-of-us-rw-staging \
+                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version "${CIRCLE_TAG}" \
+                --promote
             else
-              echo "Not master branch, skipping deploy"
+              echo "Not master branch or tagged release, skipping deploy"
             fi
 
 workflows:
@@ -216,7 +237,7 @@ workflows:
     jobs:
       - api-build-test-deploy
       - api-local-tests
-      - ui-build-test-deploy      
+      - ui-build-test-deploy
   integration-test:
     triggers:
       - schedule:

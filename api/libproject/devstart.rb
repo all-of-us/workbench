@@ -957,7 +957,7 @@ Common.register_command({
 })
 
 
-def deploy(cmd_name, args, with_cron, with_gsuite_admin)
+def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -1012,7 +1012,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy(cmd_name, args, with_cron=true, with_gsuite_admin=true)
+  deploy_app(cmd_name, args, with_cron=true, with_gsuite_admin=true)
 end
 
 Common.register_command({
@@ -1027,7 +1027,7 @@ def deploy_public_api(cmd_name, args)
   common = Common.new
   common.status "Deploying public-api..."
   Dir.chdir('../public-api') do
-    deploy(cmd_name, args, with_cron=false, with_gsuite_admin=false)
+    deploy_app(cmd_name, args, with_cron=false, with_gsuite_admin=false)
   end
 end
 
@@ -1100,19 +1100,29 @@ def with_cloud_proxy_and_db_env(cmd_name, args)
   end
 end
 
-def circle_deploy(cmd_name, args)
-  # See https://circleci.com/docs/1.0/environment-variables/#build-details
-  common = Common.new
-  common.status "circle_deploy with branch='#{ENV.fetch("CIRCLE_BRANCH", "")}'" +
-  " and tag='#{ENV.fetch("CIRCLE_TAG", "")}'"
-  if ENV.has_key?("CIRCLE_BRANCH") and ENV.has_key?("CIRCLE_TAG")
-    raise("expected exactly one of CIRCLE_BRANCH and CIRCLE_TAG env vars to be set")
-  end
-  is_master = ENV.fetch("CIRCLE_BRANCH", "") == "master"
-  if !is_master and !ENV.has_key?("CIRCLE_TAG")
-    common.status "not master or a git tag, nothing to deploy"
-    return
-  end
+def deploy(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--version [version]",
+    lambda {|opts, v| opts.version = v},
+    "Version to deploy (e.g. your-username-test)"
+  )
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.version}
+  op.add_option(
+    "--promote",
+    lambda {|opts, v| opts.promote = true},
+    "Promote this version to immediately begin serving API traffic"
+  )
+  op.add_option(
+    "--no-promote",
+    lambda {|opts, v| opts.promote = false},
+    "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
+  )
+  op.add_validator lambda {|opts| raise ArgumentError if opts.promote.nil?}
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
 
   unless Workbench::in_docker?
     exec *(%W{docker run --rm -v #{File.expand_path("..")}:/w -w /w/api
@@ -1120,46 +1130,23 @@ def circle_deploy(cmd_name, args)
       ./project.rb #{cmd_name}} + args)
   end
 
-  common = Common.new
-  unless File.exist? "circle-sa-key.json"
-    common.error "Missing service account credentials file circle-sa-key.json."
-    exit 1
+  common.status "Running database migrations..."
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    migrate_database
+    load_config(ctx.project)
+
+    common.status "Pushing GCS artifacts..."
+    deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
   end
 
-  if is_master
-    common.status "Running database migrations..."
-    with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
-      migrate_database
-      load_config(ctx.project)
-
-      common.status "Pushing GCS artifacts..."
-      deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
-    end
-  end
-
-  promote = ""
-  version = ""
-  if is_master
-    # Note that --promote will generally be a no-op, as we expect
-    # circle-ci-test to always be serving 100% traffic. Pushing to an existing
-    # live version will immediately make those changes live. In the event that
-    # someone mistakenly pushes a different version manually, this --promote
-    # will restore us to the expected circle-ci-test version on the next commit.
-    promote = "--promote"
-    version = "circle-ci-test"
-  elsif ENV.has_key?("CIRCLE_TAG")
-    promote = "--no-promote"
-    version = ENV["CIRCLE_TAG"]
-  end
-
-  deploy_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
-  deploy_public_api(cmd_name, args + %W{--quiet --version #{version} #{promote}})
+  deploy_api(cmd_name, %W{--quiet --version #{op.opts.version} #{promote}})
+  deploy_public_api(cmd_name, %W{--quiet --version #{op.opts.version} #{promote}})
 end
 
 Common.register_command({
-  :invocation => "circle-deploy",
-  :description => "Deploys the API server from within the Circle CI envronment.",
-  :fn => lambda { |*args| circle_deploy("circle-deploy", args) }
+  :invocation => "deploy",
+  :description => "Run DB migrations and deploy the API and public servers",
+  :fn => lambda { |*args| deploy("deploy", args) }
 })
 
 
