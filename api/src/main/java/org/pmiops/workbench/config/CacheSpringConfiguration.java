@@ -23,6 +23,7 @@ public class CacheSpringConfiguration {
 
   static {
     CONFIG_CLASS_MAP.put(Config.MAIN_CONFIG_ID, WorkbenchConfig.class);
+    CONFIG_CLASS_MAP.put(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
   }
 
   @Bean
@@ -53,9 +54,22 @@ public class CacheSpringConfiguration {
     return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
   }
 
+  public static CdrBigQuerySchemaConfig lookupBigQueryCdrSchemaConfig(
+      LoadingCache<String, Object> configCache) throws ExecutionException {
+    return (CdrBigQuerySchemaConfig) configCache.get(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache) throws ExecutionException {
+  WorkbenchConfig getWorkbenchConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
     return lookupWorkbenchConfig(configCache);
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  CdrBigQuerySchemaConfig getCdrSchemaConfig(@Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
+    return lookupBigQueryCdrSchemaConfig(configCache);
   }
 }

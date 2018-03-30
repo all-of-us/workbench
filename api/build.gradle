@@ -146,7 +146,9 @@ sourceSets {
   bigquerytest {
     resources {
       srcDir "bigquerytest/resources"
+      srcDir "config/"
       include "bigquery/**"
+      include "cdm/**"
     }
     java {
       compileClasspath += main.output + test.output + generated.output
