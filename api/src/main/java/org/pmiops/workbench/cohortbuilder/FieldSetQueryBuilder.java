@@ -34,10 +34,11 @@ import org.springframework.stereotype.Service;
 public class FieldSetQueryBuilder {
 
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-  private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+  private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss zzz";
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
-  private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN);
+  private static final DateTimeFormatter DATE_TIME_FORMAT =
+      DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
 
   private final ParticipantCounter participantCounter;
 

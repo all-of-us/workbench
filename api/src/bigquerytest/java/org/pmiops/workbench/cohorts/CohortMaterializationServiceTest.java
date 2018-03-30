@@ -746,7 +746,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
         .put("person_id", 1L)
         .put("observation_concept_id", 5L)
         .put("observation_date", "2009-12-03")
-        .put("observation_datetime", "2009-12-03 05:00:00")
+        .put("observation_datetime", "2009-12-03 05:00:00 UTC")
         .put("observation_type_concept_id", 5L)
         .put("value_as_number", 5.0)
         .put("value_as_string", "5")
@@ -889,7 +889,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     tableQuery.setColumns(ImmutableList.of("observation_id"));
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
-    columnFilter.setValueDate("2009-12-03 05:00:00");
+    columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -906,7 +906,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     tableQuery.setColumns(ImmutableList.of("observation_id"));
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
-    columnFilter.setValueDate("2009-12-03 05:00:01");
+    columnFilter.setValueDate("2009-12-03 05:00:01 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -924,7 +924,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.GREATER_THAN);
-    columnFilter.setValueDate("2009-12-03 04:59:59");
+    columnFilter.setValueDate("2009-12-03 04:59:59 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -942,7 +942,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.GREATER_THAN_OR_EQUAL_TO);
-    columnFilter.setValueDate("2009-12-03 05:00:00");
+    columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -960,7 +960,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.LESS_THAN);
-    columnFilter.setValueDate("2009-12-03 05:00:01");
+    columnFilter.setValueDate("2009-12-03 05:00:01 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -978,7 +978,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.LESS_THAN_OR_EQUAL_TO);
-    columnFilter.setValueDate("2009-12-03 05:00:00");
+    columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
     tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
