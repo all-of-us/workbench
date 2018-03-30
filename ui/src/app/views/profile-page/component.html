@@ -91,9 +91,9 @@
       </div>
     </div>
     <div *ngIf="editing" style="display: flex; justify-content: left; align-items: center;">
-      <div class="line"></div>
+      <hr />
       <clr-icon shape="plus-circle" class="add-icon" (click)="pushAffiliation()"></clr-icon>
-      <div class="line"></div>
+      <hr />
     </div>
     <ng-template #loading>
       <div class="loading-area">
@@ -144,19 +144,19 @@
       </div>
       <div>
         <button class="btn btn-secondary" (click)="submitTermsOfService()"
-            [disabled]="email === null || this.workingProfile.termsOfServiceCompletionTime !== null">
+            [disabled]="email || this.workingProfile.termsOfServiceCompletionTime">
           Submit Terms of Service
         </button>
       </div>
       <div>
         <button class="btn btn-secondary" (click)="completeEthicsTraining()"
-            [disabled]="email === null || this.workingProfile.ethicsTrainingCompletionTime !== null">
+            [disabled]="email || this.workingProfile.ethicsTrainingCompletionTime">
           Complete Ethics Training
         </button>
       </div>
       <div>
         <button class="btn btn-secondary" (click)="submitDemographicSurvey()"
-            [disabled]="email === null || this.workingProfile.demographicSurveyCompletionTime !== null">
+            [disabled]="email || this.workingProfile.demographicSurveyCompletionTime">
           Submit Demographics Survey
         </button>
       </div>

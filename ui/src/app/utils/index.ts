@@ -1,3 +1,5 @@
+import {fromJS} from 'immutable';
+
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
     return true;
@@ -8,5 +10,5 @@ export function isBlank(toTest: String): boolean {
 }
 
 export function deepCopy(obj: Object): Object {
-  return JSON.parse(JSON.stringify(obj));
+  return fromJS(obj).toJS();
 }

@@ -51,12 +51,6 @@ button.btn.btn-secondary {
   width: 10rem;
 }
 
-.line {
-  height: 1px;
-	border: 1px solid #C5C5C5;
-	width: 14rem;
-}
-
 .percentText {
   position: absolute;
   top: 3.5rem;
@@ -118,4 +112,9 @@ button.btn.btn-link {
 
 .alert {
   align-self: flex-start;
+}
+
+hr {
+  width: 14rem;
+  color: #C5C5C5;
 }
