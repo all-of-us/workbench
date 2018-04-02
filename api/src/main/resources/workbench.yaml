@@ -1292,8 +1292,6 @@ definitions:
       userId:
         type: integer
         format: int64
-      orderIndex:
-        type: integer
       institution:
         type: string
       role:

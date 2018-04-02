@@ -65,12 +65,7 @@ export class ProfilePageComponent implements OnInit {
   }
 
   submitChanges(): void {
-    if (this.workingProfile.institutionalAffiliations) {
-      this.workingProfile.institutionalAffiliations.forEach(
-        (affiliation, index) => {
-          affiliation.orderIndex = index;
-      });
-    }
+
     this.profileService.updateProfile(this.workingProfile).subscribe(
       () => {
         this.profile = <Profile> deepCopy(this.workingProfile);
@@ -166,7 +161,6 @@ export class ProfilePageComponent implements OnInit {
         {
           institutionalAffiliationId: null,
           role: '',
-          orderIndex: null,
           institution: '',
           userId: this.workingProfile.userId
         }

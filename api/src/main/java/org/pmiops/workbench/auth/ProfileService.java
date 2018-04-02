@@ -28,8 +28,7 @@ public class ProfileService {
           result.setUserId(institutionalAffiliation.getUserId());
           result.setRole(institutionalAffiliation.getRole());
           result.setInstitution(institutionalAffiliation.getInstitution());
-          result.setOrderIndex(institutionalAffiliation.getOrderIndex());
-
+          
           return result;
         }
       };

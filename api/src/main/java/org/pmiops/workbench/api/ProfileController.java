@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
@@ -95,7 +96,6 @@ public class ProfileController implements ProfileApiDelegate {
           result.setUserId(institutionalAffiliation.getUserId());
           result.setRole(institutionalAffiliation.getRole());
           result.setInstitution(institutionalAffiliation.getInstitution());
-          result.setOrderIndex(institutionalAffiliation.getOrderIndex());
 
           return result;
         }
@@ -477,11 +477,28 @@ public class ProfileController implements ProfileApiDelegate {
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }
-
-    user.setInstitutionalAffiliationSet(
+    List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()
         .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-        .collect(Collectors.toList()));
+        .collect(Collectors.toList());
+    int i = 0;
+    ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
+        user.getInstitutionalAffiliationSet().listIterator();
+    boolean shouldAdd = false;
+    for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+      affiliation.setOrderIndex(i);
+      if (oldAffilations.hasNext()) {
+        org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation = oldAffilations.next();
+        if (!oldAffilation.getRole().equals(affiliation.getRole())
+            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
+          shouldAdd = true;
+        }
+      } else {
+        shouldAdd = true;
+      }
+      i++;
+    }
+    user.setInstitutionalAffiliationSet(newAffiliations);
 
 
     // This does not update the name in Google.

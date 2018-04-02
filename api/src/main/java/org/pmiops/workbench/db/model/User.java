@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.model;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -51,7 +52,6 @@ public class User {
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
 
-  @OrderColumn(name="PRINT_ORDER")
   private List<InstitutionalAffiliation> institutionalAffiliationSet =
       new ArrayList<InstitutionalAffiliation>();
   private String aboutYou;
@@ -242,7 +242,8 @@ public class User {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
-  @OneToMany(mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OrderColumn(name="order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliationSet() {
     return institutionalAffiliationSet;
   }
