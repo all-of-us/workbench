@@ -9,7 +9,9 @@ import {SearchRequest} from 'generated';
 @Component({
   selector: 'app-search-group-list',
   templateUrl: './search-group-list.component.html',
-  styleUrls: ['./search-group-list.component.css']
+  styleUrls: [
+    './search-group-list.component.css',
+  ]
 })
 export class SearchGroupListComponent {
   @Input() role: keyof SearchRequest;

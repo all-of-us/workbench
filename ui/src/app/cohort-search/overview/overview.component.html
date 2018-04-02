@@ -58,44 +58,44 @@
   </ng-container>
 </div>
 
-<clr-modal
-  #saveModal
-  [clrModalStaticBackdrop]="false"
-  [clrModalSize]="'lg'">
-  <h3 class="modal-title">Save New Cohort</h3>
+<clr-modal #saveModal
+  [clrModalSize]="'md'"
+  (clrModalOpenChange)="modalChange($event)">
+  <div class="modal-title">
+    <h2>Save New Cohort</h2>
+  </div>
 
   <div class="modal-body">
     <form [formGroup]="cohortForm" (ngSubmit)="submit()">
-      <div class="form-group">
-        <label for="name" class="required">Cohort Name</label>
-        <label
-          aria-haspopup="true"
-          role="tooltip"
-          class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
-          [class.invalid]="name.invalid && (name.dirty || name.touched)">
-          <input name="name"
-            formControlName="name"
-            size="76"
-            type="text"
-            autofocus>
-          <span class="tooltip-content">
-            A Name is required
-          </span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea name="description"
-          formControlName="description">
-        </textarea>
-      </div>
+      <label
+        for="name"
+        [class.show]="(name.dirty || name.touched) && cohortForm.invalid">
+        <em>*A Cohort Name is Required</em>
+      </label>
+      <input
+        name="name"
+        id="name-control"
+        class="control"
+        placeholder="Cohort Name"
+        formControlName="name"
+        type="text"
+        [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"
+        autofocus>
+      <textarea
+        name="description"
+        id="description-control"
+        class="control"
+        placeholder="Description"
+        rows="60"
+        formControlName="description">
+      </textarea>
     </form>
   </div>
 
   <div class="modal-footer">
     <button
       type="button"
-      class="btn btn-outline"
+      class="btn btn-link"
       (click)="saveModal.close()">
       Cancel
     </button>
