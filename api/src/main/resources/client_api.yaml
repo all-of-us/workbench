@@ -188,7 +188,7 @@ definitions:
     type: object
     description: >
       A list of filters applied to the results of a query. Only results matching the filter criteria
-      should be returned.
+      should be returned. Exactly one of "allOf", "anyOf", and "columnFilter" should be set.
     properties:
       not:
         description: >
