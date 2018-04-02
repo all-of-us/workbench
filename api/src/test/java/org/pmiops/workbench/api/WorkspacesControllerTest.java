@@ -157,9 +157,6 @@ public class WorkspacesControllerTest {
   CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   WorkspacesController workspacesController;
-  @Autowired
-  JdbcTemplate jdbcTemplate;
-
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -672,9 +669,6 @@ public class WorkspacesControllerTest {
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
-
-    String sql = "select * from participant_cohort_annotations";
-    List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
 
     CohortAnnotationDefinitionListResponse clonedCad1List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
             cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId()).getBody();
