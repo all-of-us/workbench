@@ -1,0 +1,64 @@
+<clr-datagrid
+  [clrDgLoading]="loading"
+  (clrDgRefresh)="update($event)"
+  class="datagrid-compact"
+>
+  <clr-dg-placeholder>No Conditions Data</clr-dg-placeholder>
+  <clr-dg-column [clrDgField]="'itemDate'" class="date-col">
+    Date
+  </clr-dg-column>
+
+  <clr-dg-column [clrDgField]="'standardVocabulary'" class="vocab-col">
+    Standard Vocabulary
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'standardName'">
+    Standard Name
+  </clr-dg-column>
+
+  <clr-dg-column [clrDgField]="'sourceVocabulary'" class="vocab-col">
+    Source Vocabulary
+  </clr-dg-column>
+  <clr-dg-column [clrDgField]="'sourceValue'">
+    Source Value
+  </clr-dg-column>
+
+  <clr-dg-column>
+    Age At Event
+  </clr-dg-column>
+
+  <clr-dg-row *ngFor="let procedure of procedures">
+    <clr-dg-cell>
+      {{ procedure.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ procedure.standardVocabulary }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ procedure.standardName }}
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ procedure.sourceVocabulary }}
+    </clr-dg-cell>
+    <clr-dg-cell
+        [popper]="procedure.sourceName"
+        [popperTrigger]="'hover'"
+        [popperPlacement]="'left'"
+        [popperTarget]="sourceValue">
+      <span #sourceValue>{{ procedure.sourceValue }}</span>
+    </clr-dg-cell>
+    <clr-dg-cell>
+      {{ procedure.age }}
+    </clr-dg-cell>
+  </clr-dg-row>
+
+  <clr-dg-footer>
+    {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+    {{ totalCount }} Records
+    <clr-dg-pagination #pagination
+      [clrDgTotalItems]="totalCount"
+      [clrDgPageSize]="request.pageSize"
+      [clrDgPage]="request.page + 1">
+    </clr-dg-pagination>
+  </clr-dg-footer>
+
+</clr-datagrid>

@@ -4,7 +4,7 @@ import {ClarityModule} from '@clr/angular';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 
-import {DetailConditionsComponent} from './detail-conditions.component';
+import {DetailProceduresComponent} from './detail-procedures.component';
 
 import {CohortReviewService} from 'generated';
 
@@ -28,7 +28,7 @@ class StubRoute {
 }
 
 class ApiSpy {
-  getParticipantConditions = jasmine
+  getParticipantProcedures = jasmine
     .createSpy('getParticipantConditions')
     .and
     .callFake((ns, wsid, cid, cdrid, pid, pageRequest) =>
@@ -36,14 +36,14 @@ class ApiSpy {
 }
 
 
-describe('DetailConditionsComponent', () => {
-  let component: DetailConditionsComponent;
-  let fixture: ComponentFixture<DetailConditionsComponent>;
+describe('DetailProceduresComponent', () => {
+  let component: DetailProceduresComponent;
+  let fixture: ComponentFixture<DetailProceduresComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [ ClarityModule, NgxPopperModule ],
-      declarations: [ DetailConditionsComponent ],
+      declarations: [ DetailProceduresComponent ],
       providers: [
         {provide: CohortReviewService, useValue: new ApiSpy()},
         {provide: ActivatedRoute, useClass: StubRoute}
@@ -53,7 +53,7 @@ describe('DetailConditionsComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DetailConditionsComponent);
+    fixture = TestBed.createComponent(DetailProceduresComponent);
     component = fixture.componentInstance;
     component.ngOnInit();
     fixture.detectChanges();
