@@ -8,6 +8,7 @@ public class OperatorUtils {
   private static final ImmutableMap<Operator, String> operatorToSqlOperator =
       ImmutableMap.<Operator, String>builder()
           .put(Operator.EQUAL, "=")
+          .put(Operator.NOT_EQUAL, "!=")
           .put(Operator.GREATER_THAN, ">")
           .put(Operator.GREATER_THAN_OR_EQUAL_TO, ">=")
           .put(Operator.IN, "IN")
