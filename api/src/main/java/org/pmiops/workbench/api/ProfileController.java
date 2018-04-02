@@ -380,10 +380,9 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    // The two null values are aboutYou and areaOfResearch, to be filled in by the user.
     userService.createUser(request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail(), null, null);
+        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.

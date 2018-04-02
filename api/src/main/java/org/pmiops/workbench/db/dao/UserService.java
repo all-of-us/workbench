@@ -122,9 +122,7 @@ public class UserService {
   public User createUser(String givenName,
       String familyName,
       String email,
-      String contactEmail,
-      String aboutYou,
-      String areaOfResearch) {
+      String contactEmail) {
     User user = new User();
     user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
@@ -132,8 +130,8 @@ public class UserService {
     user.setFamilyName(familyName);
     user.setGivenName(givenName);
     user.setDisabled(false);
-    user.setAboutYou(aboutYou);
-    user.setAreaOfResearch(areaOfResearch);
+    user.setAboutYou(null);
+    user.setAreaOfResearch(null);
     user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
     user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
     try {

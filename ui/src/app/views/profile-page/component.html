@@ -3,7 +3,7 @@
     (click)="editing = true" class="btn btn-icon">
   <app-edit-icon [editHover]="editHover"></app-edit-icon>
 </button>
-<span *ngIf="!profileLoaded;" class="spinner spinner-sm"></span>
+<span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
 <div class="alert alert-danger" *ngIf="errorText">
   <div class="alert-items">
     <div class="alert-item static">

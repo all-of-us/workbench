@@ -157,7 +157,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     if (user == null) {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user = userService.createUser(userInfo.getGivenName(), userInfo.getFamilyName(),
-            userInfo.getEmail(), null, null, null);
+            userInfo.getEmail(), null);
     } else {
       if (user.getDisabled()) {
         throw new ForbiddenException(ExceptionUtils.errorResponse(ErrorCode.USER_DISABLED, "This user account has been disabled."));
