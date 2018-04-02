@@ -9,7 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ConditionQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -36,9 +36,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +53,10 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     private static final String NAME = "test";
     private static final Long PARTICIPANT_ID = 102246L;
     private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-    private ParticipantCondition expected1;
-    private ParticipantCondition expected2;
+    private ParticipantCondition expectedCondition1;
+    private ParticipantCondition expectedCondition2;
+    private ParticipantProcedure expectedProcedure1;
+    private ParticipantProcedure expectedProcedure2;
     private CdrVersion cdrVersion;
     private Workspace workspace;
 
@@ -92,7 +92,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
             CohortReviewServiceImpl.class,
             CohortReviewController.class,
             BigQueryService.class,
-            ConditionQueryBuilder.class,
+            ReviewTabQueryBuilder.class,
             CohortService.class,
             ParticipantCounter.class,
             DomainLookupService.class
@@ -120,26 +120,50 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     public List<String> getTableNames() {
         return Arrays.asList(
                 "condition_occurrence",
+                "procedure_occurrence",
+                "person",
                 "concept"
         );
     }
 
     @Before
     public void setUp() {
-        expected1 = new ParticipantCondition()
+        LocalDate personBirthDate = LocalDate.of(1980, Month.FEBRUARY, 17);
+        LocalDate procedureDate1 = LocalDate.of(2009, Month.DECEMBER, 2);
+        LocalDate procedureDate2 = LocalDate.of(2009, Month.DECEMBER, 3);
+        Period age1 = Period.between(personBirthDate, procedureDate1);
+        Period age2 = Period.between(personBirthDate, procedureDate2);
+
+        expectedCondition1 = new ParticipantCondition()
                 .itemDate("2008-07-22")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0020")
                 .sourceVocabulary("ICD9CM")
                 .sourceName("Typhoid and paratyphoid fevers");
-        expected2 = new ParticipantCondition()
+        expectedCondition2 = new ParticipantCondition()
                 .itemDate("2008-08-01")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0021")
                 .sourceVocabulary("ICD9CM")
                 .sourceName("Typhoid and paratyphoid fevers");
+        expectedProcedure1 = new ParticipantProcedure()
+                .itemDate("2009-12-02")
+                .standardVocabulary("ICD10CM")
+                .standardName("name")
+                .sourceValue("val")
+                .sourceVocabulary("ICD10CM")
+                .sourceName("name")
+                .age(age1.getYears());
+        expectedProcedure2 = new ParticipantProcedure()
+                .itemDate("2009-12-03")
+                .standardVocabulary("CPT4")
+                .standardName("name")
+                .sourceValue("val")
+                .sourceVocabulary("CPT4")
+                .sourceName("name")
+                .age(age2.getYears());
 
         cdrVersion = new CdrVersion();
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -185,8 +209,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
         stubMockFirecloudGetWorkspace();
 
-        ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
-        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER);
+        ParticipantConditions testFilter = new ParticipantConditions();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONS);
 
         //no sort order or column
         ParticipantConditionsListResponse response = controller
@@ -202,8 +226,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
-        assertThat(conditions.get(0)).isEqualTo(expected1);
-        assertThat(conditions.get(1)).isEqualTo(expected2);
+        assertThat(conditions.get(0)).isEqualTo(expectedCondition1);
+        assertThat(conditions.get(1)).isEqualTo(expectedCondition2);
 
         //added sort order
         testFilter.sortOrder(SortOrder.DESC);
@@ -221,8 +245,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(2);
-        assertThat(conditions.get(0)).isEqualTo(expected2);
-        assertThat(conditions.get(1)).isEqualTo(expected1);
+        assertThat(conditions.get(0)).isEqualTo(expectedCondition2);
+        assertThat(conditions.get(1)).isEqualTo(expectedCondition1);
     }
 
     @Test
@@ -235,8 +259,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
         stubMockFirecloudGetWorkspace();
 
-        ParticipantConditionsPageFilter testFilter = new ParticipantConditionsPageFilter();
-        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONSPAGEFILTER);
+        ParticipantConditions testFilter = new ParticipantConditions();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONS);
         testFilter.page(0);
         testFilter.pageSize(1);
 
@@ -254,7 +278,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         List<ParticipantCondition> conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
-        assertThat(conditions.get(0)).isEqualTo(expected1);
+        assertThat(conditions.get(0)).isEqualTo(expectedCondition1);
 
         //page 2 should have 1 item
         testFilter.page(1);
@@ -272,7 +296,107 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
         conditions = response.getItems();
         assertThat(conditions.size()).isEqualTo(1);
-        assertThat(conditions.get(0)).isEqualTo(expected2);
+        assertThat(conditions.get(0)).isEqualTo(expectedCondition2);
+    }
+
+    @Test
+    public void getParticipantProceduresSorting() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(25)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantProcedures testFilter = new ParticipantProcedures();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTPROCEDURES);
+
+        //no sort order or column
+        ParticipantProceduresListResponse response = controller
+                .getParticipantProcedures(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
+        List<ParticipantProcedure> procedures = response.getItems();
+        assertThat(procedures.size()).isEqualTo(2);
+        assertThat(procedures.get(0)).isEqualTo(expectedProcedure1);
+        assertThat(procedures.get(1)).isEqualTo(expectedProcedure2);
+
+        //added sort order
+        testFilter.sortOrder(SortOrder.DESC);
+        expectedPageRequest.sortOrder(SortOrder.DESC);
+        response = controller
+                .getParticipantProcedures(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
+        procedures = response.getItems();
+        assertThat(procedures.size()).isEqualTo(2);
+        assertThat(procedures.get(0)).isEqualTo(expectedProcedure2);
+        assertThat(procedures.get(1)).isEqualTo(expectedProcedure1);
+    }
+
+    @Test
+    public void getParticipantProceduresPagination() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(1)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantProcedures testFilter = new ParticipantProcedures();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTPROCEDURES);
+        testFilter.page(0);
+        testFilter.pageSize(1);
+
+        //page 1 should have 1 item
+        ParticipantProceduresListResponse response =  controller
+                .getParticipantProcedures(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
+        List<ParticipantProcedure> procedures = response.getItems();
+        assertThat(procedures.size()).isEqualTo(1);
+        assertThat(procedures.get(0)).isEqualTo(expectedProcedure1);
+
+        //page 2 should have 1 item
+        testFilter.page(1);
+        expectedPageRequest.page(1);
+        response = controller
+                .getParticipantProcedures(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+        assertThat(response.getCount()).isEqualTo(2);
+        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
+        procedures = response.getItems();
+        assertThat(procedures.size()).isEqualTo(1);
+        assertThat(procedures.get(0)).isEqualTo(expectedProcedure2);
     }
 
     private void stubMockFirecloudGetWorkspace() throws ApiException {

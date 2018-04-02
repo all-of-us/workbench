@@ -223,7 +223,7 @@ definitions:
           type: string
       valueDate:
         description: >
-          An ISO-formatted date / datetime value to use in comparisons.
+          A date (yyyy-MM-dd) or datetime (yyyy-MM-dd HH:mm:ss zzz) value to use in comparisons.
         type: string
       valueNumber:
         description: >
@@ -247,4 +247,4 @@ definitions:
 
   Operator:
     type: string
-    enum: ['=', '<', '>', '<=', '>=', 'like', 'in']
+    enum: [EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN]

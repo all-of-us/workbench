@@ -113,10 +113,15 @@ def dev_up(*args)
   common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-data-migration}
 
-  common.status "Updating configuration..."
+  common.status "Updating workbench configuration..."
   common.run_inline %W{
     docker-compose run update-config
     -Pconfig_file=../config/config_local.json
+  }
+  common.status "Updating CDR schema configuration..."
+  common.run_inline %W{
+    docker-compose run update-config
+    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json
   }
   run_api()
 end
@@ -149,7 +154,8 @@ def run_local_migrations()
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
   end
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_file=../config/config_local.json}
+  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
+  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
 end
 
 Common.register_command({
@@ -1070,10 +1076,8 @@ def load_config(project)
   common = Common.new
   common.status "Loading #{config_json} into database..."
   Dir.chdir("tools") do
-    common.run_inline %W{
-      gradle --info loadConfig
-      -Pconfig_file=../config/#{config_json}
-    }
+    common.run_inline %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}}
+    common.run_inline %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
   end
 end
 

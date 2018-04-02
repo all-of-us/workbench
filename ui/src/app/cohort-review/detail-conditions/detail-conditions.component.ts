@@ -68,7 +68,7 @@ export class DetailConditionsComponent implements OnInit, OnDestroy {
           includeTotal: true,
           sortOrder: SortOrder.Asc,
           sortColumn: Columns.ItemDate,
-          pageFilterType: PageFilterType.ParticipantConditionsPageFilter,
+          pageFilterType: PageFilterType.ParticipantConditions,
         };
 
         this.callApi();
@@ -85,7 +85,7 @@ export class DetailConditionsComponent implements OnInit, OnDestroy {
       this.conditions = resp.items;
       this.totalCount = resp.count;
       this.request = resp.pageRequest;
-      this.request.pageFilterType = PageFilterType.ParticipantConditionsPageFilter;
+      this.request.pageFilterType = PageFilterType.ParticipantConditions;
       this.loading = false;
     });
   }

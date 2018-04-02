@@ -1,0 +1,494 @@
+# Endpoints in this API are intended to be used by researchers in notebooks; make sure they
+# are extra-well documented and designed and that we do not break backwards compatibility!
+
+# For separate validation (with some false positives), do:
+#     ./project.rb validate-swagger
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Client API"
+  description: "The API used by AllOfUs workbench clients (including both notebooks and our UI.)"
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "MIT"
+host: "api.pmi-ops.org"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
+    type: oauth2
+    flow: accessCode
+schemes:
+  - "https"
+produces:
+  - "application/json"
+# Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
+
+paths:
+
+  # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{parentId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaByTypeAndParentId"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: parentId
+          type: integer
+          format: int64
+          required: true
+          description: fetch children of parentId
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaByTypeAndSubtype"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: subtype
+          type: string
+          required: true
+          description: the specific subtype of criteria to get
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/search:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    post:
+      tags:
+        - cohortBuilder
+      description: Searches for participants based on criteria, criteria specific parameters, and modifiers.
+      operationId: "countParticipants"
+      parameters:
+        - in: body
+          name: request
+          description: object of parameters by which to perform the search
+          schema:
+            $ref: "#/definitions/SearchRequest"
+          required: true
+      responses:
+        200:
+          description: A count of subjects
+          schema:
+            type: integer
+            format: int64
+
+  /v1/cohortbuilder/{cdrVersionId}/chartinfo:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    post:
+      tags:
+        - cohortBuilder
+      description: Searches for demographic info about subjects.
+      operationId: "getChartInfo"
+      parameters:
+        - in: body
+          name: request
+          description: object of parameters by which to perform the search
+          schema:
+            $ref: "#/definitions/SearchRequest"
+          required: true
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/ChartInfoListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Quick search for criteria that matches on code and name.
+      operationId: "getCriteriaTreeQuickSearch"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: value
+          type: string
+          required: true
+          description: value that should match code or name
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/demographics:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Will return a list all values for gender, race and ethnicity.
+      operationId: "getParticipantDemographics"
+      responses:
+        200:
+          description: An object which contains a list of all values for gender, race and ethnicity.
+          schema:
+            $ref: "#/definitions/ParticipantDemographics"
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+
+  CriteriaListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Criteria"
+
+  Criteria:
+    type: object
+    required:
+      - id
+      - type
+      - code
+      - name
+      - group
+      - selectable
+    properties:
+      id:
+        description: id of the criteria
+        type: integer
+        format: int64
+      type:
+        description: type of criteria
+        type: string
+      subtype:
+        description: subtype of this criteria
+        type: string
+      code:
+        description: >
+          code that identifies this criteria, ex: icd9, icd10 or cpt all
+          have codes that map to the concept_code column in the concept
+          table.
+        type: string
+      name:
+        description: description of criteria
+        type: string
+      count:
+        description: est. count in the cdr
+        type: integer
+        format: int64
+      group:
+        description: specifies if child or parent
+        type: boolean
+      selectable:
+        description: specifies if user can search with
+        type: boolean
+      conceptId:
+        description: >
+          concept ids are ids associated with a specific vocabulary item,
+          in the concept table and allow you to search for that code in
+          its domain table.
+        type: integer
+        format: int64
+      domainId:
+        description: >
+          clue to determine which tables to search, but these only exist
+          for leaves in the tree. Parents don't have domain ids and concept
+          id will be used in the case that a parent is selectable.
+        type: string
+
+  SearchRequest:
+    description: >
+      The SearchRequest describes the state of the Cohort Builder at any given moment.
+      It contains two keys, `include` and `exclude`, each of which specifies an array
+      of SearchGroups which are `AND`ed together, and which collectively specify which
+      subjects to include or exclude from the cohort.
+    type: object
+    required:
+      - includes
+      - excludes
+    properties:
+      includes:
+        type: array
+        items:
+          $ref: "#/definitions/SearchGroup"
+      excludes:
+        type: array
+        items:
+          $ref: "#/definitions/SearchGroup"
+    example:
+      typical:
+        {
+          include: [
+            # SearchGroups
+            [
+              # SearchGroupItems
+              {type: "ICD9", searchParameters: [{value: "Foo", domain: "Bar"}, {value: "C"}]},
+              {type: "ICD9", searchParameters: [{value: "Baz"}]}
+            ], [
+              {type: "ICD10", searchParameters: [{value: "Baz", domain: "Bar"}], modifiers: []},
+            ]
+          ],
+          exclude: []
+        }
+      minimum:
+        {
+          include: [[{type: "A Crit Type", searchParameters: [{value: "A value"}]}]]
+        }
+
+  SearchGroup:
+    description: >
+      A SearchGroup is a container for groups of criteria which are `AND`ed together.
+    type: object
+    required:
+      - items
+    properties:
+      id:
+        description: Unique within the cohort definition
+        type: string
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchGroupItem"
+
+  SearchGroupItem:
+    # TODO: When we add in modifiers we'll add that to the official description
+    description: >
+      A SearchGroupItem is the "line item" of the Cohort Builder.  It specifies
+      a set of criteria of a given kind, possibly alongside a set of modifiers,
+      the results of which are `OR`ed together with the other criteria in the
+      group.
+    type: object
+    required:
+      - type
+      - searchParameters
+    properties:
+      id:
+        description: Unique within the cohort definition
+        type: string
+      type:
+        description: type of criteria
+        type: string
+      searchParameters:
+        description: values that help search for subjects
+        type: "array"
+        items:
+          $ref: "#/definitions/SearchParameter"
+      modifiers:
+        description: criteria by operation or predicate
+        type: "array"
+        items:
+          $ref: "#/definitions/Modifier"
+    example:
+      {
+        type: "ICD9",
+        searchParameters: [
+          { value: "E9293", domain: "Condition", conceptId: null },
+          { value: "E979-E979.9", domain: null, conceptId: null }
+        ],
+        modifiers: [
+          { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
+        ]
+      }
+
+  SearchParameter:
+    type: object
+    required:
+      - parameterId
+      - name
+      - value
+      - type
+      - subtype
+      - group
+    properties:
+      parameterId:
+        description: Unique within the cohort definition
+        type: string
+      name:
+        description: The name of the generating Criterion
+        type: string
+      value:
+        description: The Value of the Criteria within its Category Tree
+        type: string
+      type:
+        description: The type of the generating Criterion
+        type: string
+      subtype:
+        description: The subtype of the generating Criterion
+        type: string
+      group:
+        description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
+        type: boolean
+      domain:
+        description: clue to determine which tables to search
+        type: string
+      conceptId:
+        description: The concept id that maps to concept table.
+        type: integer
+        format: int64
+      attribute:
+        description: Any applicable arguments that complete the sense of the parameter
+        $ref: "#/definitions/Attribute"
+    example:
+      leafExample:
+        value: "E9293"
+        subtype: "AGE"
+        domainId: "Condition"
+      parentExample:
+        value: "E979-E979.9"
+        subtype: "BP_EHR"
+        domainId: null
+
+  Attribute:
+    type: object
+    required:
+      - operator
+      - operands
+    properties:
+      operator:
+        type: string
+      operands:
+        type: "array"
+        items:
+          type: string
+    example:
+      singleValued:
+        operator: "GTE"
+        operands: ["20"]
+      multiValued:
+        operator: "BETWEEN"
+        operands: ["18", "35"]
+
+  Modifier:
+    type: object
+    required:
+      - name
+      - operator
+      - operands
+    properties:
+      name:
+        description: Semantic name of the operator
+        type: string
+      operator:
+        description: Machine name of the operator
+        type: string
+      operands:
+        type: "array"
+        items:
+          type: string
+    example:
+      singleValued:
+        name: "age_at_event"
+        operator: "GTE"
+        operands: ["20"]
+      multiValued:
+        name: "age_at_event"
+        operator: "BETWEEN"
+        operands: ["18", "35"]
+
+  ChartInfoListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChartInfo"
+
+  ChartInfo:
+    type: object
+    required:
+      - gender
+      - race
+      - ageRange
+      - count
+    properties:
+      gender:
+        description: gender of subject
+        type: string
+      race:
+        description: race of subject
+        type: string
+      ageRange:
+        description: age range of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
+
+  ParticipantDemographics:
+    type: object
+    required:
+      - genderList
+      - raceList
+      - ethnicityList
+    properties:
+      genderList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+      raceList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+      ethnicityList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConceptIdName"
+
+  ConceptIdName:
+    type: object
+    required:
+      - conceptId
+      - conceptName
+    properties:
+      conceptId:
+        type: integer
+        format: int64
+      conceptName:
+        type: string

@@ -240,7 +240,6 @@ public class CohortsController implements CohortsApiDelegate {
     }
     String cohortSpec;
     CohortReview cohortReview = null;
-    List<CohortStatus> statusFilter = null;
     if (request.getCohortName() != null) {
       org.pmiops.workbench.db.model.Cohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
@@ -252,7 +251,6 @@ public class CohortsController implements CohortsApiDelegate {
       cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
           cdrVersion.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
-      statusFilter = request.getStatusFilter();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
       if (request.getStatusFilter() != null) {
@@ -263,13 +261,13 @@ public class CohortsController implements CohortsApiDelegate {
     }
     Integer pageSize = request.getPageSize();
     if (pageSize == null || pageSize == 0) {
-      pageSize = DEFAULT_PAGE_SIZE;
+      request.setPageSize(DEFAULT_PAGE_SIZE);
     } else if (pageSize < 0) {
         throw new BadRequestException(
             String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
                 MAX_PAGE_SIZE));
     } else if (pageSize > MAX_PAGE_SIZE) {
-      pageSize = MAX_PAGE_SIZE;
+      request.setPageSize(MAX_PAGE_SIZE);
     }
 
     SearchRequest searchRequest;
@@ -280,8 +278,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cohortReview, searchRequest, statusFilter, pageSize,
-        request.getPageToken());
+        cohortReview, searchRequest, request);
     return ResponseEntity.ok(response);
   }
 

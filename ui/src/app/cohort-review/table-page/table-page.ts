@@ -16,7 +16,7 @@ import {
   Operator,
   PageFilterType,
   ParticipantCohortStatusColumns as Columns,
-  ParticipantCohortStatusesPageFilter as Request,
+  ParticipantCohortStatuses as Request,
   ParticipantDemographics,
   SortOrder,
   Workspace,
@@ -89,7 +89,7 @@ export class TablePage implements OnInit, OnDestroy {
       sortColumn: Columns.ParticipantId,
       sortOrder: SortOrder.Asc,
       filters: {items: []},
-      pageFilterType: PageFilterType.ParticipantCohortStatusesPageFilter,
+      pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };
 
     if (state.sort) {
@@ -104,11 +104,11 @@ export class TablePage implements OnInit, OnDestroy {
       for (const filter of state.filters) {
         if (isChoiceFilter(filter)) {
           const property = filter.property;
-          const operator = Operator.In;
+          const operator = Operator.IN;
           query.filters.items.push(<Filter>{property, values: filter.selection.value, operator});
         } else {
           const {property, value} = <any>filter;
-          const operator = Operator.Equal;
+          const operator = Operator.EQUAL;
           query.filters.items.push(<Filter>{property, values: [value], operator});
         }
       }

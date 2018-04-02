@@ -8,7 +8,7 @@ import {
   CohortReviewService,
   PageFilterType,
   ParticipantCohortStatusColumns,
-  ParticipantCohortStatusesPageFilter,
+  ParticipantCohortStatuses,
   SortOrder,
   Workspace,
 } from 'generated';
@@ -28,12 +28,12 @@ export class ReviewResolver implements Resolve<CohortReview> {
     // console.dir(route);
 
     /* Default values */
-    const request = <ParticipantCohortStatusesPageFilter>{
+    const request = <ParticipantCohortStatuses>{
       page: 0,
       pageSize: 25,
       sortColumn: ParticipantCohortStatusColumns.ParticipantId,
       sortOrder: SortOrder.Asc,
-      pageFilterType: PageFilterType.ParticipantCohortStatusesPageFilter,
+      pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };
 
     return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);

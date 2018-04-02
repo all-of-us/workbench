@@ -47,10 +47,6 @@ jobs:
           command: |
             ./project.rb circle-deploy \
               --project all-of-us-workbench-test --creds-file circle-sa-key.json
-      - run:
-          name: Scan dependencies for vulnerabilities
-          working_directory: ~/workbench/api
-          command: ./project.rb gradle dependencyCheckAnalyze --info
   
   api-local-tests:
     docker:

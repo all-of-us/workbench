@@ -25,19 +25,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.PageFilterType;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesPageFilter;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.http.ResponseEntity;
 
 import javax.inject.Provider;
@@ -507,12 +495,12 @@ public class CohortReviewControllerTest {
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
 
-        ParticipantCohortStatusesPageFilter request = new ParticipantCohortStatusesPageFilter();
+        ParticipantCohortStatuses request = new ParticipantCohortStatuses();
         request.page(page);
         request.pageSize(pageSize);
         request.sortOrder(sortOrder);
         request.sortColumn(sortColumn);
-        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSESPAGEFILTER);
+        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
 
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
