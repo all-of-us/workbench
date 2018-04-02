@@ -194,6 +194,7 @@ definitions:
         description: >
          Set to true if a result matching allOf or anyOf below should result in a result *not*
          being returned.
+        type: boolean
       allOf:
         description: >
           A list of result filters. All filters matching means a result should be returned (or not returned

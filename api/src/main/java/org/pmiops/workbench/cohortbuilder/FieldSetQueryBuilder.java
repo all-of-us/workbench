@@ -20,6 +20,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +117,6 @@ public class FieldSetQueryBuilder {
     sqlBuilder.append(OperatorUtils.getSqlOperator(columnFilter.getOperator()));
     sqlBuilder.append(" @");
     sqlBuilder.append(paramName);
-    sqlBuilder.append("\n");
   }
 
   private void handleInClause(ColumnFilter columnFilter, ColumnConfig columnConfig,
@@ -154,7 +154,7 @@ public class FieldSetQueryBuilder {
     sqlBuilder.append(columnFilter.getColumnName());
     sqlBuilder.append(" in unnest(@");
     sqlBuilder.append(paramName);
-    sqlBuilder.append(")\n");
+    sqlBuilder.append(")");
 
   }
 
@@ -179,23 +179,43 @@ public class FieldSetQueryBuilder {
     }
   }
 
-  private void handleColumnFilters(List<ColumnFilter> columnFilters,
-      TableQueryAndConfig tableQueryAndConfig,
-      StringBuilder sqlBuilder, Map<String, QueryParameterValue> paramMap) {
-    if (columnFilters.isEmpty()) {
-      throw new BadRequestException("Empty column filter list is invalid");
+  private void handleResultFilters(ResultFilters resultFilters,
+      TableQueryAndConfig tableQueryAndConfig, StringBuilder sqlBuilder,
+      Map<String, QueryParameterValue> paramMap) {
+    if (!((resultFilters.getColumnFilter() != null) ^ (resultFilters.getAllOf() != null)
+        ^ (resultFilters.getAnyOf() != null))) {
+      throw new BadRequestException("Exactly one of allOf, anyOf, or columnFilter must be "
+          + "specified for result filters");
     }
-    sqlBuilder.append("(");
-    boolean first = true;
-    for (ColumnFilter columnFilter : columnFilters) {
-      if (first) {
-        first = false;
+    if (resultFilters.getNot() != null && resultFilters.getNot()) {
+      sqlBuilder.append("not ");
+    }
+    if (resultFilters.getColumnFilter() != null) {
+      handleColumnFilter(resultFilters.getColumnFilter(), tableQueryAndConfig, sqlBuilder, paramMap);
+    } else {
+      String operator;
+      List<ResultFilters> childFilters;
+      if (resultFilters.getAllOf() != null) {
+        operator = "and";
+        childFilters = resultFilters.getAllOf();
       } else {
-        sqlBuilder.append("\nand\n");
+        operator = "or";
+        childFilters = resultFilters.getAnyOf();
       }
-      handleColumnFilter(columnFilter, tableQueryAndConfig, sqlBuilder, paramMap);
+      sqlBuilder.append("(");
+      boolean first = true;
+      for (ResultFilters childFilter : childFilters) {
+        if (first) {
+          first = false;
+        } else {
+          sqlBuilder.append("\n");
+          sqlBuilder.append(operator);
+          sqlBuilder.append("\n");
+        }
+        handleResultFilters(childFilter, tableQueryAndConfig, sqlBuilder, paramMap);
+      }
+      sqlBuilder.append(")\n");
     }
-    sqlBuilder.append(")");
   }
 
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -214,19 +234,10 @@ public class FieldSetQueryBuilder {
     startSql.append("\nwhere\n");
 
     Map<String, QueryParameterValue> paramMap = new HashMap<>();
-    List<List<ColumnFilter>> columnFilters = tableQuery.getFilters();
-    if (columnFilters != null && !columnFilters.isEmpty()) {
-     startSql.append("(");
-      boolean first = true;
-      for (List<ColumnFilter> filterList : columnFilters) {
-        if (first) {
-          first = false;
-        } else {
-          startSql.append("\nor\n");
-        }
-        handleColumnFilters(filterList, tableQueryAndConfig, startSql, paramMap);
-      }
-      startSql.append(")\nand\n");
+    if (tableQuery.getFilters() != null) {
+      handleResultFilters(tableQuery.getFilters(), tableQueryAndConfig,
+          startSql, paramMap);
+      startSql.append("\nand\n");
     }
 
     StringBuilder endSql = new StringBuilder("order by ");
