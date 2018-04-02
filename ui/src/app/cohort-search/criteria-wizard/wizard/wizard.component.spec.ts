@@ -5,6 +5,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
+import {NouisliderModule} from 'ng2-nouislider';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
@@ -59,6 +61,8 @@ describe('WizardComponent', () => {
           AttributesModule,
           ClarityModule,
           NoopAnimationsModule,
+          NouisliderModule,
+          NgxPopperModule,
           ReactiveFormsModule,
         ],
         providers: [
@@ -92,7 +96,6 @@ describe('WizardComponent', () => {
 
   it('Should dispatch WIZARD_FINISH on submission', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.disableFinish = false;
     fixture.detectChanges();
     comp.onSubmit();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});

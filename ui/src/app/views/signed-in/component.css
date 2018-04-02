@@ -1,5 +1,6 @@
 .header-image {
-  height:1.75rem;
+  height: 57px;
+  width: 155px;
   margin-left: 1rem;
 }
 
@@ -23,7 +24,7 @@
 .page-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   box-shadow: 3px 0px 10px;
   padding-top: 1rem;
   padding-bottom: 0.5rem;

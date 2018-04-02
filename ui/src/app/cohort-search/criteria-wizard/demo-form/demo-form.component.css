@@ -1,10 +1,6 @@
-#demo-form-container {
-  position: relative;
-}
-
 #demo-form-spinner {
   z-index: -99;
-  position: absolute;
+  position: relative;
 }
 
 #demo-form-spinner.show {
@@ -14,6 +10,7 @@
 }
 
 #demo-form-spinner .spinner {
+  position: absolute;
   top: 50%;
   left: 50%;
 }
@@ -21,4 +18,50 @@
 .blur {
 	color: transparent;
 	text-shadow: 0 0 3px #aaa;
+}
+
+/*
+ * This is set to hidden on .modal-body by the wizard for wizard reasons; we
+ * reset it here so that our form will scroll if need be on small screens
+ */
+#demographics-modal-body {
+  overflow: auto;
+}
+
+/* Slider elements */
+.slider-container {
+  width: 80%;
+  margin: 0 1rem 0 0;
+  display: flex;
+  align-items: center;
+}
+
+.slider {
+  flex: 1;
+  padding: 0 0.5rem;
+  margin: 0 0.5rem;
+}
+
+.number-display {
+  padding: 0 0.5rem;
+  border: 1px solid black;
+  border-radius: 3px;
+  width: 1rem;
+}
+
+#min-age {
+  margin-right: 0.5rem;
+}
+
+#max-age {
+  margin-left: 0.5rem;
+}
+
+/* Multiple select elements */
+select[multiple] {
+  min-width: 12rem;
+}
+
+option:hover {
+  background-color: rgb(219, 228, 233);
 }

@@ -43,5 +43,35 @@
     "procedure_source_value":"val",
     "procedure_source_concept_id":8,
     "qualifier_source_value":"val"
+  },
+  {
+    "procedure_occurrence_id":9,
+    "person_id":102246,
+    "procedure_concept_id":9,
+    "procedure_date":"2009-12-03",
+    "procedure_datetime":"2009-12-03 05:00:00 UTC",
+    "procedure_type_concept_id":9,
+    "modifier_concept_id":9,
+    "quantity":9,
+    "provider_id":9,
+    "visit_occurrence_id":9,
+    "procedure_source_value":"val",
+    "procedure_source_concept_id":9,
+    "qualifier_source_value":"val"
+  },
+  {
+    "procedure_occurrence_id":10,
+    "person_id":102246,
+    "procedure_concept_id":10,
+    "procedure_date":"2009-12-04",
+    "procedure_datetime":"2009-12-04 05:00:00 UTC",
+    "procedure_type_concept_id":10,
+    "modifier_concept_id":10,
+    "quantity":10,
+    "provider_id":10,
+    "visit_occurrence_id":10,
+    "procedure_source_value":"val",
+    "procedure_source_concept_id":10,
+    "qualifier_source_value":"val"
   }
 ]

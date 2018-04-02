@@ -55,3 +55,8 @@ button.btn.btn-secondary:disabled {
 button.btn.btn-lg {
   height: 2.5rem;
 }
+
+button.btn.btn-link {
+  color: #4a4a4a;
+  font-size: 14px;
+}

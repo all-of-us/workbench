@@ -21,6 +21,7 @@
       "styles": [
         "../node_modules/@clr/icons/clr-icons.min.css",
         "../node_modules/@clr/ui/clr-ui.min.css",
+        "../node_modules/nouislider/distribute/nouislider.min.css",
         "styles.css"
       ],
       "scripts": [
@@ -33,6 +34,7 @@
         "dev": "environments/environment.ts",
         "local": "environments/environment.local.ts",
         "test": "environments/environment.test.ts",
+        "staging": "environments/environment.staging.ts",
         "stable": "environments/environment.stable.ts",
         "prod": "environments/environment.prod.ts"
       }

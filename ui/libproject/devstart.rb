@@ -116,6 +116,7 @@ class DeployUI
     validate_options
     environment_names = {
       "all-of-us-workbench-test" => "test",
+      "all-of-us-rw-staging" => "staging",
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
