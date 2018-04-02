@@ -6,11 +6,14 @@
     </div>
     <img [src]="headerImg" class="header-image" routerLink="/">
   </div>
-  <clr-dropdown style="margin-right: 1rem;">
-    <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
-      <clr-icon shape="user" size="24"></clr-icon>
-      <clr-icon shape="caret down"></clr-icon>
-    </button>
+  <clr-dropdown style="margin-right: 1rem; margin-bottom: 0.5rem;">
+    <div style="display: flex; justify-content: space-around; align-items: center" clrDropdownTrigger>
+      <img [src]="profileImage" style="border-radius: 100px; height: 42px; width: 42px">
+      <h6 style="padding: 0.5rem;">
+        {{givenName}} {{familyName}}
+      </h6>
+      <clr-icon shape="caret down" style="width: 0.5rem; height: 0.5rem"></clr-icon>
+    </div>
     <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
       <a routerLink="/profile" clrDropdownItem>Profile</a>
       <div class="dropdown-divider"></div>
