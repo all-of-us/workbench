@@ -666,9 +666,6 @@ public class WorkspacesControllerTest {
     assertThat(gotCr1.getParticipantCohortStatuses())
         .isEqualTo(cr1.getParticipantCohortStatuses());
 
-    String sql = "select * from participant_cohort_annotations";
-    List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-
     CohortAnnotationDefinitionListResponse clonedCad1List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
             cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId()).getBody();
     assertThat(clonedCad1List.getItems().size()).isEqualTo(1);
