@@ -173,15 +173,9 @@ definitions:
           type: string
       filters:
         description: >
-          An array of arrays of ColumnFilter objects to apply to results.
-          Each child array represents a series of criteria to logically AND together; these
-          expressions are then logically OR'd together at the top level.
-        type: array
-        items:
-          type: array
-          items:
-            $ref: "#/definitions/ColumnFilter"
-
+          Filters on the results. Only results matching the criteria specified in the filters
+          will be returned
+        $ref: "#/definitions/ResultFilters"
       orderBy:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
@@ -189,6 +183,37 @@ definitions:
         type: array
         items:
           type: string
+
+  ResultFilters:
+    type: object
+    description: >
+      A list of filters applied to the results of a query. Only results matching the filter criteria
+      should be returned. Exactly one of "allOf", "anyOf", and "columnFilter" should be set.
+    properties:
+      not:
+        description: >
+         Set to true if a result matching allOf or anyOf below should result in a result *not*
+         being returned.
+        type: boolean
+      allOf:
+        description: >
+          A list of result filters. All filters matching means a result should be returned (or not returned
+          if "not" is true.)
+        type: array
+        items:
+          $ref: "#/definitions/ResultFilters"
+      anyOf:
+        description: >
+          A list of column filters. Any filters matching means a result should be returned
+          (or not returned if "not" is true.)
+        type: array
+        items:
+          $ref: "#/definitions/ResultFilters"
+      columnFilter:
+        description: >
+          A filter on a column in the table. Only a result matching this filter should be returned
+          (or not returned if "not" is true.)
+        $ref: "#/definitions/ColumnFilter"
 
   ColumnFilter:
     type: object
@@ -247,4 +272,4 @@ definitions:
 
   Operator:
     type: string
-    enum: [EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN]
+    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN]
