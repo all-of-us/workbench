@@ -60,9 +60,6 @@ def ensure_docker(cmd_name, args)
   end
 end
 
-class Options < OpenStruct
-end
-
 def read_db_vars(gcc)
   Workbench::assert_in_docker
   vars = Workbench::read_vars(Common.new.capture_stdout(%W{
@@ -667,9 +664,11 @@ def cloudsql_import(cmd_name, *args)
     "Name of the GCS bucket containing the SQL dump"
   )
   op.parse.validate
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cloudsql-import --instance #{op.opts.instance}
-      --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-cloudsql-import --instance #{op.opts.instance}
+        --sql-dump-file #{op.opts.file} --bucket #{op.opts.bucket} --project #{op.opts.project}}
+  end
 end
 Common.register_command({
                             :invocation => "cloudsql-import",
@@ -972,6 +971,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+
   env = read_db_vars(gcc)
   ENV.update(env)
 
@@ -1070,11 +1070,11 @@ def load_config(project)
   end
 end
 
-def with_cloud_proxy_and_db(gcc)
+def with_cloud_proxy_and_db(gcc, service_account = nil)
   ENV.update(read_db_vars(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   common = Common.new
-  CloudSqlProxyContext.new(gcc.project).run do
+  CloudSqlProxyContext.new(gcc.project, account=service_account).run do
     yield(gcc)
   end
 end
@@ -1093,6 +1093,12 @@ def deploy(cmd_name, args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--account [account]",
+    lambda {|opts, v| opts.account = v},
+    "Service account to act as for deployment, if any. Defaults to the GAE " +
+    "default service account."
+  )
   op.add_option(
     "--version [version]",
     lambda {|opts, v| opts.version = v},
@@ -1117,22 +1123,23 @@ def deploy(cmd_name, args)
 
   common = Common.new
   common.status "Running database migrations..."
-  with_cloud_proxy_and_db(gcc) do |ctx|
+  with_cloud_proxy_and_db(gcc, service_account=op.opts.account) do |ctx|
     migrate_database
     load_config(ctx.project)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
-  end
 
-  deploy_args = %W{
-    --project #{gcc.project}
-    --version #{op.opts.version}
-    #{op.opts.promote ? "--promote" : "--no-promote"}
-    --quiet
-  }
-  deploy_api(cmd_name, deploy_args)
-  deploy_public_api(cmd_name, deploy_args)
+    # Keep the cloud proxy context open for the service account credentials.
+    deploy_args = %W{
+      --project #{gcc.project}
+      --version #{op.opts.version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+    }
+    deploy_api(cmd_name, deploy_args)
+    deploy_public_api(cmd_name, deploy_args)
+  end
 end
 
 Common.register_command({
@@ -1215,7 +1222,7 @@ def create_project_resources(gcc)
     common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
   end
   common.status "Creating GCS bucket to store credentials..."
-  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
+  common.run_inline %W{mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating GCS bucket to store scripts..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
   common.status "Creating Cloud SQL instances..."
