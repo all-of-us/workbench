@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,10 +42,18 @@ public class CohortService {
         .stream()
         .map(definition -> new CohortAnnotationDefinition(definition).cohortId(saved.getCohortId()))
         .forEach(cohortAnnotationDefinitionDao::save);
-//      participantCohortAnnotationDao.bulkCopyByCohortReviewAndCohort(
-//        fromReview.getCohortReviewId(),
-//        cr.getCohortReviewId(),
-//        to.getCohortId());
+      participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(
+        fromReview.getCohortReviewId(),
+        cr.getCohortReviewId(),
+        from.getCohortId(),
+        to.getCohortId(),
+        AnnotationType.ENUM.ordinal());
+      participantCohortAnnotationDao.bulkCopyNotEnumAnnotationsByCohortReviewAndCohort(
+        fromReview.getCohortReviewId(),
+        cr.getCohortReviewId(),
+        from.getCohortId(),
+        to.getCohortId(),
+        AnnotationType.ENUM.ordinal());
 
     }
     return saved;
