@@ -341,7 +341,6 @@ public class FieldSetQueryBuilder {
 
   private ColumnInfo getColumnInfo(QueryState queryState, String columnName) {
     List<String> columnParts = parseColumnName(columnName);
-    String columnAlias;
     ColumnConfig columnConfig;
     if (columnParts.size() == 1) {
       columnConfig = queryState.mainTableColumns.get(columnName);

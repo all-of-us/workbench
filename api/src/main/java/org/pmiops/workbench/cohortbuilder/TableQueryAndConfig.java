@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder;
 
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.model.TableQuery;
 
 public class TableQueryAndConfig {

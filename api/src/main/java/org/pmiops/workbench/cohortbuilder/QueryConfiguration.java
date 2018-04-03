@@ -2,10 +2,12 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 
 public class QueryConfiguration {
+
+  private final ImmutableList<ColumnInfo> selectColumns;
+  private final QueryJobConfiguration queryJobConfiguration;
 
   public static class ColumnInfo {
     private final String columnName;
@@ -24,9 +26,6 @@ public class QueryConfiguration {
       return columnConfig;
     }
   }
-
-  private final ImmutableList<ColumnInfo> selectColumns;
-  private final QueryJobConfiguration queryJobConfiguration;
 
   public QueryConfiguration(ImmutableList<ColumnInfo> selectColumns,
       QueryJobConfiguration queryJobConfiguration) {
