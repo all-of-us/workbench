@@ -51,18 +51,12 @@ jobs:
                 --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            # XXX: REVERT.
-            # elif [ -n "${CIRCLE_TAG}" ]; then
-            #  ./project.rb deploy \
-            #    --project all-of-us-rw-staging \
-            #    --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-            #    --version "${CIRCLE_TAG}" \
-            #    --promote
-            elif [ "${CIRCLE_BRANCH}" == "ch/staging-deploy" ]; then
-              ./project.rb deploy \
-                --project all-of-us-rw-staging \
-                --version "calbach" \
-                --promote
+            elif [ -n "${CIRCLE_TAG}" ]; then
+             ./project.rb deploy \
+               --project all-of-us-rw-staging \
+               --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+               --version "${CIRCLE_TAG}" \
+               --promote
             else
               echo "Not master branch or tagged release, skipping deploy"
             fi
@@ -226,7 +220,7 @@ jobs:
           working_directory: ~/workbench/ui
           command: yarn run build --no-watch --no-progress
       - deploy:
-          name: Deploy to gcloud test project
+          name: Maybe deploy to test/staging
           working_directory: ~/workbench/ui
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
@@ -235,17 +229,11 @@ jobs:
                 --project all-of-us-workbench-test \
                 --version circle-ci-test \
                 --promote
-            # XXX: REVERT.
-            # elif [ -n "${CIRCLE_TAG}" ]; then
-            #   ./project.rb deploy-ui \
-            #     --project all-of-us-rw-staging \
-            #     --version "${CIRCLE_TAG}" \
-            #     --promote
-            elif [ "${CIRCLE_BRANCH}" == "ch/staging-deploy" ]; then
+            elif [ -n "${CIRCLE_TAG}" ]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
-                --version "calbach" \
+                --version "${CIRCLE_TAG}" \
                 --promote
             else
               echo "Not master branch or tagged release, skipping deploy"
