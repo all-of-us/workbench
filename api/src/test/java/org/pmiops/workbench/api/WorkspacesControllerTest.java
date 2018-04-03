@@ -158,6 +158,7 @@ public class WorkspacesControllerTest {
   @Autowired
   WorkspacesController workspacesController;
 
+
   private CdrVersion cdrVersion;
   private String cdrVersionId;
 
@@ -595,6 +596,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithCohorts() throws Exception {
+    Long participantId = 1L;
     CdrVersionContext.setCdrVersion(cdrVersion);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -612,8 +614,8 @@ public class WorkspacesControllerTest {
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
     CohortAnnotationDefinition cad1Request = createCohortAnnotationDefinition(c1.getId(),
             AnnotationType.ENUM,
-            "cad1",
-            Arrays.asList("value1"));
+            "cad",
+            Arrays.asList("value"));
     CohortAnnotationDefinition cad1Response =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
@@ -622,22 +624,45 @@ public class WorkspacesControllerTest {
                     cad1Request).getBody();
     ParticipantCohortAnnotation pca1Request =
             createParticipantCohortAnnotation(cad1Response.getCohortAnnotationDefinitionId(),
-            1L,
-                    c1.getId(),
-            "value1");
+                    cr1.getCohortReviewId(),
+                    participantId,
+            "value");
     ParticipantCohortAnnotation pca1Response =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c1.getId(),
                     cdrVersion.getCdrVersionId(),
-                    1L,
+                    participantId,
                     pca1Request).getBody();
 
     reviewReq.setSize(2);
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
+    CohortAnnotationDefinition cad2Request = createCohortAnnotationDefinition(c2.getId(),
+            AnnotationType.ENUM,
+            "cad",
+            Arrays.asList("value"));
+    CohortAnnotationDefinition cad2Response =
+            cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    c2.getId(),
+                    cad2Request).getBody();
+    ParticipantCohortAnnotation pca2Request =
+            createParticipantCohortAnnotation(cad2Response.getCohortAnnotationDefinitionId(),
+                    cr2.getCohortReviewId(),
+                    participantId,
+                    "value");
+    ParticipantCohortAnnotation pca2Response =
+            cohortReviewController.createParticipantCohortAnnotation(
+                    workspace.getNamespace(),
+                    workspace.getId(),
+                    c2.getId(),
+                    cdrVersion.getCdrVersionId(),
+                    participantId,
+                    pca2Request).getBody();
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
@@ -682,7 +707,7 @@ public class WorkspacesControllerTest {
 
     ParticipantCohortAnnotationListResponse clonedPca1List = cohortReviewController.getParticipantCohortAnnotations(
                     cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
-                    cdrVersion.getCdrVersionId(), 1L).getBody();
+                    cdrVersion.getCdrVersionId(), participantId).getBody();
     assertThat(clonedPca1List.getItems().size()).isEqualTo(1);
     ParticipantCohortAnnotation clonedPca1 = clonedPca1List.getItems().get(0);
     assertThat(clonedPca1.getAnnotationId()).isNotEqualTo(pca1Response.getAnnotationId());
@@ -699,6 +724,28 @@ public class WorkspacesControllerTest {
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses())
         .isEqualTo(cr2.getParticipantCohortStatuses());
+
+    CohortAnnotationDefinitionListResponse clonedCad2List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
+            cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId()).getBody();
+    assertThat(clonedCad2List.getItems().size()).isEqualTo(1);
+    CohortAnnotationDefinition clonedCad2 = clonedCad2List.getItems().get(0);
+    assertThat(clonedCad2.getCohortAnnotationDefinitionId()).isNotEqualTo(cad2Response.getCohortAnnotationDefinitionId());
+    assertThat(clonedCad2.getCohortId()).isEqualTo(cohortsByName.get("c2").getId());
+    assertThat(clonedCad2.getColumnName()).isEqualTo(cad2Response.getColumnName());
+    assertThat(clonedCad2.getAnnotationType()).isEqualTo(cad2Response.getAnnotationType());
+    assertThat(clonedCad2.getEnumValues()).isEqualTo(cad2Response.getEnumValues());
+
+    ParticipantCohortAnnotationListResponse clonedPca2List = cohortReviewController.getParticipantCohortAnnotations(
+            cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
+            cdrVersion.getCdrVersionId(), participantId).getBody();
+    assertThat(clonedPca2List.getItems().size()).isEqualTo(1);
+    ParticipantCohortAnnotation clonedPca2 = clonedPca2List.getItems().get(0);
+    assertThat(clonedPca2.getAnnotationId()).isNotEqualTo(pca2Response.getAnnotationId());
+    assertThat(clonedPca2.getAnnotationValueEnum()).isEqualTo(pca2Response.getAnnotationValueEnum());
+    assertThat(clonedPca2.getCohortAnnotationDefinitionId()).isEqualTo(clonedCad2.getCohortAnnotationDefinitionId());
+    assertThat(clonedPca2.getCohortReviewId()).isEqualTo(gotCr2.getCohortReviewId());
+    assertThat(clonedPca2.getParticipantId()).isEqualTo(participantId);
+    assertThat(clonedPca2.getAnnotationValueString()).isEqualTo(pca2Response.getAnnotationValueEnum());
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
