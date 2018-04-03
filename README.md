@@ -136,41 +136,45 @@ To deploy your local workbench API code to a given AppEngine project, in the api
 directory run:
 
 ```
-./project.rb deploy-api --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
+./project.rb deploy --project PROJECT --version VERSION --[no-]promote
 ```
+
+This also migrates the SQL databases, so avoid using this when you have local
+SQL schema changes.
+
+Note: This deploys both the API and public API. Use `deploy-api` or
+`deploy-public-api` for finer granularity.
 
 Example:
 
 ```
-./project.rb deploy-api --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
+./project.rb deploy --project all-of-us-workbench-test --version dantest --no-promote
 ```
 
 When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
-served out of https://api-dot-PROJECT.appspot.com.
+served out of https://api-dot-PROJECT.appspot.com. Likewise, see
+https://VERSION-public-api-dot-PROJECT.appspot.com for the public API changes.
+Aside from releases, this command can be used to test a topic branch in the
+shared test project before submitting. If possible, push to a version with your
+own username and --no-promote.
 
-To deploy your local public API code, in the api directory run:
-
-```
-./project.rb deploy-public-api --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
-
-```
 
 To deploy your local UI code to a given AppEngine project, in the ui
 directory run:
 
 ```
-./project.rb deploy-ui --project PROJECT --account ACCOUNT@pmi-ops.org --version VERSION [--promote]
+./project.rb deploy-ui --project PROJECT --version VERSION --[no-]promote
 ```
 
 Example:
 
 ```
-./project.rb deploy-ui --project all-of-us-workbench-test --account dan.rodney@pmi-ops.org --version dantest
+./project.rb deploy-ui --project all-of-us-workbench-test --version dantest --no-promote
 ```
 
 When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API
-service (https://api-dot-PROJECT.appspot.com). (If there's a need, we may
-want to make this configurable in future.)
+service (https://api-dot-PROJECT.appspot.com). (This can be overridden locally
+in the Chrome console).
 
 ## git-secrets
 

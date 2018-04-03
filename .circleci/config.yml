@@ -42,12 +42,37 @@ jobs:
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
       - deploy:
-          name: Deploy to gcloud test project
+          name: Maybe deploy to test/staging
           working_directory: ~/workbench/api
           command: |
-            ./project.rb circle-deploy \
-              --project all-of-us-workbench-test --creds-file circle-sa-key.json
-  
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./project.rb deploy \
+                --project all-of-us-workbench-test \
+                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version circle-ci-test \
+                --promote
+            elif [ "${CIRCLE_TAG}" == "v*" ]; then
+             ./project.rb deploy \
+               --project all-of-us-rw-staging \
+               --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+               --version "${CIRCLE_TAG}" \
+               --promote
+            else
+              echo "Not master branch or tagged release, skipping deploy"
+            fi
+      - run:
+          # This check is currently slow and flakey, particularly during
+          # releases of new package versions, so run it infrequently (only for
+          # tagged releases).
+          name: Scan dependencies for vulnerabilities
+          working_directory: ~/workbench/api
+          command: |
+            if [ "${CIRCLE_TAG}" == "v*" ]; then
+              ./project.rb gradle dependencyCheckAnalyze --info
+            else
+              echo "Not a tagged release, skipping dependency checks"
+            fi
+
   api-local-tests:
     docker:
       - image: allofustest/workbench:buildimage-0.0.10
@@ -198,12 +223,25 @@ jobs:
           working_directory: ~/workbench/ui
           command: yarn run build --no-watch --no-progress
       - deploy:
-          name: Deploy to gcloud test project
+          name: Maybe deploy to test/staging
+          working_directory: ~/workbench/ui
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./ci/deploy_ui.sh
+              ../ci/activate_creds.sh circle-sa-key.json
+              ./project.rb deploy-ui \
+                --project all-of-us-workbench-test \
+                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version circle-ci-test \
+                --promote
+            elif [ "${CIRCLE_TAG}" == "v*" ]; then
+              ../ci/activate_creds.sh circle-sa-key.json
+              ./project.rb deploy-ui \
+                --project all-of-us-rw-staging \
+                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version "${CIRCLE_TAG}" \
+                --promote
             else
-              echo "Not master branch, skipping deploy"
+              echo "Not master branch or tagged release, skipping deploy"
             fi
 
 workflows:
@@ -212,7 +250,7 @@ workflows:
     jobs:
       - api-build-test-deploy
       - api-local-tests
-      - ui-build-test-deploy      
+      - ui-build-test-deploy
   integration-test:
     triggers:
       - schedule:
