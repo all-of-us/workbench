@@ -1222,7 +1222,7 @@ def create_project_resources(gcc)
     common.run_inline("gcloud service-management enable #{service} --project #{gcc.project}")
   end
   common.status "Creating GCS bucket to store credentials..."
-  common.run_inline %W{mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating GCS bucket to store scripts..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
   common.status "Creating Cloud SQL instances..."

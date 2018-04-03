@@ -148,7 +148,7 @@ Note: This deploys both the API and public API. Use `deploy-api` or
 Example:
 
 ```
-./project.rb deploy --project all-of-us-workbench-test --version dantest
+./project.rb deploy --project all-of-us-workbench-test --version dantest --no-promote
 ```
 
 When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
@@ -163,13 +163,13 @@ To deploy your local UI code to a given AppEngine project, in the ui
 directory run:
 
 ```
-./project.rb deploy-ui --project PROJECT --version VERSION [--promote]
+./project.rb deploy-ui --project PROJECT --version VERSION --[no-]promote
 ```
 
 Example:
 
 ```
-./project.rb deploy-ui --project all-of-us-workbench-test --version dantest
+./project.rb deploy-ui --project all-of-us-workbench-test --version dantest --no-promote
 ```
 
 When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJECT.appspot.com. If you specify --promote, you can access it at https://PROJECT.appspot.com. Note that either way, it will be pointing at the live test API

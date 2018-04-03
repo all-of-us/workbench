@@ -51,7 +51,7 @@ jobs:
                 --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            elif [ -n "${CIRCLE_TAG}" ]; then
+            elif [ "${CIRCLE_TAG}" == "v*" ]; then
              ./project.rb deploy \
                --project all-of-us-rw-staging \
                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
@@ -227,12 +227,14 @@ jobs:
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
+                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            elif [ -n "${CIRCLE_TAG}" ]; then
+            elif [ "${CIRCLE_TAG}" == "v*" ]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
+                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version "${CIRCLE_TAG}" \
                 --promote
             else
