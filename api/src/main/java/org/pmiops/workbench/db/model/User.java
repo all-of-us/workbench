@@ -52,7 +52,7 @@ public class User {
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
 
-  private List<InstitutionalAffiliation> institutionalAffiliationSet =
+  private List<InstitutionalAffiliation> institutionalAffiliations =
       new ArrayList<InstitutionalAffiliation>();
   private String aboutYou;
   private String areaOfResearch;
@@ -244,16 +244,22 @@ public class User {
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
   @OrderColumn(name="order_index")
-  public List<InstitutionalAffiliation> getInstitutionalAffiliationSet() {
-    return institutionalAffiliationSet;
+  public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
+    return institutionalAffiliations;
   }
 
-  public void setInstitutionalAffiliationSet(List<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
-    this.institutionalAffiliationSet = newInstitutionalAffiliationSet;
+  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
+
+    // if (this.institutionalAffiliationSet != null) {
+    // this.institutionalAffiliationSet.clear();
+    // this.institutionalAffiliationSet.addAll(newInstitutionalAffiliationSet);
+    // } else {
+      this.institutionalAffiliations = newInstitutionalAffiliationSet;
+    // }
   }
 
   public void addInstitutionalAffiliation(InstitutionalAffiliation newInstitutionalAffiliation) {
-    this.institutionalAffiliationSet.add(newInstitutionalAffiliation);
+    this.institutionalAffiliations.add(newInstitutionalAffiliation);
   }
 
   @Column(name = "about_you")

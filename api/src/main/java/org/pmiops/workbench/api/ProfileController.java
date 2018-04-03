@@ -482,7 +482,7 @@ public class ProfileController implements ProfileApiDelegate {
         .collect(Collectors.toList());
     int i = 0;
     ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
-        user.getInstitutionalAffiliationSet().listIterator();
+        user.getInstitutionalAffiliations().listIterator();
     boolean shouldAdd = false;
     for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
@@ -497,7 +497,7 @@ public class ProfileController implements ProfileApiDelegate {
       }
       i++;
     }
-    user.setInstitutionalAffiliationSet(newAffiliations);
+    user.setInstitutionalAffiliations(newAffiliations);
 
 
     // This does not update the name in Google.

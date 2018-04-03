@@ -90,7 +90,7 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    profile.setInstitutionalAffiliations(user.getInstitutionalAffiliationSet()
+    profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
     EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
