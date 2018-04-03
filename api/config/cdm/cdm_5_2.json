@@ -951,7 +951,7 @@
           "name": "gender_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to an identifier in the CONCEPT table for the unique gender of the person.",
-          "foreignKey": "concept_id"
+          "foreignKey": "concept"
         },
         {
           "type": "integer",

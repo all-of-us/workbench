@@ -19,6 +19,7 @@ import org.bitbucket.radistao.test.annotation.AfterAllMethods;
 import org.bitbucket.radistao.test.annotation.BeforeAllMethods;
 import org.pmiops.workbench.testconfig.TestBigQueryConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.testconfig.WorkbenchConfigConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@SpringBootTest(classes = {TestBigQueryConfig.class})
+@SpringBootTest(classes = {TestBigQueryConfig.class, WorkbenchConfigConfig.class})
 public abstract class BigQueryBaseTest {
 
     private static final Logger log = Logger.getLogger(BigQueryBaseTest.class.getName());

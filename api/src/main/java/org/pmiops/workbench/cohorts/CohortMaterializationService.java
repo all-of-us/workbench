@@ -90,7 +90,7 @@ public class CohortMaterializationService {
 
   private ColumnConfig findPrimaryKey(TableConfig tableConfig) {
     for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (columnConfig.primaryKey) {
+      if (columnConfig.primaryKey != null && columnConfig.primaryKey) {
         return columnConfig;
       }
     }
@@ -132,7 +132,7 @@ public class CohortMaterializationService {
     List<String> orderBy = tableQuery.getOrderBy();
     if (orderBy == null || orderBy.isEmpty()) {
       ColumnConfig primaryKey = findPrimaryKey(tableConfig);
-      if (PERSON_ID.equals(primaryKey)) {
+      if (PERSON_ID.equals(primaryKey.name)) {
         tableQuery.setOrderBy(ImmutableList.of(PERSON_ID));
       } else {
         // TODO: consider having per-table default sort order based on e.g. timestamp

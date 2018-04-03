@@ -165,7 +165,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "concept", "condition_occurrence", "observation");
+    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary");
   }
 
     @Override
@@ -1092,6 +1092,74 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.males(), makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonConceptSelectColumns() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
+        "gender_concept.vocabulary_id", "gender_concept.vocabulary.vocabulary_name",
+        "gender_concept.vocabulary.vocabulary_reference",
+        "gender_concept.vocabulary.vocabulary_concept.concept_name"));
+    ColumnFilter columnFilter = new ColumnFilter();
+    columnFilter.setColumnName("person_id");
+    columnFilter.setOperator(Operator.NOT_EQUAL);
+    columnFilter.setValueNumber(new BigDecimal(2L));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 1L)
+        .put("gender_concept.concept_name", "MALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    ImmutableMap<String, Object> p2Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 102246L)
+        .put("gender_concept.concept_name", "FEMALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonConceptFilter() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter columnFilter = new ColumnFilter();
+    columnFilter.setColumnName("gender_concept.concept_name");
+    columnFilter.setValue("FEMALE");
+    tableQuery.setFilters(makeResultFilters(columnFilter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 102246L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonConceptOrderBy() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    tableQuery.setOrderBy(ImmutableList.of("gender_concept.vocabulary_id", "person_id DESC"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 102246L, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
 

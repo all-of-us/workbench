@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
  * Builds queries based of a {@link FieldSet} and {@link ParticipantCriteria}.
  */
 // TODO: figure out how to return nicer error messages to users for bad queries
+// TODO: consider whether we want to impose limits on number of columns, joins, etc. requested
 @Service
 public class FieldSetQueryBuilder {
 
@@ -106,7 +107,7 @@ public class FieldSetQueryBuilder {
 
   private ColumnConfig findPrimaryKey(Iterable<ColumnConfig> columnConfigs) {
     for (ColumnConfig columnConfig : columnConfigs) {
-      if (columnConfig.primaryKey) {
+      if (columnConfig.primaryKey != null && columnConfig.primaryKey) {
         return columnConfig;
       }
     }
@@ -150,19 +151,20 @@ public class FieldSetQueryBuilder {
 
   private TableNameAndAlias getTableNameAndAlias(List<String> columnParts, QueryState queryState) {
     String tableName = null;
-    String tableAlias = null;
+    String tableAlias = queryState.tableQuery.getTableName();
     int i;
     Map<String, ColumnConfig> tableColumns = queryState.mainTableColumns;
-    // Look for the longest already-initialized
+    // Look for the longest already-joined table alias
     for (i = columnParts.size() - 1; i > 0; i--) {
-      tableAlias = toTableAlias(columnParts, i);
-      tableName = queryState.aliasToTableName.get(tableAlias);
+      String alias = toTableAlias(columnParts, i);
+      tableName = queryState.aliasToTableName.get(alias);
       if (tableName != null) {
+        tableAlias = alias;
         tableColumns = getColumnConfigs(queryState, tableName, false);
         break;
       }
     }
-    // Add in all the necessary join tables starting from index i.
+    // Add in all the necessary remaining join tables starting from index i.
     for (int j = i; j < columnParts.size() - 1; j++) {
       String columnPart = columnParts.get(j);
       String foreignKeyColumn = getForeignKeyColumn(columnPart);
