@@ -1,9 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,20 +36,16 @@ public class CohortService {
               from.getCohortId(), to.getCohortId());
       cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationEnumsByCohort(
               from.getCohortId(), to.getCohortId());
-//      cohortAnnotationDefinitionDao.findByCohortId(from.getCohortId())
-//        .stream()
-//        .map(definition -> new CohortAnnotationDefinition(definition).cohortId(saved.getCohortId()))
-//        .forEach(cohortAnnotationDefinitionDao::save);
       participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(
         fromReview.getCohortReviewId(),
         cr.getCohortReviewId(),
         from.getCohortId(),
         to.getCohortId());
-      participantCohortAnnotationDao.bulkCopyNonEnumAnnotationsByCohortReviewAndCohort(
-        fromReview.getCohortReviewId(),
-        cr.getCohortReviewId(),
-        from.getCohortId(),
-        to.getCohortId());
+      participantCohortAnnotationDao.bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(
+              fromReview.getCohortReviewId(),
+              cr.getCohortReviewId(),
+              from.getCohortId(),
+              to.getCohortId());
 
     }
     return saved;
