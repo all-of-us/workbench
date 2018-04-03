@@ -101,4 +101,20 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   addWorkspace(): void {
     this.router.navigate(['workspace/build'], {relativeTo : this.route});
   }
+
+  openWorkspace(workspaceResponse: WorkspaceResponse): void {
+    if (workspaceResponse.workspace.researchPurpose.approved
+        || !workspaceResponse.workspace.researchPurpose.reviewRequested) {
+      this.router.navigate(
+        [
+          'workspace',
+          workspaceResponse.workspace.namespace,
+          workspaceResponse.workspace.id
+        ],
+        {
+          relativeTo : this.route
+        }
+      );
+    }
+  }
 }
