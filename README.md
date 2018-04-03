@@ -139,6 +139,9 @@ directory run:
 ./project.rb deploy --project PROJECT --version VERSION --[no-]promote
 ```
 
+This also migrates the SQL databases, so avoid using this when you have local
+SQL schema changes.
+
 Note: This deploys both the API and public API. Use `deploy-api` or
 `deploy-public-api` for finer granularity.
 
@@ -151,6 +154,9 @@ Example:
 When the api is deployed, you'll be able to access it at https://VERSION-dot-api-dot-PROJECT.appspot.com. If you specify --promote, it will be the main API code
 served out of https://api-dot-PROJECT.appspot.com. Likewise, see
 https://VERSION-public-api-dot-PROJECT.appspot.com for the public API changes.
+Aside from releases, this command can be used to test a topic branch in the
+shared test project before submitting. If possible, push to a version with your
+own username and --no-promote.
 
 
 To deploy your local UI code to a given AppEngine project, in the ui
