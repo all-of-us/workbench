@@ -496,9 +496,33 @@ public class ProfileControllerTest {
     Profile result = profileController.getMe().getBody();
     assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
     assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(second);
+    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
+  }
 
+  @Test
+  public void testMe_institutionalAffiliationsNotAlphabetical() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
+    Profile profile = profileController.getMe().getBody();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    first.setUserId(profile.getUserId());
+    first.setRole("zeta");
+    first.setInstitution("Zeta");
+    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    second.setUserId(profile.getUserId());
+    second.setRole("test");
+    second.setInstitution("Institution");
+    affiliations.add(first);
+    affiliations.add(second);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+
+    Profile result = profileController.getMe().getBody();
+    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
+    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
   }
 
   private Profile createUser() throws Exception {

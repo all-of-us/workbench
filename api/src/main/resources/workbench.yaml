@@ -1282,7 +1282,6 @@ definitions:
     type: object
     required:
       - userId
-      - order
       - institution
       - role
     properties:

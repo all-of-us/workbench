@@ -249,10 +249,7 @@ public class User {
   }
 
   public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliations) {
-    this.institutionalAffiliations.clear();
-    if (newInstitutionalAffiliations != null) {
-      this.institutionalAffiliations.addAll(newInstitutionalAffiliations);
-    }
+    this.institutionalAffiliations = newInstitutionalAffiliations;
   }
 
   public void clearInstitutionalAffiliations() {
