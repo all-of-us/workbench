@@ -3,7 +3,16 @@ package org.pmiops.workbench.db.model;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.model.AnnotationType;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -17,19 +26,6 @@ public class CohortAnnotationDefinition {
     private String columnName;
     private AnnotationType annotationType;
     private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
-
-    public CohortAnnotationDefinition() {}
-
-    public CohortAnnotationDefinition(CohortAnnotationDefinition cad) {
-        cad.getEnumValues()
-                .stream()
-                .forEach(value -> {
-                    this.getEnumValues().add(new CohortAnnotationEnumValue(value)
-                            .cohortAnnotationDefinition(this));
-                });
-        this.annotationType = cad.getAnnotationType();
-        this.columnName = cad.getColumnName();
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

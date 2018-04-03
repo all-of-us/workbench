@@ -32,30 +32,22 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         value = "INSERT INTO participant_cohort_annotations" +
         " (cohort_review_id, cohort_annotation_definition_id, participant_id, annotation_value_string," +
         " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean)" +
-        " SELECT :toCohortReviewId, new.cohort_annotation_definition_id, participant_id, annotation_value_string," +
-        " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean" +
-        " FROM cohort_annotation_definition new" +
-        " JOIN (SELECT column_name, participant_id, annotation_value_string, annotation_value_integer, annotation_value_date, " +
-        "       annotation_value_boolean, enum_order" +
-        "       FROM cohort_annotation_definition cad" +
-        "       JOIN cohort_annotation_enum_value caev" +
-        "       ON (cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
-        "       JOIN participant_cohort_annotations pca " +
-        "       ON (pca.cohort_annotation_definition_id = cad.cohort_annotation_definition_id" +
-        "           AND pca.cohort_annotation_enum_value_id = caev.cohort_annotation_enum_value_id" +
-        "           AND cohort_id = :fromCohortId" +
-        "           AND cohort_review_id = :fromCohortReviewId)" +
-        ") AS old ON new.column_name = old.column_name" +
-        " JOIN cohort_annotation_enum_value caev" +
-        " ON (caev.cohort_annotation_definition_id = new.cohort_annotation_definition_id" +
-        "     AND caev.enum_order = old.enum_order)" +
-        " WHERE cohort_id = :toCohortId",
+        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, annotation_value_string," +
+        " annotation_value_integer, annotation_value_date, caev1.cohort_annotation_enum_value_id, annotation_value_boolean" +
+        " FROM cohort_annotation_definition cad" +
+        " JOIN cohort_annotation_enum_value caev ON (cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
+        " JOIN participant_cohort_annotations pca ON (pca.cohort_annotation_definition_id = cad.cohort_annotation_definition_id" +
+        "                                            AND pca.cohort_annotation_enum_value_id = caev.cohort_annotation_enum_value_id" +
+        "                                            AND cad.cohort_id = :fromCohortId" +
+        "                                            AND cohort_review_id = :fromCohortReviewId)" +
+        " JOIN cohort_annotation_definition cad1 ON (cad1.column_name = cad.column_name and cad1.cohort_id = :toCohortId)" +
+        " JOIN cohort_annotation_enum_value caev1 ON (caev1.cohort_annotation_definition_id = cad1.cohort_annotation_definition_id" +
+        "                                            AND caev1.enum_order = caev.enum_order)",
         nativeQuery = true)
-    void bulkCopyEnumAnnotationsByCohortReviewAndCohort(
-            @Param("fromCohortReviewId") long fromCohortReviewId,
-            @Param("toCohortReviewId") long toCohortReviewId,
-            @Param("fromCohortId") long fromCohortId,
-            @Param("toCohortId") long toCohortId);
+    void bulkCopyEnumAnnotationsByCohortReviewAndCohort(@Param("fromCohortReviewId") long fromCohortReviewId,
+                                                        @Param("toCohortReviewId") long toCohortReviewId,
+                                                        @Param("fromCohortId") long fromCohortId,
+                                                        @Param("toCohortId") long toCohortId);
 
     // We use native SQL here as there may be a large number of rows within a
     // given cohort review; this avoids loading them into memory.
@@ -64,24 +56,18 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         value = "INSERT INTO participant_cohort_annotations" +
         " (cohort_review_id, cohort_annotation_definition_id, participant_id, annotation_value_string," +
         " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean)" +
-        " SELECT :toCohortReviewId, cohort_annotation_definition_id, participant_id, annotation_value_string," +
+        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, annotation_value_string," +
         " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean" +
-        " FROM cohort_annotation_definition new" +
-        " JOIN (SELECT column_name, participant_id, annotation_value_string, annotation_value_integer," +
-        "       annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean" +
-        "       FROM cohort_annotation_definition cad" +
-        "       JOIN participant_cohort_annotations pca" +
-        "       ON (cad.cohort_annotation_definition_id = pca.cohort_annotation_definition_id" +
-        "           AND cohort_id = :fromCohortId" +
-        "           AND cohort_review_id = :fromCohortReviewId)" +
-        "           WHERE NOT EXISTS(SELECT 'x' FROM cohort_annotation_enum_value caev " +
-        "                            WHERE cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
-        ") AS old ON new.column_name = old.column_name" +
-        " AND cohort_id = :toCohortId",
+        " FROM cohort_annotation_definition cad" +
+        " JOIN participant_cohort_annotations pca ON (cad.cohort_annotation_definition_id = pca.cohort_annotation_definition_id" +
+        "                                            AND cad.cohort_id = :fromCohortId" +
+        "                                            AND cohort_review_id = :fromCohortReviewId)" +
+        " JOIN cohort_annotation_definition cad1 ON (cad.column_name = cad1.column_name AND cad1.cohort_id = :toCohortId)" +
+        " WHERE NOT EXISTS" +
+        " (SELECT 'x' FROM cohort_annotation_enum_value caev WHERE cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)",
         nativeQuery = true)
-    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort(
-            @Param("fromCohortReviewId") long fromCohortReviewId,
-            @Param("toCohortReviewId") long toCohortReviewId,
-            @Param("fromCohortId") long fromCohortId,
-            @Param("toCohortId") long toCohortId);
+    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(@Param("fromCohortReviewId") long fromCohortReviewId,
+                                                            @Param("toCohortReviewId") long toCohortReviewId,
+                                                            @Param("fromCohortId") long fromCohortId,
+                                                            @Param("toCohortId") long toCohortId);
 }
