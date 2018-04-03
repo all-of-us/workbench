@@ -1338,5 +1338,6 @@ end
 # menu of options.
 Common.register_command({
   :invocation => "start-api-and-incremental-build",
+  :description => "Used internally by other commands.",
   :fn => lambda { |*args| start_api_and_incremental_build("start-api-and-incremental-build", args) }
 })
