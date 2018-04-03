@@ -93,7 +93,6 @@ public class ProfileController implements ProfileApiDelegate {
         public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(InstitutionalAffiliation institutionalAffiliation) {
           org.pmiops.workbench.db.model.InstitutionalAffiliation result =
               new org.pmiops.workbench.db.model.InstitutionalAffiliation();
-          result.setUserId(institutionalAffiliation.getUserId());
           result.setRole(institutionalAffiliation.getRole());
           result.setInstitution(institutionalAffiliation.getInstitution());
 
@@ -484,8 +483,13 @@ public class ProfileController implements ProfileApiDelegate {
     ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
         user.getInstitutionalAffiliations().listIterator();
     boolean shouldAdd = false;
+    if (newAffiliations.size() == 0) {
+      shouldAdd = true;
+    }
+    Long userId = user.getUserId();
     for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
+      affiliation.setUserId(userId);
       if (oldAffilations.hasNext()) {
         org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation = oldAffilations.next();
         if (!oldAffilation.getRole().equals(affiliation.getRole())
@@ -496,6 +500,9 @@ public class ProfileController implements ProfileApiDelegate {
         shouldAdd = true;
       }
       i++;
+    }
+    if (oldAffilations.hasNext()) {
+      shouldAdd = true;
     }
     if (shouldAdd) {
       user.clearInstitutionalAffiliations();

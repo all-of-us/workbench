@@ -1281,16 +1281,9 @@ definitions:
   InstitutionalAffiliation:
     type: object
     required:
-      - userId
       - institution
       - role
     properties:
-      institutionalAffiliationId:
-        type: integer
-        format: int64
-      userId:
-        type: integer
-        format: int64
       institution:
         type: string
       role:

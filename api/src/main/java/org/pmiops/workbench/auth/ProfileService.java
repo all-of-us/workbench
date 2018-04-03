@@ -24,7 +24,6 @@ public class ProfileService {
         public InstitutionalAffiliation apply(
             org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
           InstitutionalAffiliation result = new InstitutionalAffiliation();
-          result.setUserId(institutionalAffiliation.getUserId());
           result.setRole(institutionalAffiliation.getRole());
           result.setInstitution(institutionalAffiliation.getInstitution());
 

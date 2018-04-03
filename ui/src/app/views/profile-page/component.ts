@@ -159,10 +159,8 @@ export class ProfilePageComponent implements OnInit {
       }
       this.workingProfile.institutionalAffiliations.push(
         {
-          institutionalAffiliationId: null,
           role: '',
           institution: '',
-          userId: this.workingProfile.userId
         }
       );
     }
