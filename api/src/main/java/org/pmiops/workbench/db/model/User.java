@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.model;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;

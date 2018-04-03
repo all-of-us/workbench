@@ -497,9 +497,11 @@ public class ProfileController implements ProfileApiDelegate {
       }
       i++;
     }
-    user.clearInstitutionalAffiliations();
-    for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
-      user.addInstitutionalAffiliation(affiliation);
+    if (shouldAdd) {
+      user.clearInstitutionalAffiliations();
+      for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+        user.addInstitutionalAffiliation(affiliation);
+      }
     }
 
 
