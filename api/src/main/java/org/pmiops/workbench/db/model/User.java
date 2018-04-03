@@ -248,14 +248,15 @@ public class User {
     return institutionalAffiliations;
   }
 
-  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliationSet) {
+  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliations) {
+    this.institutionalAffiliations.clear();
+    if (newInstitutionalAffiliations != null) {
+      this.institutionalAffiliations.addAll(newInstitutionalAffiliations);
+    }
+  }
 
-    // if (this.institutionalAffiliationSet != null) {
-    // this.institutionalAffiliationSet.clear();
-    // this.institutionalAffiliationSet.addAll(newInstitutionalAffiliationSet);
-    // } else {
-      this.institutionalAffiliations = newInstitutionalAffiliationSet;
-    // }
+  public void clearInstitutionalAffiliations() {
+    this.institutionalAffiliations.clear();
   }
 
   public void addInstitutionalAffiliation(InstitutionalAffiliation newInstitutionalAffiliation) {

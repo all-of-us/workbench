@@ -497,7 +497,10 @@ public class ProfileController implements ProfileApiDelegate {
       }
       i++;
     }
-    user.setInstitutionalAffiliations(newAffiliations);
+    user.clearInstitutionalAffiliations();
+    for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+      user.addInstitutionalAffiliation(affiliation);
+    }
 
 
     // This does not update the name in Google.
