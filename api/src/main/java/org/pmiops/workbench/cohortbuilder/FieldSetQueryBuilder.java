@@ -1,26 +1,19 @@
 package org.pmiops.workbench.cohortbuilder;
 
-import ch.qos.logback.classic.db.names.TableName;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -66,28 +59,28 @@ public class FieldSetQueryBuilder {
    */
   private static final class QueryState {
     // SQL for the select clause
-    StringBuilder selectSql = new StringBuilder();
+    private StringBuilder selectSql = new StringBuilder();
     // SQL for the from clause
-    StringBuilder fromSql = new StringBuilder();
+    private StringBuilder fromSql = new StringBuilder();
     // SQL for the where clause
-    StringBuilder whereSql = new StringBuilder();
+    private StringBuilder whereSql = new StringBuilder();
     // SQL for order by, limit, offset
-    StringBuilder endSql = new StringBuilder();
+    private StringBuilder endSql = new StringBuilder();
     // A map of parameter values for bound parameters referenced in the query
-    Map<String, QueryParameterValue> paramMap = new HashMap<>();
+    private Map<String, QueryParameterValue> paramMap = new HashMap<>();
     // A map from table name to (column name -> ColumnConfig) for tables referenced in the query.
-    Map<String, Map<String, ColumnConfig>> columnConfigTable = new HashMap<>();
+    private Map<String, Map<String, ColumnConfig>> columnConfigTable = new HashMap<>();
     // A map from table aliases to SQL table names.
-    Map<String, String> aliasToTableName = new HashMap<>();
+    private Map<String, String> aliasToTableName = new HashMap<>();
     // The columns selected in the select clause.
-    ImmutableList.Builder<ColumnInfo> selectColumns = ImmutableList.builder();
+    private ImmutableList.Builder<ColumnInfo> selectColumns = ImmutableList.builder();
     // The query being turned into SQL.
-    TableQuery tableQuery;
+    private TableQuery tableQuery;
     // The CDR schema configuration.
-    CdrBigQuerySchemaConfig schemaConfig;
+    private CdrBigQuerySchemaConfig schemaConfig;
     // A map of (column name -> ColumnConfig) for the columns on the main table (pulled from
     // columnConfigTable).
-    Map<String, ColumnConfig> mainTableColumns;
+    private Map<String, ColumnConfig> mainTableColumns;
   }
 
   private static final class TableNameAndAlias {
