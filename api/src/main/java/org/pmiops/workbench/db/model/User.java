@@ -1,8 +1,11 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -13,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
@@ -46,6 +50,11 @@ public class User {
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
+
+  private List<InstitutionalAffiliation> institutionalAffiliations =
+      new ArrayList<InstitutionalAffiliation>();
+  private String aboutYou;
+  private String areaOfResearch;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -230,5 +239,41 @@ public class User {
 
   public void setEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
+  }
+
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)
+  @OrderColumn(name="order_index")
+  public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
+    return institutionalAffiliations;
+  }
+
+  public void setInstitutionalAffiliations(List<InstitutionalAffiliation> newInstitutionalAffiliations) {
+    this.institutionalAffiliations = newInstitutionalAffiliations;
+  }
+
+  public void clearInstitutionalAffiliations() {
+    this.institutionalAffiliations.clear();
+  }
+
+  public void addInstitutionalAffiliation(InstitutionalAffiliation newInstitutionalAffiliation) {
+    this.institutionalAffiliations.add(newInstitutionalAffiliation);
+  }
+
+  @Column(name = "about_you")
+  public String getAboutYou() {
+    return aboutYou;
+  }
+
+  public void setAboutYou(String aboutYou) {
+    this.aboutYou = aboutYou;
+  }
+
+  @Column(name = "area_of_research")
+  public String getAreaOfResearch() {
+    return areaOfResearch;
+  }
+
+  public void setAreaOfResearch(String areaOfResearch) {
+    this.areaOfResearch = areaOfResearch;
   }
 }

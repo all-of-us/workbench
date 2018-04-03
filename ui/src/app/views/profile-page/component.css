@@ -2,10 +2,6 @@ h2 {
   display: inline-block;
 }
 
-.btn {
-  margin: 0 0 0.75rem 0.5rem;
-}
-
 .field-label {
   font-size: 0.55rem;
 }
@@ -35,6 +31,7 @@ div.field {
   display: inline-block;
   margin-right: 2rem;
 }
+
 input[type=text]:not([readonly]) {
   padding: 0.75rem;
   width: 14rem;
@@ -46,27 +43,78 @@ label {
 
 .alert {
   width: 14rem;
+  margin-top: 0;
 }
 
 button.btn.btn-secondary {
+  margin-top: 0.5rem;
   width: 10rem;
 }
 
 .percentText {
   position: absolute;
-  top: 2.8rem;
+  top: 3.5rem;
   color: #8BC990;
   font-family: "Gotham HTF";
   font-size: 22px;
-  line-height: 34px;
-  width: 5rem;
+  width: 5.8rem;
   text-align: center;
+  line-height: 17px;
 }
 
 .profileCompletionText {
   width: 1rem;
   vertical-align: middle;
   width: 10rem;
-  padding: 1rem;
+  padding: 1.7rem 1rem 1rem 1rem;
   height: 100%;
+  line-height: 17px;
+}
+
+textarea {
+  height: 142px;
+  width: 666px;
+  resize: both;
+  border-radius: 5px;
+  border: 0.5px solid #C5C5C5;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.1);
+  font-family: "Gotham HTF"
+}
+
+.add-icon {
+  height: 0.8rem;
+  width: 0.8rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  color: #262262;
+}
+
+.remove-icon {
+  height: 1rem;
+  width: 1rem;
+  color: #D0021B;
+}
+
+button.btn.btn-primary {
+  width: 8rem;
+  height: 1.5rem;
+}
+
+button.btn.btn-link {
+  color: #4A4A4A;
+  font-size: 14px;
+}
+
+.alert-text-waiting {
+  color: #E28327;
+  font-family: "Gotham HTF";
+}
+
+.alert {
+  align-self: flex-start;
+}
+
+hr {
+  width: 14rem;
+  color: #C5C5C5;
 }

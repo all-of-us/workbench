@@ -1,6 +1,8 @@
 package org.pmiops.workbench.auth;
 
 import java.util.ArrayList;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -8,12 +10,26 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
+  private static final Function<org.pmiops.workbench.db.model.InstitutionalAffiliation,
+      InstitutionalAffiliation> TO_CLIENT_INSTITUTIONAL_AFFILIATION =
+      new Function<org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>() {
+        @Override
+        public InstitutionalAffiliation apply(
+            org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
+          InstitutionalAffiliation result = new InstitutionalAffiliation();
+          result.setRole(institutionalAffiliation.getRole());
+          result.setInstitution(institutionalAffiliation.getInstitution());
+
+          return result;
+        }
+      };
 
   private final FireCloudService fireCloudService;
   private final MailChimpService mailChimpService;
@@ -46,6 +62,8 @@ public class ProfileService {
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatus());
     profile.setEnabledInFireCloud(enabledInFireCloud);
+    profile.setAboutYou(user.getAboutYou());
+    profile.setAreaOfResearch(user.getAreaOfResearch());
 
     if (user.getBlockscoreVerificationIsValid() == null) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
@@ -71,6 +89,9 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
+    profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
+        .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
+        .collect(Collectors.toList()));
     EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
     // if verification is pending or unverified, need to query MailChimp and update DB accordingly
     if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
