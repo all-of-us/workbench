@@ -61,10 +61,13 @@ jobs:
               echo "Not master branch or tagged release, skipping deploy"
             fi
       - run:
+          # This check is currently slow and flakey, particularly during
+          # releases of new package versions, so run it infrequently (only for
+          # tagged releases).
           name: Scan dependencies for vulnerabilities
           working_directory: ~/workbench/api
           command: |
-            if [ -n "${CIRCLE_TAG}" ]; then
+            if [ "${CIRCLE_TAG}" == "v*" ]; then
               ./project.rb gradle dependencyCheckAnalyze --info
             else
               echo "Not a tagged release, skipping dependency checks"
