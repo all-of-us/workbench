@@ -53,6 +53,8 @@ export function typeToTitle(_type: string): string {
     _type = 'Demographics';
   } else if (_type.match(/^(ICD|CPT).*/i)) {
     _type = _type.toUpperCase();
+  } else if (_type.match(/^PM.*/i)) {
+    _type = 'Physical Measurement';
   }
   return _type;
 }
