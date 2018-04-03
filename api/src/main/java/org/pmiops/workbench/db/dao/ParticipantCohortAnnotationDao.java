@@ -38,13 +38,12 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         " JOIN (SELECT column_name, participant_id, annotation_value_string, annotation_value_integer, annotation_value_date, " +
         "       annotation_value_boolean, enum_order" +
         "       FROM cohort_annotation_definition cad" +
-        "       LEFT JOIN cohort_annotation_enum_value caev" +
+        "       JOIN cohort_annotation_enum_value caev" +
         "       ON (cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
         "       JOIN participant_cohort_annotations pca " +
         "       ON (pca.cohort_annotation_definition_id = cad.cohort_annotation_definition_id" +
         "           AND pca.cohort_annotation_enum_value_id = caev.cohort_annotation_enum_value_id" +
         "           AND cohort_id = :fromCohortId" +
-        "           AND annotation_type = :annotationType" +
         "           AND cohort_review_id = :fromCohortReviewId)" +
         ") AS old ON new.column_name = old.column_name" +
         " JOIN cohort_annotation_enum_value caev" +
@@ -56,8 +55,7 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
             @Param("fromCohortReviewId") long fromCohortReviewId,
             @Param("toCohortReviewId") long toCohortReviewId,
             @Param("fromCohortId") long fromCohortId,
-            @Param("toCohortId") long toCohortId,
-            @Param("annotationType") int annotationType);
+            @Param("toCohortId") long toCohortId);
 
     // We use native SQL here as there may be a large number of rows within a
     // given cohort review; this avoids loading them into memory.
@@ -75,15 +73,15 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         "       JOIN participant_cohort_annotations pca" +
         "       ON (cad.cohort_annotation_definition_id = pca.cohort_annotation_definition_id" +
         "           AND cohort_id = :fromCohortId" +
-        "           AND annotation_type != :annotationType" +
         "           AND cohort_review_id = :fromCohortReviewId)" +
+        "           WHERE NOT EXISTS(SELECT 'x' FROM cohort_annotation_enum_value caev " +
+        "                            WHERE cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
         ") AS old ON new.column_name = old.column_name" +
         " AND cohort_id = :toCohortId",
         nativeQuery = true)
-    void bulkCopyNotEnumAnnotationsByCohortReviewAndCohort(
+    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort(
             @Param("fromCohortReviewId") long fromCohortReviewId,
             @Param("toCohortReviewId") long toCohortReviewId,
             @Param("fromCohortId") long fromCohortId,
-            @Param("toCohortId") long toCohortId,
-            @Param("annotationType") int annotationType);
+            @Param("toCohortId") long toCohortId);
 }
