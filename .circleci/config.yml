@@ -74,6 +74,7 @@ jobs:
               ./project.rb gradle dependencyCheckAnalyze --info
             else
               echo "Not a tagged release, skipping dependency checks"
+            fi
 
   api-local-tests:
     docker:
