@@ -44,10 +44,10 @@ class GcloudContextV2
         exit 1
       end
       unless @account.end_with?("@pmi-ops.org") \
-          || @account.end_with?("@all-of-us-workbench-test.iam.gserviceaccount.com") \
+          || @account.end_with?("iam.gserviceaccount.com") \
           || @creds_file
-        common.error "Account is not a pmi-ops.org account: #{@account}. Try:\n" \
-            "  gcloud auth login your.name@pmi-ops.org"
+        common.error "Account is not a pmi-ops.org or service account:" \
+            " #{@account}. Try:\n gcloud auth login your.name@pmi-ops.org"
         exit 1
       end
     end
