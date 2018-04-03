@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,7 @@ import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -363,12 +365,31 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter = new ColumnFilter();
     filter.setColumnName("person_id");
     filter.setValueNumber(new BigDecimal(1L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdWithNotFilter() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter filter = new ColumnFilter();
+    filter.setColumnName("person_id");
+    filter.setValueNumber(new BigDecimal(1L));
+    ResultFilters resultFilters = makeResultFilters(filter);
+    resultFilters.setNot(true);
+    tableQuery.setFilters(resultFilters);
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
 
@@ -381,7 +402,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setOperator(Operator.GREATER_THAN);
     filter.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -399,7 +420,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setOperator(Operator.GREATER_THAN_OR_EQUAL_TO);
     filter.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -417,7 +438,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setOperator(Operator.LESS_THAN);
     filter.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -435,12 +456,30 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setOperator(Operator.LESS_THAN_OR_EQUAL_TO);
     filter.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdWithNumberNotEqualFilter() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter filter = new ColumnFilter();
+    filter.setColumnName("person_id");
+    filter.setOperator(Operator.NOT_EQUAL);
+    filter.setValueNumber(new BigDecimal(2L));
+    tableQuery.setFilters(makeResultFilters(filter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 1L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
 
@@ -453,7 +492,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setOperator(Operator.IN);
     filter.setValueNumbers(ImmutableList.of(new BigDecimal(1L), new BigDecimal(2L)));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -470,7 +509,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter = new ColumnFilter();
     filter.setColumnName("person_source_value");
     filter.setValue("psv");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -487,7 +526,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter = new ColumnFilter();
     filter.setColumnName("ethnicity_source_value");
     filter.setValue("esv");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -505,7 +544,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("ethnicity_source_value");
     filter.setOperator(Operator.GREATER_THAN);
     filter.setValue("esf");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -523,7 +562,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("ethnicity_source_value");
     filter.setOperator(Operator.LESS_THAN);
     filter.setValue("esv");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -541,12 +580,48 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("ethnicity_source_value");
     filter.setOperator(Operator.EQUAL);
     filter.setValueNull(true);
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
         SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdWithStringNotEqualNullNonMatch() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter filter = new ColumnFilter();
+    filter.setColumnName("ethnicity_source_value");
+    filter.setOperator(Operator.NOT_EQUAL);
+    filter.setValue("esv");
+    tableQuery.setFilters(makeResultFilters(filter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdWithStringIsNotNull() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter filter = new ColumnFilter();
+    filter.setColumnName("ethnicity_source_value");
+    filter.setOperator(Operator.NOT_EQUAL);
+    filter.setValueNull(true);
+    tableQuery.setFilters(makeResultFilters(filter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
 
@@ -599,7 +674,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_source_value");
     filter.setOperator(Operator.LIKE);
     filter.setValue("p%");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -617,7 +692,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_source_value");
     filter.setOperator(Operator.LIKE);
     filter.setValue("p");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -635,7 +710,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_source_value");
     filter.setOperator(Operator.IN);
     filter.setValues(ImmutableList.of("foobar", "psv"));
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -652,7 +727,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter = new ColumnFilter();
     filter.setColumnName("person_source_value");
     filter.setValue("foobar");
-    tableQuery.addFiltersItem(ImmutableList.of(filter));
+    tableQuery.setFilters(makeResultFilters(filter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -662,7 +737,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortPersonFieldSetPersonIdWithStringAndPersonIdFilter() {
+  public void testMaterializeCohortPersonFieldSetPersonIdWithAllOfFilter() {
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id"));
@@ -672,7 +747,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter2 = new ColumnFilter();
     filter2.setColumnName("person_id");
     filter2.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter1, filter2));
+    tableQuery.setFilters(makeAllOf(filter1, filter2));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -682,7 +757,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortPersonFieldSetYearOfBirthOrPersonIdFilters() {
+  public void testMaterializeCohortPersonFieldSetAnyOfFilters() {
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id"));
@@ -692,8 +767,35 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter filter2 = new ColumnFilter();
     filter2.setColumnName("person_id");
     filter2.setValueNumber(new BigDecimal(2L));
-    tableQuery.addFiltersItem(ImmutableList.of(filter1));
-    tableQuery.addFiltersItem(ImmutableList.of(filter2));
+    tableQuery.setFilters(makeAnyOf(filter1, filter2));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    assertPersonIds(response, 1L, 2L, 102246L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortPersonFieldSetPersonIdWithMultiLevelFilter() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id"));
+    ColumnFilter filter1 = new ColumnFilter();
+    filter1.setColumnName("year_of_birth");
+    filter1.setValueNumber(new BigDecimal(1987));
+    ColumnFilter filter2 = new ColumnFilter();
+    filter2.setColumnName("person_id");
+    filter2.setValueNumber(new BigDecimal(4L));
+    ColumnFilter filter3 = new ColumnFilter();
+    filter3.setColumnName("person_id");
+    filter3.setOperator(Operator.LESS_THAN_OR_EQUAL_TO);
+    filter3.setValueNumber(new BigDecimal(3L));
+    ResultFilters resultFilters = new ResultFilters();
+    ResultFilters anyOf = makeAnyOf(filter1, filter2);
+    anyOf.setNot(true);
+    resultFilters.setAllOf(ImmutableList.of(makeResultFilters(filter3), anyOf));
+    tableQuery.setFilters(resultFilters);
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -784,7 +886,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_date");
     columnFilter.setValueDate("2009-12-03");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -801,7 +903,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_date");
     columnFilter.setValueDate("2009-12-04");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -819,7 +921,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_date");
     columnFilter.setOperator(Operator.GREATER_THAN);
     columnFilter.setValueDate("2009-12-02");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -837,7 +939,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_date");
     columnFilter.setOperator(Operator.GREATER_THAN_OR_EQUAL_TO);
     columnFilter.setValueDate("2009-12-03");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -855,7 +957,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_date");
     columnFilter.setOperator(Operator.LESS_THAN);
     columnFilter.setValueDate("2009-12-04");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -873,7 +975,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_date");
     columnFilter.setOperator(Operator.LESS_THAN_OR_EQUAL_TO);
     columnFilter.setValueDate("2009-12-03");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -890,7 +992,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -907,7 +1009,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     ColumnFilter columnFilter = new ColumnFilter();
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setValueDate("2009-12-03 05:00:01 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -925,7 +1027,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.GREATER_THAN);
     columnFilter.setValueDate("2009-12-03 04:59:59 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -943,7 +1045,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.GREATER_THAN_OR_EQUAL_TO);
     columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -961,7 +1063,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.LESS_THAN);
     columnFilter.setValueDate("2009-12-03 05:00:01 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -979,7 +1081,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setColumnName("observation_datetime");
     columnFilter.setOperator(Operator.LESS_THAN_OR_EQUAL_TO);
     columnFilter.setValueDate("2009-12-03 05:00:00 UTC");
-    tableQuery.addFiltersItem(ImmutableList.of(columnFilter));
+    tableQuery.setFilters(makeResultFilters(columnFilter));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -987,6 +1089,29 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
+
+  private ResultFilters makeResultFilters(ColumnFilter columnFilter) {
+    ResultFilters result = new ResultFilters();
+    result.setColumnFilter(columnFilter);
+    return result;
+  }
+
+  private ResultFilters makeAnyOf(ColumnFilter... columnFilters) {
+    ResultFilters result = new ResultFilters();
+    result.setAnyOf(
+        Arrays.asList(columnFilters).stream().map(columnFilter -> makeResultFilters(columnFilter))
+            .collect(Collectors.toList()));
+    return result;
+  }
+
+  private ResultFilters makeAllOf(ColumnFilter... columnFilters) {
+    ResultFilters result = new ResultFilters();
+    result.setAllOf(
+        Arrays.asList(columnFilters).stream().map(columnFilter -> makeResultFilters(columnFilter))
+            .collect(Collectors.toList()));
+    return result;
+  }
+
 
   private void assertResults(MaterializeCohortResponse response, ImmutableMap<String, Object>... results) {
     if (response.getResults().size() != results.length) {

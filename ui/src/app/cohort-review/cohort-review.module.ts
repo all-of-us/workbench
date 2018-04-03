@@ -19,6 +19,7 @@ import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
+import {DetailProceduresComponent} from './detail-procedures/detail-procedures.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
@@ -84,6 +85,7 @@ import {WorkspacesService} from 'generated';
     DetailHeaderComponent,
     DetailTabsComponent,
     DetailConditionsComponent,
+    DetailProceduresComponent,
   ],
   providers: [ReviewStateService]
 })

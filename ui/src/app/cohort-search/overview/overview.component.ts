@@ -44,6 +44,12 @@ export class OverviewComponent {
     return this.cohortForm.get('name');
   }
 
+  modalChange(value) {
+    if (!value) {
+      this.cohortForm.reset();
+    }
+  }
+
   submit() {
     const ns: Workspace['namespace'] = this.route.snapshot.params.ns;
     const wsid: Workspace['id'] = this.route.snapshot.params.wsid;
