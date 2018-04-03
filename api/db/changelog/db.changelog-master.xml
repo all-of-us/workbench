@@ -37,4 +37,5 @@
   <include file="changelog/db.changelog-27-underserved-populations.xml"/>
   <include file="changelog/db.changelog-28-default-rp-values.xml"/>
   <include file="changelog/db.changelog-29-admin-logging.xml"/>
+  <include file="changelog/db.changelog-30-profile-text-fields-extension.xml"/>
 </databaseChangeLog>
