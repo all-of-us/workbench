@@ -172,7 +172,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking "new notebook" in the Jupyter UI.
-      // TODO: Use the Swagger generated code instead.
+      // TODO: Use the Swagger generated code instead:
+      // https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
       const leoNewNotebookUrl =
         WorkspaceComponent.leoBaseUrl + '/notebooks/' +
         this.cluster.clusterNamespace + '/' + this.cluster.clusterName +
