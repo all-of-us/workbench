@@ -36,8 +36,4 @@ export class AccountCreationSuccessComponent {
   signIn(): void {
     this.signInService.signIn();
   }
-
-  routeToTFA(): void {
-    window.location.href = 'https://myaccount.google.com/security';
-  }
 }

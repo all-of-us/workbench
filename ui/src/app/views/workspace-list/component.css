@@ -48,3 +48,13 @@
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
+
+.alert-item * {
+  color: #E28327;
+  font-family: "Gotham HTF";
+}
+
+.alert-item *.warning-link {
+  font-weight: bold;
+  color: #6cace4;
+}
