@@ -31,17 +31,12 @@
   {{workspace.description}}
 </div>
 <div class="area-block">
-  <h3>CDR Version</h3>
-  <div class="indented">
-    <p class="cdr-text">
-      {{workspace.cdrVersionId}}
-    </p>
-  </div>
+  <h3 class="cdr-text">CDR Version {{workspace.cdrVersionId}}</h3>
 </div>
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Cohorts</h3>
-    <a class="btn btn-link" [routerLink]="['cohorts', 'build']">Add a Cohort</a>
+    <a class="btn btn-link" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">Add a Cohort</a>
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="cohortsLoading">
@@ -110,7 +105,7 @@
         </div>
       </div>
     </div>
-    <button class="btn" [disabled]="clusterLoading" (click)="newNotebook()">
+    <button class="btn" [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
       New Notebook
     </button>
   </div>
