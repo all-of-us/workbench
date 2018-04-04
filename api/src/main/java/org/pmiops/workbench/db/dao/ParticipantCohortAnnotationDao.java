@@ -41,10 +41,10 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         " JOIN cohort_annotation_enum_value toCaev ON (toCaev.cohort_annotation_definition_id = toCad.cohort_annotation_definition_id" +
         "                                            AND toCaev.enum_order = fromCaev.enum_order)",
         nativeQuery = true)
-    void bulkCopyEnumAnnotationsByCohortReviewAndCohort(@Param("fromCohortReviewId") long fromCohortReviewId,
-                                                        @Param("toCohortReviewId") long toCohortReviewId,
-                                                        @Param("fromCohortId") long fromCohortId,
-                                                        @Param("toCohortId") long toCohortId);
+    void bulkCopyEnumAnnotationsByCohortReviewAndCohort(@Param("fromCohortId") long fromCohortId,
+                                                        @Param("toCohortId") long toCohortId,
+                                                        @Param("fromCohortReviewId") long fromCohortReviewId,
+                                                        @Param("toCohortReviewId") long toCohortReviewId);
 
     // We use native SQL here as there may be a large number of rows within a
     // given cohort review; this avoids loading them into memory.
@@ -62,8 +62,8 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         " WHERE NOT EXISTS" +
         " (SELECT 'x' FROM cohort_annotation_enum_value fromCaev WHERE fromCad.cohort_annotation_definition_id = fromCaev.cohort_annotation_definition_id)",
         nativeQuery = true)
-    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(@Param("fromCohortReviewId") long fromCohortReviewId,
-                                                            @Param("toCohortReviewId") long toCohortReviewId,
-                                                            @Param("fromCohortId") long fromCohortId,
-                                                            @Param("toCohortId") long toCohortId);
+    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(@Param("fromCohortId") long fromCohortId,
+                                                            @Param("toCohortId") long toCohortId,
+                                                            @Param("fromCohortReviewId") long fromCohortReviewId,
+                                                            @Param("toCohortReviewId") long toCohortReviewId);
 }
