@@ -268,6 +268,60 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantProceduresListResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/observations:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      description:  >
+            Returns a collection of ParticipantObservations for the specified params. This endpoint
+            does pagination based on page, limit, order and column.
+      operationId: "getParticipantObservations"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantObservations.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantObservations.
+          schema:
+            $ref: "#/definitions/ParticipantObservationsListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/drugs:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      description:  >
+            Returns a collection of ParticipantDrugs for the specified params. This endpoint
+            does pagination based on page, limit, order and column.
+      operationId: "getParticipantDrugs"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantDrugs.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantDrugs.
+          schema:
+            $ref: "#/definitions/ParticipantDrugsListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -495,6 +549,22 @@ definitions:
             $ref: "#/definitions/ParticipantProceduresColumns"
             description: Column upon which to sort (default is 'itemDate')
 
+  ParticipantObservations:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantObservationsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
+  ParticipantDrugs:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantDrugsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
@@ -506,6 +576,14 @@ definitions:
   ParticipantProceduresColumns:
     type: string
     enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
+  ParticipantObservationsColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
+  ParticipantDrugsColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, signature, sourceValue, sourceVocabulary, sourceName, age]
 
   PageFilterType:
     type: string
@@ -675,6 +753,42 @@ definitions:
       pageRequest:
         $ref: "#/definitions/PageRequest"
 
+  ParticipantObservationsListResponse:
+    type: object
+    required:
+      - items
+      - count
+      - pageRequest
+    properties:
+      items:
+        type: "array"
+        items:
+         $ref: "#/definitions/ParticipantObservation"
+      count:
+        type: integer
+        format: int64
+        description: the total count of observations.
+      pageRequest:
+        $ref: "#/definitions/PageRequest"
+
+  ParticipantDrugsListResponse:
+    type: object
+    required:
+      - items
+      - count
+      - pageRequest
+    properties:
+      items:
+        type: "array"
+        items:
+         $ref: "#/definitions/ParticipantDrug"
+      count:
+        type: integer
+        format: int64
+        description: the total count of drugs data.
+      pageRequest:
+        $ref: "#/definitions/PageRequest"
+
   ModifyParticipantCohortAnnotationRequest:
     type: object
     properties:
@@ -783,22 +897,92 @@ definitions:
     properties:
       itemDate:
         type: string
-        description: The date of the condition occurrence
+        description: The date of the procedure occurrence
       standardVocabulary:
         type: string
-        description: The standard vocabulary of this condition
+        description: The standard vocabulary of this procedure
       standardName:
         type: string
-        description: The standard name of this condition
+        description: The standard name of this procedure
       sourceValue:
         type: string
-        description: The source value of this condition
+        description: The source value of this procedure
       sourceVocabulary:
         type: string
-        description: The source vocabulary of this condition
+        description: The source vocabulary of this procedure
       sourceName:
         type: string
-        description: The source name of this condition.
+        description: The source name of this procedure.
+      age:
+        type: integer
+        description: The age of event for the participant.
+
+  ParticipantObservation:
+    type: object
+    required:
+      - itemDate
+      - standardVocabulary
+      - standardName
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+      - age
+    properties:
+      itemDate:
+        type: string
+        description: The date of the observation
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this observation
+      standardName:
+        type: string
+        description: The standard name of this observation
+      sourceValue:
+        type: string
+        description: The source value of this observation
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this observation
+      sourceName:
+        type: string
+        description: The source name of this observation.
+      age:
+        type: integer
+        description: The age of event for the participant.
+
+  ParticipantDrug:
+    type: object
+    required:
+      - itemDate
+      - standardVocabulary
+      - standardName
+      - signature
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+      - age
+    properties:
+      itemDate:
+        type: string
+        description: The date of the drug
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this drug
+      standardName:
+        type: string
+        description: The standard name of this drug
+      signature:
+        type: string
+        description: The signature for this drug
+      sourceValue:
+        type: string
+        description: The source value of this drug
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this drug
+      sourceName:
+        type: string
+        description: The source name of this drug.
       age:
         type: integer
         description: The age of event for the participant.
