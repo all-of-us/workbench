@@ -110,7 +110,7 @@
         </div>
       </div>
     </div>
-    <button class="btn" [disabled]="clusterLoading" (click)="launchCluster()">
+    <button class="btn" [disabled]="clusterLoading" (click)="newNotebook()">
       New Notebook
     </button>
   </div>
@@ -126,7 +126,7 @@
         class="table-row notebook-table-row"
         *clrDgItems="let notebook of notebookList"
         [clrDgItem]="notebook"
-        (click)="launchNotebook(notebook)">
+        (click)="openNotebook(notebook)">
         <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
         <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
       </clr-dg-row>
