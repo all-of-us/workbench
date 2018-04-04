@@ -25,9 +25,9 @@ public interface CohortAnnotationDefinitionDao extends JpaRepository<CohortAnnot
     @Query(
         value="INSERT INTO cohort_annotation_definition" +
         " (cohort_id, column_name, annotation_type)" +
-        " SELECT (:toCohortId), column_name, annotation_type" +
+        " SELECT :toCohortId, column_name, annotation_type" +
         " FROM cohort_annotation_definition" +
-        " WHERE cohort_id = (:fromCohortId)",
+        " WHERE cohort_id = :fromCohortId",
         nativeQuery=true)
     void bulkCopyCohortAnnotationDefinitionByCohort(@Param("fromCohortId") long fromCohortId,
                                                     @Param("toCohortId") long toCohortId);

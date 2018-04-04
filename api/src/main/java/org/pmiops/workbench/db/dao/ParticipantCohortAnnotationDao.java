@@ -30,16 +30,13 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
     @Modifying
     @Query(
         value = "INSERT INTO participant_cohort_annotations" +
-        " (cohort_review_id, cohort_annotation_definition_id, participant_id, annotation_value_string," +
-        " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean)" +
-        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, annotation_value_string," +
-        " annotation_value_integer, annotation_value_date, caev1.cohort_annotation_enum_value_id, annotation_value_boolean" +
+        " (cohort_review_id, cohort_annotation_definition_id, participant_id, cohort_annotation_enum_value_id)" +
+        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, caev1.cohort_annotation_enum_value_id" +
         " FROM cohort_annotation_definition cad" +
         " JOIN cohort_annotation_enum_value caev ON (cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)" +
         " JOIN participant_cohort_annotations pca ON (pca.cohort_annotation_definition_id = cad.cohort_annotation_definition_id" +
         "                                            AND pca.cohort_annotation_enum_value_id = caev.cohort_annotation_enum_value_id" +
-        "                                            AND cad.cohort_id = :fromCohortId" +
-        "                                            AND cohort_review_id = :fromCohortReviewId)" +
+        "                                            AND cad.cohort_id = :fromCohortId AND cohort_review_id = :fromCohortReviewId)" +
         " JOIN cohort_annotation_definition cad1 ON (cad1.column_name = cad.column_name and cad1.cohort_id = :toCohortId)" +
         " JOIN cohort_annotation_enum_value caev1 ON (caev1.cohort_annotation_definition_id = cad1.cohort_annotation_definition_id" +
         "                                            AND caev1.enum_order = caev.enum_order)",
@@ -54,14 +51,13 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
     @Modifying
     @Query(
         value = "INSERT INTO participant_cohort_annotations" +
-        " (cohort_review_id, cohort_annotation_definition_id, participant_id, annotation_value_string," +
-        " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean)" +
-        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, annotation_value_string," +
-        " annotation_value_integer, annotation_value_date, cohort_annotation_enum_value_id, annotation_value_boolean" +
+        " (cohort_review_id, cohort_annotation_definition_id, participant_id, cohort_annotation_enum_value_id, annotation_value_string," +
+        " annotation_value_integer, annotation_value_date, annotation_value_boolean)" +
+        " SELECT :toCohortReviewId, cad1.cohort_annotation_definition_id, participant_id, cohort_annotation_enum_value_id, annotation_value_string," +
+        " annotation_value_integer, annotation_value_date, annotation_value_boolean" +
         " FROM cohort_annotation_definition cad" +
         " JOIN participant_cohort_annotations pca ON (cad.cohort_annotation_definition_id = pca.cohort_annotation_definition_id" +
-        "                                            AND cad.cohort_id = :fromCohortId" +
-        "                                            AND cohort_review_id = :fromCohortReviewId)" +
+        "                                            AND cad.cohort_id = :fromCohortId AND cohort_review_id = :fromCohortReviewId)" +
         " JOIN cohort_annotation_definition cad1 ON (cad.column_name = cad1.column_name AND cad1.cohort_id = :toCohortId)" +
         " WHERE NOT EXISTS" +
         " (SELECT 'x' FROM cohort_annotation_enum_value caev WHERE cad.cohort_annotation_definition_id = caev.cohort_annotation_definition_id)",
