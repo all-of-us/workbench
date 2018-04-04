@@ -82,6 +82,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
+  awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
   notebookError = false;
@@ -117,6 +118,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
+    const {approved, reviewRequested} = this.workspace.researchPurpose;
+    this.awaitingReview = reviewRequested && !approved;
   }
 
   ngOnInit(): void {
@@ -310,6 +313,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.workspace.namespace, this.workspace.id).subscribe(() => {
           this.router.navigate(['/']);
         });
+  }
+
+  buildCohort(): void {
+    if (!this.awaitingReview) {
+      this.router.navigate(['cohorts', 'build'], {relativeTo : this.route});
+    }
   }
 
   get writePermission(): boolean {

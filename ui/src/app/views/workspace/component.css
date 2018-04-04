@@ -40,3 +40,8 @@ h3 {
 .notebook-table-row {
   cursor: pointer;
 }
+
+.btn.btn-link.awaiting-review {
+  cursor: not-allowed;
+  color: #565656;
+}

@@ -39,8 +39,11 @@
 
 .card *.date-text {
   font-size: 12px;
-  margin-top: auto;
   line-height: 14px;
+}
+
+.card *.status-text {
+  margin-top: auto;
 }
 
 .workspace-name {

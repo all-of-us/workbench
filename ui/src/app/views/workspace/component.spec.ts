@@ -123,7 +123,7 @@ describe('WorkspaceComponent', () => {
     updateAndTick(workspacePage.fixture);
     updateAndTick(workspacePage.fixture);
     expect(workspacePage.cdrText.nativeElement.innerText)
-      .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
+      .toMatch('CDR Version ' + WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
     expect(workspacePage.workspaceDescription.nativeElement.innerText)
       .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
   }));
