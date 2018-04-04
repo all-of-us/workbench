@@ -8,7 +8,7 @@
   <div>
     <div class="name-area" [class.validation-error]="nameNotEntered">
       <input type="text" class="input name" name="workspace-name" autofocus
-          [(ngModel)]="workspace.name" [disabled]="!hasPermission || awaitingReview"
+          [(ngModel)]="workspace.name" [disabled]="!hasPermission"
           placeholder="Workspace Name">
       <span style="display: inline-block; vertical-align: bottom">
         <div>Billing Account:</div>
