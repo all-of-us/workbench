@@ -47,8 +47,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -157,9 +155,6 @@ public class WorkspacesControllerTest {
   CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   WorkspacesController workspacesController;
-  @Autowired
-  JdbcTemplate jdbcTemplate;
-
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -766,11 +761,6 @@ public class WorkspacesControllerTest {
     assertThat(clonedCad1String.getColumnName()).isEqualTo(cad1StringResponse.getColumnName());
     assertThat(clonedCad1String.getAnnotationType()).isEqualTo(cad1StringResponse.getAnnotationType());
     assertThat(clonedCad1String.getEnumValues()).isEqualTo(cad1StringResponse.getEnumValues());
-
-    String sql = "select * from cohort_annotation_definition";
-    List<Map<String, Object>> defs = jdbcTemplate.queryForList(sql);
-    sql = "select * from participant_cohort_annotations";
-    List<Map<String, Object>> anns = jdbcTemplate.queryForList(sql);
 
     ParticipantCohortAnnotationListResponse clonedPca1List = cohortReviewController.getParticipantCohortAnnotations(
                     cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
