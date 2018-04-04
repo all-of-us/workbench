@@ -36,7 +36,7 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Cohorts</h3>
-    <a class="btn btn-link" [ngClass]="{'awaiting-review' : awaitingReview}" (click)="buildCohort()">Add a Cohort</a>
+    <a class="btn btn-link" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">Add a Cohort</a>
   </div>
   <div class="indented">
     <clr-datagrid [clrDgLoading]="cohortsLoading">

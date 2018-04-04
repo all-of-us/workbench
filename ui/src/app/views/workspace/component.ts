@@ -118,10 +118,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    if (this.workspace.researchPurpose.approved !== true
-      && this.workspace.researchPurpose.reviewRequested === true) {
-        this.awaitingReview = true;
-    }
+    const {approved, reviewRequested} = this.workspace.researchPurpose;
+    this.awaitingReview = reviewRequested && !approved;
+
 
   }
 
