@@ -333,8 +333,8 @@ export class WorkspaceEditComponent implements OnInit {
 
   get allowSave() {
     if (this.savingWorkspace) {
-      return true;
+      return false;
     }
-    return isBlank(this.workspace.name);
+    return !isBlank(this.workspace.name);
   }
 }
