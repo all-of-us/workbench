@@ -8,6 +8,7 @@
     (clrWizardOnCancel)="onCancel()"
     (clrWizardOnFinish)="onSubmit()">
     <clr-wizard-title>Add Criteria To Cohort</clr-wizard-title>
+
     <!-- Criteria Selection Page -->
     <clr-wizard-page [clrWizardPageNextDisabled]="!hasSelection">
       <ng-template clrPageTitle>{{ critPageTitle }}</ng-template>
@@ -20,6 +21,13 @@
         </div>
       </div>
     </clr-wizard-page>
+
+    <!-- Criteria Modifiers Page -->
+    <clr-wizard-page>
+      <ng-template clrPageTitle>Modifiers</ng-template>
+      <crit-modifiers></crit-modifiers>
+    </clr-wizard-page>
+
     <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
     <clr-wizard-button [type]="'next'">Next</clr-wizard-button>

@@ -10,6 +10,7 @@ import {AttributesModule} from './attributes/attributes.module';
 import {DemoFormComponent} from './demo-form/demo-form.component';
 import {ExplorerComponent} from './explorer/explorer.component';
 import {LeafComponent} from './leaf/leaf.component';
+import {ModifiersComponent} from './modifiers/modifiers.component';
 import {
   QuickSearchResultsComponent
 } from './quicksearch-results/quicksearch-results.component';
@@ -35,6 +36,7 @@ import {WizardComponent} from './wizard/wizard.component';
     DemoFormComponent,
     ExplorerComponent,
     LeafComponent,
+    ModifiersComponent,
     QuickSearchComponent,
     QuickSearchResultsComponent,
     RootSpinnerComponent,
