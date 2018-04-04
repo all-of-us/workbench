@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

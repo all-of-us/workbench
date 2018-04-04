@@ -152,7 +152,7 @@ public class WorkspacesControllerTest {
   @Autowired
   CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
-  WorkspacesController workspacesController;
+  private WorkspacesController workspacesController;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
