@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class ClusterController implements ClusterApiDelegate {
     };
 
   private final NotebooksService notebooksService;
-  private final Provider<User> userProvider;
+  private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -92,6 +93,11 @@ public class ClusterController implements ClusterApiDelegate {
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.apiHostName = apiHostName;
+  }
+
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
   }
 
   @Override
