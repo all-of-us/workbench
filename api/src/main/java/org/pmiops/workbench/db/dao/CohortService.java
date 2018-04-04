@@ -41,12 +41,10 @@ public class CohortService {
       participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(
               from.getCohortId(),
               to.getCohortId(),
-              fromReview.getCohortReviewId(),
               cr.getCohortReviewId());
       participantCohortAnnotationDao.bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(
               from.getCohortId(),
               to.getCohortId(),
-              fromReview.getCohortReviewId(),
               cr.getCohortReviewId());
 
     }
