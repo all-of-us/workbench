@@ -44,6 +44,11 @@ public interface CohortAnnotationDefinitionDao extends JpaRepository<CohortAnnot
         "                                            AND cad1.cohort_id = :fromCohortId)" +
         " JOIN cohort_annotation_definition cad2 on (cad2.cohort_id = :toCohortId AND cad2.column_name = cad1.column_name)",
         nativeQuery=true)
+    /**
+     * IMPORTANT NOTE:
+     * This method will only bulk copy correctly when called after
+     * {@link CohortAnnotationDefinitionDao#bulkCopyCohortAnnotationDefinitionByCohort(long, long)}
+     */
     void bulkCopyCohortAnnotationEnumsByCohort(@Param("fromCohortId") long fromCohortId,
                                                @Param("toCohortId") long toCohortId);
 }
