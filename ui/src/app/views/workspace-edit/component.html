@@ -84,9 +84,9 @@
             <div class="checkbox-group">
               <div (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"
                   style="cursor: pointer;">
-                <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation === true"
+                <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation"
                     shape="minus-circle"></clr-icon>
-                <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation === false"
+                <clr-icon *ngIf="!workspace.researchPurpose.containsUnderservedPopulation"
                     shape="plus-circle"></clr-icon>
                 <div style="display: inline-block;">
                   Includes an underserved population
