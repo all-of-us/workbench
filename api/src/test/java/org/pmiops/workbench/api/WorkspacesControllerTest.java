@@ -607,23 +607,22 @@ public class WorkspacesControllerTest {
     CohortReview cr1 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c1.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    CohortAnnotationDefinition cad1EnumRequest = createCohortAnnotationDefinition(c1.getId(),
-            AnnotationType.ENUM,
-            "cad",
-            Arrays.asList("value"));
+    CohortAnnotationDefinition cad1EnumRequest = new CohortAnnotationDefinition()
+            .cohortId(c1.getId())
+            .annotationType(AnnotationType.ENUM)
+            .columnName("cad")
+            .enumValues(Arrays.asList("value"));
     CohortAnnotationDefinition cad1EnumResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c1.getId(),
                     cad1EnumRequest).getBody();
-    ParticipantCohortAnnotation pca1EnumRequest =
-            createParticipantCohortAnnotation(cad1EnumResponse.getCohortAnnotationDefinitionId(),
-                    cr1.getCohortReviewId(),
-                    participantId,
-                    null,
-                    "value",
-                    null);
+    ParticipantCohortAnnotation pca1EnumRequest = new ParticipantCohortAnnotation()
+            .cohortAnnotationDefinitionId(cad1EnumResponse.getCohortAnnotationDefinitionId())
+            .annotationValueEnum("value")
+            .participantId(participantId)
+            .cohortReviewId(cr1.getCohortReviewId());
     ParticipantCohortAnnotation pca1EnumResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -632,23 +631,21 @@ public class WorkspacesControllerTest {
                     cdrVersion.getCdrVersionId(),
                     participantId,
                     pca1EnumRequest).getBody();
-    CohortAnnotationDefinition cad1StringRequest = createCohortAnnotationDefinition(c1.getId(),
-            AnnotationType.STRING,
-            "cad1",
-            null);
+    CohortAnnotationDefinition cad1StringRequest = new CohortAnnotationDefinition()
+            .cohortId(c1.getId())
+            .annotationType(AnnotationType.STRING)
+            .columnName("cad1");
     CohortAnnotationDefinition cad1StringResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c1.getId(),
                     cad1StringRequest).getBody();
-    ParticipantCohortAnnotation pca1StringRequest =
-            createParticipantCohortAnnotation(cad1StringResponse.getCohortAnnotationDefinitionId(),
-                    cr1.getCohortReviewId(),
-                    participantId,
-                    "value1",
-                    null,
-                    null);
+    ParticipantCohortAnnotation pca1StringRequest = new ParticipantCohortAnnotation()
+            .cohortAnnotationDefinitionId(cad1StringResponse.getCohortAnnotationDefinitionId())
+            .annotationValueString("value1")
+            .participantId(participantId)
+            .cohortReviewId(cr1.getCohortReviewId());
     ParticipantCohortAnnotation pca1StringResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -662,23 +659,22 @@ public class WorkspacesControllerTest {
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    CohortAnnotationDefinition cad2EnumRequest = createCohortAnnotationDefinition(c2.getId(),
-            AnnotationType.ENUM,
-            "cad",
-            Arrays.asList("value"));
+    CohortAnnotationDefinition cad2EnumRequest = new CohortAnnotationDefinition()
+            .cohortId(c2.getId())
+            .annotationType(AnnotationType.ENUM)
+            .columnName("cad")
+            .enumValues(Arrays.asList("value"));
     CohortAnnotationDefinition cad2EnumResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c2.getId(),
                     cad2EnumRequest).getBody();
-    ParticipantCohortAnnotation pca2EnumRequest =
-            createParticipantCohortAnnotation(cad2EnumResponse.getCohortAnnotationDefinitionId(),
-                    cr2.getCohortReviewId(),
-                    participantId,
-                    null,
-                    "value",
-                    null);
+    ParticipantCohortAnnotation pca2EnumRequest = new ParticipantCohortAnnotation()
+            .cohortAnnotationDefinitionId(cad2EnumResponse.getCohortAnnotationDefinitionId())
+            .annotationValueEnum("value")
+            .participantId(participantId)
+            .cohortReviewId(cr1.getCohortReviewId());
     ParticipantCohortAnnotation pca2EnumResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -687,23 +683,21 @@ public class WorkspacesControllerTest {
                     cdrVersion.getCdrVersionId(),
                     participantId,
                     pca2EnumRequest).getBody();
-    CohortAnnotationDefinition cad2BooleanRequest = createCohortAnnotationDefinition(c2.getId(),
-            AnnotationType.BOOLEAN,
-            "cad1",
-            null);
+    CohortAnnotationDefinition cad2BooleanRequest = new CohortAnnotationDefinition()
+            .cohortId(c2.getId())
+            .annotationType(AnnotationType.BOOLEAN)
+            .columnName("cad1");
     CohortAnnotationDefinition cad2BooleanResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c2.getId(),
                     cad2BooleanRequest).getBody();
-    ParticipantCohortAnnotation pca2BooleanRequest =
-            createParticipantCohortAnnotation(cad2BooleanResponse.getCohortAnnotationDefinitionId(),
-                    cr2.getCohortReviewId(),
-                    participantId,
-                    null,
-                    null,
-                    Boolean.TRUE);
+    ParticipantCohortAnnotation pca2BooleanRequest = new ParticipantCohortAnnotation()
+            .cohortAnnotationDefinitionId(cad2BooleanResponse.getCohortAnnotationDefinitionId())
+            .annotationValueBoolean(Boolean.TRUE)
+            .participantId(participantId)
+            .cohortReviewId(cr1.getCohortReviewId());
     ParticipantCohortAnnotation pca2BooleanResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -818,32 +812,6 @@ public class WorkspacesControllerTest {
       assertThat(clonedAnnotation.getCohortReviewId()).isEqualTo(cohortReviewId);
       assertThat(clonedAnnotation.getParticipantId()).isEqualTo(participantId);
     }
-  }
-
-  private ParticipantCohortAnnotation createParticipantCohortAnnotation(Long cohortAnnotationDefinitionId,
-                                                                        Long cohortReviewId,
-                                                                        Long participantId,
-                                                                        String stringValue,
-                                                                        String enumValue,
-                                                                        Boolean booleanValue) {
-    return new ParticipantCohortAnnotation()
-            .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
-            .annotationValueEnum(enumValue)
-            .annotationValueString(stringValue)
-            .annotationValueBoolean(booleanValue)
-            .participantId(participantId)
-            .cohortReviewId(cohortReviewId);
-  }
-
-  private CohortAnnotationDefinition createCohortAnnotationDefinition(Long cohortId,
-                                                                      AnnotationType annotationType,
-                                                                      String columnName,
-                                                                      List<String> enumValues) {
-    return new CohortAnnotationDefinition()
-            .cohortId(cohortId)
-            .annotationType(annotationType)
-            .columnName(columnName)
-            .enumValues(enumValues);
   }
 
   @Test
