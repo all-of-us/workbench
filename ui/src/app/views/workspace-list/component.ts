@@ -52,7 +52,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   errorText: string;
-  twoFactorShow = true;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;

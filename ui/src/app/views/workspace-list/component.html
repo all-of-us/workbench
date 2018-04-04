@@ -1,16 +1,13 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Your Workspaces</h3>
-    <div class="alert alert-warning" *ngIf="twoFactorShow">
+    <div class="alert alert-warning">
       <div class="alert-items" style="width: 18rem;">
         <div class="alert-item static">
           <span class="alert-text">
             If you have not already, please enable two factor authentication
             <a class="warning-link" href="https://myaccount.google.com/security">here</a>.
           </span>
-          <div class="alert-icon-wrapper">
-            <clr-icon class="alert-icon" shape="times" (click)="twoFactorShow = false;"></clr-icon>
-          </div>
         </div>
       </div>
     </div>
