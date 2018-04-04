@@ -120,8 +120,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
-
-
   }
 
   ngOnInit(): void {
