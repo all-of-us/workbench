@@ -1269,6 +1269,25 @@ definitions:
         type: boolean
       emailVerificationStatus:
         $ref: "#/definitions/EmailVerificationStatus"
+      aboutYou:
+        type: string
+      areaOfResearch:
+        type: string
+      institutionalAffiliations:
+        type: "array"
+        items:
+          $ref: "#/definitions/InstitutionalAffiliation"
+
+  InstitutionalAffiliation:
+    type: object
+    required:
+      - institution
+      - role
+    properties:
+      institution:
+        type: string
+      role:
+        type: string
 
   ErrorCode:
     type: string

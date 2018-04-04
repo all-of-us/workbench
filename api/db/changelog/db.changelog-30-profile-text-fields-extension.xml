@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="blrubenstein" id="changelog-30-profile-text-fields-extension">
+    <addColumn tableName="user">
+      <column name="area_of_research" type="varchar(255)"/>
+      <column name="about_you" type="CLOB"/>
+    </addColumn>
+    <createTable tableName="institutional_affiliation">
+      <column name="institutional_affiliation_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_index" type="smallint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="institution" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="role" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="user_id"
+        baseTableName="institutional_affiliation"
+        constraintName="fk_institutional_affiliation_user_id"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
+  </changeSet>
+</databaseChangeLog>
