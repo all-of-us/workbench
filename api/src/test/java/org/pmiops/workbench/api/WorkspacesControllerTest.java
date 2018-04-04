@@ -9,8 +9,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -154,7 +152,7 @@ public class WorkspacesControllerTest {
   @Autowired
   CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
-  WorkspacesController workspacesController;
+  private WorkspacesController workspacesController;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
