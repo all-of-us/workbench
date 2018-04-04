@@ -13,7 +13,8 @@ import {WorkspacesService} from 'generated';
 
 @Component({
   selector: 'workspace-share',
-  styleUrls: ['./component.css'],
+  styleUrls: ['./component.css',
+    '../../styles/buttons.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceShareComponent implements OnInit {
