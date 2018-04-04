@@ -61,7 +61,7 @@ public interface ParticipantCohortAnnotationDao extends JpaRepository<Participan
         " WHERE NOT EXISTS" +
         " (SELECT 'x' FROM cohort_annotation_enum_value fromCaev WHERE fromCad.cohort_annotation_definition_id = fromCaev.cohort_annotation_definition_id)",
         nativeQuery = true)
-    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort1(@Param("fromCohortId") long fromCohortId,
-                                                            @Param("toCohortId") long toCohortId,
-                                                            @Param("toCohortReviewId") long toCohortReviewId);
+    void bulkCopyNonEnumAnnotationsByCohortReviewAndCohort(@Param("fromCohortId") long fromCohortId,
+                                                           @Param("toCohortId") long toCohortId,
+                                                           @Param("toCohortReviewId") long toCohortReviewId);
 }
