@@ -1,4 +1,4 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -19,6 +19,9 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
+import {Location} from "@angular/common";
+import {ProfileService} from "../../../generated";
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component'
 
 
 /*
@@ -69,6 +72,9 @@ class NotebookNameComparator implements Comparator<FileDetail> {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
+
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
@@ -98,6 +104,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookList: FileDetail[] = [];
   editHover = false;
   shareHover = false;
+  sharing = false;
   trashHover = false;
   listenerAdded = false;
   notebookAuthListener: EventListenerOrEventListenerObject;
@@ -277,16 +284,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['clone'], {relativeTo : this.route});
   }
 
-  share(): void {
-    this.router.navigate(['share'], {relativeTo : this.route});
-  }
-
   delete(): void {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
         this.workspace.namespace, this.workspace.id).subscribe(() => {
           this.router.navigate(['/']);
         });
+  }
+
+  share(): void {
+    this.shareModal.open();
   }
 
   get writePermission(): boolean {

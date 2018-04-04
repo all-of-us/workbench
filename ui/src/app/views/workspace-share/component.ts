@@ -12,6 +12,7 @@ import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
 
 @Component({
+  selector: 'workspace-share',
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
@@ -28,6 +29,7 @@ export class WorkspaceShareComponent implements OnInit {
   userNotFound = false;
   userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
+  public sharing = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
@@ -45,10 +47,6 @@ export class WorkspaceShareComponent implements OnInit {
         this.userEmail = profile.username;
       });
     });
-  }
-
-  navigateBack(): void {
-    this.locationService.back();
   }
 
   setAccess(dropdownSelected: string): void {
@@ -157,6 +155,10 @@ export class WorkspaceShareComponent implements OnInit {
   resetWorkspaceEditor(): void {
     this.workspaceUpdateConflictError = false;
     this.usersLoading = false;
+  }
+
+  open(): void {
+    this.sharing = true;
   }
 
   get hasPermission(): boolean {
