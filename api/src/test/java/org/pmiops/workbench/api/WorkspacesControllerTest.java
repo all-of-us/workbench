@@ -607,22 +607,16 @@ public class WorkspacesControllerTest {
     CohortReview cr1 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c1.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    CohortAnnotationDefinition cad1EnumRequest = new CohortAnnotationDefinition()
-            .cohortId(c1.getId())
-            .annotationType(AnnotationType.ENUM)
-            .columnName("cad")
-            .enumValues(Arrays.asList("value"));
     CohortAnnotationDefinition cad1EnumResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c1.getId(),
-                    cad1EnumRequest).getBody();
-    ParticipantCohortAnnotation pca1EnumRequest = new ParticipantCohortAnnotation()
-            .cohortAnnotationDefinitionId(cad1EnumResponse.getCohortAnnotationDefinitionId())
-            .annotationValueEnum("value")
-            .participantId(participantId)
-            .cohortReviewId(cr1.getCohortReviewId());
+                    new CohortAnnotationDefinition()
+                            .cohortId(c1.getId())
+                            .annotationType(AnnotationType.ENUM)
+                            .columnName("cad")
+                            .enumValues(Arrays.asList("value"))).getBody();
     ParticipantCohortAnnotation pca1EnumResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -630,22 +624,20 @@ public class WorkspacesControllerTest {
                     c1.getId(),
                     cdrVersion.getCdrVersionId(),
                     participantId,
-                    pca1EnumRequest).getBody();
-    CohortAnnotationDefinition cad1StringRequest = new CohortAnnotationDefinition()
-            .cohortId(c1.getId())
-            .annotationType(AnnotationType.STRING)
-            .columnName("cad1");
+                    new ParticipantCohortAnnotation()
+                            .cohortAnnotationDefinitionId(cad1EnumResponse.getCohortAnnotationDefinitionId())
+                            .annotationValueEnum("value")
+                            .participantId(participantId)
+                            .cohortReviewId(cr1.getCohortReviewId())).getBody();
     CohortAnnotationDefinition cad1StringResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c1.getId(),
-                    cad1StringRequest).getBody();
-    ParticipantCohortAnnotation pca1StringRequest = new ParticipantCohortAnnotation()
-            .cohortAnnotationDefinitionId(cad1StringResponse.getCohortAnnotationDefinitionId())
-            .annotationValueString("value1")
-            .participantId(participantId)
-            .cohortReviewId(cr1.getCohortReviewId());
+                    new CohortAnnotationDefinition()
+                            .cohortId(c1.getId())
+                            .annotationType(AnnotationType.STRING)
+                            .columnName("cad1")).getBody();
     ParticipantCohortAnnotation pca1StringResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -653,28 +645,26 @@ public class WorkspacesControllerTest {
                     c1.getId(),
                     cdrVersion.getCdrVersionId(),
                     participantId,
-                    pca1StringRequest).getBody();
+                    new ParticipantCohortAnnotation()
+                            .cohortAnnotationDefinitionId(cad1StringResponse.getCohortAnnotationDefinitionId())
+                            .annotationValueString("value1")
+                            .participantId(participantId)
+                            .cohortReviewId(cr1.getCohortReviewId())).getBody();
 
     reviewReq.setSize(2);
     CohortReview cr2 = cohortReviewController.createCohortReview(
         workspace.getNamespace(), workspace.getId(), c2.getId(),
         cdrVersion.getCdrVersionId(), reviewReq).getBody();
-    CohortAnnotationDefinition cad2EnumRequest = new CohortAnnotationDefinition()
-            .cohortId(c2.getId())
-            .annotationType(AnnotationType.ENUM)
-            .columnName("cad")
-            .enumValues(Arrays.asList("value"));
     CohortAnnotationDefinition cad2EnumResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c2.getId(),
-                    cad2EnumRequest).getBody();
-    ParticipantCohortAnnotation pca2EnumRequest = new ParticipantCohortAnnotation()
-            .cohortAnnotationDefinitionId(cad2EnumResponse.getCohortAnnotationDefinitionId())
-            .annotationValueEnum("value")
-            .participantId(participantId)
-            .cohortReviewId(cr1.getCohortReviewId());
+                    new CohortAnnotationDefinition()
+                            .cohortId(c2.getId())
+                            .annotationType(AnnotationType.ENUM)
+                            .columnName("cad")
+                            .enumValues(Arrays.asList("value"))).getBody();
     ParticipantCohortAnnotation pca2EnumResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -682,22 +672,20 @@ public class WorkspacesControllerTest {
                     c2.getId(),
                     cdrVersion.getCdrVersionId(),
                     participantId,
-                    pca2EnumRequest).getBody();
-    CohortAnnotationDefinition cad2BooleanRequest = new CohortAnnotationDefinition()
-            .cohortId(c2.getId())
-            .annotationType(AnnotationType.BOOLEAN)
-            .columnName("cad1");
+                    new ParticipantCohortAnnotation()
+                            .cohortAnnotationDefinitionId(cad2EnumResponse.getCohortAnnotationDefinitionId())
+                            .annotationValueEnum("value")
+                            .participantId(participantId)
+                            .cohortReviewId(cr1.getCohortReviewId())).getBody();
     CohortAnnotationDefinition cad2BooleanResponse =
             cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
                     workspace.getNamespace(),
                     workspace.getId(),
                     c2.getId(),
-                    cad2BooleanRequest).getBody();
-    ParticipantCohortAnnotation pca2BooleanRequest = new ParticipantCohortAnnotation()
-            .cohortAnnotationDefinitionId(cad2BooleanResponse.getCohortAnnotationDefinitionId())
-            .annotationValueBoolean(Boolean.TRUE)
-            .participantId(participantId)
-            .cohortReviewId(cr1.getCohortReviewId());
+                    new CohortAnnotationDefinition()
+                            .cohortId(c2.getId())
+                            .annotationType(AnnotationType.BOOLEAN)
+                            .columnName("cad1")).getBody();
     ParticipantCohortAnnotation pca2BooleanResponse =
             cohortReviewController.createParticipantCohortAnnotation(
                     workspace.getNamespace(),
@@ -705,7 +693,11 @@ public class WorkspacesControllerTest {
                     c2.getId(),
                     cdrVersion.getCdrVersionId(),
                     participantId,
-                    pca2BooleanRequest).getBody();
+                    new ParticipantCohortAnnotation()
+                            .cohortAnnotationDefinitionId(cad2BooleanResponse.getCohortAnnotationDefinitionId())
+                            .annotationValueBoolean(Boolean.TRUE)
+                            .participantId(participantId)
+                            .cohortReviewId(cr1.getCohortReviewId())).getBody();
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
