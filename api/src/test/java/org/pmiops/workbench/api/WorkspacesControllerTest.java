@@ -89,10 +89,10 @@ public class WorkspacesControllerTest {
   @Import({
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    CohortAnnotationDefinitionController.class,
     CohortsController.class,
     CohortService.class,
     CohortReviewController.class,
+    CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
     ReviewTabQueryBuilder.class
   })
