@@ -80,6 +80,11 @@ public class WorkspacesControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
 
+  @Autowired
+  private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  @Autowired
+  private WorkspacesController workspacesController;
+
   @TestConfiguration
   @Import({
     WorkspacesController.class,
@@ -149,10 +154,6 @@ public class WorkspacesControllerTest {
   CohortsController cohortsController;
   @Autowired
   CohortReviewController cohortReviewController;
-  @Autowired
-  CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
-  @Autowired
-  private WorkspacesController workspacesController;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
