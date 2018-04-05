@@ -83,6 +83,9 @@ public class ProfileService {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
           .getTime());
     }
+    if (user.getFirstSignInTime() != null) {
+      profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
+    }
     if (user.getDataAccessLevel() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevel());
     }
