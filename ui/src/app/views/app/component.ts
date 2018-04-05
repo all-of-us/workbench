@@ -27,8 +27,8 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 })
 export class AppComponent implements OnInit {
   isSignedIn = false;
+  overriddenUrl: string = null;
   private baseTitle: string;
-  private overriddenUrl: string = null;
   private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 

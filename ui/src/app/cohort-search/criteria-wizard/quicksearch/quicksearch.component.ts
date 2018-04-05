@@ -7,8 +7,8 @@ import {FormControl} from '@angular/forms';
   styleUrls: ['./quicksearch.component.css'],
 })
 export class QuickSearchComponent {
-  private fuzzyFinder = new FormControl();
-  private isFocused = false;
+  fuzzyFinder = new FormControl();
+  isFocused = false;
   @Output() value = new EventEmitter<string>();
 
   @Input()

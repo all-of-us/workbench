@@ -127,7 +127,9 @@ class DeployUI
     }
     environment_name = environment_names[@opts.project]
     common.run_inline %W{yarn install}
-    common.run_inline %W{yarn run build --environment=#{environment_name} --no-watch --no-progress}
+    # TODO(calbach): Upgrade this to --prod for the full production build
+    # treatment. Need to fix a bunch of errors to move ahead with that.
+    common.run_inline %W{yarn run build --aot --environment=#{environment_name} --no-watch --no-progress}
     ServiceAccountContext.new(@opts.project, service_account=@opts.account).run do
       common.run_inline %W{gcloud app deploy
         --project #{@opts.project}
