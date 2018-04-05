@@ -43,6 +43,16 @@ public interface NotebooksService {
       throws WorkbenchException;
 
   /**
+   * Write the given file contents on a notebook Cluster. The given jupyterPath
+   * is a Jupyter "API path", meaning it is relative to the root of the Jupyter
+   * user directory. For example, specifying "foo.txt" would write a file which
+   * would appear at the root directory in the Jupyter UI.
+   */
+  void putFile(String googleProject, String clusterName, String workspaceDir, String fileName, String fileContents);
+  void putRootWorkspacesDir(String googleProject, String clusterName);
+  void putWorkspaceDir(String googleProject, String clusterName, String workspaceDir);
+
+  /**
    * @return true if notebooks is okay, false if notebooks are down.
    */
   boolean getNotebooksStatus();
