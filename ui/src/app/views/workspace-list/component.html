@@ -1,6 +1,17 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Your Workspaces</h3>
+    <div class="alert alert-warning">
+      <div class="alert-items" style="width: 24rem;">
+        <div class="alert-item static">
+          <span class="alert-text">
+            Please add a second layer of protection with 2-Step Verification. After three days your account will be suspended.
+            If you already completed setup, please ignore this message.
+            <a class="warning-link" href="https://myaccount.google.com/security">Set up 2-Step Verification here</a>.
+          </span>
+        </div>
+      </div>
+    </div>
     <button class="btn btn-secondary tooltip tooltip-lg tooltip-top-left" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
       <clr-icon shape="plus"></clr-icon>
       New Workspace
