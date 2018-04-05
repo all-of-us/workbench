@@ -21,6 +21,7 @@ import {
   templateUrl: './component.html',
 })
 export class ProfilePageComponent implements OnInit {
+  editHover = false;
   profile: Profile;
   workingProfile: Profile;
   profileImage: string;

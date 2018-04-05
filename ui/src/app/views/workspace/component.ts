@@ -72,12 +72,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
-  private cohortNameFilter = new CohortNameFilter();
-  private cohortDescriptionFilter = new CohortDescriptionFilter();
-  private notebookNameFilter = new NotebookNameFilter();
-  private cohortNameComparator = new CohortNameComparator();
-  private cohortDescriptionComparator = new CohortDescriptionComparator();
-  private notebookNameComparator = new NotebookNameComparator();
+  cohortNameFilter = new CohortNameFilter();
+  cohortDescriptionFilter = new CohortDescriptionFilter();
+  notebookNameFilter = new NotebookNameFilter();
+  cohortNameComparator = new CohortNameComparator();
+  cohortDescriptionComparator = new CohortDescriptionComparator();
+  notebookNameComparator = new NotebookNameComparator();
 
   workspace: Workspace;
   wsId: string;
@@ -91,8 +91,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cluster: Cluster;
   clusterLoading = true;
   clusterPulled = false;
+  launchedNotebookName: string;
   private clusterLocalDirectory: string;
-  private launchedNotebookName: string;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;

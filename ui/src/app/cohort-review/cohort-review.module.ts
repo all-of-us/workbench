@@ -39,7 +39,7 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 import {WorkspacesService} from 'generated';
 
 // This is a temporary measure until we have specs and APIs for overview specific charts
-import {ComboChartComponent} from '../cohort-search/combo-chart/combo-chart.component';
+import {CohortSearchModule} from '../cohort-search/cohort-search.module';
 /* tslint:enable:max-line-length */
 
 
@@ -54,6 +54,9 @@ import {ComboChartComponent} from '../cohort-search/combo-chart/combo-chart.comp
     ClarityModule,
     NgxChartsModule,
     NgxPopperModule,
+    // Ours
+    // TODO: Remove this once the dependency on ComboChartComponent is broken.
+    CohortSearchModule
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -63,7 +66,6 @@ import {ComboChartComponent} from '../cohort-search/combo-chart/combo-chart.comp
     PageLayout,
     TablePage,
 
-    ComboChartComponent,
     ReviewNavComponent,
 
     /* Annotations */

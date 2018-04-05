@@ -11,8 +11,8 @@ import {StatusCheckService} from 'app/services/status-check.service';
 export class ErrorHandlerComponent implements OnInit {
 
   constructor(
-    private errorHandlingService: ErrorHandlingService,
-    private statusCheckService: StatusCheckService
+    public errorHandlingService: ErrorHandlingService,
+    public statusCheckService: StatusCheckService
   ) {}
 
   ngOnInit(): void {}

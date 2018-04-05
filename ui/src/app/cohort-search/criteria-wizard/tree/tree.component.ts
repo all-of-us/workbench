@@ -19,9 +19,9 @@ export class TreeComponent implements OnInit {
   @Input() node;
 
   /* Selections derived from `node` */
-  private loading$: Observable<boolean>;
-  private hasError$: Observable<boolean>;
-  private children$: Observable<List<any>>;
+  loading$: Observable<boolean>;
+  hasError$: Observable<boolean>;
+  children$: Observable<List<any>>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
