@@ -19,6 +19,12 @@ public class CohortService {
   @Transactional
   public Cohort saveAndCloneReviews(Cohort from, Cohort to) {
     Cohort saved = cohortDao.save(to);
+    cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
+            from.getCohortId(), to.getCohortId());
+    //Important: this must follow the above method
+    //{@link CohortAnnotationDefinitionDao#bulkCopyCohortAnnotationDefinitionByCohort(long, long)}
+    cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationEnumsByCohort(
+            from.getCohortId(), to.getCohortId());
     for (CohortReview fromReview : from.getCohortReviews()) {
       CohortReview cr = new CohortReview();
       cr.setCohortId(saved.getCohortId());
@@ -32,12 +38,6 @@ public class CohortService {
       cr = cohortReviewDao.save(cr);
       participantCohortStatusDao.bulkCopyByCohortReview(
         fromReview.getCohortReviewId(), cr.getCohortReviewId());
-      cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
-              from.getCohortId(), to.getCohortId());
-      //Important: this must follow the above method
-      //{@link CohortAnnotationDefinitionDao#bulkCopyCohortAnnotationDefinitionByCohort(long, long)}
-      cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationEnumsByCohort(
-              from.getCohortId(), to.getCohortId());
       participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(
               from.getCohortId(),
               to.getCohortId(),
