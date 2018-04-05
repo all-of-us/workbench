@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -21,6 +25,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +34,20 @@ public class ClusterController implements ClusterApiDelegate {
   private static final String DEFAULT_CLUSTER_NAME = "all-of-us";
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+
+  // Writing this file to a directory on a Leonardo cluster will result in
+  // delocalization of saved files back to a given GCS location. See
+  // https://github.com/DataBiosphere/leonardo/blob/develop/jupyter-docker/jupyter_delocalize.py#L12
+  private static final String DELOCALIZE_CONFIG_FILENAME = ".delocalize.json";
+
+  // This file is used by the All of Us libraries to access workspace/CDR metadata.
+  private static final String AOU_CONFIG_FILENAME = ".all_of_us_config.json";
+  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
+  private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
+  private static final String API_HOST_KEY = "API_HOST";
+  private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
+  private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
+  private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
@@ -55,19 +74,30 @@ public class ClusterController implements ClusterApiDelegate {
     };
 
   private final NotebooksService notebooksService;
-  private final Provider<User> userProvider;
+  private Provider<User> userProvider;
+  private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final String apiHostName;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
       Provider<User> userProvider,
+      WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      @Qualifier("apiHostName") String apiHostName) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
+    this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.apiHostName = apiHostName;
+  }
+
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
   }
 
   @Override
@@ -100,11 +130,10 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
-    String workspaceBucket;
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
     try {
-      workspaceBucket = "gs://" + fireCloudService.getWorkspace(body.getWorkspaceNamespace(), body.getWorkspaceId())
-          .getWorkspace()
-          .getBucketName();
+      fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(), body.getWorkspaceId())
+          .getWorkspace();
     } catch (ApiException e) {
       if (e.getCode() == 404) {
         log.log(Level.INFO, "Firecloud workspace not found", e);
@@ -114,29 +143,66 @@ public class ClusterController implements ClusterApiDelegate {
       }
       throw ExceptionUtils.convertFirecloudException(e);
     }
+    CdrVersion cdrVersion =
+        workspaceService.getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId()).getCdrVersion();
 
     // For the common case where the notebook cluster matches the workspace
     // namespace, simply name the directory as the workspace ID; else we
     // include the namespace in the directory name to avoid possible conflicts
     // in workspace IDs.
+    String gcsNotebooksDir = "gs://" + fcWorkspace.getBucketName() + "/notebooks";
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
     }
-    String apiDir = String.join("/", "workspaces", workspacePath);
-    String localDir = String.join("/", "~", apiDir);
-    Map<String, String> toLocalize = body.getNotebookNames()
-        .stream()
-        .collect(Collectors.<String, String, String>toMap(
-            name -> localDir + "/" + name,
-            name -> String.join("/", workspaceBucket, "notebooks", name)));
-    // TODO(calbach): Localize a delocalize config JSON file as well, once Leo supports this.
-    toLocalize.put(
-        localDir + "/.all_of_us_config.json",
-        workspaceBucket + "/" + WorkspacesController.CONFIG_FILENAME);
-    notebooksService.localize(projectName, clusterName, toLocalize);
+
+    // Materialize the JSON config files directly via the Jupyter server API.
+    // We perform this on every localize call because the Jupyter local
+    // directory can be deleted by the user, and config files may become
+    // outdated, e.g. as we add new properties to the .all_of_us_config.json.
+    // In most cases, aside from the first localize() call this initialization
+    // work will be a no-op.
+    // TODO: It is very inefficient to do 5 serial requests here. Rework this
+    // to utilize "mkdir -p"-like functionality, e.g. via starting with calling
+    // the /localize endpoint.
+    notebooksService.putRootWorkspacesDir(projectName, clusterName);
+    notebooksService.putWorkspaceDir(projectName, clusterName, workspacePath);
+    notebooksService.putFile(
+        projectName, clusterName, workspacePath, DELOCALIZE_CONFIG_FILENAME,
+        new JSONObject()
+            .put("destination", gcsNotebooksDir)
+            .put("pattern", "\\.ipynb$")
+            .toString());
+    notebooksService.putFile(
+        projectName, clusterName, workspacePath, AOU_CONFIG_FILENAME,
+        aouConfigJson(fcWorkspace, cdrVersion).toString());
+
+    // Localize the requested notebooks, if any.
+    String apiDir = "workspaces/" + workspacePath;
+    if (body.getNotebookNames() != null && !body.getNotebookNames().isEmpty()) {
+      String localDir = "~/" + apiDir;
+      notebooksService.localize(projectName, clusterName, body.getNotebookNames()
+          .stream()
+          .collect(Collectors.<String, String, String>toMap(
+              name -> localDir + "/" + name,
+              name -> gcsNotebooksDir + "/" + name)));
+    }
+
     ClusterLocalizeResponse resp = new ClusterLocalizeResponse();
     resp.setClusterLocalDirectory(apiDir);
     return ResponseEntity.ok(resp);
+  }
+
+  private JSONObject aouConfigJson(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      CdrVersion cdrVersion) {
+    JSONObject config = new JSONObject();
+
+    config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
+    config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
+    config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
+    config.put(API_HOST_KEY, this.apiHostName);
+    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
+    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
+    return config;
   }
 }
