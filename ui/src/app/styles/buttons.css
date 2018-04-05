@@ -27,25 +27,31 @@ button.btn.btn-primary:disabled {
   cursor: auto;
 }
 
-button.btn.btn-secondary {
+button.btn.btn-secondary,
+button.btn.btn-outline {
   border: 2px solid #262262;
   padding: 0rem 0.77rem;
   border-radius: 0.2rem;
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
-  font-size: 10px;
   color: #262262;
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
 }
 
-button.btn.btn-secondary:hover {
+button.btn.btn-secondary {
+  font-size: 10px;
+}
+
+button.btn.btn-secondary:hover,
+button.btn.btn-outline:hover {
   background-color: #262262;
   color: #fff;
 }
 
-button.btn.btn-secondary:disabled {
+button.btn.btn-secondary:disabled,
+button.btn.btn-outline:disabled {
   border: 2px solid #c3c3c3;
   background-color: #f1f2f2;
   color: #c3c3c3;
