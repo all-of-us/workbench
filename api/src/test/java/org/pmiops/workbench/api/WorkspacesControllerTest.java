@@ -740,7 +740,6 @@ public class WorkspacesControllerTest {
 
     CohortAnnotationDefinitionListResponse clonedCad1List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
             cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId()).getBody();
-    assertThat(clonedCad1List.getItems().size()).isEqualTo(2);
     assertCohortAnnotationDefinitions(clonedCad1List,
             Arrays.asList(cad1EnumResponse, cad1StringResponse),
             cohortsByName.get("c1").getId());
@@ -748,7 +747,6 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca1List = cohortReviewController.getParticipantCohortAnnotations(
                     cloned.getNamespace(), cloned.getId(), cohortsByName.get("c1").getId(),
                     cdrVersion.getCdrVersionId(), participantId).getBody();
-    assertThat(clonedPca1List.getItems().size()).isEqualTo(2);
     assertParticipantCohortAnnotation(clonedPca1List,
             clonedCad1List,
             Arrays.asList(pca1EnumResponse, pca1StringResponse),
@@ -765,7 +763,6 @@ public class WorkspacesControllerTest {
 
     CohortAnnotationDefinitionListResponse clonedCad2List = cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(
             cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId()).getBody();
-    assertThat(clonedCad2List.getItems().size()).isEqualTo(2);
     assertCohortAnnotationDefinitions(clonedCad2List,
             Arrays.asList(cad2EnumResponse, cad2BooleanResponse),
             cohortsByName.get("c2").getId());
@@ -773,7 +770,6 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca2List = cohortReviewController.getParticipantCohortAnnotations(
             cloned.getNamespace(), cloned.getId(), cohortsByName.get("c2").getId(),
             cdrVersion.getCdrVersionId(), participantId).getBody();
-    assertThat(clonedPca2List.getItems().size()).isEqualTo(2);
     assertParticipantCohortAnnotation(clonedPca2List,
             clonedCad2List,
             Arrays.asList(pca2EnumResponse, pca2BooleanResponse),
@@ -787,6 +783,7 @@ public class WorkspacesControllerTest {
   private void assertCohortAnnotationDefinitions(CohortAnnotationDefinitionListResponse responseList,
                                                  List<CohortAnnotationDefinition> expectedCads,
                                                  Long cohortId) {
+    assertThat(responseList.getItems().size()).isEqualTo(expectedCads.size());
     int i = 0;
     for (CohortAnnotationDefinition clonedDefinition : responseList.getItems()) {
       CohortAnnotationDefinition expectedCad = expectedCads.get(i++);
@@ -803,6 +800,7 @@ public class WorkspacesControllerTest {
                                                  List<ParticipantCohortAnnotation> expectedPcas,
                                                  Long cohortReviewId,
                                                  Long participantId) {
+    assertThat(pcaResponseList.getItems().size()).isEqualTo(expectedPcas.size());
     int i = 0;
     for (ParticipantCohortAnnotation clonedAnnotation : pcaResponseList.getItems()) {
       ParticipantCohortAnnotation expectedPca = expectedPcas.get(i);
