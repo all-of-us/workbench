@@ -1,6 +1,9 @@
 <app-review-nav></app-review-nav>
 
 <div>
-  <app-demographics-overview-chart [data]="data">
-  </app-demographics-overview-chart>
+  <app-combo-chart
+    *ngIf="data?.size"
+    [mode]="'stacked'"
+    [data]="data">
+  </app-combo-chart>
 </div>

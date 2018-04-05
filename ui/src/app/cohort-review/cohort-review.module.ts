@@ -6,8 +6,6 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {NgxPopperModule} from 'ngx-popper';
 
-import {ChartsModule} from '../charts/charts.module';
-
 /* Pages */
 import {CreateReviewPage} from './create-review-page/create-review-page';
 import {DetailPage} from './detail-page/detail-page';
@@ -36,10 +34,12 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
 import {ReviewStateService} from './review-state.service';
-
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
+
+// This is a temporary measure until we have specs and APIs for overview specific charts
+import {ComboChartComponent} from '../cohort-search/combo-chart/combo-chart.component';
 /* tslint:enable:max-line-length */
 
 
@@ -54,8 +54,6 @@ import {WorkspacesService} from 'generated';
     ClarityModule,
     NgxChartsModule,
     NgxPopperModule,
-    // Ours
-    ChartsModule,
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -65,6 +63,7 @@ import {WorkspacesService} from 'generated';
     PageLayout,
     TablePage,
 
+    ComboChartComponent,
     ReviewNavComponent,
 
     /* Annotations */
