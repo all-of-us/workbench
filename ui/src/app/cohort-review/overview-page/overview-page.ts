@@ -1,5 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
@@ -12,7 +13,7 @@ import {ChartInfoListResponse, CohortBuilderService, SearchRequest} from 'genera
 })
 export class OverviewPage implements OnInit, OnDestroy {
 
-  data;
+  data = List();
   private subscription: Subscription;
 
   constructor(
@@ -27,7 +28,7 @@ export class OverviewPage implements OnInit, OnDestroy {
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
       .switchMap(request => this.chartAPI.getChartInfo(cdrVersionId, request))
       .map(response => (<ChartInfoListResponse>response).items)
-      .subscribe(data => this.data = data);
+      .subscribe(data => this.data = fromJS(data));
   }
 
   ngOnDestroy() {
