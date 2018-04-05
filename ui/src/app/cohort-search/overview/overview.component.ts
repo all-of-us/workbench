@@ -24,7 +24,7 @@ export class OverviewComponent {
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
 
-  private cohortForm = new FormGroup({
+  cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl()
   });

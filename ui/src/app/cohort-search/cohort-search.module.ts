@@ -54,6 +54,10 @@ const routes: Routes = [{
     OverviewComponent,
     SearchGroupSelectComponent,
   ],
+  exports: [
+    // TODO: Remove this once no longer needed by CohortReviewModule.
+    ComboChartComponent
+  ],
   providers: [
     CohortSearchActions,
     CohortSearchEpics,
