@@ -157,6 +157,11 @@ public class ClusterController implements ClusterApiDelegate {
     }
 
     // Materialize the JSON config files directly via the Jupyter server API.
+    // We perform this on every localize call because the Jupyter local
+    // directory can be deleted by the user, and config files may become
+    // outdated, e.g. as we add new properties to the .all_of_us_config.json.
+    // In most cases, aside from the first localize() call this initialization
+    // work will be a no-op.
     // TODO: It is very inefficient to do 5 serial requests here. Rework this
     // to utilize "mkdir -p"-like functionality, e.g. via starting with calling
     // the /localize endpoint.
