@@ -52,6 +52,7 @@ export class SignInService {
           this.subscribeToAuth2User();
         });
         resolve(gapi.auth2);
+        this.router.initialNavigation();
       });
     });
   }
