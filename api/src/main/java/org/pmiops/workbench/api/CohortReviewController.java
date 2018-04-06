@@ -388,7 +388,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         for (List<FieldValue> row : result.iterateAll()) {
             response.addItemsItem(convertRowToParticipantData(rm, row, queryBuilder.createParticipantData()));
         }
-        response.count(getTotalCount(participantId, queryBuilder.getCountQuery()));
+
+        result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+                reviewTabQueryBuilder.buildCountQuery(queryBuilder.getCountQuery(), participantId)));
+        rm = bigQueryService.getResultMapper(result);
+        response.count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
         response.setPageRequest(new org.pmiops.workbench.model.PageRequest()
                 .page(pageRequest.getPageNumber())
                 .pageSize(pageRequest.getPageSize())
@@ -577,24 +581,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                 .sourceVocabulary(bigQueryService.getString(row, rm.get("source_vocabulary")))
                 .sourceName(bigQueryService.getString(row, rm.get("source_name")))
                 .age(bigQueryService.getLong(row, rm.get("age")).intValue());
-    }
-
-    /**
-     * Helper method to get total count from bigquery for specified {@link ReviewTabQueries}.
-     *
-     * @param participantId
-     * @param query
-     * @return
-     */
-    private long getTotalCount(Long participantId, String query) {
-        QueryResult result;
-        Map<String, Integer> rm;
-        result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                reviewTabQueryBuilder.buildCountQuery(query, participantId)));
-        rm = bigQueryService.getResultMapper(result);
-        List<FieldValue> row = result.iterateAll().iterator().next();
-        return bigQueryService.getLong(row, rm.get("count"));
-
     }
 
 }
