@@ -3,7 +3,7 @@ jobs:
 
   api-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.10
+      - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
     environment:
       # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
@@ -75,7 +75,7 @@ jobs:
 
   api-local-tests:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.10
+      - image: allofustest/workbench:buildimage-0.0.11
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
@@ -129,7 +129,7 @@ jobs:
 
   api-integration-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.10
+      - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -157,7 +157,7 @@ jobs:
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
   api-bigquery-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.10
+      - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
     environment:
       JVM_OPTS: -Xmx3200m
@@ -185,7 +185,7 @@ jobs:
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
   ui-build-test-deploy:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.10
+      - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
     environment: []
     steps:
