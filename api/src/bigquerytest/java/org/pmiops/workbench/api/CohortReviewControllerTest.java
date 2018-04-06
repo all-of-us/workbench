@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryFactory;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import java.time.*;
@@ -46,17 +48,22 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, ReviewQueryFactory.class})
+@ComponentScan(basePackages = "org.pmiops.workbench.cohortreview.*")
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     private static final String NAMESPACE = "aou-test";
     private static final String NAME = "test";
     private static final Long PARTICIPANT_ID = 102246L;
     private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-    private ParticipantCondition expectedCondition1;
-    private ParticipantCondition expectedCondition2;
-    private ParticipantProcedure expectedProcedure1;
-    private ParticipantProcedure expectedProcedure2;
+    private ParticipantData expectedCondition1;
+    private ParticipantData expectedCondition2;
+    private ParticipantData expectedProcedure1;
+    private ParticipantData expectedProcedure2;
+    private ParticipantData expectedObservation1;
+    private ParticipantData expectedObservation2;
+    private ParticipantData expectedDrug1;
+    private ParticipantData expectedDrug2;
     private CdrVersion cdrVersion;
     private Workspace workspace;
 
@@ -121,6 +128,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         return Arrays.asList(
                 "condition_occurrence",
                 "procedure_occurrence",
+                "observation",
+                "drug_exposure",
                 "person",
                 "concept"
         );
@@ -129,10 +138,22 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     @Before
     public void setUp() {
         LocalDate personBirthDate = LocalDate.of(1980, Month.FEBRUARY, 17);
+        LocalDate conditionDate1 = LocalDate.of(2008, Month.JULY, 22);
+        LocalDate conditionDate2 = LocalDate.of(2008, Month.AUGUST, 1);
         LocalDate procedureDate1 = LocalDate.of(2009, Month.DECEMBER, 2);
         LocalDate procedureDate2 = LocalDate.of(2009, Month.DECEMBER, 3);
-        Period age1 = Period.between(personBirthDate, procedureDate1);
-        Period age2 = Period.between(personBirthDate, procedureDate2);
+        LocalDate observationDate1 = LocalDate.of(2009, Month.DECEMBER, 3);
+        LocalDate observationDate2 = LocalDate.of(2009, Month.DECEMBER, 4);
+        LocalDate drugDate1 = LocalDate.of(2001, Month.DECEMBER, 3);
+        LocalDate drugDate2 = LocalDate.of(2001, Month.DECEMBER, 4);
+        Period conditionAge1 = Period.between(personBirthDate, conditionDate1);
+        Period conditionAge2 = Period.between(personBirthDate, conditionDate2);
+        Period procedureAge1 = Period.between(personBirthDate, procedureDate1);
+        Period procedureAge2 = Period.between(personBirthDate, procedureDate2);
+        Period observationAge1 = Period.between(personBirthDate, observationDate1);
+        Period observationAge2 = Period.between(personBirthDate, observationDate2);
+        Period drugAge1 = Period.between(personBirthDate, drugDate1);
+        Period drugAge2 = Period.between(personBirthDate, drugDate2);
 
         expectedCondition1 = new ParticipantCondition()
                 .itemDate("2008-07-22")
@@ -140,14 +161,18 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .standardName("SNOMED")
                 .sourceValue("0020")
                 .sourceVocabulary("ICD9CM")
-                .sourceName("Typhoid and paratyphoid fevers");
+                .sourceName("Typhoid and paratyphoid fevers")
+                .age(conditionAge1.getYears())
+                .dataType(DataType.PARTICIPANTCONDITION);
         expectedCondition2 = new ParticipantCondition()
                 .itemDate("2008-08-01")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0021")
                 .sourceVocabulary("ICD9CM")
-                .sourceName("Typhoid and paratyphoid fevers");
+                .sourceName("Typhoid and paratyphoid fevers")
+                .age(conditionAge2.getYears())
+                .dataType(DataType.PARTICIPANTCONDITION);
         expectedProcedure1 = new ParticipantProcedure()
                 .itemDate("2009-12-02")
                 .standardVocabulary("ICD10CM")
@@ -155,7 +180,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .sourceValue("val")
                 .sourceVocabulary("ICD10CM")
                 .sourceName("name")
-                .age(age1.getYears());
+                .age(procedureAge1.getYears())
+                .dataType(DataType.PARTICIPANTPROCEDURE);
         expectedProcedure2 = new ParticipantProcedure()
                 .itemDate("2009-12-03")
                 .standardVocabulary("CPT4")
@@ -163,7 +189,46 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .sourceValue("val")
                 .sourceVocabulary("CPT4")
                 .sourceName("name")
-                .age(age2.getYears());
+                .age(procedureAge2.getYears())
+                .dataType(DataType.PARTICIPANTPROCEDURE);
+        expectedObservation1 = new ParticipantObservation()
+                .itemDate("2009-12-02")
+                .standardVocabulary("ICD10CM")
+                .standardName("name")
+                .sourceValue("sourceValue")
+                .sourceVocabulary("ICD10CM")
+                .sourceName("name")
+                .age(observationAge1.getYears())
+                .dataType(DataType.PARTICIPANTOBSERVATION);
+        expectedObservation2 = new ParticipantObservation()
+                .itemDate("2009-12-03")
+                .standardVocabulary("ICD10CM")
+                .standardName("name")
+                .sourceValue("sourceValue")
+                .sourceVocabulary("ICD10CM")
+                .sourceName("name")
+                .age(observationAge2.getYears())
+                .dataType(DataType.PARTICIPANTOBSERVATION);
+        expectedDrug1 = new ParticipantDrug()
+                .signature("signature")
+                .itemDate("2001-12-02")
+                .standardVocabulary("CPT4")
+                .standardName("name")
+                .sourceValue("Varivax")
+                .sourceVocabulary("CPT4")
+                .sourceName("name")
+                .age(drugAge1.getYears())
+                .dataType(DataType.PARTICIPANTDRUG);
+        expectedDrug2 = new ParticipantDrug()
+                .signature("signature")
+                .itemDate("2001-12-03")
+                .standardVocabulary("CPT4")
+                .standardName("name")
+                .sourceValue("Varivax")
+                .sourceVocabulary("CPT4")
+                .sourceName("name")
+                .age(drugAge2.getYears())
+                .dataType(DataType.PARTICIPANTDRUG);
 
         cdrVersion = new CdrVersion();
         cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -213,8 +278,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONS);
 
         //no sort order or column
-        ParticipantConditionsListResponse response = controller
-                .getParticipantConditions(
+        ParticipantDataListResponse response = controller
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -222,18 +287,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        List<ParticipantCondition> conditions = response.getItems();
-        assertThat(conditions.size()).isEqualTo(2);
-        assertThat(conditions.get(0)).isEqualTo(expectedCondition1);
-        assertThat(conditions.get(1)).isEqualTo(expectedCondition2);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1, expectedCondition2), 2);
 
         //added sort order
         testFilter.sortOrder(SortOrder.DESC);
         expectedPageRequest.sortOrder(SortOrder.DESC);
         response = controller
-                .getParticipantConditions(
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -241,12 +302,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        conditions = response.getItems();
-        assertThat(conditions.size()).isEqualTo(2);
-        assertThat(conditions.get(0)).isEqualTo(expectedCondition2);
-        assertThat(conditions.get(1)).isEqualTo(expectedCondition1);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2, expectedCondition1), 2);
     }
 
     @Test
@@ -265,8 +322,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageSize(1);
 
         //page 1 should have 1 item
-        ParticipantConditionsListResponse response =  controller
-                .getParticipantConditions(
+        ParticipantDataListResponse response =  controller
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -274,17 +331,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        List<ParticipantCondition> conditions = response.getItems();
-        assertThat(conditions.size()).isEqualTo(1);
-        assertThat(conditions.get(0)).isEqualTo(expectedCondition1);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1), 2);
 
         //page 2 should have 1 item
         testFilter.page(1);
         expectedPageRequest.page(1);
         response = controller
-                .getParticipantConditions(
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -292,11 +346,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        conditions = response.getItems();
-        assertThat(conditions.size()).isEqualTo(1);
-        assertThat(conditions.get(0)).isEqualTo(expectedCondition2);
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2), 2);
     }
 
     @Test
@@ -313,8 +363,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageFilterType(PageFilterType.PARTICIPANTPROCEDURES);
 
         //no sort order or column
-        ParticipantProceduresListResponse response = controller
-                .getParticipantProcedures(
+        ParticipantDataListResponse response = controller
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -322,18 +372,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        List<ParticipantProcedure> procedures = response.getItems();
-        assertThat(procedures.size()).isEqualTo(2);
-        assertThat(procedures.get(0)).isEqualTo(expectedProcedure1);
-        assertThat(procedures.get(1)).isEqualTo(expectedProcedure2);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure1, expectedProcedure2), 2);
 
         //added sort order
         testFilter.sortOrder(SortOrder.DESC);
         expectedPageRequest.sortOrder(SortOrder.DESC);
         response = controller
-                .getParticipantProcedures(
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -341,12 +387,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        procedures = response.getItems();
-        assertThat(procedures.size()).isEqualTo(2);
-        assertThat(procedures.get(0)).isEqualTo(expectedProcedure2);
-        assertThat(procedures.get(1)).isEqualTo(expectedProcedure1);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure2, expectedProcedure1), 2);
     }
 
     @Test
@@ -365,8 +407,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         testFilter.pageSize(1);
 
         //page 1 should have 1 item
-        ParticipantProceduresListResponse response =  controller
-                .getParticipantProcedures(
+        ParticipantDataListResponse response =  controller
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -374,17 +416,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
-        assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        List<ParticipantProcedure> procedures = response.getItems();
-        assertThat(procedures.size()).isEqualTo(1);
-        assertThat(procedures.get(0)).isEqualTo(expectedProcedure1);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure1), 2);
 
         //page 2 should have 1 item
         testFilter.page(1);
         expectedPageRequest.page(1);
         response = controller
-                .getParticipantProcedures(
+                .getParticipantData(
                         NAMESPACE,
                         NAME,
                         cohort.getCohortId(),
@@ -392,11 +431,203 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                         PARTICIPANT_ID,
                         testFilter)
                 .getBody();
-        assertThat(response.getCount()).isEqualTo(2);
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedProcedure2), 2);
+    }
+
+    @Test
+    public void getParticipantObservationsSorting() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(25)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantObservations testFilter = new ParticipantObservations();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTOBSERVATIONS);
+
+        //no sort order or column
+        ParticipantDataListResponse response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation1, expectedObservation2), 2);
+
+        //added sort order
+        testFilter.sortOrder(SortOrder.DESC);
+        expectedPageRequest.sortOrder(SortOrder.DESC);
+        response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation2, expectedObservation1), 2);
+    }
+
+    @Test
+    public void getParticipantObservationsPagination() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(1)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantObservations testFilter = new ParticipantObservations();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTOBSERVATIONS);
+        testFilter.page(0);
+        testFilter.pageSize(1);
+
+        //page 1 should have 1 item
+        ParticipantDataListResponse response =  controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation1), 2);
+
+        //page 2 should have 1 item
+        testFilter.page(1);
+        expectedPageRequest.page(1);
+        response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedObservation2), 2);
+    }
+
+    @Test
+    public void getParticipantDrugsSorting() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(25)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantDrugs testFilter = new ParticipantDrugs();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTDRUGS);
+
+        //no sort order or column
+        ParticipantDataListResponse response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug1, expectedDrug2), 2);
+
+        //added sort order
+        testFilter.sortOrder(SortOrder.DESC);
+        expectedPageRequest.sortOrder(SortOrder.DESC);
+        response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug2, expectedDrug1), 2);
+    }
+
+    @Test
+    public void getParticipantDrugsPagination() throws Exception {
+        PageRequest expectedPageRequest = new PageRequest()
+                .page(0)
+                .pageSize(1)
+                .sortOrder(SortOrder.ASC)
+                .sortColumn("itemDate");
+
+        stubMockFirecloudGetWorkspace();
+
+        ParticipantDrugs testFilter = new ParticipantDrugs();
+        testFilter.pageFilterType(PageFilterType.PARTICIPANTDRUGS);
+        testFilter.page(0);
+        testFilter.pageSize(1);
+
+        //page 1 should have 1 item
+        ParticipantDataListResponse response =  controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug1), 2);
+
+        //page 2 should have 1 item
+        testFilter.page(1);
+        expectedPageRequest.page(1);
+        response = controller
+                .getParticipantData(
+                        NAMESPACE,
+                        NAME,
+                        cohort.getCohortId(),
+                        cdrVersion.getCdrVersionId(),
+                        PARTICIPANT_ID,
+                        testFilter)
+                .getBody();
+
+        assertResponse(response, expectedPageRequest, Arrays.asList(expectedDrug2), 2);
+    }
+
+    private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {
+        List<ParticipantData> data = response.getItems();
+        assertThat(response.getCount()).isEqualTo(totalCount);
         assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
-        procedures = response.getItems();
-        assertThat(procedures.size()).isEqualTo(1);
-        assertThat(procedures.get(0)).isEqualTo(expectedProcedure2);
+        assertThat(data.size()).isEqualTo(expectedData.size());
+        int i = 0;
+        for (ParticipantData actualData : data) {
+            ParticipantData expected = expectedData.get(i++);
+            assertThat(actualData.getAge()).isEqualTo(expected.getAge());
+            assertThat(actualData.getDataType()).isEqualTo(expected.getDataType());
+            assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
+            assertThat(actualData.getSourceName()).isEqualTo(expected.getSourceName());
+            assertThat(actualData.getSourceValue()).isEqualTo(expected.getSourceValue());
+            assertThat(actualData.getSourceVocabulary()).isEqualTo(expected.getSourceVocabulary());
+            assertThat(actualData.getStandardName()).isEqualTo(expected.getStandardName());
+            assertThat(actualData.getStandardVocabulary()).isEqualTo(expected.getStandardVocabulary());
+            if (actualData instanceof ParticipantDrug) {
+                assertThat(((ParticipantDrug) actualData).getSignature())
+                        .isEqualTo(((ParticipantDrug) expected).getSignature());
+            }
+        }
     }
 
     private void stubMockFirecloudGetWorkspace() throws ApiException {
