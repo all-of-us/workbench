@@ -16,6 +16,7 @@ import {TablePage} from './table-page/table-page';
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
 import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
+import {DetailDrugsComponent} from './detail-drugs/detail-drugs.component';
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailProceduresComponent} from './detail-procedures/detail-procedures.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
@@ -56,7 +57,7 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
     NgxPopperModule,
     // Ours
     // TODO: Remove this once the dependency on ComboChartComponent is broken.
-    CohortSearchModule
+    CohortSearchModule,
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -84,8 +85,10 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
     ParticipantStatusComponent,
     SidebarContentComponent,
     DetailHeaderComponent,
+
     DetailTabsComponent,
     DetailConditionsComponent,
+    DetailDrugsComponent,
     DetailProceduresComponent,
   ],
   providers: [ReviewStateService]
