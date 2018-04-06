@@ -10,10 +10,9 @@ import {Workspace} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
-import {WorkspaceData} from "../../resolvers/workspace";
 
 @Component({
-  selector: 'workspace-share',
+  selector: 'app-workspace-share',
   styleUrls: ['./component.css',
     '../../styles/buttons.css'],
   templateUrl: './component.html',

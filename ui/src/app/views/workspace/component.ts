@@ -5,8 +5,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   Cluster,
@@ -19,7 +20,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component'
 
 
 /*
@@ -70,11 +70,11 @@ class NotebookNameComparator implements Comparator<FileDetail> {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
-
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
+
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
 
   cohortNameFilter = new CohortNameFilter();
   cohortDescriptionFilter = new CohortDescriptionFilter();
