@@ -1,4 +1,4 @@
-import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
 import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';

@@ -1,4 +1,4 @@
-import {DebugElement} from '@angular/core';
+import {DebugElement, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
@@ -14,6 +14,7 @@ import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   queryAllByCss,
@@ -23,6 +24,9 @@ import {
 } from 'testing/test-helpers';
 
 class WorkspacePage {
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
+
   fixture: ComponentFixture<WorkspaceComponent>;
   cohortsService: CohortsService;
   workspacesService: WorkspacesService;

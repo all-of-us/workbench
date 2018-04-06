@@ -44,7 +44,7 @@ class WorkspaceSharePage {
 
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
-    const setOfUsers = queryAllByCss(this.fixture, '.user');
+    const setOfUsers = queryAllByCss(this.fixture, '.collaborator');
     this.userRolesOnPage = [];
     setOfUsers.forEach((user) => {
       this.userRolesOnPage.push({email: user.children[0].nativeElement.innerText,
