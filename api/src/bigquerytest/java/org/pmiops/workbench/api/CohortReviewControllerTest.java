@@ -46,7 +46,6 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class, ReviewQueryFactory.class})

@@ -1,7 +1,5 @@
 package org.pmiops.workbench.cohortreview;
 
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortreview.querybuilder.ReviewQueryBuilder;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.PageFilterType;
