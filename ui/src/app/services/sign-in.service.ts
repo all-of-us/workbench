@@ -8,7 +8,7 @@ import {ActivatedRouteSnapshot, NavigationEnd, Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
 declare const gapi: any;
@@ -19,7 +19,7 @@ const SIGNED_IN_USER = 'signedInUser';
 @Injectable()
 export class SignInService {
   // Expose "current user details" as an Observable
-  private isSignedIn = new BehaviorSubject<boolean>(false);
+  private isSignedIn = new AsyncSubject<boolean>();
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
@@ -52,7 +52,6 @@ export class SignInService {
           this.subscribeToAuth2User();
         });
         resolve(gapi.auth2);
-        this.router.initialNavigation();
       });
     });
   }
@@ -63,6 +62,10 @@ export class SignInService {
     if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
       this.zone.run(() => {
         this.isSignedIn.next(true);
+      });
+    } else if (gapi.auth2.getAuthInstance().isSignedIn.get() === false) {
+      this.zone.run(() => {
+        this.isSignedIn.next(false);
       });
     }
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
