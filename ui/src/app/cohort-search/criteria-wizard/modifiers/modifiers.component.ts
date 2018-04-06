@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -17,7 +17,7 @@ import {Modifier} from 'generated';
   templateUrl: './modifiers.component.html',
   styleUrls: ['./modifiers.component.css']
 })
-export class ModifiersComponent implements OnInit {
+export class ModifiersComponent implements OnInit, OnDestroy {
   existing = List();
   subscription: Subscription;
 
@@ -46,6 +46,10 @@ export class ModifiersComponent implements OnInit {
     this.subscription = this.ngRedux
       .select(activeModifierList)
       .subscribe(mods => this.existing = mods);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   isSelected(name) {
