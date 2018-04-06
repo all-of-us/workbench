@@ -116,8 +116,9 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     if (this.firstSignIn == null) {
       return false;
     }
-    // If it is three days or more after they first sign in, deactivate the banner
-    if (new Date().getTime() - this.firstSignIn.getTime() > 2.592e+8) {
+    // Don't show the banner after 1 week as their account would
+    // have been disabled had they not enabled 2-factor auth.
+    if (new Date().getTime() - this.firstSignIn.getTime() > 1 * 7 * 24 * 60 * 60 * 1000) {
       return false;
     }
     return true;
