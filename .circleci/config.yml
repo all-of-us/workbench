@@ -238,7 +238,7 @@ jobs:
                 --promote
             else
               echo "Not master branch or tagged release, skipping deploy; building only"
-              yarn run build --aot --no-watch --no-progress
+              ./project.rb build --environment test
             fi
 
 workflows:
