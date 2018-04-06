@@ -5,8 +5,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
-import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
