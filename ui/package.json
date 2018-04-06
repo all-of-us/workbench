@@ -38,7 +38,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "angular-2-local-storage": "^1.0.1",
     "angular2-highcharts": "^0.5.5",
-    "bootstrap": "4.0.0-alpha.5",
+    "bootstrap": "4.0.0",
     "core-js": "^2.5.3",
     "d3": "^4.12.2",
     "dom-to-image": "^2.6.0",
