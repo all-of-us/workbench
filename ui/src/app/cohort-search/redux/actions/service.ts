@@ -330,7 +330,7 @@ export class CohortSearchActions {
       id: itemId,
       type: item.get('type', '').toUpperCase(),
       searchParameters: params,
-      modifiers: [],
+      modifiers: item.get('modifiers', List()).toJS(),
     };
   }
 
