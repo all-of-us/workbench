@@ -53,7 +53,7 @@ export class DetailConditionsComponent implements OnInit, OnDestroy {
       .subscribe(([participant, cohort, workspace]) => {
         this.loading = true;
 
-        this.apiCaller = (request) => this.reviewApi.getParticipantConditions(
+        this.apiCaller = (request) => this.reviewApi.getParticipantData(
           workspace.namespace,
           workspace.id,
           cohort.id,
