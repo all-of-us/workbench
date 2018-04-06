@@ -2,9 +2,9 @@
 
 require "optparse"
 require_relative "../../aou-utils/serviceaccounts"
+require_relative "../../aou-utils/swagger"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
-require_relative "../../aou-utils/swagger"
 
 class Options < OpenStruct
 end
@@ -48,19 +48,22 @@ Common.register_command({
 })
 
 class DevUpOptions
-  ENV_CHOICES = %W{local test prod}
+  ENV_CHOICES = %W{local-test local test prod}
   attr_accessor :env
 
   def initialize
-    self.env = "test"
+    self.env = nil
   end
 
   def parse args
     parser = OptionParser.new do |parser|
       parser.banner = "Usage: ./project.rb dev-up [options]"
       parser.on(
-          "--environment ENV", ENV_CHOICES, "Environment [local (default), test, prod]") do |v|
-        self.env = v
+          "--environment ENV", ENV_CHOICES, "Environment [local-test (default), local, test, prod]") do |v|
+        # The default environment file (called "dev" in Angular language)
+        # compiles a local server to run against the deployed remote test API.
+        # Leave this unset to get that default.
+        self.env = v == "local-test" ? nil : v
       end
     end
     parser.parse args
@@ -80,12 +83,14 @@ class DeployUI
   end
 
   def add_options
+    # TODO: Make flag handling more consistent with api/devstart.rb
     @parser.on("--project [PROJECT]",
         "Project to create credentials for (e.g. all-of-us-workbench-test). Required.") do |project|
       @opts.project = project
     end
     @parser.on("--account [ACCOUNT]",
-         "Account to use when creating credentials (your.name@pmi-ops.org). Required.") do |account|
+      "Service account to act as for deployment, if any. Defaults to the GAE " +
+      "default service account.") do |account|
       @opts.account = account
     end
     @parser.on("--version [VERSION]",
@@ -93,15 +98,19 @@ class DeployUI
        @opts.version = version
     end
     @parser.on("--promote",
-          "Use this if you want to promote this version so it receives traffic. By default, it won't."
-          ) do |promote|
-       @opts.promote = "promote"
+               "Promote this version to immediately begin serving UI traffic. " +
+               "Required: must set --promote or --no-promote") do
+       @opts.promote = true
     end
-    @opts.promote = "no-promote" # default
+    @parser.on("--no-promote",
+               "Deploy, but do not yet serve traffic from this version. " +
+               "Required: must set --promote or --no-promote") do
+       @opts.promote = false
+    end
   end
 
   def validate_options
-    if @opts.project == nil || @opts.account == nil || @opts.version == nil
+    if @opts.project == nil || @opts.version == nil || @opts.promote == nil
       puts @parser.help
       exit 1
     end
@@ -113,12 +122,20 @@ class DeployUI
     validate_options
     environment_names = {
       "all-of-us-workbench-test" => "test",
+      "all-of-us-rw-staging" => "staging",
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{yarn run build --environment=#{environment_name} --no-watch --no-progress}
-    ServiceAccountContext.new(@opts.project).run do
-      common.run_inline %W{gcloud app deploy --project #{@opts.project} --version #{@opts.version} --#{@opts.promote}}
+    common.run_inline %W{yarn install}
+    # TODO(calbach): Upgrade this to --prod for the full production build
+    # treatment. Need to fix a bunch of errors to move ahead with that.
+    common.run_inline %W{yarn run build --aot --environment=#{environment_name} --no-watch --no-progress}
+    ServiceAccountContext.new(@opts.project, service_account=@opts.account).run do
+      common.run_inline %W{gcloud app deploy
+        --project #{@opts.project}
+        --version #{@opts.version}
+        #{opts.promote ? "--promote" : "--no-promote"}
+      }
     end
   end
 end
@@ -141,7 +158,7 @@ def dev_up(*args)
 
   install_dependencies
 
-  ENV["ENV_FLAG"] = options.env == "local" ? "" : "--environment=#{options.env}"
+  ENV["ENV_FLAG"] = options.env ? "--environment=#{options.env}" : ""
   at_exit { common.run_inline %W{docker-compose down} }
   swagger_regen()
   common.run_inline %W{docker-compose run -d --service-ports tests}

@@ -24,7 +24,7 @@ task loadConfig(type: JavaExec, dependsOn: ':generateApi') {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ConfigLoader"
   systemProperties = dbProperties
-  args config_file
+  args config_key, config_file
 }
 
 // See api/project.rb set-authority.
@@ -60,6 +60,7 @@ sourceSets {
                    // In general, command-line tools won't need access to
                    // org.pmiops.workbench.model (Swagger-generated classes),
                    // so we selectively whitelist as needed.
+                   'org/pmiops/workbench/config/CdrBigQuerySchemaConfig.java',
                    'org/pmiops/workbench/config/WorkbenchConfig.java',
                    'org/pmiops/workbench/model/Authority.java',
                    'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',

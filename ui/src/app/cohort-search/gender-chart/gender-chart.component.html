@@ -1,0 +1,12 @@
+<div class="chart-container" [style.min-height.px]="minHeight">
+  <ngx-charts-bar-horizontal
+    [animations]="false"
+    [results]="data"
+    [xAxis]="axis.x.show"
+    [showXAxisLabel]="axis.x.showLabel"
+    [xAxisLabel]="axis.x.label"
+    [yAxis]="axis.y.show"
+    [showYAxisLabel]="axis.y.showLabel"
+    [yAxisLabel]="axis.y.label">
+  </ngx-charts-bar-horizontal>
+</div>

@@ -5,6 +5,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
+import {NouisliderModule} from 'ng2-nouislider';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
@@ -12,18 +14,21 @@ import {
   WIZARD_FINISH,
 } from '../../redux';
 
+/* tslint:disable */
 import {AlertsComponent} from '../alerts/alerts.component';
 import {AttributesModule} from '../attributes/attributes.module';
+import {DemoFormComponent} from '../demo-form/demo-form.component';
 import {ExplorerComponent} from '../explorer/explorer.component';
 import {LeafComponent} from '../leaf/leaf.component';
-import {
-  QuickSearchResultsComponent
-} from '../quicksearch-results/quicksearch-results.component';
+import {ModifiersComponent} from '../modifiers/modifiers.component';
+import {ModifierSelectionComponent} from '../modifier-selection/modifier-selection.component';
+import {QuickSearchResultsComponent} from '../quicksearch-results/quicksearch-results.component';
 import {QuickSearchComponent} from '../quicksearch/quicksearch.component';
 import {RootSpinnerComponent} from '../root-spinner/root-spinner.component';
-import {SelectionComponent} from '../selection/selection.component';
+import {CriteriaSelectionComponent} from '../criteria-selection/criteria-selection.component';
 import {TreeComponent} from '../tree/tree.component';
 import {WizardComponent} from './wizard.component';
+/* tslint:enable */
 
 import {CohortBuilderService} from 'generated';
 
@@ -44,12 +49,15 @@ describe('WizardComponent', () => {
       .configureTestingModule({
         declarations: [
           AlertsComponent,
+          DemoFormComponent,
           ExplorerComponent,
           LeafComponent,
+          ModifiersComponent,
+          ModifierSelectionComponent,
           QuickSearchComponent,
           QuickSearchResultsComponent,
           RootSpinnerComponent,
-          SelectionComponent,
+          CriteriaSelectionComponent,
           TreeComponent,
           WizardComponent,
         ],
@@ -57,6 +65,8 @@ describe('WizardComponent', () => {
           AttributesModule,
           ClarityModule,
           NoopAnimationsModule,
+          NouisliderModule,
+          NgxPopperModule,
           ReactiveFormsModule,
         ],
         providers: [
@@ -84,13 +94,14 @@ describe('WizardComponent', () => {
 
   it('Should dispatch WIZARD_CANCEL on cancel', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.cancel();
+    comp.onCancel();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_CANCEL});
   });
 
-  it('Should dispatch WIZARD_FINISH on finish', () => {
+  it('Should dispatch WIZARD_FINISH on submission', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.finish();
+    fixture.detectChanges();
+    comp.onSubmit();
     expect(spy).toHaveBeenCalledWith({type: WIZARD_FINISH});
   });
 });

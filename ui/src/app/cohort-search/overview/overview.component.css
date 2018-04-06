@@ -1,3 +1,4 @@
+/* Right third column */
 .overview-header {
   display: flex;
   flex-flow: row wrap;
@@ -12,17 +13,86 @@
   margin: 0;
 }
 
-input[type=text],
-input[type=text]:focus,
-input[type=text]:not([readonly]),
-input[type=text]:not([readonly]):focus {
-  border-top: none;
-  border-right: none;
-  border-left: none;
-}
-
 .card {
   background-color: white;
   margin-top: 0.6rem;
   margin-bottom: 0.6rem;
+}
+
+/* Save Cohort Modal */
+/*
+ * ng-deep is technically "deprecated" but there's no upgrade path and no other
+ * way to do this short of removing all css encapsulation and liberally
+ * sprinkling on some `!important`s.  When Angular figures out how this should
+ * be done, we can change.  Until then, there's not even any plans to
+ * _actually_ remove the ::ng-deep feature, much less replace it:
+ * https://github.com/angular/angular/issues/17867
+ */
+::ng-deep .modal-header .close clr-icon {
+  fill: rgb(38, 34, 98);
+  color: rgb(38, 34, 98);
+  border: 1px solid rgb(38, 34, 98);
+  border-radius: 50%;
+  margin: 0.5rem 0;
+}
+
+::ng-deep .modal-header {
+  padding-bottom: 0;
+}
+
+.modal-title h2 {
+  margin: 0;
+}
+
+.modal-footer {
+  padding-top: 0;
+}
+
+form {
+  padding-top: 0;
+}
+
+.control {
+  width: 100%;
+  padding: 0.75rem 0.25rem;
+  margin: 0.25rem 0.25rem 0.75rem 0;
+  border-radius: 6px;
+}
+
+label[for="name"] {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+label[for="name"].show {
+  opacity: 1;
+}
+
+#name-control:focus {
+  border: 1px solid #0094d2;
+  box-shadow: 0 0 2px 2px rgb(92, 183, 225);
+  /* Undoes the clarity animated background */
+  background-size: 0;
+}
+
+#name-control.invalid {
+  border-color: rgb(158, 158, 158);
+  box-shadow: 0 0 2px 2px red;
+}
+
+#description-control {
+  border: 1px solid #9a9a9a;
+  height: 12rem;
+}
+
+#description-control:focus {
+  border: 1px solid #0094d2;
+  box-shadow: 0 0 2px 2px rgb(92, 183, 225);
+}
+
+::placeholder {
+  color: rgb(158, 158, 158);
+  text-transform: uppercase;
+  font-size: 0.5rem;
+  font-weight: bold;
 }

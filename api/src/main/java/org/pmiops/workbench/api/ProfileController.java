@@ -9,12 +9,13 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.Properties;
 import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -52,6 +53,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
@@ -63,6 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
+
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
       .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
@@ -83,8 +86,22 @@ public class ProfileController implements ProfileApiDelegate {
           return result;
         }
       };
+  private static final Function<InstitutionalAffiliation,
+      org.pmiops.workbench.db.model.InstitutionalAffiliation> FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
+      new Function<InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>() {
+        @Override
+        public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(InstitutionalAffiliation institutionalAffiliation) {
+          org.pmiops.workbench.db.model.InstitutionalAffiliation result =
+              new org.pmiops.workbench.db.model.InstitutionalAffiliation();
+          result.setRole(institutionalAffiliation.getRole());
+          result.setInstitution(institutionalAffiliation.getInstitution());
+
+          return result;
+        }
+      };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
+
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
 
   private final ProfileService profileService;
@@ -250,7 +267,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // Free tier billing project setup is complete; nothing to do.
-    if (!BillingProjectStatus.PENDING.equals(user.getFreeTierBillingProjectStatus())) {
+    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
       return user;
     }
 
@@ -448,6 +465,9 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setAboutYou(updatedProfile.getAboutYou());
+    user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
+
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
         mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
@@ -455,6 +475,42 @@ public class ProfileController implements ProfileApiDelegate {
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }
+    List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
+        updatedProfile.getInstitutionalAffiliations()
+        .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+        .collect(Collectors.toList());
+    int i = 0;
+    ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
+        user.getInstitutionalAffiliations().listIterator();
+    boolean shouldAdd = false;
+    if (newAffiliations.size() == 0) {
+      shouldAdd = true;
+    }
+    Long userId = user.getUserId();
+    for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+      affiliation.setOrderIndex(i);
+      affiliation.setUserId(userId);
+      if (oldAffilations.hasNext()) {
+        org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation = oldAffilations.next();
+        if (!oldAffilation.getRole().equals(affiliation.getRole())
+            || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
+          shouldAdd = true;
+        }
+      } else {
+        shouldAdd = true;
+      }
+      i++;
+    }
+    if (oldAffilations.hasNext()) {
+      shouldAdd = true;
+    }
+    if (shouldAdd) {
+      user.clearInstitutionalAffiliations();
+      for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+        user.addInstitutionalAffiliation(affiliation);
+      }
+    }
+
 
     // This does not update the name in Google.
     userDao.save(user);
@@ -483,11 +539,23 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     BlockscoreIdVerificationStatus status = review.getNewStatus();
+    Boolean oldVerification = userDao.findUserByUserId(userId).getBlockscoreVerificationIsValid();
+    String newValue;
+
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
+      newValue = "true";
     } else {
       userService.setIdVerificationApproved(userId, false);
+      newValue = "false";
     }
+
+    userService.logAdminUserAction(
+        userId,
+        "manual ID verification",
+        oldVerification,
+        newValue
+    );
     return getIdVerificationsForReview();
   }
 }

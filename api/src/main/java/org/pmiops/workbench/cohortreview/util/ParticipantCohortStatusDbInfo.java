@@ -6,6 +6,7 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import java.sql.Date;
@@ -108,10 +109,12 @@ public enum ParticipantCohortStatusDbInfo {
     private static String buildSqlString(Filter filter) {
         if (filter.getOperator().equals(Operator.IN)) {
             return fromName(filter.getProperty()).getDbName() +
-                    " " + filter.getOperator().toString() + " (:" + filter.getProperty().toString() + ")\n";
+                " " + OperatorUtils.getSqlOperator(filter.getOperator()) +
+                " (:" + filter.getProperty().toString() + ")\n";
         }
         return fromName(filter.getProperty()).getDbName() +
-                " " + filter.getOperator().toString() + " :" + filter.getProperty().toString() + "\n";
+                " " + OperatorUtils.getSqlOperator(filter.getOperator())  +
+                " :" + filter.getProperty().toString() + "\n";
     }
 
     private static void validateFilterSize(Filter filter) {

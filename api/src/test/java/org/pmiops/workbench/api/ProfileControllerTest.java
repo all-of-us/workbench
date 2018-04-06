@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -47,6 +49,7 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationRequest;
+import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.test.FakeClock;
@@ -84,6 +87,8 @@ public class ProfileControllerTest {
   private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired
   private UserDao userDao;
+  @Autowired
+  private AdminActionHistoryDao adminActionHistoryDao;
   @Mock
   private FireCloudService fireCloudService;
   @Mock
@@ -134,7 +139,7 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    UserService userService = new UserService(userProvider, userDao, clock, fireCloudService, configProvider);
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
@@ -466,6 +471,104 @@ public class ProfileControllerTest {
     assertThat(result.getProjectName()).isEqualTo("a");
     assertThat(result.getRole()).isEqualTo("c");
     assertThat(result.getStatus()).isEqualTo(BillingProjectStatus.PENDING);
+  }
+
+  @Test
+  public void testMe_institutionalAffiliationsAlphabetical() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    first.setRole("test");
+    first.setInstitution("Institution");
+    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    second.setRole("zeta");
+    second.setInstitution("Zeta");
+    affiliations.add(first);
+    affiliations.add(second);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+
+    Profile result = profileController.getMe().getBody();
+    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
+    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
+  }
+
+  @Test
+  public void testMe_institutionalAffiliationsNotAlphabetical() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    first.setRole("zeta");
+    first.setInstitution("Zeta");
+    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    second.setRole("test");
+    second.setInstitution("Institution");
+    affiliations.add(first);
+    affiliations.add(second);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+
+    Profile result = profileController.getMe().getBody();
+    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
+    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
+  }
+
+  @Test
+  public void testMe_removeSingleInstitutionalAffiliation() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    first.setRole("test");
+    first.setInstitution("Institution");
+    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    second.setRole("zeta");
+    second.setInstitution("Zeta");
+    affiliations.add(first);
+    affiliations.add(second);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+    affiliations = new ArrayList<InstitutionalAffiliation>();
+    affiliations.add(first);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+    Profile result = profileController.getMe().getBody();
+    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(1);
+    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
+  }
+
+  @Test
+  public void testMe_removeAllInstitutionalAffiliations() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
+    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    first.setRole("test");
+    first.setInstitution("Institution");
+    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    second.setRole("zeta");
+    second.setInstitution("Zeta");
+    affiliations.add(first);
+    affiliations.add(second);
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+    affiliations.clear();
+    profile.setInstitutionalAffiliations(affiliations);
+    profileController.updateProfile(profile);
+    Profile result = profileController.getMe().getBody();
+    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
   }
 
   private Profile createUser() throws Exception {

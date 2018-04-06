@@ -20,7 +20,7 @@
     "gSuiteDomain": "stable.fake-research-aou.org"
   },
   "server": {
-    "stackdriverApiKey": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
+    "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable"
   }
 }

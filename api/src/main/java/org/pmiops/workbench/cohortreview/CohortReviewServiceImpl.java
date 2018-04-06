@@ -48,7 +48,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
     @Autowired
-    CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
+    public CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,
                             CohortDao cohortDao,
                             ParticipantCohortStatusDao participantCohortStatusDao,
                             ParticipantCohortAnnotationDao participantCohortAnnotationDao,

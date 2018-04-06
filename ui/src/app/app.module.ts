@@ -4,6 +4,7 @@ import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
@@ -25,10 +26,11 @@ import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
+import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
-import {ProfileEditComponent} from './views/profile-edit/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
+import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
@@ -79,6 +81,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     ReactiveFormsModule,
 
     IconsModule,
+    NgxChartsModule,
     ClarityModule,
     DataBrowserModule,
   ],
@@ -94,10 +97,11 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceListComponent,
     IdVerificationPageComponent,
     InvitationKeyComponent,
+    LoginComponent,
     PageTemplateSignedOutComponent,
-    ProfileEditComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
+    SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceShareComponent,

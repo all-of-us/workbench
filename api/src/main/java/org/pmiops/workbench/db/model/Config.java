@@ -10,6 +10,8 @@ import javax.persistence.Table;
 public class Config {
 
   public static final String MAIN_CONFIG_ID = "main";
+  // TODO: consider whether we need different CDR schema config for different CDR versions in future
+  public static final String CDR_BIGQUERY_SCHEMA_CONFIG_ID = "cdrBigQuerySchema";
 
   private String configId;
   private String configuration;

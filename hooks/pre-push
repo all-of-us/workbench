@@ -1,7 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
-IFS=$'\n\t'
 
 # Checks to run before pushing to a remote git repo for review/merging.
 cd ui
-./project.rb lint
+
+# Only lint modified files, see https://coderwall.com/p/l5ddcq/lint-code-before-git-pushing
+remote="$1"
+url="$2"
+z40=0000000000000000000000000000000000000000
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  has_ts=0
+  if [ "$local_sha" = $z40 ]; then
+    # branch deleted
+    :
+  else
+    if [ "$remote_sha" = $z40 ]; then
+      # New remote branch.
+      has_ts=1
+    else
+      files=$(git diff --name-only "$remote_sha..$local_sha")
+
+      [ -n "`echo $files | grep \.ts$`" ] && has_ts=1
+    fi
+
+    if [[ $has_ts -eq 1 ]]; then
+      ./project.rb lint
+    fi
+  fi
+done
+
+

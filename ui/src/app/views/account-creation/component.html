@@ -13,7 +13,7 @@
     </div>
     <div class="form-section">
       <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="Create Account">
-      <h5 style="display: inline-block;">@fake-research-aou.org</h5>
+      <h5 style="display: inline-block;">@{{gsuiteDomain}}</h5>
       <div *ngIf="conflictError" class="error">
         Username is already taken.
       </div>

@@ -29,6 +29,10 @@
 /api/tools/build/*
 /api/tools/.gradle/*
 /build/*
+/ci/ci.iml
+/cli/cli.iml
+/client/client.iml
+/hooks/hooks.iml
 /ui/package-lock.json
 /ui/coverage
 /ui/ui.iml
@@ -44,6 +48,7 @@ cloud_sql_proxy
 node_modules
 npm-debug.log
 tools/*.jar
+tools/tools.iml
 tools/cloud_sql_proxy
 .DS_Store
 client/py/.pydevproject

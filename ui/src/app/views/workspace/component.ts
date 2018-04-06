@@ -5,6 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
+import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 
 import {
@@ -20,9 +21,6 @@ import {
 } from 'generated';
 
 
-class Notebook {
-  constructor(public name: string, public path: string) {}
-}
 /*
 * Search filters used by the cohort and notebook data tables to
 * determine which of the cohorts loaded into client side memory
@@ -38,8 +36,8 @@ class CohortDescriptionFilter implements StringFilter<Cohort> {
     return cohort.description.toLowerCase().indexOf(search) >= 0;
   }
 }
-class NotebookNameFilter implements StringFilter<Notebook> {
-  accepts(notebook: Notebook, search: string): boolean {
+class NotebookNameFilter implements StringFilter<FileDetail> {
+  accepts(notebook: FileDetail, search: string): boolean {
     return notebook.name.toLowerCase().indexOf(search) >= 0;
   }
 }
@@ -59,8 +57,8 @@ class CohortDescriptionComparator implements Comparator<Cohort> {
     return a.description.localeCompare(b.description);
   }
 }
-class NotebookNameComparator implements Comparator<Notebook> {
-  compare(a: Notebook, b: Notebook) {
+class NotebookNameComparator implements Comparator<FileDetail> {
+  compare(a: FileDetail, b: FileDetail) {
     return a.name.localeCompare(b.name);
   }
 }
@@ -74,17 +72,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
-  private cohortNameFilter = new CohortNameFilter();
-  private cohortDescriptionFilter = new CohortDescriptionFilter();
-  private notebookNameFilter = new NotebookNameFilter();
-  private cohortNameComparator = new CohortNameComparator();
-  private cohortDescriptionComparator = new CohortDescriptionComparator();
-  private notebookNameComparator = new NotebookNameComparator();
+  cohortNameFilter = new CohortNameFilter();
+  cohortDescriptionFilter = new CohortDescriptionFilter();
+  notebookNameFilter = new NotebookNameFilter();
+  cohortNameComparator = new CohortNameComparator();
+  cohortDescriptionComparator = new CohortDescriptionComparator();
+  notebookNameComparator = new NotebookNameComparator();
 
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  workspaceLoading = true;
+  awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
   notebookError = false;
@@ -94,12 +92,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   clusterLoading = true;
   clusterPulled = false;
   launchedNotebookName: string;
-  notFound = false;
+  private clusterLocalDirectory: string;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;
-  // TODO: Replace with real data/notebooks read in from GCS
-  notebookList: Notebook[] = [];
+  notebookList: FileDetail[] = [];
   editHover = false;
   shareHover = false;
   trashHover = false;
@@ -117,60 +114,50 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       private signInService: SignInService,
       private workspacesService: WorkspacesService,
       @Inject(DOCUMENT) private document: any
-  ) {}
+  ) {
+    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.workspace = wsData;
+    this.accessLevel = wsData.accessLevel;
+    const {approved, reviewRequested} = this.workspace.researchPurpose;
+    this.awaitingReview = reviewRequested && !approved;
+  }
 
   ngOnInit(): void {
-    this.workspaceLoading = true;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
+      .subscribe(
+        cohortsReceived => {
+          for (const coho of cohortsReceived.items) {
+            this.cohortList.push(coho);
+          }
+          this.cohortsLoading = false;
+        },
+        error => {
+          this.cohortsLoading = false;
+          this.cohortsError = true;
+        });
+    this.loadNotebookList();
+    this.initCluster();
+  }
 
-    this.workspacesService.getWorkspace(this.wsNamespace, this.wsId)
-        .subscribe(
-          workspaceResponse => {
-            this.workspace = workspaceResponse.workspace;
-            this.accessLevel = workspaceResponse.accessLevel;
-            this.workspaceLoading = false;
-            this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
-                .subscribe(
-                    cohortsReceived => {
-                      for (const coho of cohortsReceived.items) {
-                        this.cohortList.push(coho);
-                      }
-                      this.cohortsLoading = false;
-                    },
-                    error => {
-                      this.cohortsLoading = false;
-                      this.cohortsError = true;
-                    });
-
-            this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-                .subscribe(
-                  fileList => {
-                    for (const filedetail of fileList) {
-                      this.notebookList
-                          .push(new Notebook(filedetail.name, filedetail.path));
-                    }
-                  },
-                  error => {
-                    this.notebooksLoading = false;
-                    this.notebookError = false;
-                  });
-            this.initCluster();
-          },
-          error => {
-            if (error.status === 404) {
-              this.notFound = true;
-            } else {
-              this.workspaceLoading = false;
-            }
-          });
+  private loadNotebookList() {
+    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
+      .subscribe(
+        fileList => {
+          this.notebookList = fileList;
+        },
+        error => {
+          this.notebooksLoading = false;
+          this.notebookError = false;
+        });
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('message', this.notebookAuthListener);
   }
 
-  launchNotebook(notebook): void {
+  openNotebook(notebook): void {
     if (this.clusterLoading) {
       return;
     }
@@ -180,18 +167,38 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  launchCluster(): void {
+  newNotebook(): void {
     if (this.clusterLoading) {
       return;
     }
-    this.localizeNotebooks(this.notebookList).subscribe(() => {
-      // TODO(calbach): Going through this modal is a temporary hack to avoid
-      // triggering pop-up blockers. Likely we'll want to switch notebook
-      // cluster opening to go through a redirect URL to make the localize and
-      // redirect look more atomic to the browser. Once this is in place, rm the
-      // modal and this hacky passing of the launched notebook name.
-      this.launchedNotebookName = '';
-      this.clusterPulled = true;
+    this.localizeNotebooks([]).subscribe(() => {
+      // Use the Jupyter Server API directly to create a new notebook. This
+      // API handles notebook name collisions and matches the behavior of
+      // clicking "new notebook" in the Jupyter UI.
+      // TODO: Use the Swagger generated code instead:
+      // https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+      const leoNewNotebookUrl =
+        WorkspaceComponent.leoBaseUrl + '/notebooks/' +
+        this.cluster.clusterNamespace + '/' + this.cluster.clusterName +
+        '/api/contents/' + this.clusterLocalDirectory;
+
+      const headers = new Headers();
+      headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
+      this.http.post(leoNewNotebookUrl, {
+        'type': 'notebook'
+      }, {
+        headers: headers,
+      }).subscribe((resp) => {
+        // TODO(calbach): Going through this modal is a temporary hack to avoid
+        // triggering pop-up blockers. Likely we'll want to switch notebook
+        // cluster opening to go through a redirect URL to make the localize and
+        // redirect look more atomic to the browser. Once this is in place, rm the
+        // modal and this hacky passing of the launched notebook name.
+        this.launchedNotebookName = resp.json().name;
+        this.clusterPulled = true;
+        // Reload the notebook list to get the newly created notebook.
+        this.loadNotebookList();
+      });
     });
   }
 
@@ -252,12 +259,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       + this.cluster.clusterName;
     if (notebookName) {
       leoNotebookUrl = [
-        leoNotebookUrl, 'edit', 'workspaces', this.workspace.id, notebookName
+        leoNotebookUrl, 'notebooks', this.clusterLocalDirectory, notebookName
       ].join('/');
     } else {
-      // TODO(calbach): If lacking a notebook name, should create a new notebook instead.
       leoNotebookUrl = [
-        leoNotebookUrl, 'tree', 'workspaces', this.workspace.id
+        leoNotebookUrl, 'tree', this.clusterLocalDirectory
       ].join('/');
     }
 
@@ -309,6 +315,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         });
   }
 
+  buildCohort(): void {
+    if (!this.awaitingReview) {
+      this.router.navigate(['cohorts', 'build'], {relativeTo : this.route});
+    }
+  }
+
   get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
@@ -327,7 +339,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           workspaceId: this.workspace.id,
           notebookNames: names
         })
-        .subscribe(() => {
+        .subscribe((resp) => {
+          this.clusterLocalDirectory = resp.clusterLocalDirectory;
           obs.next();
           obs.complete();
         }, (err) => {

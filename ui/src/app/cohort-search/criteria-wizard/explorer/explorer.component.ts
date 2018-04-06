@@ -28,12 +28,12 @@ export class ExplorerComponent implements OnInit {
   private readonly parentId = 0;  /* Root parent ID is always zero */
 
   private searchValue = '';
-  private searchResults;
+  searchResults;
   private settingAttributes = false;
 
-  private loading$: Observable<boolean>;
-  private errors$: Observable<any>;
-  private nodeInFocus$: Observable<Map<any, any>>;
+  loading$: Observable<boolean>;
+  errors$: Observable<any>;
+  nodeInFocus$: Observable<Map<any, any>>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,

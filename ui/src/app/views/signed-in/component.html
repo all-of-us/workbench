@@ -1,0 +1,52 @@
+<div class="page-container">
+  <div>
+    <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
+      <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"
+          style="width: 1.5rem; height: 1.5rem; fill: #6cace4"></clr-icon>
+    </div>
+    <img [src]="headerImg" class="header-image" routerLink="/">
+  </div>
+  <clr-dropdown style="margin-right: 1rem; margin-bottom: 0.5rem;">
+    <div style="display: flex; justify-content: space-around; align-items: center" clrDropdownTrigger>
+      <img [src]="profileImage" style="border-radius: 100px; height: 42px; width: 42px">
+      <h6 style="padding: 0.5rem;">
+        {{givenName}} {{familyName}}
+      </h6>
+      <clr-icon shape="caret down" style="width: 0.5rem; height: 0.5rem"></clr-icon>
+    </div>
+    <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+      <a routerLink="/profile" clrDropdownItem>Profile</a>
+      <div class="dropdown-divider"></div>
+      <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
+    </clr-dropdown-menu>
+  </clr-dropdown>
+</div>
+
+<div class="content-container">
+  <div class="background-image"></div>
+  <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
+    <section class="sidenav-content">
+      <button class="btn btn-primary nav-link"
+          [class.active]="workspacesActive"
+          routerLink="/"
+          (click)="sidenavToggle = false">My Workspaces</button>
+      <button class="btn btn-primary nav-link"
+          [class.active]="reviewWorkspaceActive"
+          *ngIf="hasReviewResearchPurpose"
+          routerLink="/admin/review-workspace"
+          (click)="sidenavToggle = false">Review Workspaces</button>
+      <button class="btn btn-primary nav-link"
+          [class.active]="reviewIdActive"
+          *ngIf="hasReviewIdVerification"
+          routerLink="/admin/review-id-verification"
+          (click)="sidenavToggle = false">Review ID Verifications</button>
+    </section>
+  </nav>
+  <div class="app-container">
+    <!--
+      Angular's builtin Router module will attach specific views here
+      based on clicking routerLink elements (above) or router.navigate calls.
+    -->
+    <router-outlet></router-outlet>
+  </div>
+</div>

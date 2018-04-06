@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -24,18 +25,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatusesRequest;
-import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.http.ResponseEntity;
 
 import javax.inject.Provider;
@@ -183,7 +173,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, definition));
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
-        when(participantCounter.buildParticipantIdQuery(searchRequest, 200, 0L)).thenReturn(null);
+        when(participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest), 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
         when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
@@ -204,7 +194,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
         verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
-        verify(participantCounter, times(1)).buildParticipantIdQuery(searchRequest, 200, 0L);
+        verify(participantCounter, times(1)).buildParticipantIdQuery(new ParticipantCriteria(searchRequest), 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
         verify(bigQueryService, times(1)).getResultMapper(queryResult);
@@ -500,16 +490,18 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findAll(key.getCohortReviewId(),
                 Collections.<Filter>emptyList(),
-                new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn))).thenReturn(participants);
+                new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()))).thenReturn(participants);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
 
-        ParticipantCohortStatusesRequest request = new ParticipantCohortStatusesRequest()
-                .page(page)
-                .pageSize(pageSize)
-                .sortColumn(sortColumn)
-                .sortOrder(sortOrder);
+        ParticipantCohortStatuses request = new ParticipantCohortStatuses();
+        request.page(page);
+        request.pageSize(pageSize);
+        request.sortOrder(sortOrder);
+        request.sortColumn(sortColumn);
+        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
+
         ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
                 reviewController.getParticipantCohortStatuses(
                         namespace, name, cohortId, cdrVersionId, request);
@@ -522,7 +514,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findAll(key.getCohortReviewId(),
                         Collections.<Filter>emptyList(),
-                        new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn));
+                        new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
         verifyNoMoreMockInteractions();
     }

@@ -10,9 +10,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -29,7 +27,6 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -186,13 +183,7 @@ public class FireCloudServiceImpl implements FireCloudService {
               fromName,
               e.getResponseBody()),
           e);
-      if (e.getCode() == 403) {
-        throw new ForbiddenException(e.getResponseBody());
-      } else if (e.getCode() == 409) {
-        throw new ConflictException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
+      ExceptionUtils.convertFirecloudException(e);
     }
   }
 

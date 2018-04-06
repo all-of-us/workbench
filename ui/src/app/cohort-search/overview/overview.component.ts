@@ -24,10 +24,14 @@ export class OverviewComponent {
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
 
-  private cohortForm = new FormGroup({
+  cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl()
   });
+
+  stackChart = false;
+  showGenderChart = true;
+  showComboChart = true;
 
   constructor(
     private actions: CohortSearchActions,
@@ -40,6 +44,12 @@ export class OverviewComponent {
     return this.cohortForm.get('name');
   }
 
+  modalChange(value) {
+    if (!value) {
+      this.cohortForm.reset();
+    }
+  }
+
   submit() {
     const ns: Workspace['namespace'] = this.route.snapshot.params.ns;
     const wsid: Workspace['id'] = this.route.snapshot.params.wsid;
@@ -50,5 +60,17 @@ export class OverviewComponent {
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
     const goBack = (_) => this.router.navigate(['workspace', ns, wsid]);
     this.cohortApi.createCohort(ns, wsid, cohort).subscribe(goBack);
+  }
+
+  toggleChartMode() {
+    this.stackChart = !this.stackChart;
+  }
+
+  toggleShowGender() {
+    this.showGenderChart = !this.showGenderChart;
+  }
+
+  toggleShowCombo() {
+    this.showComboChart = !this.showComboChart;
   }
 }

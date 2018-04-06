@@ -46,7 +46,7 @@ public class DemoQueryBuilderTest {
             }
         }
 
-        String expected = "select distinct person_id\n" +
+        String expected = "select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
                 "where\n" +
                 "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +

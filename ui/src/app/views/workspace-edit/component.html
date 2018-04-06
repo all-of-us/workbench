@@ -82,14 +82,15 @@
               </div>
             </div>
             <div class="checkbox-group">
-              <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation === true"
-                  shape="minus-circle"
-                  (click)="workspace.researchPurpose.containsUnderservedPopulation = false"></clr-icon>
-              <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation === false"
-                  shape="plus-circle"
-                  (click)="workspace.researchPurpose.containsUnderservedPopulation = true"></clr-icon>
-              <div style="display: inline-block;">
-                Includes an underserved population
+              <div (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"
+                  style="cursor: pointer;">
+                <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation"
+                    shape="minus-circle"></clr-icon>
+                <clr-icon *ngIf="!workspace.researchPurpose.containsUnderservedPopulation"
+                    shape="plus-circle"></clr-icon>
+                <div style="display: inline-block;">
+                  Includes an underserved population
+                </div>
               </div>
               <div>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
@@ -179,16 +180,17 @@
       <div class="button">
         <ng-container [ngSwitch]="mode">
           <button *ngSwitchCase="Mode.Create" class="btn add-button btn-primary"
-              [clrLoading]="savingWorkspace" (click)="addWorkspace()">
+              [clrLoading]="savingWorkspace" (click)="addWorkspace()" [disabled]="!allowSave">
             Create Workspace
           </button>
           <button *ngSwitchCase="Mode.Edit" class="btn add-button btn-primary"
               [clrLoading]="savingWorkspace" (click)="updateWorkspace()"
-              [disabled]="!hasPermission">
+              [disabled]="!hasPermission || !allowSave">
             Update Workspace
           </button>
           <button *ngSwitchCase="Mode.Clone" class="btn add-button btn-primary"
-              [clrLoading]="savingWorkspace" (click)="cloneWorkspace()">
+              [clrLoading]="savingWorkspace" (click)="cloneWorkspace()"
+              [disabled]="!allowSave">
             Clone Workspace
           </button>
         </ng-container>

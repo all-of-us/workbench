@@ -1,7 +1,8 @@
 import {Component} from '@angular/core';
 
-import {AppComponent} from '../app/component';
+import {ServerConfigService} from '../../services/server-config.service';
 import {InvitationKeyComponent} from '../invitation-key/component';
+import {LoginComponent} from '../login/component';
 
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
@@ -39,14 +40,24 @@ export class AccountCreationComponent {
   creatingAcccount: boolean;
   accountCreated: boolean;
   conflictError = false;
+  gsuiteDomain: string;
   usernameCheckTimeout: NodeJS.Timer;
 
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
-    private appComponent: AppComponent
+    private loginComponent: LoginComponent,
+    serverConfigService: ServerConfigService
   ) {
-    this.appComponent.backgroundImgSrc = '/assets/images/create-account-male@2x.jpg';
+    serverConfigService.getConfig().subscribe((config) => {
+      this.gsuiteDomain = config.gsuiteDomain;
+    });
+    // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
+    setTimeout(() => {
+      this.loginComponent.smallerBackgroundImgSrc =
+          '/assets/images/create-account-male-standing.png';
+      this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
+    }, 0);
   }
 
   createAccount(): void {

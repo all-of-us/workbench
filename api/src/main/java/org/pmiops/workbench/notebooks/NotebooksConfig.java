@@ -3,6 +3,7 @@ package org.pmiops.workbench.notebooks;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,14 @@ public class NotebooksConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public NotebooksApi notebooksApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
     NotebooksApi api = new NotebooksApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public JupyterApi jupyterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+    JupyterApi api = new JupyterApi();
     api.setApiClient(apiClient);
     return api;
   }

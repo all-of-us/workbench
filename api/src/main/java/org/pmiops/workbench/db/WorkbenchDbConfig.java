@@ -35,14 +35,14 @@ public class WorkbenchDbConfig {
 
   @Primary
   @Bean(name = "dataSourceProperties")
-  @ConfigurationProperties(prefix = "workbench.datasource")
+  @ConfigurationProperties(prefix = "spring.datasource")
   public DataSourceProperties dataSourceProperties() {
     return new DataSourceProperties();
   }
 
   @Primary
   @Bean(name = "dataSource")
-  @ConfigurationProperties(prefix = "workbench.datasource")
+  @ConfigurationProperties(prefix = "spring.datasource")
   public DataSource dataSource() {
     return dataSourceProperties().initializeDataSourceBuilder().build();
   }
@@ -73,7 +73,7 @@ public class WorkbenchDbConfig {
    */
   @Bean("poolConfiguration")
   @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  @ConfigurationProperties(prefix = "workbench.datasource")
+  @ConfigurationProperties(prefix = "spring.datasource")
   public PoolConfiguration poolConfig() {
     return new PoolProperties();
   }

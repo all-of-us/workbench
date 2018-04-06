@@ -330,4 +330,11 @@ export class WorkspaceEditComponent implements OnInit {
   set workspacePopulationDetails(val) {
     this.workspace.researchPurpose.underservedPopulationDetails = val;
   }
+
+  get allowSave() {
+    if (this.savingWorkspace) {
+      return false;
+    }
+    return !isBlank(this.workspace.name);
+  }
 }

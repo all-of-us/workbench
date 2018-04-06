@@ -113,7 +113,12 @@ definitions:
           Maximum number of results to return in a response. Defaults to 1000.
         type: integer
         format: int32
-      # TODO: add fieldSpec, output information
+      fieldSet:
+        description: >
+          Specification defining what data to return for participants in the cohort. Defaults to
+          just participant IDs.
+        $ref: "#/definitions/FieldSet"
+      # TODO: add output information
 
   MaterializeCohortResponse:
     type: object
@@ -133,7 +138,138 @@ definitions:
           retrieve more results. If not set, there are no more results to retrieve.
         type: string
 
+  FieldSet:
+    type: object
+    description: >
+      A specification for fields to retrieve about participants in a cohort.
+      Exactly one of the properties below should be specified.
+    properties:
+      tableQuery:
+        description: >
+          A query specifying how to pull data out of a single table.
+        $ref: "#/definitions/TableQuery"
+
+  TableQuery:
+    type: object
+    description: >
+      A specification for pulling data from a single table.
+    required:
+      - tableName
+    properties:
+      tableName:
+        description: >
+          The name of a table containing a person_id column to retrieve data from (e.g. person, observation);
+          should be in the OMOP CDM 5.2 schema.
+        externalDocs:
+          description: OMOP CDM 5.2 schema definition
+          url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql                          
+        type: string
+      columns:
+        description: >
+          An array of columns to retrieve from the table, taken from the table specified above.
+          Defaults to all columns.
+        type: array
+        items:
+          type: string
+      filters:
+        description: >
+          Filters on the results. Only results matching the criteria specified in the filters
+          will be returned
+        $ref: "#/definitions/ResultFilters"
+      orderBy:
+        description: >
+          An array of columns to sort the resulting data by, taken from the table specified above,
+          each one optionally followed by " DESC" for descending sort order. (Default varies by table.)
+        type: array
+        items:
+          type: string
+
+  ResultFilters:
+    type: object
+    description: >
+      A list of filters applied to the results of a query. Only results matching the filter criteria
+      should be returned. Exactly one of "allOf", "anyOf", and "columnFilter" should be set.
+    properties:
+      not:
+        description: >
+         Set to true if a result matching allOf or anyOf below should result in a result *not*
+         being returned.
+        type: boolean
+      allOf:
+        description: >
+          A list of result filters. All filters matching means a result should be returned (or not returned
+          if "not" is true.)
+        type: array
+        items:
+          $ref: "#/definitions/ResultFilters"
+      anyOf:
+        description: >
+          A list of column filters. Any filters matching means a result should be returned
+          (or not returned if "not" is true.)
+        type: array
+        items:
+          $ref: "#/definitions/ResultFilters"
+      columnFilter:
+        description: >
+          A filter on a column in the table. Only a result matching this filter should be returned
+          (or not returned if "not" is true.)
+        $ref: "#/definitions/ColumnFilter"
+
+  ColumnFilter:
+    type: object
+    required:
+      - columnName
+    description: >
+      A filter applied to the results of a query, based on a column value in a table. Only results
+      matching the filter will be returned. One (and only one) of the value columns should be populated.
+      values and valueNumbers should only be used in conjunction with the "in" operator.
+    properties:
+      columnName:
+        description: >
+          The name of the column to filter on.
+        type: string
+      operator:
+        description: >
+          The operator to use when comparing values. Defaults to EQUAL. If the "in" operator is used,
+          either values or valueNumbers should be populated.
+        $ref: "#/definitions/Operator"
+        externalDocs:
+          description: "Documentation of BigQuery SQL operators"
+          url: https://cloud.google.com/bigquery/docs/reference/standard-sql/functions-and-operators#comparison-operators
+      value:
+        description: >
+          A string to use in comparisons (case-sensitive).
+        type: string
+      values:
+        description: >
+          An array of strings to use in comparisons (case-sensitive); used with the "in" operator.
+        type: array
+        items:
+          type: string
+      valueDate:
+        description: >
+          A date (yyyy-MM-dd) or datetime (yyyy-MM-dd HH:mm:ss zzz) value to use in comparisons.
+        type: string
+      valueNumber:
+        description: >
+          A number to use in comparisons (either integer or floating point.)
+        type: number
+      valueNumbers:
+        description: >
+          An array of numbers to use in comparisons (used with the "in" operator)
+        type: array
+        items:
+          type: number
+      valueNull:
+        description: >
+          Set to true if the column value should be compared to null.
+        type: boolean
+
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
     enum: [EXCLUDED, INCLUDED, NEEDS_FURTHER_REVIEW, NOT_REVIEWED]
+
+  Operator:
+    type: string
+    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN]

@@ -3,8 +3,8 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-
-import {ChartsModule} from '../charts/charts.module';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {NgxPopperModule} from 'ngx-popper';
 
 /* Pages */
 import {CreateReviewPage} from './create-review-page/create-review-page';
@@ -14,6 +14,11 @@ import {PageLayout} from './page-layout/page-layout';
 import {TablePage} from './table-page/table-page';
 
 import {ReviewNavComponent} from './review-nav/review-nav.component';
+
+import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
+import {DetailHeaderComponent} from './detail-header/detail-header.component';
+import {DetailProceduresComponent} from './detail-procedures/detail-procedures.component';
+import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
@@ -29,22 +34,29 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
 import {ReviewStateService} from './review-state.service';
-
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
-import { DetailHeaderComponent } from './detail-header/detail-header.component';
-import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
+
+// This is a temporary measure until we have specs and APIs for overview specific charts
+import {CohortSearchModule} from '../cohort-search/cohort-search.module';
 /* tslint:enable:max-line-length */
 
 
 @NgModule({
   imports: [
-    CohortReviewRoutingModule,
-    ClarityModule,
+    // Angular
     CommonModule,
     ReactiveFormsModule,
-    ChartsModule,
+    // Routes
+    CohortReviewRoutingModule,
+    // 3rd Party
+    ClarityModule,
+    NgxChartsModule,
+    NgxPopperModule,
+    // Ours
+    // TODO: Remove this once the dependency on ComboChartComponent is broken.
+    CohortSearchModule
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -73,6 +85,8 @@ import { DetailTabsComponent } from './detail-tabs/detail-tabs.component';
     SidebarContentComponent,
     DetailHeaderComponent,
     DetailTabsComponent,
+    DetailConditionsComponent,
+    DetailProceduresComponent,
   ],
   providers: [ReviewStateService]
 })
