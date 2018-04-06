@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryFactory;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import java.time.*;
@@ -47,7 +49,8 @@ import static org.mockito.Mockito.when;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, ReviewQueryFactory.class})
+@ComponentScan(basePackages = "org.pmiops.workbench.cohortreview.*")
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     private static final String NAMESPACE = "aou-test";
@@ -208,6 +211,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(observationAge2.getYears())
                 .dataType(DataType.PARTICIPANTOBSERVATION);
         expectedDrug1 = new ParticipantDrug()
+                .signature("signature")
                 .itemDate("2001-12-02")
                 .standardVocabulary("CPT4")
                 .standardName("name")
@@ -217,6 +221,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(drugAge1.getYears())
                 .dataType(DataType.PARTICIPANTDRUG);
         expectedDrug2 = new ParticipantDrug()
+                .signature("signature")
                 .itemDate("2001-12-03")
                 .standardVocabulary("CPT4")
                 .standardName("name")
@@ -619,6 +624,10 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
             assertThat(actualData.getSourceVocabulary()).isEqualTo(expected.getSourceVocabulary());
             assertThat(actualData.getStandardName()).isEqualTo(expected.getStandardName());
             assertThat(actualData.getStandardVocabulary()).isEqualTo(expected.getStandardVocabulary());
+            if (actualData instanceof ParticipantDrug) {
+                assertThat(((ParticipantDrug) actualData).getSignature())
+                        .isEqualTo(((ParticipantDrug) expected).getSignature());
+            }
         }
     }
 
