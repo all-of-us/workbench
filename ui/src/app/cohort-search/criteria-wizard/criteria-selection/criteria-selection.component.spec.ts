@@ -13,7 +13,7 @@ import {
   REMOVE_PARAMETER,
   removeParameter,
 } from '../../redux';
-import {SelectionComponent} from './selection.component';
+import {CriteriaSelectionComponent} from './criteria-selection.component';
 
 import {CohortBuilderService} from 'generated';
 
@@ -38,9 +38,9 @@ class MockActions {
   @dispatch() removeParameter = removeParameter;
 }
 
-describe('SelectionComponent', () => {
-  let fixture: ComponentFixture<SelectionComponent>;
-  let comp: SelectionComponent;
+describe('CriteriaSelectionComponent', () => {
+  let fixture: ComponentFixture<CriteriaSelectionComponent>;
+  let comp: CriteriaSelectionComponent;
   let mockReduxInst;
 
   let dispatchSpy;
@@ -55,7 +55,7 @@ describe('SelectionComponent', () => {
 
     TestBed
       .configureTestingModule({
-        declarations: [SelectionComponent],
+        declarations: [CriteriaSelectionComponent],
         imports: [ClarityModule],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
@@ -69,7 +69,7 @@ describe('SelectionComponent', () => {
   beforeEach(() => {
     MockNgRedux.reset();
     dispatchSpy = spyOn(mockReduxInst, 'dispatch');
-    fixture = TestBed.createComponent(SelectionComponent);
+    fixture = TestBed.createComponent(CriteriaSelectionComponent);
     comp = fixture.componentInstance;
 
     typeStub = MockNgRedux

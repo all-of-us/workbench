@@ -32,6 +32,8 @@ import {
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
+  ADD_MODIFIER,
+  REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
@@ -154,6 +156,24 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.filterNot(id => id === action.parameterId)
+          );
+
+      case ADD_MODIFIER:
+        return state
+          .updateIn(
+            ['wizard', 'item', 'modifiers'],
+            List(),
+            mods => (mods.includes(fromJS(action.modifier))
+              ? mods
+              : mods.push(fromJS(action.modifier)))
+          );
+
+      case REMOVE_MODIFIER:
+        return state
+          .updateIn(
+            ['wizard', 'item', 'modifiers'],
+            List(),
+            mods => mods.filter(item => item !== fromJS(action.modifier))
           );
 
       case SET_WIZARD_FOCUS:
