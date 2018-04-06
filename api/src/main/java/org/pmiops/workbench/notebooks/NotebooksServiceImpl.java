@@ -7,10 +7,12 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
+import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
+import org.pmiops.workbench.notebooks.model.JupyterModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +22,15 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
+  private final Provider<JupyterApi> jupyterApiProvider;
 
   @Autowired
   public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
-      Provider<NotebooksApi> notebooksApiProvider) {
+      Provider<NotebooksApi> notebooksApiProvider,
+      Provider<JupyterApi> jupyterApiProvider) {
     this.clusterApiProvider = clusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
+    this.jupyterApiProvider = jupyterApiProvider;
   }
 
   @Override
@@ -88,5 +93,44 @@ public class NotebooksServiceImpl implements NotebooksService {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void putFile(
+      String googleProject, String clusterName, String workspaceDir, String fileName, String fileContents) {
+    JupyterApi jupyterApi = jupyterApiProvider.get();
+    JupyterModel model = new JupyterModel();
+    model.setType("file");
+    model.setFormat("text");
+    model.setContent(fileContents);
+    try {
+      jupyterApi.putContents(googleProject, clusterName, workspaceDir, fileName, model);
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertNotebookException(e);
+    }
+  }
+
+  @Override
+  public void putRootWorkspacesDir(String googleProject, String clusterName) {
+    JupyterApi jupyterApi = jupyterApiProvider.get();
+    JupyterModel model = new JupyterModel();
+    model.setType("directory");
+    try {
+      jupyterApi.putWorkspacesRootDir(googleProject, clusterName, model);
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertNotebookException(e);
+    }
+  }
+
+  @Override
+  public void putWorkspaceDir(String googleProject, String clusterName, String workspaceDir) {
+    JupyterApi jupyterApi = jupyterApiProvider.get();
+    JupyterModel model = new JupyterModel();
+    model.setType("directory");
+    try {
+      jupyterApi.putWorkspaceDir(googleProject, clusterName, workspaceDir, model);
+    } catch (ApiException e) {
+      throw ExceptionUtils.convertNotebookException(e);
+    }
   }
 }

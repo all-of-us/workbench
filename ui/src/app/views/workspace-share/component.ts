@@ -10,6 +10,7 @@ import {Workspace} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
+import {WorkspaceData} from "../../resolvers/workspace";
 
 @Component({
   selector: 'workspace-share',
@@ -28,7 +29,6 @@ export class WorkspaceShareComponent implements OnInit {
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
-  userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
   public sharing = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
@@ -42,11 +42,15 @@ export class WorkspaceShareComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadWorkspace().subscribe((workspace) => {
+      this.workspace = workspace.workspace;
       this.profileService.getMe().subscribe(profile => {
         this.usersLoading = false;
         this.loadingWorkspace = false;
         this.userEmail = profile.username;
       });
+    },
+    (error) => {
+
     });
   }
 

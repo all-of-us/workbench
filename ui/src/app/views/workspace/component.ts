@@ -19,8 +19,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {Location} from "@angular/common";
-import {ProfileService} from "../../../generated";
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component'
 
 
@@ -78,16 +76,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
-  private cohortNameFilter = new CohortNameFilter();
-  private cohortDescriptionFilter = new CohortDescriptionFilter();
-  private notebookNameFilter = new NotebookNameFilter();
-  private cohortNameComparator = new CohortNameComparator();
-  private cohortDescriptionComparator = new CohortDescriptionComparator();
-  private notebookNameComparator = new NotebookNameComparator();
+  cohortNameFilter = new CohortNameFilter();
+  cohortDescriptionFilter = new CohortDescriptionFilter();
+  notebookNameFilter = new NotebookNameFilter();
+  cohortNameComparator = new CohortNameComparator();
+  cohortDescriptionComparator = new CohortDescriptionComparator();
+  notebookNameComparator = new NotebookNameComparator();
 
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
+  awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
   notebookError = false;
@@ -96,15 +95,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cluster: Cluster;
   clusterLoading = true;
   clusterPulled = false;
+  launchedNotebookName: string;
   private clusterLocalDirectory: string;
-  private launchedNotebookName: string;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   showAlerts = false;
   notebookList: FileDetail[] = [];
   editHover = false;
   shareHover = false;
-  sharing = false;
   trashHover = false;
   listenerAdded = false;
   notebookAuthListener: EventListenerOrEventListenerObject;
@@ -124,6 +122,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
+    const {approved, reviewRequested} = this.workspace.researchPurpose;
+    this.awaitingReview = reviewRequested && !approved;
   }
 
   ngOnInit(): void {
@@ -141,6 +141,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsLoading = false;
           this.cohortsError = true;
         });
+    this.loadNotebookList();
+    this.initCluster();
+  }
+
+  private loadNotebookList() {
     this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
       .subscribe(
         fileList => {
@@ -150,14 +155,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.notebooksLoading = false;
           this.notebookError = false;
         });
-    this.initCluster();
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('message', this.notebookAuthListener);
   }
 
-  launchNotebook(notebook): void {
+  openNotebook(notebook): void {
     if (this.clusterLoading) {
       return;
     }
@@ -167,18 +171,38 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  launchCluster(): void {
+  newNotebook(): void {
     if (this.clusterLoading) {
       return;
     }
-    this.localizeNotebooks(this.notebookList).subscribe(() => {
-      // TODO(calbach): Going through this modal is a temporary hack to avoid
-      // triggering pop-up blockers. Likely we'll want to switch notebook
-      // cluster opening to go through a redirect URL to make the localize and
-      // redirect look more atomic to the browser. Once this is in place, rm the
-      // modal and this hacky passing of the launched notebook name.
-      this.launchedNotebookName = '';
-      this.clusterPulled = true;
+    this.localizeNotebooks([]).subscribe(() => {
+      // Use the Jupyter Server API directly to create a new notebook. This
+      // API handles notebook name collisions and matches the behavior of
+      // clicking "new notebook" in the Jupyter UI.
+      // TODO: Use the Swagger generated code instead:
+      // https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+      const leoNewNotebookUrl =
+        WorkspaceComponent.leoBaseUrl + '/notebooks/' +
+        this.cluster.clusterNamespace + '/' + this.cluster.clusterName +
+        '/api/contents/' + this.clusterLocalDirectory;
+
+      const headers = new Headers();
+      headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
+      this.http.post(leoNewNotebookUrl, {
+        'type': 'notebook'
+      }, {
+        headers: headers,
+      }).subscribe((resp) => {
+        // TODO(calbach): Going through this modal is a temporary hack to avoid
+        // triggering pop-up blockers. Likely we'll want to switch notebook
+        // cluster opening to go through a redirect URL to make the localize and
+        // redirect look more atomic to the browser. Once this is in place, rm the
+        // modal and this hacky passing of the launched notebook name.
+        this.launchedNotebookName = resp.json().name;
+        this.clusterPulled = true;
+        // Reload the notebook list to get the newly created notebook.
+        this.loadNotebookList();
+      });
     });
   }
 
@@ -239,10 +263,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       + this.cluster.clusterName;
     if (notebookName) {
       leoNotebookUrl = [
-        leoNotebookUrl, 'edit', this.clusterLocalDirectory, notebookName
+        leoNotebookUrl, 'notebooks', this.clusterLocalDirectory, notebookName
       ].join('/');
     } else {
-      // TODO(calbach): If lacking a notebook name, should create a new notebook instead.
       leoNotebookUrl = [
         leoNotebookUrl, 'tree', this.clusterLocalDirectory
       ].join('/');
@@ -294,6 +317,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   share(): void {
     this.shareModal.open();
+  }
+
+  buildCohort(): void {
+    if (!this.awaitingReview) {
+      this.router.navigate(['cohorts', 'build'], {relativeTo : this.route});
+    }
   }
 
   get writePermission(): boolean {

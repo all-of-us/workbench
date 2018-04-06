@@ -49,13 +49,10 @@ const DataBrowserServiceFactory = (http: Http) => {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ChartModule.forRoot(highcharts),
+    ChartModule,
     HttpModule,
     ClarityModule,
-    LocalStorageModule.withConfig({
-      prefix: 'my-app',
-      storageType: 'localStorage'
-    })
+    LocalStorageModule
   ],
   declarations: [
     ChartComponent,
@@ -84,6 +81,12 @@ const DataBrowserServiceFactory = (http: Http) => {
       {
         provide: HighchartsStatic,
         useValue: highcharts,
+      },
+      {
+        provide: 'LOCAL_STORAGE_SERVICE_CONFIG', useValue: {
+          prefix: 'my-app',
+          storageType: 'localStorage'
+        }
       }
   ]
 })

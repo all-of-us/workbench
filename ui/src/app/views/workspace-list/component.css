@@ -39,12 +39,31 @@
 
 .card *.date-text {
   font-size: 12px;
-  margin-top: auto;
   line-height: 14px;
+}
+
+.card *.status-text {
+  margin-top: auto;
 }
 
 .workspace-name {
   color: #6cace4;
   font-weight: bold;
   margin-bottom: 0.5rem;
+}
+
+.alert.alert-warning {
+  background-color: #FFFCEB;
+  border: none;
+}
+
+.alert-item * {
+  color: #E28327;
+  font-size: 10;
+  font-family: "Gotham HTF";
+  font-weight: 300;
+}
+
+.alert-item *.warning-link {
+  color: #2691D0;
 }

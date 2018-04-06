@@ -6,8 +6,6 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {NgxPopperModule} from 'ngx-popper';
 
-import {ChartsModule} from '../charts/charts.module';
-
 /* Pages */
 import {CreateReviewPage} from './create-review-page/create-review-page';
 import {DetailPage} from './detail-page/detail-page';
@@ -36,10 +34,12 @@ import {ParticipantStatusComponent} from './participant-status/participant-statu
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
 import {ReviewStateService} from './review-state.service';
-
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
+
+// This is a temporary measure until we have specs and APIs for overview specific charts
+import {CohortSearchModule} from '../cohort-search/cohort-search.module';
 /* tslint:enable:max-line-length */
 
 
@@ -55,7 +55,8 @@ import {WorkspacesService} from 'generated';
     NgxChartsModule,
     NgxPopperModule,
     // Ours
-    ChartsModule,
+    // TODO: Remove this once the dependency on ComboChartComponent is broken.
+    CohortSearchModule
   ],
   declarations: [
     /* Scaffolding and Pages */
