@@ -165,10 +165,6 @@
                 </div>
                 <div>
                   <label class="checkbox-label" (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"><h3>Includes an underserved population</h3></label>
-                  <div>
-                    This research will focus on a specific population group. For example: a
-                    specific gender, age group or ethnic group.
-                  </div>
                 </div>
               </div>
             </div>
@@ -177,7 +173,7 @@
 
 
           <div *ngIf="workspace.researchPurpose.containsUnderservedPopulation === true" style="padding-top: 1rem">
-            <h5>Additional information underserved population</h5>
+            <h5>Additional information for underserved population</h5>
             <div>Select all that apply. Only options for underserved populations are provided.</div>
             <div *ngFor="let categoryHeader of keys(underservedCategories)">
               <h4 class="underserved-header">{{categoryHeader}}</h4>
@@ -203,7 +199,6 @@
         </div>
       </div>
       <div class="card">
-        <!-- TODO: Replace with real request approval text. -->
         <div class="checkbox-group">
           <div style="display: flex">
             <clr-checkbox
