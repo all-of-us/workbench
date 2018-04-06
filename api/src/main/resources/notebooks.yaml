@@ -376,6 +376,172 @@ paths:
             $ref: '#/definitions/ErrorReport'
 
 ##########################################################################################
+## Subset of the Jupyter API
+## https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+##########################################################################################
+
+  # In Swagger 2, path params are escaped so we need to hardcode any known "/"
+  # delimiters. With Swagger 3, allowReserved would allow us to collapse the
+  # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
+  # own Swagger definition. The next 3 methods are actually one in the same in
+  # Jupyter's API.
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+    put:
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
+      tags:
+        - jupyter
+      operationId: putWorkspacesRootDir
+      parameters:
+        - name: model
+          in: body
+          description: New path for file or directory
+          schema:
+            $ref: '#/definitions/JupyterModel'
+      responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        201:
+          description: Path created
+          headers:
+            Location:
+              description: URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+    put:
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
+      tags:
+        - jupyter
+      operationId: putWorkspaceDir
+      parameters:
+        - name: model
+          in: body
+          description: New path for file or directory
+          schema:
+            $ref: '#/definitions/JupyterModel'
+      responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        201:
+          description: Path created
+          headers:
+            Location:
+              description: URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    put:
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
+      tags:
+        - jupyter
+      operationId: putContents
+      parameters:
+        - name: model
+          in: body
+          description: New path for file or directory
+          schema:
+            $ref: '#/definitions/JupyterModel'
+      responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        201:
+          description: Path created
+          headers:
+            Location:
+              description: URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        400:
+          description: No data provided
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+
+##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
@@ -575,3 +741,71 @@ definitions:
       systems:
         type: object
         description: Map[String, SubsystemStatus]
+
+  # Jupyter API definitions
+  JupyterModel:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The new filename if changed
+      path:
+        type: string
+        description: New path for file or directory
+      type:
+        type: string
+        description: Path dtype ('notebook', 'file', 'directory')
+      format:
+        type: string
+        description: File format ('json', 'text', 'base64')
+      content:
+        type: string
+        description: The actual body of the document excluding directory type
+
+  JupyterContents:
+    description: "A contents object.  The content and format keys may be null if content is not contained.  If type is 'file', then the mimetype will be null."
+    type: object
+    required:
+      - type
+      - name
+      - path
+      - writable
+      - created
+      - last_modified
+      - mimetype
+      - format
+      - content
+    properties:
+      name:
+        type: string
+        description: "Name of file or directory, equivalent to the last part of the path"
+      path:
+        type: string
+        description: Full path for file or directory
+      type:
+        type: string
+        description: Type of content
+        enum:
+          - directory
+          - file
+          - notebook
+      writable:
+        type: boolean
+        description: indicates whether the requester has permission to edit the file
+      created:
+        type: string
+        description: Creation timestamp
+        format: dateTime
+      last_modified:
+        type: string
+        description: Last modified timestamp
+        format: dateTime
+      mimetype:
+        type: string
+        description: "The mimetype of a file.  If content is not null, and type is 'file', this will contain the mimetype of the file, otherwise this will be null."
+      content:
+        type: string
+        description: "The content, if requested (otherwise null).  Will be an array if type is 'directory'"
+      format:
+        type: string
+        description: Format of content (one of null, 'text', 'base64', 'json')

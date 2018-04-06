@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {Router} from '@angular/router';
 
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
@@ -17,6 +18,7 @@ export class AccountCreationSuccessComponent {
   constructor(
     private loginComponent: LoginComponent,
     private account: AccountCreationComponent,
+    private router: Router,
     private signInService: SignInService,
     serverConfigService: ServerConfigService
   ) {
