@@ -8,8 +8,9 @@ import {ActivatedRouteSnapshot, NavigationEnd, Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
-import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+
 
 declare const gapi: any;
 
@@ -19,7 +20,7 @@ const SIGNED_IN_USER = 'signedInUser';
 @Injectable()
 export class SignInService {
   // Expose "current user details" as an Observable
-  private isSignedIn = new AsyncSubject<boolean>();
+  private isSignedIn = new ReplaySubject<boolean>(1);
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
@@ -59,15 +60,9 @@ export class SignInService {
   private subscribeToAuth2User(): void {
     // The listen below only fires on changes, so we need an initial
     // check to handle the case where the user is already signed in.
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      this.zone.run(() => {
-        this.isSignedIn.next(true);
-      });
-    } else if (gapi.auth2.getAuthInstance().isSignedIn.get() === false) {
-      this.zone.run(() => {
-        this.isSignedIn.next(false);
-      });
-    }
+    this.zone.run(() => {
+      this.isSignedIn.next(gapi.auth2.getAuthInstance().isSignedIn.get());
+    });
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
