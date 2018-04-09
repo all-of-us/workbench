@@ -65,8 +65,8 @@ public class FieldSetQueryBuilder {
     private Map<String, Map<String, ColumnConfig>> columnConfigTable = new HashMap<>();
     // A map from table aliases to SQL table names.
     private Map<String, String> aliasToTableName = new HashMap<>();
-    // The query being turned into SQL.
-    private TableQuery tableQuery;
+    // The name of the main table.
+    private String mainTableName;
     // The CDR schema configuration.
     private CdrBigQuerySchemaConfig schemaConfig;
     // A map of (column name -> ColumnConfig) for the columns on the main table (pulled from
@@ -134,7 +134,7 @@ public class FieldSetQueryBuilder {
   }
 
   private TableNameAndAlias getTableNameAndAlias(List<String> columnParts, QueryState queryState) {
-    String tableName = queryState.tableQuery.getTableName();
+    String tableName = queryState.mainTableName;
     String tableAlias = tableName;
     int i;
     Map<String, ColumnConfig> tableColumns = queryState.mainTableColumns;
@@ -175,12 +175,10 @@ public class FieldSetQueryBuilder {
     return new TableNameAndAlias(tableName, tableAlias);
   }
 
-  private String handleSelect(QueryState queryState,
+  private String handleSelect(QueryState queryState, List<String> columnNames,
       ImmutableList.Builder<ColumnInfo> selectColumns) {
     StringBuilder selectSql = new StringBuilder();
-    TableQuery tableQuery = queryState.tableQuery;
-    List<String> columnNames = tableQuery.getColumns();
-    String tableName = tableQuery.getTableName();
+    String tableName = queryState.mainTableName;
     selectSql.append("select ");
 
     queryState.fromSql.append(String.format("\nfrom `${projectId}.${dataSetId}.%s` %s",
@@ -340,7 +338,7 @@ public class FieldSetQueryBuilder {
       columnConfig = queryState.mainTableColumns.get(columnName);
       if (columnConfig == null) {
         throw new BadRequestException("No such column " + columnName +
-            "on table " + queryState.tableQuery.getTableName());
+            "on table " + queryState.mainTableName);
       }
       return new ColumnInfo(columnName, columnConfig);
     } else {
@@ -417,8 +415,7 @@ public class FieldSetQueryBuilder {
     }
   }
 
-  private StringBuilder handleOrderBy(QueryState queryState) {
-    List<String> orderBy = queryState.tableQuery.getOrderBy();
+  private StringBuilder handleOrderBy(QueryState queryState, List<String> orderBy) {
     if (orderBy.isEmpty()) {
       throw new BadRequestException("Order by list must not be empty");
     }
@@ -443,18 +440,19 @@ public class FieldSetQueryBuilder {
       TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
-    queryState.tableQuery = tableQueryAndConfig.getTableQuery();
+    TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
+    queryState.mainTableName = tableQuery.getTableName();
 
     ImmutableList.Builder<ColumnInfo> selectColumns = ImmutableList.builder();
-    String selectSql = handleSelect(queryState, selectColumns);
+    String selectSql = handleSelect(queryState, tableQuery.getColumns(), selectColumns);
 
     StringBuilder whereSql = new StringBuilder("\nwhere\n");
 
-    if (queryState.tableQuery.getFilters() != null) {
-      handleResultFilters(queryState.tableQuery.getFilters(), queryState, whereSql);
+    if (tableQuery.getFilters() != null) {
+      handleResultFilters(tableQuery.getFilters(), queryState, whereSql);
       whereSql.append("\nand\n");
     }
-    StringBuilder endSql = handleOrderBy(queryState);
+    StringBuilder endSql = handleOrderBy(queryState, tableQuery.getOrderBy());
     endSql.append(" limit ");
     endSql.append(resultSize);
     if (offset > 0) {
@@ -464,7 +462,7 @@ public class FieldSetQueryBuilder {
     QueryJobConfiguration jobConfiguration = cohortQueryBuilder.buildQuery(participantCriteria,
         selectSql + queryState.fromSql.toString() + whereSql.toString(),
         endSql.toString(),
-        queryState.tableQuery.getTableName(), queryState.paramMap);
+        queryState.mainTableName, queryState.paramMap);
     return new QueryConfiguration(selectColumns.build(), jobConfiguration);
   }
 
