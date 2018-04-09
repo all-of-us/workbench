@@ -62,7 +62,6 @@ const activatedRouteStub  = {
       {path: 'workspace'},
       {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
       {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      {path: 'share'}
     ],
     params: {
       'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,

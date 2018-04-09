@@ -1,4 +1,3 @@
-import {Location} from '@angular/common';
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -33,7 +32,6 @@ export class WorkspaceShareComponent implements OnInit {
   @ViewChild('usernameSharingInput') input: ElementRef;
 
   constructor(
-      private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,
       private workspacesService: WorkspacesService,
