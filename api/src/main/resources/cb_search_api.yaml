@@ -410,24 +410,25 @@ definitions:
       - operands
     properties:
       name:
-        description: Semantic name of the operator
-        type: string
+        description: name/type of modifier
+        $ref: "#/definitions/ModifierType"
       operator:
         description: Machine name of the operator
-        type: string
+        $ref: "#/definitions/Operator"
       operands:
         type: "array"
         items:
           type: string
     example:
       singleValued:
-        name: "age_at_event"
-        operator: "GTE"
+        name: "AGE_AT_EVENT"
+        operator: "GREATER_THAN_OR_EQUAL_TO"
         operands: ["20"]
-      multiValued:
-        name: "age_at_event"
-        operator: "BETWEEN"
-        operands: ["18", "35"]
+
+  ModifierType:
+    type: string
+    description: possible types of modifiers
+    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE]
 
   ChartInfoListResponse:
     type: object

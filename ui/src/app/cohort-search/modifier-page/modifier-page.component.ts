@@ -10,7 +10,7 @@ import {
   CohortSearchState,
 } from '../redux';
 
-import {Modifier} from 'generated';
+import {Modifier, Operator} from 'generated';
 
 @Component({
   selector: 'crit-modifier-page',
@@ -20,6 +20,10 @@ import {Modifier} from 'generated';
 export class ModifierPageComponent implements OnInit, OnDestroy {
   existing = List();
   subscription: Subscription;
+  ageAtEventMap: any;
+  numOfOccurrencesMap: any;
+  eventDateMap: any;
+  ageAtEventMapEntries: any;
 
   form = new FormGroup({
     ageAtEvent: new FormGroup({
@@ -42,6 +46,20 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.ageAtEventMap = new Map();
+    this.ageAtEventMap.set(Operator.EQUAL, 'Equal To');
+    this.ageAtEventMap.set(Operator.GREATERTHAN, 'Greater Than');
+    this.ageAtEventMap.set(Operator.LESSTHAN, 'Less Than');
+    this.ageAtEventMapEntries = Array.of(this.ageAtEventMap.entries());
+    this.numOfOccurrencesMap = new Map();
+    this.numOfOccurrencesMap.set(Operator.EQUAL, 'Equal To');
+    this.numOfOccurrencesMap.set(Operator.GREATERTHAN, 'Greater Than');
+    this.numOfOccurrencesMap.set(Operator.LESSTHAN, 'Less Than');
+    this.eventDateMap = new Map();
+    this.eventDateMap.set(Operator.EQUAL, 'On');
+    this.eventDateMap.set(Operator.GREATERTHAN, 'After');
+    this.eventDateMap.set(Operator.LESSTHAN, 'Before');
+
     this.form.valueChanges.subscribe(console.log);
     this.subscription = this.ngRedux
       .select(activeModifierList)
