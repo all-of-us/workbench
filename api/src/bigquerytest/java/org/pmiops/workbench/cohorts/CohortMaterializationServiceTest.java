@@ -652,11 +652,11 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortPersonFieldSetOrderByGenderConceptIdDesc() {
+  public void testMaterializeCohortPersonFieldSetOrderByGenderConceptIdDescending() {
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept_id"));
-    tableQuery.setOrderBy(ImmutableList.of("gender_concept_id DESC"));
+    tableQuery.setOrderBy(ImmutableList.of("descending(gender_concept_id)"));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -1155,7 +1155,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id"));
-    tableQuery.setOrderBy(ImmutableList.of("gender_concept.vocabulary_id", "person_id DESC"));
+    tableQuery.setOrderBy(ImmutableList.of("gender_concept.vocabulary_id", "descending(person_id)"));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,

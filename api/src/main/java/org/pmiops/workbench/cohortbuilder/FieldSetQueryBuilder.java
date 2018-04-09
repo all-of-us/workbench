@@ -42,7 +42,7 @@ public class FieldSetQueryBuilder {
 
   private static final String TABLE_SEPARATOR = ".";
   private static final String ALIAS_SEPARATOR = "_";
-  private static final String DESCENDING_SUFFIX = " DESC";
+  private static final String DESCENDING_PREFIX = "DESCENDING(";
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
   private static final String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss zzz";
 
@@ -57,22 +57,14 @@ public class FieldSetQueryBuilder {
    * to pass around a whole bunch of arguments.
    */
   private static final class QueryState {
-    // SQL for the select clause
-    private StringBuilder selectSql = new StringBuilder();
     // SQL for the from clause
     private StringBuilder fromSql = new StringBuilder();
-    // SQL for the where clause
-    private StringBuilder whereSql = new StringBuilder();
-    // SQL for order by, limit, offset
-    private StringBuilder endSql = new StringBuilder();
     // A map of parameter values for bound parameters referenced in the query
     private Map<String, QueryParameterValue> paramMap = new HashMap<>();
     // A map from table name to (column name -> ColumnConfig) for tables referenced in the query.
     private Map<String, Map<String, ColumnConfig>> columnConfigTable = new HashMap<>();
     // A map from table aliases to SQL table names.
     private Map<String, String> aliasToTableName = new HashMap<>();
-    // The columns selected in the select clause.
-    private ImmutableList.Builder<ColumnInfo> selectColumns = ImmutableList.builder();
     // The query being turned into SQL.
     private TableQuery tableQuery;
     // The CDR schema configuration.
@@ -142,8 +134,8 @@ public class FieldSetQueryBuilder {
   }
 
   private TableNameAndAlias getTableNameAndAlias(List<String> columnParts, QueryState queryState) {
-    String tableName = null;
-    String tableAlias = queryState.tableQuery.getTableName();
+    String tableName = queryState.tableQuery.getTableName();
+    String tableAlias = tableName;
     int i;
     Map<String, ColumnConfig> tableColumns = queryState.mainTableColumns;
     // Look for the longest already-joined table alias
@@ -168,7 +160,7 @@ public class FieldSetQueryBuilder {
       if (foreignKeyTable == null) {
         throw new BadRequestException("Column is not a foreign key: " + foreignKeyColumn);
       }
-      tableColumns = getColumnConfigs(queryState, foreignKeyTable,false);
+      tableColumns = getColumnConfigs(queryState, foreignKeyTable, false);
       ColumnConfig foreignKeyTablePrimaryKey = findPrimaryKey(tableColumns.values());
 
       String foreignKeyAlias = toTableAlias(columnParts, j + 1);
@@ -183,11 +175,13 @@ public class FieldSetQueryBuilder {
     return new TableNameAndAlias(tableName, tableAlias);
   }
 
-  private void handleSelect(QueryState queryState) {
+  private String handleSelect(QueryState queryState,
+      ImmutableList.Builder<ColumnInfo> selectColumns) {
+    StringBuilder selectSql = new StringBuilder();
     TableQuery tableQuery = queryState.tableQuery;
     List<String> columnNames = tableQuery.getColumns();
     String tableName = tableQuery.getTableName();
-    queryState.selectSql.append("select ");
+    selectSql.append("select ");
 
     queryState.fromSql.append(String.format("\nfrom `${projectId}.${dataSetId}.%s` %s",
         tableName, tableName));
@@ -197,7 +191,7 @@ public class FieldSetQueryBuilder {
       if (first) {
         first = false;
       } else {
-        queryState.selectSql.append(", ");
+        selectSql.append(", ");
       }
       List<String> columnParts = parseColumnName(columnName);
       if (columnParts.size() == 1) {
@@ -206,9 +200,9 @@ public class FieldSetQueryBuilder {
           throw new BadRequestException(
               String.format("No column %s found on table %s", tableName, columnName));
         }
-        queryState.selectSql.append(String.format("%s.%s %s",
+        selectSql.append(String.format("%s.%s %s",
             tableName, columnName, columnName));
-        queryState.selectColumns.add(new ColumnInfo(columnName, columnConfig));
+        selectColumns.add(new ColumnInfo(columnName, columnConfig));
       } else {
 
         TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts,
@@ -222,16 +216,17 @@ public class FieldSetQueryBuilder {
               String.format("No column %s found on table %s", tableNameAndAlias.tableName,
                   columnEnd));
         }
-        queryState.selectSql.append(String.format("%s.%s %s_%s",
+        selectSql.append(String.format("%s.%s %s_%s",
             tableNameAndAlias.alias, columnEnd,
             tableNameAndAlias.alias, columnEnd));
-        queryState.selectColumns.add(new ColumnInfo(columnName, columnConfig));
+        selectColumns.add(new ColumnInfo(columnName, columnConfig));
       }
     }
-
+    return selectSql.toString();
   }
+
   private void handleComparison(ColumnFilter columnFilter, ColumnInfo columnInfo,
-      QueryState queryState) {
+      QueryState queryState, StringBuilder whereSql) {
     ColumnConfig columnConfig = columnInfo.getColumnConfig();
     String paramName = "p" + queryState.paramMap.size();
     Operator operator = columnFilter.getOperator();
@@ -288,21 +283,21 @@ public class FieldSetQueryBuilder {
       if (operator != Operator.EQUAL && operator != Operator.NOT_EQUAL) {
         throw new BadRequestException("Unsupported operator for valueNull: " + operator);
       }
-      queryState.whereSql.append(columnInfo.getColumnName());
+      whereSql.append(columnInfo.getColumnName());
       if (operator.equals(Operator.EQUAL)) {
-        queryState.whereSql.append(" is null\n");
+        whereSql.append(" is null\n");
       } else {
-        queryState.whereSql.append(" is not null\n");
+        whereSql.append(" is not null\n");
       }
       return;
     }
-    queryState.whereSql.append(String.format("%s %s @%s",
+    whereSql.append(String.format("%s %s @%s",
         columnInfo.getColumnName(), OperatorUtils.getSqlOperator(columnFilter.getOperator()),
         paramName));
   }
 
   private void handleInClause(ColumnFilter columnFilter, ColumnInfo columnInfo,
-      QueryState queryState) {
+      QueryState queryState, StringBuilder whereSql) {
     ColumnConfig columnConfig = columnInfo.getColumnConfig();
     String paramName = "p" + queryState.paramMap.size();
     if (columnFilter.getValue() != null || columnFilter.getValueNumber() != null
@@ -334,7 +329,7 @@ public class FieldSetQueryBuilder {
       queryState.paramMap.put(paramName, QueryParameterValue.array(valueStrings.toArray(new String[0]),
           String.class));
     }
-    queryState.whereSql.append(String.format("%s in unnest(@%s)",
+    whereSql.append(String.format("%s in unnest(@%s)",
         columnInfo.getColumnName(), paramName));
   }
 
@@ -365,7 +360,8 @@ public class FieldSetQueryBuilder {
     }
   }
 
-  private void handleColumnFilter(ColumnFilter columnFilter, QueryState queryState) {
+  private void handleColumnFilter(ColumnFilter columnFilter, QueryState queryState,
+      StringBuilder whereSql) {
     if (Strings.isNullOrEmpty(columnFilter.getColumnName())) {
       throw new BadRequestException("Missing column name for column filter");
     }
@@ -377,23 +373,24 @@ public class FieldSetQueryBuilder {
     }
 
     if (columnFilter.getOperator().equals(Operator.IN)) {
-      handleInClause(columnFilter, columnInfo, queryState);
+      handleInClause(columnFilter, columnInfo, queryState, whereSql);
     } else {
-      handleComparison(columnFilter, columnInfo, queryState);
+      handleComparison(columnFilter, columnInfo, queryState, whereSql);
     }
   }
 
-  private void handleResultFilters(ResultFilters resultFilters, QueryState queryState) {
+  private void handleResultFilters(ResultFilters resultFilters, QueryState queryState,
+      StringBuilder whereSql) {
     if (!((resultFilters.getColumnFilter() != null) ^ (resultFilters.getAllOf() != null)
         ^ (resultFilters.getAnyOf() != null))) {
       throw new BadRequestException("Exactly one of allOf, anyOf, or columnFilter must be "
           + "specified for result filters");
     }
     if (resultFilters.getNot() != null && resultFilters.getNot()) {
-      queryState.whereSql.append("not ");
+      whereSql.append("not ");
     }
     if (resultFilters.getColumnFilter() != null) {
-      handleColumnFilter(resultFilters.getColumnFilter(), queryState);
+      handleColumnFilter(resultFilters.getColumnFilter(), queryState, whereSql);
     } else {
       String operator;
       List<ResultFilters> childFilters;
@@ -404,23 +401,23 @@ public class FieldSetQueryBuilder {
         operator = "or";
         childFilters = resultFilters.getAnyOf();
       }
-      queryState.whereSql.append("(");
+      whereSql.append("(");
       boolean first = true;
       for (ResultFilters childFilter : childFilters) {
         if (first) {
           first = false;
         } else {
-          queryState.whereSql.append("\n");
-          queryState.whereSql.append(operator);
-          queryState.whereSql.append("\n");
+          whereSql.append("\n");
+          whereSql.append(operator);
+          whereSql.append("\n");
         }
-        handleResultFilters(childFilter, queryState);
+        handleResultFilters(childFilter, queryState, whereSql);
       }
-      queryState.whereSql.append(")\n");
+      whereSql.append(")\n");
     }
   }
 
-  private void handleOrderBy(QueryState queryState) {
+  private StringBuilder handleOrderBy(QueryState queryState) {
     List<String> orderBy = queryState.tableQuery.getOrderBy();
     if (orderBy.isEmpty()) {
       throw new BadRequestException("Order by list must not be empty");
@@ -429,15 +426,17 @@ public class FieldSetQueryBuilder {
     for (String columnName : orderBy) {
       String columnStart = columnName;
       boolean descending = false;
-      if (columnName.toUpperCase().endsWith(DESCENDING_SUFFIX)) {
-        columnStart = columnName.substring(0, columnName.length() - DESCENDING_SUFFIX.length());
+      if (columnName.toUpperCase().startsWith(DESCENDING_PREFIX) && columnName.endsWith(")")) {
+        columnStart = columnName.substring(DESCENDING_PREFIX.length(), columnName.length() - 1);
         descending = true;
       }
       ColumnInfo columnInfo = getColumnInfo(queryState, columnStart);
-      orderByColumns.add(descending ? columnInfo.getColumnName() + " DESC" : columnInfo.getColumnName());
+      orderByColumns.add(descending ? columnInfo.getColumnName() + " DESC"
+          : columnInfo.getColumnName());
     }
-    queryState.endSql.append("order by ");
-    queryState.endSql.append(Joiner.on(", ").join(orderByColumns));
+    StringBuilder orderBySql = new StringBuilder("order by ");
+    orderBySql.append(Joiner.on(", ").join(orderByColumns));
+    return orderBySql;
   }
 
   public QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -446,27 +445,27 @@ public class FieldSetQueryBuilder {
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
     queryState.tableQuery = tableQueryAndConfig.getTableQuery();
 
-    handleSelect(queryState);
+    ImmutableList.Builder<ColumnInfo> selectColumns = ImmutableList.builder();
+    String selectSql = handleSelect(queryState, selectColumns);
 
-    queryState.whereSql.append("\nwhere\n");
+    StringBuilder whereSql = new StringBuilder("\nwhere\n");
 
     if (queryState.tableQuery.getFilters() != null) {
-      handleResultFilters(queryState.tableQuery.getFilters(), queryState);
-      queryState.whereSql.append("\nand\n");
+      handleResultFilters(queryState.tableQuery.getFilters(), queryState, whereSql);
+      whereSql.append("\nand\n");
     }
-    handleOrderBy(queryState);
-    queryState.endSql.append(" limit ");
-    queryState.endSql.append(resultSize);
+    StringBuilder endSql = handleOrderBy(queryState);
+    endSql.append(" limit ");
+    endSql.append(resultSize);
     if (offset > 0) {
-      queryState.endSql.append(" offset ");
-      queryState.endSql.append(offset);
+      endSql.append(" offset ");
+      endSql.append(offset);
     }
     QueryJobConfiguration jobConfiguration = cohortQueryBuilder.buildQuery(participantCriteria,
-        queryState.selectSql.toString() + queryState.fromSql.toString() +
-            queryState.whereSql.toString(),
-        queryState.endSql.toString(),
+        selectSql + queryState.fromSql.toString() + whereSql.toString(),
+        endSql.toString(),
         queryState.tableQuery.getTableName(), queryState.paramMap);
-    return new QueryConfiguration(queryState.selectColumns.build(), jobConfiguration);
+    return new QueryConfiguration(selectColumns.build(), jobConfiguration);
   }
 
   public Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
