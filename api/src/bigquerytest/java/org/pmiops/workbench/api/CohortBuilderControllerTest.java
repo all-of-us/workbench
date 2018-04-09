@@ -103,6 +103,11 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 "death");
     }
 
+    @Override
+    public String getTestDataDirectory() {
+        return CB_DATA;
+    }
+
     @Before
     public void setUp() {
         cdrVersion = new CdrVersion();
