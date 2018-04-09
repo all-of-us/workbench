@@ -8,17 +8,17 @@ import {
   CohortReviewService,
   PageFilterRequest,
   PageFilterType,
-  ParticipantProcedure,
-  ParticipantProceduresColumns as Columns,
+  ParticipantObservation,
+  ParticipantObservationsColumns as Columns,
   SortOrder,
 } from 'generated';
 
 @Component({
-  selector: 'app-detail-procedures',
-  templateUrl: './detail-procedures.component.html',
-  styleUrls: ['./detail-procedures.component.css']
+  selector: 'app-detail-observations',
+  templateUrl: './detail-observations.component.html',
+  styleUrls: ['./detail-observations.component.css']
 })
-export class DetailProceduresComponent implements OnInit, OnDestroy {
+export class DetailObservationsComponent implements OnInit, OnDestroy {
   /* Maps string values to Enum values */
   readonly reverseColumnEnum = {
     itemDate: Columns.ItemDate,
@@ -32,7 +32,7 @@ export class DetailProceduresComponent implements OnInit, OnDestroy {
 
   loading = false;
 
-  procedures: ParticipantProcedure[];
+  observations: ParticipantObservation[];
   request;
   totalCount: number;
   apiCaller: (any) => Observable<any>;
@@ -69,7 +69,7 @@ export class DetailProceduresComponent implements OnInit, OnDestroy {
           includeTotal: true,
           sortOrder: SortOrder.Asc,
           sortColumn: Columns.ItemDate,
-          pageFilterType: PageFilterType.ParticipantProcedures,
+          pageFilterType: PageFilterType.ParticipantObservations,
         };
 
         this.callApi();
@@ -83,10 +83,10 @@ export class DetailProceduresComponent implements OnInit, OnDestroy {
   callApi() {
     this.loading = true;
     this.apiCaller(this.request).subscribe(resp => {
-      this.procedures = resp.items;
+      this.observations = resp.items;
       this.totalCount = resp.count;
       this.request = resp.pageRequest;
-      this.request.pageFilterType = PageFilterType.ParticipantProcedures;
+      this.request.pageFilterType = PageFilterType.ParticipantObservations;
       this.loading = false;
     });
   }

@@ -67,6 +67,9 @@ export const activeParameterList = (state): List<any> =>
     .getIn(['wizard', 'item', 'searchParameters'], List())
     .map(id => state.getIn(['wizard', 'selections', id]));
 
+export const activeModifierList = (state): List<any> =>
+  state.getIn(['wizard', 'item', 'modifiers'], List());
+
 export const isParameterActive = paramId => (state): boolean =>
   state
     .getIn(['wizard', 'item', 'searchParameters'], List())

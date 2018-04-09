@@ -1,4 +1,4 @@
-import {ChartInfo, Criteria, SearchRequest} from 'generated';
+import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
@@ -18,6 +18,8 @@ export const CHARTS_REQUEST_ERROR = 'CHARTS_REQUEST_ERROR';
 export const INIT_SEARCH_GROUP = 'INIT_SEARCH_GROUP';
 export const ADD_PARAMETER = 'ADD_PARAMETER';
 export const REMOVE_PARAMETER = 'REMOVE_PARAMETER';
+export const ADD_MODIFIER = 'ADD_MODIFIER';
+export const REMOVE_MODIFIER = 'REMOVE_MODIFIER';
 export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
 export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
@@ -128,6 +130,14 @@ export interface ActionTypes {
     type: typeof REMOVE_PARAMETER;
     parameterId: string;
   };
+  ADD_MODIFIER: {
+    type: typeof ADD_MODIFIER;
+    modifier: Modifier;
+  };
+  REMOVE_MODIFIER: {
+    type: typeof REMOVE_MODIFIER;
+    modifier: Modifier;
+  };
   SET_WIZARD_FOCUS: {
     type: typeof SET_WIZARD_FOCUS;
     criterion: any;
@@ -196,6 +206,8 @@ export type RootAction =
   | ActionTypes[typeof INIT_SEARCH_GROUP]
   | ActionTypes[typeof ADD_PARAMETER]
   | ActionTypes[typeof REMOVE_PARAMETER]
+  | ActionTypes[typeof ADD_MODIFIER]
+  | ActionTypes[typeof REMOVE_MODIFIER]
   | ActionTypes[typeof SET_WIZARD_FOCUS]
   | ActionTypes[typeof CLEAR_WIZARD_FOCUS]
   | ActionTypes[typeof REMOVE_ITEM]

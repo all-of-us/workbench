@@ -1,7 +1,7 @@
 <div class="area-block">
   <div class="table-header">
     <h3 class="table-header-descriptor">Your Workspaces</h3>
-    <div class="alert alert-warning">
+    <div class="alert alert-warning" *ngIf="twoFactorBannerEnabled">
       <div class="alert-items" style="width: 24rem;">
         <div class="alert-item static">
           <span class="alert-text">

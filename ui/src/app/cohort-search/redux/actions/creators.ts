@@ -18,6 +18,8 @@ import {
   INIT_SEARCH_GROUP,
   ADD_PARAMETER,
   REMOVE_PARAMETER,
+  ADD_MODIFIER,
+  REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
   REMOVE_ITEM,
@@ -34,7 +36,7 @@ import {
 } from './types';
 /* tslint:enable:ordered-imports */
 
-import {ChartInfo, Criteria, SearchRequest} from 'generated';
+import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 /**
  * Criteria loading mgmt
@@ -122,6 +124,16 @@ export const removeParameter =
   (parameterId: string
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
   ({type: REMOVE_PARAMETER, parameterId});
+
+export const addModifier =
+  (modifier: Modifier
+  ): ActionTypes[typeof ADD_MODIFIER] =>
+  ({type: ADD_MODIFIER, modifier});
+
+export const removeModifier =
+  (modifier: Modifier
+  ): ActionTypes[typeof REMOVE_MODIFIER] =>
+  ({type: REMOVE_MODIFIER, modifier});
 
 export const setWizardFocus =
   (criterion: any

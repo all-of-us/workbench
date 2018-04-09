@@ -1,6 +1,7 @@
 # UI project management commands and command-line flag definitions.
 
 require "optparse"
+require "set"
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/swagger"
 require_relative "../../aou-utils/utils/common"
@@ -47,23 +48,24 @@ Common.register_command({
   :fn => Proc.new { |*args| swagger_regen(*args) }
 })
 
-class DevUpOptions
-  ENV_CHOICES = %W{local-test local test prod}
+class BuildOptions
+  # Keep in sync with .angular-cli.json.
+  ENV_CHOICES = %W{local-test local test staging stable}
   attr_accessor :env
 
   def initialize
-    self.env = nil
+    self.env = "dev"
   end
 
-  def parse args
+  def parse cmd_name, args
     parser = OptionParser.new do |parser|
-      parser.banner = "Usage: ./project.rb dev-up [options]"
+      parser.banner = "Usage: ./project.rb #{cmd_name} [options]"
       parser.on(
-          "--environment ENV", ENV_CHOICES, "Environment [local-test (default), local, test, prod]") do |v|
+        "--environment ENV", ENV_CHOICES,
+        "Environment (default: local-test): [#{ENV_CHOICES.join(" ")}]") do |v|
         # The default environment file (called "dev" in Angular language)
         # compiles a local server to run against the deployed remote test API.
-        # Leave this unset to get that default.
-        self.env = v == "local-test" ? nil : v
+        self.env = v == "local-test" ? "dev" : v
       end
     end
     parser.parse args
@@ -75,10 +77,11 @@ end
 class DeployUI
   attr_reader :common, :opts
 
-  def initialize(command_name, args)
+  def initialize(cmd_name, args)
     @common = Common.new
+    @cmd_name = cmd_name
     @args = args
-    @parser = create_parser(command_name)
+    @parser = create_parser(cmd_name)
     @opts = Options.new
   end
 
@@ -126,10 +129,8 @@ class DeployUI
       "all-of-us-rw-stable" => "stable",
     }
     environment_name = environment_names[@opts.project]
-    common.run_inline %W{yarn install}
-    # TODO(calbach): Upgrade this to --prod for the full production build
-    # treatment. Need to fix a bunch of errors to move ahead with that.
-    common.run_inline %W{yarn run build --aot --environment=#{environment_name} --no-watch --no-progress}
+
+    build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, service_account=@opts.account).run do
       common.run_inline %W{gcloud app deploy
         --project #{@opts.project}
@@ -140,9 +141,35 @@ class DeployUI
   end
 end
 
+def build(cmd_name, args)
+  ensure_docker cmd_name, args
+  options = BuildOptions.new.parse(cmd_name, args)
+
+  common = Common.new
+  common.run_inline %W{yarn install}
+
+  # Just use --aot for "test", which catches many compilation issues. Go full
+  # --prod (includes --aot) for other environments. Don't use full --prod in the
+  # test environment, as it takes twice as long to compile (1m vs 2m on 4/5/18)
+  # and also uglifies the source.
+  # See https://github.com/angular/angular-cli/wiki/build#--dev-vs---prod-builds.
+  optimize = "--aot"
+  if Set['staging', 'stable'].include?(options.env)
+    optimize = "--prod"
+  end
+  common.run_inline %W{yarn run build
+    #{optimize} --environment=#{options.env} --no-watch --no-progress}
+end
+
+Common.register_command({
+  :invocation => "build",
+  :description => "Builds the UI for the given environment.",
+  :fn => lambda { |*args| build("build", args) }
+})
+
 def deploy_ui(cmd_name, args)
   ensure_docker cmd_name, args
-  DeployUI.new("deploy-ui", args).run
+  DeployUI.new(cmd_name, args).run
 end
 
 Common.register_command({
@@ -153,12 +180,11 @@ Common.register_command({
 
 def dev_up(*args)
   common = Common.new
-
-  options = DevUpOptions.new.parse(args)
+  options = BuildOptions.new.parse("dev-up", args)
 
   install_dependencies
 
-  ENV["ENV_FLAG"] = options.env ? "--environment=#{options.env}" : ""
+  ENV["ENV_FLAG"] = "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
   swagger_regen()
   common.run_inline %W{docker-compose run -d --service-ports tests}

@@ -55,6 +55,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
+  firstSignIn: Date;
   constructor(
       private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
@@ -64,7 +65,16 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.queryBillingStatus();
+    this.profileService.getMe().subscribe((profile: Profile) => {
+      this.firstSignIn = new Date(profile.firstSignInTime);
+      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+        this.billingProjectInitialized = true;
+      } else {
+        this.billingProjectQuery = setTimeout(() => {
+          this.queryBillingStatus();
+        }, 10000);
+      }
+    });
     this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
@@ -101,4 +111,16 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   addWorkspace(): void {
     this.router.navigate(['workspace/build'], {relativeTo : this.route});
   }
+
+  get twoFactorBannerEnabled() {
+    if (this.firstSignIn == null) {
+      return false;
+    }
+    // Don't show the banner after 1 week as their account would
+    // have been disabled had they not enabled 2-factor auth.
+    if (new Date().getTime() - this.firstSignIn.getTime() > 1 * 7 * 24 * 60 * 60 * 1000) {
+      return false;
+    }
+    return true;
+}
 }

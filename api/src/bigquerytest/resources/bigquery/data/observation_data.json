@@ -17,5 +17,43 @@
     "observation_source_concept_id":5,
     "unit_source_value":"5",
     "qualifier_source_value":"5"
+  },
+  {
+    "observation_id":6,
+    "person_id":102246,
+    "observation_concept_id":6,
+    "observation_date":"2009-12-03",
+    "observation_datetime":"2009-12-03 05:00:00 UTC",
+    "observation_type_concept_id":6,
+    "value_as_number":6,
+    "value_as_string":"sourceValue",
+    "value_as_concept_id":6,
+    "qualifier_concept_id":6,
+    "unit_concept_id":6,
+    "provider_id":6,
+    "visit_occurrence_id":6,
+    "observation_source_value":"6",
+    "observation_source_concept_id":6,
+    "unit_source_value":"6",
+    "qualifier_source_value":"6"
+  },
+  {
+    "observation_id":7,
+    "person_id":102246,
+    "observation_concept_id":7,
+    "observation_date":"2009-12-04",
+    "observation_datetime":"2009-12-04 05:00:00 UTC",
+    "observation_type_concept_id":7,
+    "value_as_number":7,
+    "value_as_string":"sourceValue",
+    "value_as_concept_id":7,
+    "qualifier_concept_id":7,
+    "unit_concept_id":7,
+    "provider_id":7,
+    "visit_occurrence_id":7,
+    "observation_source_value":"7",
+    "observation_source_concept_id":7,
+    "unit_source_value":"7",
+    "qualifier_source_value":"7"
   }
 ]

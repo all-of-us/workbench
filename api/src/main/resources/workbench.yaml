@@ -1221,6 +1221,9 @@ definitions:
       contactEmail:
         description: email address that can be used to contact the user
         type: string
+      firstSignInTime:
+        type: integer
+        format: int64
       enabledInFireCloud:
         description: true if the user is enabled in FireCloud, false if they are not
         type: boolean

@@ -23,13 +23,13 @@
   width: 100%!important;
 }
 
-#criteria-page {
+.page {
   height: 100%;
   display: flex;
   flex-flow: column;
 }
 
-#criteria-explorer {
+.main-panel {
   width: 100%;
   height: 70%;
   overflow-y: auto;
@@ -38,7 +38,7 @@
   position: relative;
 }
 
-#criteria-selection {
+.selection {
   width: 100%;
   height: 30%;
   flex: 3;
@@ -48,14 +48,14 @@
 }
 
 @media all and (min-width: 1200px) {
-  #criteria-page {
+  .page {
     flex-flow: row;
   }
-  #criteria-explorer{
+  .main-panel {
     width: 70%;
     height: 100%;
   }
-  #criteria-selection {
+  .selection {
     width: 30%;
     height: 100%;
   }

@@ -20,12 +20,28 @@
     rxjs "^5.5.6"
     source-map "^0.5.6"
 
+"@angular-devkit/core@0.4.7":
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-0.4.7.tgz#c918d200d35eabe20660feb0b4f9bb145b016dba"
+  dependencies:
+    ajv "~5.5.1"
+    chokidar "^1.7.0"
+    rxjs "^5.5.8"
+    source-map "^0.5.6"
+
 "@angular-devkit/schematics@0.0.52":
   version "0.0.52"
   resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-0.0.52.tgz#cbd2f42778b50d6422a254ffaec05ad4ef3cb6c0"
   dependencies:
     "@ngtools/json-schema" "^1.1.0"
     rxjs "^5.5.6"
+
+"@angular-devkit/schematics@0.4.7":
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-0.4.7.tgz#671eda6102bf80e580727f6979a6f30715872f73"
+  dependencies:
+    "@ngtools/json-schema" "^1.1.0"
+    rxjs "^5.5.8"
 
 "@angular-redux/store@^6.6.0":
   version "6.6.0"
@@ -161,17 +177,19 @@
   dependencies:
     tslib "^1.7.1"
 
-"@clr/angular@^0.11.2-patch":
-  version "0.11.2-patch"
-  resolved "https://registry.yarnpkg.com/@clr/angular/-/angular-0.11.2-patch.tgz#39597f419b06903b2fe8d9adb173799d1891960f"
+"@clr/angular@^0.11.12":
+  version "0.11.12"
+  resolved "https://registry.yarnpkg.com/@clr/angular/-/angular-0.11.12.tgz#4d8c2d432b05ad8f01a2f08d6cc1078e6b69f53f"
+  dependencies:
+    tslib "^1.7.1"
 
-"@clr/icons@^0.11.2-patch":
-  version "0.11.2-patch"
-  resolved "https://registry.yarnpkg.com/@clr/icons/-/icons-0.11.2-patch.tgz#0d57cb1c8ad13b74ba65bb4a9f92beccc72d1b91"
+"@clr/icons@^0.11.12":
+  version "0.11.12"
+  resolved "https://registry.yarnpkg.com/@clr/icons/-/icons-0.11.12.tgz#db708e587ac0fe2a3ef270c9c900558c94997f33"
 
-"@clr/ui@^0.11.2-patch":
-  version "0.11.2-patch"
-  resolved "https://registry.yarnpkg.com/@clr/ui/-/ui-0.11.2-patch.tgz#05ebd31ecb432562fae2495794ec614c20676803"
+"@clr/ui@^0.11.12":
+  version "0.11.12"
+  resolved "https://registry.yarnpkg.com/@clr/ui/-/ui-0.11.12.tgz#e6a08f3d0c716f148686773f47d15ddd42d0d91a"
 
 "@ngtools/json-schema@1.1.0", "@ngtools/json-schema@^1.1.0":
   version "1.1.0"
@@ -822,7 +840,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-bootstrap@^4.0.0-alpha.5:
+bootstrap@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.0.0.tgz#ceb03842c145fcc1b9b4e15da2a05656ba68469a"
 
@@ -4503,9 +4521,9 @@ normalize-url@^1.4.0:
     query-string "^4.1.0"
     sort-keys "^1.0.0"
 
-nouislider@^11.0.3:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/nouislider/-/nouislider-11.0.3.tgz#a45a31bb7846bbced498afa514a513da197d22b2"
+nouislider@10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/nouislider/-/nouislider-10.0.0.tgz#166145168bc05701ef5168c17d171f79154c174e"
 
 npm-run-path@^2.0.0:
   version "2.0.2"
@@ -5705,6 +5723,12 @@ rw@1:
 rxjs@^5.5.6:
   version "5.5.6"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.6.tgz#e31fb96d6fd2ff1fd84bcea8ae9c02d007179c02"
+  dependencies:
+    symbol-observable "1.0.1"
+
+rxjs@^5.5.8:
+  version "5.5.8"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.8.tgz#b2b0809a57614ad6254c03d7446dea0d83ca3791"
   dependencies:
     symbol-observable "1.0.1"
 

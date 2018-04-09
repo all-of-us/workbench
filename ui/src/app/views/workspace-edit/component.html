@@ -15,11 +15,7 @@
         <div>National Institute of Health:</div>
       </span>
     </div>
-
     <div>
-      <h3>Research Purpose</h3>
-      <!-- TODO: Real description of workspace purpose -->
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar tempor. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
       <div class="card">
         <h4>Describe your research purpose:</h4>
         <textarea class="input description" name="workspace-description"
@@ -27,7 +23,7 @@
         </textarea>
       </div>
       <div class="card">
-        <h4>Please select all that apply</h4>
+        <h4>Please select all data use categories that apply for your current study</h4>
         <div class="form-group">
           <div class="checkbox-group">
             <clr-checkbox
@@ -35,122 +31,149 @@
                 id="disease-focused-research"
                 [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch"
                 [clrDisabled]="mode == Mode.Edit">
-              Disease focused research
+              <h3>Disease focused research</h3>
             </clr-checkbox>
-            <input type="text" class="input" name="disease-specification"
-                [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
-                placeholder="Name of Disease">
-            <span style="display: inline-block; vertical-align: bottom; padding-left: 1rem; width: 25rem">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-            </span>
+            <div style="display: flex">
+              <input type="text" class="input" name="disease-specification"
+                  [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
+                  placeholder="Name of Disease">
+              <span style="vertical-align: bottom; padding-left: 1rem; width: 18rem">
+                The primary purpose of the research is to learn more about a particular disease or disorder
+                (for example, type 2 diabetes), a trait (for example, blood pressure), or a set of related conditions
+                (for example, autoimmune diseases, psychiatric disorders).
+              </span>
+            </div>
           </div>
-          <div class="two-column">
+          <div class="row">
             <div class="checkbox-group">
-              <clr-checkbox
-                  name="methods-development"
-                  id="methods-development"
-                  [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
-                  [clrDisabled]="mode == Mode.Edit">
-                Methods development/validation study
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-              </div>
-            </div>
-            <div class="checkbox-group">
-              <clr-checkbox
-                  name="control-set"
-                  id="control-set"
-                  [(ngModel)]="workspace.researchPurpose.controlSet"
-                  [clrDisabled]="mode == Mode.Edit">
-                Control set
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-              </div>
-            </div>
-            <div class="checkbox-group">
-              <clr-checkbox
-                  name="commercial-purpose"
-                  id="commercial-purpose"
-                  [(ngModel)]="workspace.researchPurpose.commercialPurpose"
-                  [clrDisabled]="mode == Mode.Edit">
-                Commercial purpose/entity
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-              </div>
-            </div>
-            <div class="checkbox-group">
-              <div (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"
-                  style="cursor: pointer;">
-                <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation"
-                    shape="minus-circle"></clr-icon>
-                <clr-icon *ngIf="!workspace.researchPurpose.containsUnderservedPopulation"
-                    shape="plus-circle"></clr-icon>
-                <div style="display: inline-block;">
-                  Includes an underserved population
+              <div style="display: flex">
+                <clr-checkbox
+                    name="methods-development"
+                    id="methods-development"
+                    [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
+                    [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-methods-development"><h3>Methods development/validation study</h3></label>
+                  <div>
+                    The primary purpose of the research is to develop and/or validate new methods/tools
+                    for analyzing or interpreting data (for example, developing more powerful methods to detect
+                    epistatic, gene-environment, or other types of complex interactions in genome-wide
+                    association studies). Data will be used for developing and/or validating new methods.
+                  </div>
                 </div>
               </div>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+            </div>
+            <div class="checkbox-group">
+              <div style="display: flex">
+                <clr-checkbox
+                        name="aggregate-analysis"
+                        id="aggregate-analysis"
+                        [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
+                        [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3>Aggregate analysis to understand variation in general population</h3></label>
+                  <div>
+                    The primary purpose of the research is to understand variation in the
+                    general population (for example, genetic substructure of a population).
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="two-column">
+          <div class="row">
             <div class="checkbox-group">
-              <clr-checkbox
-                  name="aggregate-analysis"
-                  id="aggregate-analysis"
-                  [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
-                  [clrDisabled]="mode == Mode.Edit">
-                Aggregate analysis to understand variation in general population
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              <div style="display: flex">
+                <clr-checkbox
+                    name="control-set"
+                    id="control-set"
+                    [(ngModel)]="workspace.researchPurpose.controlSet"
+                    [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-control-set"><h3>Control Set</h3></label>
+                  <div>
+                    All of Us data will be used  increase the number of controls available for a
+                    comparison group (for example, a case-control study) to another dataset.
+                  </div>
+                </div>
               </div>
             </div>
             <div class="checkbox-group">
-              <clr-checkbox
-                  name="ancestry"
-                  id="ancestry"
-                  [(ngModel)]="workspace.researchPurpose.ancestry"
-                  [clrDisabled]="mode == Mode.Edit">
-                Population origins or ancestry
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-              </div>
-            </div>
-            <div class="checkbox-group">
-              <clr-checkbox
-                  name="population"
-                  id="population"
-                  [(ngModel)]="workspace.researchPurpose.population"
-                  [clrDisabled]="mode == Mode.Edit">
-                Restricted to a specific population
-              </clr-checkbox>
-              <!-- TODO: Dropdown for population-->
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
-              </div>
-            </div>
-            <!-- TODO: Replace with real request approval text. -->
-            <div class="checkbox-group">
-              <clr-checkbox
-                  name="requestApproval"
-                  id="requestApproval"
-                  [(ngModel)]="workspace.researchPurpose.reviewRequested"
-                  [clrDisabled]="mode == Mode.Edit">
-                Request a Review of Your Research Purpose
-              </clr-checkbox>
-              <div>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+              <div style="display: flex">
+                <clr-checkbox
+                        name="ancestry"
+                        id="ancestry"
+                        [(ngModel)]="workspace.researchPurpose.ancestry"
+                        [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-ancestry"><h3>Population origins or ancestry</h3></label>
+                  <div>
+                    The primary purpose of the research is to study the ancestry or origins
+                    of a specific population.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <div class="row">
+            <div class="checkbox-group">
+              <div style="display: flex">
+                <clr-checkbox
+                        name="population"
+                        id="population"
+                        [(ngModel)]="workspace.researchPurpose.population"
+                        [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-population"><h3>Restricted to a specific population</h3></label>
+                  <div>
+                    This research will focus on a specific population group. For example: a
+                    specific gender, age group or ethnic group.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="checkbox-group">
+              <div style="display: flex">
+                <clr-checkbox
+                        name="commercial-purpose"
+                        id="commercial-purpose"
+                        [(ngModel)]="workspace.researchPurpose.commercialPurpose"
+                        [clrDisabled]="mode == Mode.Edit">
+                </clr-checkbox>
+                <div>
+                  <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3>Commercial Purpose/entity</h3></label>
+                  <div>
+                    The study is conducted by a for-profit entity and/or in support of a commercial activity.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="checkbox-group">
+              <div style="display: flex">
+                <div (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"
+                    style="cursor: pointer; padding-right: 6px">
+                  <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation"
+                      shape="minus-circle"></clr-icon>
+                  <clr-icon *ngIf="!workspace.researchPurpose.containsUnderservedPopulation"
+                      shape="plus-circle"></clr-icon>
+                </div>
+                <div>
+                  <label class="checkbox-label" (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"><h3>Includes an underserved population</h3></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
           <div *ngIf="workspace.researchPurpose.containsUnderservedPopulation === true" style="padding-top: 1rem">
-            <h5>Additional information underserved population</h5>
+            <h5>Additional information for underserved population</h5>
             <div>Select all that apply. Only options for underserved populations are provided.</div>
             <div *ngFor="let categoryHeader of keys(underservedCategories)">
               <h4 class="underserved-header">{{categoryHeader}}</h4>
@@ -170,6 +193,25 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="checkbox-group">
+          <div style="display: flex">
+            <clr-checkbox
+                    name="request-approval"
+                    id="request-approval"
+                    [(ngModel)]="workspace.researchPurpose.reviewRequested"
+                    [clrDisabled]="mode == Mode.Edit">
+            </clr-checkbox>
+            <div>
+              <label class="checkbox-label" for="clr-checkbox-request-approval"><h3>Request a Review of Your Research Purpose</h3></label>
+              <div>
+                I am concerned about potential stigmatization of research participants. I would like
+                the All Of Us Data Access Committee to review my Research Purpose.
               </div>
             </div>
           </div>

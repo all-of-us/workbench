@@ -15,11 +15,11 @@ import {
 } from '../../utils';
 
 @Component({
-  selector: 'crit-selection',
-  templateUrl: './selection.component.html',
-  styleUrls: ['./selection.component.css'],
+  selector: 'crit-criteria-selection',
+  templateUrl: './criteria-selection.component.html',
+  styleUrls: ['./criteria-selection.component.css'],
 })
-export class SelectionComponent {
+export class CriteriaSelectionComponent {
 
   @select(activeCriteriaType) criteriaType$;
   @select(activeParameterList) criteriaList$;
