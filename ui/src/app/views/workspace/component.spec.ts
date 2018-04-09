@@ -9,12 +9,12 @@ import {ClarityModule} from '@clr/angular';
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {ClusterService, CohortsService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   queryAllByCss,
