@@ -50,8 +50,7 @@ public class FieldSetQueryBuilder {
   private static final DateTimeFormatter DATE_TIME_FORMAT =
       DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
 
-  private final ParticipantCounter participantCounter;
-
+  private final CohortQueryBuilder cohortQueryBuilder;
 
   /**
    * A container for state needed to turn a query into SQL. We pass this around to avoid having
@@ -94,8 +93,8 @@ public class FieldSetQueryBuilder {
   }
 
   @Autowired
-  public FieldSetQueryBuilder(ParticipantCounter participantCounter) {
-    this.participantCounter = participantCounter;
+  public FieldSetQueryBuilder(CohortQueryBuilder cohortQueryBuilder) {
+    this.cohortQueryBuilder = cohortQueryBuilder;
   }
 
   private ColumnConfig findPrimaryKey(Iterable<ColumnConfig> columnConfigs) {
@@ -462,7 +461,7 @@ public class FieldSetQueryBuilder {
       queryState.endSql.append(" offset ");
       queryState.endSql.append(offset);
     }
-    QueryJobConfiguration jobConfiguration = participantCounter.buildQuery(participantCriteria,
+    QueryJobConfiguration jobConfiguration = cohortQueryBuilder.buildQuery(participantCriteria,
         queryState.selectSql.toString() + queryState.fromSql.toString() +
             queryState.whereSql.toString(),
         queryState.endSql.toString(),
