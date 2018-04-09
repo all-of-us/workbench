@@ -1,4 +1,4 @@
-import {DebugElement, ViewChild} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, DebugElement, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
@@ -95,6 +95,7 @@ describe('WorkspaceComponent', () => {
       declarations: [
         WorkspaceComponent
       ],
+      schemas : [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
