@@ -16,11 +16,10 @@
   padding: 0.6rem 0;
 }
 
-.two-column {
+.row .checkbox-group {
   width: 20rem;
   display: inline-block;
   padding-right: 2rem;
-  vertical-align: top;
 }
 
 .three-column {
@@ -38,4 +37,21 @@
 
 .underserved-checkbox {
   padding-bottom: 0.6rem;
+}
+
+.checkbox-inline input[type=checkbox], .checkbox input[type=checkbox] {
+  color: blue;
+}
+
+.checkbox-label {
+  cursor: pointer;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
 }
