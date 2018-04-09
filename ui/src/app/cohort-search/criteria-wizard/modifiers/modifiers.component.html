@@ -7,9 +7,7 @@
         <label for="age-at-event">Age at Event</label>
         <div class="select">
           <select formControlName="operator">
-            <option value="equal">Equal To</option>
-            <option value="greater">Greater Than</option>
-            <option value="lesser">Less Than</option>
+            <option *ngFor="let entry of ageAtEventMapEntries" value="{{ entry[0] }}">{{ entry[1] }}</option>
           </select>
         </div>
         <input type="number"
@@ -32,9 +30,7 @@
         <label for="num-of-occurrences">Number of Occurrences</label>
         <div class="select">
           <select formControlName="operator">
-            <option value="equal">Equal To</option>
-            <option value="greater">Greater Than</option>
-            <option value="lesser">Less Than</option>
+            <option *ngFor="let entry of numOfOccurrencesMap.entries()" value="{{ entry[0] }}">{{ entry[1] }}</option>
           </select>
         </div>
         <input type="number"
@@ -57,9 +53,7 @@
         <label for="event-date">Date of Event</label>
         <div class="select">
           <select formControlName="operator">
-            <option value="equal">On</option>
-            <option value="greater">After</option>
-            <option value="lesser">Before</option>
+            <option *ngFor="let entry of eventDateMap.entries()" value="{{ entry[0] }}">{{ entry[1] }}</option>
           </select>
         </div>
         <input type="date"
