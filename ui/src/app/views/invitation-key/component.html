@@ -3,9 +3,6 @@
   <div *ngIf="!invitationKeyVerifed" class="form-area">
     <div class="form-section">
       <h2>Enter your Invitation Key:</h2>
-      <div class="invitation-help-text">Lorem ipsum dolor sit amet, conser adipiscing elit. Aenean euisimod bibendum
-        laoreet. Proin gravida sit amet lacus accumsan et viverra justo commodo.
-      </div>
       <input type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key">
       <div *ngIf="invitationKeyReq" class="alert alert-danger">
         <strong> Invitation Key is required.</strong>
@@ -17,10 +14,9 @@
     <button id="next" (click)="next()" class="btn btn-primary" style="width: 10rem; height: 2rem">
       Next
     </button>
+    <!-- 
+    TODO: Find a contact person to re-implement
     <h4>Need an invitation key?</h4>
-    <div class="invitation-help-text">Lorem ipsum dolor sit amet, conser adipiscing elit. Aenean euisimod bibendum
-      laoreet.
-    </div>
     <input type="text" class="input" [(ngModel)]="invitationKeyRequestEmail" placeholder="Email Address" style="display: block;">
     <button id="requestKey" (click)="requestKey()" class="btn btn-secondary" style="width: 9rem; height: 1.8rem">
       Request Invite Key
@@ -28,6 +24,7 @@
     <div *ngIf="requestSent">
       <strong> The invitation key request has been sent.</strong>
     </div>
+    -->
   </div>
   <div *ngIf="invitationKeyVerifed">
     <app-account-creation></app-account-creation>
