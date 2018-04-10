@@ -135,6 +135,11 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         );
     }
 
+    @Override
+    public String getTestDataDirectory() {
+        return CB_DATA;
+    }
+
     @Before
     public void setUp() {
         LocalDate personBirthDate = LocalDate.of(1980, Month.FEBRUARY, 17);
