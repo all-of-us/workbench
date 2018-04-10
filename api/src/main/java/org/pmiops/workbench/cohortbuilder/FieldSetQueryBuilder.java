@@ -111,13 +111,13 @@ public class FieldSetQueryBuilder {
   }
 
   private Map<String, ColumnConfig> getColumnConfigs(
-      QueryState queryState, String tableName, boolean cohortTable) {
+      QueryState queryState, String tableName, boolean tableNeedsPersonId) {
     Map<String, ColumnConfig> configTable = queryState.columnConfigTable.get(tableName);
     if (configTable == null) {
       TableConfig tableConfig = queryState.schemaConfig.cohortTables.get(tableName);
       if (tableConfig == null) {
-        if (cohortTable) {
-          throw new BadRequestException("Not a valid cohort table: " + tableName);
+        if (tableNeedsPersonId) {
+          throw new BadRequestException("Not a valid cohort table (lacks person_id column): " + tableName);
         }
         tableConfig = queryState.schemaConfig.metadataTables.get(tableName);
         if (tableConfig == null) {
