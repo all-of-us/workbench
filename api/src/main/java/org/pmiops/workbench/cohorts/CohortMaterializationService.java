@@ -23,6 +23,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohortbuilder.QueryConfiguration;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
@@ -52,8 +53,6 @@ public class CohortMaterializationService {
   static final String PERSON_ID = "person_id";
   @VisibleForTesting
   static final String PERSON_TABLE = "person";
-
-  private static final String DESCENDING_SUFFIX = " DESC";
 
   private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());
 
@@ -91,7 +90,7 @@ public class CohortMaterializationService {
 
   private ColumnConfig findPrimaryKey(TableConfig tableConfig) {
     for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (columnConfig.primaryKey) {
+      if (columnConfig.primaryKey != null && columnConfig.primaryKey) {
         return columnConfig;
       }
     }
@@ -129,34 +128,18 @@ public class CohortMaterializationService {
     if (columnNames == null || columnNames.isEmpty()) {
       // By default, return all columns on the table in question in our configuration.
       tableQuery.setColumns(columnMap.keySet().stream().collect(Collectors.toList()));
-    } else {
-      for (String columnName : columnNames) {
-        // TODO: handle columns on foreign key tables
-        if (!columnMap.containsKey(columnName)) {
-          throw new BadRequestException("Unrecognized column name: " + columnName);
-        }
-      }
     }
     List<String> orderBy = tableQuery.getOrderBy();
     if (orderBy == null || orderBy.isEmpty()) {
       ColumnConfig primaryKey = findPrimaryKey(tableConfig);
-      if (PERSON_ID.equals(primaryKey)) {
+      if (PERSON_ID.equals(primaryKey.name)) {
         tableQuery.setOrderBy(ImmutableList.of(PERSON_ID));
       } else {
         // TODO: consider having per-table default sort order based on e.g. timestamp
         tableQuery.setOrderBy(ImmutableList.of(PERSON_ID, primaryKey.name));
       }
-    } else {
-      for (String columnName : orderBy) {
-        if (columnName.toUpperCase().endsWith(DESCENDING_SUFFIX)) {
-          columnName = columnName.substring(0, columnName.length() - DESCENDING_SUFFIX.length());
-        }
-        if (!columnMap.containsKey(columnName)) {
-          throw new BadRequestException("Invalid column in orderBy: " + columnName);
-        }
-      }
     }
-    return new TableQueryAndConfig(tableQuery, tableConfig, columnMap);
+    return new TableQueryAndConfig(tableQuery, cdrSchemaConfig);
   }
 
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
@@ -206,12 +189,12 @@ public class CohortMaterializationService {
     }
     TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(fieldSet);
 
-    QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.buildQuery(criteria,
+    QueryConfiguration queryConfiguration = fieldSetQueryBuilder.buildQuery(criteria,
         tableQueryAndConfig, limit, offset);
     QueryResult result;
+    QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     try {
-      result = bigQueryService.executeQuery(
-          bigQueryService.filterBigQueryConfig(jobConfiguration));
+      result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
     } catch (BigQueryException e) {
       if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
         throw new ServerUnavailableException("BigQuery was temporarily unavailable, try again later", e);
@@ -234,7 +217,8 @@ public class CohortMaterializationService {
         hasMoreResults = true;
         break;
       }
-      Map<String, Object> resultMap = fieldSetQueryBuilder.extractResults(tableQueryAndConfig, row);
+      Map<String, Object> resultMap = fieldSetQueryBuilder.extractResults(tableQueryAndConfig,
+          queryConfiguration.getSelectColumns(), row);
       results.add(resultMap);
       numResults++;
     }

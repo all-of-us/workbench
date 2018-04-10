@@ -173,5 +173,16 @@
     "concept_code": "F",
     "valid_start_date": "1970-01-01",
     "valid_end_date": "2099-12-31"
+  },
+  {
+    "concept_id": "666666",
+    "concept_name": "Gender vocabulary concept",
+    "domain_id": "Gender",
+    "vocabulary_id": "Gender",
+    "concept_class_id": "Gender",
+    "standard_concept": "x",
+    "concept_code": "y",
+    "valid_start_date": "1970-01-01",
+    "valid_end_date": "2099-12-31"
   }
 ]

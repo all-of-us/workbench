@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +18,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @Import({QueryBuilderFactory.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
@@ -30,7 +30,8 @@ public class ParticipantCounterTest {
 
     @Before
     public void setUp() {
-        this.participantCounter = new ParticipantCounter(new DomainLookupService(criteriaDao));
+        this.participantCounter = new ParticipantCounter(new CohortQueryBuilder(
+            new DomainLookupService(criteriaDao)));
     }
 
     @Test
