@@ -43,8 +43,6 @@ export class WorkspaceNavBarComponent implements OnInit {
         this.wsId = this.route.snapshot.params['wsid'];
     }
 
-
-
     delete(): void {
         this.deleting = true;
         this.workspacesService.deleteWorkspace(
