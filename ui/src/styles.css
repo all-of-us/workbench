@@ -23,23 +23,23 @@ h3, h3 > * {
 }
 
 h1 {
-  font-family: GothamBook;
   font-size: 36px;
 }
 
 h2 {
-  font-family: GothamMedium;
   font-size: 20px;
 }
 
 h3 {
-  font-family: GothamBook;
   font-size: 16px;
 }
 
 body, input[text] {
   color: #888;
-  font-family: Cambria, Georgia;
+}
+
+body * {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
 }
 
 a {
