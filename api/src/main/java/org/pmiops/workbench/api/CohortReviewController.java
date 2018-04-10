@@ -573,8 +573,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         if (data instanceof ParticipantDrug) {
             ((ParticipantDrug) data).signature(bigQueryService.getString(row, rm.get("signature")));
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return data.itemDate(sdf.format(bigQueryService.getDate(row, rm.get("item_date"))))
+        return data.itemDate(bigQueryService.getDate(row, rm.get("item_date")))
                 .standardVocabulary(bigQueryService.getString(row, rm.get("standard_vocabulary")))
                 .standardName(bigQueryService.getString(row, rm.get("standard_name")))
                 .sourceValue(bigQueryService.getString(row, rm.get("source_value")))
