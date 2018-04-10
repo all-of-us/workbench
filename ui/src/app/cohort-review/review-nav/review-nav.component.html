@@ -1,23 +1,20 @@
 <!-- Cohort Review header -->
-<div class="btn-group"
-  [style.display]="'flex'"
-  [style.align-items]="'center'"
-  [style.justify-content]="'center'">
-  <button
-    class="btn"
+<div class="review-header">
+  <a
+    class="header-link"
     title="Go to Cohort Overview"
     routerLink="../overview"
-    routerLinkActive="btn-primary">
-    <clr-icon shape="line-chart"></clr-icon>
+    routerLinkActive="active">
     Overview
-  </button>
+  </a>
 
-  <button
-    class="btn"
+  <div class="vert-bar"></div>
+
+  <a
+    class="header-link"
     title="Go to Participant Browser"
     routerLink="../participants"
-    routerLinkActive="btn-primary">
-    <clr-icon shape="users"></clr-icon>
+    routerLinkActive="active">
     Participants
-  </button>
+  </a>
 </div>
