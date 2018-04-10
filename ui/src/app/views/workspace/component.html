@@ -32,9 +32,6 @@
         </button>
       </div>
     </div>
-    <!--<div class="area-block">-->
-    <!--<h3 class="cdr-text">CDR Version {{workspace.cdrVersionId}}</h3>-->
-    <!--</div>-->
     <div *ngIf="tabOpen===Tabs.Cohorts">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
         <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">

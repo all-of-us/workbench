@@ -904,7 +904,7 @@ definitions:
         type: string
       creator:
         type: string
-      googleBucketLink:
+      googleBucketName:
         type: string
       dataAccessLevel:
         $ref: "#/definitions/DataAccessLevel"
