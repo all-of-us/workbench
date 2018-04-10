@@ -17,10 +17,12 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -98,6 +100,13 @@ public class BigQueryService {
         if (row.get(index).isNull()) {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
-        return java.sql.Date.from(Instant.ofEpochMilli(Double.valueOf(row.get(index).getStringValue()).longValue() * 1000));
+        try {
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            isoFormat.setTimeZone(TimeZone.getDefault());
+            return isoFormat.parse(Instant.ofEpochMilli(
+                    Double.valueOf(row.get(index).getStringValue()).longValue() * 1000).toString());
+        } catch (Exception e) {
+            throw new BigQueryException(500, "Failed to parse date: " + e.getMessage());
+        }
     }
 }
