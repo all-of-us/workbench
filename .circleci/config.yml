@@ -1,7 +1,7 @@
 version: 2
 jobs:
 
-  api-build-test-deploy:
+  api-build-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
@@ -16,7 +16,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Fetch Submodules
           command: git submodule update --init --recursive
       - restore_cache:
           keys:
@@ -27,12 +26,6 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
-          working_directory: ~/workbench
-          command: ci/activate_creds.sh api/circle-sa-key.json
-      - run:
-          working_directory: ~/workbench
-          command: cp api/circle-sa-key.json public-api
-      - run:
           working_directory: ~/workbench/api
           command: ./project.rb test
       - save_cache:
@@ -41,39 +34,8 @@ jobs:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-      - deploy:
-          name: Maybe deploy to test/staging
-          working_directory: ~/workbench/api
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./project.rb deploy \
-                --project all-of-us-workbench-test \
-                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-                --version circle-ci-test \
-                --promote
-            elif [ "${CIRCLE_TAG}" == "v*" ]; then
-             ./project.rb deploy \
-               --project all-of-us-rw-staging \
-               --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-               --version "${CIRCLE_TAG}" \
-               --promote
-            else
-              echo "Not master branch or tagged release, skipping deploy"
-            fi
-      - run:
-          # This check is currently slow and flakey, particularly during
-          # releases of new package versions, so run it infrequently (only for
-          # tagged releases).
-          name: Scan dependencies for vulnerabilities
-          working_directory: ~/workbench/api
-          command: |
-            if [ "${CIRCLE_TAG}" == "v*" ]; then
-              ./project.rb gradle dependencyCheckAnalyze --info
-            else
-              echo "Not a tagged release, skipping dependency checks"
-            fi
 
-  api-local-tests:
+  api-local-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
       - image: mysql:5.7
@@ -83,11 +45,6 @@ jobs:
           - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      # Gradle itself doesn't usually reach 1G, so as long as we can keep tasks under 3G, we should
-      # have room in Circle's 4G to get our work done.
       JAVA_TOOL_OPTIONS: -Xmx3g
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
@@ -127,6 +84,67 @@ jobs:
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
+  api-deploy:
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.11
+    working_directory: ~/workbench
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx3g
+      TERM: dumb
+    steps:
+      - checkout
+      - run:
+          command: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-cache-
+      - run:
+          working_directory: ~/workbench
+          command: ci/activate_creds.sh api/circle-sa-key.json
+      - deploy:
+          name: Deploy to App Engine
+          working_directory: ~/workbench/api
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ./project.rb deploy \
+                --project all-of-us-workbench-test \
+                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --version circle-ci-test \
+                --promote
+            elif [ "${CIRCLE_TAG}" == "v*" ]; then
+             ./project.rb deploy \
+               --project all-of-us-rw-staging \
+               --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+               --version "${CIRCLE_TAG}" \
+               --promote
+            else
+              echo "Not master branch or tagged release, skipping deploy"
+            fi
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.m2
+            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
+          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+
+  api-deps-check:
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.11
+    working_directory: ~/workbench
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx3g
+      TERM: dumb
+    steps:
+      - checkout
+      - run:
+          command: git submodule update --init --recursive
+      - run:
+          name: Scan dependencies for vulnerabilities
+          working_directory: ~/workbench/api
+          command: |
+            ./project.rb gradle dependencyCheckAnalyze --info
+
   api-integration-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
@@ -155,6 +173,7 @@ jobs:
             - ~/.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
+
   api-bigquery-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
@@ -173,7 +192,7 @@ jobs:
           - api-integration-cache-
       - run:
           working_directory: ~/workbench
-          #Used to call gsutil from the circle environment.
+          # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench/api
@@ -183,11 +202,11 @@ jobs:
             - ~/.gradle
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
-  ui-build-test-deploy:
+
+  ui-build-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
-    environment: []
     steps:
       - checkout
       - run:
@@ -218,36 +237,121 @@ jobs:
           working_directory: ~/workbench/ui
           command: |
             yarn run codegen && yarn test --no-watch --no-progress --browsers=ChromeHeadless
+      - run:
+          name: Build with stricter compilation
+          working_directory: ~/workbench/ui
+          command: ./project.rb build --environment test
+
+  ui-deploy:
+    docker:
+      - image: allofustest/workbench:buildimage-0.0.11
+    working_directory: ~/workbench
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
+      - run:
+          working_directory: ~/workbench
+          name: Download Swagger CLI
+          command: |
+            ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      - restore_cache:
+          keys:
+          - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+          - ui-cache-
+      - run:
+          working_directory: ~/workbench/ui
+          command: yarn install
+      - save_cache:
+          paths:
+            - ~/workbench/ui/node_modules
+          key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
       - deploy:
-          name: Maybe deploy to test/staging
+          name: Deploy to App Engine
           working_directory: ~/workbench/ui
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
-                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
             elif [ "${CIRCLE_TAG}" == "v*" ]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
-                --account=circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version "${CIRCLE_TAG}" \
                 --promote
             else
-              echo "Not master branch or tagged release, skipping deploy; building only"
-              ./project.rb build --environment test
+              echo "Not master branch or tagged release, skipping deploy"
             fi
 
 workflows:
   version: 2
   build-test-deploy:
     jobs:
-      - api-build-test-deploy
-      - api-local-tests
-      - ui-build-test-deploy
+      # Always run basic test/lint/compilation (open PRs, master merge, tags).
+      - api-local-test:
+          filters:
+            tags:
+              only: /^v.*/
+      - api-build-test:
+          filters:
+            tags:
+              only: /^v.*/
+      - ui-build-test:
+          filters:
+            tags:
+              only: /^v.*/
+      # Run slower integration tests and dep checks on release tag.
+      - api-bigquery-test:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - api-deps-check:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - api-integration-test:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      # Run deployment to "test" on master merge, or "staging" on release tag.
+      - api-deploy:
+          requires:
+            - api-local-test
+            - api-build-test
+            - api-bigquery-test
+            - api-deps-check
+            - api-integration-test
+            - ui-build-test
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^v.*/
+      - ui-deploy:
+          requires:
+            - api-local-test
+            - api-build-test
+            - api-bigquery-test
+            - api-deps-check
+            - api-integration-test
+            - ui-build-test
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^v.*/
   integration-test:
     triggers:
       - schedule:
