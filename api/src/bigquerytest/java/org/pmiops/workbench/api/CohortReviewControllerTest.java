@@ -179,7 +179,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(conditionAge2.getYears())
                 .dataType(DataType.PARTICIPANTCONDITION);
         expectedProcedure1 = new ParticipantProcedure()
-                .itemDate("2009-12-02")
+                .itemDate("2009-12-03")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("val")
@@ -188,7 +188,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(procedureAge1.getYears())
                 .dataType(DataType.PARTICIPANTPROCEDURE);
         expectedProcedure2 = new ParticipantProcedure()
-                .itemDate("2009-12-03")
+                .itemDate("2009-12-04")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("val")
@@ -197,7 +197,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(procedureAge2.getYears())
                 .dataType(DataType.PARTICIPANTPROCEDURE);
         expectedObservation1 = new ParticipantObservation()
-                .itemDate("2009-12-02")
+                .itemDate("2009-12-03")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("sourceValue")
@@ -206,7 +206,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(observationAge1.getYears())
                 .dataType(DataType.PARTICIPANTOBSERVATION);
         expectedObservation2 = new ParticipantObservation()
-                .itemDate("2009-12-03")
+                .itemDate("2009-12-04")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("sourceValue")
@@ -216,7 +216,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .dataType(DataType.PARTICIPANTOBSERVATION);
         expectedDrug1 = new ParticipantDrug()
                 .signature("signature")
-                .itemDate("2001-12-02")
+                .itemDate("2001-12-03")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("Varivax")
@@ -226,7 +226,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .dataType(DataType.PARTICIPANTDRUG);
         expectedDrug2 = new ParticipantDrug()
                 .signature("signature")
-                .itemDate("2001-12-03")
+                .itemDate("2001-12-04")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("Varivax")
