@@ -262,8 +262,8 @@ workflows:
   bigquery-test:
     triggers:
       - schedule:
-          # Run this command once every Sunday at 4:00AM UTC
-          cron: "0 4 * * 0"
+          # Run this command once every day at 4:00AM UTC
+          cron: "0 4 * * *"
           filters:
             branches:
               only:

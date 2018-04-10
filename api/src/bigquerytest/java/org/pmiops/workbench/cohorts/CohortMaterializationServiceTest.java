@@ -168,7 +168,12 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     return Arrays.asList("person", "concept", "condition_occurrence", "observation");
   }
 
-  private MaterializeCohortRequest makeRequest(int pageSize) {
+    @Override
+    public String getTestDataDirectory() {
+        return MATERIALIZED_DATA;
+    }
+
+    private MaterializeCohortRequest makeRequest(int pageSize) {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setPageSize(pageSize);
     return request;
