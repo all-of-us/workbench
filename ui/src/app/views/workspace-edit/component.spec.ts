@@ -1,3 +1,4 @@
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -53,6 +54,9 @@ describe('WorkspaceEditComponent', () => {
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
+      ],
+      schemas: [
+        CUSTOM_ELEMENTS_SCHEMA
       ],
       providers: [
         { provide: WorkspacesService, useValue: workspacesService },

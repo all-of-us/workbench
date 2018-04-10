@@ -1,0 +1,45 @@
+.btn.btn-primary.btn-top {
+    height: 100%;
+    width: 8rem;
+    background-color: transparent;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    border-right: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0;
+}
+
+.btn.btn-primary.btn-top:hover {
+    height: 100%;
+    width: 8rem;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+.btn-top.btn-overflow {
+    color: white;
+    width: 2rem;
+    border: none;
+    height: 100%;
+}
+
+.btn-top.btn-overflow:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-group-overflow {
+    position: absolute;
+    right: 0;
+    height: 100%;
+}
+
+.btn-group {
+    /*Account for margins.*/
+    width: calc(100% + 1.6rem);
+    background-color: #5FAEE0;
+    height: 60px;
+    margin-left: -1rem;
+    position: relative;
+    margin-right: 0;
+    border-bottom: 5px solid #478EBA;
+    padding-left: 5rem;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+}

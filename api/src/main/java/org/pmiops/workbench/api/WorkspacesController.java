@@ -200,7 +200,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .id(fcWorkspace.getName())
         .namespace(fcWorkspace.getNamespace())
         .description(workspace.getDescription())
-        .researchPurpose(researchPurpose);
+        .researchPurpose(researchPurpose)
+        .googleBucketLink(fcWorkspace.getBucketName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }

@@ -63,14 +63,23 @@ class NotebookNameComparator implements Comparator<FileDetail> {
   }
 }
 
+enum Tabs {
+  Cohorts,
+  Notebooks,
+}
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['../../styles/buttons.css',
+              '../../styles/headers.css',
+              './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
+
+  Tabs = Tabs;
+  dropdownOpen = false;
 
   cohortNameFilter = new CohortNameFilter();
   cohortDescriptionFilter = new CohortDescriptionFilter();
@@ -97,13 +106,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   deleting = false;
   showAlerts = false;
   notebookList: FileDetail[] = [];
-  editHover = false;
-  shareHover = false;
-  trashHover = false;
   listenerAdded = false;
   notebookAuthListener: EventListenerOrEventListenerObject;
   alertCategory: string;
   alertMsg: string;
+  tabOpen = Tabs.Cohorts;
+  rightSidebarClosed = true;
 
   constructor(
       private route: ActivatedRoute,
@@ -363,5 +371,20 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.alertCategory = '';
     this.alertMsg = '';
     this.showAlerts = false;
+  }
+
+  get workspaceCreationTime(): string {
+    const asDate = new Date(this.workspace.creationTime);
+    return asDate.toDateString();
+  }
+
+  get workspaceLastModifiedTime(): string {
+    const asDate = new Date(this.workspace.lastModifiedTime);
+    return asDate.toDateString();
+  }
+
+  get formattedDataAccessLevel(): string {
+    const formatted = this.workspace.dataAccessLevel.toString();
+    return formatted.charAt(0).toUpperCase() + formatted.substring(1);
   }
 }

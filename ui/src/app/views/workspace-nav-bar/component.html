@@ -1,0 +1,27 @@
+<div class="btn-group">
+  <button class="btn btn-primary btn-top" (click)="navigateWorkspaceHome()">Dashboard</button>
+  <!--
+    This is to be added when we have cards for notebooks, because that will show just the most recent.
+    <button class="btn btn-primary btn-top">Notebooks</button>
+  -->
+  <button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">Cohort Builder</button>
+  <div class="btn-group-overflow open bottom-right">
+    <button class="btn-top btn btn-overflow" (click)="dropdownOpen = !dropdownOpen">
+      <clr-icon shape="ellipsis-horizontal"></clr-icon>
+    </button>
+    <div *ngIf="dropdownOpen" class="dropdown-menu">
+      <button class="btn" [disabled]="!writePermission" (click)="edit()">
+        Edit
+      </button>
+      <button class="btn" (click)="share()">
+        Share
+      </button>
+      <button class="btn" (click)="clone()">
+        Clone
+      </button>
+      <button class="btn" [disabled]="!ownerPermission" (click)="delete()">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

@@ -47,6 +47,8 @@
 
 .content-container {
   display: flex;
+  /*View height minus top bar.*/
+  min-height: calc(100vh - 4rem);
 }
 
 .sidenav {
@@ -88,6 +90,7 @@
   width: 100%;
   margin-right: 0.6rem;
   margin-left: 1rem;
+  flex-grow: 1;
 }
 
 .background-image {
@@ -99,5 +102,5 @@
   top: 3.3rem;
   width: 50%;
   position: absolute;
-  height: 90%;
+  height: calc(100vh - 3.3rem);
 }

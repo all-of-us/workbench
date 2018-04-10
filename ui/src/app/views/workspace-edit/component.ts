@@ -260,6 +260,7 @@ export class WorkspaceEditComponent implements OnInit {
       {workspace: this.workspace})
       .subscribe(
         () => {
+
           this.navigateBack();
         },
         (error) => {
