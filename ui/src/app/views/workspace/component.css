@@ -78,12 +78,12 @@ h3 {
 .subheader {
   color: #2F2E7E;
   font-size: 0.8rem;
-  font-family: "Gotham HTF";
+  font-family: "Gotham", sans-serif;
   font-weight: 500;
 }
 
 button.btn.btn-link {
-  font-family: "Gotham HTF";
+  font-family: "Gotham", sans-serif;
   color: #2691D0;
   font-size: 0.8rem;
   font-weight: 300;
@@ -97,7 +97,7 @@ button.btn.btn-link.final {
 }
 
 button.btn.btn-link.selected {
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .information-area {
@@ -118,13 +118,13 @@ button.btn.btn-link.selected {
 }
 
 .information-header {
-  font-family: "Gotham HTF";
+  font-family: "Gotham", sans-serif;
   text-transform: uppercase;
   font-size: 0.4rem;
 }
 
 .information-body {
-  font-family: "Gotham HTF";
+  font-family: "Gotham", sans-serif;
   font-size: 0.5rem;
 }
 
