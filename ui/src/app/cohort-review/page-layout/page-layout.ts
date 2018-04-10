@@ -22,7 +22,7 @@ const ONE_REM = 24;  // value in pixels
   styleUrls: ['./page-layout.css']
 })
 export class PageLayout implements OnInit {
-  @ViewChild('fullPageDiv') fullPageDiv: ElementRef;
+  @ViewChild('wrapper') wrapper: ElementRef;
 
   constructor(
     private state: ReviewStateService,
@@ -50,7 +50,7 @@ export class PageLayout implements OnInit {
   }
 
   updateWrapperDimensions() {
-    const nativeEl = this.fullPageDiv.nativeElement;
+    const nativeEl = this.wrapper.nativeElement;
     const {top} = nativeEl.getBoundingClientRect();
 
     // margin-top, margin-bottom each one rem, see the css file
