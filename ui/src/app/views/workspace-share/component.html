@@ -15,7 +15,7 @@
           <input type="text" class="input share" name="to-share" autofocus
               [(ngModel)]="toShare" placeholder="Enter username" (ngModelChange)="userNotFound = false"
               #usernameSharingInput [disabled]="!hasPermission">
-          <span>@fake-research-aou.org</span>
+          <span>@{{gsuiteDomain}}</span>
           <clr-dropdown>
             <button type="button" class="btn btn-outline-primary sharing-buttons permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
               {{selectedPermission}}

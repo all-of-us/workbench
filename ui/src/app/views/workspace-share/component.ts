@@ -3,6 +3,8 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {ServerConfigService} from '../../services/server-config.service';
+
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {ShareWorkspaceResponse} from 'generated';
@@ -29,13 +31,19 @@ export class WorkspaceShareComponent implements OnInit {
   userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
+  gsuiteDomain: string;
 
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,
       private workspacesService: WorkspacesService,
-  ) {}
+      private serverConfigService: ServerConfigService
+  ) {
+    serverConfigService.getConfig().subscribe((config) => {
+      this.gsuiteDomain = config.gsuiteDomain;
+    });
+  }
 
   ngOnInit(): void {
     this.loadWorkspace().subscribe((workspace) => {
@@ -63,7 +71,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   convertToEmail(username: string): string {
-    return username + '@fake-research-aou.org';
+    return username + '@' + this.gsuiteDomain;
   }
 
 
