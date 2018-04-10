@@ -128,7 +128,9 @@ definitions:
           An array of JSON dictionaries representing results to the cohort materialization.
           (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
           list[object] where each object is a dictionary. In Typescript clients, this is an
-          Array<any> where each object is a dictionary.)
+          Array<any> where each object is a dictionary.) Keys in the dictionaries will be the
+          columns / fields selected in the field set provided in the request, and the values will
+          be the values of those columns / fields.
         type: array
         items:
           type: object
@@ -148,11 +150,16 @@ definitions:
         description: >
           A query specifying how to pull data out of a single table.
         $ref: "#/definitions/TableQuery"
+      annotationQuery:
+        description: >
+          A query specifying how to retrieve annotation values created about participants in a
+          cohort during cohort review.
+        $ref: "#/definitions/AnnotationQuery"
 
   TableQuery:
     type: object
     description: >
-      A specification for pulling data from a single table.
+      A specification for retrieving data from a single table.
     required:
       - tableName
     properties:
@@ -179,7 +186,33 @@ definitions:
       orderBy:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
-          each one optionally followed by " DESC" for descending sort order. (Default varies by table.)
+          each one optionally enclosed in "DESCENDING()" for descending sort order.
+          (Default sort order is person_id followed by the ID of the specified table.)
+        type: array
+        items:
+          type: string
+
+  AnnotationQuery:
+    type: object
+    description: >
+      A specification for retrieving annotation values or review statuses entered for participants.
+    properties:
+      annotations:
+        description: >
+          An array of names of annotations to retrieve about participants, "review_status" for
+          the cohort review status of the participant, or "person_id" for the
+          ID of the participant. Defaults to "person_id", "review_status", and the names of all
+          defined annotations in the cohort review. This is only valid in combination with a named
+          cohort that has a cohort review created for it; if no cohort review has been created,
+          no results will be returned.
+        type: array
+        items:
+          type: string
+      orderBy:
+        description: >
+          An array of names of annotations to sort the resulting data by, or "person_id" for the
+          ID of the participant, each one optionally enclosed in "DESCENDING()" for descending
+          sort order. Defaults to "person_id".
         type: array
         items:
           type: string
