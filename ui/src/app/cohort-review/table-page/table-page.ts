@@ -29,6 +29,9 @@ function isChoiceFilter(filter): filter is ChoiceFilterComponent {
 
 @Component({
   templateUrl: './table-page.html',
+  styleUrls: [
+    './table-page.css',
+  ],
 })
 export class TablePage implements OnInit, OnDestroy {
 
