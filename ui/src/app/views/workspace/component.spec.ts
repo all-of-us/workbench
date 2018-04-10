@@ -68,7 +68,7 @@ const activatedRouteStub  = {
     params: {
       'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    }
+    },
     data: {
       workspace: {
         ...WorkspacesServiceStub.stubWorkspace(),
