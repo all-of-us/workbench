@@ -357,11 +357,10 @@ class IncrementalHotSwapTask extends DefaultTask {
       if (inputs.incremental) {
 
         inputs.outOfDate { change ->
-          println("inputDir: " + inputDir.path)
           String prefix = inputDir.path + "/"
           String relativePath = change.file.path.substring(prefix.length())
           String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
-          printf "Hot swapping $fqClassName..."
+          printf "Hot swapping $fqClassName from $change.file.path..."
           def proc = "echo redefine $fqClassName $change.file.path".execute() \
             | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
           proc.waitFor()
