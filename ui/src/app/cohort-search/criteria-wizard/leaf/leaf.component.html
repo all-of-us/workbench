@@ -16,7 +16,12 @@
           {{ displayCode }}
         </small>
       </div>
-      <div class="name">
+      <div #name
+        [popper]="displayName"
+        [popperTrigger]="'hover'"
+        [popperPlacement]="'bottom'"
+        [popperDisabled]="!isTruncated"
+        class="name">
         <small class="text-muted">
           {{ displayName }}
         </small>
