@@ -4,8 +4,12 @@
     <h2>{{workspace.name}}</h2>
     <div style="display: flex; justify-content: space-between">
       <div style="margin-left: -0.5rem;">
-        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="tabOpen = Tabs.Notebooks">Notebooks ({{notebookList.length}})</button>
-        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">Cohorts ({{cohortList.length}})</button>
+        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="tabOpen = Tabs.Notebooks">
+          Notebooks ({{notebookList.length}})
+        </button>
+        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">
+          Cohorts ({{cohortList.length}})
+        </button>
         <div class="alert {{alertCategory}}" *ngIf="showAlerts">
           <div class="alert-items">
             <div class="alert-item static">
@@ -18,16 +22,18 @@
         </div>
       </div>
       <div>
-        <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">
+        <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
+                [class.awaiting-review]="awaitingReview" (click)="buildCohort()">
           + Add a Cohort
         </button>
-        <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create" [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
+        <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
+                [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
           + New Notebook
         </button>
       </div>
     </div>
     <!--<div class="area-block">-->
-      <!--<h3 class="cdr-text">CDR Version {{workspace.cdrVersionId}}</h3>-->
+    <!--<h3 class="cdr-text">CDR Version {{workspace.cdrVersionId}}</h3>-->
     <!--</div>-->
     <div *ngIf="tabOpen===Tabs.Cohorts">
       <clr-datagrid [clrDgLoading]="cohortsLoading">
@@ -91,10 +97,10 @@
         <clr-dg-column>Path</clr-dg-column>
         <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
         <clr-dg-row
-                class="table-row notebook-table-row"
-                *clrDgItems="let notebook of notebookList"
-                [clrDgItem]="notebook"
-                (click)="openNotebook(notebook)">
+            class="table-row notebook-table-row"
+            *clrDgItems="let notebook of notebookList"
+            [clrDgItem]="notebook"
+            (click)="openNotebook(notebook)">
           <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
           <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
         </clr-dg-row>
@@ -150,7 +156,7 @@
             Data Access Level
           </div>
           <div class="information-body">
-            {{workspace.dataAccessLevel | titlecase}}
+            {{workspace.dataAccessLevel | titlcase}}
           </div>
         </div>
       </div>
