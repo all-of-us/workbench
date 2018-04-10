@@ -10,7 +10,7 @@ import {
   CohortSearchState,
 } from '../../redux';
 
-import {Modifier, Operator} from 'generated';
+import {Modifier, ModifierType, Operator} from 'generated';
 
 @Component({
   selector: 'crit-modifiers',
@@ -18,23 +18,23 @@ import {Modifier, Operator} from 'generated';
   styleUrls: ['./modifiers.component.css']
 })
 export class ModifiersComponent implements OnInit, OnDestroy {
+  modifierType: ModifierType;
   existing = List();
   subscription: Subscription;
-  ageAtEventMap: any;
-  numOfOccurrencesMap: any;
-  eventDateMap: any;
   ageAtEventMapEntries: any;
+  numOfOccurrencesMapEntries: any;
+  eventDateMapEntries: any;
 
   form = new FormGroup({
-    ageAtEvent: new FormGroup({
+    AGE_AT_EVENT: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
-    numOfOccurrences: new FormGroup({
+    NUM_OF_OCCURRENCES: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
-    eventDate: new FormGroup({
+    EVENT_DATE: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
@@ -46,19 +46,26 @@ export class ModifiersComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.ageAtEventMap = new Map();
-    this.ageAtEventMap.set(Operator.EQUAL, 'Equal To');
-    this.ageAtEventMap.set(Operator.GREATERTHAN, 'Greater Than');
-    this.ageAtEventMap.set(Operator.LESSTHAN, 'Less Than');
-    this.ageAtEventMapEntries = Array.of(this.ageAtEventMap.entries());
-    this.numOfOccurrencesMap = new Map();
-    this.numOfOccurrencesMap.set(Operator.EQUAL, 'Equal To');
-    this.numOfOccurrencesMap.set(Operator.GREATERTHAN, 'Greater Than');
-    this.numOfOccurrencesMap.set(Operator.LESSTHAN, 'Less Than');
-    this.eventDateMap = new Map();
-    this.eventDateMap.set(Operator.EQUAL, 'On');
-    this.eventDateMap.set(Operator.GREATERTHAN, 'After');
-    this.eventDateMap.set(Operator.LESSTHAN, 'Before');
+    const ageAtEventMap = new Map([
+        [Operator.EQUAL, 'Equal To'],
+        [Operator.GREATERTHAN, 'Greater Than'],
+        [Operator.LESSTHAN, 'Less Than']
+    ]);
+    this.ageAtEventMapEntries = Array.from(ageAtEventMap.entries());
+
+    const numOfOccurrencesMap = new Map([
+        [Operator.EQUAL, 'Equal To'],
+        [Operator.GREATERTHAN, 'Greater Than'],
+        [Operator.LESSTHAN, 'Less Than']
+    ]);
+    this.numOfOccurrencesMapEntries = Array.from(numOfOccurrencesMap.entries());
+
+    const eventDateMap = new Map([
+        [Operator.EQUAL, 'On'],
+        [Operator.GREATERTHAN, 'After'],
+        [Operator.LESSTHAN, 'Before']
+    ]);
+    this.eventDateMapEntries = Array.from(eventDateMap.entries());
 
     this.form.valueChanges.subscribe(console.log);
     this.subscription = this.ngRedux
@@ -91,6 +98,6 @@ export class ModifiersComponent implements OnInit, OnDestroy {
     if (value === null  || operator === null) {
       return ; // noop
     }
-    return <Modifier>{name, operator, operands: [value]};
+    return <Modifier>{name: ModifierType.AGEATEVENT, operator: Operator.EQUAL, operands: [value]};
   }
 }

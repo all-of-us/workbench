@@ -3,7 +3,7 @@
     <section class="form-block">
       <label>Available Modifiers</label>
 
-      <div class="form-group" formGroupName="ageAtEvent">
+      <div class="form-group" formGroupName="AGE_AT_EVENT">
         <label for="age-at-event">Age at Event</label>
         <div class="select">
           <select formControlName="operator">
@@ -19,18 +19,18 @@
         <button
             type="button"
             class="btn btn-sm btn-link"
-            [disabled]="isSelected('ageAtEvent')"
-            (click)="select('ageAtEvent')">
-          <clr-icon *ngIf="isSelected('ageAtEvent')" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected('ageAtEvent')" shape="plus-circle" size="20"></clr-icon>
+            [disabled]="isSelected('AGE_AT_EVENT')"
+            (click)="select('AGE_AT_EVENT')">
+          <clr-icon *ngIf="isSelected('AGE_AT_EVENT')" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected('AGE_AT_EVENT')" shape="plus-circle" size="20"></clr-icon>
         </button>
       </div>
 
-      <div class="form-group" formGroupName="numOfOccurrences">
+      <div class="form-group" formGroupName="NUM_OF_OCCURRENCES">
         <label for="num-of-occurrences">Number of Occurrences</label>
         <div class="select">
           <select formControlName="operator">
-            <option *ngFor="let entry of numOfOccurrencesMap.entries()" value="{{ entry[0] }}">{{ entry[1] }}</option>
+            <option *ngFor="let entry of numOfOccurrencesMapEntries" value="{{ entry[0] }}">{{ entry[1] }}</option>
           </select>
         </div>
         <input type="number"
@@ -42,18 +42,18 @@
         <button
             type="button"
             class="btn btn-sm btn-link"
-            [disabled]="isSelected('numOfOccurrences')"
-            (click)="select('numOfOccurrences')">
-          <clr-icon *ngIf="isSelected('numOfOccurrences')" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected('numOfOccurrences')" shape="plus-circle" size="20"></clr-icon>
+            [disabled]="isSelected('NUM_OF_OCCURRENCES')"
+            (click)="select('NUM_OF_OCCURRENCES')">
+          <clr-icon *ngIf="isSelected('NUM_OF_OCCURRENCES')" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected('NUM_OF_OCCURRENCES')" shape="plus-circle" size="20"></clr-icon>
         </button>
       </div>
 
-      <div class="form-group" formGroupName="eventDate">
+      <div class="form-group" formGroupName="EVENT_DATE">
         <label for="event-date">Date of Event</label>
         <div class="select">
           <select formControlName="operator">
-            <option *ngFor="let entry of eventDateMap.entries()" value="{{ entry[0] }}">{{ entry[1] }}</option>
+            <option *ngFor="let entry of eventDateMapEntries" value="{{ entry[0] }}">{{ entry[1] }}</option>
           </select>
         </div>
         <input type="date"
@@ -64,10 +64,10 @@
         <button
             type="button"
             class="btn btn-sm btn-link"
-            [disabled]="isSelected('eventDate')"
-            (click)="select('eventDate')">
-          <clr-icon *ngIf="isSelected('eventDate')" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected('eventDate')" shape="plus-circle" size="20"></clr-icon>
+            [disabled]="isSelected(modifierType.EVENTDATE)"
+            (click)="select(modifierType.EVENTDATE)">
+          <clr-icon *ngIf="isSelected(modifierType.EVENTDATE)" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected(modifierType.EVENTDATE)" shape="plus-circle" size="20"></clr-icon>
         </button>
       </div>
 
