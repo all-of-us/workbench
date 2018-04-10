@@ -23,7 +23,7 @@
       </div>
       <div>
         <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
-                [class.awaiting-review]="awaitingReview" (click)="buildCohort()">
+                [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview" (click)="buildCohort()">
           + Add a Cohort
         </button>
         <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
