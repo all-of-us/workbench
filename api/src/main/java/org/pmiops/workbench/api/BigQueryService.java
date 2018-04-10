@@ -7,9 +7,15 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
+
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -19,10 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -96,17 +98,13 @@ public class BigQueryService {
         return row.get(index).getBooleanValue();
     }
 
-    public Date getDate(List<FieldValue> row, int index) {
+    public String getDate(List<FieldValue> row, int index) {
         if (row.get(index).isNull()) {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
-        try {
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            isoFormat.setTimeZone(TimeZone.getDefault());
-            return isoFormat.parse(Instant.ofEpochMilli(
-                    Double.valueOf(row.get(index).getStringValue()).longValue() * 1000).toString());
-        } catch (Exception e) {
-            throw new BigQueryException(500, "Failed to parse date: " + e.getMessage());
-        }
+        String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss zzz";
+        DateTimeFormatter DATE_TIME_FORMAT =
+                DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
+        return DATE_TIME_FORMAT.print(row.get(index).getTimestampValue() / 1000L);
     }
 }
