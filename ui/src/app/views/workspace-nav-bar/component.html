@@ -1,22 +1,22 @@
 <div class="btn-group">
-  <button class="btn btn-primary btn-top" (click)="navigateWorkspaceHome()">Dashboard</button>
+  <button class="btn btn-primary btn-top" [routerLink]="['/workspace', wsNamespace, wsId]" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</button>
   <!--
     This is to be added when we have cards for notebooks, because that will show just the most recent.
     <button class="btn btn-primary btn-top">Notebooks</button>
   -->
-  <button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">Cohort Builder</button>
+  <button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" [disabled] = "awaitingReview" [routerLink]="['/workspace', wsNamespace, wsId, 'cohorts', 'build']">Cohort Builder</button>
   <div class="btn-group-overflow open bottom-right">
     <button class="btn-top btn btn-overflow" (click)="dropdownOpen = !dropdownOpen">
       <clr-icon shape="ellipsis-horizontal"></clr-icon>
     </button>
     <div *ngIf="dropdownOpen" class="dropdown-menu">
-      <button class="btn" [disabled]="!writePermission" (click)="edit()">
+      <button class="btn" [disabled]="!writePermission" [routerLink]="['/workspace', wsNamespace, wsId, 'edit']" routerLinkActive="active">
         Edit
       </button>
-      <button class="btn" (click)="share()">
+      <button class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'share']" routerLinkActive="active">
         Share
       </button>
-      <button class="btn" (click)="clone()">
+      <button class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'clone']" routerLinkActive="active">
         Clone
       </button>
       <button class="btn" [disabled]="!ownerPermission" (click)="delete()">

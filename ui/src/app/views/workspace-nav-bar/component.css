@@ -8,8 +8,15 @@
 }
 
 .btn.btn-primary.btn-top:hover {
-    height: 100%;
-    width: 8rem;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn.btn-primary.btn-top:disabled {
+    cursor: not-allowed;
+    background-color: transparent;
+}
+
+.btn.btn-primary.btn-top.active {
     background-color: rgba(255, 255, 255, 0.15);
 }
 

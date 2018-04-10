@@ -382,9 +382,4 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const asDate = new Date(this.workspace.lastModifiedTime);
     return asDate.toDateString();
   }
-
-  get formattedDataAccessLevel(): string {
-    const formatted = this.workspace.dataAccessLevel.toString();
-    return formatted.charAt(0).toUpperCase() + formatted.substring(1);
-  }
 }
