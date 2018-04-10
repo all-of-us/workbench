@@ -98,7 +98,7 @@ public class BigQueryService {
         return row.get(index).getBooleanValue();
     }
 
-    public String getDate(List<FieldValue> row, int index) {
+    public String getDateTime(List<FieldValue> row, int index) {
         if (row.get(index).isNull()) {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
@@ -106,5 +106,12 @@ public class BigQueryService {
         DateTimeFormatter DATE_TIME_FORMAT =
                 DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
         return DATE_TIME_FORMAT.print(row.get(index).getTimestampValue() / 1000L);
+    }
+
+    public String getDate(List<FieldValue> row, int index) {
+        if (row.get(index).isNull()) {
+            throw new BigQueryException(500, "FieldValue is null at position: " + index);
+        }
+        return row.get(index).getStringValue();
     }
 }
