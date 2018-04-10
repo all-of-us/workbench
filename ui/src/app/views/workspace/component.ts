@@ -78,6 +78,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
+  Tabs = Tabs;
+
   cohortNameFilter = new CohortNameFilter();
   cohortDescriptionFilter = new CohortDescriptionFilter();
   notebookNameFilter = new NotebookNameFilter();

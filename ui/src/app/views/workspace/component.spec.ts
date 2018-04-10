@@ -1,4 +1,4 @@
-import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
@@ -8,7 +8,9 @@ import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+
 import {ClusterService, CohortsService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
@@ -18,7 +20,6 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {
   queryAllByCss,
   queryByCss,
-  simulateClick,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -89,10 +90,8 @@ describe('WorkspaceComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        WorkspaceComponent
-      ],
-      schemas: [
-        CUSTOM_ELEMENTS_SCHEMA
+        WorkspaceComponent,
+        WorkspaceNavBarComponent
       ],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },

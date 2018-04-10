@@ -7,6 +7,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -48,15 +49,13 @@ describe('WorkspaceEditComponent', () => {
     workspacesService = new WorkspacesServiceStub();
     TestBed.configureTestingModule({
       declarations: [
-        WorkspaceEditComponent
+        WorkspaceEditComponent,
+        WorkspaceNavBarComponent
       ],
       imports: [
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
-      ],
-      schemas: [
-        CUSTOM_ELEMENTS_SCHEMA
       ],
       providers: [
         { provide: WorkspacesService, useValue: workspacesService },
