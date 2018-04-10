@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 public abstract class BigQueryBaseTest {
 
     private static final Logger log = Logger.getLogger(BigQueryBaseTest.class.getName());
+    public static final String CB_DATA = "cbdata";
+    public static final String MATERIALIZED_DATA = "materializeddata";
 
     @Autowired
     BigQuery bigquery;
@@ -62,6 +64,8 @@ public abstract class BigQueryBaseTest {
     }
 
     public abstract List<String> getTableNames();
+
+    public abstract String getTestDataDirectory();
 
     private void createDataSet(String dataSetId) {
         Dataset dataSet = bigquery.create(DatasetInfo.newBuilder(dataSetId).build());
@@ -114,7 +118,7 @@ public abstract class BigQueryBaseTest {
     private void insertData(String dataSetId, String tableId) throws Exception {
         ObjectMapper jackson = new ObjectMapper();
         String rawJson =
-                new String(Files.readAllBytes(Paths.get(BASE_PATH + "data/" + tableId.toLowerCase() + "_data.json")), Charset.defaultCharset());
+                new String(Files.readAllBytes(Paths.get(BASE_PATH + getTestDataDirectory() + "/" + tableId.toLowerCase() + "_data.json")), Charset.defaultCharset());
         JsonNode newJson = jackson.readTree(rawJson);
 
         Gson gson = new Gson();
