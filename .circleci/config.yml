@@ -39,12 +39,6 @@ jobs:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
-      - persist_to_workspace:
-          root: .
-          paths:
-            - api
-            - common-api
-            - public-api
 
   api-local-test:
     docker:
@@ -101,8 +95,11 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
-      - attach_workspace:
-          at: .
+      # Note: most of the time spent here appears to be in Gradle / App Engine
+      # deployment. We tried more aggressively caching outputs via Cirlce
+      # workspaces, but that seemed to have a negligible effect on speed. It's
+      # also tricky to pick specific sub directories since the API deploy
+      # touches several top level folders {public,common,}api.
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -129,12 +126,6 @@ jobs:
             else
               echo "Not master branch or tagged release, skipping deploy"
             fi
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-            - ~/workbench/api/build/exploded-api/WEB-INF/lib/
-          key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   api-deps-check:
     <<: *java_defaults
@@ -174,12 +165,6 @@ jobs:
 
   api-bigquery-test:
     <<: *java_defaults
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
     steps:
       - checkout
       - run:
@@ -248,26 +233,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Fetch Submodules
           command: git submodule update --init --recursive
-      - run:
-          working_directory: ~/workbench
-          name: Download Swagger CLI
-          command: |
-            ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
-      - restore_cache:
-          keys:
-          - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
-          - ui-cache-
-      - run:
-          working_directory: ~/workbench/ui
-          command: yarn install && yarn run codegen
-      - save_cache:
-          paths:
-            - ~/workbench/ui/node_modules
-          key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
       - deploy:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui
