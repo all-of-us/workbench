@@ -148,12 +148,13 @@ definitions:
     properties:
       tableQuery:
         description: >
-          A query specifying how to pull data out of a single table.
+          A query specifying how to pull data out of a single table. Either this or annotationQuery
+          should be set (not both.)
         $ref: "#/definitions/TableQuery"
       annotationQuery:
         description: >
           A query specifying how to retrieve annotation values created about participants in a
-          cohort during cohort review.
+          cohort during cohort review. Either this or tableQuery should be set (not both.)
         $ref: "#/definitions/AnnotationQuery"
 
   TableQuery:
