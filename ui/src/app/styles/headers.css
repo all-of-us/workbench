@@ -1,15 +1,19 @@
 h1 {
   color: #262262;
+  font-weight: 500;
   font-size: 1.6rem;
 }
 h2 {
   color: #262262;
+  font-weight: 800;
   font-size: 1.25rem;
 }
 h3 {
   color: #262262;
+  font-weight: 800;
   font-size: 1rem;
 }
 h4 {
+  font-weight: 300;
   color: #000;
 }
