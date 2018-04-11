@@ -1,38 +1,56 @@
-.btn.btn-primary.btn-top {
+::ng-deep .btn.btn-primary.btn-top {
   height: 100%;
   width: 8rem;
   background-color: transparent;
   border-left: 1px solid rgba(255, 255, 255, 0.15);
   border-right: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0;
+  border-top: none;
+  border-bottom: none;
 }
 
-.btn.btn-primary.btn-top:hover {
+::ng-deep .btn.btn-primary.btn-top:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-.btn.btn-primary.btn-top:disabled {
+::ng-deep .btn.btn-primary.btn-top:disabled {
   cursor: not-allowed;
   background-color: transparent;
 }
 
-.btn.btn-primary.btn-top.active {
+::ng-deep .btn.dropdown-toggle {
+  height: 100%;
+  width: 2rem;
+  background-color: transparent;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  color: white;
+  border-top: none;
+  border-bottom: none;
+}
+
+::ng-deep .btn.dropdown-toggle:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-.btn-top.btn-overflow {
+::ng-deep btn.btn-primary.btn-top.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+::ng-deep .btn-top.btn-overflow {
   color: white;
   width: 2rem;
   border: none;
   height: 100%;
 }
 
-.btn-top.btn-overflow:hover {
+::ng-deep .btn-top.btn-overflow:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-.btn-group-overflow {
-  position: absolute;
+::ng-deep .btn-group>.btn-group-overflow {
+  position: absolute !important;
   right: 0;
   height: 100%;
 }
