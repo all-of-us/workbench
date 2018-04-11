@@ -106,7 +106,7 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/api
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "ch/circle-tags" ]; then
               ./project.rb deploy \
                 --project all-of-us-workbench-test \
                 --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
@@ -271,7 +271,7 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "ch/circle-tags" ]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
@@ -342,7 +342,7 @@ workflows:
             - ui-build-test
           filters:
             branches:
-              only: master
+              only: ch/circle-tags
             tags:
               only: /^v.*/
       - ui-deploy:
@@ -355,7 +355,7 @@ workflows:
             - ui-build-test
           filters:
             branches:
-              only: master
+              only: ch/circle-tags
             tags:
               only: /^v.*/
   integration-test:
