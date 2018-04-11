@@ -1,4 +1,4 @@
-import {CUSTOM_ELEMENTS_SCHEMA, DebugElement, ViewChild} from '@angular/core';
+import {DebugElement, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {Http} from '@angular/http';
