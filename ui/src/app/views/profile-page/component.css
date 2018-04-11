@@ -55,7 +55,6 @@ button.btn.btn-secondary {
   position: absolute;
   top: 3.5rem;
   color: #8BC990;
-  font-family: "Gotham HTF";
   font-size: 22px;
   width: 5.8rem;
   text-align: center;
@@ -65,7 +64,7 @@ button.btn.btn-secondary {
 .profileCompletionText {
   width: 1rem;
   vertical-align: middle;
-  width: 10rem;
+  width: 11rem;
   padding: 1.7rem 1rem 1rem 1rem;
   height: 100%;
   line-height: 17px;
@@ -78,7 +77,6 @@ textarea {
   border-radius: 5px;
   border: 0.5px solid #C5C5C5;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.1);
-  font-family: "Gotham HTF"
 }
 
 .add-icon {
@@ -107,7 +105,6 @@ button.btn.btn-link {
 
 .alert-text-waiting {
   color: #E28327;
-  font-family: "Gotham HTF";
 }
 
 .alert {
