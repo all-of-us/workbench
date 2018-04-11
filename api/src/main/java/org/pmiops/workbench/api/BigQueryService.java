@@ -99,10 +99,9 @@ public class BigQueryService {
         if (row.get(index).isNull()) {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
-        String DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss zzz";
-        DateTimeFormatter DATE_TIME_FORMAT =
-                DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
-        return DATE_TIME_FORMAT.print(row.get(index).getTimestampValue() / 1000L);
+        DateTimeFormatter df =
+                DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz").withZoneUTC();
+        return df.print(row.get(index).getTimestampValue() / 1000L);
     }
 
     public String getDate(List<FieldValue> row, int index) {
