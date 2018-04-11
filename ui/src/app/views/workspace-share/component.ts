@@ -17,7 +17,10 @@ import {WorkspacesService} from 'generated';
   templateUrl: './component.html',
 })
 export class WorkspaceShareComponent implements OnInit {
-  workspace: Workspace;
+  workspace: Workspace = {
+    name: '',
+    userRoles: []
+  };
   loadingWorkspace = true;
   toShare = '';
   selectedPermission = 'Select Permission';
@@ -39,7 +42,6 @@ export class WorkspaceShareComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadWorkspace().subscribe((workspace) => {
-      this.workspace = workspace.workspace;
       this.profileService.getMe().subscribe(profile => {
         this.usersLoading = false;
         this.loadingWorkspace = false;
