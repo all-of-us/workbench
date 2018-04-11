@@ -3,6 +3,7 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {fromJS, Map} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 
 import {
   BEGIN_CRITERIA_REQUEST,
@@ -32,7 +33,7 @@ describe('TreeComponent', () => {
           LeafComponent,
           TreeComponent,
         ],
-        imports: [ClarityModule],
+        imports: [ClarityModule, NgxPopperModule],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
           {provide: CohortBuilderService, useValue: {}},

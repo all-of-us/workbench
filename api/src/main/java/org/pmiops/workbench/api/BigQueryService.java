@@ -7,7 +7,11 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +27,13 @@ import java.util.stream.Collectors;
 @Service
 public class BigQueryService {
 
+    private static final Logger logger = Logger.getLogger(BigQueryService.class.getName());
+
     @Autowired
     private BigQuery bigquery;
+
+    @Autowired
+    private Provider<WorkbenchConfig> workbenchConfigProvider;
 
     /**
      * Execute the provided query using bigquery.
@@ -33,6 +42,10 @@ public class BigQueryService {
 
         // Execute the query
         QueryResponse response = null;
+        if (workbenchConfigProvider.get().cdr.debugQueries) {
+            logger.log(Level.INFO, "Executing query ({0}) with parameters ({1})",
+                new Object[] { query.getQuery(), query.getNamedParameters()});
+        }
         try {
             response = bigquery.query(query, BigQuery.QueryOption.of(BigQuery.QueryResultsOption.maxWaitTime(60000L)));
         } catch (InterruptedException e) {

@@ -1,12 +1,17 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  isParameterActive,
-} from '../../redux';
+import {CohortSearchActions, CohortSearchState, isParameterActive} from '../../redux';
 
 /*
  * Stub function - some criteria types will have "attributes" that help define
@@ -19,15 +24,18 @@ function needsAttributes(node) {
   return false;
 }
 
+
 @Component({
   selector: 'crit-leaf',
   templateUrl: './leaf.component.html',
   styleUrls: ['./leaf.component.css']
 })
-export class LeafComponent implements OnInit, OnDestroy {
+export class LeafComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node;
   private isSelected: boolean;
   private subscription: Subscription;
+  @ViewChild('name') name: ElementRef;
+  isTruncated = false;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -45,6 +53,25 @@ export class LeafComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+
+  /*
+   * Running the truncation check only on window resize is efficient (running
+   * this check with change detection visibly slows the browser), but if any
+   * other conditions arise that might dynamically affect the size of the #name
+   * div this will need to be attached to those events as well.  Also we need
+   * to make sure it is run at least once on initialization of the _child view_
+   * (the name div), not the initialization of _this_ component.
+   */
+  ngAfterViewInit() {
+    setTimeout(() => this.checkTruncation(), 0);
+  }
+
+  @HostListener('window:resize')
+  checkTruncation() {
+    const elem = this.name.nativeElement;
+    this.isTruncated = elem.offsetWidth < elem.scrollWidth;
   }
 
   get paramId() {

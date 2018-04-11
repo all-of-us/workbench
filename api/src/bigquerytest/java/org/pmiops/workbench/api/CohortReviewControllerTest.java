@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryFactory;
@@ -102,7 +103,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
             ReviewTabQueryBuilder.class,
             CohortService.class,
             ParticipantCounter.class,
-            DomainLookupService.class
+            DomainLookupService.class,
+            CohortQueryBuilder.class
     })
     @MockBean({
             FireCloudService.class

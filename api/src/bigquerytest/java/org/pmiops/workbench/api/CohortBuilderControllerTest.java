@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -37,7 +38,8 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
-        ParticipantCounter.class, DomainLookupService.class, TestJpaConfig.class})
+        ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class,
+        TestJpaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerTest extends BigQueryBaseTest {
 

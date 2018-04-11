@@ -1,0 +1,23 @@
+.review-header {
+  display: flex;
+}
+
+.header-link {
+  color: #2691D0;
+  font-family: GothamLight;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.active {
+  font-family: GothamMedium;
+}
+
+.vert-bar {
+  display: inline-block;
+  margin: 0 0.75rem;
+  box-sizing: border-box;
+  height: 17px;
+  width: 1px;
+  border: 1px solid #979797;
+}
