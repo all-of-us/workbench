@@ -10,10 +10,17 @@ import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
-import {ClusterService, CohortsService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {
+  ClusterService,
+  CohortsService,
+  ProfileService,
+  WorkspaceAccessLevel,
+  WorkspacesService
+} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
@@ -93,13 +100,14 @@ describe('WorkspaceComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        WorkspaceComponent
+        WorkspaceComponent,
+        WorkspaceShareComponent
       ],
-      schemas : [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: Http, useValue: new HttpStub() },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
