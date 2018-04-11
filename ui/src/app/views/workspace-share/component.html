@@ -14,23 +14,20 @@
           <input type="text" class="input share" name="to-share" autofocus
               [(ngModel)]="toShare" placeholder="enter name or {{gsuiteDomain}} ID" (ngModelChange)="userNotFound = false"
               #usernameSharingInput [disabled]="!hasPermission">
-          <clr-dropdown>
-            <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()" [disabled]="!hasPermission">Add</button>
-            <div>
-              <clr-dropdown>
-                <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
-                  {{selectedPermission}}
-                  <clr-icon shape="caret down"></clr-icon>
-                </button>
-                <clr-dropdown-menu *clrIfOpen>
-                  <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
-                  <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
-                  <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
-                </clr-dropdown-menu>
-              </clr-dropdown>
-            </div>
-          </clr-dropdown>
-          <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()" [disabled]="!hasPermission">Add Collaborator</button>
+          <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()" [disabled]="!hasPermission">Add</button>
+          <div>
+            <clr-dropdown>
+              <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
+                {{selectedPermission}}
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu *clrIfOpen>
+                <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
+                <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
+                <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+          </div>
         </div>
         <div *ngIf="userNotFound" class="error-message">
           User {{toShare}} not found.
