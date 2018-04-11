@@ -1,3 +1,4 @@
+import {Location} from "@angular/common";
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -38,6 +39,7 @@ export class WorkspaceShareComponent implements OnInit {
   gsuiteDomain: string;
 
   constructor(
+      private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,
       private workspacesService: WorkspacesService,
@@ -176,4 +178,9 @@ export class WorkspaceShareComponent implements OnInit {
   get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
+
+  navigateBack(): void {
+    this.locationService.back();
+  }
+
 }
