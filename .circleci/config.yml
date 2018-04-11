@@ -1,18 +1,23 @@
 version: 2
-jobs:
 
+defaults: &defaults
+  docker:
+    - image: allofustest/workbench:buildimage-0.0.11
+  working_directory: ~/workbench
+java_defaults: &java_defaults
+  <<: *defaults
+  environment:
+    # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
+    # processes executed within CircleCI's docker containers will respect. Very helpful resource:
+    # https://circleci.com/blog/how-to-handle-java-oom-errors/
+    # Gradle itself doesn't usually reach 1G, so as long as we can keep tasks under 3G, we should
+    # have room in Circle's 4G to get our work done.
+    JAVA_TOOL_OPTIONS: -Xmx3g
+    TERM: dumb
+
+jobs:
   api-build-test:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
-    environment:
-      # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
-      # processes executed within CircleCI's docker containers will respect. Very helpful resource:
-      # https://circleci.com/blog/how-to-handle-java-oom-errors/
-      # Gradle itself doesn't usually reach 1G, so as long as we can keep tasks under 3G, we should
-      # have room in Circle's 4G to get our work done.
-      JAVA_TOOL_OPTIONS: -Xmx3g
-      TERM: dumb
+    <<: *java_defaults
     steps:
       - checkout
       - run:
@@ -85,12 +90,7 @@ jobs:
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   api-deploy:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
-    environment:
-      JAVA_TOOL_OPTIONS: -Xmx3g
-      TERM: dumb
+    <<: *java_defaults
     steps:
       - checkout
       - run:
@@ -129,12 +129,7 @@ jobs:
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   api-deps-check:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
-    environment:
-      JAVA_TOOL_OPTIONS: -Xmx3g
-      TERM: dumb
+    <<: *java_defaults
     steps:
       - checkout
       - run:
@@ -146,12 +141,7 @@ jobs:
             ./project.rb gradle dependencyCheckAnalyze --info
 
   api-integration-test:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+    <<: *java_defaults
     steps:
       - checkout
       - run:
@@ -175,6 +165,7 @@ jobs:
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   api-bigquery-test:
+    <<: *java_defaults
     docker:
       - image: allofustest/workbench:buildimage-0.0.11
     working_directory: ~/workbench
@@ -204,9 +195,7 @@ jobs:
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   ui-build-test:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -243,9 +232,7 @@ jobs:
           command: ./project.rb build --environment test
 
   ui-deploy:
-    docker:
-      - image: allofustest/workbench:buildimage-0.0.11
-    working_directory: ~/workbench
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -289,75 +276,62 @@ jobs:
               echo "Not master branch or tagged release, skipping deploy"
             fi
 
+# This filter includes all branches (no branch constraint) + tags with
+# a prefix of "v". See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+filter_all: &filter_all
+  filters:
+    tags:
+      only: /^v.*/
+filter_releases: &filter_releases
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^v.*/
+
+# Note: We block on these jobs, *if they run*. A requirement is
+# considered to be satisfied if that job did not run for the given
+# branch/filter. For example, on master merge "api-deploy" would
+# still be triggered despite "api-integration-test" being skipped.
+deploy_config: &deploy_config
+  requires:
+    - api-local-test
+    - api-build-test
+    - api-bigquery-test
+    - api-deps-check
+    - api-integration-test
+    - ui-build-test
+  # Only deploy on master merge or release.
+  filters:
+    branches:
+      # XXX: Revert to master.
+      only: ch/circle-tags
+    tags:
+      only: /^v.*/
+
 workflows:
   version: 2
   build-test-deploy:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge, tags).
       - api-local-test:
-          # This filter includes all branches (no branch constraint) + tags with
-          # a prefix of "v". See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
-          filters:
-            tags:
-              only: /^v.*/
+          <<: *filter_all
       - api-build-test:
-          filters:
-            tags:
-              only: /^v.*/
+          <<: *filter_all
       - ui-build-test:
-          filters:
-            tags:
-              only: /^v.*/
+          <<: *filter_all
       # Run slower integration tests and dep checks on release tag.
       - api-bigquery-test:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+          <<: *filter_releases
       - api-deps-check:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+          <<: *filter_releases
       - api-integration-test:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+          <<: *filter_releases
       # Run deployment to "test" on master merge, or "staging" on release tag.
       - api-deploy:
-          requires:
-            # Note: We block on these jobs, *if they run*. A requirement is
-            # considered to be satisfied if that job did not run for the given
-            # branch/filter. For example, on master merge "api-deploy" would
-            # still be triggered despite "api-integration-test" being skipped.
-            - api-local-test
-            - api-build-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-build-test
-          filters:
-            branches:
-              only: ch/circle-tags
-            tags:
-              only: /^v.*/
+          <<: *deploy_config
       - ui-deploy:
-          requires:
-            - api-local-test
-            - api-build-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-build-test
-          filters:
-            branches:
-              only: ch/circle-tags
-            tags:
-              only: /^v.*/
+          <<: *deploy_config
   integration-test:
     triggers:
       - schedule:
