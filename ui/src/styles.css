@@ -1,21 +1,3 @@
-/* Master Styles */
-@font-face {
-    font-family: GothamBook;
-    src: url('/assets/fonts/Gotham Book.otf');
-}
-@font-face {
-    font-family: GothamBold;
-    src: url('/assets/fonts/Gotham Bold.otf');
-}
-@font-face {
-    font-family: GothamLight;
-    src: url('/assets/fonts/Gotham Light.otf');
-}
-@font-face {
-    font-family: GothamMedium;
-    src: url('/assets/fonts/Gotham Medium.otf');
-}
-
 h1, h1 > *,
 h2, h2 > *,
 h3, h3 > * {
@@ -23,23 +5,23 @@ h3, h3 > * {
 }
 
 h1 {
-  font-family: GothamBook;
   font-size: 36px;
 }
 
 h2 {
-  font-family: GothamMedium;
   font-size: 20px;
 }
 
 h3 {
-  font-family: GothamBook;
   font-size: 16px;
 }
 
 body, input[text] {
   color: #888;
-  font-family: Cambria, Georgia;
+}
+
+body * {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
 }
 
 a {
