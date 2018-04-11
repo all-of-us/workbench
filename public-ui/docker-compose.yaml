@@ -1,0 +1,26 @@
+version: "3"
+services:
+  public-ui:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/public-ui
+    volumes:
+      - ..:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: yarn start --host=0.0.0.0 ${ENV_FLAG}
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/ui/sa-key.json
+    ports:
+      - 4201:4201
+  tests:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/public-ui
+    volumes:
+      - ..:/w:cached
+    command: yarn test
+    ports:
+      - 9877:9877
