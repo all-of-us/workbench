@@ -1317,3 +1317,27 @@ Common.register_command({
   :description => "Initializes resources within a cloud project that has already been created",
   :fn => lambda { |*args| setup_cloud_project("setup-cloud-project", *args) }
 })
+
+def start_api_and_incremental_build(cmd_name, args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  begin
+    # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
+    # the application has finished starting.
+    common.run_inline %W{gradle --daemon appengineStart}
+    common.run_inline "tail -f -n 0 /w/api/build/dev-appserver-out/dev_appserver.out &"
+    # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
+    # in the output.
+    common.run_inline %W{gradle --no-daemon --continuous incrementalHotSwap}
+  ensure
+    common.run_inline %W{gradle --stop}
+  end
+end
+
+# TODO(dmohs): This is really isn't meant to be run directly, so it'd be better to hide it from the
+# menu of options.
+Common.register_command({
+  :invocation => "start-api-and-incremental-build",
+  :description => "Used internally by other commands.",
+  :fn => lambda { |*args| start_api_and_incremental_build("start-api-and-incremental-build", args) }
+})

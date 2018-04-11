@@ -11,7 +11,8 @@
     "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Test Registered CDR"
+    "defaultCdrVersion": "Test Registered CDR",
+    "debugQueries": false
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-rw-stable-credentials"

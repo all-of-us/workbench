@@ -6,9 +6,11 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {ServerConfigService} from 'app/services/server-config.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   queryAllByCss,
@@ -89,7 +91,11 @@ describe('WorkspaceShareComponent', () => {
       providers: [
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ServerConfigService,
+          useValue: new ServerConfigServiceStub({
+            gsuiteDomain: 'fake-research-aou.org'
+          }) }
       ] }).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
       });

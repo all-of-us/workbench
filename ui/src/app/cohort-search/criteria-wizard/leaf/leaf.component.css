@@ -28,12 +28,6 @@
   text-overflow: ellipsis;
 }
 
-.item-info > .name:hover {
-  overflow: visible;
-  white-space: normal;
-  text-align: justify;
-}
-
 .item-count {
   padding: 0 0.5rem;
   white-space: nowrap;

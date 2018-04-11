@@ -87,11 +87,14 @@ You can run the server (skipping config and db setup) by running:
 ./project.rb run-api
 ```
 
-
 Other available operations may be discovered by running:
 ```Shell
 ./project.rb
 ```
+
+#### Hot Code Swapping
+
+While the API is running locally, saving a .java file should cause a recompile and reload of that class. Status is logged to the console. Not all changes reload correctly (e.g., model classes do not appear to reload more than once).
 
 ### Public API: dev AppEngine appserver
 
