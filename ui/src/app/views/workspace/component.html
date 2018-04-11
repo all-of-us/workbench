@@ -22,14 +22,21 @@
         </div>
       </div>
       <div>
-        <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
-                [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview" (click)="buildCohort()">
-          + Add a Cohort
-        </button>
-        <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
-                [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
-          + New Notebook
-        </button>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+          <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
+                  [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview" (click)="buildCohort()">
+            + Add a Cohort
+          </button>
+          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        </span>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+          <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
+                  [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
+            + New Notebook
+          </button>
+          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+          <span *ngIf="clusterLoading" class="tooltip-content">Your account is still being set up, try again later</span>
+        </span>
       </div>
     </div>
     <div *ngIf="tabOpen===Tabs.Cohorts">
