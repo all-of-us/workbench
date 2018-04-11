@@ -39,6 +39,12 @@ jobs:
             - ~/.m2
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api
+            - common-api
+            - public-api
 
   api-local-test:
     docker:
@@ -95,6 +101,8 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
+      - attach_workspace:
+          at: .
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -230,6 +238,10 @@ jobs:
           name: Build with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ui
 
   ui-deploy:
     <<: *defaults
@@ -243,6 +255,8 @@ jobs:
           name: Download Swagger CLI
           command: |
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      - attach_workspace:
+          at: .
       - restore_cache:
           keys:
           - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
