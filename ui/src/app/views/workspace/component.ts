@@ -1,6 +1,5 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
-import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
@@ -112,14 +111,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   tabOpen = Tabs.Cohorts;
   rightSidebarClosed = true;
 
-  constructor(private route: ActivatedRoute,
-              private cohortsService: CohortsService,
-              private clusterService: ClusterService,
-              private http: Http,
-              private router: Router,
-              private signInService: SignInService,
-              private workspacesService: WorkspacesService,
-              @Inject(DOCUMENT) private document: any) {
+  constructor(
+    private route: ActivatedRoute,
+    private cohortsService: CohortsService,
+    private clusterService: ClusterService,
+    private http: Http,
+    private router: Router,
+    private signInService: SignInService,
+    private workspacesService: WorkspacesService,
+  ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
@@ -300,26 +300,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  edit(): void {
-    this.router.navigate(['edit'], {relativeTo: this.route});
-  }
-
-  clone(): void {
-    this.router.navigate(['clone'], {relativeTo: this.route});
-  }
-
-  share(): void {
-    this.router.navigate(['share'], {relativeTo: this.route});
-  }
-
-  delete(): void {
-    this.deleting = true;
-    this.workspacesService.deleteWorkspace(
-      this.workspace.namespace, this.workspace.id).subscribe(() => {
-      this.router.navigate(['/']);
-    });
-  }
-
   buildCohort(): void {
     if (!this.awaitingReview) {
       this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
@@ -328,7 +308,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
-      || this.accessLevel === WorkspaceAccessLevel.WRITER;
+        || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
   get ownerPermission(): boolean {

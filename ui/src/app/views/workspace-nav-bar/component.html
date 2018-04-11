@@ -1,13 +1,15 @@
 <div class="btn-group">
   <button class="btn btn-primary btn-top" [routerLink]="['/workspace', wsNamespace, wsId]" routerLinkActive="active"
-          [routerLinkActiveOptions]="{exact: true}">Dashboard
+          [routerLinkActiveOptions]="{exact: true}">
+    Dashboard
   </button>
   <!--
     This is to be added when we have cards for notebooks, because that will show just the most recent.
     <button class="btn btn-primary btn-top">Notebooks</button>
   -->
   <button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview"
-          [routerLink]="['/workspace', wsNamespace, wsId, 'cohorts', 'build']">Cohort Builder
+          [routerLink]="['/workspace', wsNamespace, wsId, 'cohorts', 'build']">
+    Cohort Builder
   </button>
   <div class="btn-group-overflow open bottom-right">
     <button class="btn-top btn btn-overflow" (click)="dropdownOpen = !dropdownOpen">

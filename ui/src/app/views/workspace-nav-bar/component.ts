@@ -12,8 +12,8 @@ import {
 @Component({
   selector: 'app-workspace-nav-bar',
   styleUrls: ['../../styles/buttons.css',
-    '../../styles/headers.css',
-    './component.css'],
+              '../../styles/headers.css',
+              './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceNavBarComponent implements OnInit {
@@ -25,11 +25,11 @@ export class WorkspaceNavBarComponent implements OnInit {
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private workspacesService: WorkspacesService) {
-
-  }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private workspacesService: WorkspacesService
+  ) {}
 
   ngOnInit(): void {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
