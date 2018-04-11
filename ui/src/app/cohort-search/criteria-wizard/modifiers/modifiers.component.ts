@@ -18,7 +18,7 @@ import {Modifier, ModifierType, Operator} from 'generated';
   styleUrls: ['./modifiers.component.css']
 })
 export class ModifiersComponent implements OnInit, OnDestroy {
-  modifierType: ModifierType;
+  modifierType = ModifierType;
   existing = List();
   subscription: Subscription;
   ageAtEventMapEntries: any;
@@ -26,15 +26,15 @@ export class ModifiersComponent implements OnInit, OnDestroy {
   eventDateMapEntries: any;
 
   form = new FormGroup({
-    AGE_AT_EVENT: new FormGroup({
+    [this.modifierType.AGEATEVENT]: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
-    NUM_OF_OCCURRENCES: new FormGroup({
+    [this.modifierType.NUMOFOCCURRENCES]: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
-    EVENT_DATE: new FormGroup({
+    [this.modifierType.EVENTDATE]: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
     }),
@@ -98,6 +98,10 @@ export class ModifiersComponent implements OnInit, OnDestroy {
     if (value === null  || operator === null) {
       return ; // noop
     }
-    return <Modifier>{name: ModifierType.AGEATEVENT, operator: Operator.EQUAL, operands: [value]};
+    return <Modifier>{
+      name: this.modifierType[this.modifierType[name]],
+      operator: Operator[Operator[operator]],
+      operands: [value]
+    };
   }
 }

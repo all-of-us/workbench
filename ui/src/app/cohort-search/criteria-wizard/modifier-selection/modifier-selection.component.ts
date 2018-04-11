@@ -2,6 +2,7 @@ import {select} from '@angular-redux/store';
 import {Component} from '@angular/core';
 
 import {activeModifierList, CohortSearchActions} from '../../redux';
+import {ModifierType, Operator} from 'generated';
 
 @Component({
   selector: 'crit-modifier-selection',
@@ -18,17 +19,17 @@ export class ModifierSelectionComponent {
 
   name(modifier) {
     return {
-      ageAtEvent: 'Age At Event',
-      numOfOccurrences: 'Number of Occurrences',
-      eventDate: 'Date of Event',
+      [ModifierType.AGEATEVENT]: 'Age At Event',
+      [ModifierType.NUMOFOCCURRENCES]: 'Number of Occurrences',
+      [ModifierType.EVENTDATE]: 'Date of Event',
     }[modifier.get('name')];
   }
 
   value(modifier) {
     const op = {
-      equal: 'Equal To',
-      greater: 'Greater Than',
-      lesser: 'Less Than',
+      [Operator.EQUAL]: 'Equal To',
+      [Operator.GREATERTHAN]: 'Greater Than',
+      [Operator.LESSTHAN]: 'Less Than',
     }[modifier.get('operator')];
 
     return `${op} ${modifier.getIn(['operands', 0])}`;

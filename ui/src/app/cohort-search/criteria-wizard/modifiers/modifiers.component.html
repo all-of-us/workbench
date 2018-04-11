@@ -19,10 +19,10 @@
         <button
             type="button"
             class="btn btn-sm btn-link"
-            [disabled]="isSelected('AGE_AT_EVENT')"
-            (click)="select('AGE_AT_EVENT')">
-          <clr-icon *ngIf="isSelected('AGE_AT_EVENT')" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected('AGE_AT_EVENT')" shape="plus-circle" size="20"></clr-icon>
+            [disabled]="isSelected(modifierType.AGEATEVENT)"
+            (click)="select(modifierType.AGEATEVENT)">
+          <clr-icon *ngIf="isSelected(modifierType.AGEATEVENT)" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected(modifierType.AGEATEVENT)" shape="plus-circle" size="20"></clr-icon>
         </button>
       </div>
 
@@ -42,10 +42,10 @@
         <button
             type="button"
             class="btn btn-sm btn-link"
-            [disabled]="isSelected('NUM_OF_OCCURRENCES')"
-            (click)="select('NUM_OF_OCCURRENCES')">
-          <clr-icon *ngIf="isSelected('NUM_OF_OCCURRENCES')" shape="check-circle" size="20"></clr-icon>
-          <clr-icon *ngIf="!isSelected('NUM_OF_OCCURRENCES')" shape="plus-circle" size="20"></clr-icon>
+            [disabled]="isSelected(modifierType.NUMOFOCCURRENCES)"
+            (click)="select(modifierType.NUMOFOCCURRENCES)">
+          <clr-icon *ngIf="isSelected(modifierType.NUMOFOCCURRENCES)" shape="check-circle" size="20"></clr-icon>
+          <clr-icon *ngIf="!isSelected(modifierType.NUMOFOCCURRENCES)" shape="plus-circle" size="20"></clr-icon>
         </button>
       </div>
 
