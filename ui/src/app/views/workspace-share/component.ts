@@ -1,4 +1,4 @@
-import {Location} from "@angular/common";
+import {Location} from '@angular/common';
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
