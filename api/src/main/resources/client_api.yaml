@@ -129,8 +129,8 @@ definitions:
           (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
           list[object] where each object is a dictionary. In Typescript clients, this is an
           Array<any> where each object is a dictionary.) Keys in the dictionaries will be the
-          columns / fields selected in the field set provided in the request, and the values will
-          be the values of those columns / fields.
+          columns selected in the field set provided in the request, and the values will
+          be the values of those columns.
         type: array
         items:
           type: object
