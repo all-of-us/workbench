@@ -29,8 +29,8 @@ import {
   simulateClick,
   updateAndTick
 } from 'testing/test-helpers';
-import {ServerConfigServiceStub} from "../../../testing/stubs/server-config-service-stub";
-import {ServerConfigService} from "../../services/server-config.service";
+import {ServerConfigServiceStub} from '../../../testing/stubs/server-config-service-stub';
+import {ServerConfigService} from '../../services/server-config.service';
 
 class WorkspacePage {
   @ViewChild(WorkspaceShareComponent)
@@ -112,7 +112,7 @@ describe('WorkspaceComponent', () => {
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
-        { provide: ActivatedRoute, useValue: activatedRouteStub }
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
