@@ -163,7 +163,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
         Period drugAge2 = Period.between(personBirthDate, drugDate2);
 
         expectedCondition1 = new ParticipantCondition()
-                .itemDate("2008-07-22")
+                .itemDate("2008-07-22 05:00:00 UTC")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0020")
@@ -172,7 +172,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(conditionAge1.getYears())
                 .dataType(DataType.PARTICIPANTCONDITION);
         expectedCondition2 = new ParticipantCondition()
-                .itemDate("2008-08-01")
+                .itemDate("2008-08-01 05:00:00 UTC")
                 .standardVocabulary("SNOMED")
                 .standardName("SNOMED")
                 .sourceValue("0021")
@@ -181,7 +181,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(conditionAge2.getYears())
                 .dataType(DataType.PARTICIPANTCONDITION);
         expectedProcedure1 = new ParticipantProcedure()
-                .itemDate("2009-12-02")
+                .itemDate("2009-12-03 05:00:00 UTC")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("val")
@@ -190,7 +190,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(procedureAge1.getYears())
                 .dataType(DataType.PARTICIPANTPROCEDURE);
         expectedProcedure2 = new ParticipantProcedure()
-                .itemDate("2009-12-03")
+                .itemDate("2009-12-04 05:00:00 UTC")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("val")
@@ -199,7 +199,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(procedureAge2.getYears())
                 .dataType(DataType.PARTICIPANTPROCEDURE);
         expectedObservation1 = new ParticipantObservation()
-                .itemDate("2009-12-02")
+                .itemDate("2009-12-03 05:00:00 UTC")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("sourceValue")
@@ -208,7 +208,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .age(observationAge1.getYears())
                 .dataType(DataType.PARTICIPANTOBSERVATION);
         expectedObservation2 = new ParticipantObservation()
-                .itemDate("2009-12-03")
+                .itemDate("2009-12-04 05:00:00 UTC")
                 .standardVocabulary("ICD10CM")
                 .standardName("name")
                 .sourceValue("sourceValue")
@@ -218,7 +218,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .dataType(DataType.PARTICIPANTOBSERVATION);
         expectedDrug1 = new ParticipantDrug()
                 .signature("signature")
-                .itemDate("2001-12-02")
+                .itemDate("2001-12-03 05:00:00 UTC")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("Varivax")
@@ -228,7 +228,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
                 .dataType(DataType.PARTICIPANTDRUG);
         expectedDrug2 = new ParticipantDrug()
                 .signature("signature")
-                .itemDate("2001-12-03")
+                .itemDate("2001-12-04 05:00:00 UTC")
                 .standardVocabulary("CPT4")
                 .standardName("name")
                 .sourceValue("Varivax")
