@@ -7,9 +7,14 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
+
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -17,10 +22,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -94,10 +95,19 @@ public class BigQueryService {
         return row.get(index).getBooleanValue();
     }
 
-    public Date getDate(List<FieldValue> row, int index) {
+    public String getDateTime(List<FieldValue> row, int index) {
         if (row.get(index).isNull()) {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
-        return java.sql.Date.from(Instant.ofEpochMilli(Double.valueOf(row.get(index).getStringValue()).longValue() * 1000));
+        DateTimeFormatter df =
+                DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss zzz").withZoneUTC();
+        return df.print(row.get(index).getTimestampValue() / 1000L);
+    }
+
+    public String getDate(List<FieldValue> row, int index) {
+        if (row.get(index).isNull()) {
+            throw new BigQueryException(500, "FieldValue is null at position: " + index);
+        }
+        return row.get(index).getStringValue();
     }
 }
