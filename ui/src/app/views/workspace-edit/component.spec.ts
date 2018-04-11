@@ -15,8 +15,6 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
 
-const activatedRouteStub  =
-
 describe('WorkspaceEditComponent', () => {
   let activatedRouteStub;
   let testComponent: WorkspaceEditComponent;
@@ -24,6 +22,7 @@ describe('WorkspaceEditComponent', () => {
   let workspacesService: WorkspacesServiceStub;
 
   function setupComponent(mode: WorkspaceEditMode) {
+    console.log(activatedRouteStub);
     activatedRouteStub.routeConfig.data.mode = mode;
     fixture = TestBed.createComponent(WorkspaceEditComponent);
     testComponent = fixture.componentInstance;
@@ -50,9 +49,9 @@ describe('WorkspaceEditComponent', () => {
             ...WorkspacesServiceStub.stubWorkspace(),
             accessLevel: WorkspaceAccessLevel.OWNER,
           }
-        },
-        routeConfig: {data: {}}
-      }
+        }
+      },
+      routeConfig: {data: {}}
     };
     workspacesService = new WorkspacesServiceStub();
     TestBed.configureTestingModule({
