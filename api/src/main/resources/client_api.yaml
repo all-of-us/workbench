@@ -187,7 +187,8 @@ definitions:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
           each one optionally enclosed in "DESCENDING()" for descending sort order.
-          (Default sort order is person_id followed by the ID of the specified table.)
+          Default sort order is "person_id" (in ascending order) followed by the ID of the specified
+          table (in ascending order.)
         type: array
         items:
           type: string
@@ -197,22 +198,23 @@ definitions:
     description: >
       A specification for retrieving annotation values or review statuses entered for participants.
     properties:
-      annotations:
+      columns:
         description: >
-          An array of names of annotations to retrieve about participants, "review_status" for
-          the cohort review status of the participant, or "person_id" for the
+          An array of names of annotations to retrieve about participants, or "review_status" for
+          the cohort review status of the participant or "person_id" for the
           ID of the participant. Defaults to "person_id", "review_status", and the names of all
-          defined annotations in the cohort review. This is only valid in combination with a named
-          cohort that has a cohort review created for it; if no cohort review has been created,
-          no results will be returned.
+          defined annotations in the cohort review. This is only valid in combination with the use
+          of cohortName above. Only data for participants in the cohort review will be returned;
+          if no cohort review has been created, no results will be returned.
         type: array
         items:
           type: string
       orderBy:
         description: >
-          An array of names of annotations to sort the resulting data by, or "person_id" for the
-          ID of the participant, each one optionally enclosed in "DESCENDING()" for descending
-          sort order. Defaults to "person_id".
+          An array of names of annotations, or "review status" or "person_id",
+          each one optionally enclosed in "DESCENDING()" for descending
+          sort order. Specifies the order that results should be returned. Defaults to "person_id"
+          (in ascending order).
         type: array
         items:
           type: string
