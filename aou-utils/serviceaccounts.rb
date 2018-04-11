@@ -9,18 +9,22 @@ class ServiceAccountContext
 
   SERVICE_ACCOUNT_KEY_PATH = "sa-key.json"
 
-  def initialize(project, service_account = nil)
+  def initialize(project, service_account = nil, path = nil)
     @project = project
     @service_account = service_account
+    @path = path
+    if not @path
+      @path = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
+    end
   end
 
   def run()
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path(SERVICE_ACCOUNT_KEY_PATH)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = @path
     common = Common.new
     if @project == "all-of-us-workbench-test" and not @service_account
-      unless File.exists?(SERVICE_ACCOUNT_KEY_PATH)
+      unless File.exists?(@path)
         common.run_inline %W{gsutil cp gs://#{@project}-credentials/app-engine-default-sa.json
-            #{SERVICE_ACCOUNT_KEY_PATH}}
+            #{@path}}
       end
       yield
     else
@@ -28,15 +32,15 @@ class ServiceAccountContext
       if not service_account
         service_account = "#{@project}@appspot.gserviceaccount.com"
       end
-      common.run_inline %W{gcloud iam service-accounts keys create #{SERVICE_ACCOUNT_KEY_PATH}
+      common.run_inline %W{gcloud iam service-accounts keys create #{@path}
           --iam-account=#{service_account} --project=#{@project}}
       begin
         yield
       ensure
-        tmp_private_key = `grep private_key_id #{SERVICE_ACCOUNT_KEY_PATH} | cut -d\\\" -f4`.strip()
+        tmp_private_key = `grep private_key_id #{@path} | cut -d\\\" -f4`.strip()
         common.run_inline %W{gcloud iam service-accounts keys delete #{tmp_private_key} -q
            --iam-account=#{service_account} --project=#{@project}}
-        common.run_inline %W{rm #{SERVICE_ACCOUNT_KEY_PATH}}
+        common.run_inline %W{rm #{@path}}
       end
     end
   end
