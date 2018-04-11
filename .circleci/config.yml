@@ -163,7 +163,7 @@ jobs:
           - api-integration-cache-
       - run:
           working_directory: ~/workbench
-          #Used to call gsutil from the circle environment.
+          # Used to call gsutil from the circle environment.
           command: ci/activate_creds.sh api/circle-sa-key.json
       - run:
           working_directory: ~/workbench/api
@@ -295,6 +295,8 @@ workflows:
     jobs:
       # Always run basic test/lint/compilation (open PRs, master merge, tags).
       - api-local-test:
+          # This filter includes all branches (no branch constraint) + tags with
+          # a prefix of "v". See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
           filters:
             tags:
               only: /^v.*/
@@ -328,6 +330,10 @@ workflows:
       # Run deployment to "test" on master merge, or "staging" on release tag.
       - api-deploy:
           requires:
+            # Note: We block on these jobs, *if they run*. A requirement is
+            # considered to be satisfied if that job did not run for the given
+            # branch/filter. For example, on master merge "api-deploy" would
+            # still be triggered despite "api-integration-test" being skipped.
             - api-local-test
             - api-build-test
             - api-bigquery-test
