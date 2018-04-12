@@ -21,6 +21,7 @@ import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
+import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
@@ -35,7 +36,6 @@ import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
-import {BreadcrumbComponent} from "./views/breadcrumb/component";
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
