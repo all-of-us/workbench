@@ -193,7 +193,7 @@ def deploy(cmd_name, args)
   # TODO: Don't grab another key inside of here.
   common.run_inline %W{
     ../api/project.rb deploy
-      --project all-of-us-workbench-test
+      --project #{op.opts.project}
       --account #{op.opts.account}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
@@ -201,7 +201,7 @@ def deploy(cmd_name, args)
 
   common.run_inline %W{
     ../ui/project.rb deploy-ui
-      --project all-of-us-workbench-test
+      --project #{op.opts.project}
       --account #{op.opts.account}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
