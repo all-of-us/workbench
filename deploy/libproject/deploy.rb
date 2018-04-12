@@ -9,47 +9,60 @@ require_relative "../../api/libproject/wboptionsparser"
 
 
 DOCKER_KEY_FILE_PATH = "/creds/sa-key.json"
+STAGING_PROJECT = "all-of-us-rw-staging"
+VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
-def get_source_project(p)
-  # Returns the project preceding "p" in the release promotion process.
-  return {
-    "all-of-us-rw-stable" => "all-of-us-rw-staging"
-  }[p]
-end
-
-def capture_stdout2(cmd)
+# TODO(calbach): Factor these utils down into common.rb
+def capture_stdout(cmd)
+  # common.capture_stdout suppresses stderr, which is not desired.
   out, _ = Open3.capture2(*cmd)
   return out
 end
 
+def yellow_term_text(text)
+  "\033[0;33m#{text}\033[0m"
+end
+
+def warning(text)
+  STDERR.puts yellow_term_text(text)
+end
+
 def get_live_gae_version(project)
-  versions = capture_stdout2 %W{
+  common = Common.new
+  versions = capture_stdout %W{
     gcloud app
     --format json(id,service,traffic_split)
     --project #{project}
     versions list
   }
   if versions.empty?
-    Common.new.error "Failed to get live version from gcloud"
+    common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
   services = Set["api", "default", "public-api"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   if actives.empty?
-    return nil
-  elsif actives.length > services.length
-    # Found some extra services. Log
+    warning "Found 0 active GAE services in project '#{project}'"
     return nil
   elsif services != actives.map{|v| v["service"]}.to_set
-    # Found the wrong services
+    warning "Found active services #{v}, expected #{services} for project " +
+            "'#{project}'"
     return nil
   end
 
   versions = actives.map{|v| v["id"]}.to_set
   if versions.length != 1
+    warning "Found varying IDs across GAE services in project '#{project}': " +
+            "#{versions}"
     return nil
   end
-  return versions.to_a.first
+  v = versions.to_a.first
+  unless VERSION_RE.match(v)
+    warning "Found a live version '#{v}' in project '#{project}', but it " +
+            "doesn't match the expected release version format"
+    return nil
+  end
+  return v
 end
 
 def deploy(cmd_name, args)
@@ -74,12 +87,14 @@ def deploy(cmd_name, args)
     "--git_version [git version]",
     lambda {|opts, v| opts.git_version = v},
     "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/master'. Branch names " +
-    "must be prefixed with 'origin/'"
+    "must be prefixed with 'origin/'. By default, uses the current live " +
+    "staging release tag (if staging is in a good state)"
   )
   op.add_option(
     "--app_version [app version]",
     lambda {|opts, v| opts.app_version = v},
-    "App Engine version to deploy as"
+    "App Engine version to deploy as. By default, uses the current live " +
+    "staging release version (if staging is in a good state)"
   )
   op.add_option(
     "--promote",
@@ -99,39 +114,46 @@ def deploy(cmd_name, args)
 
   common = Common.new
   unless Workbench::in_docker?
-    source_project = get_source_project(op.opts.project)
     live_version = get_live_gae_version(op.opts.project)
-    live_source_version = source_project and get_live_gae_version(source_project)
-    if live_source_version and not op.opts.app_version
-      common.status "--app_version defaulting to #{live_source_version}; " +
-                    "found on project #{source_project}"
-      op.opts.app_version = live_source_version
-    end
-    if live_source_version and not op.opts.git_version
-      common.status "--git_version defaulting to #{live_source_version}; " +
-                    "found on project #{source_project}"
-      op.opts.git_version = live_source_version
-    end
     if not op.opts.git_version or not op.opts.app_version
-      if source_project
-        common.error "Failed to find a promotion candidate version in project "+
-                     source_project
-      else
-        common.error "Project #{op.opts.project} has no environment from which " +
-                     "to promote a release; please verify that you intended to " +
-                     "deploy to this environment using this method (uncommon)"
+      if op.opts.project == STAGING_PROJECT
+        common.error "--git_version and --app_version are required when " +
+                     "using this script to deploy to staging. Note: this " +
+                     "should be an uncommon use case, please see the release " +
+                     "documentation for details"
+        exit 1
       end
-      common.error "No default version found, both --git_version and " +
-                   "--app_version must be specified"
-      exit 1
+      live_staging_version = get_live_gae_version(STAGING_PROJECT)
+      if not live_staging_version
+        common.error "No default staging version could be determined for " +
+                     "promotion; please investigate or else be explicit in " +
+                     "the version to promote by specifying both " +
+                     "--git_version and --app_version"
+        exit 1
+      end
+      if live_staging_version and not op.opts.app_version
+        common.status "--app_version defaulting to '#{live_staging_version}'; " +
+                      "found on project '#{STAGING_PROJECT}'"
+        op.opts.app_version = live_staging_version
+      end
+      if live_staging_version and not op.opts.git_version
+        common.status "--git_version defaulting to '#{live_staging_version}'; " +
+                      "found on project '#{STAGING_PROJECT}'"
+        op.opts.git_version = live_staging_version
+      end
     end
 
     # TODO: Might be nice to emit the last version creation time here as a
     # sanity check (need to pick which service to do that for...).
     common.status "Current live version is '#{live_version}' (project " +
-                  "#{op.opts.project}); will deploy git version " +
-                  "'#{op.opts.git_version}' as app engine version " +
-                  "'#{op.opts.app_version}'"
+                  "#{op.opts.project})"
+    puts "Will deploy git version '#{op.opts.git_version}' as App Engine " +
+         "version '#{op.opts.app_version}' in project '#{op.opts.project}'"
+    printf "Continue? (Y/n): "
+    got = STDIN.gets.chomp.strip.upcase
+    unless got == '' or got == 'Y'
+      exit 1
+    end
 
     key_file = Tempfile.new(["#{op.opts.account}-key", ".json"])
     ServiceAccountContext.new(
