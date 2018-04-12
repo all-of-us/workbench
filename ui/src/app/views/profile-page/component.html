@@ -131,7 +131,7 @@
         </h6>
       </div>
       <div>
-        <button class="btn btn-secondary" routerLink="id-verification"
+        <button class="btn btn-secondary" (click)="requestVerification()"
             [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED'">
           Submit Identity Verification
           <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
