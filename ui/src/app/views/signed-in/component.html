@@ -17,6 +17,7 @@
     <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
       <a routerLink="/profile" clrDropdownItem>Profile</a>
       <div class="dropdown-divider"></div>
+      <button id="report-bug" class="btn" (click)="bugReportComponent.reportBug();">Report A Bug</button>
       <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
     </clr-dropdown-menu>
   </clr-dropdown>
@@ -50,3 +51,4 @@
     <router-outlet></router-outlet>
   </div>
 </div>
+<app-bug-report></app-bug-report>

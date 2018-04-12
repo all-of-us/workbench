@@ -35,7 +35,6 @@ class BugReportPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.reportBugButton = queryByCss(this.fixture, '#report-bug');
     this.sendButton = queryByCss(this.fixture, '#send-bug-report');
     this.shortDescription = queryByCss(this.fixture, '#bug-report-short-descr');
     this.reproSteps = queryByCss(this.fixture, '#bug-report-repro-steps');
@@ -68,7 +67,7 @@ describe('BugReportComponent', () => {
 
 
   it('submits a bug report', fakeAsync(() => {
-    simulateClick(bugReportPage.fixture, bugReportPage.reportBugButton);
+    bugReportPage.fixture.componentRef.instance.reportBug();
     bugReportPage.readPageData();
     simulateInput(bugReportPage.fixture, bugReportPage.shortDescription, testShortDescription);
     simulateInput(bugReportPage.fixture, bugReportPage.reproSteps, testReproSteps);
