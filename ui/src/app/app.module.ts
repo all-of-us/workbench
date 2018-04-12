@@ -33,6 +33,7 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
+import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -104,6 +105,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
+    WorkspaceNavBarComponent,
     WorkspaceShareComponent,
   ],
   providers: [

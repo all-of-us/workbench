@@ -1,0 +1,37 @@
+<clr-button-group class="btn-group" [clrMenuPosition]="'bottom-right'">
+  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspace', wsNamespace, wsId]" routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}">
+    Dashboard
+  </clr-button>
+  <!--
+    This is to be added when we have cards for notebooks, because that will show just the most recent.
+    <button class="btn btn-primary btn-top">Notebooks</button>
+  -->
+  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+    <clr-button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview"
+            [routerLink]="['/workspace', wsNamespace, wsId, 'cohorts', 'build']">
+      Cohort Builder
+    </clr-button>
+    <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+  </span>
+
+  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+    <clr-button [clrInMenu]="true" class="btn" [disabled]="!writePermission" [routerLink]="['/workspace', wsNamespace, wsId, 'edit']"
+            routerLinkActive="active">
+      Edit
+    </clr-button>
+    <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+  </span>
+  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'share']" routerLinkActive="active">
+    Share
+  </clr-button>
+  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'clone']" routerLinkActive="active">
+    Clone
+  </clr-button>
+  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission" (click)="delete()">
+      Delete
+    </clr-button>
+    <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
+  </span>
+</clr-button-group>

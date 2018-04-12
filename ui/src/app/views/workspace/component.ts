@@ -1,6 +1,5 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
-import {DOCUMENT} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
@@ -22,10 +21,10 @@ import {
 
 
 /*
-* Search filters used by the cohort and notebook data tables to
-* determine which of the cohorts loaded into client side memory
-* are displayed.
-*/
+ * Search filters used by the cohort and notebook data tables to
+ * determine which of the cohorts loaded into client side memory
+ * are displayed.
+ */
 class CohortNameFilter implements StringFilter<Cohort> {
   accepts(cohort: Cohort, search: string): boolean {
     return cohort.name.toLowerCase().indexOf(search) >= 0;
@@ -43,10 +42,10 @@ class NotebookNameFilter implements StringFilter<FileDetail> {
 }
 
 /*
-* Sort comparators used by the cohort and notebook data tables to
-* determine the order that the cohorts loaded into client side memory
-* are displayed.
-*/
+ * Sort comparators used by the cohort and notebook data tables to
+ * determine the order that the cohorts loaded into client side memory
+ * are displayed.
+ */
 class CohortNameComparator implements Comparator<Cohort> {
   compare(a: Cohort, b: Cohort) {
     return a.name.localeCompare(b.name);
@@ -63,14 +62,22 @@ class NotebookNameComparator implements Comparator<FileDetail> {
   }
 }
 
+enum Tabs {
+  Cohorts,
+  Notebooks,
+}
 
 @Component({
-  styleUrls: ['./component.css'],
+  styleUrls: ['../../styles/buttons.css',
+    '../../styles/headers.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
+
+  Tabs = Tabs;
 
   cohortNameFilter = new CohortNameFilter();
   cohortDescriptionFilter = new CohortDescriptionFilter();
@@ -97,23 +104,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   deleting = false;
   showAlerts = false;
   notebookList: FileDetail[] = [];
-  editHover = false;
-  shareHover = false;
-  trashHover = false;
   listenerAdded = false;
   notebookAuthListener: EventListenerOrEventListenerObject;
   alertCategory: string;
   alertMsg: string;
+  tabOpen = Tabs.Cohorts;
+  rightSidebarClosed = true;
 
   constructor(
-      private route: ActivatedRoute,
-      private cohortsService: CohortsService,
-      private clusterService: ClusterService,
-      private http: Http,
-      private router: Router,
-      private signInService: SignInService,
-      private workspacesService: WorkspacesService,
-      @Inject(DOCUMENT) private document: any
+    private route: ActivatedRoute,
+    private cohortsService: CohortsService,
+    private clusterService: ClusterService,
+    private http: Http,
+    private router: Router,
+    private signInService: SignInService,
+    private workspacesService: WorkspacesService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -214,7 +219,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private initializeNotebookCookies(cluster: Cluster): Observable<Response> {
     // TODO(calbach): Generate the FC notebook Typescript client and call here.
     const leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
-        + cluster.clusterNamespace + '/'
+      + cluster.clusterNamespace + '/'
       + cluster.clusterName;
     const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
 
@@ -244,7 +249,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
             observer.next(cluster);
             observer.complete();
           }
-      });
+        });
     });
   }
 
@@ -286,7 +291,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         notebook.postMessage({
           'type': 'bootstrap-auth.response',
           'body': {
-              'googleClientId': this.signInService.clientId
+            'googleClientId': this.signInService.clientId
           }
         }, WorkspaceComponent.leoBaseUrl);
       };
@@ -295,29 +300,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  edit(): void {
-    this.router.navigate(['edit'], {relativeTo : this.route});
-  }
-
-  clone(): void {
-    this.router.navigate(['clone'], {relativeTo : this.route});
-  }
-
-  share(): void {
-    this.router.navigate(['share'], {relativeTo : this.route});
-  }
-
-  delete(): void {
-    this.deleting = true;
-    this.workspacesService.deleteWorkspace(
-        this.workspace.namespace, this.workspace.id).subscribe(() => {
-          this.router.navigate(['/']);
-        });
-  }
-
   buildCohort(): void {
     if (!this.awaitingReview) {
-      this.router.navigate(['cohorts', 'build'], {relativeTo : this.route});
+      this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
     }
   }
 
@@ -363,5 +348,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.alertCategory = '';
     this.alertMsg = '';
     this.showAlerts = false;
+  }
+
+  get workspaceCreationTime(): string {
+    const asDate = new Date(this.workspace.creationTime);
+    return asDate.toDateString();
+  }
+
+  get workspaceLastModifiedTime(): string {
+    const asDate = new Date(this.workspace.lastModifiedTime);
+    return asDate.toDateString();
   }
 }

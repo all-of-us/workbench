@@ -47,12 +47,14 @@
 
 .content-container {
   display: flex;
+  /*View height minus top bar.*/
+  min-height: calc(100vh - 4rem);
 }
 
 .sidenav {
   background-color: #262262;
   position: absolute;
-  top: 3.3rem;
+  top: 4rem;
   bottom: 0;
   z-index: 1500;
   flex-grow: 1;
@@ -88,6 +90,7 @@
   width: 100%;
   margin-right: 0.6rem;
   margin-left: 1rem;
+  flex-grow: 1;
 }
 
 .background-image {
@@ -99,5 +102,5 @@
   top: 3.3rem;
   width: 50%;
   position: absolute;
-  height: 90%;
+  height: calc(100vh - 3.3rem);
 }
