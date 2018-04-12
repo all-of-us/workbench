@@ -134,6 +134,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     },
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
+  bootstrap: [AppComponent, ErrorHandlerComponent]
 })
 export class AppModule {}
