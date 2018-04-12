@@ -7,7 +7,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +41,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     private static final String INNER_SQL_TEMPLATE =
-            "select person_id\n" +
+            "select distinct a.person_id, a.${entryDate} as entry_date, b.concept_code\n" +
                     "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n"+
                     "where a.${tableId} = b.concept_id\n";
 
@@ -52,15 +55,27 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
     private static final String UNION_TEMPLATE = " union all\n";
 
-    private static final String OUTER_SQL_TEMPLATE =
-            "select person_id\n"+
+    private static final String OUTER_SQL_TEMPLATE = "select person_id\n"+
                     "from `${projectId}.${dataSetId}.person` p\n"+
-                    "where person_id in (${innerSql})\n";
+                    "where person_id in (${modifiersSqlTemplate})\n";
+
+    private static final String MODIFIERS_SQL_TEMPLATE =
+            "select criteria.person_id from (${innerSqlTemplate}) criteria\n" +
+                    "join `${projectId}.${dataSetId}.person` p on (criteria.person_id = p.person_id)\n";
+
+    private static final String AGE_AT_EVENT_SQL_TEMPLATE =
+            "CAST(FLOOR(DATE_DIFF(criteria.entry_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64)\n";
+
+    private static final String EVENT_DATE_SQL_TEMPLATE = "criteria.entry_date\n";
+
+    private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
+            "having count(criteria.person_id)";
 
     @Override
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
         Map<GroupType, ListMultimap<String, SearchParameter>> paramMap = getMappedParameters(params.getParameters());
         List<String> queryParts = new ArrayList<String>();
+        List<String> modifierQueryParts = new ArrayList<String>();
         Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
         for (GroupType group : paramMap.keySet()) {
@@ -81,7 +96,32 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             }
         }
 
-        String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", String.join(UNION_TEMPLATE, queryParts));
+        for (Modifier modifier : params.getModifiers()) {
+            if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)) {
+                String ageAtEventParameter = "age" + getUniqueNamedParameterPostfix();
+                modifierQueryParts.add((modifierQueryParts.size() > 0 ? " and " : "") + AGE_AT_EVENT_SQL_TEMPLATE + " "
+                        + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + ageAtEventParameter + "\n");
+                queryParams.put(ageAtEventParameter,
+                        QueryParameterValue.int64(new Long(modifier.getOperands().get(0))));
+            } else if (modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
+                String occurrencesParameter = "occ" + getUniqueNamedParameterPostfix();
+                modifierQueryParts.add(OCCURRENCES_SQL_TEMPLATE + " "
+                        + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + occurrencesParameter + "\n");
+                queryParams.put(occurrencesParameter,
+                        QueryParameterValue.int64(new Long(modifier.getOperands().get(0))));
+            } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
+                String eventParameter = "event" + getUniqueNamedParameterPostfix();
+                modifierQueryParts.add((modifierQueryParts.size() > 0 ? " and " : "") + EVENT_DATE_SQL_TEMPLATE + " "
+                        + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + eventParameter + "\n");
+                queryParams.put(eventParameter,
+                        QueryParameterValue.date(modifier.getOperands().get(0)));
+            }
+        }
+        String modifierSql = MODIFIERS_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
+        if (!modifierQueryParts.isEmpty()) {
+            modifierSql = modifierSql + " where " + String.join(" ", modifierQueryParts);
+        }
+        String finalSql = OUTER_SQL_TEMPLATE.replace("${modifiersSqlTemplate}", modifierSql);
 
         return QueryJobConfiguration
                 .newBuilder(finalSql)
@@ -141,6 +181,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             paramNames = new ImmutableMap.Builder<String, String>()
                     .put("${tableName}", DomainTableEnum.getTableName(domain))
                     .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
+                    .put("${entryDate}", DomainTableEnum.getEntryDate(domain))
                     .put("${conceptCodes}", "@" + namedParameter)
                     .put("${cmOrProc}", "@" + cmOrProcUniqueParam)
                     .build();
@@ -151,6 +192,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             paramNames = new ImmutableMap.Builder<String, String>()
                     .put("${tableName}", DomainTableEnum.getTableName(domain))
                     .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
+                    .put("${entryDate}", DomainTableEnum.getEntryDate(domain))
                     .put("${conceptCodes}", "@" + namedParameter)
                     .put("${cm}", "@" + cmUniqueParam)
                     .put("${proc}", "@" + procUniqueParam)
