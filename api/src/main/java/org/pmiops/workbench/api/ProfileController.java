@@ -392,7 +392,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
     User user = userProvider.get();
-    if (user.getRequestedIdVerification() != null) {
+    if (user.getRequestedIdVerification() == null || user.getRequestedIdVerification() == false) {
       Properties props = new Properties();
       Session session = Session.getDefaultInstance(props, null);
       try {
