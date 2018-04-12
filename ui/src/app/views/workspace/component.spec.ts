@@ -1,4 +1,4 @@
-import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
@@ -9,6 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
@@ -100,9 +101,9 @@ describe('WorkspaceComponent', () => {
       ],
       declarations: [
         WorkspaceComponent,
-        WorkspaceNavBarComponent
+        WorkspaceNavBarComponent,
+        WorkspaceShareComponent
       ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
@@ -111,10 +112,13 @@ describe('WorkspaceComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
-        { provide: ServerConfigService,
+        {
+          provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
-          }) }      ] }).compileComponents().then(() => {
+          })
+        }
+      ]}).compileComponents().then(() => {
         workspacePage = new WorkspacePage(TestBed);
       });
       tick();
