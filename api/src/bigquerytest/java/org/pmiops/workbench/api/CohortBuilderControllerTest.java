@@ -14,11 +14,7 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.SearchGroup;
-import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,42 +137,87 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
+    }
+
+    @Test
+    public void countSubjectsICD9ConditionOccurrenceChildAgeAtEvent() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+        Modifier modifier = new Modifier()
+                .name(ModifierType.AGE_AT_EVENT)
+                .operator(Operator.GREATER_THAN)
+                .operands(Arrays.asList("25"));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
+    }
+
+    @Test
+    public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+        Modifier modifier1 = new Modifier()
+                .name(ModifierType.AGE_AT_EVENT)
+                .operator(Operator.GREATER_THAN)
+                .operands(Arrays.asList("25"));
+        Modifier modifier2 = new Modifier()
+                .name(ModifierType.NUM_OF_OCCURRENCES)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("1"));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
+    }
+
+    @Test
+    public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrencesAndEventDate() throws Exception {
+        SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+        Modifier modifier1 = new Modifier()
+                .name(ModifierType.AGE_AT_EVENT)
+                .operator(Operator.GREATER_THAN)
+                .operands(Arrays.asList("25"));
+        Modifier modifier2 = new Modifier()
+                .name(ModifierType.NUM_OF_OCCURRENCES)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("1"));
+        Modifier modifier3 = new Modifier()
+                .name(ModifierType.EVENT_DATE)
+                .operator(Operator.EQUAL)
+                .operands(Arrays.asList("2009-12-03"));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier1, modifier2, modifier3));
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
-        SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
-        SearchRequest searchRequest = createSearchRequests(icd9ProcedureChild.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9ProcedureChild.getType(), Arrays.asList(icd9), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
-        SearchRequest searchRequest = createSearchRequests(icd9ProcedureParent.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9ProcedureParent.getType(), Arrays.asList(icd9), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD9MeasurementChild() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-        SearchRequest searchRequest = createSearchRequests(icd9MeasurementChild.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9MeasurementChild.getType(), Arrays.asList(icd9), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD9MeasurementParent() throws Exception {
         SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
-        SearchRequest searchRequest = createSearchRequests(icd9MeasurementParent.getType(), Arrays.asList(icd9));
+        SearchRequest searchRequest = createSearchRequests(icd9MeasurementParent.getType(), Arrays.asList(icd9), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -184,7 +225,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjectsDemoGender() throws Exception {
         Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
         SearchParameter demo = createSearchParameter(demoGender, null);
-        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo));
+        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -192,7 +233,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     public void countSubjectsDemoDec() throws Exception {
         Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
         SearchParameter demo = createSearchParameter(demoGender, "Deceased");
-        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo));
+        SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -204,7 +245,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
         SearchParameter demo = createSearchParameter(demoAge, null);
         demo.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
-        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo));
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests),1);
     }
 
@@ -220,7 +261,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
         demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
 
-        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam));
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests),1);
     }
 
@@ -236,14 +277,14 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
         SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
         demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
 
-        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam));
+        SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
 
         SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(icd9.getType()).searchParameters(Arrays.asList(icd9));
+        SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(icd9.getType()).searchParameters(Arrays.asList(icd9)).modifiers(new ArrayList<>());
 
         searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-        assertParticipants( controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+        assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
     }
 
     @Test
@@ -257,7 +298,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
         SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
-        SearchRequest searchRequests = createSearchRequests(demoGender.getType(), Arrays.asList(demoGenderSearchParam));
+        SearchRequest searchRequests = createSearchRequests(demoGender.getType(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
         searchRequests.getExcludes().add(excludeSearchGroup);
 
         assertParticipants( controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
@@ -266,70 +307,70 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     @Test
     public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-        SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
-        SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10ProcedureChild, "16070");
-        SearchRequest searchRequest = createSearchRequests(icd10ProcedureChild.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10ProcedureChild.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
-        SearchRequest searchRequest = createSearchRequests(icd10ProcedureParent.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10ProcedureParent.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD10MeasurementChild() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
-        SearchRequest searchRequest = createSearchRequests(icd10MeasurementChild.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10MeasurementChild.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsICD10MeasurementParent() throws Exception {
         SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
-        SearchRequest searchRequest = createSearchRequests(icd10MeasurementParent.getType(), Arrays.asList(icd10));
+        SearchRequest searchRequest = createSearchRequests(icd10MeasurementParent.getType(), Arrays.asList(icd10), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsCPTProcedureOccurrence() throws Exception {
         SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
-        SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt));
+        SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsCPTObservation() throws Exception {
         SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
-        SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt));
+        SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsCPTMeasurement() throws Exception {
         SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
-        SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt));
+        SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
     @Test
     public void countSubjectsCPTDrugExposure() throws Exception {
         SearchParameter cpt = createSearchParameter(cptDrug, "90703");
-        SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt));
+        SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt), new ArrayList<>());
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -381,8 +422,13 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
     }
 
-    private SearchRequest createSearchRequests(String type, List<SearchParameter> parameters) {
-        final SearchGroupItem searchGroupItem = new SearchGroupItem().type(type).searchParameters(parameters);
+    private SearchRequest createSearchRequests(String type,
+                                               List<SearchParameter> parameters,
+                                               List<Modifier> modifiers) {
+        final SearchGroupItem searchGroupItem = new SearchGroupItem()
+                .type(type)
+                .searchParameters(parameters)
+                .modifiers(modifiers);
 
         final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
 

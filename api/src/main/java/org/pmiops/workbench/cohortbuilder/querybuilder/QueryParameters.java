@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchParameter;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class QueryParameters {
 
     private String type;
-    private Long parentId;
+    private List<Modifier> modifiers;
     private List<SearchParameter> parameters;
 
     public String getType() {
@@ -28,16 +29,16 @@ public class QueryParameters {
         return this;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public List<Modifier> getModifiers() {
+        return modifiers;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setModifiers(List<Modifier> modifiers) {
+        this.modifiers = modifiers;
     }
 
-    public QueryParameters parentId(Long parentId) {
-        this.parentId = parentId;
+    public QueryParameters modifiers(List<Modifier> modifiers) {
+        this.modifiers = modifiers;
         return this;
     }
 
@@ -62,14 +63,14 @@ public class QueryParameters {
         QueryParameters that = (QueryParameters) o;
 
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (parentId != null ? !parentId.equals(that.parentId) : that.parentId != null) return false;
+        if (modifiers != null ? !modifiers.equals(that.modifiers) : that.modifiers != null) return false;
         return parameters != null ? parameters.equals(that.parameters) : that.parameters == null;
     }
 
     @Override
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (parentId != null ? parentId.hashCode() : 0);
+        result = 31 * result + (modifiers != null ? modifiers.hashCode() : 0);
         result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
         return result;
     }
