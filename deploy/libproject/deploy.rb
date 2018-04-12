@@ -135,6 +135,7 @@ def deploy(cmd_name, args)
     key_file = Tempfile.new(["#{op.opts.account}-key", ".json"])
     ServiceAccountContext.new(
       op.opts.project, account=op.opts.account, path=key_file.path).run do
+      common.run_inline %W{docker-compose build deploy}
       common.run_inline %W{
         docker-compose run --rm
         -e WORKBENCH_VERSION=#{op.opts.git_version}
@@ -188,4 +189,18 @@ Common.register_command({
   :invocation => "deploy",
   :description => "",
   :fn => lambda { |*args| deploy("deploy", args) }
+})
+
+def docker_clean(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose down --volumes}
+end
+
+Common.register_command({
+  :invocation => "docker-clean",
+  :description => \
+    "Removes docker containers and volumes, allowing the next `deploy` to " \
+    "start from scratch (e.g., no git repo cache). This should not normally " \
+    "be necessary outside of deploy script development",
+  :fn => lambda { |*args| docker_clean(*args) }
 })

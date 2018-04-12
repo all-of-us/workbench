@@ -13,7 +13,7 @@ sudo chgrp circleci /creds/sa-key.json
 sudo chmod g+r /creds/sa-key.json
 sudo chown -R circleci /.gradle
 
-if [[ ! -d "~/workbench/.git" ]]; then
+if [[ ! -d ~/workbench/.git ]]; then
   sudo git clone https://github.com/all-of-us/workbench ~/workbench
   sudo chown -R circleci ~/workbench
 fi
@@ -24,5 +24,6 @@ git checkout origin/"${WORKBENCH_VERSION}"
 git submodule update --init --recursive
 # Drop any ignored files which may have carried over, to ensure a clean build.
 git clean -fX
+git status
 
 exec "$@"
