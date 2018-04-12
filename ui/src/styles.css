@@ -28,10 +28,6 @@ body, input[text] {
   font-weight: 300;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
-}
-
 a {
   color: #6fb4ff;
   cursor: pointer;
@@ -92,4 +88,155 @@ input[type=text]:focus, input[type=password]:focus {
  */
 .noUi-connect {
   background: rgb(92, 183, 225);
+}
+
+/*
+ * Override clarity fonts
+ */
+body {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+html {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.login {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.login-wrapper .login .title {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.login-wrapper .login .trademark {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.login-wrapper .login .subtitle {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.modal-header .modal-title {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.header .branding .title {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.sidenav .sidenav-content > .nav-link {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+.sidenav .nav-group label {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+
+
+/*
+ * Override clarity font weights. They default to 400 for normal, we want 300.
+ */
+body {
+  font-weight: 300;
+}
+body p {
+  font-weight: 300;
+}
+.btn {
+  font-weight: 300;
+}
+.btn.btn-sm, .alert-app-level .alert-item .btn,
+.btn-sm .btn, .alert-app-level .alert-item .btn .btn {
+  font-weight: 300;
+}
+
+.btn-group.btn-sm .btn-group-overflow > .dropdown-toggle, .alert-app-level .alert-item .btn-group.btn .btn-group-overflow > .dropdown-toggle {
+  font-weight: 300;
+}
+.dropdown-menu .btn,
+.dropdown-menu .btn-secondary,
+.dropdown-menu .btn-info,
+.dropdown-menu .btn-outline,
+.dropdown-menu .btn-outline-primary,
+.dropdown-menu .btn-outline-secondary,
+.dropdown-menu .btn-outline-warning,
+.dropdown-menu .btn-outline-danger,
+.dropdown-menu .btn-outline-success,
+.dropdown-menu .btn-danger,
+.dropdown-menu .btn-primary,
+.dropdown-menu .btn-warning,
+.dropdown-menu .btn-success,
+.dropdown-menu .btn-link,
+.dropdown-menu .dropdown-item {
+  font-weight: 300;
+}
+.label, a.label {
+  font-weight: 300;
+}
+header .branding .title,
+.header .branding .title {
+  font-weight: 300;
+}
+header .header-nav .nav-text,
+.header .header-nav .nav-text {
+  font-weight: 300;
+}
+header .settings .nav-text,
+header .header-actions .nav-text,
+.header .settings .nav-text,
+.header .header-actions .nav-text {
+  font-weight: 300;
+}
+.nav .nav-link {
+  font-weight: 300;
+}
+.sidenav .sidenav-content > .nav-link {
+  font-weight: 300;
+}
+.sidenav .nav-group {
+  font-weight: 300;
+}
+.sidenav .nav-group label {
+  font-weight: 300;
+}
+.clr-vertical-nav.has-nav-groups .nav-group-children .nav-link {
+  font-weight: 300;
+}
+.tooltip.tooltip-top-right > .tooltip-content, .tooltip .tooltip-content.tooltip-top-right {
+  font-weight: 300;
+}
+.tooltip.tooltip-top-left > .tooltip-content, .tooltip .tooltip-content.tooltip-top-left {
+  font-weight: 300;
+}
+.tooltip.tooltip-bottom-right > .tooltip-content, .tooltip .tooltip-content.tooltip-bottom-right {
+  font-weight: 300;
+}
+.tooltip.tooltip-bottom-left > .tooltip-content, .tooltip .tooltip-content.tooltip-bottom-left {
+  font-weight: 300;
+}
+.tooltip.tooltip-right > .tooltip-content, .tooltip .tooltip-content.tooltip-right {
+  font-weight: 300;
+}
+.tooltip.tooltip-left > .tooltip-content, .tooltip .tooltip-content.tooltip-left {
+  font-weight: 300;
+}
+form .form-block > label,
+.form .form-block > label {
+  font-weight: 300;
+}
+.stack-view {
+  font-weight: 300;
+}
+.stack-view .stack-block-label {
+  font-weight: 300;
+}
+.datagrid .datagrid-column .datagrid-filter, .datagrid .datagrid-head .datagrid-row-actions .datagrid-filter {
+  font-weight: 300;
+}
+.datagrid .datagrid-body .datagrid-row .datagrid-action-overflow {
+  font-weight: 300;
+}
+.datagrid-foot .column-switch-wrapper .column-switch .switch-header {
+  font-weight: 300;
+}
+.clr-wizard .clr-wizard-stepnav-item {
+  font-weight: 300;
+}
+.clr-wizard .clr-wizard-stepnav-item.active {
+  font-weight: 300;
 }
