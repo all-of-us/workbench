@@ -45,48 +45,83 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: WorkspaceListComponent,
-        data: {title: 'View Workspaces'}
-      }, {
-        /* TODO The children under ./views need refactoring to use the data
-         * provided by the route rather than double-requesting it.
-         */
-        path: 'workspace/:ns/:wsid',
-        runGuardsAndResolvers: 'always',
-        resolve: {
-          workspace: WorkspaceResolver,
-        },
-        children: [{
+        data: { breadcrumb: 'Workspaces' },
+        children: [
+          {
             path: '',
-            component: WorkspaceComponent,
-            data: {title: 'View Workspace Details'}
-          }, {
-            path: 'edit',
-            component: WorkspaceEditComponent,
-            data: {title: 'Edit Workspace', mode: WorkspaceEditMode.Edit}
-          }, {
-            path: 'clone',
-            component: WorkspaceEditComponent,
-            data: {title: 'Clone Workspace', mode: WorkspaceEditMode.Clone}
-          }, {
-            path: 'share',
-            component: WorkspaceShareComponent,
-            data: {title: 'Share Workspace'}
-          }, {
-            path: 'cohorts/build',
-            loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-          }, {
-            path: 'cohorts/:cid/review',
-            loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-          }, {
-            path: 'cohorts/:cid/edit',
-            component: CohortEditComponent,
-            data: {title: 'Edit Cohort'},
-            resolve: {
-              cohort: CohortResolver,
+            component: WorkspaceListComponent,
+            data: {title: 'View Workspaces'}
+          },
+          {
+            /* TODO The children under ./views need refactoring to use the data
+             * provided by the route rather than double-requesting it.
+             */
+            path: 'workspace/:ns/:wsid',
+            data: {
+              title: 'View Workspace Details',
+              breadcrumb: ':wsid'
             },
-        }],
-      }, {
+            runGuardsAndResolvers: 'always',
+            resolve: {
+              workspace: WorkspaceResolver,
+            },
+            children: [{
+              path: '',
+              component: WorkspaceComponent,
+              data: {
+                title: 'View Workspace Details',
+                breadcrumb: 'View Workspace Details'
+              }
+            }, {
+              path: 'edit',
+              component: WorkspaceEditComponent,
+              data: {
+                title: 'Edit Workspace',
+                mode: WorkspaceEditMode.Edit,
+                breadcrumb: 'Edit Workspace'
+              }
+            }, {
+              path: 'clone',
+              component: WorkspaceEditComponent,
+              data: {
+                title: 'Clone Workspace',
+                mode: WorkspaceEditMode.Clone,
+                breadcrumb: 'Clone Workspace'
+              }
+            }, {
+              path: 'share',
+              component: WorkspaceShareComponent,
+              data: {
+                title: 'Share Workspace',
+                breadcrumb: 'Share Workspace'
+              }
+            }, {
+              path: 'cohorts/build',
+              loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+              data: {
+                breadcrumb: 'Cohort Builder'
+              }
+            }, {
+              path: 'cohorts/:cid/review',
+              loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+              data: {
+                breadcrumb: 'Cohort Review'
+              }
+            }, {
+              path: 'cohorts/:cid/edit',
+              component: CohortEditComponent,
+              data: {
+                title: 'Edit Cohort',
+                breadcrumb: 'Edit Cohort'
+              },
+              resolve: {
+                cohort: CohortResolver,
+              },
+            }],
+          }
+        ]
+      },
+      {
         path: 'admin/review-workspace',
         component: AdminReviewWorkspaceComponent,
         data: {title: 'Review Workspaces'}

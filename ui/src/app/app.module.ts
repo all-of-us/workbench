@@ -35,6 +35,7 @@ import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
+import {BreadcrumbComponent} from "./views/breadcrumb/component";
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
@@ -105,6 +106,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceEditComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
+    BreadcrumbComponent,
   ],
   providers: [
     {

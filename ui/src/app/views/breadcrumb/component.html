@@ -1,0 +1,6 @@
+<div class="breadcrumb-container">
+  <div *ngFor="let breadcrumb of breadcrumbs; let last = last"
+       [ngClass]="{'breadcrumb-last': last, 'breadcrumb': !last}">
+    <a [routerLink]="[breadcrumb.url]">{{ breadcrumb.label | titlecase }}</a>
+  </div>
+</div>
