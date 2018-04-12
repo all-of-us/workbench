@@ -183,7 +183,6 @@ public class CohortMaterializationService {
     }
 
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    response.setResults(new ArrayList<Object>());
     Iterable<Map<String, Object>> results;
     if (fieldSet == null || fieldSet.getTableQuery() != null) {
       ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,

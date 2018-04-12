@@ -122,6 +122,8 @@ definitions:
 
   MaterializeCohortResponse:
     type: object
+    required:
+      - results
     properties:
       results:
         description: >

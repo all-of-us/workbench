@@ -71,7 +71,7 @@ public class AnnotationQueryBuilder {
   private static final String ANNOTATION_VALUE_JOIN_SQL =
       " LEFT OUTER JOIN cohort_annotation_enum_value ae%d "
       + "ON ae%d.cohort_annotation_enum_value_id = a%d.cohort_annotation_enum_value_id";
-  
+
   private static final ImmutableSet<CohortStatus> REVIEWED_STATUSES =
       ImmutableSet.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
