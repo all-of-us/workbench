@@ -92,6 +92,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
+    BreadcrumbComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
@@ -106,7 +107,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceEditComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
-    BreadcrumbComponent,
   ],
   providers: [
     {
