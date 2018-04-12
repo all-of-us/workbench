@@ -2,7 +2,7 @@ import {select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {fromJS} from 'immutable';
+import {fromJS, List} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -63,8 +63,9 @@ export class DemoFormComponent implements OnInit, OnDestroy {
   /* Storage for the demographics options (fetched via the API) */
   ageNode;
   deceasedNode;
-  genderNodes = [];
-  raceNodes = [];
+  genderNodes = List();
+  raceNodes = List();
+  ethnicityNodes = List();
 
   constructor(
     private route: ActivatedRoute,

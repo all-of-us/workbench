@@ -57,11 +57,7 @@
   margin-left: 0.5rem;
 }
 
-/* Multiple select elements */
-select[multiple] {
-  min-width: 12rem;
-}
-
-option:hover {
-  background-color: rgb(219, 228, 233);
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
 }

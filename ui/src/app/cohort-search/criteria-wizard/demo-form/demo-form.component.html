@@ -76,46 +76,26 @@
           </div>
 
           <!-- Genders -->
-          <div class="form-group">
-            <label for="genders">
-              And match any of these genders
-            </label>
-            <div class="select multiple">
-              <select multiple
-                size="5"
-                [compareWith]="optionComparator"
-                formControlName="genders"
-                id="genders">
-                <option *ngFor="let gender of genderNodes" [value]="gender">
-                  {{ gender.get('name', '') }}
-                  <span *ngIf="gender.get('count')">
-                    ({{ gender.get('count') | number }})
-                  </span>
-                </option>
-              </select>
-            </div>
-          </div>
+          <app-demo-select
+            [label]="'genders'"
+            [options]="genderNodes"
+            [includeSearchBox]="false"
+            >
+          </app-demo-select>
 
           <!-- Races -->
-          <div class="form-group">
-            <label for="races">
-              And match any of these races
-            </label>
-            <div class="select multiple">
-              <select multiple
-                size="5"
-                [compareWith]="optionComparator"
-                formControlName="races"
-                id="races">
-                <option *ngFor="let race of raceNodes" [value]="race">
-                  {{ race.get('name', '') }}
-                  <span *ngIf="race.get('count')">
-                    ({{ race.get('count') | number }})
-                  </span>
-                </option>
-              </select>
-            </div>
-          </div>
+          <app-demo-select
+            [label]="'races'"
+            [options]="raceNodes"
+            >
+          </app-demo-select>
+
+          <!-- Ethnicities -->
+          <app-demo-select
+            [label]="'ethnicities'"
+            [options]="ethnicityNodes"
+            >
+          </app-demo-select>
 
           <!-- Deceased status -->
           <div class="form-group">
@@ -133,18 +113,18 @@
         </section>
       </form>
     </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button"
-      class="btn btn-secondary"
-      (click)="onCancel()">
-      Cancel
-    </button>
-    <button type="submit"
-      class="btn btn-primary"
-      (click)="onSubmit()"
-      [disabled]="demoForm.invalid || !hasSelection">
-      Finish
-    </button>
+    <div class="form-footer">
+      <button type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()">
+        Cancel
+      </button>
+      <button type="submit"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="demoForm.invalid || !hasSelection">
+        Finish
+      </button>
+    </div>
   </div>
 </clr-modal>
