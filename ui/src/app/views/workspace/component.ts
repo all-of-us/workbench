@@ -6,7 +6,6 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   Cluster,
@@ -77,9 +76,6 @@ enum Tabs {
 export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
-
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
   Tabs = Tabs;
 
   cohortNameFilter = new CohortNameFilter();
@@ -303,7 +299,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-<<<<<<< HEAD
   edit(): void {
     this.router.navigate(['edit'], {relativeTo : this.route});
   }
@@ -320,25 +315,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         });
   }
 
-  share(): void {
-    this.shareModal.open();
-  }
-
-=======
->>>>>>> master
   buildCohort(): void {
     if (!this.awaitingReview) {
       this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
     }
-  }
-
-  get writePermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER
-        || this.accessLevel === WorkspaceAccessLevel.WRITER;
-  }
-
-  get ownerPermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
   private localizeNotebooks(notebooks): Observable<void> {

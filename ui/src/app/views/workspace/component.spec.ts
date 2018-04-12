@@ -8,7 +8,6 @@ import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {ClusterService, CohortsService, ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
@@ -27,9 +26,6 @@ import {ServerConfigServiceStub} from '../../../testing/stubs/server-config-serv
 import {ServerConfigService} from '../../services/server-config.service';
 
 class WorkspacePage {
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
-
   fixture: ComponentFixture<WorkspaceComponent>;
   cohortsService: CohortsService;
   workspacesService: WorkspacesService;
@@ -97,7 +93,6 @@ describe('WorkspaceComponent', () => {
       ],
       declarations: [
         WorkspaceComponent,
-        WorkspaceShareComponent,
         WorkspaceNavBarComponent
       ],
       providers: [

@@ -92,11 +92,13 @@ describe('WorkspaceShareComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
-        { provide: ServerConfigService,
+        {
+          provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
-          }) }
-      ] }).compileComponents().then(() => {
+          })
+        }
+      ]}).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
       });
       tick();

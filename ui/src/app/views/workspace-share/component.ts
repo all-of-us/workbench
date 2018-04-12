@@ -57,9 +57,6 @@ export class WorkspaceShareComponent implements OnInit {
         this.loadingWorkspace = false;
         this.userEmail = profile.username;
       });
-    },
-    (error) => {
-
     });
   }
 

@@ -1,11 +1,3 @@
-h3 {
-  font-family: GothamMedium;
-  line-height: 0.85rem;
-  font-size: 0.85rem;
-  margin-top: 0;
-  padding: 1rem 0 0 0;
-}
-
 input.share, .sharing-buttons {
   width: 10rem;
   font-family: GothamLight, sans-serif;
