@@ -117,11 +117,6 @@ public class AnnotationQueryBuilderTest {
     cohortReview.setReviewSize(3);
     cohortReviewDao.save(cohortReview);
 
-    participantCohortStatusDao.save(
-        makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
-    participantCohortStatusDao.save(
-        makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
-
     cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "integer annotation",
             AnnotationType.INTEGER));
@@ -170,6 +165,19 @@ public class AnnotationQueryBuilderTest {
   public void testQueryEmptyReview() {
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
         new AnnotationQuery(), 10, 0));
+  }
+
+  @Test
+  public void testQueryOneIncluded() {
+
+  }
+
+
+  private void saveReviewStatuses() {
+    participantCohortStatusDao.save(
+        makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
+    participantCohortStatusDao.save(
+        makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
   }
 
   private void assertResults(Iterable<Map<String, Object>> results,

@@ -1,13 +1,9 @@
 package org.pmiops.workbench.cohortreview;
 
-import static org.junit.Assert.fail;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,10 +15,10 @@ import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -104,7 +100,8 @@ public class AnnotationQueryBuilder {
         annotationCount++;
         fromBuilder.append(
             String.format(ANNOTATION_JOIN_SQL, annotationCount, annotationCount, annotationCount,
-                definition.getCohortAnnotationDefinitionId(), cohortReview.getCohortReviewId()));
+                definition.getCohortAnnotationDefinitionId(), annotationCount,
+                cohortReview.getCohortReviewId()));
         String sourceColumn;
         if (definition.getAnnotationType().equals(AnnotationType.ENUM)) {
           sourceColumn = String.format("ae%d.name", annotationCount);
@@ -114,7 +111,7 @@ public class AnnotationQueryBuilder {
 
           String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationType());
           if (columnName == null) {
-            throw new BadRequestException("Invalid annotation type: " + definition.getAnnotationType());
+            throw new ServerErrorException("Invalid annotation type: " + definition.getAnnotationType());
           }
           sourceColumn = String.format("a%d.%s", annotationCount, columnName);
         }
@@ -213,7 +210,7 @@ public class AnnotationQueryBuilder {
         ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
         List<String> columns = annotationQuery.getColumns();
         for (int i = 0; i < columns.size(); i++) {
-          Object obj = rs.getObject(i);
+          Object obj = rs.getObject(i + 1);
           if (obj != null) {
             result.put(columns.get(i), obj);
           }
