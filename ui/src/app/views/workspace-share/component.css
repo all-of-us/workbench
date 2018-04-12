@@ -1,14 +1,76 @@
-input {
-  width: 5rem;
+input.share, .sharing-buttons {
+  width: 10rem;
+  font-family: GothamLight, sans-serif;
+  color: #565656;
+  border: 1px #565656 solid;
+  border-radius: 0.2rem;
+  font-size: 0.35rem;
+  height: 1.1rem;
+  text-transform: uppercase;
 }
 
-.add-by-text-area {
+.sharing-buttons, .add-button {
+  width: auto;
+  font-size: 0.5rem;
+}
+
+.permissions-button {
+  margin-top: 0.5rem;
+  color: #565656;
+  border: 1px solid #565656;
+  font-size: 0.45rem;
+  height: 1.1rem;
+  line-height: 0.5em;
+}
+
+.add-by-text-area, .removing-area {
+  display: inline-block;
   padding-top: 1rem;
+  width: 18rem;
 }
 
-.sharing-buttons {
-  height: 1rem;
-  line-height: 0rem;
+.removing-area {
+  width: 22rem;
+}
+
+.removing-area h5, .user-role {
+  font-family: GothamBook;
+  font-size: 0.5rem;
+  line-height: 0.8rem;
+  color: rgb(38, 34, 98);
+}
+
+.removing-area h5 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.user-role {
+  font-family: GothamBook;
+  color: #565656;
+}
+
+.user {
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  clear: both;
+}
+
+.user.owner {
+  padding-left: 22px;
+}
+
+.collaborator-icon {
+  width: 22px;
+}
+
+.collaborator, .collaborator-icon {
+  display: block;
+}
+
+.collaborator-icon {
+  float: left;
+  padding-right: 0.25rem;
 }
 
 clr-dropdown {
@@ -20,7 +82,15 @@ clr-dropdown > button {
 }
 
 .paragraph-text {
-  width: 60%;
+  font-family: GothamBook;
+  font-size: 0.5rem;
+  line-height: 0.8rem;
+  margin: 0;
+  padding: 0;
+}
+
+.paragraph-text a {
+  font-family: inherit;
 }
 
 .return-button {
@@ -38,8 +108,12 @@ clr-dropdown > button {
   border-right: 1px solid black;
 }
 
-.find-collaborator-label {
+.collaborator-label {
+  font-family: GothamLight;
+  font-size: 0.65rem;
   display: block;
+  margin: 0 0 0.5rem 0;
+  color: rgb(38, 34, 98);
 }
 
 .removing-area {
