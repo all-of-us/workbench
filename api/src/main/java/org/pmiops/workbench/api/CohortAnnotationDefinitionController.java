@@ -1,11 +1,13 @@
 package org.pmiops.workbench.api;
 
+import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -82,6 +84,12 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         this.workspaceService = workspaceService;
     }
 
+    private void validateColumnName(String columnName) {
+        if (AnnotationQueryBuilder.RESERVED_COLUMNS.contains(columnName)) {
+            throw new BadRequestException("Annotations are not allowed to be named " + columnName);
+        }
+    }
+
     @Override
     public ResponseEntity<CohortAnnotationDefinition> createCohortAnnotationDefinition(String workspaceNamespace,
                                                                                        String workspaceId,
@@ -97,6 +105,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition =
                 FROM_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(request);
+        validateColumnName(cohortAnnotationDefinition.getColumnName());
 
         org.pmiops.workbench.db.model.CohortAnnotationDefinition existingDefinition =
                 cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
@@ -181,6 +190,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
         String columnName = modifyCohortAnnotationDefinitionRequest.getColumnName();
+        validateColumnName(columnName);
         Cohort cohort = findCohort(cohortId);
         //this validates that the user is in the proper workspace
         validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());

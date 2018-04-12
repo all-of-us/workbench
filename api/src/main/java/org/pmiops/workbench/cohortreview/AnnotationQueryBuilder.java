@@ -1,12 +1,16 @@
 package org.pmiops.workbench.cohortreview;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -15,12 +19,17 @@ import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class AnnotationQueryBuilder {
 
-  private static final String PERSON_ID_COLUMN = "person_id";
-  private static final String REVIEW_STATUS_COLUMN = "review_status";
+  public static final String PERSON_ID_COLUMN = "person_id";
+  public static final String REVIEW_STATUS_COLUMN = "review_status";
+
+  // These column names are reserved and can't be used for annotation definition column names.
+  public static final ImmutableSet<String> RESERVED_COLUMNS = ImmutableSet.of(PERSON_ID_COLUMN,
+      REVIEW_STATUS_COLUMN);
 
   private static final ImmutableMap<AnnotationType, String> ANNOTATION_COLUMN_MAP =
       ImmutableMap.of(
@@ -55,13 +64,16 @@ public class AnnotationQueryBuilder {
   private static final ImmutableSet<CohortStatus> REVIEWED_STATUSES =
       ImmutableSet.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
-  public Iterable<Map<String, Object>> materializeAnnotationQuery(CohortReview cohortReview,
-      List<CohortStatus> statusFilter,
-      AnnotationQuery annotationQuery, int limit, long offset) {
-    Map<String, CohortAnnotationDefinition> annotationDefinitions = null;
-    List<String> columns = annotationQuery.getColumns();
+  private Map<String, CohortAnnotationDefinition> getAnnotationDefinitions(CohortReview cohortReview) {
+    return Maps.uniqueIndex(
+            cohortAnnotationDefinitionDao.findByCohortId(cohortReview.getCohortId()),
+            CohortAnnotationDefinition::getColumnName);
+  }
+
+  private String getSelectAndFromSql(CohortReview cohortReview, List<String> columns,
+      Map<String, CohortAnnotationDefinition> annotationDefinitions, Map<String, String> columnAliasMap) {
     StringBuilder selectBuilder = new StringBuilder("SELECT ");
-    StringBuilder fromBuilder = new StringBuilder(" FROM participant_cohort_status pcs");
+    StringBuilder fromBuilder = new StringBuilder("\nFROM participant_cohort_status pcs");
     int annotationCount = 0;
     boolean firstColumn = true;
     for (String column : columns) {
@@ -76,11 +88,7 @@ public class AnnotationQueryBuilder {
         selectBuilder.append("pcs.status review_status");
       } else {
         if (annotationDefinitions == null) {
-          annotationDefinitions =
-              Maps.uniqueIndex(
-                  cohortAnnotationDefinitionDao.findByCohortId(cohortReview.getCohortId()),
-                  CohortAnnotationDefinition::getColumnName);
-
+          annotationDefinitions = getAnnotationDefinitions(cohortReview);
         }
         CohortAnnotationDefinition definition = annotationDefinitions.get(column);
         if (definition == null) {
@@ -90,30 +98,120 @@ public class AnnotationQueryBuilder {
         fromBuilder.append(
             String.format(ANNOTATION_JOIN_SQL, annotationCount, annotationCount, annotationCount,
                 definition.getCohortAnnotationDefinitionId(), cohortReview.getCohortReviewId()));
+        String sourceColumn;
         if (definition.getAnnotationType().equals(AnnotationType.ENUM)) {
-          selectBuilder.append(String.format("ae%d.name av%d", annotationCount, annotationCount));
+          sourceColumn = String.format("ae%d.name", annotationCount);
           fromBuilder.append(
               String.format(ANNOTATION_VALUE_JOIN_SQL, annotationCount, annotationCount, annotationCount));
         } else {
+
           String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationType());
           if (columnName == null) {
             throw new BadRequestException("Invalid annotation type: " + definition.getAnnotationType());
           }
-          selectBuilder.append(String.format("a%d.%s av%d", annotationCount, columnName, annotationCount));
+          sourceColumn = String.format("a%d.%s", annotationCount, columnName);
         }
+        String columnAliasName = String.format("av%d", annotationCount);
+        selectBuilder.append(String.format("%s %s", sourceColumn, columnAliasName));
+        columnAliasMap.put(column, columnAliasName);
       }
     }
+    return selectBuilder.toString() + fromBuilder.toString();
+  }
+
+  private String getWhereSql(CohortReview cohortReview, List<CohortStatus> statusFilter) {
     StringBuilder whereBuilder = new StringBuilder(
-        String.format(" WHERE pcs.cohort_review_id = %d", cohortReview.getCohortReviewId()));
+        String.format("\nWHERE pcs.cohort_review_id = %d", cohortReview.getCohortReviewId()));
     if (!statusFilter.containsAll(REVIEWED_STATUSES)) {
       whereBuilder.append(" AND pcs.status IN (");
       whereBuilder.append(Joiner.on(", ").join(statusFilter.stream().map(CohortStatus::ordinal).toArray()));
       whereBuilder.append(")");
     }
-    StringBuilder sqlBuilder = new StringBuilder(selectBuilder);
-    sqlBuilder.append(fromBuilder);
+    return whereBuilder.toString();
+  }
 
+  private String getOrderBySql(List<String> orderBy, Map<String, String> columnAliasMap) {
+    StringBuilder orderByBuilder = new StringBuilder("\nORDER BY ");
+    boolean firstOrderByColumn = true;
+    for (String orderByColumn : orderBy) {
+      if (firstOrderByColumn) {
+        firstOrderByColumn = false;
+      } else {
+        orderByBuilder.append(", ");
+      }
+      if (orderByColumn.equals(PERSON_ID_COLUMN) || orderByColumn.equals(REVIEW_STATUS_COLUMN)) {
+        orderByBuilder.append(orderByColumn);
+      } else {
+        String columnAlias = columnAliasMap.get(orderByColumn);
+        if (columnAlias == null) {
+          throw new BadRequestException("Column " + orderByColumn + " in orderBy must be present in columns");
+        }
+        orderByBuilder.append(columnAlias);
+      }
+    }
+    return orderByBuilder.toString();
+  }
 
-    return null;
+  private String getLimitAndOffsetSql(int limit, long offset) {
+    StringBuilder endSqlBuilder = new StringBuilder("\nLIMIT ");
+    endSqlBuilder.append(limit);
+    if (offset != 0L) {
+      endSqlBuilder.append(" OFFSET ");
+      endSqlBuilder.append(offset);
+    }
+    return endSqlBuilder.toString();
+  }
+
+  private String getSql(CohortReview cohortReview, List<CohortStatus> statusFilter,
+      AnnotationQuery annotationQuery, int limit, long offset,
+      Map<String, CohortAnnotationDefinition> annotationDefinitions) {
+    Map<String, String> columnAliasMap = Maps.newHashMap();
+    String selectAndFromSql = getSelectAndFromSql(cohortReview, annotationQuery.getColumns(),
+        annotationDefinitions, columnAliasMap);
+    String whereSql = getWhereSql(cohortReview, statusFilter);
+    String orderBySql = getOrderBySql(annotationQuery.getOrderBy(), columnAliasMap);
+    String limitAndOffsetSql = getLimitAndOffsetSql(limit, offset);
+        StringBuilder sqlBuilder = new StringBuilder(selectAndFromSql);
+    sqlBuilder.append(whereSql);
+    sqlBuilder.append(orderBySql);
+    sqlBuilder.append(limitAndOffsetSql);
+    return sqlBuilder.toString();
+  }
+
+  public Iterable<Map<String, Object>> materializeAnnotationQuery(CohortReview cohortReview,
+      List<CohortStatus> statusFilter,
+      AnnotationQuery annotationQuery, int limit, long offset) {
+    Map<String, CohortAnnotationDefinition> annotationDefinitions = null;
+    List<String> columns = annotationQuery.getColumns();
+    if (columns == null || columns.isEmpty()) {
+      // By default get person_id, review_status, and all the annotation definitions.
+      columns = new ArrayList<>();
+      columns.add(PERSON_ID_COLUMN);
+      columns.add(REVIEW_STATUS_COLUMN);
+      annotationDefinitions = getAnnotationDefinitions(cohortReview);
+      columns.addAll(annotationDefinitions.values().stream()
+          .map(CohortAnnotationDefinition::getColumnName).collect(Collectors.toList()));
+      annotationQuery.setColumns(columns);
+    }
+    List<String> orderBy = annotationQuery.getOrderBy();
+    if (orderBy == null || orderBy.isEmpty()) {
+      annotationQuery.setOrderBy(ImmutableList.of(PERSON_ID_COLUMN));
+    }
+    String sql = getSql(cohortReview, statusFilter, annotationQuery, limit, offset,
+        annotationDefinitions);
+    return namedParameterJdbcTemplate.query(sql, new RowMapper<Map<String, Object>>() {
+      @Override
+      public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+        ImmutableMap.Builder result = ImmutableMap.builder();
+        List<String> columns = annotationQuery.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+          Object obj = rs.getObject(i);
+          if (obj != null) {
+            result.put(columns.get(i), obj);
+          }
+        }
+        return result.build();
+      }
+    });
   }
 }
