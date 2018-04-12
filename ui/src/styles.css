@@ -20,7 +20,15 @@ body, input[text] {
   color: #888;
 }
 
-body * {
+* {
+  /*
+   * Need to include elsewhere as well to override clarity's font styles.
+   */
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+  font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
   font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
 }
 
@@ -55,11 +63,6 @@ input[type=text]:focus, input[type=password]:focus {
 
 .loading-area {
   padding-top: 0.3rem;
-}
-
-/* everywhere else */
-* {
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 .required::after {
