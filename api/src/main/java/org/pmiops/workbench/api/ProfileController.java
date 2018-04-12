@@ -406,7 +406,7 @@ public class ProfileController implements ProfileApiDelegate {
         // than the group.
         // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
         msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-            "brubenst@broadinstitute.org"));
+            ADMIN_EMAIL));
         msg.setSubject("[Id Verification Request]: " + user.getEmail());
         msg.setText(ID_VERIFICATION_TEXT + user.getEmail());
         Transport.send(msg);
