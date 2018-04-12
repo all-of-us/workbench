@@ -65,16 +65,13 @@ public class AnnotationQueryBuilder {
   private static final String ANNOTATION_JOIN_SQL =
       " LEFT OUTER JOIN participant_cohort_annotations a%d "
       + "ON a%d.participant_id = pcs.participant_id "
-      + "AND a%d.cohort_annotation_definition_id = %d"
+      + "AND a%d.cohort_annotation_definition_id = :def_%d "
       + "AND a%d.cohort_review_id = %d";
 
   private static final String ANNOTATION_VALUE_JOIN_SQL =
       " LEFT OUTER JOIN cohort_annotation_enum_value ae%d "
       + "ON ae%d.cohort_annotation_enum_value_id = a%d.cohort_annotation_enum_value_id";
-
-  private static final String WHERE_SQL =
-      " WHERE pcs.cohort_review_id = %d";
-
+  
   private static final ImmutableSet<CohortStatus> REVIEWED_STATUSES =
       ImmutableSet.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
@@ -85,7 +82,8 @@ public class AnnotationQueryBuilder {
   }
 
   private String getSelectAndFromSql(CohortReview cohortReview, List<String> columns,
-      Map<String, CohortAnnotationDefinition> annotationDefinitions, Map<String, String> columnAliasMap) {
+      Map<String, CohortAnnotationDefinition> annotationDefinitions, Map<String, String> columnAliasMap,
+      ImmutableMap.Builder<String, Object> parameters) {
     StringBuilder selectBuilder = new StringBuilder("SELECT ");
     StringBuilder fromBuilder = new StringBuilder("\nFROM participant_cohort_status pcs");
     int annotationCount = 0;
@@ -111,8 +109,9 @@ public class AnnotationQueryBuilder {
         annotationCount++;
         fromBuilder.append(
             String.format(ANNOTATION_JOIN_SQL, annotationCount, annotationCount, annotationCount,
-                definition.getCohortAnnotationDefinitionId(), annotationCount,
+                annotationCount, annotationCount,
                 cohortReview.getCohortReviewId()));
+        parameters.put("def_" + annotationCount, definition.getCohortAnnotationDefinitionId());
         String sourceColumn;
         if (definition.getAnnotationType().equals(AnnotationType.ENUM)) {
           sourceColumn = String.format("ae%d.name", annotationCount);
@@ -134,13 +133,13 @@ public class AnnotationQueryBuilder {
     return selectBuilder.toString() + fromBuilder.toString();
   }
 
-  private String getWhereSql(CohortReview cohortReview, List<CohortStatus> statusFilter) {
-    StringBuilder whereBuilder = new StringBuilder(
-        String.format("\nWHERE pcs.cohort_review_id = %d", cohortReview.getCohortReviewId()));
+  private String getWhereSql(CohortReview cohortReview, List<CohortStatus> statusFilter,
+      ImmutableMap.Builder<String, Object> parameters) {
+    StringBuilder whereBuilder = new StringBuilder(" WHERE pcs.cohort_review_id = :cohort_review_id");
+    parameters.put("cohort_review_id", cohortReview.getCohortReviewId());
     if (!statusFilter.containsAll(REVIEWED_STATUSES)) {
-      whereBuilder.append(" AND pcs.status IN (");
-      whereBuilder.append(Joiner.on(", ").join(statusFilter.stream().map(CohortStatus::ordinal).toArray()));
-      whereBuilder.append(")");
+      whereBuilder.append(" AND pcs.status IN (:statuses)");
+      parameters.put("statuses", statusFilter.stream().map(CohortStatus::ordinal).collect(Collectors.toList()));
     }
     return whereBuilder.toString();
   }
@@ -176,26 +175,27 @@ public class AnnotationQueryBuilder {
     return orderByBuilder.toString();
   }
 
-  private String getLimitAndOffsetSql(int limit, long offset) {
-    StringBuilder endSqlBuilder = new StringBuilder("\nLIMIT ");
-    endSqlBuilder.append(limit);
+  private String getLimitAndOffsetSql(int limit, long offset, ImmutableMap.Builder<String, Object> params) {
+    StringBuilder endSqlBuilder = new StringBuilder("\nLIMIT :limit");
+    params.put("limit", limit);
     if (offset != 0L) {
       // TODO: consider pagination based on values rather than offsets
-      endSqlBuilder.append(" OFFSET ");
-      endSqlBuilder.append(offset);
+      endSqlBuilder.append(" OFFSET :offset");
+      params.put("offset", offset);
     }
     return endSqlBuilder.toString();
   }
 
   private String getSql(CohortReview cohortReview, List<CohortStatus> statusFilter,
       AnnotationQuery annotationQuery, int limit, long offset,
-      Map<String, CohortAnnotationDefinition> annotationDefinitions) {
+      Map<String, CohortAnnotationDefinition> annotationDefinitions,
+      ImmutableMap.Builder<String, Object> parameters) {
     Map<String, String> columnAliasMap = Maps.newHashMap();
     String selectAndFromSql = getSelectAndFromSql(cohortReview, annotationQuery.getColumns(),
-        annotationDefinitions, columnAliasMap);
-    String whereSql = getWhereSql(cohortReview, statusFilter);
+        annotationDefinitions, columnAliasMap, parameters);
+    String whereSql = getWhereSql(cohortReview, statusFilter, parameters);
     String orderBySql = getOrderBySql(annotationQuery.getOrderBy(), columnAliasMap);
-    String limitAndOffsetSql = getLimitAndOffsetSql(limit, offset);
+    String limitAndOffsetSql = getLimitAndOffsetSql(limit, offset, parameters);
         StringBuilder sqlBuilder = new StringBuilder(selectAndFromSql);
     sqlBuilder.append(whereSql);
     sqlBuilder.append(orderBySql);
@@ -222,9 +222,11 @@ public class AnnotationQueryBuilder {
     if (orderBy == null || orderBy.isEmpty()) {
       annotationQuery.setOrderBy(ImmutableList.of(PERSON_ID_COLUMN));
     }
+    ImmutableMap.Builder<String, Object> parameters = ImmutableMap.builder();
     String sql = getSql(cohortReview, statusFilter, annotationQuery, limit, offset,
-        annotationDefinitions);
-    return namedParameterJdbcTemplate.query(sql, new RowMapper<Map<String, Object>>() {
+        annotationDefinitions, parameters);
+    return namedParameterJdbcTemplate.query(sql, parameters.build(),
+        new RowMapper<Map<String, Object>>() {
       @Override
       public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
         ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();

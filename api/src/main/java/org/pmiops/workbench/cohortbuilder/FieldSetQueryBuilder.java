@@ -515,26 +515,16 @@ public class FieldSetQueryBuilder {
     return results;
   }
 
+  /**
+   * Materializes a cohort with the specified table query and participant criteria, and returns
+   * a {@link Iterable} of {@link Map} objects representing dictionaries of key-value pairs.
+   */
   public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
       ParticipantCriteria criteria, int limit, long offset) {
     QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, limit, offset);
     QueryResult result;
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
-    try {
-      result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
-    } catch (BigQueryException e) {
-      if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
-        throw new ServerUnavailableException("BigQuery was temporarily unavailable, try again later", e);
-      } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-        throw new ForbiddenException("Access to the CDR is denied", e);
-      } else {
-        throw new ServerErrorException(
-            String.format("An unexpected error occurred materializing the cohort with "
-                    + "query = (%s), params = (%s)", jobConfiguration.getQuery(),
-                jobConfiguration.getNamedParameters()), e);
-      }
-
-    }
+    result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
     return Iterables.transform(result.iterateAll(),
         (row) -> extractResults(tableQueryAndConfig, queryConfiguration.getSelectColumns(), row));
   }
