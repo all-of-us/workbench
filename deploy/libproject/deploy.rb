@@ -27,7 +27,7 @@ def warning(text)
   STDERR.puts yellow_term_text(text)
 end
 
-def get_live_gae_version(project)
+def get_live_gae_version(project, validate_version=true)
   common = Common.new
   versions = capture_stdout %W{
     gcloud app
@@ -57,7 +57,7 @@ def get_live_gae_version(project)
     return nil
   end
   v = versions.to_a.first
-  unless VERSION_RE.match(v)
+  if validate_version and not VERSION_RE.match(v)
     warning "Found a live version '#{v}' in project '#{project}', but it " +
             "doesn't match the expected release version format"
     return nil
@@ -114,7 +114,6 @@ def deploy(cmd_name, args)
 
   common = Common.new
   unless Workbench::in_docker?
-    live_version = get_live_gae_version(op.opts.project)
     if not op.opts.git_version or not op.opts.app_version
       if op.opts.project == STAGING_PROJECT
         common.error "--git_version and --app_version are required when " +
@@ -145,6 +144,7 @@ def deploy(cmd_name, args)
 
     # TODO: Might be nice to emit the last version creation time here as a
     # sanity check (need to pick which service to do that for...).
+    live_version = get_live_gae_version(op.opts.project, validate_version=false)
     common.status "Current live version is '#{live_version}' (project " +
                   "#{op.opts.project})"
     puts "Will deploy git version '#{op.opts.git_version}' as App Engine " +
