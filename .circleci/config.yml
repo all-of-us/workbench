@@ -111,13 +111,13 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/api
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
               ./project.rb deploy \
                 --project all-of-us-workbench-test \
                 --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            elif [ "${CIRCLE_TAG}" == "v*" ]; then
+            elif [[ "${CIRCLE_TAG}" = v* ]]; then
              ./project.rb deploy \
                --project all-of-us-rw-staging \
                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
@@ -241,14 +241,14 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-workbench-test \
                 --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
                 --version circle-ci-test \
                 --promote
-            elif [ "${CIRCLE_TAG}" == "v*" ]; then
+            elif [[ "${CIRCLE_TAG}" = v* ]]; then
               ../ci/activate_creds.sh circle-sa-key.json
               ./project.rb deploy-ui \
                 --project all-of-us-rw-staging \
