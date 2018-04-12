@@ -203,13 +203,8 @@ paths:
     post:
       tags:
         - profile
-      description: Accepts identity information for verification.
+      description: Request identity verification.
       operationId: submitIdVerification
-      parameters:
-        - in: body
-          name: idVerificationRequest
-          schema:
-            $ref: "#/definitions/IdVerificationRequest"
       responses:
         200:
           description: The user's profile.
@@ -1282,6 +1277,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
+      requestedIdVerification:
+        type: boolean
 
   InstitutionalAffiliation:
     type: object

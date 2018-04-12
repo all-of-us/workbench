@@ -24,7 +24,6 @@ import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
-import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -96,7 +95,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortEditComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
-    IdVerificationPageComponent,
     InvitationKeyComponent,
     LoginComponent,
     PageTemplateSignedOutComponent,
