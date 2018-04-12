@@ -1,3 +1,4 @@
+import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -42,6 +43,7 @@ describe('WorkspaceEditComponent', () => {
           'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
           'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
         },
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
         data: {
           workspace: {
             ...WorkspacesServiceStub.stubWorkspace(),
@@ -62,6 +64,7 @@ describe('WorkspaceEditComponent', () => {
         FormsModule,
         ClarityModule.forRoot()
       ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: WorkspacesService, useValue: workspacesService },
         // Wrap in a factory function so we can later mutate the value if needed

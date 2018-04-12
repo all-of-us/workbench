@@ -3,12 +3,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+
 import {
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 @Component({
   selector: 'app-workspace-nav-bar',

@@ -1,6 +1,6 @@
-import {DebugElement, ViewChild} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -8,9 +8,16 @@ import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceComponent} from 'app/views/workspace/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
-import {ClusterService, CohortsService, ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {WorkspaceComponent} from 'app/views/workspace/component';
+
+import {
+  ClusterService,
+  CohortsService,
+  ProfileService,
+  WorkspaceAccessLevel,
+  WorkspacesService} from 'generated';
+
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
@@ -95,6 +102,7 @@ describe('WorkspaceComponent', () => {
         WorkspaceComponent,
         WorkspaceNavBarComponent
       ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
