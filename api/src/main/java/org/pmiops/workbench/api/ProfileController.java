@@ -66,6 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProfileController implements ProfileApiDelegate {
   private String ID_VERIFICATION_TEXT = "A new user has requested manual ID verification: ";
+  private String ADMIN_EMAIL = "stable-environment-manual-id-verification-requests@fake-research-aou.org";
 
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
@@ -397,7 +398,7 @@ public class ProfileController implements ProfileApiDelegate {
       Session session = Session.getDefaultInstance(props, null);
       try {
         Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(user.getEmail()));
+        msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
         InternetAddress[] replyTo = new InternetAddress[1];
         replyTo[0] = new InternetAddress(user.getContactEmail());
         msg.setReplyTo(replyTo);
