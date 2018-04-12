@@ -1,9 +1,13 @@
 package org.pmiops.workbench.cohortreview;
 
+import static org.junit.Assert.fail;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,6 +22,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -158,6 +163,7 @@ public class AnnotationQueryBuilder {
     StringBuilder endSqlBuilder = new StringBuilder("\nLIMIT ");
     endSqlBuilder.append(limit);
     if (offset != 0L) {
+      // TODO: consider pagination based on values rather than offsets
       endSqlBuilder.append(" OFFSET ");
       endSqlBuilder.append(offset);
     }
