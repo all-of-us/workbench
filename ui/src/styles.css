@@ -20,8 +20,12 @@ body, input[text] {
   color: #888;
 }
 
-body * {
+* {
+  /*
+   * Need to include elsewhere as well to override clarity's font styles.
+   */
   font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+  font-weight: 300;
 }
 
 a {
@@ -58,11 +62,6 @@ input[type=text]:focus, input[type=password]:focus {
   padding-top: 0.3rem;
 }
 
-/* everywhere else */
-* {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 .required::after {
   content: " *";
   color: red;
@@ -90,4 +89,74 @@ input[type=text]:focus, input[type=password]:focus {
  */
 .noUi-connect {
   background: rgb(92, 183, 225);
+}
+
+/*
+ * Override clarity fonts
+ */
+body, html, .login,
+.login-wrapper .login .title,
+.login-wrapper .login .trademark,
+.login-wrapper .login .subtitle,
+.modal-header .modal-title,
+.header .branding .title,
+.sidenav .sidenav-content > .nav-link,
+.sidenav .nav-group label,
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+}
+
+
+/*
+ * Override clarity font weights. They default to 400 for normal, we want 300.
+ */
+body, body p, .btn,
+.btn.btn-sm, .alert-app-level .alert-item .btn,
+.btn-sm .btn, .alert-app-level .alert-item .btn .btn,
+.btn-group.btn-sm .btn-group-overflow > .dropdown-toggle, .alert-app-level .alert-item .btn-group.btn .btn-group-overflow > .dropdown-toggle,
+.dropdown-menu .btn,
+.dropdown-menu .btn-secondary,
+.dropdown-menu .btn-info,
+.dropdown-menu .btn-outline,
+.dropdown-menu .btn-outline-primary,
+.dropdown-menu .btn-outline-secondary,
+.dropdown-menu .btn-outline-warning,
+.dropdown-menu .btn-outline-danger,
+.dropdown-menu .btn-outline-success,
+.dropdown-menu .btn-danger,
+.dropdown-menu .btn-primary,
+.dropdown-menu .btn-warning,
+.dropdown-menu .btn-success,
+.dropdown-menu .btn-link,
+.dropdown-menu .dropdown-item,
+.label, a.label,
+header .branding .title,
+.header .branding .title,
+header .header-nav .nav-text,
+.header .header-nav .nav-text,
+header .settings .nav-text,
+header .header-actions .nav-text,
+.header .settings .nav-text,
+.header .header-actions .nav-text,
+.nav .nav-link,
+.sidenav .sidenav-content > .nav-link,
+.sidenav .nav-group,
+.sidenav .nav-group label,
+.clr-vertical-nav.has-nav-groups .nav-group-children .nav-link,
+.tooltip.tooltip-top-right > .tooltip-content, .tooltip .tooltip-content.tooltip-top-right,
+.tooltip.tooltip-top-left > .tooltip-content, .tooltip .tooltip-content.tooltip-top-left,
+.tooltip.tooltip-bottom-right > .tooltip-content, .tooltip .tooltip-content.tooltip-bottom-right,
+.tooltip.tooltip-bottom-left > .tooltip-content, .tooltip .tooltip-content.tooltip-bottom-left,
+.tooltip.tooltip-right > .tooltip-content, .tooltip .tooltip-content.tooltip-right,
+.tooltip.tooltip-left > .tooltip-content, .tooltip .tooltip-content.tooltip-left,
+form .form-block > label,
+.form .form-block > label,
+.stack-view,
+.stack-view .stack-block-label,
+.datagrid .datagrid-column .datagrid-filter, .datagrid .datagrid-head .datagrid-row-actions .datagrid-filter,
+.datagrid .datagrid-body .datagrid-row .datagrid-action-overflow,
+.datagrid-foot .column-switch-wrapper .column-switch .switch-header,
+.clr-wizard .clr-wizard-stepnav-item,
+.clr-wizard .clr-wizard-stepnav-item.active {
+  font-weight: 300;
 }
