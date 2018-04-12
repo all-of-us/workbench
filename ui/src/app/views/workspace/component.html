@@ -1,132 +1,175 @@
-<div class="workspace-header">
-  <h2>{{workspace.name}}</h2>
-  <div class="btn-group btn-primary-outline permissions-group">
-    <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
-        [disabled]="!writePermission" (click)="edit()"
-        class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-      <app-edit-icon [editHover]="editHover"></app-edit-icon>
-      <span class="tooltip-content">Edit Workspace</span>
-    </button>
-    <button (mouseover)="shareHover=true" (mouseleave)="shareHover=false"
-        (click)="share()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-      <app-share-icon [shareHover]="shareHover"></app-share-icon>
-      <span class="tooltip-content">Share Workspace</span>
-    </button>
-    <button (click)="clone()" class="btn btn-icon btn-primary-outline tooltip tooltip-sm">
-      <!-- TODO(calbach): Check whether we have the real asset available. -->
-      <clr-icon shape="copy"></clr-icon>
-      <span class="tooltip-content">Clone Workspace</span>
-    </button>
-    <button (mouseover)="trashHover=true" (mouseleave)="trashHover=false"
-        [disabled]="!ownerPermission"
-        class="btn btn-icon btn-danger-outline btn-deleting tooltip tooltip-sm"
-        (click)="delete()" [clrLoading]="deleting">
-      <app-trash-icon [trashHover]="trashHover"></app-trash-icon>
-      <span class="tooltip-content">Delete Workspace</span>
-    </button>
-  </div>
-</div>
-<div class="description-text">
-  {{workspace.description}}
-</div>
-<div class="area-block">
-  <h3 class="cdr-text">CDR Version {{workspace.cdrVersionId}}</h3>
-</div>
-<div class="area-block">
-  <div class="table-header">
-    <h3 class="table-header-descriptor">Cohorts</h3>
-    <a class="btn btn-link" [class.awaiting-review]="awaitingReview" (click)="buildCohort()">Add a Cohort</a>
-  </div>
-  <div class="indented">
-    <clr-datagrid [clrDgLoading]="cohortsLoading">
-      <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator" [style.width.%]="25">
-        Name
-        <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator" [style.width.%]="50">
-        Description
-        <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column [style.width.%]="25">Created Date</clr-dg-column>
-      <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
-      <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-        <clr-dg-action-overflow>
-          <button class="action-item"
-            [routerLink]="['cohorts', 'build']"
-            [queryParams]="{criteria: cohort.criteria}">
-            <clr-icon shape="copy"></clr-icon>
-            Clone
-          </button>
-          <button class="action-item"
-            routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/edit">
-            <clr-icon shape="pencil"></clr-icon>
-            Edit
-          </button>
-          <button class="action-item"
-            routerLink="{{document.location.pathname}}/cohorts/{{cohort.id}}/review">
-            <clr-icon shape="grid-view"></clr-icon>
-            Review
-          </button>
-        </clr-dg-action-overflow>
-        <clr-dg-cell>{{cohort.name}}</clr-dg-cell>
-        <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-        <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
-  </div>
-</div>
-<clr-modal [(clrModalOpen)]="cohortsError">
-  <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">Could not fetch cohorts from workspace.</div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
-  </div>
-</clr-modal>
-
-<clr-modal [(clrModalOpen)]="clusterPulled">
-  <h3 class="modal-title">Notebook Server Ready:</h3>
-  <div class="modal-body">Your notebook server is ready, please confirm to open in a new tab</div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="openCluster(launchedNotebookName)">Ok</button>
-    <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
-  </div>
-</clr-modal>
-<div class="area-block">
-  <div class="table-header">
-    <h3 class="table-header-descriptor">Notebooks</h3>
-    <div class="alert {{alertCategory}}" *ngIf="showAlerts">
-      <div class="alert-items">
-        <div class="alert-item static">
-          <div class="alert-icon-wrapper">
-            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+<div class="workspace-container">
+  <div class="main-body">
+    <app-workspace-nav-bar></app-workspace-nav-bar>
+    <h2>{{workspace.name}}</h2>
+    <div style="display: flex; justify-content: space-between">
+      <div style="margin-left: -0.5rem;">
+        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="tabOpen = Tabs.Notebooks">
+          Notebooks ({{notebookList.length}})
+        </button>
+        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">
+          Cohorts ({{cohortList.length}})
+        </button>
+        <div class="alert {{alertCategory}}" *ngIf="showAlerts">
+          <div class="alert-items">
+            <div class="alert-item static">
+              <div class="alert-icon-wrapper">
+                <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+              </div>
+              <span class="alert-text">{{alertMsg}}</span>
+            </div>
           </div>
-          <span class="alert-text">{{alertMsg}}</span>
         </div>
       </div>
+      <div>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+          <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
+                  [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview" (click)="buildCohort()">
+            + Add a Cohort
+          </button>
+          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        </span>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+          <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
+                  [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
+            + New Notebook
+          </button>
+          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+          <span *ngIf="clusterLoading" class="tooltip-content">Your account is still being set up, try again later</span>
+        </span>
+      </div>
     </div>
-    <button class="btn" [disabled]="clusterLoading || awaitingReview" (click)="newNotebook()">
-      New Notebook
-    </button>
+    <div *ngIf="tabOpen===Tabs.Cohorts">
+      <clr-datagrid [clrDgLoading]="cohortsLoading">
+        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
+          Description
+          <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>Created Date</clr-dg-column>
+        <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
+          <clr-dg-action-overflow>
+            <button class="action-item"
+                    [routerLink]="['cohorts', 'build']"
+                    [queryParams]="{criteria: cohort.criteria}">
+              <clr-icon shape="copy"></clr-icon>
+              Clone
+            </button>
+            <button class="action-item"
+                    routerLink="cohorts/{{cohort.id}}/edit">
+              <clr-icon shape="pencil"></clr-icon>
+              Edit
+            </button>
+            <button class="action-item"
+                    routerLink="cohorts/{{cohort.id}}/review">
+              <clr-icon shape="grid-view"></clr-icon>
+              Review
+            </button>
+          </clr-dg-action-overflow>
+          <clr-dg-cell>{{cohort.name}}</clr-dg-cell>
+          <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
+          <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </div>
+    <clr-modal [(clrModalOpen)]="cohortsError">
+      <h3 class="modal-title">Error:</h3>
+      <div class="modal-body">Could not fetch cohorts from workspace.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
+      </div>
+    </clr-modal>
+
+    <clr-modal [(clrModalOpen)]="clusterPulled">
+      <h3 class="modal-title">Notebook Server Ready:</h3>
+      <div class="modal-body">Your notebook server is ready, please confirm to open in a new tab</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="openCluster(launchedNotebookName)">Ok</button>
+        <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
+      </div>
+    </clr-modal>
+    <div *ngIf="tabOpen===Tabs.Notebooks">
+      <clr-datagrid [clrDgLoading]="notebooksLoading || clusterLoading">
+        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
+          Name
+          <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
+        </clr-dg-column>
+        <clr-dg-column>Path</clr-dg-column>
+        <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
+        <clr-dg-row
+            class="table-row notebook-table-row"
+            *clrDgItems="let notebook of notebookList"
+            [clrDgItem]="notebook"
+            (click)="openNotebook(notebook)">
+          <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
+          <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </div>
+    <div style="padding-top: 1rem;">
+      <h4 class="subheader">About the Workspace</h4>
+      <div class="description-text">
+        {{workspace.description}}
+      </div>
+    </div>
   </div>
-  <div class="indented">
-    <clr-datagrid [clrDgLoading]="notebooksLoading || clusterLoading">
-      <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
-        Name
-        <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
-      </clr-dg-column>
-      <clr-dg-column>Path</clr-dg-column>
-      <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
-      <clr-dg-row
-        class="table-row notebook-table-row"
-        *clrDgItems="let notebook of notebookList"
-        [clrDgItem]="notebook"
-        (click)="openNotebook(notebook)">
-        <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
-        <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
+  <div [class.right-sidebar-open]="!rightSidebarClosed" class="right-sidebar">
+    <a *ngIf="rightSidebarClosed" (click)="rightSidebarClosed=false">
+      <<
+    </a>
+    <div *ngIf="!rightSidebarClosed">
+      <a (click)="rightSidebarClosed=true">
+        >>
+      </a>
+      <h6>Collaborators</h6>
+      <div *ngFor="let user of workspace.userRoles">
+        <div>{{user.role}}: {{user.email}}</div>
+      </div>
+      <h6>Workspace Information</h6>
+      <div class="information-area">
+        <div class="information-box">
+          <div class="information-header">
+            CDR
+          </div>
+          <div class="information-body cdr-version-text">
+            {{workspace.cdrVersionId}}
+          </div>
+        </div>
+        <div class="information-box">
+          <div class="information-header">
+            Creation Date
+          </div>
+          <div class="information-body">
+            {{workspaceCreationTime}}
+          </div>
+        </div>
+        <div class="information-box">
+          <div class="information-header">
+            Last Updated
+          </div>
+          <div class="information-body">
+            {{workspaceLastModifiedTime}}
+          </div>
+        </div>
+        <div class="information-box">
+          <div class="information-header">
+            Data Access Level
+          </div>
+          <div class="information-body">
+            {{workspace.dataAccessLevel | titlecase}}
+          </div>
+        </div>
+      </div>
+      <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketLink}}">Google Bucket</a>
+    </div>
   </div>
 </div>
+
+
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace.</div>

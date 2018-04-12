@@ -904,6 +904,8 @@ definitions:
         type: string
       creator:
         type: string
+      googleBucketName:
+        type: string
       dataAccessLevel:
         $ref: "#/definitions/DataAccessLevel"
       researchPurpose:

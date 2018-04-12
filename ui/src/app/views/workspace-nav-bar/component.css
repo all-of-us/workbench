@@ -1,0 +1,74 @@
+/*ng-deep plumbs the styling down into the clarity objects. Necessary for the overflow dropdown*/
+::ng-deep .btn.btn-primary.btn-top {
+  height: 100%;
+  width: 8rem;
+  background-color: transparent;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  border-top: none;
+  border-bottom: none;
+}
+
+::ng-deep .btn.btn-primary.btn-top:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+::ng-deep .btn.btn-primary.btn-top:disabled {
+  cursor: not-allowed;
+  background-color: transparent;
+}
+
+::ng-deep .btn.dropdown-toggle {
+  height: 100%;
+  width: 2rem;
+  background-color: transparent;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0;
+  color: white;
+  border-top: none;
+  border-bottom: none;
+}
+
+::ng-deep .btn.dropdown-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+::ng-deep btn.btn-primary.btn-top.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+::ng-deep .btn-top.btn-overflow {
+  color: white;
+  width: 2rem;
+  border: none;
+  height: 100%;
+}
+
+::ng-deep .btn-top.btn-overflow:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+/*
+ * The use of !important here is to prevent clarity from overriding the position.
+ * Clarity's overflow elements apply a static position on click, so we needed to
+ * override that.
+ */
+::ng-deep .btn-group>.btn-group-overflow {
+  position: absolute !important;
+  right: 0;
+  height: 100%;
+}
+
+.btn-group {
+  /*Account for margins.*/
+  width: calc(100% + 1.6rem);
+  background-color: #5FAEE0;
+  height: 60px;
+  margin-left: -1rem;
+  position: relative;
+  margin-right: 0;
+  border-bottom: 5px solid #478EBA;
+  padding-left: 5rem;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26), 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+}

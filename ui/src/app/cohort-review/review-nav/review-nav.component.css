@@ -4,13 +4,13 @@
 
 .header-link {
   color: #2691D0;
-  font-family: GothamLight;
+  font-weight: 300;
   font-size: 20px;
   line-height: 24px;
 }
 
 .active {
-  font-family: GothamMedium;
+  font-weight: 500;
 }
 
 .vert-bar {
