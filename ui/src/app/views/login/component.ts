@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   headerImg = '/assets/images/all-of-us-logo.svg';
   googleIcon = '/assets/icons/google-icon.png';
-  private showCreateAccount = false;
+  showCreateAccount = false;
 
   constructor(
     /* Ours */
