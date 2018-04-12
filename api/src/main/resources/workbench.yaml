@@ -1275,6 +1275,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
+      requestedIdVerification:
+        type: boolean
 
   InstitutionalAffiliation:
     type: object

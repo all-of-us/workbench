@@ -132,7 +132,7 @@
       </div>
       <div>
         <button class="btn btn-secondary" (click)="requestVerification()"
-            [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED'">
+            [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
           Submit Identity Verification
           <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
             <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>

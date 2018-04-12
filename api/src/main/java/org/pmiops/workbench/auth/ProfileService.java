@@ -64,7 +64,7 @@ public class ProfileService {
     profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
-
+    profile.setRequestedIdVerification(user.getRequestedIdVerification());
     if (user.getBlockscoreVerificationIsValid() == null) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
     } else if (user.getBlockscoreVerificationIsValid() == false) {
