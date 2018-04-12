@@ -1,3 +1,4 @@
+/*ng-deep plumbs the styling down into the clarity objects. Necessary for the overflow dropdown*/
 ::ng-deep .btn.btn-primary.btn-top {
   height: 100%;
   width: 8rem;
@@ -48,7 +49,11 @@
 ::ng-deep .btn-top.btn-overflow:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
-
+/*
+ * The use of !important here is to prevent clarity from overriding the position.
+ * Clarity's overflow elements apply a static position on click, so we needed to
+ * override that.
+ */
 ::ng-deep .btn-group>.btn-group-overflow {
   position: absolute !important;
   right: 0;

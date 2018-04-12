@@ -1,4 +1,3 @@
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {ComponentFixture, fakeAsync, inject, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -22,7 +21,6 @@ describe('WorkspaceEditComponent', () => {
   let workspacesService: WorkspacesServiceStub;
 
   function setupComponent(mode: WorkspaceEditMode) {
-    console.log(activatedRouteStub);
     activatedRouteStub.routeConfig.data.mode = mode;
     fixture = TestBed.createComponent(WorkspaceEditComponent);
     testComponent = fixture.componentInstance;
