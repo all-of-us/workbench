@@ -2,14 +2,10 @@
   display: flex;
 }
 
-.area-block {
-  margin-top: 0.2rem;
-  margin-left: 4%;
-}
-
 .description-text {
   color: #333;
   width: 100ex;
+  padding-top: 0.5rem;
 }
 
 .indented {
@@ -44,4 +40,91 @@ h3 {
 .btn.btn-link.awaiting-review {
   cursor: not-allowed;
   color: #565656;
+}
+
+
+
+.btn.btn-primary.btn-create {
+  width: 7rem;
+}
+
+
+.main-body {
+  flex-grow: 1;
+  margin-right: 0.6rem;
+}
+
+.right-sidebar {
+  background-color: #E2E2EA;
+  width: 2rem;
+  margin-right: -0.6rem;
+  padding-left: 0.5rem;
+  box-shadow: -3px 0 4px 0 rgba(0,0,0,0.15);
+  z-index: 1;
+}
+
+.right-sidebar.right-sidebar-open {
+  width: 16rem;
+}
+
+.workspace-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  flex-grow: 1;
+  height: 100%;
+}
+
+.subheader {
+  color: #2F2E7E;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+button.btn.btn-link {
+  color: #2691D0;
+  font-size: 0.8rem;
+  font-weight: 300;
+  text-transform: none;
+  border-right: 1px solid #979797;
+  width: 10rem;
+}
+
+button.btn.btn-link.final {
+  border-right: none;
+}
+
+button.btn.btn-link.selected {
+  font-weight: normal;
+}
+
+.information-area {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.information-box {
+  background-color: #CDCDE2;
+  height: 2rem;
+  width: 6rem;
+  border-radius: 5px;
+  line-height: 14px;
+  padding: 0.4rem;
+  color: #000000;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.information-header {
+  text-transform: uppercase;
+  font-size: 0.4rem;
+}
+
+.information-body {
+  font-size: 0.5rem;
+}
+
+app-workspace-nav-bar {
+  /*Change for sidebar*/
+  width: calc(100% + 1rem);
 }

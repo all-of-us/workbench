@@ -8,7 +8,9 @@ import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
+
 import {ClusterService, CohortsService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
@@ -18,7 +20,6 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {
   queryAllByCss,
   queryByCss,
-  simulateClick,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -51,7 +52,7 @@ class WorkspacePage {
     this.workspaceId = this.route[2].path;
     this.cohortsTableRows = queryAllByCss(this.fixture, '.cohort-table-row');
     this.notebookTableRows = queryAllByCss(this.fixture, '.notebook-table-row');
-    this.cdrText = queryByCss(this.fixture, '.cdr-text');
+    this.cdrText = queryByCss(this.fixture, '.cdr-version-text');
     this.workspaceDescription = queryByCss(this.fixture, '.description-text');
     this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
     this.createAndLaunch = queryByCss(this.fixture, '#createAndLaunch');
@@ -89,7 +90,8 @@ describe('WorkspaceComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        WorkspaceComponent
+        WorkspaceComponent,
+        WorkspaceNavBarComponent
       ],
       providers: [
         { provide: ClusterService, useValue: new ClusterServiceStub() },
@@ -105,7 +107,7 @@ describe('WorkspaceComponent', () => {
   }));
 
 
-  it('displays correct information in default workspace', fakeAsync(() => {
+  it('displays correct information when cohorts selected.', fakeAsync(() => {
     let expectedCohorts: number;
     workspacePage.cohortsService.getCohortsInWorkspace(
         workspacePage.workspaceNamespace,
@@ -115,6 +117,14 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
+  }));
+
+  it('displays correct information when notebooks selected.', fakeAsync(() => {
+    workspacePage.fixture.componentRef.instance.tabOpen =
+        workspacePage.fixture.componentRef.instance.Tabs.Notebooks;
+    tick();
+    workspacePage.readPageData();
+    tick();
     expect(workspacePage.notebookTableRows.length).toEqual(1);
   }));
 
@@ -122,25 +132,8 @@ describe('WorkspaceComponent', () => {
     workspacePage.fixture.componentRef.instance.ngOnInit();
     updateAndTick(workspacePage.fixture);
     updateAndTick(workspacePage.fixture);
-    expect(workspacePage.cdrText.nativeElement.innerText)
-      .toMatch('CDR Version ' + WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION);
     expect(workspacePage.workspaceDescription.nativeElement.innerText)
       .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
-  }));
-
-  it('deletes the correct workspace', fakeAsync(() => {
-    let originalWorkspaceLength = 0;
-    workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
-      originalWorkspaceLength = workspaces.items.length;
-    });
-    simulateClick(workspacePage.fixture, queryByCss(workspacePage.fixture, '.btn-deleting'));
-    let workspaceLength;
-    workspacePage.workspacesService.getWorkspaces().subscribe((workspaces) => {
-      workspaceLength = workspaces.items.length;
-    });
-    tick();
-    expect(workspaceLength).toBe(originalWorkspaceLength - 1);
-
   }));
 
   it('displays correct notebook information', fakeAsync(() => {

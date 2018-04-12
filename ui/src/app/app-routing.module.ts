@@ -53,6 +53,7 @@ const routes: Routes = [
          * provided by the route rather than double-requesting it.
          */
         path: 'workspace/:ns/:wsid',
+        runGuardsAndResolvers: 'always',
         resolve: {
           workspace: WorkspaceResolver,
         },

@@ -200,7 +200,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .id(fcWorkspace.getName())
         .namespace(fcWorkspace.getNamespace())
         .description(workspace.getDescription())
-        .researchPurpose(researchPurpose);
+        .researchPurpose(researchPurpose)
+        .googleBucketName(fcWorkspace.getBucketName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }
@@ -520,6 +521,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
         workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = request.getWorkspace();
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+
+    try {
+      fcWorkspace = fireCloudService.getWorkspace(
+          workspaceNamespace, workspaceId).getWorkspace();
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      throw ExceptionUtils.convertFirecloudException(e);
+    }
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
     }
@@ -545,7 +554,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE.apply(dbWorkspace));
+    return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }
 
   @Override

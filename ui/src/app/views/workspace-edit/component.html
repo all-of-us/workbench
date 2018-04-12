@@ -1,8 +1,16 @@
 <div *ngIf="!notFound else notFoundMessage">
   <ng-container [ngSwitch]="mode">
-    <h2 *ngSwitchCase="Mode.Create">Create a new Workspace</h2>
-    <h2 *ngSwitchCase="Mode.Edit">Edit workspace "{{workspace.name}}"</h2>
-    <h2 *ngSwitchCase="Mode.Clone">Clone workspace "{{oldWorkspaceName}}"</h2>
+    <div *ngSwitchCase="Mode.Create">
+      <h2>Create a new Workspace</h2>
+    </div>
+    <div *ngSwitchCase="Mode.Edit">
+      <app-workspace-nav-bar></app-workspace-nav-bar>
+      <h2>Edit workspace "{{workspace.name}}"</h2>
+    </div>
+    <div *ngSwitchCase="Mode.Clone">
+      <app-workspace-nav-bar></app-workspace-nav-bar>
+      <h2>Clone workspace "{{oldWorkspaceName}}"</h2>
+    </div>
   </ng-container>
   <div>* is a required field</div>
   <div>
