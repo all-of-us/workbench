@@ -22,9 +22,7 @@
     </clr-button>
     <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
   </span>
-  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'share']" routerLinkActive="active">
-    Share
-  </clr-button>
+  <clr-button [clrInMenu]="true" class="btn" (click)="share()">Share</clr-button>
   <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'clone']" routerLinkActive="active">
     Clone
   </clr-button>
@@ -35,3 +33,5 @@
     <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
   </span>
 </clr-button-group>
+
+<app-workspace-share></app-workspace-share>

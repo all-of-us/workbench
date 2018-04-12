@@ -7,11 +7,14 @@ import {ClarityModule} from '@clr/angular';
 
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {ServerConfigService} from '../../services/server-config.service';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -55,7 +58,8 @@ describe('WorkspaceEditComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         WorkspaceEditComponent,
-        WorkspaceNavBarComponent
+        WorkspaceNavBarComponent,
+        WorkspaceShareComponent
       ],
       imports: [
         RouterTestingModule,
@@ -67,9 +71,14 @@ describe('WorkspaceEditComponent', () => {
         // Wrap in a factory function so we can later mutate the value if needed
         // for testing.
         { provide: ActivatedRoute, useFactory: () => activatedRouteStub },
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
-      ]
-    }).compileComponents();
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        {
+          provide: ServerConfigService,
+          useValue: new ServerConfigServiceStub({
+            gsuiteDomain: 'fake-research-aou.org'
+          })
+        }
+      ]}).compileComponents();
   }));
 
 

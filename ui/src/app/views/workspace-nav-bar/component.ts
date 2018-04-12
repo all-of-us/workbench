@@ -1,7 +1,9 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   Workspace,
@@ -17,6 +19,9 @@ import {
   templateUrl: './component.html',
 })
 export class WorkspaceNavBarComponent implements OnInit {
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
+
   dropdownOpen = false;
   workspace: Workspace;
   wsId: string;
@@ -47,6 +52,10 @@ export class WorkspaceNavBarComponent implements OnInit {
       this.workspace.namespace, this.workspace.id).subscribe(() => {
         this.router.navigate(['/']);
     });
+  }
+
+  share(): void {
+    this.shareModal.open();
   }
 
   get writePermission(): boolean {
