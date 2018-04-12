@@ -7,9 +7,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
@@ -25,6 +27,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
+// TODO(RW-499): use a library to construct the SQL below, rather than concatenating strings
 public class AnnotationQueryBuilder {
 
   public static final String PERSON_ID_COLUMN = "person_id";
@@ -33,13 +36,21 @@ public class AnnotationQueryBuilder {
   // These column names are reserved and can't be used for annotation definition column names.
   public static final ImmutableSet<String> RESERVED_COLUMNS = ImmutableSet.of(PERSON_ID_COLUMN,
       REVIEW_STATUS_COLUMN);
-
   private static final ImmutableMap<AnnotationType, String> ANNOTATION_COLUMN_MAP =
       ImmutableMap.of(
           AnnotationType.BOOLEAN, "annotation_value_boolean",
           AnnotationType.DATE, "annotation_value_date",
           AnnotationType.INTEGER, "annotation_value_integer",
           AnnotationType.STRING, "annotation_value_string");
+
+  public static final String DESCENDING_PREFIX = "DESCENDING(";
+
+  private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+
+  static {
+    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+  }
 
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   private final CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
@@ -143,6 +154,12 @@ public class AnnotationQueryBuilder {
       } else {
         orderByBuilder.append(", ");
       }
+      boolean descending = false;
+      if (orderByColumn.startsWith(DESCENDING_PREFIX)) {
+        orderByColumn = orderByColumn.substring(DESCENDING_PREFIX.length(), orderByColumn.length() - 1);
+        descending = true;
+      }
+
       if (orderByColumn.equals(PERSON_ID_COLUMN) || orderByColumn.equals(REVIEW_STATUS_COLUMN)) {
         orderByBuilder.append(orderByColumn);
       } else {
@@ -151,6 +168,9 @@ public class AnnotationQueryBuilder {
           throw new BadRequestException("Column " + orderByColumn + " in orderBy must be present in columns");
         }
         orderByBuilder.append(columnAlias);
+      }
+      if (descending) {
+        orderByBuilder.append(" DESC");
       }
     }
     return orderByBuilder.toString();
@@ -212,7 +232,14 @@ public class AnnotationQueryBuilder {
         for (int i = 0; i < columns.size(); i++) {
           Object obj = rs.getObject(i + 1);
           if (obj != null) {
-            result.put(columns.get(i), obj);
+            String column = columns.get(i);
+            if (column.equals(REVIEW_STATUS_COLUMN)) {
+              result.put(column, CohortStatus.values()[(Integer) obj].name());
+            } else if (obj instanceof java.sql.Date) {
+              result.put(column, DATE_FORMAT.format((java.sql.Date) obj));
+            } else {
+              result.put(column, obj);
+            }
           }
         }
         return result.build();

@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -87,6 +88,9 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     private void validateColumnName(String columnName) {
         if (AnnotationQueryBuilder.RESERVED_COLUMNS.contains(columnName)) {
             throw new BadRequestException("Annotations are not allowed to be named " + columnName);
+        } else if (columnName.toUpperCase().contains(AnnotationQueryBuilder.DESCENDING_PREFIX)) {
+            throw new BadRequestException("Annotations are not allowed to contain " +
+              AnnotationQueryBuilder.DESCENDING_PREFIX);
         }
     }
 

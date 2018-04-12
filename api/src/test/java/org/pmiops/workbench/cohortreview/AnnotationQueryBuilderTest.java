@@ -1,12 +1,15 @@
 package org.pmiops.workbench.cohortreview;
 
 import static org.junit.Assert.fail;
-import static com.google.common.truth.Truth.assertThat;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -25,6 +28,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
@@ -59,8 +63,14 @@ public class AnnotationQueryBuilderTest {
   static class Configuration {
   }
 
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
   private static final ImmutableList<CohortStatus> INCLUDED_ONLY =
       ImmutableList.of(CohortStatus.INCLUDED);
+
+  private static final ImmutableList<CohortStatus> ALL_STATUSES =
+      ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED,
+          CohortStatus.NEEDS_FURTHER_REVIEW);
 
   @Autowired
   private AnnotationQueryBuilder annotationQueryBuilder;
@@ -87,13 +97,20 @@ public class AnnotationQueryBuilderTest {
   private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   private CohortReview cohortReview;
+  private CohortAnnotationDefinition integerAnnotation;
+  private CohortAnnotationDefinition stringAnnotation;
+  private CohortAnnotationDefinition booleanAnnotation;
+  private CohortAnnotationDefinition dateAnnotation;
+  private CohortAnnotationDefinition enumAnnotation;
+  private Map<String, CohortAnnotationEnumValue> enumValueMap;
+  private ImmutableMap<String, Object> expectedResult1;
+  private ImmutableMap<String, Object> expectedResult2;
 
   @Before
   public void setUp() {
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersion(cdrVersion);
-
 
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
@@ -117,21 +134,42 @@ public class AnnotationQueryBuilderTest {
     cohortReview.setReviewSize(3);
     cohortReviewDao.save(cohortReview);
 
-    cohortAnnotationDefinitionDao.save(
+    integerAnnotation = cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "integer annotation",
             AnnotationType.INTEGER));
-    cohortAnnotationDefinitionDao.save(
+    stringAnnotation = cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "string annotation",
             AnnotationType.STRING));
-    cohortAnnotationDefinitionDao.save(
+    booleanAnnotation = cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "boolean annotation",
             AnnotationType.BOOLEAN));
-    cohortAnnotationDefinitionDao.save(
+    dateAnnotation = cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "date annotation",
             AnnotationType.DATE));
-    cohortAnnotationDefinitionDao.save(
+    enumAnnotation = cohortAnnotationDefinitionDao.save(
         makeAnnotationDefinition(cohort.getCohortId(), "enum annotation",
             AnnotationType.ENUM, "zebra", "aardvark"));
+    enumValueMap = Maps.uniqueIndex(enumAnnotation.getEnumValues(), CohortAnnotationEnumValue::getName);
+
+    expectedResult1 =
+        ImmutableMap.<String, Object>builder()
+            .put("person_id", 1L)
+            .put("review_status", "INCLUDED")
+            .put("integer annotation", 123)
+            .put("string annotation", "foo")
+            .put("boolean annotation", true)
+            .put("date annotation", "2017-02-14")
+            .put("enum annotation", "zebra")
+            .build();
+    expectedResult2 =
+        ImmutableMap.<String, Object>builder()
+            .put("person_id", 2L)
+            .put("review_status", "EXCLUDED")
+            .put("integer annotation", 456)
+            .put("boolean annotation", false)
+            .put("date annotation", "2017-02-15")
+            .put("enum annotation", "aardvark")
+            .build();
   }
 
   private CohortAnnotationDefinition makeAnnotationDefinition(long cohortId, String columnName,
@@ -169,15 +207,239 @@ public class AnnotationQueryBuilderTest {
 
   @Test
   public void testQueryOneIncluded() {
+    saveReviewStatuses();
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
+        new AnnotationQuery(), 10, 0),
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
 
   }
 
+  @Test
+  public void testQueryAllStatuses() {
+    saveReviewStatuses();
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        new AnnotationQuery(), 10, 0),
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"),
+        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"));
+  }
+
+  @Test
+  public void testQueryAllStatusesReviewStatusOrder() {
+    saveReviewStatuses();
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("review_status"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0),
+        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"),
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
+
+  }
+
+  @Test
+  public void testQueryAllStatusesReviewPersonIdOrderDescending() {
+    saveReviewStatuses();
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(person_id)"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0),
+        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"),
+        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
+
+  }
+
+  @Test
+  public void testQueryIncludedWithAnnotations() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    ImmutableMap<String, Object> expectedResult =
+        ImmutableMap.<String, Object>builder()
+            .put("person_id", 1L)
+            .put("review_status", "INCLUDED")
+            .put("integer annotation", 123)
+            .put("string annotation", "foo")
+            .put("boolean annotation", true)
+            .put("date annotation", "2017-02-14")
+            .put("enum annotation", "zebra")
+            .build();
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
+        new AnnotationQuery(), 10, 0), expectedResult);
+
+  }
+
+  @Test
+  public void testQueryIncludedWithAnnotationsNoReviewStatus() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    ImmutableMap<String, Object> expectedResult =
+        ImmutableMap.<String, Object>builder()
+            .put("person_id", 1L)
+            .put("integer annotation", 123)
+            .put("string annotation", "foo")
+            .put("boolean annotation", true)
+            .put("date annotation", "2017-02-14")
+            .put("enum annotation", "zebra")
+            .build();
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setColumns(ImmutableList.of("person_id", "integer annotation", "string annotation",
+        "boolean annotation", "date annotation", "enum annotation"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
+        annotationQuery, 10, 0), expectedResult);
+
+  }
+
+  @Test
+  public void testQueryAllWithAnnotations() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        new AnnotationQuery(), 10, 0), expectedResult1, expectedResult2);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsLimit1() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        new AnnotationQuery(), 1, 0), expectedResult1);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsLimit1Offset1() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        new AnnotationQuery(), 1, 1), expectedResult2);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsOrderByIntegerDescending() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(integer annotation)", "person_id"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsOrderByBoolean() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("boolean annotation", "person_id"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsOrderByDateDescending() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(date annotation)", "person_id"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsOrderByString() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("string annotation", "person_id"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+  }
+
+  @Test
+  public void testQueryAllWithAnnotationsOrderByEnum() throws Exception {
+    saveReviewStatuses();
+    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
+        "zebra");
+    saveAnnotations(2L, 456, null, false, "2017-02-15",
+        "aardvark");
+    AnnotationQuery annotationQuery = new AnnotationQuery();
+    annotationQuery.setOrderBy(ImmutableList.of("enum annotation", "person_id"));
+    assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
+        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+  }
 
   private void saveReviewStatuses() {
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
+  }
+
+  private void saveAnnotations(long personId, Integer integerValue, String stringValue,
+      Boolean booleanValue, String dateValue, String enumValue) throws ParseException {
+    if (integerValue != null) {
+      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      annotation.setCohortAnnotationDefinitionId(integerAnnotation.getCohortAnnotationDefinitionId());
+      annotation.setParticipantId(personId);
+      annotation.setCohortReviewId(cohortReview.getCohortReviewId());
+      annotation.setAnnotationValueInteger(integerValue);
+      participantCohortAnnotationDao.save(annotation);
+    }
+    if (stringValue != null) {
+      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      annotation.setCohortAnnotationDefinitionId(stringAnnotation.getCohortAnnotationDefinitionId());
+      annotation.setParticipantId(personId);
+      annotation.setCohortReviewId(cohortReview.getCohortReviewId());
+      annotation.setAnnotationValueString(stringValue);
+      participantCohortAnnotationDao.save(annotation);
+    }
+    if (booleanValue != null) {
+      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      annotation.setCohortAnnotationDefinitionId(booleanAnnotation.getCohortAnnotationDefinitionId());
+      annotation.setParticipantId(personId);
+      annotation.setCohortReviewId(cohortReview.getCohortReviewId());
+      annotation.setAnnotationValueBoolean(booleanValue);
+      participantCohortAnnotationDao.save(annotation);
+    }
+    if (dateValue != null) {
+      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      annotation.setCohortAnnotationDefinitionId(dateAnnotation.getCohortAnnotationDefinitionId());
+      annotation.setParticipantId(personId);
+      annotation.setCohortReviewId(cohortReview.getCohortReviewId());
+      Date date = new Date(DATE_FORMAT.parse(dateValue).getTime());
+      annotation.setAnnotationValueDate(date);
+      participantCohortAnnotationDao.save(annotation);
+    }
+    if (enumValue != null) {
+      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      annotation.setCohortAnnotationDefinitionId(enumAnnotation.getCohortAnnotationDefinitionId());
+      annotation.setParticipantId(personId);
+      annotation.setCohortReviewId(cohortReview.getCohortReviewId());
+      annotation.setCohortAnnotationEnumValue(enumValueMap.get(enumValue));
+      participantCohortAnnotationDao.save(annotation);
+    }
   }
 
   private void assertResults(Iterable<Map<String, Object>> results,
@@ -193,7 +455,8 @@ public class AnnotationQueryBuilderTest {
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
             + "; unexpected entries: " + difference.entriesOnlyOnLeft()
-            + "; missing entries: " + difference.entriesOnlyOnRight());
+            + "; missing entries: " + difference.entriesOnlyOnRight()
+            + "; actual result: " + actualResults.get(i));
       }
     }
   }
