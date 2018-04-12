@@ -33,6 +33,7 @@
 /cli/cli.iml
 /client/client.iml
 /hooks/hooks.iml
+/libproject/swagger-codegen-cli.jar
 /ui/package-lock.json
 /ui/coverage
 /ui/ui.iml
@@ -41,9 +42,18 @@
 /ui/**/*.map
 /ui/dist/**
 /ui/yarn-error.log
-/libproject/swagger-codegen-cli.jar
 /ui/src/generated/*
 /ui/src/publicGenerated/*
+/public-ui/package-lock.json
+/public-ui/coverage
+/public-ui/ui.iml
+/public-ui/.idea/*
+/public-ui/**/*.js
+/public-ui/**/*.map
+/public-ui/dist/**
+/public-ui/yarn-error.log
+/public-ui/src/generated/*
+/public-ui/src/publicGenerated/*
 cloud_sql_proxy
 node_modules
 npm-debug.log
