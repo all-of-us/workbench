@@ -26,12 +26,11 @@ these processes locally.
 
 ## Deploy to stable
 
-- Take the latest staging release version; ensure that Circle staging deployment
-  succeeded.
-- Run deployment:
+- Ensure that Circle staging deployment succeeded.
+- Run deployment (automatically takes the current staging deployment):
   ```
   deploy$ ./project.rb --project all-of-us-rw-stable \
-    --account ACCOUNT --version VERSION_TAG --promote
+    --account DEPLOY_AS_ACCOUNT --promote
   ```
 
 # Manual deployment details
