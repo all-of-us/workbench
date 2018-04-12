@@ -19,8 +19,7 @@ if [[ ! -d ~/workbench/.git ]]; then
 fi
 cd ~/workbench
 git fetch
-# TODO: drop origin, maybe???
-git checkout origin/"${WORKBENCH_VERSION}"
+git checkout "${WORKBENCH_VERSION}"
 git submodule update --init --recursive
 # Drop any ignored files which may have carried over, to ensure a clean build.
 git clean -fX

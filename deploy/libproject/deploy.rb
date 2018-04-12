@@ -73,7 +73,8 @@ def deploy(cmd_name, args)
   op.add_option(
     "--git_version [git version]",
     lambda {|opts, v| opts.git_version = v},
-    "GitHub tag or branch, e.g. 'v1-0-rc1', 'master'"
+    "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/master'. Branch names " +
+    "must be prefixed with 'origin/'"
   )
   op.add_option(
     "--app_version [app version]",
