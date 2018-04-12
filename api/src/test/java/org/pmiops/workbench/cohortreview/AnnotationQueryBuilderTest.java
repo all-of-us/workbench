@@ -65,6 +65,9 @@ public class AnnotationQueryBuilderTest {
 
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
+  private static final long INCLUDED_PERSON_ID = 1L;
+  private static final long EXCLUDED_PERSON_ID = 2L;
+
   private static final ImmutableList<CohortStatus> INCLUDED_ONLY =
       ImmutableList.of(CohortStatus.INCLUDED);
 
@@ -153,7 +156,7 @@ public class AnnotationQueryBuilderTest {
 
     expectedResult1 =
         ImmutableMap.<String, Object>builder()
-            .put("person_id", 1L)
+            .put("person_id", INCLUDED_PERSON_ID)
             .put("review_status", "INCLUDED")
             .put("integer annotation", 123)
             .put("string annotation", "foo")
@@ -163,7 +166,7 @@ public class AnnotationQueryBuilderTest {
             .build();
     expectedResult2 =
         ImmutableMap.<String, Object>builder()
-            .put("person_id", 2L)
+            .put("person_id", EXCLUDED_PERSON_ID)
             .put("review_status", "EXCLUDED")
             .put("integer annotation", 456)
             .put("boolean annotation", false)
@@ -210,7 +213,7 @@ public class AnnotationQueryBuilderTest {
     saveReviewStatuses();
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
         new AnnotationQuery(), 10, 0),
-        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
+        ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
   }
 
@@ -219,8 +222,8 @@ public class AnnotationQueryBuilderTest {
     saveReviewStatuses();
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         new AnnotationQuery(), 10, 0),
-        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"),
-        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"));
+        ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"),
+        ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"));
   }
 
   @Test
@@ -230,8 +233,8 @@ public class AnnotationQueryBuilderTest {
     annotationQuery.setOrderBy(ImmutableList.of("review_status"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         annotationQuery, 10, 0),
-        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"),
-        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
+        ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"),
+        ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
   }
 
@@ -242,19 +245,18 @@ public class AnnotationQueryBuilderTest {
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(person_id)"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         annotationQuery, 10, 0),
-        ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED"),
-        ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED"));
+        ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"),
+        ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
   }
 
   @Test
   public void testQueryIncludedWithAnnotations() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
     ImmutableMap<String, Object> expectedResult =
         ImmutableMap.<String, Object>builder()
-            .put("person_id", 1L)
+            .put("person_id", INCLUDED_PERSON_ID)
             .put("review_status", "INCLUDED")
             .put("integer annotation", 123)
             .put("string annotation", "foo")
@@ -270,11 +272,10 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryIncludedWithAnnotationsNoReviewStatus() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
     ImmutableMap<String, Object> expectedResult =
         ImmutableMap.<String, Object>builder()
-            .put("person_id", 1L)
+            .put("person_id", INCLUDED_PERSON_ID)
             .put("integer annotation", 123)
             .put("string annotation", "foo")
             .put("boolean annotation", true)
@@ -292,10 +293,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotations() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         new AnnotationQuery(), 10, 0), expectedResult1, expectedResult2);
@@ -304,10 +303,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsLimit1() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         new AnnotationQuery(), 1, 0), expectedResult1);
@@ -316,10 +313,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsLimit1Offset1() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
         new AnnotationQuery(), 1, 1), expectedResult2);
@@ -328,10 +323,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsOrderByIntegerDescending() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(integer annotation)", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
@@ -341,10 +334,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsOrderByBoolean() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("boolean annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
@@ -354,10 +345,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsOrderByDateDescending() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(date annotation)", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
@@ -367,10 +356,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsOrderByString() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("string annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
@@ -380,10 +367,8 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryAllWithAnnotationsOrderByEnum() throws Exception {
     saveReviewStatuses();
-    saveAnnotations(1L, 123, "foo", true, "2017-02-14",
-        "zebra");
-    saveAnnotations(2L, 456, null, false, "2017-02-15",
-        "aardvark");
+    saveAnnotations(INCLUDED_PERSON_ID, 123, "foo", true, "2017-02-14","zebra");
+    saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("enum annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
@@ -392,9 +377,9 @@ public class AnnotationQueryBuilderTest {
 
   private void saveReviewStatuses() {
     participantCohortStatusDao.save(
-        makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
+        makeStatus(cohortReview.getCohortReviewId(), INCLUDED_PERSON_ID, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(
-        makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
+        makeStatus(cohortReview.getCohortReviewId(), EXCLUDED_PERSON_ID, CohortStatus.EXCLUDED));
   }
 
   private void saveAnnotations(long personId, Integer integerValue, String stringValue,
