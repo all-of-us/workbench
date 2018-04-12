@@ -179,4 +179,11 @@ export class ProfilePageComponent implements OnInit {
       }
     }
   }
+
+  requestVerification(): void {
+    this.profileService.submitIdVerification().subscribe((profile) => {
+      this.profile.requestedIdVerification = profile.requestedIdVerification;
+      this.workingProfile.requestedIdVerification = profile.requestedIdVerification;
+    });
+  }
 }

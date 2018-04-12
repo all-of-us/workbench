@@ -50,6 +50,7 @@ public class User {
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
+  private Boolean requestedIdVerification;
 
   private List<InstitutionalAffiliation> institutionalAffiliations =
       new ArrayList<InstitutionalAffiliation>();
@@ -275,5 +276,14 @@ public class User {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
+  }
+
+  @Column(name = "requested_id_verification")
+  public Boolean getRequestedIdVerification() {
+    return requestedIdVerification;
+  }
+
+  public void setRequestedIdVerification(Boolean requestedIdVerification) {
+    this.requestedIdVerification = requestedIdVerification;
   }
 }

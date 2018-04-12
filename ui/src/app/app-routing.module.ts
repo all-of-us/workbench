@@ -9,7 +9,6 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
-import {IdVerificationPageComponent} from './views/id-verification-page/component';
 import {LoginComponent} from './views/login/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -95,10 +94,6 @@ const routes: Routes = [
         path: 'admin/review-id-verification',
         component: AdminReviewIdVerificationComponent,
         data: {title: 'Review ID Verifications'}
-      }, {
-        path: 'profile/id-verification',
-        component: IdVerificationPageComponent,
-        data: {title: 'ID Verification'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,
