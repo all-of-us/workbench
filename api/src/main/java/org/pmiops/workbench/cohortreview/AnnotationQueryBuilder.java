@@ -202,7 +202,7 @@ public class AnnotationQueryBuilder {
     return namedParameterJdbcTemplate.query(sql, new RowMapper<Map<String, Object>>() {
       @Override
       public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-        ImmutableMap.Builder result = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Object> result = ImmutableMap.builder();
         List<String> columns = annotationQuery.getColumns();
         for (int i = 0; i < columns.size(); i++) {
           Object obj = rs.getObject(i);
