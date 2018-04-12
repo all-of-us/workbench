@@ -205,6 +205,7 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
   }
 end
 

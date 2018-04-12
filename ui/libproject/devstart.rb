@@ -37,7 +37,7 @@ Common.register_command({
 })
 
 def swagger_regen(cmd_name)
-  ensure_docker cmd_name, args
+  ensure_docker cmd_name, %{}
 
   common = Common.new
   Workbench::Swagger.download_swagger_codegen_cli
@@ -112,6 +112,10 @@ class DeployUI
                "Required: must set --promote or --no-promote") do
        @opts.promote = false
     end
+    @parser.on("--quiet",
+               "Whether to suppress user prompts; shown by default") do
+       @opts.quiet = true
+    end
   end
 
   def validate_options
@@ -139,7 +143,7 @@ class DeployUI
         --project #{@opts.project}
         --version #{@opts.version}
         #{opts.promote ? "--promote" : "--no-promote"}
-      }
+      } + @opts.quiet ? %{--quiet} : %{}
     end
   end
 end
@@ -189,7 +193,7 @@ def dev_up(*args)
 
   ENV["ENV_FLAG"] = "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
-  swagger_regen()
+  swagger_regen("swagger-regen")
   common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
