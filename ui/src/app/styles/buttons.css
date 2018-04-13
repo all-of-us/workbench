@@ -40,6 +40,10 @@ button.btn.btn-outline {
   line-height: 0.77rem;
 }
 
+button.btn.btn-secondary:active {
+  box-shadow: inset 0 2px 0 0 #4356a7;
+}
+
 button.btn.btn-secondary {
   font-size: 10px;
 }

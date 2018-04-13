@@ -126,8 +126,8 @@
         >>
       </a>
       <div>
-        <h6 style="display: inline-block; margin-right: 0.5rem">Collaborators:</h6>
-        <button style="display: inline-block; height: 0.9rem" class="btn btn-secondary" (click)="navBar.share()">Share</button>
+        <h6 class="collaborator-text">Collaborators:</h6>
+        <button class="btn btn-secondary btn-short" (click)="navBar.share()">Share</button>
       </div>
       <div *ngFor="let user of workspace.userRoles">
         <div>{{user.role}}: {{user.email}}</div>
