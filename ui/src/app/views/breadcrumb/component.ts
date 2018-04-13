@@ -33,11 +33,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * @param {ActivatedRoute} route
    * @returns {Breadcrumb}
    */
-  private static makeBreadcrumb(
-      label: string,
-      url: string,
-      route: ActivatedRoute
-  ): Breadcrumb {
+  private static makeBreadcrumb(label: string,
+                                url: string,
+                                route: ActivatedRoute): Breadcrumb {
     let newLabel = label;
     // Perform variable substitution in label only if needed.
     if (newLabel.indexOf(':') >= 0) {
