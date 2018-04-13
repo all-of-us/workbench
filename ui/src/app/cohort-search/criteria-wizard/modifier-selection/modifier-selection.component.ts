@@ -1,8 +1,8 @@
 import {select} from '@angular-redux/store';
 import {Component} from '@angular/core';
 
-import {activeModifierList, CohortSearchActions} from '../../redux';
 import {ModifierType, Operator} from 'generated';
+import {activeModifierList, CohortSearchActions} from '../../redux';
 
 @Component({
   selector: 'crit-modifier-selection',
