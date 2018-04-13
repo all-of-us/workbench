@@ -137,10 +137,8 @@ public class AnnotationQueryBuilder {
       ImmutableMap.Builder<String, Object> parameters) {
     StringBuilder whereBuilder = new StringBuilder(" WHERE pcs.cohort_review_id = :cohort_review_id");
     parameters.put("cohort_review_id", cohortReview.getCohortReviewId());
-    if (!statusFilter.containsAll(REVIEWED_STATUSES)) {
-      whereBuilder.append(" AND pcs.status IN (:statuses)");
-      parameters.put("statuses", statusFilter.stream().map(CohortStatus::ordinal).collect(Collectors.toList()));
-    }
+    whereBuilder.append(" AND pcs.status IN (:statuses)");
+    parameters.put("statuses", statusFilter.stream().map(CohortStatus::ordinal).collect(Collectors.toList()));
     return whereBuilder.toString();
   }
 
