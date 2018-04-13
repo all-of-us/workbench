@@ -6,7 +6,6 @@ export interface Breadcrumb {
   label: string;
   url: string;
 }
-
 @Component({
   selector: 'app-breadcrumb',
   templateUrl: './component.html',
@@ -17,15 +16,11 @@ export interface Breadcrumb {
     './component.css']
 })
 export class BreadcrumbComponent implements OnInit, OnDestroy {
-
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
-
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {}
-
-
 
   /**
    * Generate a breadcrumb using the default label and url. Uses the route's
@@ -43,23 +38,22 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       url: string,
       route: ActivatedRoute
   ): Breadcrumb {
-    try {
-      const paramValues = route.paramMap['source']['_value'];
-      let newLabel = label;
-      for (const k of Object.keys(paramValues)) {
-        newLabel = newLabel.replace(':' + k, paramValues[k]);
+    let newLabel = label;
+    // Perform variable substitution in label only if needed.
+    if (newLabel.indexOf(':') >= 0) {
+      try {
+        const paramMap = route.snapshot.paramMap;
+        for (const k of paramMap.keys) {
+          newLabel = newLabel.replace(':' + k, paramMap.get(k));
+        }
+      } catch (e) {
+        console.log(e);
       }
-      return {
-        label: newLabel,
-        url: url
-      };
-    } catch (e) {
-      console.log(e);
-      return {
-        label: label,
-        url: url
-      };
     }
+    return {
+      label: newLabel,
+      url: url
+    };
   }
 
   ngOnInit() {
