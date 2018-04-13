@@ -125,7 +125,10 @@
       <a (click)="rightSidebarClosed=true">
         >>
       </a>
-      <h6>Collaborators</h6>
+      <div>
+        <h6 class="collaborator-text">Collaborators:</h6>
+        <button class="btn btn-secondary btn-short" (click)="navBar.share()">Share</button>
+      </div>
       <div *ngFor="let user of workspace.userRoles">
         <div>{{user.role}}: {{user.email}}</div>
       </div>

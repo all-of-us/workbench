@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Headers, Http, Response} from '@angular/http';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 
 import {
   Cluster,
@@ -76,6 +77,9 @@ enum Tabs {
 export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
+
+  @ViewChild(WorkspaceNavBarComponent)
+  navBar: WorkspaceNavBarComponent;
   Tabs = Tabs;
 
   cohortNameFilter = new CohortNameFilter();

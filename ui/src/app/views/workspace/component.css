@@ -128,3 +128,13 @@ app-workspace-nav-bar {
   /*Change for sidebar*/
   width: calc(100% + 1rem);
 }
+
+.collaborator-text {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.btn-short {
+  display: inline-block;
+  height: 0.9rem;
+}
