@@ -1,4 +1,4 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -16,19 +16,16 @@ export interface Breadcrumb {
     '../../styles/inputs.css',
     './component.css']
 })
-export class BreadcrumbComponent implements OnDestroy {
+export class BreadcrumbComponent implements OnInit, OnDestroy {
 
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
 
   constructor(
       private activatedRoute: ActivatedRoute,
-      private router: Router) {
-    this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
-          this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
-        });
-  }
+      private router: Router) {}
+
+
 
   /**
    * Generate a breadcrumb using the default label and url. Uses the route's
@@ -63,6 +60,15 @@ export class BreadcrumbComponent implements OnDestroy {
         url: url
       };
     }
+  }
+
+  ngOnInit() {
+    this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
+
+    this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
+      .subscribe(event => {
+        this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
+      });
   }
 
   ngOnDestroy() {
