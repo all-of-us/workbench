@@ -32,9 +32,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
@@ -185,6 +187,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     return true;
+  }
+
+  @Override
+  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+      ModelAndView modelAndView) throws Exception {
+    // Clear the security context, just to make sure nothing subsequently uses the credentials
+    // set up in here.
+    SecurityContextHolder.getContext().setAuthentication(null);
   }
 
   /**
