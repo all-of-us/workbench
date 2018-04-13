@@ -122,6 +122,8 @@ definitions:
 
   MaterializeCohortResponse:
     type: object
+    required:
+      - results
     properties:
       results:
         description: >
@@ -215,7 +217,7 @@ definitions:
           An array of names of annotations, or "review status" or "person_id",
           each one optionally enclosed in "DESCENDING()" for descending
           sort order. Specifies the order that results should be returned. Defaults to "person_id"
-          (in ascending order).
+          (in ascending order). Annotations referenced in orderBy must also be present in columns.
         type: array
         items:
           type: string

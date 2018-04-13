@@ -29,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
+import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -64,7 +66,8 @@ import org.springframework.context.annotation.Import;
 @Import({DemoQueryBuilder.class, QueryBuilderFactory.class, CohortMaterializationService.class,
         BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
         CohortQueryBuilder.class, FieldSetQueryBuilder.class, QueryBuilderFactory.class,
-        TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class})
+        TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
+        AnnotationQueryBuilder.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
@@ -1163,6 +1166,39 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     assertPersonIds(response, 102246L, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
+
+  @Test
+  public void testMaterializeAnnotationQueryNoPagination() {
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setAnnotationQuery(new AnnotationQuery());
+    MaterializeCohortResponse response =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
+            makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeAnnotationQueryWithPagination() {
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setAnnotationQuery(new AnnotationQuery());
+    MaterializeCohortRequest request = makeRequest(fieldSet, 1);
+    MaterializeCohortResponse response =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+    assertResults(response, p1Map);
+    assertThat(response.getNextPageToken()).isNotNull();
+
+    request.setPageToken(response.getNextPageToken());
+    MaterializeCohortResponse response2 =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
+    assertResults(response2, p2Map);
+    assertThat(response2.getNextPageToken()).isNull();
+  }
+
 
   private ResultFilters makeResultFilters(ColumnFilter columnFilter) {
     ResultFilters result = new ResultFilters();

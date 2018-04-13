@@ -1,15 +1,12 @@
 package org.pmiops.workbench.cohorts;
 
-import com.google.cloud.bigquery.BigQueryException;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,13 +15,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.cohortbuilder.QueryConfiguration;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
+import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
@@ -33,9 +29,6 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
@@ -44,6 +37,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -59,6 +53,7 @@ public class CohortMaterializationService {
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
   private final FieldSetQueryBuilder fieldSetQueryBuilder;
+  private final AnnotationQueryBuilder annotationQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
 
@@ -66,11 +61,13 @@ public class CohortMaterializationService {
   public CohortMaterializationService(BigQueryService bigQueryService,
       ParticipantCounter participantCounter,
       FieldSetQueryBuilder fieldSetQueryBuilder,
+      AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
       Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
+    this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
   }
@@ -142,6 +139,26 @@ public class CohortMaterializationService {
     return new TableQueryAndConfig(tableQuery, cdrSchemaConfig);
   }
 
+
+  private ParticipantCriteria getParticipantCriteria(List<CohortStatus> statusFilter,
+      @Nullable CohortReview cohortReview, SearchRequest searchRequest) {
+    if (statusFilter.contains(CohortStatus.NOT_REVIEWED)) {
+      Set<Long> participantIdsToExclude;
+      if (statusFilter.size() < CohortStatus.values().length) {
+        // Find the participant IDs that have statuses which *aren't* in the filter.
+        Set<CohortStatus> statusesToExclude =
+            Sets.difference(ImmutableSet.copyOf(CohortStatus.values()), ImmutableSet.copyOf(statusFilter));
+        participantIdsToExclude = getParticipantIdsWithStatus(cohortReview, ImmutableList.copyOf(statusesToExclude));
+      } else {
+        participantIdsToExclude = ImmutableSet.of();
+      }
+      return new ParticipantCriteria(searchRequest, participantIdsToExclude);
+    } else {
+      Set<Long> participantIds = getParticipantIdsWithStatus(cohortReview, statusFilter);
+      return new ParticipantCriteria(participantIds);
+    }
+  }
+
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
       SearchRequest searchRequest, MaterializeCohortRequest request) {
     long offset = 0L;
@@ -165,64 +182,41 @@ public class CohortMaterializationService {
       statusFilter = ALL_STATUSES;
     }
 
-    ParticipantCriteria criteria;
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    if (statusFilter.contains(CohortStatus.NOT_REVIEWED)) {
-      Set<Long> participantIdsToExclude;
-      if (statusFilter.size() < CohortStatus.values().length) {
-        // Find the participant IDs that have statuses which *aren't* in the filter.
-        Set<CohortStatus> statusesToExclude =
-            Sets.difference(ImmutableSet.copyOf(CohortStatus.values()), ImmutableSet.copyOf(statusFilter));
-        participantIdsToExclude = getParticipantIdsWithStatus(cohortReview, ImmutableList.copyOf(statusesToExclude));
-      } else {
-        participantIdsToExclude = ImmutableSet.of();
-      }
-      criteria = new ParticipantCriteria(searchRequest, participantIdsToExclude);
-    } else {
-      Set<Long> participantIds = getParticipantIdsWithStatus(cohortReview, statusFilter);
-      if (participantIds.isEmpty()) {
+    Iterable<Map<String, Object>> results;
+    if (fieldSet == null || fieldSet.getTableQuery() != null) {
+      ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
+          searchRequest);
+      if (criteria.getParticipantIdsToInclude() != null
+          && criteria.getParticipantIdsToInclude().isEmpty()) {
         // There is no cohort review, or no participants matching the status filter;
         // return an empty response.
         return response;
       }
-      criteria = new ParticipantCriteria(participantIds);
-    }
-    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(fieldSet);
-
-    QueryConfiguration queryConfiguration = fieldSetQueryBuilder.buildQuery(criteria,
-        tableQueryAndConfig, limit, offset);
-    QueryResult result;
-    QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
-    try {
-      result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
-    } catch (BigQueryException e) {
-      if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
-        throw new ServerUnavailableException("BigQuery was temporarily unavailable, try again later", e);
-      } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-        throw new ForbiddenException("Access to the CDR is denied", e);
-      } else {
-        throw new ServerErrorException(
-            String.format("An unexpected error occurred materializing the cohort with "
-                + "query = (%s), params = (%s)", jobConfiguration.getQuery(),
-                jobConfiguration.getNamedParameters()), e);
+      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(fieldSet),
+          criteria, limit, offset);
+    } else if (fieldSet.getAnnotationQuery() != null) {
+      if (cohortReview == null) {
+        // There is no cohort review, so there are no annotations; return empty results.
+        return response;
       }
-
+      results = annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
+          fieldSet.getAnnotationQuery(), limit, offset);
+    } else {
+      throw new BadRequestException("Must specify tableQuery or annotationQuery");
     }
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
     int numResults = 0;
     boolean hasMoreResults = false;
-    ArrayList<Object> results = new ArrayList<>();
-    for (List<FieldValue> row : result.iterateAll()) {
+    ArrayList<Object> responseResults = new ArrayList<>();
+    for (Map<String, Object> resultMap : results) {
       if (numResults == pageSize) {
         hasMoreResults = true;
         break;
       }
-      Map<String, Object> resultMap = fieldSetQueryBuilder.extractResults(tableQueryAndConfig,
-          queryConfiguration.getSelectColumns(), row);
-      results.add(resultMap);
+      responseResults.add(resultMap);
       numResults++;
     }
-    response.setResults(results);
+    response.setResults(responseResults);
     if (hasMoreResults) {
       // TODO: consider pagination based on cursor / values rather than offset
       PaginationToken token = PaginationToken.of(offset + pageSize, paginationParameters);
