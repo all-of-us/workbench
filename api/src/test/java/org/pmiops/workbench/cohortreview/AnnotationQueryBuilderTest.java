@@ -287,7 +287,6 @@ public class AnnotationQueryBuilderTest {
         "boolean annotation", "date annotation", "enum annotation"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
         annotationQuery, 10, 0), expectedResult);
-
   }
 
   @Test
