@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceNavBarComponent} from 'git app/views/workspace-nav-bar/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 
 import {
   Cluster,
