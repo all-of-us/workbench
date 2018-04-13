@@ -1,5 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 export interface Breadcrumb {
   label: string;
@@ -7,30 +8,33 @@ export interface Breadcrumb {
 }
 
 @Component({
+  selector: 'app-breadcrumb',
+  templateUrl: './component.html',
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
     '../../styles/headers.css',
     '../../styles/inputs.css',
-    './component.css'],
-  templateUrl: './component.html',
-  selector: 'app-breadcrumb'
+    './component.css']
 })
+export class BreadcrumbComponent implements OnDestroy {
 
-export class BreadcrumbComponent {
-
+  subscription: Subscription;
   breadcrumbs: Breadcrumb[];
 
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {
-    this.router.events.filter(event => event instanceof NavigationEnd).subscribe(event => {
-      this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
-    });
+    this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(event => {
+          this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
+        });
   }
 
   /**
-   * Generate a breadcrumb using the default label and url.
-   * Uses the route's paramMap to do any necessary variable replacement.
+   * Generate a breadcrumb using the default label and url. Uses the route's
+   * paramMap to do any necessary variable replacement. For example, if we
+   * have a label value of ':wsid' as defined in a route's breadcrumb, we can
+   * do substitution with the 'wsid' value in the route's paramMap.
    *
    * @param {String} label
    * @param {String} url
@@ -40,7 +44,8 @@ export class BreadcrumbComponent {
   private static makeBreadcrumb(
       label: string,
       url: string,
-      route: ActivatedRoute): Breadcrumb {
+      route: ActivatedRoute
+  ): Breadcrumb {
     try {
       const paramValues = route.paramMap['source']['_value'];
       let newLabel = label;
@@ -60,6 +65,10 @@ export class BreadcrumbComponent {
     }
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
   /**
    * Returns array of Breadcrumb objects that represent the breadcrumb trail.
    * Derived from current route in conjunction with the overall route structure.
@@ -74,45 +83,26 @@ export class BreadcrumbComponent {
                            breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
 
     const ROUTE_DATA_BREADCRUMB = 'breadcrumb';
-
-    // get the child routes
     const children: ActivatedRoute[] = route.children;
-
-    // return if there are no more children
     if (children.length === 0) {
       return breadcrumbs;
     }
-
-    // iterate over children
     for (const child of children) {
-
-      // verify primary route
       if (child.outlet !== PRIMARY_OUTLET) {
         continue;
       }
-
-      // verify the custom data property "breadcrumb" is specified on the route
       if (!child.snapshot.data.hasOwnProperty(ROUTE_DATA_BREADCRUMB)) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
-
-      // get the route's URL segment
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
-
-      // append route URL to URL
       if (routeURL.length > 0) {
         url += `/${routeURL}`;
       }
-
       const label = child.snapshot.data[ROUTE_DATA_BREADCRUMB];
-
-      // make a new breadcrumb if needed
       if (!breadcrumbs.some(b => b.url === url)) {
         const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
         breadcrumbs.push(breadcrumb);
       }
-
-      // recursive
       return this.buildBreadcrumbs(child, url, breadcrumbs);
     }
 
