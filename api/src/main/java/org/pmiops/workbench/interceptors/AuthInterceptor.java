@@ -31,6 +31,7 @@ import org.pmiops.workbench.model.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
@@ -74,6 +75,17 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+    // We suspect that security context, not having been cleared before, is still set here sometimes.
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null) {
+      log.info("No authentication already set");
+    } else {
+      log.info("Authentication already set!");
+      if (authentication instanceof UserAuthentication) {
+        log.info("User authentication = " + ((UserAuthentication) authentication).getPrincipal().getEmail());
+      }
+    }
+
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
