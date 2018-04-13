@@ -24,11 +24,14 @@ export class ModifiersComponent implements OnInit, OnDestroy {
   ageAtEventMapEntries: any;
   numOfOccurrencesMapEntries: any;
   eventDateMapEntries: any;
+  ageAtEventBetween = false;
+  eventDateBetween = false;
 
   form = new FormGroup({
     [this.modifierType.AGEATEVENT]: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
+      value1: new FormControl(),
     }),
     [this.modifierType.NUMOFOCCURRENCES]: new FormGroup({
       operator: new FormControl(),
@@ -37,6 +40,7 @@ export class ModifiersComponent implements OnInit, OnDestroy {
     [this.modifierType.EVENTDATE]: new FormGroup({
       operator: new FormControl(),
       value: new FormControl(),
+      value1: new FormControl(),
     }),
   });
 
@@ -47,23 +51,22 @@ export class ModifiersComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const ageAtEventMap = new Map([
-        [Operator.EQUAL, 'Equal To'],
-        [Operator.GREATERTHAN, 'Greater Than'],
-        [Operator.LESSTHAN, 'Less Than']
+        [Operator.GREATERTHANOREQUALTO, 'Greater Than Or Equal To'],
+        [Operator.LESSTHANOREQUALTO, 'Less Than Or Equals To'],
+        [Operator.BETWEEN, 'Between']
     ]);
     this.ageAtEventMapEntries = Array.from(ageAtEventMap.entries());
 
     const numOfOccurrencesMap = new Map([
-        [Operator.EQUAL, 'Equal To'],
-        [Operator.GREATERTHAN, 'Greater Than'],
-        [Operator.LESSTHAN, 'Less Than']
+        [Operator.EQUAL, 'Equal to'],
+        [Operator.GREATERTHANOREQUALTO, 'Greater Than Or Equal To']
     ]);
     this.numOfOccurrencesMapEntries = Array.from(numOfOccurrencesMap.entries());
 
     const eventDateMap = new Map([
-        [Operator.EQUAL, 'On'],
-        [Operator.GREATERTHAN, 'After'],
-        [Operator.LESSTHAN, 'Before']
+        [Operator.GREATERTHANOREQUALTO, 'Greater Than Or Equal To'],
+        [Operator.LESSTHANOREQUALTO, 'Less Than Or Equals To'],
+        [Operator.BETWEEN, 'Between']
     ]);
     this.eventDateMapEntries = Array.from(eventDateMap.entries());
 
@@ -91,6 +94,17 @@ export class ModifiersComponent implements OnInit, OnDestroy {
     }
   }
 
+  showHide(name) {
+    const group = this.form.get(name);
+    const operator = group.get('operator').value;
+    if (name === ModifierType.AGEATEVENT) {
+      this.ageAtEventBetween = operator === Operator.BETWEEN;
+    }
+    if (name === ModifierType.EVENTDATE) {
+      this.eventDateBetween = operator === Operator.BETWEEN;
+    }
+  }
+
   private toModifier(name) {
     const group = this.form.get(name);
     const operator = group.get('operator').value;
@@ -98,10 +112,15 @@ export class ModifiersComponent implements OnInit, OnDestroy {
     if (value === null  || operator === null) {
       return ; // noop
     }
+    const values: string[] = [];
+    values.push(value);
+    if (operator === Operator.BETWEEN) {
+      values.push(group.get('value1').value);
+    }
     return <Modifier>{
       name: this.modifierType[this.modifierType[name]],
       operator: Operator[Operator[operator]],
-      operands: [value]
+      operands: values
     };
   }
 }

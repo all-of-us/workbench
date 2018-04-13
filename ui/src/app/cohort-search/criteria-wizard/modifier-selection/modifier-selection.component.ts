@@ -29,7 +29,10 @@ export class ModifierSelectionComponent {
     const op = {
       [Operator.EQUAL]: 'Equal To',
       [Operator.GREATERTHAN]: 'Greater Than',
+      [Operator.GREATERTHANOREQUALTO]: 'Greater Than Or Equal To',
       [Operator.LESSTHAN]: 'Less Than',
+      [Operator.LESSTHANOREQUALTO]: 'Less Than Or Equal To',
+      [Operator.BETWEEN]: 'Between',
     }[modifier.get('operator')];
 
     return `${op} ${modifier.getIn(['operands', 0])}`;

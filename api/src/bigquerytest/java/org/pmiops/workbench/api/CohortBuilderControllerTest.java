@@ -148,7 +148,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .name(ModifierType.AGE_AT_EVENT)
                 .operator(Operator.GREATER_THAN)
                 .operands(Arrays.asList("25"));
-        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+                Arrays.asList(icd9), Arrays.asList(modifier));
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -163,7 +164,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .name(ModifierType.NUM_OF_OCCURRENCES)
                 .operator(Operator.EQUAL)
                 .operands(Arrays.asList("1"));
-        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+                Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
@@ -182,7 +184,8 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
                 .name(ModifierType.EVENT_DATE)
                 .operator(Operator.EQUAL)
                 .operands(Arrays.asList("2009-12-03"));
-        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier1, modifier2, modifier3));
+        SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+                Arrays.asList(icd9), Arrays.asList(modifier1, modifier2, modifier3));
         assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest),1);
     }
 
