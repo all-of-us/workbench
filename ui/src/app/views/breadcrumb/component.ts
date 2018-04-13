@@ -27,11 +27,6 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * paramMap to do any necessary variable replacement. For example, if we
    * have a label value of ':wsid' as defined in a route's breadcrumb, we can
    * do substitution with the 'wsid' value in the route's paramMap.
-   *
-   * @param {String} label
-   * @param {String} url
-   * @param {ActivatedRoute} route
-   * @returns {Breadcrumb}
    */
   private static makeBreadcrumb(label: string,
                                 url: string,
@@ -39,13 +34,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     let newLabel = label;
     // Perform variable substitution in label only if needed.
     if (newLabel.indexOf(':') >= 0) {
-      try {
-        const paramMap = route.snapshot.paramMap;
-        for (const k of paramMap.keys) {
-          newLabel = newLabel.replace(':' + k, paramMap.get(k));
-        }
-      } catch (e) {
-        console.log(e);
+      const paramMap = route.snapshot.paramMap;
+      for (const k of paramMap.keys) {
+        newLabel = newLabel.replace(':' + k, paramMap.get(k));
       }
     }
     return {
@@ -70,25 +61,16 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   /**
    * Returns array of Breadcrumb objects that represent the breadcrumb trail.
    * Derived from current route in conjunction with the overall route structure.
-   *
-   * @param {ActivatedRoute} route
-   * @param {string} url
-   * @param {Breadcrumb[]} breadcrumbs
-   * @returns {Array<Breadcrumb>}
    */
   private buildBreadcrumbs(route: ActivatedRoute,
                            url: string = '',
                            breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
-
     const ROUTE_DATA_BREADCRUMB = 'breadcrumb';
     const children: ActivatedRoute[] = route.children;
     if (children.length === 0) {
       return breadcrumbs;
     }
     for (const child of children) {
-      if (child.outlet !== PRIMARY_OUTLET) {
-        continue;
-      }
       if (!child.snapshot.data.hasOwnProperty(ROUTE_DATA_BREADCRUMB)) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
@@ -97,6 +79,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         url += `/${routeURL}`;
       }
       const label = child.snapshot.data[ROUTE_DATA_BREADCRUMB];
+      // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
         const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
         breadcrumbs.push(breadcrumb);
